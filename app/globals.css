@@ -1785,8 +1785,8 @@ html.past-hero .themeSwitch {
   left: 50%;
   top: 50%;
   margin: 0;
-  width: clamp(168px, 15vw, 208px);
-  height: clamp(210px, 20vw, 264px);
+  width: clamp(134px, 12vw, 166px);
+  height: clamp(168px, 16vw, 211px);
   translate: -50% -50%;
   padding: 18px 18px 0;
   display: flex;
@@ -3440,7 +3440,7 @@ html.past-hero .themeSwitch {
 
 /* Wallet sizing */
 .wallet {
-  --w-w: clamp(340px, 50vw, 560px);
+  --w-w: clamp(272px, 40vw, 448px);
   --w-h: calc(var(--w-w) * 0.65);
 }
 
@@ -3516,13 +3516,13 @@ html.past-hero .themeSwitch {
     padding-bottom: 0; /* center wallet vertically in remaining space */
   }
   .wallet {
-    --w-w: clamp(290px, 82vw, 345px); /* wider holder to match figma proportions */
+    --w-w: clamp(232px, 65vw, 276px); /* 0.8x scaled down size */
     --w-h: calc(var(--w-w) * 0.65); /* maintain aspect ratio */
   }
   .capCard {
-    width: 140px !important; /* larger card size matching design scale */
-    height: 185px !important;
-    padding: 12px 12px 0 !important;
+    width: 112px !important; /* 0.8x scaled down card size */
+    height: 148px !important;
+    padding: 10px 10px 0 !important;
     border-radius: 12px !important;
   }
   .capCard__index {

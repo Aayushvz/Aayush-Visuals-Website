@@ -63,8 +63,8 @@ export default function Capabilities() {
       const r = canvas.getBoundingClientRect();
       // subtract an (approx) card half-size so the spread scales down on
       // narrow canvases and cards never cross the rulers
-      const cw = Math.min(112, r.width * 0.11);
-      const ch = Math.min(140, r.height * 0.14);
+      const cw = Math.min(83, r.width * 0.11);
+      const ch = Math.min(105, r.height * 0.14);
       const mobile = r.width < 640;
       setIsMobile(mobile);
       
