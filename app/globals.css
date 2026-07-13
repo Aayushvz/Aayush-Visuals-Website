@@ -1,40 +1,94 @@
+/*
+  Design tokens.
+  Global tokens are fixed (reference light look with purple accent) and style
+  everything below the hero. Only the --hero-* and --glass-* tokens react to
+  html[data-theme], so the light/dark toggle art-directs the hero alone.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #f2ede6;
+  --ink: #1f1f1f;
+  --ink-soft: rgba(31, 31, 31, 0.14);
+  --dot: rgba(31, 31, 31, 0.16);
+  --purple: #7c3aed;
+  --purple-soft: #a78bfa;
+  --purple-mid: #6d28d9;
+  --bridge-dark: #1a1a1a;
+  --orange: #e8834a;
+  --dark: #232323;
+  --faded: #c9c2b4;
+  --card-hover: #faf7f1;
+  --wm: rgba(0, 0, 0, 0.22);
+
+  /* shared grid geometry — identical cells in both themes (15.6px × 1.30) */
+  --grid-size: 20.28px;
+
+  /* global interface typeface — the hero identity lockup (aayush / Visuals)
+     keeps its own explicit --font-serif / --font-archivo declarations and
+     is untouched by this. Everything else inherits from body. */
+  --font-primary: "General Sans", system-ui, sans-serif;
+
+  /* global ruler frame geometry (.rails) — content below the hero stays
+     clear of these fixed left/right lines by --page-content-inset. */
+  --page-rail-inset: clamp(14px, 5vw, 78px);
+  --page-content-inset: clamp(44px, 9vw, 132px);
+
+  /* hero theme — dark default (original Aayush Visuals mood) */
+  --hero-bg: #1a1a1a;
+  --hero-fg: #f4f1ea;
+  --hero-fg-2: #9ba1a5;
+  --hero-brand: #8b5cf6;
+  --hero-grid-line: rgba(244, 241, 234, 0.055);
+  --trail-max: 0.24;
+  --hero-line: rgba(244, 241, 234, 0.16);
+  --heroCard-border: rgba(255, 255, 255, 0.1);
+  --heroCard-shadow: 0 4px 8px rgba(0, 0, 0, 0.25), 0 24px 52px rgba(0, 0, 0, 0.38);
+  --heroCard-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.42), 0 18px 36px rgba(0, 0, 0, 0.4),
+    0 48px 100px rgba(0, 0, 0, 0.5);
+
+  /* apple-style glass */
+  --glass-bg: rgba(26, 26, 30, 0.34);
+  --glass-fg: #f4f1ea;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.09);
+  --glass-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+:root[data-theme="light"] {
+  --hero-bg: #f2ede6;
+  --hero-fg: #26221d;
+  --hero-fg-2: #8b857b;
+  --hero-brand: #7c3aed;
+  --hero-grid-line: rgba(31, 31, 31, 0.075);
+  --trail-max: 0.16;
+  --hero-line: rgba(31, 31, 31, 0.14);
+  --heroCard-border: rgba(31, 31, 31, 0.08);
+  --heroCard-shadow: 0 8px 20px rgba(88, 78, 62, 0.14), 0 26px 60px rgba(88, 78, 62, 0.12);
+  --heroCard-shadow-hover: 0 4px 10px rgba(88, 78, 62, 0.18), 0 20px 42px rgba(88, 78, 62, 0.2),
+    0 52px 110px rgba(88, 78, 62, 0.22);
 
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --glass-bg: rgba(255, 252, 246, 0.46);
+  --glass-fg: #26221d;
+  --glass-border: rgba(31, 31, 31, 0.09);
+  --glass-highlight: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 10px 30px rgba(31, 31, 31, 0.1);
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
   margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-primary);
+  font-size: 17px;
+  line-height: 1.5;
+  overflow-x: hidden;
 }
 
 a {
@@ -42,8 +96,3131 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
+.display {
+  font-stretch: 125%;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.94;
+}
+
+/* Hide the native cursor only when the custom cursor is active */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+/* ---------- custom cursor ---------- */
+
+.cursorDot,
+.cursorRing {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  pointer-events: none;
+  display: none;
+}
+
+html.has-cursor .cursorDot,
+html.has-cursor .cursorRing {
+  display: block;
+}
+
+.cursorDot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+}
+
+.cursorRing {
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+}
+
+/* the plain ring border stays difference-blended for legibility over both
+   hero themes; the project CTA pill (below) deliberately opts out, since a
+   solid pill needs to stay a clean opaque white regardless of backdrop */
+.cursorRing i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  mix-blend-mode: difference;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.28s ease,
+    opacity 0.28s ease;
+}
+
+.cursorRing--active i {
+  transform: scale(1.55);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.cursorRing--drag i {
+  transform: scale(1.3);
+  border-style: dashed;
+}
+
+.cursorRing--down i {
+  transform: scale(0.82);
+}
+
+/* project tiles: the ring's plain circle hides and a "View project" pill
+   fades/scales in on top instead — the tile itself never renders a button.
+   Slim outline pill, plain chevron (no filled circle), arrow nudges right
+   on a soft loop to invite the click. */
+.cursorRing__cta {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1), scale 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cursorRing__ctaText {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.cursorRing__ctaArrow {
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+}
+
+.cursorRing--project i {
+  opacity: 0;
+}
+
+.cursorRing--project .cursorRing__cta {
+  opacity: 1;
+  scale: 1;
+}
+
+.cursorRing--project .cursorRing__ctaArrow {
+  animation: ctaArrowNudge 1.6s ease-in-out infinite;
+}
+
+@keyframes ctaArrowNudge {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 3px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursorRing--project .cursorRing__ctaArrow {
+    animation: none;
+  }
+}
+
+/* ---------- side rails (light sections below the hero) ---------- */
+
+.rails {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.rails::before,
+.rails::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--ink-soft);
+}
+
+.rails::before {
+  left: clamp(14px, 5vw, 78px);
+}
+
+.rails::after {
+  right: clamp(14px, 5vw, 78px);
+}
+
+/* ---------- glass navbar ---------- */
+
+.navbar {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 4vw, 46px);
+  padding: 11px 26px 11px 22px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  backdrop-filter: blur(18px) saturate(1.7);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
+  color: var(--glass-fg);
+  white-space: nowrap;
+  transition: background-color 0.55s ease, color 0.55s ease, border-color 0.55s ease,
+    box-shadow 0.55s ease;
+}
+
+.navbar__logo {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.navbar__logo sup {
+  color: var(--hero-brand);
+  font-size: 11px;
+  font-weight: 800;
+  margin-left: 1px;
+  transition: color 0.55s ease;
+}
+
+.navbar__links {
+  display: flex;
+  gap: clamp(14px, 2.6vw, 30px);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.navbar__links a {
+  opacity: 0.66;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.navbar__links a:hover,
+.navbar__links a:focus-visible {
+  opacity: 1;
+}
+
+.navbar__links a[aria-current="page"] {
+  opacity: 1;
+  color: var(--hero-brand);
+}
+
+.navbar__links a:focus-visible {
+  outline: 2px solid var(--hero-brand);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+/* ---------- hero ---------- */
+
+/* Stage: one extra viewport of scroll drives the hero→panel transition */
+.heroStage {
+  position: relative;
+  height: calc(100svh + 100vh);
+}
+
+.hero {
+  --spread: 1;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  z-index: 1;
+  /* clip, not hidden: anchor navigation can programmatically scroll a
+     hidden-overflow box (the oversized world gives it scrollable overflow),
+     which silently shifts the whole hero interior. clip forbids scrolling. */
+  overflow: clip;
+  background: var(--hero-bg);
+  color: var(--hero-fg);
+  transition: background-color 0.55s ease, color 0.55s ease;
+}
+
+/* The single draggable world: grid, typography, and artwork all live here
+   and move together under one translate3d applied from JS. */
+.heroWorld {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  will-change: transform;
+}
+
+.hero--dragging .heroWorld {
+  cursor: grabbing;
+}
+
+.hero--dragging {
+  user-select: none;
+}
+
+/* Stationary viewport-aligned fade: nested horizontal × vertical masks
+   multiply, so all four edges fade and the corners fade hardest while a
+   large central region stays clearly visible. The pattern inside pans with
+   the world (same transform each frame), sliding under the fixed fade. */
+.heroGridFade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+
+.heroGridFade__v {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+
+/* Oversized so panning never runs out of pattern */
+.heroGridFade__pattern {
+  position: absolute;
+  inset: -45%;
+  background-image: linear-gradient(var(--hero-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  will-change: transform;
+}
+
+/* purple grid-cell hover trail — aligned to the pattern's own grid origin;
+   --cellMax carries the per-cell recency × distance intensity */
+.gridTrail__cell {
+  position: absolute;
+  background: var(--hero-brand);
+  opacity: 0;
+  animation: trailCell 3.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes trailCell {
+  0% {
+    opacity: 0;
+    scale: 0.94;
+  }
+  5% {
+    opacity: var(--cellMax, var(--trail-max));
+    scale: 1;
+  }
+  45% {
+    opacity: calc(var(--cellMax, var(--trail-max)) * 0.7);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.hero__mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -55%;
+  z-index: 2;
+  text-align: center;
+  pointer-events: none;
+}
+
+.hero__line {
+  display: block;
+  overflow: hidden;
+}
+
+.hero__aayush {
+  display: inline-block;
+  font-family: var(--font-serif), serif;
+  font-weight: 400;
+  font-size: clamp(64px, 7.2vw, 109px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  will-change: transform;
+}
+
+.hero__line--visuals {
+  margin-top: -0.26em;
+}
+
+.hero__visuals {
+  display: inline-block;
+  font-family: var(--font-serif), serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(61px, 6.95vw, 105px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--hero-brand);
+  transition: color 0.55s ease;
+  will-change: transform;
+  padding: 0 0.06em;
+}
+
+/* Viewport-aligned editorial ruler frame. One continuous system:
+   rail → line → label → inner line ... clearance ... inner line → label →
+   line → rail. Draws inward from the rails on load; dissolves during world
+   drag (.heroRuler--hidden) and fades back after the canvas settles. */
+.heroRuler {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.heroRuler--hidden {
+  opacity: 0.06;
+  transition-duration: 0.22s;
+}
+
+.heroRuler__rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hero-fg);
+  opacity: 0.45;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  animation: rulerRail 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: background-color 0.55s ease;
+}
+
+/* same inset as the page rails so the systems align */
+.heroRuler__rail--left {
+  left: clamp(14px, 5vw, 78px);
+}
+
+.heroRuler__rail--right {
+  right: clamp(14px, 5vw, 78px);
+}
+
+.heroRuler__row {
+  position: absolute;
+  left: clamp(14px, 5vw, 78px);
+  right: clamp(14px, 5vw, 78px);
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.heroRuler__seg {
+  height: 1px;
+  background: var(--hero-fg);
+  opacity: 0.45;
+  transition: background-color 0.55s ease;
+}
+
+/* outer segments grow from the rails to the labels — physically connected */
+.heroRuler__seg--outerLeft,
+.heroRuler__seg--outerRight {
+  flex: 1 1 0;
+}
+
+.heroRuler__seg--innerLeft,
+.heroRuler__seg--innerRight {
+  flex: 0 0 clamp(28px, 5vw, 90px);
+}
+
+/* entrance: lines draw inward from the outer rails */
+.heroRuler__seg--outerLeft {
+  transform-origin: left center;
+  animation: rulerSeg 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.heroRuler__seg--outerRight {
+  transform-origin: right center;
+  animation: rulerSeg 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.heroRuler__seg--innerLeft {
+  transform-origin: left center;
+  animation: rulerSeg 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both;
+}
+
+.heroRuler__seg--innerRight {
+  transform-origin: right center;
+  animation: rulerSeg 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both;
+}
+
+/* deliberate central title clearance zone */
+.heroRuler__spacer {
+  flex: 0 0 clamp(320px, 42vw, 620px);
+}
+
+.heroRuler__label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--hero-fg);
+  opacity: 0.72;
+  animation: rulerLabel 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+  transition: color 0.55s ease;
+}
+
+@keyframes rulerRail {
+  from {
+    opacity: 0;
+    transform: scaleY(0.35);
+  }
+  to {
+    opacity: 0.45;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes rulerSeg {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rulerLabel {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 0.72;
+    transform: translateY(0);
+  }
+}
+
+.hero__hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% calc(-50% + 210px * var(--spread));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--hero-fg-2);
+  transition: color 0.55s ease;
+  pointer-events: none;
+}
+
+.hero__pins {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* upper-mid-right pocket: clear of the ruler row, labels, cards, toggle */
+  translate: calc(-50% + 175px * var(--spread)) calc(-50% - 215px * var(--spread));
+  width: 174px;
+  height: 100px;
+  pointer-events: none;
+}
+
+.hero__pins img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- floating project artwork ---------- */
+
+/* One responsibility per layer:
+   .heroCard        → world position + base rotation (+ entrance transform)
+   .heroCard__drag  → individual card x/y drag offset only
+   .heroCard__inner → hover tilt / scale only
+   The world transform never touches these nodes. */
+.heroCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: calc(-50% + var(--ox) * var(--spread)) calc(-50% + var(--oy) * var(--spread));
+  rotate: var(--rot);
+  z-index: 7;
+  border-radius: 20px;
+  perspective: 700px;
+  cursor: grab;
+}
+
+.heroCard:hover {
+  z-index: 16;
+}
+
+.heroCard--top {
+  z-index: 12;
+}
+
+.heroCard--dragging {
+  z-index: 30;
+  cursor: grabbing;
+}
+
+.heroCard__drag {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  will-change: transform;
+}
+
+.heroCard__inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--heroCard-border);
+  box-shadow: var(--heroCard-shadow);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.55s ease, box-shadow 0.32s ease;
+  will-change: transform;
+  background: #1a1a1c;
+}
+
+.heroCard:hover .heroCard__inner {
+  box-shadow: var(--heroCard-shadow-hover);
+}
+
+.heroCard__inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- theme switcher (fixed, centre-right, vertical glass pill) ---------- */
+
+.themeSwitch {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(16px) saturate(1.7);
+  backdrop-filter: blur(16px) saturate(1.7);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
+  transition: background-color 0.55s ease, border-color 0.55s ease, box-shadow 0.55s ease,
+    opacity 0.45s ease, translate 0.45s ease;
+}
+
+/* hero-only: fades out once the user scrolls past the hero */
+html.past-hero .themeSwitch {
+  opacity: 0;
+  translate: 14px -50%;
+  pointer-events: none;
+}
+
+.themeSwitch:hover {
+  border-color: var(--hero-brand);
+}
+
+.themeSwitch button {
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--glass-fg);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.themeSwitch button:hover {
+  opacity: 0.85;
+}
+
+.themeSwitch button[aria-pressed="true"] {
+  opacity: 1;
+  color: #fff;
+}
+
+.themeSwitch button:focus-visible {
+  outline: 2px solid var(--hero-brand);
+  outline-offset: 2px;
+}
+
+.themeSwitch__thumb {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
+  transition: translate 0.42s cubic-bezier(0.22, 1, 0.36, 1), scale 0.3s ease;
+}
+
+.themeSwitch[data-active="dark"] .themeSwitch__thumb {
+  translate: 0 50px;
+}
+
+.themeSwitch:hover .themeSwitch__thumb {
+  scale: 1.06;
+}
+
+/* ---------- about / impact ---------- */
+
+/* Stage for the About panel: pulls it up over the pinned hero (approved
+   entry transition, unchanged), then PINS About once it reaches the top so
+   the following dark Statement panel can rise over it — About stays
+   physically behind, never animating itself. The extra bottom padding is
+   the choreography budget: ~60vh of calm dwell on the pinned About, then
+   100vh of Statement rise (the Statement is pulled up 100vh into it). */
+.aboutStage {
+  position: relative;
+  z-index: 5;
+  margin-top: -100vh;
+}
+
+/* the choreography spacer must be CONTENT (not padding) — a sticky child
+   is constrained to its parent's content box, so padding-bottom would give
+   it zero room to pin. ::after adds the scroll budget as real content. */
+.aboutStage::after {
+  content: "";
+  display: block;
+  height: 160vh;
+}
+
+/* The panel itself. White/off-white on purpose — the hero is the one dark,
+   saturated beat; this is the calm editorial counter-beat. Purple returns
+   only as a small accent (card dot, cursor-proximity glow in the dot
+   field, hover states on stats/rules). */
+.about {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: #fffdfa;
+  /* sharp corners — the live-site transition language is flat, square-edged
+     stepped surfaces; the top stays visible so .about__steps can rise
+     above it, and everything below is clipped by .about__inner instead. */
+  overflow: visible;
+}
+
+.about__inner {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* -------- stepped-band transition --------
+   Five flat, sharp-cornered white bands (~20% viewport width each) sit
+   anchored to the panel's top edge, forming a stepped skyline: centre
+   tallest, inner plateaus next, outer edges lowest. Each band's height =
+   its max × --transP (0→1, a self-contained rAF loop in About.tsx reading
+   this section's own getBoundingClientRect — independent of Hero.tsx), so
+   at the start the silhouette is nearly flush with the panel edge and the
+   steps spread apart as the panel rises — the centre band climbs into the
+   hero title and occludes it while the hero stays alive behind. Reverse
+   scrolling mirrors it automatically since heights derive purely from
+   scroll position. */
+.about__steps {
+  --transP: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.about__step {
+  position: absolute;
+  bottom: 0;
+  background: #fffdfa;
+}
+
+.about__step--l2 {
+  left: 0;
+  width: 20%;
+  height: calc(var(--transP) * 88px);
+}
+
+.about__step--l1 {
+  left: 20%;
+  width: 20%;
+  height: calc(var(--transP) * 104px);
+}
+
+.about__step--c {
+  left: 40%;
+  width: 20%;
+  /* small constant base so a sliver of the centre band already peeks
+     above the viewport bottom at rest, exactly like the live site */
+  height: calc(12px + var(--transP) * 188px);
+}
+
+.about__step--r1 {
+  left: 60%;
+  width: 20%;
+  height: calc(var(--transP) * 104px);
+}
+
+.about__step--r2 {
+  left: 80%;
+  width: 20%;
+  height: calc(var(--transP) * 58px);
+}
+
+/* canvas dot field: near-invisible grey by default, brightens toward the
+   brand purple only near the pointer with a soft radial falloff and a
+   short fading memory (see About.tsx). Clips to the inner panel. */
+.about__dots {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.about__content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* one shared centred container, constrained well inside the viewport so
+     the composition reads as a calm block surrounded by whitespace (per the
+     reference) rather than stretching to the page edges */
+  width: min(1320px, calc(100vw - 240px));
+  margin-inline: auto;
+  padding-block: clamp(48px, 8vh, 96px);
+}
+
+.about__marker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.48);
+  margin-bottom: 18px;
+}
+
+.about__markerNum {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.about__heading {
+  font-size: clamp(42px, 3.2vw, 58px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+  margin: 0 0 clamp(40px, 5.5vh, 64px);
+}
+
+.about__grid {
+  display: grid;
+  /* card ≈36% / stats ≈64% of the constrained container */
+  grid-template-columns: clamp(390px, 33%, 420px) 1fr;
+  gap: clamp(48px, 6vw, 96px);
+  align-items: center;
+}
+
+/* ---------- about identity card ---------- */
+
+.aboutCard {
+  position: relative;
+  /* compact tall editorial proportion (≈410 × 545 desktop), not a giant
+     panel — the empty lower zone is deliberate negative space */
+  min-height: clamp(500px, 60vh, 560px);
+  padding: clamp(26px, 2.2vw, 34px);
+  display: flex;
+  flex-direction: column;
+  background: var(--bridge-dark);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.14), 0 6px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+  will-change: transform;
+}
+
+/* moving highlight sheen — a soft purple wedge that slow-orbits the card
+   at all times but only becomes visible on hover, so the card reads as
+   quietly alive rather than a static dashboard tile. */
+/* ambient living gradient — three soft purple blobs slowly drifting behind
+   the card content, always faintly alive, brightening a little on hover */
+.aboutCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.4), transparent 42%),
+    radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.3), transparent 46%),
+    radial-gradient(circle at 50% 100%, rgba(168, 85, 247, 0.26), transparent 50%);
+  background-size: 200% 200%;
+  background-position: 0% 30%, 100% 20%, 50% 100%;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  animation: aboutCardGradient 16s ease-in-out infinite;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.aboutCard:hover::before {
+  opacity: 0.4;
+}
+
+@keyframes aboutCardGradient {
+  0%,
+  100% {
+    background-position: 0% 30%, 100% 20%, 50% 100%;
+  }
+  50% {
+    background-position: 40% 70%, 60% 60%, 30% 30%;
+  }
+}
+
+.aboutCard:hover {
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+.aboutCard__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--purple);
+  margin-bottom: clamp(20px, 3vh, 32px);
+}
+
+.aboutCard__name {
+  position: relative;
+  font-size: clamp(24px, 1.9vw, 30px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 16px;
+}
+
+.aboutCard__desc {
+  position: relative;
+  font-size: clamp(15px, 1.1vw, 18px);
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(244, 241, 234, 0.6);
+  margin: 0;
+  max-width: 40ch;
+}
+
+/* wide reference-style CTA: spans the card, anchored at the bottom */
+.aboutCard__cta {
+  position: relative;
+  margin-top: auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 24px;
+  border-radius: 999px;
+  background: #fff;
+  color: #141414;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.aboutCard__cta:hover {
+  background: #f3efe8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+/* ---------- stats ---------- */
+
+.about__stats {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: min-content;
+  align-content: center;
+  /* one aligned system: uniform rows, controlled rhythm (per reference) */
+  gap: clamp(44px, 6vh, 72px) clamp(36px, 4vw, 64px);
+}
+
+.aboutStat {
+  position: relative;
+}
+
+.aboutStat__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.aboutStat__num {
+  display: block;
+  font-size: clamp(44px, 3.6vw, 64px);
+  /* Medium, not bold — the reference numbers read clean because of scale,
+     not weight. tabular-nums keeps the count-up from shifting layout. */
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+.aboutStat:hover .aboutStat__num {
+  color: var(--purple);
+}
+
+.aboutStat__label {
+  display: block;
+  font-size: clamp(15px, 1vw, 18px);
+  font-weight: 400;
+  color: rgba(31, 31, 31, 0.44);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.aboutStat__rule {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 16px 0 18px;
+  background: rgba(31, 31, 31, 0.12);
+}
+
+/* hover accent: a short purple segment draws in from the left — never the
+   full-width line */
+.aboutStat__rule::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background: var(--purple);
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aboutStat:hover .aboutStat__rule::after {
+  width: 40px;
+}
+
+.aboutStat__desc {
+  margin: 0;
+  font-size: clamp(15px, 1vw, 17px);
+  line-height: 1.4;
+  color: rgba(31, 31, 31, 0.52);
+  max-width: 32ch;
+}
+
+/* touch devices: neutralise the hover-only accents so a tap never leaves a
+   stuck highlight — the entrance motion already carries the polish there */
+@media (hover: none) {
+  .aboutStat:hover .aboutStat__num {
+    color: var(--ink);
+  }
+
+  .aboutStat:hover .aboutStat__rule::after {
+    width: 0;
+  }
+
+  .aboutCard:hover::before {
+    opacity: 0.22;
+  }
+}
+
+/* ---------- statement (full-screen dark canvas) ---------- */
+
+/* One solid rectangular panel — flat, sharp top edge — pulled up 100vh so
+   it physically rises over the PINNED About (inside .aboutStage) as the
+   user scrolls. z-index 6 beats the stage's 5: the About stays visually
+   behind while the dark layer covers it. After full coverage it continues
+   as normal document flow into Services; the bottom edge gets a quiet
+   designed detail (soft rounded corners) rather than a plain cut. */
+.statement {
+  position: relative;
+  z-index: 6;
+  margin-top: -100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bridge-dark);
+  padding: clamp(72px, 12vh, 120px) clamp(20px, 5vw, 64px);
+  overflow: hidden;
+  box-shadow: 0 -28px 70px rgba(0, 0, 0, 0.35);
+}
+
+/* bottom boundary: not a card radius and not a flat cut — a thin cream
+   strip whose top edge carries a few pixels of organic jitter, so the dark
+   panel dissolves into the next light section along a nearly-straight,
+   subtly imperfect line (rides with the section; the next section is
+   simply revealed underneath, no gap). */
+.statement::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  background: var(--cream);
+  /* irregularly spaced points with long near-flat runs — reads almost
+     straight at a glance, organic only up close */
+  clip-path: polygon(
+    0 52%,
+    7% 48%,
+    11% 60%,
+    23% 54%,
+    28% 40%,
+    31% 56%,
+    46% 50%,
+    52% 62%,
+    55% 46%,
+    68% 52%,
+    73% 38%,
+    77% 56%,
+    89% 50%,
+    94% 60%,
+    100% 48%,
+    100% 100%,
+    0 100%
+  );
+  pointer-events: none;
+}
+
+/* micro-dot base — PLANE 1 (moves least): tiny 1px dots on a tight 16px
+   pitch, far quieter than the hero's draggable grid. Static CSS layer that
+   also serves as the reduced-motion / no-JS fallback. */
+.dotsLight {
+  background-image: radial-gradient(rgba(244, 241, 234, 0.11) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* magnetic light field: a canvas overlaid exactly on the base dots that
+   additively brightens dots within ~165px of the cursor (heat buffer +
+   exponential decay in the rAF loop → a soft light ripple that follows the
+   pointer and fades smoothly when it leaves). Sits above the base dots,
+   below the ruler / text / tools. */
+.statement__dotsCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* PLANE 2: typography wrapper — receives a slight scroll drift from the
+   rAF loop (transform only, never layout) */
+.statement__inner {
+  position: relative;
+  z-index: 1;
+  /* narrowed with the 20% type reduction — kept just under the ruler gap
+     (min(76vw, 1120px)) so the horizontal segments always clear the text */
+  width: min(66vw, 940px);
+  /* optically a touch above true centre so the floating objects own the
+     space around the statement */
+  padding-bottom: 4vh;
+  will-change: transform;
+}
+
+.statement__text {
+  margin: 0;
+  /* reduced 20% from clamp(58px, 6vw, 112px) → creates more negative space
+     while remaining the dominant element; weight hierarchy preserved */
+  font-size: clamp(46px, 4.8vw, 90px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  text-align: center;
+  color: var(--cream);
+  text-wrap: balance;
+}
+
+/* scrubbed word reveal: each word brightens in sequence as the panel
+   rises (--tp 0→1 from Statement.tsx), dimmed → full — fully reversible
+   on upward scroll since it derives purely from scroll position */
+.statement__word {
+  opacity: clamp(0.22, calc(var(--tp, 1) * 13 - var(--i, 0)), 1);
+}
+
+.statement__word--strong {
+  font-weight: 600;
+}
+
+/* -------- ruler frame — mirrors the hero (.heroRuler) exactly --------
+   Two permanent light vertical rails at the shared --page-rail-inset (same
+   X as the hero + global .rails, so the measurement system aligns down the
+   page), plus a flex row on the optical centre line: [left seg | central
+   gap | right seg]. The central gap is a fixed clearance zone wider than
+   the headline container, so the segments physically cannot enter the text
+   area — three distinct regions, never a strikethrough. Colour/opacity/
+   thickness copied from .heroRuler__rail / __seg. */
+.statement__ruler {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.statement__rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  /* fixed light tone (not --hero-fg, which flips dark in light-hero mode)
+     so the rails stay legible on the always-dark statement background,
+     while matching the hero rail's light-on-dark appearance and 0.45 alpha */
+  background: var(--cream);
+  opacity: 0.45;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+
+.statement__rail--left {
+  left: var(--page-rail-inset);
+}
+
+.statement__rail--right {
+  right: var(--page-rail-inset);
+}
+
+.statement__rulerRow {
+  position: absolute;
+  left: var(--page-rail-inset);
+  right: var(--page-rail-inset);
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  align-items: center;
+}
+
+/* horizontal segments grow inward from the rails, scrubbed by --lineP */
+.statement__seg {
+  flex: 1 1 0;
+  height: 1px;
+  background: var(--cream);
+  opacity: 0.45;
+  transform: scaleX(var(--lineP, 1));
+}
+
+.statement__seg--left {
+  transform-origin: left center;
+}
+
+.statement__seg--right {
+  transform-origin: right center;
+}
+
+/* protected central clearance — wider than the headline container
+   (min(66vw, 940px)) so the segments always stop well before the text */
+.statement__rulerGap {
+  flex: 0 0 min(76vw, 1120px);
+}
+
+/* -------- floating tool objects — PLANE 3 (moves most) -------- */
+
+.statement__tools {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* shared 3D camera so tile rotateX/Y read as real depth */
+  perspective: 900px;
+}
+
+/* outer layer: placement + JS-driven transform (cursor-toward tilt + pull +
+   scroll depth). Inner layers own entrance and idle 3D float so the
+   transforms never fight each other. */
+.toolTile {
+  position: absolute;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.toolTile--figma {
+  left: 13%;
+  top: 27%;
+  --rot: -7deg;
+  --dur: 6.4s;
+  --del: -1.2s;
+}
+
+.toolTile--framer {
+  left: 24%;
+  bottom: 16%;
+  --rot: 5deg;
+  --dur: 7.6s;
+  --del: -3.4s;
+}
+
+.toolTile--claude {
+  right: 12%;
+  top: 17%;
+  --rot: 8deg;
+  --dur: 6.9s;
+  --del: -2.2s;
+}
+
+.toolTile--ps {
+  right: 16%;
+  bottom: 21%;
+  --rot: -5deg;
+  --dur: 8.3s;
+  --del: -4.6s;
+}
+
+/* staggered entrance once the panel has substantially covered the
+   viewport (.statement--revealed set from the rAF loop) */
+.toolTile__enter {
+  position: relative;
+  display: block;
+  transform-style: preserve-3d;
+  opacity: 0;
+  translate: 0 26px;
+  scale: 0.85;
+  transition: opacity 0.7s ease, translate 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toolTile--figma .toolTile__enter {
+  transition-delay: 0.1s;
+}
+
+.toolTile--framer .toolTile__enter {
+  transition-delay: 0.28s;
+}
+
+.toolTile--claude .toolTile__enter {
+  transition-delay: 0.42s;
+}
+
+.toolTile--ps .toolTile__enter {
+  transition-delay: 0.58s;
+}
+
+.statement--revealed .toolTile__enter {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+
+/* premium glass tile: translucent frosted face, soft bevel via layered
+   inset highlights, ambient drop shadow — an Apple-like floating object.
+   Continuously performs a subtle 3D float; timing varies per tile so they
+   never move together. */
+.toolTile__obj {
+  display: grid;
+  place-items: center;
+  width: var(--sz, clamp(64px, 6vw, 92px));
+  aspect-ratio: 1;
+  border-radius: 26%;
+  /* frosted-glass look via layered translucent fills + bevel highlights —
+     no backdrop-filter (keeps the animated 3D tiles cheap and jank-free) */
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 52%),
+    linear-gradient(#26262a, #191919);
+  border: 1px solid rgba(244, 241, 234, 0.16);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -12px 20px rgba(0, 0, 0, 0.28);
+  transform-style: preserve-3d;
+  animation: toolFloat3d var(--dur, 7s) cubic-bezier(0.37, 0, 0.63, 1) var(--del, 0s) infinite;
+  transition: scale 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.toolTile__obj svg {
+  width: 44%;
+  height: auto;
+  /* lift the logo slightly off the glass face for depth */
+  transform: translateZ(12px);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+}
+
+.toolTile:hover .toolTile__obj {
+  scale: 1.05;
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.58), 0 6px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -12px 20px rgba(0, 0, 0, 0.28);
+}
+
+/* tiny label on hover — minimal, no tooltip card */
+.toolTile__label {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  translate: -50% 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.6);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease, translate 0.3s ease;
+  pointer-events: none;
+}
+
+.toolTile:hover .toolTile__label {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+/* idle 3D float: subtle translateY + rotateX/Y/Z drift, oscillating
+   between two mirrored poses for a seamless loop (easeInOutSine timing set
+   on the animation). Kept within the spec's gentle ranges. */
+@keyframes toolFloat3d {
+  0%,
+  100% {
+    transform: translateY(-6px) rotateX(4deg) rotateY(-5deg) rotateZ(-2deg);
+  }
+  50% {
+    transform: translateY(6px) rotateX(-4deg) rotateY(5deg) rotateZ(2deg);
+  }
+}
+
+/* ---------- capabilities (skills vault) ----------
+   A deep-violet scene lifted from the reference clip: soft radial glow,
+   drifting blurred bokeh orbs, and holographic card objects. The holder
+   ("vault") floats centred; the skill cards scatter into the wings and
+   always render BELOW the holder in z, so nothing ever covers it. */
+
+.capabilities {
+  /* single source of truth for the holder height — the on-holder Collect
+     button derives its resting spot from it (and the open-state 0.94 scale) */
+  --walletH: clamp(146px, 16vw, 186px);
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  background: radial-gradient(120% 90% at 50% 42%, #4a3a78 0%, #322558 38%, #1e1538 70%, #140d26 100%);
+  overflow: hidden;
+}
+
+/* -------- drifting bokeh field -------- */
+.capOrbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.capOrb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(235, 226, 255, 0.55), rgba(200, 180, 255, 0.12) 60%, transparent 75%);
+  filter: blur(14px);
+  opacity: 0.34;
+  animation: orbDrift var(--dur, 16s) ease-in-out var(--del, 0s) infinite alternate;
+}
+
+.capOrb--1 { left: 6%; top: 16%; width: 90px; height: 90px; --dur: 17s; }
+.capOrb--2 { left: 22%; top: 68%; width: 46px; height: 46px; --dur: 13s; --del: -4s; opacity: 0.26; }
+.capOrb--3 { left: 44%; top: 8%; width: 34px; height: 34px; --dur: 11s; --del: -7s; opacity: 0.2; }
+.capOrb--4 { right: 8%; top: 24%; width: 110px; height: 110px; --dur: 19s; --del: -2s; }
+.capOrb--5 { right: 24%; bottom: 12%; width: 60px; height: 60px; --dur: 14s; --del: -9s; opacity: 0.28; }
+.capOrb--6 { left: 12%; bottom: 6%; width: 130px; height: 130px; --dur: 21s; --del: -5s; opacity: 0.18; }
+.capOrb--7 { right: 42%; bottom: 30%; width: 26px; height: 26px; --dur: 10s; --del: -3s; opacity: 0.22; }
+
+@keyframes orbDrift {
+  from {
+    transform: translate3d(0, -18px, 0) scale(1);
+  }
+  to {
+    transform: translate3d(26px, 22px, 0) scale(1.18);
+  }
+}
+
+/* the play canvas — constrained inside the rulers; drag is bounded to it */
+.capabilities__canvas {
+  position: relative;
+  flex: 1 1 auto;
+  margin: clamp(64px, 10vh, 120px) var(--page-content-inset);
+  border-radius: 4px;
+}
+
+/* -------- the holder: a holographic vault sleeve -------- */
+.wallet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  /* above the cards (z 10): dragged cards pass UNDER the holder */
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wallet:disabled {
+  cursor: default;
+}
+
+/* holo rim: a gradient border via padding + inner surface */
+.wallet__body {
+  position: relative;
+  width: clamp(200px, 22vw, 260px);
+  height: var(--walletH);
+  border-radius: 18px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(233, 223, 255, 0.75), rgba(139, 92, 246, 0.35) 30%, rgba(56, 189, 248, 0.3) 62%, rgba(233, 223, 255, 0.6));
+  box-shadow: 0 34px 70px rgba(8, 4, 24, 0.55), 0 10px 22px rgba(8, 4, 24, 0.4),
+    0 0 44px rgba(139, 92, 246, 0.22);
+  animation: walletFloat 5.5s ease-in-out infinite;
+  transition: box-shadow 0.4s ease;
+}
+
+/* inner glass face — carries the embossed circuit texture from the clip */
+.wallet__body::before {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 17px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 13px),
+    linear-gradient(155deg, #372a5e, #241a44 55%, #1a1233);
+}
+
+.wallet:hover .wallet__body {
+  box-shadow: 0 42px 84px rgba(8, 4, 24, 0.6), 0 12px 26px rgba(8, 4, 24, 0.44),
+    0 0 64px rgba(139, 92, 246, 0.34);
+}
+
+@keyframes walletFloat {
+  0%,
+  100% {
+    transform: translateY(-4px) rotateZ(-0.4deg);
+  }
+  50% {
+    transform: translateY(4px) rotateZ(0.4deg);
+  }
+}
+
+/* card tops peeking above the pocket, gently fanned — holographic */
+.wallet__peek {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 62%;
+  height: 46%;
+  border-radius: 9px 9px 3px 3px;
+  border: 1px solid rgba(233, 223, 255, 0.18);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wallet__peek--a {
+  translate: -50% 0;
+  rotate: 0deg;
+  background: linear-gradient(150deg, #4c3f82, #2c2154 70%);
+}
+
+.wallet__peek--b {
+  translate: -62% 0;
+  rotate: -6deg;
+  background: linear-gradient(150deg, #3d3170 10%, #251b49 75%);
+}
+
+.wallet__peek--c {
+  translate: -38% 0;
+  rotate: 6deg;
+  background: linear-gradient(150deg, #35296a, #1f163f 80%);
+}
+
+/* the front pocket: darker glass with the emboss + chip + status dot */
+.wallet__pocket {
+  position: absolute;
+  left: 1.5px;
+  right: 1.5px;
+  bottom: 1.5px;
+  height: 58%;
+  border-radius: 4px 4px 17px 17px;
+  background: linear-gradient(rgba(26, 17, 48, 0.92), rgba(16, 10, 32, 0.96));
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(233, 223, 255, 0.14);
+  overflow: hidden;
+}
+
+/* small metal chip, like the reference cards */
+.wallet__chip {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  width: 26px;
+  height: 19px;
+  border-radius: 4px;
+  background: linear-gradient(140deg, #cfc4ee, #8f83bb 55%, #b7abdf);
+  box-shadow: inset 0 0 0 1px rgba(20, 12, 40, 0.5), inset 0 -3px 5px rgba(20, 12, 40, 0.3);
+}
+
+/* embossed wordmark — lit by the surface, not printed on it */
+.wallet__emboss {
+  position: absolute;
+  left: 16px;
+  bottom: 13px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(233, 223, 255, 0.5);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55), 0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.wallet__emboss sup {
+  font-size: 7px;
+  color: rgba(167, 139, 250, 0.85);
+}
+
+.wallet__dot {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--purple-soft);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.18), 0 0 12px rgba(167, 139, 250, 0.8);
+}
+
+/* opened: the peeking cards are gone (they became the scattered cards), the
+   pocket mouth tips forward, and the float pauses so the Collect button
+   sits rock-solid on the holder's face */
+.wallet--open .wallet__body {
+  animation: none;
+}
+
+.wallet--open .wallet__peek {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.9);
+}
+
+.wallet--open .wallet__pocket {
+  transform: perspective(400px) rotateX(-12deg);
+  transform-origin: bottom;
+}
+
+.wallet__hint {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(233, 223, 255, 0.45);
+  min-height: 14px;
+}
+
+/* -------- scattered skill cards (below the holder in z) -------- */
+.capCards {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.capCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  width: clamp(168px, 15vw, 208px);
+  height: clamp(210px, 20vw, 264px);
+  translate: -50% -50%;
+  padding: 18px 18px 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border: 1px solid rgba(233, 223, 255, 0.14);
+  background: linear-gradient(160deg, #17112d, #0d0920 65%);
+  overflow: hidden;
+  box-shadow: 0 26px 54px rgba(8, 4, 24, 0.5), 0 8px 16px rgba(8, 4, 24, 0.36);
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+}
+
+/* holographic sheen sweeping the face — the Alloy-card wash */
+.capCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    118deg,
+    transparent 22%,
+    rgba(139, 92, 246, 0.2) 42%,
+    rgba(56, 189, 248, 0.14) 58%,
+    rgba(52, 211, 153, 0.1) 70%,
+    transparent 86%
+  );
+  pointer-events: none;
+}
+
+/* per-card hue shift so no two cards read identical */
+.capCard:nth-child(2n)::before {
+  filter: hue-rotate(24deg);
+}
+
+.capCard:nth-child(3n)::before {
+  filter: hue-rotate(-28deg);
+}
+
+.capCard:active {
+  cursor: grabbing;
+}
+
+.capCard__index {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: rgba(233, 223, 255, 0.42);
+}
+
+.capCard__category {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(233, 223, 255, 0.62);
+}
+
+.capCard__title {
+  margin: 7px 0 0;
+  font-size: clamp(19px, 1.5vw, 24px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #e9dfff;
+  text-shadow: 0 0 24px rgba(167, 139, 250, 0.35);
+  pointer-events: none;
+}
+
+/* artwork slot — holo bloom + fine dot grain, image drops in later */
+.capCard__art {
+  margin-top: auto;
+  height: 42%;
+  border-radius: 12px 12px 0 0;
+  background:
+    radial-gradient(80% 90% at 28% 88%, rgba(139, 92, 246, 0.4), rgba(56, 189, 248, 0.14) 55%, transparent 75%),
+    radial-gradient(rgba(233, 223, 255, 0.14) 1px, transparent 1px);
+  background-size: 100% 100%, 13px 13px;
+  -webkit-mask-image: linear-gradient(to top, #000 55%, transparent);
+  mask-image: linear-gradient(to top, #000 55%, transparent);
+  pointer-events: none;
+}
+
+/* -------- collect / reset: a button ON the holder's pocket face -------- */
+.capGather {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* sits over the wallet's lower pocket area (the wallet is centred and
+     scales to 0.94 when open, so this tracks its face) */
+  translate: -50% calc(var(--walletH) * 0.94 / 2 - 100% - 10px);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px 8px 12px;
+  border: 1px solid rgba(233, 223, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(20, 12, 40, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #e9dfff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, background 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.capGather--show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.capGather:hover {
+  background: rgba(139, 92, 246, 0.32);
+  border-color: rgba(233, 223, 255, 0.45);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet__body,
+  .capOrb {
+    animation: none;
+  }
+}
+
+/* ---------- projects ---------- */
+
+/* the section sits at the rail inset (not the deeper content inset) so
+   .projGrid's edges can land exactly on the rulers with zero gap; the
+   header text gets its own extra inset to stay visually centred */
+.projects {
+  padding: 14vh var(--page-rail-inset) 18vh;
+}
+
+.projects__title {
+  padding: 0 calc(var(--page-content-inset) - var(--page-rail-inset));
+  font-size: clamp(26px, 3.2vw, 46px);
+  font-weight: 600;
+  font-stretch: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  margin: 0;
+}
+
+.projects__sub {
+  max-width: 640px;
+  padding: 0 calc(var(--page-content-inset) - var(--page-rail-inset));
+  text-align: center;
+  margin: 18px auto 7vh;
+  color: rgba(31, 31, 31, 0.6);
+  line-height: 1.5;
+}
+
+/* -------- editorial grid: no cards, the divider IS the spacing -------- */
+/* left/right border lands exactly on the rulers — the ruler line IS the
+   grid's edge, not a second line offset from it */
+
+.projGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--ink-soft);
+}
+
+/* small "+" at each internal row/column crossing, like the reference */
+.projGrid__cross {
+  position: absolute;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 3;
+  font-size: 15px;
+  line-height: 1;
+  color: rgba(31, 31, 31, 0.4);
+  pointer-events: none;
+}
+
+.projTile {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ink-soft);
+  min-height: clamp(320px, 46vh, 460px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.projTile:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: -2px;
+}
+
+/* the cover photo bleeds edge-to-edge — the grid divider is the only
+   spacing, there is no internal card margin */
+.projTile__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.projTile__coverWrap {
+  position: absolute;
+  inset: -5%;
+  width: 110%;
+  height: 110%;
+}
+
+.projTile__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transform: scale(1);
+  filter: blur(16px);
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.projTile:hover .projTile__cover,
+.projTile:focus-visible .projTile__cover {
+  opacity: 1;
+  transform: scale(1.03);
+  filter: blur(0);
+}
+
+/* soft wash so the photo feels cinematic, not a harsh rectangle — a
+   bottom-weighted bloom (where the category label sits) plus a mild
+   all-round feather, fading to the page's own cream tone rather than a
+   stock white. Kept short of fully opaque so the white category/logo text
+   (recoloured on hover) still reads over it. */
+.projTile__vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      to top,
+      rgba(242, 237, 230, 0.55) 0%,
+      rgba(242, 237, 230, 0.26) 20%,
+      transparent 48%
+    ),
+    radial-gradient(140% 140% at 50% 45%, transparent 62%, rgba(242, 237, 230, 0.4) 100%);
+  opacity: 0;
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.projTile:hover .projTile__vignette,
+.projTile:focus-visible .projTile__vignette {
+  opacity: 1;
+}
+
+/* -------- year (top) / logo (centre) / category (bottom) -------- */
+
+.projTile__year {
+  position: absolute;
+  z-index: 2;
+  top: 24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  color: rgba(31, 31, 31, 0.45);
+  transition: color 0.5s ease;
+}
+
+.projTile__logo {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 24px;
+  font-size: clamp(26px, 3vw, 46px);
+  color: var(--ink);
+  text-shadow: 0 0 0 transparent;
+  transition: color 0.5s cubic-bezier(0.22, 1, 0.36, 1), text-shadow 0.5s ease;
+}
+
+.projTile__category {
+  position: absolute;
+  z-index: 2;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-shadow: 0 0 0 transparent;
+  transition: color 0.5s ease, text-shadow 0.5s ease;
+}
+
+.projTile:hover .projTile__year,
+.projTile:focus-visible .projTile__year {
+  color: rgba(31, 31, 31, 0.55);
+}
+
+.projTile:hover .projTile__logo,
+.projTile:focus-visible .projTile__logo {
+  color: #fff;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.28);
+}
+
+.projTile:hover .projTile__category,
+.projTile:focus-visible .projTile__category {
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.32);
+}
+
+/* -------- shared CTA pill (modal only — tiles never show a button) -------- */
+
+.ctaPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ctaPill--solid {
+  background: var(--purple);
+  color: #fff;
+}
+
+.ctaPill--solid:hover {
+  background: var(--purple-mid);
+}
+
+/* ---------- project modal ---------- */
+
+.projModal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5vh 24px;
+  background: rgba(20, 16, 14, 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+
+.projModal {
+  position: relative;
+  width: min(960px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 32px;
+  background: rgba(255, 253, 249, 0.94);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(31, 31, 31, 0.07);
+  box-shadow: 0 20px 60px rgba(31, 31, 31, 0.16), 0 4px 16px rgba(31, 31, 31, 0.08);
+  color: var(--ink);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.projModal::-webkit-scrollbar {
+  display: none;
+}
+
+/* -------- in-modal "navbar": brand mark left, primary action + close right —
+   pinned so it reads as standalone app chrome while the content scrolls -------- */
+.projModal__nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px 16px 26px;
+  background: rgba(255, 253, 249, 0.86);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  border-bottom: 1px solid rgba(31, 31, 31, 0.07);
+}
+
+.projModal__navLogo {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.projModal__navLogo sup {
+  color: var(--purple);
+  font-size: 9px;
+}
+
+.projModal__navActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.projModal__navCta {
+  padding: 9px 18px;
+  font-size: 12px;
+}
+
+.projModal__close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(31, 31, 31, 0.12);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.projModal__close:hover {
+  background: rgba(31, 31, 31, 0.06);
+  border-color: rgba(31, 31, 31, 0.2);
+  transform: rotate(90deg);
+}
+
+.projModal__preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--dark);
+  overflow: hidden;
+}
+
+.projPreview,
+.projPreview iframe,
+.projPreview img,
+.projPreview video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  object-fit: cover;
+}
+
+.projPreview__skeleton {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    var(--bridge-dark) 30%,
+    #2a2a2e 50%,
+    var(--bridge-dark) 70%
+  );
+  background-size: 200% 100%;
+  animation: projSkeleton 1.5s ease-in-out infinite;
+}
+
+@keyframes projSkeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.projPreview__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: radial-gradient(120% 140% at 50% 0%, #2c2430, var(--bridge-dark) 60%, var(--dark));
+  color: rgba(244, 241, 234, 0.7);
+}
+
+.projPreview__placeholderLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(244, 241, 234, 0.45);
+}
+
+.projPreview__placeholderUrl {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(244, 241, 234, 0.9);
+}
+
+.projModal__body {
+  padding: clamp(28px, 4vw, 48px);
+}
+
+.projModal__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.projModal__title {
+  font-size: clamp(24px, 3vw, 36px);
+  margin: 0;
+}
+
+.projModal__tag {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(31, 31, 31, 0.5);
+  white-space: nowrap;
+}
+
+.projModal__desc {
+  max-width: 60ch;
+  color: rgba(31, 31, 31, 0.72);
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+.projModal__facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin: 0 0 28px;
+}
+
+.projModal__facts dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(31, 31, 31, 0.45);
+  margin-bottom: 6px;
+}
+
+.projModal__facts dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.projModal__highlights {
+  margin: 0 0 32px;
+}
+
+.projModal__highlightsLabel {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(31, 31, 31, 0.45);
+  margin-bottom: 12px;
+}
+
+.projModal__highlights ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.projModal__highlights li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(31, 31, 31, 0.78);
+}
+
+.projModal__highlights li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple);
+}
+
+.projModal__cta {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .projects {
+    padding: 10vh var(--page-rail-inset) 12vh;
+  }
+
+  .projects__sub {
+    margin-bottom: 5vh;
+  }
+
+  .projGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* single column has no internal vertical divider to cross */
+  .projGrid__cross {
+    display: none;
+  }
+
+  .projTile {
+    min-height: 300px;
+  }
+
+  /* touch devices can't hover, and there's no cursor pill to invite the
+     tap — so the cover stays ambiently visible at rest and the whole tile
+     is the tap target (no button, same as desktop). */
+  .projTile__cover {
+    opacity: 1;
+    filter: blur(0);
+  }
+
+  .projTile__vignette {
+    opacity: 0.7;
+  }
+
+  .projTile__logo {
+    color: #fff;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  .projTile__year {
+    color: rgba(31, 31, 31, 0.6);
+  }
+
+  .projTile__category {
+    color: #fff;
+  }
+
+  .projModal__backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .projModal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+  }
+}
+
+/* ---------- footer ---------- */
+
+.dotsInk {
+  background-image: radial-gradient(var(--dot) 1.4px, transparent 1.4px);
+  background-size: 20px 20px;
+}
+
+.footer {
+  position: relative;
+  background-color: var(--purple);
+  color: #f2ede6;
+  padding: 8vh 9vw 4vh;
+  overflow: hidden;
+}
+
+.footer__hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6vh 0 4vh;
+}
+
+.footer__watermark {
+  font-size: clamp(56px, 12vw, 190px);
+  font-weight: 800;
+  text-align: center;
+  color: var(--wm);
+  user-select: none;
+}
+
+.footer__dude {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: clamp(160px, 30vh, 260px);
+}
+
+.footer__rule {
+  height: 1px;
+  background: currentColor;
+  opacity: 0.3;
+  margin-bottom: 6vh;
+}
+
+.footer__cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footer__lead {
+  font-size: clamp(18px, 2vw, 28px);
+  margin: 0 0 14px;
+}
+
+.footer__big {
+  font-size: clamp(44px, 6.4vw, 96px);
+  font-weight: 800;
+  margin: 0;
+}
+
+.footer__reach {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+  font-size: 17px;
+}
+
+.footer__icons {
+  display: flex;
+  gap: 16px;
+}
+
+.footer__icons a {
+  width: 52px;
+  height: 52px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 700;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.footer__icons a:hover {
+  background: #f2ede6;
+  color: var(--purple);
+  transform: translateY(-4px);
+}
+
+.footer__base {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 9vh;
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+.footer__base strong {
+  font-weight: 800;
+}
+
+/* ---------- mobile bottom navbar (phone widths only) ---------- */
+
+.mobileNav {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  translate: -50% 0;
+  z-index: 96;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  max-width: calc(100vw - 24px);
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  backdrop-filter: blur(18px) saturate(1.7);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
+  color: var(--glass-fg);
+  transition: background-color 0.55s ease, border-color 0.55s ease, box-shadow 0.55s ease;
+}
+
+/* equal-width side zones keep the logo optically centred when closed */
+.mobileNav__menu,
+.mobileNav__theme {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.mobileNav__menu:focus-visible,
+.mobileNav__theme:focus-visible {
+  outline: 2px solid var(--hero-brand);
+  outline-offset: 2px;
+}
+
+.mobileNav__logo {
+  flex: 1 1 auto;
+  text-align: center;
+  padding: 0 6px;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.mobileNav__logo sup {
+  color: var(--hero-brand);
+  font-size: 10px;
+  font-weight: 800;
+  margin-left: 1px;
+}
+
+/* hamburger → close morph */
+.mobileNav__menuIcon {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 12px;
+}
+
+.mobileNav__menuIcon i {
+  position: absolute;
+  left: 0;
+  width: 16px;
+  height: 1.6px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobileNav__menuIcon i:first-child {
+  top: 2px;
+}
+
+.mobileNav__menuIcon i:last-child {
+  bottom: 2px;
+}
+
+.mobileNav--open .mobileNav__menuIcon i:first-child {
+  translate: 0 3.2px;
+  rotate: 45deg;
+}
+
+.mobileNav--open .mobileNav__menuIcon i:last-child {
+  translate: 0 -3.2px;
+  rotate: -45deg;
+}
+
+/* links live INSIDE the same pill; the pill widens as they reveal */
+.mobileNav__links {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+}
+
+.mobileNav--open .mobileNav__links {
+  max-width: 72vw;
+  opacity: 1;
+}
+
+/* open state trades a little logo size for full link visibility */
+.mobileNav--open .mobileNav__logo {
+  font-size: 14px;
+}
+
+.mobileNav__links a {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0;
+  translate: 0 8px;
+  transition: opacity 0.35s ease, translate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobileNav--open .mobileNav__links a {
+  opacity: 0.85;
+  translate: 0 0;
+}
+
+.mobileNav__themeIcon {
+  display: flex;
+  animation: mobileThemeIconIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mobileThemeIconIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-40deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- reveal ---------- */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
   html {
-    color-scheme: dark;
+    scroll-behavior: auto;
+  }
+
+  .heroRuler__rail,
+  .heroRuler__seg,
+  .heroRuler__label {
+    animation: none;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .aboutCard,
+  .aboutCard::before {
+    transition: none;
+    animation: none;
+  }
+
+  /* the JS rAF loop that drives --transP is skipped under reduced motion;
+     the bands are purely decorative, so with --transP stuck at 0 they
+     collapse to nothing and the panel presents a clean flat edge */
+
+  /* statement: no idle float, no staggered entrance, words fully bright
+     (Statement.tsx also pins --tp to 1 and skips its loop) */
+  .toolTile__obj {
+    animation: none;
+  }
+
+  .toolTile__enter {
+    transition: none;
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+
+  .statement__word {
+    opacity: 1;
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  .navbar {
+    gap: 14px;
+    padding: 9px 18px;
+  }
+
+  .navbar__links {
+    gap: 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  /* Pull the card cluster inward so it stays in view on smaller screens */
+  .hero {
+    --spread: 0.72;
+  }
+
+  .heroCard {
+    scale: 0.8;
+  }
+
+  /* tablet: the two-column About grid gets cramped below ~900px — stack it
+     as a single centred column. Card + padding trimmed so the whole pinned
+     section still fits ~1024-tall tablets (the section is sticky; content
+     over 100svh would clip the lower stats). The ≤640 block refines the
+     phone composition further. */
+  .about__content {
+    padding-block: clamp(44px, 5vh, 60px);
+  }
+
+  .about__grid {
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 4vh, 44px);
+  }
+
+  .aboutCard {
+    min-height: 300px;
+    max-width: 560px;
+  }
+
+  .about__stats {
+    gap: clamp(32px, 4vh, 48px) clamp(28px, 4vw, 52px);
+  }
+
+  /* tablet statement: recomposed, not shrunk — objects pulled inward and
+     slightly smaller so they never collide with the wrapping statement */
+  .statement__inner {
+    width: min(86vw, 720px);
+  }
+
+  .toolTile__obj {
+    --sz: clamp(56px, 8vw, 72px);
+  }
+
+  .toolTile--figma {
+    left: 7%;
+    top: 20%;
+  }
+
+  .toolTile--framer {
+    left: 12%;
+    bottom: 13%;
+  }
+
+  .toolTile--claude {
+    right: 7%;
+    top: 14%;
+  }
+
+  .toolTile--ps {
+    right: 9%;
+    bottom: 16%;
+  }
+
+  .services__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .servicesCard {
+    height: 34vh;
+  }
+
+  .projects__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer__cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer__reach {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    --spread: 0.5;
+  }
+
+  /* -------- capabilities (vault): phone composition -------- */
+  .capabilities {
+    --walletH: clamp(112px, 32vw, 132px);
+  }
+
+  .capabilities__canvas {
+    margin: clamp(48px, 8vh, 84px) var(--page-content-inset);
+  }
+
+  .wallet__body {
+    width: clamp(150px, 44vw, 180px);
+  }
+
+  .capCard {
+    width: clamp(116px, 32vw, 140px);
+    height: clamp(150px, 42vw, 180px);
+    padding: 13px 13px 0;
+  }
+
+  .capCard__title {
+    font-size: clamp(15px, 4.2vw, 18px);
+  }
+
+  /* -------- dedicated mobile art direction (original phone reference):
+     four large edge-cropped cards frame the identity, sized in vw with the
+     artwork's own aspect ratios — not scaled-down desktop coordinates.
+     !important is needed only against the inline desktop width/height. */
+  .heroCard {
+    scale: none;
+  }
+
+  .heroCard--mHide,
+  .hero__pins {
+    display: none;
+  }
+
+  /* top-left poster: tall, cropped by the top and left edges */
+  .heroCard--c0 {
+    width: 56vw !important;
+    height: 83vw !important;
+    translate: calc(-50% - 36vw) calc(-50% - 35svh);
+  }
+
+  /* top-right car: cropped by the right edge */
+  .heroCard--c2 {
+    width: 52vw !important;
+    height: 77vw !important;
+    translate: calc(-50% + 38vw) calc(-50% - 32svh);
+  }
+
+  /* lower-left E-Summit laptop (landscape): enters from the left */
+  .heroCard--c6 {
+    width: 62vw !important;
+    height: 43.5vw !important;
+    translate: calc(-50% - 36vw) calc(-50% + 32svh);
+  }
+
+  /* lower-right fuzion: deep corner crop */
+  .heroCard--c7 {
+    width: 52vw !important;
+    height: 64vw !important;
+    translate: calc(-50% + 40vw) calc(-50% + 40svh);
+  }
+
+  /* horizontal finger drags move the card; vertical swipes keep scrolling */
+  .heroCard__drag {
+    touch-action: pan-y;
+  }
+
+  /* title tuned to the original phone dominance */
+  .hero__aayush {
+    font-size: clamp(56px, 17vw, 76px);
+  }
+
+  .hero__visuals {
+    font-size: clamp(54px, 16.5vw, 74px);
+  }
+
+  /* drag hint pulled close under the identity group */
+  .hero__hint {
+    translate: -50% calc(-50% + 154px);
+    font-size: 13px;
+  }
+
+  /* phones: bottom mobile navbar replaces the desktop pill; the standalone
+     floating theme switcher never shows (the navbar owns theming) */
+  .navbar {
+    display: none;
+  }
+
+  .mobileNav {
+    display: flex;
+  }
+
+  .themeSwitch {
+    display: none;
+  }
+
+  /* compact identity group: labels hug the wordmark as one block */
+  .heroRuler__rail,
+  .heroRuler__seg,
+  .heroRuler__spacer {
+    display: none;
+  }
+
+  .heroRuler__row {
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: clamp(176px, 50vw, 208px);
+  }
+
+  /* clean mobile labels: no ruler lines, just the text */
+  .heroRuler__label {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+  }
+
+  /* ================= dedicated mobile About composition =================
+     Art-directed for phones, not a scaled desktop: a dominant black card,
+     then a clean 2×2 stat grid where each stat STACKS (big number → label →
+     short line) so it scans top-to-bottom instead of cramming a number and
+     label side-by-side in a narrow cell. Generous, even vertical rhythm;
+     the global rulers sit outside and are untouched. */
+  .about {
+    min-height: auto;
+  }
+
+  .about__content {
+    /* content clears the global rails with room to spare; centred column,
+       sized so the whole section fits one pinned viewport (see the note on
+       .aboutCard — the section is sticky, content must not exceed 100svh) */
+    width: 100%;
+    max-width: 560px;
+    margin-inline: auto;
+    padding: clamp(48px, 7vh, 72px) 24px clamp(40px, 6vh, 56px);
+  }
+
+  .about__marker {
+    margin-bottom: 16px;
+  }
+
+  .about__heading {
+    font-size: clamp(30px, 8.5vw, 42px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: clamp(24px, 4vh, 36px);
+  }
+
+  .about__grid {
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 5vh, 44px);
+  }
+
+  /* dominant card: full-width anchor object, comfortable internal spacing,
+     bottom-anchored CTA. Sized so the whole section (heading + card + 2×2
+     stats) fits within one pinned viewport — the section is sticky-pinned,
+     so content must not exceed 100svh or the lower rows become unreachable. */
+  .aboutCard {
+    min-height: 300px;
+    padding: 28px 24px;
+    border-radius: 26px;
+  }
+
+  .aboutCard__dot {
+    width: 13px;
+    height: 13px;
+    margin-bottom: 20px;
+  }
+
+  .aboutCard__name {
+    font-size: 25px;
+    margin-bottom: 13px;
+  }
+
+  .aboutCard__desc {
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: none;
+    margin-bottom: 26px;
+  }
+
+  .aboutCard__cta {
+    padding: 16px 24px;
+    font-size: 15px;
+  }
+
+  /* 2×2 grid, each stat stacked (big number → label) for clean top-to-
+     bottom scanning; the descriptions are dropped on phones so all four
+     numbers stay visible in the pinned viewport — the labels already carry
+     the product framing (years creating / projects shipped / …). */
+  .about__stats {
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(22px, 3.5vh, 32px) 22px;
+  }
+
+  .aboutStat__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .aboutStat__num {
+    font-size: clamp(36px, 11vw, 46px);
+  }
+
+  .aboutStat__label {
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  .aboutStat__rule {
+    width: 32px;
+    margin: 11px 0 0;
+  }
+
+  .aboutStat__desc {
+    display: none;
+  }
+
+  /* shorter stepped bands on phones — same skyline, roughly half the
+     travel so the silhouette stays proportionate to the small screen */
+  .about__step--l2 {
+    height: calc(var(--transP) * 44px);
+  }
+
+  .about__step--l1 {
+    height: calc(var(--transP) * 54px);
+  }
+
+  .about__step--c {
+    height: calc(var(--transP) * 100px);
+  }
+
+  .about__step--r1 {
+    height: calc(var(--transP) * 54px);
+  }
+
+  .about__step--r2 {
+    height: calc(var(--transP) * 30px);
+  }
+
+
+  /* -------- statement: dedicated phone composition --------
+     still a full-screen canvas; statement stays dominant on ~4 lines, the
+     four tool objects shrink and move into the empty corners, autonomous
+     float stays, cursor movement is naturally absent (pointer: coarse).
+     Extra bottom padding keeps everything clear of the bottom navbar. */
+  .statement {
+    padding: 84px 20px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  /* phones: keep the vertical rails (page measurement system) but drop the
+     horizontal segments and the forced desktop line breaks — readability
+     and an uncluttered centre first */
+  .statement__rulerRow {
+    display: none;
+  }
+
+  .statement__br {
+    display: none;
+  }
+
+  .statement__inner {
+    width: 100%;
+    padding-bottom: 0;
+  }
+
+  /* sized so the statement lands on ~4 controlled lines at 390px, still
+     clearly dominant on the dark canvas */
+  .statement__text {
+    font-size: clamp(32px, 9vw, 44px);
+    line-height: 1.02;
+  }
+
+  .toolTile__obj {
+    --sz: 50px;
+  }
+
+  .toolTile--figma {
+    left: 7%;
+    top: 11%;
+  }
+
+  .toolTile--claude {
+    right: 7%;
+    top: 9%;
+  }
+
+  .toolTile--framer {
+    left: 10%;
+    bottom: 24%;
+  }
+
+  /* stays clear of the fixed bottom navbar pill */
+  .toolTile--ps {
+    right: 8%;
+    bottom: 19%;
+  }
+}
+
+/* small phones (≈390 / 360): keep the About composition balanced and
+   overflow-free without shrinking the card into an info box */
+@media (max-width: 400px) {
+  .about__content {
+    padding: clamp(44px, 7vh, 64px) 20px clamp(40px, 6vh, 56px);
+  }
+
+  .about__marker {
+    margin-bottom: 14px;
+  }
+
+  .about__heading {
+    margin-bottom: clamp(22px, 4vh, 34px);
+  }
+
+  .about__grid {
+    gap: clamp(28px, 5vh, 40px);
+  }
+
+  .aboutCard {
+    min-height: 280px;
+    padding: 24px 20px;
+  }
+
+  .aboutCard__name {
+    font-size: 23px;
+  }
+
+  .aboutCard__desc {
+    font-size: 14.5px;
+    margin-bottom: 20px;
+  }
+
+  .about__stats {
+    gap: 20px 16px;
+  }
+
+  .aboutStat__num {
+    font-size: clamp(32px, 10vw, 40px);
+  }
+}
+
+/* narrow phones: compact navbar so the open state fits without overflow */
+@media (max-width: 374px) {
+  .mobileNav {
+    gap: 4px;
+    padding: 6px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .mobileNav__menu,
+  .mobileNav__theme {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mobileNav__logo,
+  .mobileNav--open .mobileNav__logo {
+    font-size: 13px;
+    padding: 0 3px;
+  }
+
+  .mobileNav__links {
+    gap: 7px;
+  }
+
+  .mobileNav__links a {
+    font-size: 9px;
+    letter-spacing: 0.02em;
   }
 }
