@@ -23,7 +23,7 @@ import { useEffect, useRef, useState } from "react";
 
 const WORDS: { t: string; strong?: boolean; br?: boolean }[] = [
   { t: "4+", strong: true },
-  { t: "years", strong: true },
+  { t: "years", strong: true, br: true },
   { t: "of" },
   { t: "turning", br: true },
   { t: "complex" },
@@ -69,21 +69,15 @@ function ClaudeMark() {
   );
 }
 
-function PhotoshopMark() {
+function VectorMark() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="1.2" y="1.2" width="21.6" height="21.6" rx="4.8" stroke="#31A8FF" strokeWidth="1.7" />
-      <text
-        x="12"
-        y="16.4"
-        textAnchor="middle"
-        fontSize="11"
-        fontWeight="600"
-        fill="#31A8FF"
-        fontFamily="inherit"
-      >
-        Ps
-      </text>
+      <path d="M6 14 Q 12 8, 18 14" stroke="white" strokeWidth="1.5" fill="none" />
+      <line x1="8" y1="17" x2="12" y2="10" stroke="white" strokeWidth="1.5" />
+      <line x1="16" y1="17" x2="12" y2="10" stroke="white" strokeWidth="1.5" />
+      <circle cx="12" cy="10" r="2" fill="white" />
+      <circle cx="8" cy="17" r="1.5" stroke="white" strokeWidth="1.5" fill="#222" />
+      <circle cx="16" cy="17" r="1.5" stroke="white" strokeWidth="1.5" fill="#222" />
     </svg>
   );
 }
@@ -92,7 +86,7 @@ const TOOLS = [
   { id: "figma", label: "Figma", icon: <FigmaMark /> },
   { id: "framer", label: "Framer", icon: <FramerMark /> },
   { id: "claude", label: "Claude", icon: <ClaudeMark /> },
-  { id: "ps", label: "Photoshop", icon: <PhotoshopMark /> },
+  { id: "vector", label: "Design", icon: <VectorMark /> },
 ];
 
 export default function Statement() {
@@ -284,6 +278,13 @@ export default function Statement() {
           <span className="statement__rulerGap" />
           <span className="statement__seg statement__seg--right" />
         </div>
+      </div>
+      
+      {/* Mobile wavy line behind the vector tool */}
+      <div className="statement__wavyLine" aria-hidden>
+        <svg viewBox="0 0 400 100" fill="none" preserveAspectRatio="none">
+          <path d="M-10,70 Q90,30 200,80 T410,20" stroke="var(--cream)" strokeWidth="2.5" />
+        </svg>
       </div>
 
       <div className="statement__inner" ref={innerRef}>

@@ -28,20 +28,31 @@ const CAPS: Cap[] = [
    keeps |fx| ≥ 0.5 so the whole centre column stays clear: scattered cards
    never land on the holder (and z-order keeps them under it even when
    dragged across). r = resting rotation. */
-const SCATTER = [
-  { fx: -0.82, fy: -0.55, r: -7 },
-  { fx: -0.56, fy: 0.02, r: 5 },
-  { fx: -0.8, fy: 0.6, r: -5 },
-  { fx: 0.82, fy: -0.55, r: 7 },
-  { fx: 0.56, fy: -0.02, r: -6 },
-  { fx: 0.85, fy: 0.52, r: 6 },
-  { fx: 0.52, fy: 0.78, r: 3 },
+const SCATTER_DESKTOP = [
+  { fx: -0.82, fy: -0.45, r: -7 },
+  { fx: -0.56, fy: 0.05, r: 5 },
+  { fx: -0.8, fy: 0.28, r: -5 },
+  { fx: 0.82, fy: -0.45, r: 7 },
+  { fx: 0.56, fy: 0.0, r: -6 },
+  { fx: 0.85, fy: 0.25, r: 6 },
+  { fx: 0.52, fy: 0.3, r: 3 },
+];
+
+const SCATTER_MOBILE = [
+  { fx: -0.85, fy: -0.52, r: -10 }, // 0: Product Design (top-left, tilted left)
+  { fx: -0.82, fy: 0.58, r: -8 },   // 1: Interface Design (bottom-left, tilted left)
+  { fx: 0.85, fy: -0.25, r: 8 },    // 2: Design Systems (middle-right, tilted right)
+  { fx: -0.2, fy: -0.48, r: -6 },   // 3: Brand Identity (center-top-left, tilted left)
+  { fx: 0.42, fy: -0.72, r: -5 },   // 4: Web Experiences (top-center-right, tilted left)
+  { fx: 0.82, fy: 0.62, r: -6 },    // 5: Motion Design (bottom-right, tilted left)
+  { fx: -0.05, fy: 0.72, r: -4 },   // 6: Creative Development (bottom-center, tilted left)
 ];
 
 export default function Capabilities() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [half, setHalf] = useState({ w: 380, h: 240 });
+  const [isMobile, setIsMobile] = useState(false);
   const topZ = useRef(10);
   const reduce = useReducedMotion();
 
@@ -54,7 +65,15 @@ export default function Capabilities() {
       // narrow canvases and cards never cross the rulers
       const cw = Math.min(112, r.width * 0.11);
       const ch = Math.min(140, r.height * 0.14);
-      setHalf({ w: Math.max(40, r.width / 2 - cw - 12), h: Math.max(80, r.height / 2 - ch - 12) });
+      const mobile = r.width < 640;
+      setIsMobile(mobile);
+      
+      const scaleX = mobile ? 1.2 : 1;
+      const scaleY = mobile ? 1.15 : 1;
+      setHalf({ 
+        w: Math.max(40, r.width / 2 - cw - 12) * scaleX, 
+        h: Math.max(80, r.height / 2 - ch - 12) * scaleY 
+      });
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -83,16 +102,19 @@ export default function Capabilities() {
         ? { duration: 0 }
         : { type: "spring", stiffness: 320, damping: 30 },
     },
-    open: (i: number) => ({
-      x: SCATTER[i].fx * half.w,
-      y: SCATTER[i].fy * half.h,
-      rotate: SCATTER[i].r,
-      scale: 1,
-      opacity: 1,
-      transition: reduce
-        ? { duration: 0 }
-        : { type: "spring", stiffness: 300, damping: 22, mass: 0.9 },
-    }),
+    open: (i: number) => {
+      const coord = isMobile ? SCATTER_MOBILE[i] : SCATTER_DESKTOP[i];
+      return {
+        x: coord.fx * half.w,
+        y: coord.fy * half.h,
+        rotate: coord.rotate ?? coord.r,
+        scale: 1,
+        opacity: 1,
+        transition: reduce
+          ? { duration: 0 }
+          : { type: "spring", stiffness: 300, damping: 22, mass: 0.9 },
+      };
+    },
   };
 
   return (
@@ -108,32 +130,48 @@ export default function Capabilities() {
         <span className="capOrb capOrb--7" />
       </div>
 
+      {/* Vertical side rails (matching statement section rails) */}
+      <div className="capRails" aria-hidden>
+        <span className="capRail capRail--left" />
+        <span className="capRail capRail--right" />
+      </div>
+
       <div className="capabilities__canvas" ref={canvasRef}>
-        {/* the holo vault / card-holder, centred; scattered cards render
-            BELOW it in z, so nothing ever covers the holder */}
-        <motion.button
-          type="button"
+        {/* the holo vault / card-holder, centred */}
+        <motion.div
           className={`wallet${open ? " wallet--open" : ""}`}
-          aria-label={open ? "Skills issued" : "Open skills wallet"}
-          aria-expanded={open}
-          onClick={() => !open && setOpen(true)}
-          animate={reduce ? undefined : open ? { scale: 0.94 } : { scale: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 24 }}
+          animate={
+            reduce
+              ? undefined
+              : open
+              ? { scale: 0.94, x: 0, rotate: 0 }
+              : { scale: 1, x: [0, -3, 3, -3, 3, 0], rotate: [0, -1, 1, -1, 1, 0] }
+          }
+          transition={
+            open
+              ? { type: "spring", stiffness: 260, damping: 24 }
+              : { duration: 0.4, repeat: Infinity, repeatDelay: 1.5, ease: "easeInOut" }
+          }
+          onClick={() => setOpen(!open)}
+          style={{ cursor: "pointer" }}
         >
           <span className="wallet__body">
             <span className="wallet__peek wallet__peek--a" aria-hidden />
             <span className="wallet__peek wallet__peek--b" aria-hidden />
             <span className="wallet__peek wallet__peek--c" aria-hidden />
             <span className="wallet__pocket" aria-hidden>
-              <span className="wallet__chip" aria-hidden />
+              <span className="wallet__actionBtn" aria-hidden>
+                {open ? "Collect" : "Open"}
+              </span>
               <span className="wallet__emboss" aria-hidden>
                 aayush<sup>vz</sup> · skills
               </span>
+              <span className="wallet__chip" aria-hidden />
               <span className="wallet__dot" aria-hidden />
             </span>
           </span>
-          <span className="wallet__hint">{open ? "" : "Tap to open"}</span>
-        </motion.button>
+          <span className="wallet__hint">{open ? "" : "TAP TO OPEN"}</span>
+        </motion.div>
 
         {/* the scattered skill cards */}
         <motion.div
@@ -162,31 +200,16 @@ export default function Capabilities() {
               <span className="capCard__index">{String(i + 1).padStart(2, "0")}</span>
               <span className="capCard__category">{cap.category}</span>
               <h3 className="capCard__title">{cap.title}</h3>
-              {/* artwork slot — drop the final square image here later */}
               <div className="capCard__art" aria-hidden />
             </motion.article>
           ))}
         </motion.div>
+      </div>
 
-        {/* collect / reset — sits ON the holder's pocket face (a sibling
-            overlay, since a button can't nest inside the wallet button) */}
-        <button
-          type="button"
-          className={`capGather${open && !reduce ? " capGather--show" : ""}`}
-          onClick={() => setOpen(false)}
-          aria-label="Collect the skill cards back into the holder"
-        >
-          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" aria-hidden>
-            <path
-              d="M10 4v9m0 0-3.5-3.5M10 13l3.5-3.5M4 16h12"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Collect
-        </button>
+      {/* Footer text — OUTSIDE the canvas, pinned to section bottom */}
+      <div className="capabilities__footer">
+        <h2 className="capabilities__footerTitle">Skills</h2>
+        <p className="capabilities__footerSub">Hold the wallet to reveal</p>
       </div>
     </section>
   );

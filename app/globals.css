@@ -442,6 +442,10 @@ html.has-cursor .cursorRing {
   overflow: hidden;
 }
 
+.hero__mobileLabel {
+  display: none;
+}
+
 .hero__aayush {
   display: inline-block;
   font-family: var(--font-serif), serif;
@@ -493,8 +497,6 @@ html.has-cursor .cursorRing {
   width: 1px;
   background: var(--hero-fg);
   opacity: 0.45;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
   animation: rulerRail 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   transition: background-color 0.55s ease;
 }
@@ -1196,6 +1198,7 @@ html.past-hero .themeSwitch {
    subtly imperfect line (rides with the section; the next section is
    simply revealed underneath, no gap). */
 .statement::after {
+  display: none;
   content: "";
   position: absolute;
   left: 0;
@@ -1249,6 +1252,11 @@ html.past-hero .themeSwitch {
 
 /* PLANE 2: typography wrapper — receives a slight scroll drift from the
    rAF loop (transform only, never layout) */
+
+.statement__wavyLine {
+  display: none;
+}
+
 .statement__inner {
   position: relative;
   z-index: 1;
@@ -1310,8 +1318,6 @@ html.past-hero .themeSwitch {
      while matching the hero rail's light-on-dark appearance and 0.45 alpha */
   background: var(--cream);
   opacity: 0.45;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
 }
 
 .statement__rail--left {
@@ -1384,12 +1390,18 @@ html.past-hero .themeSwitch {
   --del: -1.2s;
 }
 
+/* removed framer */
+
+
 .toolTile--framer {
   left: 24%;
   bottom: 16%;
   --rot: 5deg;
   --dur: 7.6s;
   --del: -3.4s;
+}
+.toolTile--framer .toolTile__enter {
+  transition-delay: 0.28s;
 }
 
 .toolTile--claude {
@@ -1400,7 +1412,24 @@ html.past-hero .themeSwitch {
   --del: -2.2s;
 }
 
-.toolTile--ps {
+
+.toolTile--vector .toolTile__obj {
+  background: rgba(30, 30, 30, 0.8) !important;
+  border: 1px solid #FFE873 !important;
+  border-radius: 26% !important;
+}
+.toolTile--vector .toolTile__obj svg {
+  width: 50% !important;
+  height: 50% !important;
+}
+
+
+  .toolTile--framer {
+    left: 10%;
+    bottom: 20%;
+  }
+
+  .toolTile--vector {
   right: 16%;
   bottom: 21%;
   --rot: -5deg;
@@ -1425,15 +1454,13 @@ html.past-hero .themeSwitch {
   transition-delay: 0.1s;
 }
 
-.toolTile--framer .toolTile__enter {
-  transition-delay: 0.28s;
-}
+/* removed framer enter */
 
 .toolTile--claude .toolTile__enter {
   transition-delay: 0.42s;
 }
 
-.toolTile--ps .toolTile__enter {
+.toolTile--vector .toolTile__enter {
   transition-delay: 0.58s;
 }
 
@@ -1525,12 +1552,12 @@ html.past-hero .themeSwitch {
 .capabilities {
   /* single source of truth for the holder height — the on-holder Collect
      button derives its resting spot from it (and the open-state 0.94 scale) */
-  --walletH: clamp(146px, 16vw, 186px);
+  --walletH: clamp(180px, 22vw, 260px);
   position: relative;
   min-height: 100svh;
   display: flex;
   background: radial-gradient(120% 90% at 50% 42%, #4a3a78 0%, #322558 38%, #1e1538 70%, #140d26 100%);
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* -------- drifting bokeh field -------- */
@@ -1576,10 +1603,9 @@ html.past-hero .themeSwitch {
 
 /* -------- the holder: a holographic vault sleeve -------- */
 .wallet {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
+  --w-w: clamp(200px, 22vw, 260px);
+  --w-h: clamp(146px, 16vw, 186px);
+  position: relative;
   /* above the cards (z 10): dragged cards pass UNDER the holder */
   z-index: 30;
   display: flex;
@@ -1600,8 +1626,8 @@ html.past-hero .themeSwitch {
 /* holo rim: a gradient border via padding + inner surface */
 .wallet__body {
   position: relative;
-  width: clamp(200px, 22vw, 260px);
-  height: var(--walletH);
+  width: var(--w-w);
+  height: var(--w-h);
   border-radius: 18px;
   padding: 1.5px;
   background: linear-gradient(135deg, rgba(233, 223, 255, 0.75), rgba(139, 92, 246, 0.35) 30%, rgba(56, 189, 248, 0.3) 62%, rgba(233, 223, 255, 0.6));
@@ -1678,14 +1704,14 @@ html.past-hero .themeSwitch {
   border-radius: 4px 4px 17px 17px;
   background: linear-gradient(rgba(26, 17, 48, 0.92), rgba(16, 10, 32, 0.96));
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(233, 223, 255, 0.14);
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* small metal chip, like the reference cards */
 .wallet__chip {
   position: absolute;
-  right: 16px;
-  top: 14px;
+  right: 24px;
+  top: 24px;
   width: 26px;
   height: 19px;
   border-radius: 4px;
@@ -1696,8 +1722,8 @@ html.past-hero .themeSwitch {
 /* embossed wordmark — lit by the surface, not printed on it */
 .wallet__emboss {
   position: absolute;
-  left: 16px;
-  bottom: 13px;
+  left: 24px;
+  bottom: 24px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -1712,8 +1738,8 @@ html.past-hero .themeSwitch {
 
 .wallet__dot {
   position: absolute;
-  right: 18px;
-  bottom: 18px;
+  right: 24px;
+  bottom: 24px;
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -2440,6 +2466,7 @@ html.past-hero .themeSwitch {
   color: #f2ede6;
   padding: 8vh 9vw 4vh;
   overflow: hidden;
+  z-index: 50;
 }
 
 .footer__hero {
@@ -2808,17 +2835,14 @@ html.past-hero .themeSwitch {
     top: 20%;
   }
 
-  .toolTile--framer {
-    left: 12%;
-    bottom: 13%;
-  }
+  /* removed framer */
 
   .toolTile--claude {
     right: 7%;
     top: 14%;
   }
 
-  .toolTile--ps {
+  .toolTile--vector {
     right: 9%;
     bottom: 16%;
   }
@@ -2850,33 +2874,9 @@ html.past-hero .themeSwitch {
     --spread: 0.5;
   }
 
-  /* -------- capabilities (vault): phone composition -------- */
-  .capabilities {
-    --walletH: clamp(112px, 32vw, 132px);
-  }
-
-  .capabilities__canvas {
-    margin: clamp(48px, 8vh, 84px) var(--page-content-inset);
-  }
-
-  .wallet__body {
-    width: clamp(150px, 44vw, 180px);
-  }
-
-  .capCard {
-    width: clamp(116px, 32vw, 140px);
-    height: clamp(150px, 42vw, 180px);
-    padding: 13px 13px 0;
-  }
-
-  .capCard__title {
-    font-size: clamp(15px, 4.2vw, 18px);
-  }
-
-  /* -------- dedicated mobile art direction (original phone reference):
-     four large edge-cropped cards frame the identity, sized in vw with the
-     artwork's own aspect ratios — not scaled-down desktop coordinates.
-     !important is needed only against the inline desktop width/height. */
+  /* -------- dedicated mobile art direction (matches first screenshot):
+     four smaller edge-cropped cards frame the identity, sized in vw with the
+     artwork's own aspect ratios. !important overrides inline desktop sizes. */
   .heroCard {
     scale: none;
   }
@@ -2886,32 +2886,32 @@ html.past-hero .themeSwitch {
     display: none;
   }
 
-  /* top-left poster: tall, cropped by the top and left edges */
+  /* top-left poster: partial left/top crop — card peeks into view */
   .heroCard--c0 {
-    width: 56vw !important;
-    height: 83vw !important;
-    translate: calc(-50% - 36vw) calc(-50% - 35svh);
+    width: 42vw !important;
+    height: 62vw !important;
+    translate: calc(-50% - 25vw) calc(-50% - 34svh);
   }
 
-  /* top-right car: cropped by the right edge */
+  /* top-right car: partial right crop */
   .heroCard--c2 {
-    width: 52vw !important;
-    height: 77vw !important;
-    translate: calc(-50% + 38vw) calc(-50% - 32svh);
+    width: 40vw !important;
+    height: 60vw !important;
+    translate: calc(-50% + 27vw) calc(-50% - 31svh);
   }
 
-  /* lower-left E-Summit laptop (landscape): enters from the left */
+  /* lower-left E-Summit laptop (landscape) */
   .heroCard--c6 {
-    width: 62vw !important;
-    height: 43.5vw !important;
-    translate: calc(-50% - 36vw) calc(-50% + 32svh);
+    width: 50vw !important;
+    height: 35vw !important;
+    translate: calc(-50% - 28vw) calc(-50% + 30svh);
   }
 
-  /* lower-right fuzion: deep corner crop */
+  /* lower-right fuzion: corner crop */
   .heroCard--c7 {
-    width: 52vw !important;
-    height: 64vw !important;
-    translate: calc(-50% + 40vw) calc(-50% + 40svh);
+    width: 40vw !important;
+    height: 52vw !important;
+    translate: calc(-50% + 29vw) calc(-50% + 38svh);
   }
 
   /* horizontal finger drags move the card; vertical swipes keep scrolling */
@@ -2919,13 +2919,13 @@ html.past-hero .themeSwitch {
     touch-action: pan-y;
   }
 
-  /* title tuned to the original phone dominance */
+  /* title slightly smaller to keep all four cards visible around it */
   .hero__aayush {
-    font-size: clamp(56px, 17vw, 76px);
+    font-size: clamp(52px, 15vw, 72px);
   }
 
   .hero__visuals {
-    font-size: clamp(54px, 16.5vw, 74px);
+    font-size: clamp(50px, 14.5vw, 70px);
   }
 
   /* drag hint pulled close under the identity group */
@@ -2948,26 +2948,30 @@ html.past-hero .themeSwitch {
     display: none;
   }
 
-  /* compact identity group: labels hug the wordmark as one block */
-  .heroRuler__rail,
-  .heroRuler__seg,
-  .heroRuler__spacer {
+  /* hide the fixed ruler frame entirely on mobile; mobile labels live inside the
+     heroWorld typography block so they naturally drag and scroll with the title */
+  .heroRuler {
     display: none;
   }
 
-  .heroRuler__row {
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    height: clamp(176px, 50vw, 208px);
+  .hero__mobileLabel {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hero-fg);
+    opacity: 0.72;
+    text-align: center;
+    white-space: nowrap;
   }
 
-  /* clean mobile labels: no ruler lines, just the text */
-  .heroRuler__label {
-    font-size: 11px;
-    letter-spacing: 0.16em;
+  .hero__mobileLabel--top {
+    margin-bottom: 24px;
+  }
+
+  .hero__mobileLabel--bottom {
+    margin-top: 24px;
   }
 
   /* ================= dedicated mobile About composition =================
@@ -2977,95 +2981,91 @@ html.past-hero .themeSwitch {
      label side-by-side in a narrow cell. Generous, even vertical rhythm;
      the global rulers sit outside and are untouched. */
   .about {
-    min-height: auto;
+    min-height: 100svh;
   }
 
   .about__content {
-    /* content clears the global rails with room to spare; centred column,
-       sized so the whole section fits one pinned viewport (see the note on
-       .aboutCard — the section is sticky, content must not exceed 100svh) */
+    /* Tighter top/bottom so the entire sticky section fits within 100svh:
+       heading + card + 2×2 stats all need to land on one pinned screen.
+       Left/right padding is 32px to ensure clean breathing room between content
+       and the vertical side ruler rails. */
     width: 100%;
     max-width: 560px;
     margin-inline: auto;
-    padding: clamp(48px, 7vh, 72px) 24px clamp(40px, 6vh, 56px);
+    padding: clamp(36px, 5vh, 52px) 32px clamp(28px, 4vh, 44px);
   }
 
   .about__marker {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    font-size: 11px;
   }
 
   .about__heading {
-    font-size: clamp(30px, 8.5vw, 42px);
+    font-size: clamp(26px, 7.5vw, 38px);
     line-height: 1;
     letter-spacing: -0.03em;
-    margin-bottom: clamp(24px, 4vh, 36px);
+    margin-bottom: clamp(18px, 3vh, 28px);
   }
 
   .about__grid {
     grid-template-columns: 1fr;
-    gap: clamp(32px, 5vh, 44px);
+    gap: clamp(20px, 3.5vh, 32px);
   }
 
-  /* dominant card: full-width anchor object, comfortable internal spacing,
-     bottom-anchored CTA. Sized so the whole section (heading + card + 2×2
-     stats) fits within one pinned viewport — the section is sticky-pinned,
-     so content must not exceed 100svh or the lower rows become unreachable. */
+  /* card: compact height so the whole pinned section fits on one screen */
   .aboutCard {
-    min-height: 300px;
-    padding: 28px 24px;
-    border-radius: 26px;
+    min-height: 220px;
+    padding: 22px 20px;
+    border-radius: 22px;
   }
 
   .aboutCard__dot {
-    width: 13px;
-    height: 13px;
-    margin-bottom: 20px;
+    width: 11px;
+    height: 11px;
+    margin-bottom: 14px;
   }
 
   .aboutCard__name {
-    font-size: 25px;
-    margin-bottom: 13px;
+    font-size: 22px;
+    margin-bottom: 10px;
   }
 
   .aboutCard__desc {
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.45;
     max-width: none;
-    margin-bottom: 26px;
+    margin-bottom: 20px;
   }
 
   .aboutCard__cta {
-    padding: 16px 24px;
-    font-size: 15px;
+    padding: 13px 20px;
+    font-size: 14px;
   }
 
-  /* 2×2 grid, each stat stacked (big number → label) for clean top-to-
-     bottom scanning; the descriptions are dropped on phones so all four
-     numbers stay visible in the pinned viewport — the labels already carry
-     the product framing (years creating / projects shipped / …). */
+  /* 2×2 stats grid: numbers stacked above their label */
   .about__stats {
     grid-template-columns: 1fr 1fr;
-    gap: clamp(22px, 3.5vh, 32px) 22px;
+    gap: clamp(16px, 2.8vh, 26px) 18px;
   }
 
   .aboutStat__row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 3px;
   }
 
   .aboutStat__num {
-    font-size: clamp(36px, 11vw, 46px);
+    font-size: clamp(32px, 10vw, 42px);
   }
 
   .aboutStat__label {
-    font-size: 13px;
+    font-size: 12px;
     white-space: normal;
   }
 
   .aboutStat__rule {
-    width: 32px;
-    margin: 11px 0 0;
+    width: 28px;
+    margin: 9px 0 0;
   }
 
   .aboutStat__desc {
@@ -3095,18 +3095,97 @@ html.past-hero .themeSwitch {
   }
 
 
-  /* -------- statement: dedicated phone composition --------
-     still a full-screen canvas; statement stays dominant on ~4 lines, the
-     four tool objects shrink and move into the empty corners, autonomous
-     float stays, cursor movement is naturally absent (pointer: coarse).
-     Extra bottom padding keeps everything clear of the bottom navbar. */
-  .statement {
-    padding: 84px 20px calc(96px + env(safe-area-inset-bottom));
+  /* -------- statement: phone composition --------
+     Full-screen dark canvas. Statement headline is the dominant element;
+     four tool tiles shrink and retreat to the corners. Extra padding clears
+     the bottom navbar pill. */
+  
+  .statement__wavyLine {
+    display: block;
+    position: absolute;
+    bottom: 22%;
+    left: 0;
+    right: 0;
+    height: 140px;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 1;
+    /* Animate left-to-right using lineP from Statement.tsx */
+    clip-path: inset(0 calc((1 - var(--lineP, 0)) * 100%) 0 0);
+  }
+  
+  .statement__wavyLine svg {
+    width: 100%;
+    height: 100%;
   }
 
-  /* phones: keep the vertical rails (page measurement system) but drop the
-     horizontal segments and the forced desktop line breaks — readability
-     and an uncluttered centre first */
+  .statement__word--strong {
+    font-size: clamp(48px, 13.5vw, 72px);
+    display: inline;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  
+  /* Make the Figma and Claude logos truly floating on mobile without the tile box */
+  .toolTile--figma .toolTile__obj, 
+  .toolTile--claude .toolTile__obj, 
+  .toolTile--framer .toolTile__obj {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .toolTile--figma .toolTile__obj svg, 
+  .toolTile--claude .toolTile__obj svg, 
+  .toolTile--framer .toolTile__obj svg {
+    width: 130% !important;
+    height: 130% !important;
+    transform: perspective(400px) rotateX(10deg) rotateY(-15deg) rotateZ(5deg) !important;
+    filter: drop-shadow(1px 1px 0px #444) drop-shadow(2px 2px 0px #333) drop-shadow(3px 3px 0px #222) drop-shadow(6px 8px 10px rgba(0,0,0,0.6)) !important;
+  }
+  
+  .toolTile--figma {
+    left: 8%;
+    top: 6%;
+  }
+  
+  .toolTile--claude {
+    right: 5%;
+    top: 18%;
+  }
+  
+  .toolTile--vector {
+    right: 12%;
+    bottom: 25%;
+    z-index: 2;
+  }
+  .toolTile--vector .toolTile__obj {
+    background: #111 !important; /* solid dark */
+    border: 1px solid #FFE873 !important;
+    border-radius: 20% !important;
+  }
+  .toolTile--vector .toolTile__obj svg {
+    width: 65% !important;
+    height: 65% !important;
+  }
+  .toolTile--vector .toolTile__enter {
+     translate: 0 0;
+  }
+
+  /* Remove ruler on mobile completely */
+  .statement__ruler {
+    display: none;
+  }
+
+  .statement {
+    min-height: 110vh;
+    padding: 76px 24px calc(100px + env(safe-area-inset-bottom));
+    align-items: center;
+  }
+
+  /* vertical rails stay for measurement consistency; horizontal ruler and
+     forced desktop line-breaks are suppressed for readability */
   .statement__rulerRow {
     display: none;
   }
@@ -3120,78 +3199,156 @@ html.past-hero .themeSwitch {
     padding-bottom: 0;
   }
 
-  /* sized so the statement lands on ~4 controlled lines at 390px, still
-     clearly dominant on the dark canvas */
+  /* ~4 lines on a 390px screen — dominant but not cramped */
   .statement__text {
-    font-size: clamp(32px, 9vw, 44px);
-    line-height: 1.02;
+    font-size: clamp(26px, 7.5vw, 36px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
   }
 
+  /* tool tiles: slightly smaller, well clear of the statement text */
   .toolTile__obj {
-    --sz: 50px;
+    --sz: 46px;
+  }
+
+  /* reduce Z translation on mobile: small boxes (46px) don't need a deep
+     12px translateZ, which causes visual shifting away from the center */
+  .toolTile__obj svg {
+    transform: translateZ(4px);
+  }
+
+  .toolTile__label {
+    display: none; /* no room for labels on phone */
   }
 
   .toolTile--figma {
-    left: 7%;
-    top: 11%;
+    left: 14%;
+    top: 14%;
   }
 
   .toolTile--claude {
-    right: 7%;
-    top: 9%;
+    right: 12%;
+    top: 11%;
   }
 
-  .toolTile--framer {
-    left: 10%;
-    bottom: 24%;
+  /* removed framer */
+
+  /* stays clear of the bottom navbar pill */
+  .toolTile--vector {
+    right: 15%;
+    bottom: 20%;
   }
 
-  /* stays clear of the fixed bottom navbar pill */
-  .toolTile--ps {
-    right: 8%;
-    bottom: 19%;
+  /* -------- projects: phone tile sizing -------- */
+  .projects {
+    padding: 8vh var(--page-rail-inset) 10vh;
+  }
+
+  .projects__title {
+    font-size: clamp(22px, 7vw, 32px);
+    padding: 0 calc(var(--page-content-inset) - var(--page-rail-inset));
+  }
+
+  .projects__sub {
+    font-size: 14px;
+    margin-bottom: 4vh;
+    padding: 0 calc(var(--page-content-inset) - var(--page-rail-inset));
+  }
+
+  .projTile {
+    min-height: 260px;
+  }
+
+  .projTile__logo {
+    font-size: clamp(22px, 6.5vw, 34px);
+  }
+
+  .projTile__category {
+    font-size: 11px;
+    bottom: 18px;
+  }
+
+  .projTile__year {
+    font-size: 10px;
+    top: 18px;
+  }
+
+  /* -------- footer: phone layout -------- */
+  .footer {
+    padding: 6vh 6vw 4vh;
+  }
+
+  .footer__watermark {
+    font-size: clamp(42px, 10vw, 80px);
+  }
+
+  .footer__dude {
+    height: clamp(120px, 22vh, 180px);
+  }
+
+  .footer__lead {
+    font-size: clamp(15px, 4vw, 20px);
+    margin-bottom: 10px;
+  }
+
+  .footer__big {
+    font-size: clamp(36px, 10vw, 58px);
+  }
+
+  .footer__icons a {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .footer__base {
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6vh;
+    font-size: 13px;
   }
 }
 
-/* small phones (≈390 / 360): keep the About composition balanced and
-   overflow-free without shrinking the card into an info box */
+/* small phones (≈390 / 360): further compact the About section so the
+   full sticky viewport still shows all content without overflow */
 @media (max-width: 400px) {
   .about__content {
-    padding: clamp(44px, 7vh, 64px) 20px clamp(40px, 6vh, 56px);
+    padding: clamp(32px, 5vh, 48px) 24px clamp(24px, 4vh, 36px);
   }
 
   .about__marker {
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
 
   .about__heading {
-    margin-bottom: clamp(22px, 4vh, 34px);
+    margin-bottom: clamp(16px, 3vh, 24px);
   }
 
   .about__grid {
-    gap: clamp(28px, 5vh, 40px);
+    gap: clamp(16px, 3.5vh, 28px);
   }
 
   .aboutCard {
-    min-height: 280px;
-    padding: 24px 20px;
+    min-height: 200px;
+    padding: 18px 16px;
   }
 
   .aboutCard__name {
-    font-size: 23px;
+    font-size: 20px;
   }
 
   .aboutCard__desc {
-    font-size: 14.5px;
-    margin-bottom: 20px;
+    font-size: 13.5px;
+    margin-bottom: 16px;
   }
 
   .about__stats {
-    gap: 20px 16px;
+    gap: 14px 14px;
   }
 
   .aboutStat__num {
-    font-size: clamp(32px, 10vw, 40px);
+    font-size: clamp(28px, 9vw, 36px);
   }
 }
 
@@ -3223,4 +3380,185 @@ html.past-hero .themeSwitch {
     font-size: 9px;
     letter-spacing: 0.02em;
   }
+}
+
+
+/* ======== CAPABILITIES REDESIGN (pixel-perfect) ======== */
+
+.capabilities {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* Canvas fills available space, wallet + cards live here */
+.capabilities__canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  padding-bottom: 0; /* center wallet perfectly */
+}
+
+/* Footer pinned to absolute bottom of the section in desktop */
+.capabilities__footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 var(--page-content-inset) 42px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.capabilities__footerTitle {
+  font-size: clamp(42px, 6vw, 72px);
+  font-weight: 600; /* decreased font-weight to match about heading */
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+  margin: 0;
+}
+
+.capabilities__footerSub {
+  font-size: clamp(13px, 1.2vw, 18px);
+  font-weight: 400;
+  color: var(--cream);
+  opacity: 0.4;
+  margin: 0;
+  padding-bottom: 0.4em;
+  font-style: normal; /* changed from italic to normal */
+}
+
+/* Wallet sizing */
+.wallet {
+  --w-w: clamp(340px, 50vw, 560px);
+  --w-h: calc(var(--w-w) * 0.65);
+}
+
+/* Action label on the wallet pocket (visual only — whole wallet is clickable) */
+.wallet__actionBtn {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 6px;
+  background: rgba(200, 189, 225, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #1a1233;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none; /* whole wallet handles click */
+  z-index: 20;
+  transition: background 0.2s ease;
+}
+
+.wallet:hover .wallet__actionBtn {
+  background: rgba(220, 210, 240, 0.95);
+}
+
+/* Hide old capGather button */
+.capGather {
+  display: none !important;
+}
+
+/* TAP TO OPEN hint below the wallet */
+.wallet__hint {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cream);
+  opacity: 0.25;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* Mobile Optimizations - Skills header at top left, centered wallet lower down, smaller cards */
+@media (max-width: 640px) {
+  .capabilities__footer {
+    position: absolute;
+    top: 48px;
+    bottom: auto; /* reset absolute bottom stretching */
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 0 calc(var(--page-rail-inset) + 10px); /* 10px spacing from vertical side rails/rulers */
+  }
+  .capabilities__footerTitle {
+    font-size: 44px; /* bold, prominent title matching design scale */
+    font-weight: 500; /* decreased weight slightly per request */
+  }
+  .capabilities__footerSub {
+    font-size: 15px;
+    padding-bottom: 0;
+    font-style: normal;
+  }
+  .capabilities__canvas {
+    margin: 140px var(--page-rail-inset) 40px; /* clear top header, stretch to rail edges */
+    justify-content: center;
+    padding-bottom: 0; /* center wallet vertically in remaining space */
+  }
+  .wallet {
+    --w-w: clamp(290px, 82vw, 345px); /* wider holder to match figma proportions */
+    --w-h: calc(var(--w-w) * 0.65); /* maintain aspect ratio */
+  }
+  .capCard {
+    width: 140px !important; /* larger card size matching design scale */
+    height: 185px !important;
+    padding: 12px 12px 0 !important;
+    border-radius: 12px !important;
+  }
+  .capCard__index {
+    font-size: 12px !important;
+  }
+  .capCard__category {
+    font-size: 9.5px !important;
+    margin-bottom: 5px !important;
+  }
+  .capCard__title {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+  }
+}
+
+/* Capabilities section rails — light on dark, matching statement rails */
+.capRails {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.capRail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--cream);
+  opacity: 0.15;
+}
+
+.capRail--left {
+  left: var(--page-rail-inset);
+}
+
+.capRail--right {
+  right: var(--page-rail-inset);
 }

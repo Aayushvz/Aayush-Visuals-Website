@@ -523,6 +523,14 @@ export default function Hero() {
 
           <div className="heroWorld" ref={worldRef} data-cursor="drag">
             <div className="hero__mark">
+              <motion.span
+                className="hero__mobileLabel hero__mobileLabel--top"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 0.72, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8, ease: EASE }}
+              >
+                Product Designer
+              </motion.span>
               <span className="hero__line">
                 <motion.span
                   className="hero__aayush"
@@ -543,6 +551,14 @@ export default function Hero() {
                   Visuals
                 </motion.span>
               </span>
+              <motion.span
+                className="hero__mobileLabel hero__mobileLabel--bottom"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 0.72, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8, ease: EASE }}
+              >
+                Based in India
+              </motion.span>
             </div>
 
             <motion.div
