@@ -29,13 +29,13 @@ const CAPS: Cap[] = [
    never land on the holder (and z-order keeps them under it even when
    dragged across). r = resting rotation. */
 const SCATTER_DESKTOP = [
-  { fx: -0.82, fy: -0.45, r: -7 },
-  { fx: -0.56, fy: 0.05, r: 5 },
-  { fx: -0.8, fy: 0.28, r: -5 },
-  { fx: 0.82, fy: -0.45, r: 7 },
-  { fx: 0.56, fy: 0.0, r: -6 },
-  { fx: 0.85, fy: 0.25, r: 6 },
-  { fx: 0.52, fy: 0.3, r: 3 },
+  { fx: -0.85, fy: -0.58, r: -8 },  // 0: Product Design (top-left)
+  { fx: -0.6, fy: 0.22, r: 6 },     // 1: Interface Design (bottom-left-center)
+  { fx: -1.02, fy: 0.26, r: -6 },   // 2: Design Systems (bottom-left-left)
+  { fx: 0.92, fy: -0.65, r: -8 },   // 3: Brand Identity (top-right)
+  { fx: 0.68, fy: -0.12, r: -7 },   // 4: Web Experiences (middle-right)
+  { fx: 0.96, fy: 0.58, r: -7 },    // 5: Motion Design (bottom-right-right)
+  { fx: 0.64, fy: 0.42, r: 6 },     // 6: Creative Development (bottom-right-center)
 ];
 
 const SCATTER_MOBILE = [
