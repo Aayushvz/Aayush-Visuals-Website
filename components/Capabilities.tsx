@@ -107,7 +107,7 @@ export default function Capabilities() {
       return {
         x: coord.fx * half.w,
         y: coord.fy * half.h,
-        rotate: coord.rotate ?? coord.r,
+        rotate: coord.r,
         scale: 1,
         opacity: 1,
         transition: reduce
