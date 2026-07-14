@@ -2041,8 +2041,8 @@ html.past-hero .themeSwitch {
   position: absolute;
   inset: 0;
   background: 
-    linear-gradient(to bottom, #F2EDE6 0%, rgba(242, 237, 230, 0.72) 10%, rgba(242, 237, 230, 0.1) 22%, transparent 30%),
-    linear-gradient(to top, #F2EDE6 0%, rgba(242, 237, 230, 0.78) 14%, rgba(242, 237, 230, 0.1) 26%, transparent 35%);
+    linear-gradient(to bottom, #F2EDE6 0%, rgba(242, 237, 230, 0.58) 15%, transparent 35%),
+    linear-gradient(to top, #F2EDE6 0%, rgba(242, 237, 230, 0.71) 25%, transparent 50%);
   opacity: 0;
   transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 3;
@@ -2171,13 +2171,7 @@ html.past-hero .themeSwitch {
 .projTile__mist {
   position: absolute;
   inset: 0;
-  /* transparent in centre (0-5%), fades in only at left/right/corner edges */
-  background: radial-gradient(
-    ellipse 75% 65% at center,
-    transparent 55%,
-    rgba(242, 237, 230, 0.12) 75%,
-    rgba(242, 237, 230, 0.20) 100%
-  );
+  background: rgba(242, 237, 230, 0.56);
   opacity: 0;
   transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 4;
@@ -2187,6 +2181,34 @@ html.past-hero .themeSwitch {
 .projTile:hover .projTile__mist,
 .projTile:focus-visible .projTile__mist {
   opacity: 1;
+}
+
+/* -------- Mike Tyson Invitational: dark bg video, no mist, cream text -------- */
+
+.projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__mist,
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__mist {
+  opacity: 0;
+}
+
+.projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__year,
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__year {
+  color: #F2EDE6;
+}
+
+.projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__category,
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__category {
+  color: #F2EDE6;
+}
+
+.projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__logo,
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__logo {
+  color: #F2EDE6;
+}
+
+.projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__logoImg,
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__logoImg {
+  /* Shift from solid black → warm cream #F2EDE6 */
+  filter: brightness(0) invert(1) sepia(0.12) saturate(0.25) brightness(0.97);
 }
 
 /* -------- shared CTA pill (modal only — tiles never show a button) -------- */

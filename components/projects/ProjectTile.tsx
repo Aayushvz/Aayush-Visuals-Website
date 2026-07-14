@@ -58,6 +58,7 @@ export default function ProjectTile({ project, index, onOpen }: Props) {
       ref={ref}
       className="projTile"
       data-reveal
+      data-project-id={project.id}
       style={{ transitionDelay: `${Math.min(index, 5) * 80}ms` }}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
