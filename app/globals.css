@@ -3389,8 +3389,10 @@ html.past-hero .themeSwitch {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100svh;
-  min-height: 100svh;
+  height: 100vh; /* fallback */
+  height: 100dvh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
   overflow: hidden;
   padding-bottom: 0;
 }
