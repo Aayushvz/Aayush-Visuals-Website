@@ -2977,7 +2977,12 @@ html.past-hero .themeSwitch {
      short line) so it scans top-to-bottom instead of cramming a number and
      label side-by-side in a narrow cell. Generous, even vertical rhythm;
      the global rulers sit outside and are untouched. */
+  .aboutStage::after {
+    display: none !important;
+  }
+
   .about {
+    position: relative !important;
     min-height: 100svh;
   }
 
@@ -3169,6 +3174,7 @@ html.past-hero .themeSwitch {
   }
 
   .statement {
+    margin-top: 0 !important;
     min-height: 110vh;
     padding: 76px 24px calc(100px + env(safe-area-inset-bottom));
     align-items: center;
