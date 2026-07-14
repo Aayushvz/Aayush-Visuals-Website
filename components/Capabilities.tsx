@@ -121,13 +121,47 @@ export default function Capabilities() {
     <section className="capabilities" id="capabilities">
       {/* drifting bokeh field — the violet scene from the reference clip */}
       <div className="capOrbs" aria-hidden>
-        <span className="capOrb capOrb--1" />
-        <span className="capOrb capOrb--2" />
-        <span className="capOrb capOrb--3" />
-        <span className="capOrb capOrb--4" />
-        <span className="capOrb capOrb--5" />
-        <span className="capOrb capOrb--6" />
-        <span className="capOrb capOrb--7" />
+        {[
+          { id: 1, x: ["-10px", "10px"], y: ["-10px", "10px"], scale: [1, 1.15, 1], dur: 12, size: 90, left: "6%", top: "16%" },
+          { id: 2, x: ["8px", "-8px"], y: ["12px", "-12px"], scale: [1, 1.2, 1], dur: 15, size: 46, left: "22%", top: "68%", opacity: 0.26 },
+          { id: 3, x: ["-6px", "6px"], y: ["-10px", "10px"], scale: [1, 1.1, 1], dur: 10, size: 34, left: "44%", top: "8%", opacity: 0.2 },
+          { id: 4, x: ["12px", "-12px"], y: ["-8px", "8px"], scale: [1, 1.25, 1], dur: 18, size: 110, right: "8%", top: "24%" },
+          { id: 5, x: ["-8px", "8px"], y: ["10px", "-10px"], scale: [1, 1.15, 1], dur: 14, size: 60, right: "24%", bottom: "12%", opacity: 0.28 },
+        ].map((orb) => (
+          <motion.span
+            key={orb.id}
+            className={`capOrb capOrb--${orb.id}`}
+            style={{
+              position: "absolute",
+              width: orb.size,
+              height: orb.size,
+              left: orb.left,
+              top: orb.top,
+              right: orb.right,
+              bottom: orb.bottom,
+              opacity: orb.opacity ?? 0.34,
+              pointerEvents: "auto",
+              cursor: "pointer",
+            }}
+            animate={reduce ? undefined : {
+              x: orb.x,
+              y: orb.y,
+              scale: orb.scale,
+            }}
+            transition={{
+              duration: orb.dur,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+            whileHover={{
+              scale: 1.4,
+              opacity: 0.72,
+              filter: "blur(6px) drop-shadow(0 0 25px rgba(235, 226, 255, 0.72))",
+              transition: { duration: 0.4, ease: "easeOut" }
+            }}
+          />
+        ))}
       </div>
 
       {/* Vertical side rails (matching statement section rails) */}

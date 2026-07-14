@@ -1542,6 +1542,17 @@ html.past-hero .themeSwitch {
    ("vault") floats centred; the skill cards scatter into the wings and
    always render BELOW the holder in z, so nothing ever covers it. */
 
+.capabilities::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/purple_ice_background.png") no-repeat center/cover;
+  opacity: 0.12; /* subtle purple ice texture */
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .capabilities {
   /* single source of truth for the holder height — the on-holder Collect
      button derives its resting spot from it (and the open-state 0.94 scale) */
@@ -1558,6 +1569,7 @@ html.past-hero .themeSwitch {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 2;
 }
 
 .capOrb {
@@ -1565,25 +1577,7 @@ html.past-hero .themeSwitch {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(235, 226, 255, 0.55), rgba(200, 180, 255, 0.12) 60%, transparent 75%);
   filter: blur(14px);
-  opacity: 0.34;
-  animation: orbDrift var(--dur, 16s) ease-in-out var(--del, 0s) infinite alternate;
-}
-
-.capOrb--1 { left: 6%; top: 16%; width: 90px; height: 90px; --dur: 17s; }
-.capOrb--2 { left: 22%; top: 68%; width: 46px; height: 46px; --dur: 13s; --del: -4s; opacity: 0.26; }
-.capOrb--3 { left: 44%; top: 8%; width: 34px; height: 34px; --dur: 11s; --del: -7s; opacity: 0.2; }
-.capOrb--4 { right: 8%; top: 24%; width: 110px; height: 110px; --dur: 19s; --del: -2s; }
-.capOrb--5 { right: 24%; bottom: 12%; width: 60px; height: 60px; --dur: 14s; --del: -9s; opacity: 0.28; }
-.capOrb--6 { left: 12%; bottom: 6%; width: 130px; height: 130px; --dur: 21s; --del: -5s; opacity: 0.18; }
-.capOrb--7 { right: 42%; bottom: 30%; width: 26px; height: 26px; --dur: 10s; --del: -3s; opacity: 0.22; }
-
-@keyframes orbDrift {
-  from {
-    transform: translate3d(0, -18px, 0) scale(1);
-  }
-  to {
-    transform: translate3d(26px, 22px, 0) scale(1.18);
-  }
+  transition: filter 0.4s ease;
 }
 
 /* the play canvas — constrained inside the rulers; drag is bounded to it */
