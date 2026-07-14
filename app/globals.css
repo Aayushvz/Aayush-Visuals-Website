@@ -2008,8 +2008,26 @@ html.past-hero .themeSwitch {
 .projTile:hover .projTile__cover,
 .projTile:focus-visible .projTile__cover {
   opacity: 1;
-  transform: scale(1.03);
   filter: blur(0);
+  animation: projectDrift 14s ease-in-out infinite;
+}
+
+@keyframes projectDrift {
+  0% {
+    transform: scale(1.03) translate3d(0, 0, 0);
+  }
+  25% {
+    transform: scale(1.06) translate3d(-1.5%, 1%, 0);
+  }
+  50% {
+    transform: scale(1.09) translate3d(1%, -1.5%, 0);
+  }
+  75% {
+    transform: scale(1.05) translate3d(-1%, -1%, 0);
+  }
+  100% {
+    transform: scale(1.03) translate3d(0, 0, 0);
+  }
 }
 
 /* soft wash so the photo feels cinematic, not a harsh rectangle — a
@@ -2029,11 +2047,66 @@ html.past-hero .themeSwitch {
     radial-gradient(140% 140% at 50% 45%, transparent 62%, rgba(242, 237, 230, 0.4) 100%);
   opacity: 0;
   transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 3;
 }
 
 .projTile:hover .projTile__vignette,
 .projTile:focus-visible .projTile__vignette {
   opacity: 1;
+}
+
+.projTile__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.14) 45%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.14) 55%,
+    transparent 70%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.55s ease;
+  opacity: 0;
+}
+
+.projTile:hover .projTile__sheen,
+.projTile:focus-visible .projTile__sheen {
+  opacity: 1;
+  animation: sheenSweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes sheenSweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(100%) skewX(-15deg);
+  }
+}
+
+.projTile__logoImg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 44%;
+  max-height: 25%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.85;
+  filter: grayscale(1) brightness(0); /* solid black at rest */
+  transition: opacity 0.55s ease, filter 0.55s ease;
+}
+
+.projTile:hover .projTile__logoImg,
+.projTile:focus-visible .projTile__logoImg {
+  opacity: 1;
+  filter: grayscale(1) brightness(0) invert(1); /* solid white on hover */
 }
 
 /* -------- year (top) / logo (centre) / category (bottom) -------- */

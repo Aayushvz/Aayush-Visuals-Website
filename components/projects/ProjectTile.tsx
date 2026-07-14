@@ -82,12 +82,21 @@ export default function ProjectTile({ project, index, onOpen }: Props) {
 
       <span className="projTile__year">{project.year}</span>
 
-      <motion.span
-        className="projTile__logo display"
-        style={reduce ? undefined : { x: springLogoX, y: springLogoY }}
-      >
-        {project.logoText}
-      </motion.span>
+      {project.logoUrl ? (
+        <motion.img
+          src={project.logoUrl}
+          alt={`${project.title} logo`}
+          className="projTile__logoImg"
+          style={reduce ? undefined : { x: springLogoX, y: springLogoY }}
+        />
+      ) : (
+        <motion.span
+          className="projTile__logo display"
+          style={reduce ? undefined : { x: springLogoX, y: springLogoY }}
+        >
+          {project.logoText}
+        </motion.span>
+      )}
 
       <span className="projTile__category">{project.category}</span>
     </div>

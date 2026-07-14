@@ -23,6 +23,7 @@ export default function HoverOverlay({ src, alt, x, y }: Props) {
       <motion.div className="projTile__coverWrap" style={x && y ? { x, y } : undefined}>
         <img className="projTile__cover" src={src} alt={alt} loading="lazy" />
       </motion.div>
+      <div className="projTile__sheen" />
       <div className="projTile__vignette" />
     </div>
   );

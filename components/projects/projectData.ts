@@ -20,6 +20,7 @@ export type Project = {
   title: string;
   /** short wordmark shown on the tile until a real logo asset lands */
   logoText: string;
+  logoUrl?: string;
   category: string;
   year: string;
   /** placeholder cover photo — swap for real artwork later */
@@ -57,9 +58,10 @@ export const PROJECTS: Project[] = [
     id: "layover",
     title: "Layover",
     logoText: "layover*",
+    logoUrl: "/projects/layover-logo.png",
     category: "Product Design",
     year: "2026",
-    cover: "https://picsum.photos/seed/layover-portfolio/1600/1100",
+    cover: "/projects/layover-cover.png",
     preview: { kind: "website", href: "https://mylayover.in/" },
     cta: "Visit Website",
     role: "Product Design",
