@@ -107,6 +107,11 @@ export default function ProjectTile({ project, index, onOpen }: Props) {
       )}
 
       <span className="projTile__category">{project.category}</span>
+
+      {/* Mobile-only tap CTA — hidden on desktop via CSS */}
+      <span className="projTile__mobileCta" aria-hidden="true">
+        View project&nbsp;↗
+      </span>
     </div>
   );
 }

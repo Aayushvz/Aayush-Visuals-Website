@@ -2152,6 +2152,11 @@ html.past-hero .themeSwitch {
   transition: color 0.5s ease;
 }
 
+/* Mobile-only CTA pill — hidden by default, shown inside @media (max-width: 640px) */
+.projTile__mobileCta {
+  display: none;
+}
+
 .projTile:hover .projTile__logo,
 .projTile:focus-visible .projTile__logo {
   color: var(--ink);
@@ -2512,6 +2517,8 @@ html.past-hero .themeSwitch {
 
   .projGrid {
     grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid rgba(31, 31, 31, 0.12);
   }
 
   /* single column has no internal vertical divider to cross */
@@ -2519,33 +2526,117 @@ html.past-hero .themeSwitch {
     display: none;
   }
 
+  /* ---- Phone tile: clean editorial list card, no cover image ---- */
   .projTile {
-    min-height: 300px;
+    min-height: unset;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 36px 24px 32px;
+    border-bottom: 1px solid rgba(31, 31, 31, 0.12);
+    border-right: none;
+    background: var(--paper);
+    cursor: pointer;
   }
 
-  /* touch devices can't hover, and there's no cursor pill to invite the
-     tap — so the cover stays ambiently visible at rest and the whole tile
-     is the tap target (no button, same as desktop). */
-  .projTile__cover {
-    opacity: 1;
-    filter: blur(0);
+  /* Hide the animated cover image layer entirely on mobile */
+  .projTile__frame {
+    display: none;
   }
 
+  /* Hide sheen, mist, vignette — not needed without image */
+  .projTile__sheen,
+  .projTile__mist,
   .projTile__vignette {
-    opacity: 0.7;
+    display: none;
   }
 
-  .projTile__logo {
-    color: #fff;
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
-  }
-
+  /* Year — small, muted, top */
   .projTile__year {
-    color: rgba(31, 31, 31, 0.6);
+    position: static;
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: rgba(31, 31, 31, 0.4);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    text-align: center;
   }
 
+  /* Logo wrapper — centered, no parallax transform on mobile */
+  .projTile__logoWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transform: none !important;
+  }
+
+  /* Logo image — natural size, black */
+  .projTile__logoImg {
+    max-width: 64%;
+    max-height: 64px;
+    object-fit: contain;
+    filter: grayscale(1) brightness(0);
+    opacity: 0.88;
+    transform: none !important;
+  }
+
+  /* Text logo (wordmark) */
+  .projTile__logo {
+    font-size: clamp(24px, 6vw, 38px);
+    color: var(--ink);
+    text-align: center;
+    text-shadow: none;
+    transform: none !important;
+  }
+
+  /* Category — bold uppercase, below logo */
   .projTile__category {
-    color: #fff;
+    position: static;
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-align: center;
+    margin-top: 6px;
+    margin-bottom: 22px;
+  }
+
+  /* Mobile CTA pill — shown only on mobile */
+  .projTile__mobileCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border: 1.5px solid rgba(31, 31, 31, 0.25);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    background: transparent;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .projTile:active .projTile__mobileCta {
+    background: rgba(31, 31, 31, 0.06);
+    border-color: rgba(31, 31, 31, 0.4);
+  }
+
+  /* Kill all hover states on touch — nothing to hover */
+  .projTile:hover .projTile__logo,
+  .projTile:hover .projTile__year,
+  .projTile:hover .projTile__category,
+  .projTile:hover .projTile__logoImg {
+    color: inherit;
+    filter: grayscale(1) brightness(0);
+    transform: none !important;
   }
 
   .projModal__backdrop {
