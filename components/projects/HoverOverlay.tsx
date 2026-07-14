@@ -12,18 +12,31 @@ import { motion, type MotionValue } from "framer-motion";
 
 type Props = {
   src: string;
+  videoSrc?: string;
   alt: string;
   x?: MotionValue<number>;
   y?: MotionValue<number>;
 };
 
-export default function HoverOverlay({ src, alt, x, y }: Props) {
+export default function HoverOverlay({ src, videoSrc, alt, x, y }: Props) {
   return (
     <div className="projTile__frame" aria-hidden>
       <motion.div className="projTile__coverWrap" style={x && y ? { x, y } : undefined}>
-        <img className="projTile__cover" src={src} alt={alt} loading="lazy" />
+        {videoSrc ? (
+          <video
+            className="projTile__cover"
+            src={videoSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        ) : (
+          <img className="projTile__cover" src={src} alt={alt} loading="lazy" />
+        )}
       </motion.div>
       <div className="projTile__sheen" />
+      <div className="projTile__mist" />
       <div className="projTile__vignette" />
     </div>
   );

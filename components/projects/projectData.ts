@@ -21,6 +21,7 @@ export type Project = {
   /** short wordmark shown on the tile until a real logo asset lands */
   logoText: string;
   logoUrl?: string;
+  bgVideoUrl?: string;
   category: string;
   year: string;
   /** placeholder cover photo — swap for real artwork later */
@@ -39,6 +40,8 @@ export const PROJECTS: Project[] = [
     id: "mike-tyson-invitational",
     title: "Mike Tyson Invitational",
     logoText: "MTI",
+    logoUrl: "/projects/mike-tyson-logo.png",
+    bgVideoUrl: "/projects/mike-tyson-bg.mp4",
     category: "Website Design",
     year: "2026",
     cover: "https://picsum.photos/seed/mti-portfolio/1600/1100",

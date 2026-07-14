@@ -75,6 +75,7 @@ export default function ProjectTile({ project, index, onOpen }: Props) {
     >
       <HoverOverlay
         src={project.cover}
+        videoSrc={project.bgVideoUrl}
         alt=""
         x={reduce ? undefined : springImgX}
         y={reduce ? undefined : springImgY}
