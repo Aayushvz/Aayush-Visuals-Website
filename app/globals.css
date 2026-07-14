@@ -2186,7 +2186,9 @@ html.past-hero .themeSwitch {
 /* -------- Mike Tyson Invitational: dark bg video, no mist, cream text -------- */
 
 .projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__mist,
-.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__mist {
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__mist,
+.projTile[data-project-id="mike-tyson-invitational"]:hover .projTile__vignette,
+.projTile[data-project-id="mike-tyson-invitational"]:focus-visible .projTile__vignette {
   opacity: 0;
 }
 
