@@ -18,7 +18,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Aayush Visuals — Portfolio",
+  title: "Aayush Visuals",
   description:
     "Product and digital designer crafting immersive experiences through UI/UX design, brand identity, motion graphics and visual storytelling.",
 };
