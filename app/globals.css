@@ -805,6 +805,7 @@ html.past-hero .themeSwitch {
   position: relative;
   z-index: 5;
   margin-top: -100vh;
+  background-color: #fffdfa;
 }
 
 /* the choreography spacer must be CONTENT (not padding) — a sticky child
@@ -1633,7 +1634,8 @@ html.past-hero .themeSwitch {
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 9px),
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 13px),
-    linear-gradient(155deg, #372a5e, #241a44 55%, #1a1233);
+    linear-gradient(155deg, rgba(55, 42, 94, 0.78), rgba(36, 26, 68, 0.68) 55%, rgba(26, 18, 51, 0.68));
+  backdrop-filter: blur(20px);
 }
 
 .wallet:hover .wallet__body {
@@ -1780,7 +1782,8 @@ html.past-hero .themeSwitch {
   flex-direction: column;
   border-radius: 18px;
   border: 1px solid rgba(233, 223, 255, 0.14);
-  background: linear-gradient(160deg, #17112d, #0d0920 65%);
+  background: linear-gradient(160deg, rgba(30, 20, 60, 0.78), rgba(15, 10, 35, 0.68) 65%);
+  backdrop-filter: blur(20px);
   overflow: hidden;
   box-shadow: 0 26px 54px rgba(8, 4, 24, 0.5), 0 8px 16px rgba(8, 4, 24, 0.36);
   cursor: grab;
@@ -2971,12 +2974,7 @@ html.past-hero .themeSwitch {
      short line) so it scans top-to-bottom instead of cramming a number and
      label side-by-side in a narrow cell. Generous, even vertical rhythm;
      the global rulers sit outside and are untouched. */
-  .aboutStage::after {
-    display: none !important;
-  }
-
   .about {
-    position: relative !important;
     min-height: 100svh;
   }
 
@@ -3168,7 +3166,6 @@ html.past-hero .themeSwitch {
   }
 
   .statement {
-    margin-top: 0 !important;
     min-height: 110vh;
     padding: 76px 24px calc(100px + env(safe-area-inset-bottom));
     align-items: center;

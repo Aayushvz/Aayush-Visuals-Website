@@ -53,6 +53,8 @@ export default function Capabilities() {
   const [open, setOpen] = useState(false);
   const [half, setHalf] = useState({ w: 380, h: 240 });
   const [isMobile, setIsMobile] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
   const topZ = useRef(10);
   const reduce = useReducedMotion();
 
@@ -118,15 +120,48 @@ export default function Capabilities() {
   };
 
   return (
-    <section className="capabilities" id="capabilities">
-      {/* drifting bokeh field — the violet scene from the reference clip */}
+    <section
+      className="capabilities"
+      id="capabilities"
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        });
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ position: "relative" }}
+    >
+      {/* Subtle mouse-following spotlight glow (replaces individual dot hover triggers) */}
+      {!reduce && isHovered && (
+        <motion.div
+          style={{
+            position: "absolute",
+            left: mousePos.x,
+            top: mousePos.y,
+            width: 440,
+            height: 440,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(235, 226, 255, 0.08) 0%, rgba(139, 92, 246, 0.03) 45%, transparent 70%)",
+            filter: "blur(28px)",
+            pointerEvents: "none",
+            zIndex: 1,
+            transform: "translate(-50%, -50%)",
+          }}
+          layoutId="capabilitiesSpotlight"
+        />
+      )}
+
+      {/* drifting bokeh field — 5 circular dots moving in random directions (no hover handlers) */}
       <div className="capOrbs" aria-hidden>
         {[
-          { id: 1, x: ["-10px", "10px"], y: ["-10px", "10px"], scale: [1, 1.15, 1], dur: 12, size: 90, left: "6%", top: "16%" },
-          { id: 2, x: ["8px", "-8px"], y: ["12px", "-12px"], scale: [1, 1.2, 1], dur: 15, size: 46, left: "22%", top: "68%", opacity: 0.26 },
-          { id: 3, x: ["-6px", "6px"], y: ["-10px", "10px"], scale: [1, 1.1, 1], dur: 10, size: 34, left: "44%", top: "8%", opacity: 0.2 },
-          { id: 4, x: ["12px", "-12px"], y: ["-8px", "8px"], scale: [1, 1.25, 1], dur: 18, size: 110, right: "8%", top: "24%" },
-          { id: 5, x: ["-8px", "8px"], y: ["10px", "-10px"], scale: [1, 1.15, 1], dur: 14, size: 60, right: "24%", bottom: "12%", opacity: 0.28 },
+          { id: 1, x: [0, 20, -15, 10, -25, 0], y: [0, -10, 20, -25, 15, 0], scale: [1, 1.15, 1], dur: 14, size: 90, left: "6%", top: "16%" },
+          { id: 2, x: [0, -12, 25, -8, 18, 0], y: [0, 18, -10, 22, -15, 0], scale: [1, 1.2, 1], dur: 17, size: 46, left: "22%", top: "68%", opacity: 0.26 },
+          { id: 3, x: [0, 15, -20, 12, -8, 0], y: [0, -15, 18, -10, 25, 0], scale: [1, 1.1, 1], dur: 12, size: 34, left: "44%", top: "8%", opacity: 0.2 },
+          { id: 4, x: [0, -25, 15, -12, 20, 0], y: [0, 10, -22, 18, -10, 0], scale: [1, 1.25, 1], dur: 20, size: 110, right: "8%", top: "24%" },
+          { id: 5, x: [0, 18, -10, 25, -15, 0], y: [0, -20, 12, -28, 15, 0], scale: [1, 1.15, 1], dur: 16, size: 60, right: "24%", bottom: "12%", opacity: 0.28 },
         ].map((orb) => (
           <motion.span
             key={orb.id}
@@ -140,8 +175,7 @@ export default function Capabilities() {
               right: orb.right,
               bottom: orb.bottom,
               opacity: orb.opacity ?? 0.34,
-              pointerEvents: "auto",
-              cursor: "pointer",
+              pointerEvents: "none",
             }}
             animate={reduce ? undefined : {
               x: orb.x,
@@ -151,14 +185,7 @@ export default function Capabilities() {
             transition={{
               duration: orb.dur,
               repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-            whileHover={{
-              scale: 1.4,
-              opacity: 0.72,
-              filter: "blur(6px) drop-shadow(0 0 25px rgba(235, 226, 255, 0.72))",
-              transition: { duration: 0.4, ease: "easeOut" }
+              ease: "linear",
             }}
           />
         ))}
