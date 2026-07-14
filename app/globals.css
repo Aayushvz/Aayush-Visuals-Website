@@ -2105,8 +2105,8 @@ html.past-hero .themeSwitch {
 }
 
 .projTile[data-project-id="dropby"] .projTile__logoImg {
-  max-width: 47.7%;
-  max-height: 27%;
+  max-width: 39.75%;
+  max-height: 22.5%;
 }
 
 .projTile:hover .projTile__logoImg,
@@ -2598,10 +2598,10 @@ html.past-hero .themeSwitch {
     max-width: 72%;
   }
 
-  /* DropBy logo 0.9× smaller on mobile */
+  /* DropBy logo 0.75× smaller on mobile */
   .projTile[data-project-id="dropby"] .projTile__logoImg {
-    max-height: 58px;
-    max-width: 57.6%;
+    max-height: 48px;
+    max-width: 48%;
   }
 
   /* Text logo (wordmark) */
