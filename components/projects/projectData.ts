@@ -62,7 +62,7 @@ export const PROJECTS: Project[] = [
     category: "Product Design",
     year: "2026",
     cover: "/projects/layover-cover.png",
-    preview: { kind: "website", href: "https://mylayover.in/" },
+    preview: { kind: "website", href: "https://mylayover.in/", image: "/projects/layover-cover.png" },
     cta: "Visit Website",
     role: "Product Design",
     tools: ["Figma", "Prototyping"],
