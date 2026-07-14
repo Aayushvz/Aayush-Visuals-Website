@@ -2528,14 +2528,14 @@ html.past-hero .themeSwitch {
 
   /* ---- Phone tile: clean editorial list card, no cover image ---- */
   .projTile {
-    min-height: unset;
+    min-height: 240px;
     height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0;
-    padding: 36px 24px 32px;
+    padding: 0 24px;
     border-bottom: 1px solid rgba(31, 31, 31, 0.12);
     border-right: none;
     background: var(--paper);
@@ -2554,7 +2554,7 @@ html.past-hero .themeSwitch {
     display: none;
   }
 
-  /* Year — small, muted, top */
+  /* Year — small, muted, pinned near top with spacing from border */
   .projTile__year {
     position: static;
     display: block;
@@ -2562,7 +2562,8 @@ html.past-hero .themeSwitch {
     letter-spacing: 0.18em;
     color: rgba(31, 31, 31, 0.4);
     text-transform: uppercase;
-    margin-bottom: 18px;
+    margin-top: 24px;
+    margin-bottom: 20px;
     text-align: center;
   }
 
@@ -2585,6 +2586,12 @@ html.past-hero .themeSwitch {
     transform: none !important;
   }
 
+  /* Mike Tyson logo 1.3× bigger on mobile */
+  .projTile[data-project-id="mike-tyson-invitational"] .projTile__logoImg {
+    max-height: 83px;
+    max-width: 72%;
+  }
+
   /* Text logo (wordmark) */
   .projTile__logo {
     font-size: clamp(24px, 6vw, 38px);
@@ -2605,23 +2612,25 @@ html.past-hero .themeSwitch {
     color: var(--ink);
     text-align: center;
     margin-top: 6px;
-    margin-bottom: 22px;
+    margin-bottom: 0;
   }
 
-  /* Mobile CTA pill — shown only on mobile */
+  /* Mobile CTA pill — pushed to bottom via margin-top: auto */
   .projTile__mobileCta {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 9px 20px;
-    border: 1.5px solid rgba(31, 31, 31, 0.25);
+    gap: 5px;
+    padding: 7px 15px;
+    border: 1px solid rgba(31, 31, 31, 0.22);
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 10.5px;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     color: var(--ink);
     background: transparent;
     transition: background 0.2s ease, border-color 0.2s ease;
+    margin-top: auto;
+    margin-bottom: 22px;
   }
 
   .projTile:active .projTile__mobileCta {
