@@ -2042,7 +2042,7 @@ html.past-hero .themeSwitch {
   inset: 0;
   background: 
     linear-gradient(to bottom, #fffdfa 0%, rgba(255, 253, 250, 0.58) 15%, transparent 35%),
-    linear-gradient(to top, #fffdfa 0%, rgba(255, 253, 250, 0.63) 25%, transparent 50%);
+    linear-gradient(to top, #fffdfa 0%, rgba(255, 253, 250, 0.71) 25%, transparent 50%);
   opacity: 0;
   transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 3;
