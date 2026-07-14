@@ -41,7 +41,7 @@ export const PROJECTS: Project[] = [
     title: "Mike Tyson Invitational",
     logoText: "MTI",
     logoUrl: "/projects/mike-tyson-logo.png",
-    bgVideoUrl: "/projects/mike-tyson-bg.mp4",
+    bgVideoUrl: "/projects/mike-tyson-bg.webp",
     category: "Website Design",
     year: "2026",
     cover: "https://picsum.photos/seed/mti-portfolio/1600/1100",

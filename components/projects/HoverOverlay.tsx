@@ -19,10 +19,13 @@ type Props = {
 };
 
 export default function HoverOverlay({ src, videoSrc, alt, x, y }: Props) {
+  const isVideo = videoSrc && (videoSrc.endsWith(".mp4") || videoSrc.endsWith(".webm"));
+  const isAnimatedImg = videoSrc && (videoSrc.endsWith(".webp") || videoSrc.endsWith(".gif"));
+
   return (
     <div className="projTile__frame" aria-hidden>
       <motion.div className="projTile__coverWrap" style={x && y ? { x, y } : undefined}>
-        {videoSrc ? (
+        {isVideo ? (
           <video
             className="projTile__cover"
             src={videoSrc}
@@ -31,6 +34,8 @@ export default function HoverOverlay({ src, videoSrc, alt, x, y }: Props) {
             muted
             playsInline
           />
+        ) : isAnimatedImg ? (
+          <img className="projTile__cover" src={videoSrc} alt="" />
         ) : (
           <img className="projTile__cover" src={src} alt={alt} loading="lazy" />
         )}
