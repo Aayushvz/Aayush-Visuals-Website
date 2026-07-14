@@ -2598,10 +2598,10 @@ html.past-hero .themeSwitch {
     max-width: 72%;
   }
 
-  /* DropBy logo 0.75× smaller on mobile */
+  /* DropBy logo 1.15× bigger on mobile to balance white space */
   .projTile[data-project-id="dropby"] .projTile__logoImg {
-    max-height: 48px;
-    max-width: 48%;
+    max-height: 75px;
+    max-width: 78%;
   }
 
   /* Text logo (wordmark) */
@@ -2669,6 +2669,22 @@ html.past-hero .themeSwitch {
     width: 100%;
     max-height: 92vh;
     border-radius: 22px 22px 0 0;
+  }
+
+  .projModal__navLogo {
+    display: none;
+  }
+
+  .projModal__nav {
+    padding: 10px 14px;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .projModal__navCta {
+    padding: 6px 12px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
   }
 }
 
