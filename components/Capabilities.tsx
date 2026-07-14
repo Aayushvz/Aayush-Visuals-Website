@@ -129,6 +129,7 @@ export default function Capabilities() {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         });
+        if (!isHovered) setIsHovered(true);
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -139,8 +140,8 @@ export default function Capabilities() {
         <motion.div
           style={{
             position: "absolute",
-            left: mousePos.x,
-            top: mousePos.y,
+            left: 0,
+            top: 0,
             width: 440,
             height: 440,
             borderRadius: "50%",
@@ -148,9 +149,9 @@ export default function Capabilities() {
             filter: "blur(28px)",
             pointerEvents: "none",
             zIndex: 1,
-            transform: "translate(-50%, -50%)",
+            x: mousePos.x - 220,
+            y: mousePos.y - 220,
           }}
-          layoutId="capabilitiesSpotlight"
         />
       )}
 
