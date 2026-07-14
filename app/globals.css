@@ -2104,6 +2104,11 @@ html.past-hero .themeSwitch {
   transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
 }
 
+.projTile[data-project-id="dropby"] .projTile__logoImg {
+  max-width: 42.4%;
+  max-height: 24%;
+}
+
 .projTile:hover .projTile__logoImg,
 .projTile:focus-visible .projTile__logoImg {
   opacity: 1;
@@ -2591,6 +2596,12 @@ html.past-hero .themeSwitch {
   .projTile[data-project-id="mike-tyson-invitational"] .projTile__logoImg {
     max-height: 83px;
     max-width: 72%;
+  }
+
+  /* DropBy logo 0.8× smaller on mobile */
+  .projTile[data-project-id="dropby"] .projTile__logoImg {
+    max-height: 51px;
+    max-width: 51.2%;
   }
 
   /* Text logo (wordmark) */
