@@ -1929,6 +1929,7 @@ html.past-hero .themeSwitch {
   letter-spacing: 0;
   text-align: center;
   margin: 0;
+  text-transform: none;
 }
 
 .projects__sub {
