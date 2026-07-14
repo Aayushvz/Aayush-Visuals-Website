@@ -181,14 +181,16 @@ html.has-cursor .cursorRing {
   translate: -50% -50%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   width: max-content;
   height: 42px;
-  padding: 0 20px;
+  padding: 0 22px;
   border-radius: 999px;
-  background: #fff;
-  border: 1.5px solid var(--ink);
-  color: var(--ink);
+  background: rgba(255, 253, 250, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.2px solid rgba(26, 26, 26, 0.76);
+  color: rgba(26, 26, 26, 0.9);
   white-space: nowrap;
   opacity: 0;
   scale: 0.6;
@@ -197,15 +199,15 @@ html.has-cursor .cursorRing {
 
 .cursorRing__ctaText {
   font-family: var(--font-primary);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .cursorRing__ctaArrow {
   display: flex;
   align-items: center;
-  color: var(--ink);
+  color: rgba(26, 26, 26, 0.9);
 }
 
 .cursorRing--project i {
@@ -2038,16 +2040,13 @@ html.past-hero .themeSwitch {
 .projTile__vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-      to top,
-      rgba(242, 237, 230, 0.55) 0%,
-      rgba(242, 237, 230, 0.26) 20%,
-      transparent 48%
-    ),
-    radial-gradient(140% 140% at 50% 45%, transparent 62%, rgba(242, 237, 230, 0.4) 100%);
+  background: 
+    linear-gradient(to bottom, #fffdfa 0%, rgba(255, 253, 250, 0.8) 18%, transparent 45%),
+    linear-gradient(to top, #fffdfa 0%, rgba(255, 253, 250, 0.85) 30%, transparent 60%);
   opacity: 0;
   transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 3;
+  pointer-events: none;
 }
 
 .projTile:hover .projTile__vignette,
@@ -2088,21 +2087,27 @@ html.past-hero .themeSwitch {
   }
 }
 
+.projTile__logoWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
 .projTile__logoImg {
   max-width: 44%;
   max-height: 25%;
   object-fit: contain;
-  pointer-events: none;
-  z-index: 10;
   opacity: 0.85;
   filter: grayscale(1) brightness(0); /* solid black at rest */
-  transition: opacity 0.55s ease, filter 0.55s ease;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
 }
 
 .projTile:hover .projTile__logoImg,
 .projTile:focus-visible .projTile__logoImg {
   opacity: 1;
-  filter: grayscale(1) brightness(0); /* keep solid black on hover */
+  transform: translateY(64px) scale(0.82);
 }
 
 /* -------- year (top) / logo (centre) / category (bottom) -------- */
@@ -2117,19 +2122,19 @@ html.past-hero .themeSwitch {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: 12px;
+  font-weight: 400;
   color: rgba(31, 31, 31, 0.45);
   transition: color 0.5s ease;
 }
 
 .projTile__logo {
-  position: relative;
-  z-index: 2;
   text-align: center;
   padding: 0 24px;
-  font-size: clamp(26px, 3vw, 46px);
+  font-family: var(--font-serif), serif;
+  font-size: clamp(24px, 2.5vw, 42px);
+  font-weight: 400; /* clean regular serif weight */
   color: var(--ink);
-  text-shadow: 0 0 0 transparent;
-  transition: color 0.5s cubic-bezier(0.22, 1, 0.36, 1), text-shadow 0.5s ease;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .projTile__category {
@@ -2141,28 +2146,21 @@ html.past-hero .themeSwitch {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--ink);
-  text-shadow: 0 0 0 transparent;
-  transition: color 0.5s ease, text-shadow 0.5s ease;
-}
-
-.projTile:hover .projTile__year,
-.projTile:focus-visible .projTile__year {
-  color: rgba(31, 31, 31, 0.55);
+  transition: color 0.5s ease;
 }
 
 .projTile:hover .projTile__logo,
 .projTile:focus-visible .projTile__logo {
   color: var(--ink);
-  text-shadow: none;
+  transform: translateY(64px) scale(0.82);
 }
 
 .projTile:hover .projTile__category,
 .projTile:focus-visible .projTile__category {
   color: var(--ink);
-  text-shadow: none;
 }
 
 .projTile__mist {

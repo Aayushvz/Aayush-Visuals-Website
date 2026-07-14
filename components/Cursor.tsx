@@ -84,11 +84,11 @@ export default function Cursor() {
         <span className="cursorRing__cta">
           <span className="cursorRing__ctaText">{PROJECT_CURSOR_LABEL}</span>
           <span className="cursorRing__ctaArrow">
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="none" aria-hidden>
               <path
-                d="M3.5 8h9m0 0L8.5 4M12.5 8 8.5 12"
+                d="M5 3l5 5-5 5M9 3l5 5-5 5"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="1.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
