@@ -569,7 +569,7 @@ html.has-cursor .cursorRing {
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
   color: var(--hero-fg);
   opacity: 0.72;
@@ -1413,15 +1413,7 @@ html.past-hero .themeSwitch {
 }
 
 
-.toolTile--vector .toolTile__obj {
-  background: rgba(30, 30, 30, 0.8) !important;
-  border: 1px solid #FFE873 !important;
-  border-radius: 26% !important;
-}
-.toolTile--vector .toolTile__obj svg {
-  width: 50% !important;
-  height: 50% !important;
-}
+
 
 
   .toolTile--framer {
@@ -2888,30 +2880,34 @@ html.past-hero .themeSwitch {
 
   /* top-left poster: partial left/top crop — card peeks into view */
   .heroCard--c0 {
-    width: 42vw !important;
-    height: 62vw !important;
-    translate: calc(-50% - 25vw) calc(-50% - 34svh);
+    width: 33vw !important;
+    height: 49vw !important;
+    translate: calc(-50% - 30vw) calc(-50% - 41svh) !important;
+    rotate: -4deg !important;
   }
 
   /* top-right car: partial right crop */
   .heroCard--c2 {
-    width: 40vw !important;
-    height: 60vw !important;
-    translate: calc(-50% + 27vw) calc(-50% - 31svh);
+    width: 32vw !important;
+    height: 48vw !important;
+    translate: calc(-50% + 33vw) calc(-50% - 41svh) !important;
+    rotate: -3deg !important;
   }
 
   /* lower-left E-Summit laptop (landscape) */
   .heroCard--c6 {
-    width: 50vw !important;
-    height: 35vw !important;
-    translate: calc(-50% - 28vw) calc(-50% + 30svh);
+    width: 46vw !important;
+    height: 32vw !important;
+    translate: calc(-50% - 32vw) calc(-50% + 36svh) !important;
+    rotate: -3deg !important;
   }
 
   /* lower-right fuzion: corner crop */
   .heroCard--c7 {
-    width: 40vw !important;
-    height: 52vw !important;
-    translate: calc(-50% + 29vw) calc(-50% + 38svh);
+    width: 35vw !important;
+    height: 46vw !important;
+    translate: calc(-50% + 30vw) calc(-50% + 36svh) !important;
+    rotate: -5deg !important;
   }
 
   /* horizontal finger drags move the card; vertical swipes keep scrolling */
@@ -3127,10 +3123,11 @@ html.past-hero .themeSwitch {
     font-weight: 600;
   }
   
-  /* Make the Figma and Claude logos truly floating on mobile without the tile box */
+  /* Make the Figma, Claude, Framer, and Adobe Suite logos truly floating on mobile without the tile box */
   .toolTile--figma .toolTile__obj, 
   .toolTile--claude .toolTile__obj, 
-  .toolTile--framer .toolTile__obj {
+  .toolTile--framer .toolTile__obj,
+  .toolTile--vector .toolTile__obj {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -3138,7 +3135,8 @@ html.past-hero .themeSwitch {
   
   .toolTile--figma .toolTile__obj svg, 
   .toolTile--claude .toolTile__obj svg, 
-  .toolTile--framer .toolTile__obj svg {
+  .toolTile--framer .toolTile__obj svg,
+  .toolTile--vector .toolTile__obj svg {
     width: 130% !important;
     height: 130% !important;
     transform: perspective(400px) rotateX(10deg) rotateY(-15deg) rotateZ(5deg) !important;
@@ -3160,22 +3158,13 @@ html.past-hero .themeSwitch {
     bottom: 25%;
     z-index: 2;
   }
-  .toolTile--vector .toolTile__obj {
-    background: #111 !important; /* solid dark */
-    border: 1px solid #FFE873 !important;
-    border-radius: 20% !important;
-  }
-  .toolTile--vector .toolTile__obj svg {
-    width: 65% !important;
-    height: 65% !important;
-  }
   .toolTile--vector .toolTile__enter {
      translate: 0 0;
   }
 
-  /* Remove ruler on mobile completely */
+  /* Show ruler container on mobile to keep vertical side rails */
   .statement__ruler {
-    display: none;
+    display: block;
   }
 
   .statement {
@@ -3563,4 +3552,132 @@ html.past-hero .themeSwitch {
 
 .capRail--right {
   right: var(--page-rail-inset);
+}
+
+/* Floating apple glass card menu overlay */
+.mobileNavCard {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  translate: -50% 0;
+  z-index: 200;
+  width: 260px; /* same width as the closed navbar */
+  height: 270px; /* decreased height to be very compact */
+  border-radius: 40px; /* highly rounded per mockup */
+  background: rgba(30, 30, 30, 0.65); /* Apple glass dark backdrop */
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px 54px; /* offset bottom padding to center links vertically */
+  color: #ffffff;
+  font-family: var(--font-primary), sans-serif;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+[data-theme="light"] .mobileNavCard {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  color: #140a2d;
+}
+
+.mobileNavCard__links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.mobileNavCard__link {
+  font-family: var(--font-primary), sans-serif; /* cleaner font */
+  font-size: 16px; /* reduced size */
+  font-weight: 500; /* reduced font-weight */
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+[data-theme="light"] .mobileNavCard__link {
+  color: #140a2d;
+}
+
+.mobileNavCard__link:active {
+  opacity: 0.6;
+  transform: scale(0.97);
+}
+
+.mobileNavCard__bottom {
+  position: absolute;
+  bottom: 18px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobileNavCard__title {
+  font-family: var(--font-primary), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme="light"] .mobileNavCard__title {
+  color: rgba(20, 10, 45, 0.5);
+}
+
+.mobileNavCard__logo {
+  font-family: var(--font-primary), sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-decoration: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="light"] .mobileNavCard__logo {
+  color: #140a2d;
+}
+
+.mobileNavCard__logo sup {
+  color: var(--hero-brand);
+  font-size: 10px;
+  font-weight: 800;
+  margin-left: 1px;
+  top: -0.4em;
+}
+
+.mobileNavCard__close {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+[data-theme="light"] .mobileNavCard__close {
+  color: #140a2d;
+}
+
+.mobileNavCard__close:active {
+  opacity: 0.5;
 }

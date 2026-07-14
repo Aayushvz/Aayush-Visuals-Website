@@ -69,15 +69,12 @@ function ClaudeMark() {
   );
 }
 
-function VectorMark() {
+function AdobeSuiteMark() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M6 14 Q 12 8, 18 14" stroke="white" strokeWidth="1.5" fill="none" />
-      <line x1="8" y1="17" x2="12" y2="10" stroke="white" strokeWidth="1.5" />
-      <line x1="16" y1="17" x2="12" y2="10" stroke="white" strokeWidth="1.5" />
-      <circle cx="12" cy="10" r="2" fill="white" />
-      <circle cx="8" cy="17" r="1.5" stroke="white" strokeWidth="1.5" fill="#222" />
-      <circle cx="16" cy="17" r="1.5" stroke="white" strokeWidth="1.5" fill="#222" />
+      <path d="M14.65 3H22v14.7L14.65 3z" fill="#FF2200" />
+      <path d="M9.35 3H2v14.7L9.35 3z" fill="#FA0F00" />
+      <path d="M12 8.7L19.7 21H15.4L12 15.6L8.6 21H4.3L12 8.7z" fill="#ED1C24" />
     </svg>
   );
 }
@@ -86,7 +83,7 @@ const TOOLS = [
   { id: "figma", label: "Figma", icon: <FigmaMark /> },
   { id: "framer", label: "Framer", icon: <FramerMark /> },
   { id: "claude", label: "Claude", icon: <ClaudeMark /> },
-  { id: "vector", label: "Design", icon: <VectorMark /> },
+  { id: "vector", label: "Adobe Suite", icon: <AdobeSuiteMark /> },
 ];
 
 export default function Statement() {

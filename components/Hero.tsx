@@ -464,6 +464,7 @@ export default function Hero() {
       world.style.transform = t;
       // grid pattern pans with the world; its fade mask stays put
       if (gridPattern) gridPattern.style.transform = t;
+      if (ruler) ruler.style.transform = `translate3d(0, ${py.toFixed(2)}px, 0)`;
       raf = requestAnimationFrame(loop);
     };
 

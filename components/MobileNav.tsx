@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SunIcon, MoonIcon } from "./icons";
+import { motion, AnimatePresence } from "framer-motion";
 
 /*
   Mobile bottom navbar (phone widths only — the desktop top pill hides).
@@ -9,15 +10,12 @@ import { SunIcon, MoonIcon } from "./icons";
   world, always visible across the site.
 
   Closed:  [ MENU ] [ aayushᵛᶻ ] [ THEME ACTION ]
-  Open:    [ CLOSE ] [ aayushᵛᶻ ] [ HOME ABOUT WORKS CONTACT ] [ THEME ]
-
-  The links expand inside the SAME pill (max-width transition, staggered
-  reveal). The theme button shows the OPPOSITE theme — the action you get.
+  Open:    Toggles a full-screen dynamic overlay in a lilac-purple scheme.
 */
 
 const links = [
   { label: "Home", href: "#top" },
-  { label: "About", href: "#about" },
+  { label: "About Me", href: "#about" },
   { label: "Works", href: "#work" },
   { label: "Contact", href: "#contact" },
 ];
@@ -25,9 +23,13 @@ const links = [
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [activeHash, setActiveHash] = useState("#top");
 
   useEffect(() => {
     setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    if (typeof window !== "undefined") {
+      setActiveHash(window.location.hash || "#top");
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -40,48 +42,88 @@ export default function MobileNav() {
   };
 
   return (
-    <nav className={`mobileNav ${open ? "mobileNav--open" : ""}`} aria-label="Mobile navigation">
-      <button
-        type="button"
-        className="mobileNav__menu"
-        aria-label={open ? "Close menu" : "Open menu"}
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="mobileNav__menuIcon" aria-hidden>
-          <i />
-          <i />
-        </span>
-      </button>
-
-      <a href="#top" className="mobileNav__logo" onClick={() => setOpen(false)}>
-        aayush<sup>vz</sup>
-      </a>
-
-      <div className="mobileNav__links">
-        {links.map((l, i) => (
-          <a
-            key={l.href}
-            href={l.href}
-            style={{ transitionDelay: open ? `${120 + i * 45}ms` : "0ms" }}
-            onClick={() => setOpen(false)}
+    <>
+      <AnimatePresence>
+        {!open && (
+          <motion.nav 
+            className="mobileNav" 
+            aria-label="Mobile navigation"
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
           >
-            {l.label}
-          </a>
-        ))}
-      </div>
+            <button
+              type="button"
+              className="mobileNav__menu"
+              aria-label="Open menu"
+              onClick={() => setOpen(true)}
+            >
+              <span className="mobileNav__menuIcon" aria-hidden>
+                <i />
+                <i />
+              </span>
+            </button>
 
-      <button
-        type="button"
-        className="mobileNav__theme"
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        onClick={toggleTheme}
-      >
-        {/* key remount replays the subtle icon-in animation on switch */}
-        <span key={theme} className="mobileNav__themeIcon">
-          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-        </span>
-      </button>
-    </nav>
+            <a href="#top" className="mobileNav__logo">
+              aayush<sup>vz</sup>
+            </a>
+
+            <button
+              type="button"
+              className="mobileNav__theme"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={toggleTheme}
+            >
+              <span key={theme} className="mobileNav__themeIcon">
+                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+              </span>
+            </button>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="mobileNavCard"
+            initial={{ opacity: 0, scale: 0.85, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 40 }}
+            transition={{ type: "spring", stiffness: 320, damping: 28 }}
+          >
+            {/* Centered Navigation Links */}
+            <div className="mobileNavCard__links">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="mobileNavCard__link"
+                  onClick={() => setOpen(false)}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+
+            {/* Bottom Row */}
+            <div className="mobileNavCard__bottom">
+              <span className="mobileNavCard__title">Menu</span>
+              <a href="#top" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
+                aayush<sup>vz</sup>
+              </a>
+              <button
+                type="button"
+                className="mobileNavCard__close"
+                onClick={() => setOpen(false)}
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
