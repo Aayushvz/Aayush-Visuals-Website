@@ -1486,6 +1486,7 @@ html.past-hero .themeSwitch {
 }
 
 .toolTile__obj svg {
+  display: block;
   width: 44%;
   height: auto;
   /* lift the logo slightly off the glass face for depth */
