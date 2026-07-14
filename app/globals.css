@@ -2563,15 +2563,16 @@ html.past-hero .themeSwitch {
     color: rgba(31, 31, 31, 0.4);
     text-transform: uppercase;
     margin-top: 24px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     text-align: center;
   }
 
-  /* Logo wrapper — centered, no parallax transform on mobile */
+  /* Logo wrapper — auto top margin vertically centers it between year and CTA */
   .projTile__logoWrapper {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: auto;
     margin-bottom: 10px;
     transform: none !important;
   }
@@ -2611,7 +2612,7 @@ html.past-hero .themeSwitch {
     text-transform: uppercase;
     color: var(--ink);
     text-align: center;
-    margin-top: 6px;
+    margin-top: 8px;
     margin-bottom: 0;
   }
 
