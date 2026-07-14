@@ -1949,7 +1949,7 @@ html.past-hero .themeSwitch {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--ink-soft);
+  border-top: 1px solid var(--ink-soft);
 }
 
 /* small "+" at each internal row/column crossing, like the reference */
@@ -1967,13 +1967,19 @@ html.past-hero .themeSwitch {
 .projTile {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--ink-soft);
+  border-bottom: 1px solid var(--ink-soft);
   min-height: clamp(320px, 46vh, 460px);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   isolation: isolate;
+}
+
+@media (min-width: 641px) {
+  .projTile:nth-child(odd) {
+    border-right: 1px solid var(--ink-soft);
+  }
 }
 
 .projTile:focus-visible {
@@ -2524,7 +2530,7 @@ html.past-hero .themeSwitch {
   .projGrid {
     grid-template-columns: 1fr;
     gap: 0;
-    border-top: 1px solid rgba(31, 31, 31, 0.12);
+    border-top: 1px solid var(--ink-soft);
   }
 
   /* single column has no internal vertical divider to cross */
@@ -2542,7 +2548,7 @@ html.past-hero .themeSwitch {
     justify-content: flex-start;
     gap: 0;
     padding: 0 24px;
-    border-bottom: 1px solid rgba(31, 31, 31, 0.12);
+    border-bottom: 1px solid var(--ink-soft);
     border-right: none;
     background: var(--paper);
     cursor: pointer;
