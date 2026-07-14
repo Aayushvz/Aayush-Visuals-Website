@@ -2089,10 +2089,6 @@ html.past-hero .themeSwitch {
 }
 
 .projTile__logoImg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   max-width: 44%;
   max-height: 25%;
   object-fit: contain;
@@ -2106,7 +2102,7 @@ html.past-hero .themeSwitch {
 .projTile:hover .projTile__logoImg,
 .projTile:focus-visible .projTile__logoImg {
   opacity: 1;
-  filter: grayscale(1) brightness(0) invert(1); /* solid white on hover */
+  filter: grayscale(1) brightness(0); /* keep solid black on hover */
 }
 
 /* -------- year (top) / logo (centre) / category (bottom) -------- */
@@ -2159,14 +2155,29 @@ html.past-hero .themeSwitch {
 
 .projTile:hover .projTile__logo,
 .projTile:focus-visible .projTile__logo {
-  color: #fff;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.28);
+  color: var(--ink);
+  text-shadow: none;
 }
 
 .projTile:hover .projTile__category,
 .projTile:focus-visible .projTile__category {
-  color: #fff;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.32);
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.projTile__mist {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 253, 250, 0.76); /* white layer of mist */
+  opacity: 0;
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.projTile:hover .projTile__mist,
+.projTile:focus-visible .projTile__mist {
+  opacity: 1;
 }
 
 /* -------- shared CTA pill (modal only — tiles never show a button) -------- */
