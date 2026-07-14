@@ -2096,8 +2096,8 @@ html.past-hero .themeSwitch {
 }
 
 .projTile__logoImg {
-  max-width: 44%;
-  max-height: 25%;
+  max-width: 53%;
+  max-height: 30%;
   object-fit: contain;
   opacity: 0.85;
   filter: grayscale(1) brightness(0); /* solid black at rest */
@@ -2131,7 +2131,7 @@ html.past-hero .themeSwitch {
   text-align: center;
   padding: 0 24px;
   font-family: var(--font-serif), serif;
-  font-size: clamp(24px, 2.5vw, 42px);
+  font-size: clamp(28px, 3vw, 50px);
   font-weight: 400; /* clean regular serif weight */
   color: var(--ink);
   transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
