@@ -3964,13 +3964,30 @@ html.past-hero .themeSwitch {
 
 /* Stationary engineering dotted/line grid mirroring the hero exactly */
 .aboutPage__gridPattern {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 10;
   pointer-events: none;
   background-image: linear-gradient(var(--hero-grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--hero-grid-line) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
+}
+
+/* Background masks to fade out pixels and grid lines at corners/edges like hero */
+.aboutPage__bgMask {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+
+.aboutPage__bgMask--v {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
 }
 
 /* -------- numbered measurement rulers (per the Figma) --------

@@ -143,7 +143,7 @@ export default function PixelBackground() {
           const d2 = Math.hypot(cx - cluster2X, cy - cluster2Y);
           const t1 = Math.max(0, 1 - d1 / clusterR);
           const t2 = Math.max(0, 1 - d2 / cluster2R);
-          const prob = Math.max(0.04, t1 * t1 * 0.80, t2 * t2 * 0.45);
+          const prob = Math.max(0.0, t1 * t1 * 0.80, t2 * t2 * 0.45);
           if (rng() < prob) {
             const df = Math.max(t1, t2 * 0.5, 0.1);
             pixels.push({
@@ -387,9 +387,8 @@ export default function PixelBackground() {
     <canvas
       ref={canvasRef}
       style={{
-        position: "fixed",
+        position: "absolute",
         inset: 0,
-        zIndex: 5,
         pointerEvents: "none",
         display: "block",
       }}
