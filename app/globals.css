@@ -3953,6 +3953,13 @@ html.past-hero .themeSwitch {
   padding-bottom: 52px; /* space for the fixed status bar */
 }
 
+.aboutPage__canvasBg {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
 /* same geometry as the global .rails, page-local so the light-section
    hairline colour never leaks in */
 .aboutPage__rails {

@@ -75,11 +75,14 @@ export default function AboutPageClient() {
       <div className="aboutPage__vignette" aria-hidden />
       <div className="aboutPage__grain" aria-hidden />
 
+      {/* Full-screen background halftone matrix */}
+      <div className="aboutPage__canvasBg">
+        <AsciiPortrait src="/about/portrait.png" onHoverChange={onHoverChange} />
+      </div>
+
       <main className="aboutPage__main">
-        {/* portrait first in DOM, under the typography */}
-        <div className="aboutPage__right" data-enter style={{ "--d": "0.28s" } as React.CSSProperties}>
-          <AsciiPortrait src="/about/portrait.png" onHoverChange={onHoverChange} />
-        </div>
+        {/* Placeholder column to preserve layout balance */}
+        <div className="aboutPage__right" />
 
         <div className="aboutPage__left">
           <div>

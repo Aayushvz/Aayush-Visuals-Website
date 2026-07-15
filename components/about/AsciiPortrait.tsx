@@ -133,11 +133,21 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       canvas.style.height = `${H}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (img) {
-        const s = Math.min(W / swc, H / shc);
-        iw = swc * s;
-        ih = shc * s;
-        ix = (W - iw) / 2;
-        iy = H - ih; // stands at the bottom edge
+        if (W > 900) {
+          // Desktop: center the portrait in the right 45% of the viewport width
+          const s = (H * 0.76) / shc; // scale to fit height nicely
+          iw = swc * s;
+          ih = shc * s;
+          ix = W * 0.52 + (W * 0.48 - iw) / 2;
+          iy = H - ih;
+        } else {
+          // Mobile: center horizontally at the bottom of the screen
+          const s = Math.min(W * 0.78, H * 0.52) / shc;
+          iw = swc * s;
+          ih = shc * s;
+          ix = (W - iw) / 2;
+          iy = H - ih;
+        }
         resample();
       }
     };
@@ -277,7 +287,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         hovering = true;
         bx = btx;
         by = bty;
-        brTarget = Math.min(W, H) * 0.38;
+        brTarget = Math.min(W, H) * 0.35;
         hoverCb.current?.(true);
       }
     };
@@ -287,10 +297,10 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       hoverCb.current?.(false);
     };
 
-    canvas.addEventListener("pointermove", onPointerMove, { passive: true });
-    canvas.addEventListener("pointerdown", onPointerMove, { passive: true });
-    canvas.addEventListener("pointerleave", onPointerLeave, { passive: true });
-    canvas.addEventListener("pointercancel", onPointerLeave, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    window.addEventListener("pointercancel", onPointerLeave, { passive: true });
 
     const ro = new ResizeObserver(layout);
     ro.observe(wrap);
@@ -346,10 +356,10 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       destroyed = true;
       ro.disconnect();
       cancelAnimationFrame(raf);
-      canvas.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("pointerdown", onPointerMove);
-      canvas.removeEventListener("pointerleave", onPointerLeave);
-      canvas.removeEventListener("pointercancel", onPointerLeave);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("pointercancel", onPointerLeave);
     };
   }, [src]);
 
