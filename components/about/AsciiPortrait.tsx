@@ -3,39 +3,19 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Living ASCII portrait — canvas renderer, no CSS fakery.
-
-  Pipeline: PNG → alpha-bbox crop → two luminance samplings (a coarse
-  resting grid and a 2× fine grid) → character mapping onto the ramp
-  " .:-=+*%#@░▒▓█" (brightness → density, block glyphs at the top end,
-  which is what gives the reference its mosaic read) → glyph-atlas
-  blitting per frame.
-
-  Motion systems:
-    · signal noise — every ~90ms a scattered subset of cells drifts one
-      ramp step, so the surface renders continuously, never static;
-    · breathing   — the resting cell size wanders a few percent every
-      ~2.5s and the grid resamples;
-    · spotlight   — the hover interaction. The cursor does NOT reveal the
-      photo: it locally REBUILDS the portrait at double resolution.
-      Inside a feathered radius the coarse glyphs dissolve and the fine
-      grid fades in, sharper and brighter; outside stays soft and sparse.
-      Radius and position are lerped every frame, so entering, moving and
-      leaving are all continuous — on leave the coarse field rebuilds as
-      the radius eases to zero.
-
-  Perf: glyphs pre-rendered to atlases (one per resolution) and blitted
-  with drawImage — zero per-frame fillText; the fine pass only touches
-  the spotlight's bounding box; redraws only happen when state actually
-  changed; DPR capped at 2; everything dies with the component on route
-  leave.
+  Living Pixel-Halftone Portrait — canvas renderer, no CSS/font fakery.
+  Draws vector squares directly onto the canvas. The size and opacity of
+  the squares are driven by the source image's processed luminance grid.
+  
+  Hover spotlight dynamically REBUILDS the portrait locally at 2× grid
+  resolution and switches the color to your soft purple accent shade.
+  
+  Background grid covers the entire canvas, reacting seamlessly to the spotlight.
 */
 
-const RAMP = [" ", ".", ":", "-", "=", "+", "*", "%", "#", "@", "░", "▒", "▓", "█"];
-const BASE_CELL = 11; // resting (coarse) cell, css px
-const SHIMMER_MS = 90;
+const BASE_CELL = 9; // Grid resolution (resting size), in CSS px. A bit smaller makes the face much more high-res and detailed!
+const SHIMMER_MS = 110;
 const BREATH_MS = 2500;
-const ATLAS_FONT = 'ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace';
 
 type Props = {
   src: string;
@@ -80,12 +60,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     const sampler = document.createElement("canvas");
     const sctx = sampler.getContext("2d", { willReadFrequently: true })!;
 
-    /* glyph atlases */
-    const atlasC = document.createElement("canvas");
-    const atlasF = document.createElement("canvas");
-    let atlasCellC = 0;
-    let atlasCellF = 0;
-
     /* spotlight */
     let bx = 0, by = 0, btx = 0, bty = 0;
     let br = 0, brTarget = 0;
@@ -96,22 +70,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let lastShimmer = 0;
     let lastBreath = 0;
     let needsDraw = true;
-
-    const buildAtlas = (target: HTMLCanvasElement, cellPx: number, color: string) => {
-      const s = Math.max(3, Math.round(cellPx)) * dpr;
-      target.width = s * RAMP.length;
-      target.height = s;
-      const a = target.getContext("2d")!;
-      a.clearRect(0, 0, target.width, target.height);
-      a.fillStyle = color;
-      a.font = `${Math.ceil(s * 1.02)}px ${ATLAS_FONT}`;
-      a.textAlign = "center";
-      a.textBaseline = "middle";
-      RAMP.forEach((ch, i) => {
-        if (ch !== " ") a.fillText(ch, i * s + s / 2, s * 0.54);
-      });
-      return Math.max(3, Math.round(cellPx));
-    };
 
     const sampleGrid = (c: number, r: number) => {
       sampler.width = c;
@@ -144,9 +102,9 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         // Boost contrast and brightness for face recognition
         let l = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
         if (a > 0) {
-          l = (l - 0.12) / 0.78; // stretch contrast
+          l = (l - 0.10) / 0.82; // stretch contrast
           l = Math.max(0, Math.min(1, l));
-          l = Math.pow(l, 0.76); // gamma midtone boost
+          l = Math.pow(l, 0.70); // gamma midtone boost
         }
 
         lum[i] = l * a;
@@ -162,8 +120,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       colsF = cols * 2;
       rowsF = rows * 2;
       ({ lum: lumF, alp: alpF } = sampleGrid(colsF, rowsF));
-      atlasCellC = buildAtlas(atlasC, cell, "#f4f1ea");
-      atlasCellF = buildAtlas(atlasF, cell / 2, "#a78bfa");
       needsDraw = true;
     };
 
@@ -181,14 +137,9 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         iw = swc * s;
         ih = shc * s;
         ix = (W - iw) / 2;
-        iy = H - ih; // figure stands on the frame's bottom edge
+        iy = H - ih; // stands at the bottom edge
         resample();
       }
-    };
-
-    const rampIdx = (l: number, boost: number) => {
-      let idx = Math.round(Math.pow(l, 0.78) * (RAMP.length - 1) * (0.98 + boost * 0.25));
-      return Math.max(0, Math.min(RAMP.length - 1, idx));
     };
 
     const falloff = (cx: number, cy: number) => {
@@ -196,116 +147,118 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       const d = Math.hypot(cx - bx, cy - by);
       if (d >= br) return 0;
       const f = 1 - d / br;
-      return f * f * (3 - 2 * f); // smoothstep feather
+      return f * f * (3 - 2 * f); // smoothstep
     };
 
     const draw = () => {
       if (!img || !cols) return;
       ctx.clearRect(0, 0, W, H);
+      
       const c = cell;
-      const acC = atlasCellC * dpr;
-      const acF = atlasCellF * dpr;
+      const cf = c / 2;
 
-      /* coarse resting field — dissolves inside the spotlight */
+      /* 1. Coarse background and resting state (Cream tone #f4f1ea) */
+      ctx.fillStyle = "#f4f1ea";
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
           const i = y * cols + x;
-          const f = falloff(x * c + c / 2, y * c + c / 2);
+          const cx = x * c + c / 2;
+          const cy = y * c + c / 2;
+          const f = falloff(cx, cy);
           
-          let idx = 0;
-          let a = 0.06; // background grid density
+          let size = 0;
+          let opacity = 0;
 
           if (alpC[i] >= 0.3) {
-            // Draw face/body
-            idx = rampIdx(lumC[i], 0);
-            if (alpC[i] > 0.6) idx = Math.max(1, idx);
-            const j = jitter.get(i);
-            if (j) idx = Math.max(1, Math.min(RAMP.length - 1, idx + j));
-            a = (0.24 + lumC[i] * 0.58) * (1 - f);
+            // Face cell
+            const l = lumC[i];
+            const jVal = jitter.get(i) || 0;
+            const lAdj = Math.max(0, Math.min(1, l + jVal * 0.12));
+            size = c * Math.pow(lAdj, 0.52) * (1 - f);
+            opacity = (0.28 + lAdj * 0.54) * (1 - f);
           } else {
-            // Background noise grid
-            idx = ((x + y) % 3 === 0) ? 1 : 0; // occasional dot "."
-            const j = jitter.get(i);
-            if (j && idx > 0) idx = Math.max(0, idx + j);
-            a = 0.07 * (1 - f);
+            // Background screen grid (dots/squares)
+            size = 1.6;
+            opacity = 0.08 * (1 - f);
           }
 
-          if (idx === 0 || a < 0.015) continue;
-          ctx.globalAlpha = a;
-          ctx.drawImage(atlasC, idx * acC, 0, acC, acC, x * c, y * c, c, c);
+          if (size <= 0.25 || opacity < 0.015) continue;
+          ctx.globalAlpha = opacity;
+          ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
         }
       }
 
-      /* fine spotlight field — double resolution, brighter, only the
-         brush's bounding box is walked */
+      /* 2. Fine Spotlight Hover overlay (Lavender tone #a78bfa) */
       if (br > 0.5) {
-        const cf = c / 2;
+        ctx.fillStyle = "#a78bfa";
         const x0 = Math.max(0, Math.floor((bx - br) / cf));
         const x1 = Math.min(colsF - 1, Math.ceil((bx + br) / cf));
         const y0 = Math.max(0, Math.floor((by - br) / cf));
         const y1 = Math.min(rowsF - 1, Math.ceil((by + br) / cf));
+
         for (let y = y0; y <= y1; y++) {
           for (let x = x0; x <= x1; x++) {
             const i = y * colsF + x;
-            const f = falloff(x * cf + cf / 2, y * cf + cf / 2);
+            const cx = x * cf + cf / 2;
+            const cy = y * cf + cf / 2;
+            const f = falloff(cx, cy);
             if (f < 0.02) continue;
 
-            let idx = 0;
-            let a = 0;
+            let size = 0;
+            let opacity = 0;
 
             if (alpF[i] >= 0.3) {
-              idx = rampIdx(lumF[i], f);
-              if (alpF[i] > 0.6) idx = Math.max(1, idx);
-              a = (0.34 + lumF[i] * 0.66) * f;
+              // Detailed face cell
+              const l = lumF[i];
+              size = cf * Math.pow(l, 0.48) * f;
+              opacity = (0.42 + l * 0.58) * f;
             } else {
-              // Background spotlight grid: draw fine sharp dots/crosses
-              idx = ((x + y) % 4 === 0) ? 1 : 0;
-              a = 0.12 * f;
+              // Spotlighted background screen grid (sharper)
+              size = 1.2;
+              opacity = 0.18 * f;
             }
 
-            if (idx === 0 || a < 0.015) continue;
-            ctx.globalAlpha = a;
-            ctx.drawImage(atlasF, idx * acF, 0, acF, acF, x * cf, y * cf, cf, cf);
+            if (size <= 0.25 || opacity < 0.015) continue;
+            ctx.globalAlpha = opacity;
+            ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
           }
         }
       }
+
       ctx.globalAlpha = 1;
     };
 
     const loop = (now: number) => {
       if (destroyed) return;
 
-      if (!reduced && now - lastShimmer > SHIMMER_MS) {
-        lastShimmer = now;
-        jitter = new Map();
-        const n = Math.floor(cols * rows * 0.014);
-        for (let k = 0; k < n; k++) {
-          jitter.set(
-            Math.floor(Math.random() * cols * rows),
-            Math.random() > 0.5 ? 1 : -1
-          );
-        }
+      // Lerp spotlight radius and coords
+      const ease = 0.15;
+      bx += (btx - bx) * ease;
+      by += (bty - by) * ease;
+      br += (brTarget - br) * ease;
+      if (Math.abs(br - brTarget) > 0.1 || (brTarget > 0 && Math.hypot(bx - btx, by - bty) > 0.5)) {
         needsDraw = true;
       }
 
+      // Breathing effect on resolution grid size (subtle organic shimmer)
       if (!reduced && now - lastBreath > BREATH_MS) {
         lastBreath = now;
-        cellTarget = BASE_CELL * (0.88 + Math.random() * 0.18);
+        cellTarget = BASE_CELL + (Math.random() - 0.5) * 0.4;
       }
-      if (Math.abs(cellTarget - cell) > 0.02) {
-        cell += (cellTarget - cell) * 0.06;
-        if (Math.abs(Math.floor(W / cell) - cols) >= 1) resample();
-        needsDraw = true;
+      if (!reduced && Math.abs(cell - cellTarget) > 0.01) {
+        cell += (cellTarget - cell) * 0.05;
+        resample();
       }
 
-      const rk = reduced ? 1 : 0.16;
-      bx += (btx - bx) * rk;
-      by += (bty - by) * rk;
-      br += (brTarget - br) * (reduced ? 1 : 0.11);
-      if (
-        Math.abs(brTarget - br) > 0.4 ||
-        (br > 0.5 && (Math.abs(btx - bx) > 0.4 || Math.abs(bty - by) > 0.4))
-      ) {
+      // Shimmer noise modulation
+      if (now - lastShimmer > SHIMMER_MS) {
+        lastShimmer = now;
+        jitter.clear();
+        const num = Math.floor(cols * rows * 0.08);
+        for (let k = 0; k < num; k++) {
+          const idx = Math.floor(Math.random() * cols * rows);
+          jitter.set(idx, (Math.random() - 0.5) * 0.45);
+        }
         needsDraw = true;
       }
 
@@ -346,8 +299,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     image.src = src;
     image.decode().then(() => {
       if (destroyed) return;
-      // crop to the figure's alpha bounding box (the PNG carries wide
-      // transparent margins) — scanned once at low res
       const probe = document.createElement("canvas");
       const scanW = 160;
       const scanH = Math.max(1, Math.round((image.height / image.width) * scanW));
@@ -403,13 +354,8 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
   }, [src]);
 
   return (
-    <div className="aboutPage__portrait" ref={wrapRef}>
-      <canvas
-        ref={canvasRef}
-        className="aboutPage__portraitCanvas"
-        aria-label="ASCII portrait of Aayush Raj"
-        role="img"
-      />
+    <div ref={wrapRef} style={{ width: "100%", height: "100%" }}>
+      <canvas ref={canvasRef} style={{ display: "block" }} />
     </div>
   );
 }

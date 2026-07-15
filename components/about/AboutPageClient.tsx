@@ -24,7 +24,7 @@ import StatusBar, { type AboutStatus } from "./StatusBar";
   AVAILABLE (after first interaction) > OPEN FOR FULL-TIME OFFERS.
 */
 
-const META_LINE = ["Product Design", "UI / UX", "Design Systems", "Creative Development"];
+const META_LINE = ["Product Design", "UI / UX", "Creative Development"];
 
 const FACTS = [
   "4+ years designing digital products",
@@ -107,16 +107,16 @@ export default function AboutPageClient() {
               Raj<span className="aboutPage__namePeriod">.</span>
             </span>
           </h1>
-
-          <ul className="aboutPage__facts" data-enter style={{ "--d": "0.34s" } as React.CSSProperties}>
-            {FACTS.map((f) => (
-              <li key={f}>
-                <i className="aboutPage__factMark" aria-hidden />
-                {f}
-              </li>
-            ))}
-          </ul>
         </div>
+
+        <ul className="aboutPage__facts" data-enter style={{ "--d": "0.34s" } as React.CSSProperties}>
+          {FACTS.map((f) => (
+            <li key={f}>
+              <i className="aboutPage__factMark" aria-hidden />
+              {f}
+            </li>
+          ))}
+        </ul>
       </main>
 
       <StatusBar status={status} />

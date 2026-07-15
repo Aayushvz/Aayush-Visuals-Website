@@ -4076,9 +4076,11 @@ html.past-hero .themeSwitch {
   flex: 1;
   display: grid;
   grid-template-columns: 55% 45%;
+  grid-template-rows: 1fr auto;
   align-items: center;
-  padding: 0 var(--page-content-inset);
+  padding: 0 var(--page-rail-inset); /* Align exactly within vertical rulers */
   min-height: 0;
+  row-gap: 20px;
 }
 
 .aboutPage__left {
@@ -4121,7 +4123,7 @@ html.past-hero .themeSwitch {
   text-transform: uppercase;
   letter-spacing: 0.01em;
   line-height: 0.92;
-  font-size: clamp(60px, 9vw, 142px);
+  font-size: clamp(52px, 8vw, 126px); /* slightly reduced to ensure it never overflows right rail */
   color: #f4f1ea;
 }
 
@@ -4144,20 +4146,22 @@ html.past-hero .themeSwitch {
 }
 
 .aboutPage__facts {
+  grid-column: 1 / span 2; /* Span full page width inside vertical rulers */
   list-style: none;
-  margin: clamp(28px, 6vh, 60px) 0 0;
+  margin: 0 0 clamp(20px, 4.5svh, 36px) 0;
   padding: 0;
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap; /* strictly single line on desktop */
-  gap: clamp(16px, 2.2vw, 38px);
+  flex-wrap: nowrap;
+  justify-content: space-between; /* Fact 1 aligns left rail, Fact 3 aligns right rail */
+  gap: 20px;
 }
 
 .aboutPage__facts li {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: clamp(9px, 0.72vw, 10.5px); /* reduced size to fit nicely */
+  font-size: clamp(9px, 0.72vw, 10.5px);
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -4328,8 +4332,10 @@ html.past-hero .themeSwitch {
   }
 
   .aboutPage__facts {
+    grid-column: 1;
     flex-direction: column;
     gap: 12px;
+    margin: 32px 0 20px;
   }
 }
 
