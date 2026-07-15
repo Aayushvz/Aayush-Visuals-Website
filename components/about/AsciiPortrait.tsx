@@ -251,16 +251,12 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             const l = lumC[i];
             colorVal = Math.max(0, Math.min(1, l + waveBoost));
             opacity = (0.08 + colorVal * 0.72) * (1 - f);
-          } else {
-            // Background screen grid (matching pixel size exactly, completely solid/static)
-            colorVal = Math.max(0, Math.min(1, bgNoise[i] + waveBoost * 0.7));
-            opacity = 0.45 * (1 - f); // darker background shade
-          }
 
-          if (opacity < 0.01) continue;
-          ctx.globalAlpha = opacity;
-          ctx.fillStyle = getPixelColor(colorVal, false);
-          ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+            if (opacity < 0.01) continue;
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = getPixelColor(colorVal, false);
+            ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+          }
         }
       }
 
@@ -302,17 +298,12 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
               const l = lumF[i];
               colorVal = Math.max(0, Math.min(1, l + waveBoost));
               opacity = (0.12 + colorVal * 0.78) * f;
-            } else {
-              // Spotlighted background screen grid (matching fine pixel size)
-              const bgN = (cIdx >= 0 && cIdx < cols * rows) ? bgNoise[cIdx] : 0;
-              colorVal = Math.max(0, Math.min(1, bgN + waveBoost * 0.7));
-              opacity = 0.5 * f;
-            }
 
-            if (opacity < 0.01) continue;
-            ctx.globalAlpha = opacity;
-            ctx.fillStyle = getPixelColor(colorVal, true);
-            ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+              if (opacity < 0.01) continue;
+              ctx.globalAlpha = opacity;
+              ctx.fillStyle = getPixelColor(colorVal, true);
+              ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+            }
           }
         }
       }

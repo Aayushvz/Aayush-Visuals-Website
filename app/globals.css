@@ -3987,54 +3987,6 @@ html.past-hero .themeSwitch {
   right: var(--page-rail-inset);
 }
 
-/* ~2% animated film grain — steps() jumps the noise tile so it never
-   reads as a slide, GPU-cheap (background-position only) */
-.aboutPage__grain {
-  position: fixed;
-  inset: -100px;
-  pointer-events: none;
-  z-index: 90;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: aboutGrain 0.9s steps(6) infinite;
-}
-
-/* Faded pixel grid overlay, centered vignette */
-.aboutPage__pixels {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 41;
-  background-image: 
-    radial-gradient(rgba(244, 241, 234, 0.08) 1.5px, transparent 1.5px);
-  background-size: 11px 11px;
-  mask-image: radial-gradient(circle at 60% 45%, black 25%, rgba(0, 0, 0, 0.3) 65%, transparent 95%);
-  -webkit-mask-image: radial-gradient(circle at 60% 45%, black 25%, rgba(0, 0, 0, 0.3) 65%, transparent 95%);
-}
-
-.aboutPage__glows {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 42;
-  background: 
-    radial-gradient(circle at 75% 30%, rgba(167, 139, 250, 0.12) 0%, transparent 55%),
-    radial-gradient(circle at 20% 80%, rgba(109, 40, 217, 0.08) 0%, transparent 60%);
-}
-
-.aboutPage__vignette {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 48;
-  background: radial-gradient(circle, transparent 20%, rgba(20, 20, 20, 0.4) 100%);
-}
-
-@keyframes aboutGrain {
-  0% { background-position: 0 0; }
-  100% { background-position: 160px 96px; }
-}
-
 /* -------- top chrome -------- */
 
 .aboutPage__top {
@@ -4129,7 +4081,7 @@ html.past-hero .themeSwitch {
   text-transform: uppercase;
   letter-spacing: 0.01em;
   line-height: 0.92;
-  font-size: clamp(52px, 8vw, 126px); /* slightly reduced to ensure it never overflows right rail */
+  font-size: clamp(62px, 9.6vw, 150px); /* increased by 1.2x */
   color: #f4f1ea;
 }
 
@@ -4159,16 +4111,16 @@ html.past-hero .themeSwitch {
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  gap: clamp(18px, 2.5vw, 44px);
+  gap: clamp(24px, 3.5vw, 60px); /* more breathing room */
 }
 
 .aboutPage__facts li {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: clamp(9px, 0.72vw, 10.5px);
+  font-size: clamp(8.5px, 0.68vw, 10px); /* reduced to 95% */
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em; /* increased tracking slightly */
   text-transform: uppercase;
   color: rgba(244, 241, 234, 0.72);
   white-space: nowrap;

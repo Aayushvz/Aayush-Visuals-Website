@@ -7,6 +7,7 @@ import Cursor from "@/components/Cursor";
 import PageLink from "@/components/PageLink";
 import AsciiPortrait from "./AsciiPortrait";
 import StatusBar, { type AboutStatus } from "./StatusBar";
+import PixelBackground from "./PixelBackground";
 
 /*
   /about — Aayush Visuals × the Mauricio Juba interaction school.
@@ -66,13 +67,11 @@ export default function AboutPageClient() {
 
   return (
     <div className="aboutPage">
+      <PixelBackground />
       <Navbar />
       <MobileNav />
       <Cursor />
       <div className="aboutPage__rails" aria-hidden />
-      <div className="aboutPage__glows" aria-hidden />
-      <div className="aboutPage__vignette" aria-hidden />
-      <div className="aboutPage__grain" aria-hidden />
 
       {/* Full-screen background halftone matrix */}
       <div className="aboutPage__canvasBg">
