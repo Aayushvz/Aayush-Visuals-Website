@@ -3,14 +3,19 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Procedural Pixel Environment — Hybrid Approach
-  -----------------------------------------------
-  Combines a continuous density field with multiple drifting noise layers.
-  Each layer has its own gray tone, scale, speed, and Z-seed, creating
-  the multi-tonal atmospheric look of the reference.
+  Procedural Pixel Environment — Unified Grid & Portrait Colors
+  -------------------------------------------------------------
+  Combines continuous density with 8 drifting noise layers.
+  Uses the exact portrait image colors:
+    - Deep charcoal purple: rgb(20, 17, 24)
+    - Muted lavender: rgb(124, 106, 150)
+    - Warm cream: rgb(244, 241, 234)
   
-  Same 7px cell / 6px square grid as the portrait renderer.
-  Monochrome only. No purple, no glow, no blur.
+  Format:
+    - Large cloud sizes (lower scales)
+    - Increased number of clouds/layers (8 layers)
+    - Low opacity for subtle digital fog effect
+    - Grid cell size: 7px cell, 6px square
 */
 
 // Perlin noise
@@ -63,15 +68,36 @@ function fbm(x: number, y: number, z: number) {
 const CELL = 7;
 const SQ = CELL - 1;
 
-// Each layer drifts independently and has its own gray tone
+// Image animation colors:
+// Stop 0: Deep charcoal purple (20, 17, 24)
+// Stop 1: Muted lavender       (124, 106, 150)
+// Stop 2: Warm cream           (244, 241, 234)
+function getLayerColor(intensity: number): [number, number, number] {
+  if (intensity < 0.6) {
+    const t = intensity / 0.6;
+    return [
+      20 + t * (124 - 20),
+      17 + t * (106 - 17),
+      24 + t * (150 - 24)
+    ];
+  } else {
+    const t = (intensity - 0.6) / 0.4;
+    return [
+      124 + t * (244 - 124),
+      106 + t * (241 - 106),
+      150 + t * (234 - 150)
+    ];
+  }
+}
+
 type Layer = {
-  scale: number;
+  scale: number;      // scale factor (smaller = larger cloud size)
   speedX: number;
   speedY: number;
   zSeed: number;
-  gray: number;       // base gray value 0-255
-  threshold: number;  // noise cutoff
-  opacity: number;    // base alpha
+  threshold: number;  // lower = more dense coverage
+  opacity: number;    // transparency (subtle)
+  toneIntensity: number; // 0 (charcoal) to 1 (cream)
 };
 
 export default function PixelBackground() {
@@ -108,24 +134,37 @@ export default function PixelBackground() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     resize();
 
-    // 5 layers — each with a different gray tone, scale, speed, and density
-    // Deepest/darkest layers are large and slow; brightest layers are finer and faster
+    // 8 layers — larger sizes (lower scales) and higher number of layers
     const layers: Layer[] = [
-      // Dark black undertone — large, slow, dense
-      { scale: 0.005, speedX: 0.006, speedY: 0.004, zSeed: 3.7,  gray: 22,  threshold: 0.32, opacity: 0.35 },
-      // Dark gray mid-layer
-      { scale: 0.008, speedX: 0.010, speedY: 0.007, zSeed: 18.4, gray: 45,  threshold: 0.40, opacity: 0.28 },
-      // Mid gray atmospheric layer
-      { scale: 0.012, speedX: 0.015, speedY: 0.011, zSeed: 41.9, gray: 75,  threshold: 0.46, opacity: 0.22 },
-      // Light gray detail layer
-      { scale: 0.018, speedX: 0.020, speedY: 0.014, zSeed: 67.3, gray: 110, threshold: 0.52, opacity: 0.18 },
-      // Brightest highlights — finest, fastest
-      { scale: 0.025, speedX: 0.025, speedY: 0.018, zSeed: 93.8, gray: 155, threshold: 0.58, opacity: 0.14 },
+      // Deep undertones (charcoal-purple, very large, slow)
+      { scale: 0.002, speedX: 0.005, speedY: 0.003, zSeed: 3.7,  threshold: 0.28, opacity: 0.32, toneIntensity: 0.02 },
+      { scale: 0.003, speedX: 0.007, speedY: 0.005, zSeed: 12.1, threshold: 0.32, opacity: 0.28, toneIntensity: 0.08 },
+      { scale: 0.004, speedX: 0.010, speedY: 0.007, zSeed: 24.5, threshold: 0.36, opacity: 0.24, toneIntensity: 0.16 },
+      // Lavender midtones (larger cloud sizes)
+      { scale: 0.006, speedX: 0.012, speedY: 0.009, zSeed: 38.9, threshold: 0.40, opacity: 0.20, toneIntensity: 0.28 },
+      { scale: 0.008, speedX: 0.015, speedY: 0.011, zSeed: 53.4, threshold: 0.44, opacity: 0.18, toneIntensity: 0.40 },
+      { scale: 0.011, speedX: 0.018, speedY: 0.013, zSeed: 67.2, threshold: 0.48, opacity: 0.15, toneIntensity: 0.52 },
+      // Light lavender details
+      { scale: 0.015, speedX: 0.022, speedY: 0.016, zSeed: 81.6, threshold: 0.52, opacity: 0.12, toneIntensity: 0.64 },
+      // Cream highlight touches (fastest, sparsest)
+      { scale: 0.020, speedX: 0.026, speedY: 0.019, zSeed: 95.3, threshold: 0.56, opacity: 0.08, toneIntensity: 0.76 },
     ];
 
     // Portrait suppression center
     const portraitCX = 0.28;
     const portraitCY = 0.62;
+
+    // Color string cache to optimize rendering performance
+    const colorCache = new Map<number, string>();
+    function getCachedColor(r: number, g: number, b: number): string {
+      const key = (r << 16) | (g << 8) | b;
+      let c = colorCache.get(key);
+      if (!c) {
+        c = `rgb(${r},${g},${b})`;
+        colorCache.set(key, c);
+      }
+      return c;
+    }
 
     const draw = (t: number) => {
       mx += (tmx - mx) * 0.04;
@@ -133,15 +172,13 @@ export default function PixelBackground() {
 
       ctx.clearRect(0, 0, W, H);
 
-      // Base black
+      // Base black background matches portrait shadow stop
       ctx.fillStyle = "#090909";
       ctx.fillRect(0, 0, W, H);
 
       const cols = Math.ceil(W / CELL);
       const rows = Math.ceil(H / CELL);
 
-      // Pre-compute density mask per cell (portrait suppression + corner boost)
-      // This is shared across all layers
       for (let gy = 0; gy < rows; gy++) {
         const cellY = gy * CELL;
         const ny = cellY / H;
@@ -149,50 +186,49 @@ export default function PixelBackground() {
           const cellX = gx * CELL;
           const nx2 = cellX / W;
 
-          // Distance from portrait center
+          // Portrait suppression mask (40% suppression around portrait)
           const dpx = nx2 - portraitCX;
           const dpy = ny - portraitCY;
           const portraitDist = Math.sqrt(dpx * dpx + dpy * dpy);
-
-          // Distance from viewport center
           const vcx = nx2 - 0.5;
           const vcy = ny - 0.5;
           const centerDist = Math.sqrt(vcx * vcx + vcy * vcy);
 
-          // Density mask
           let mask = 1.0;
-          if (portraitDist < 0.42) {
-            const f = portraitDist / 0.42;
+          if (portraitDist < 0.40) {
+            const f = portraitDist / 0.40;
             mask = f * f;
           }
-          if (centerDist > 0.32) {
-            mask = Math.min(1.0, mask + (centerDist - 0.32) * 0.4);
+          if (centerDist > 0.30) {
+            mask = Math.min(1.0, mask + (centerDist - 0.30) * 0.5);
           }
 
-          // Evaluate each layer — composite darkest to brightest
+          // Render layers — darkest/largest to brightest/smallest
           for (const layer of layers) {
             const driftX = t * layer.speedX;
             const driftY = t * layer.speedY;
 
+            // Parallax offset applied to grid coordinates
             const sampleX = (cellX + mx * 12) * layer.scale + driftX;
             const sampleY = (cellY + my * 12) * layer.scale + driftY;
 
             const n = fbm(sampleX, sampleY, layer.zSeed);
             const nv = (n + 1) * 0.5;
 
-            // Raise threshold where mask is low (near portrait)
+            // Shift threshold based on the suppression mask
             const thresh = layer.threshold + (1 - mask) * 0.35;
 
             if (nv <= thresh) continue;
 
-            // Intensity drives subtle alpha variation
             const intensity = Math.min(1, (nv - thresh) / (1 - thresh));
-            const g = layer.gray;
+            const tone = layer.toneIntensity + intensity * 0.12;
+            const [r, g, b] = getLayerColor(Math.min(1, tone));
+            const ri = Math.round(r), gi = Math.round(g), bi = Math.round(b);
 
-            ctx.globalAlpha = layer.opacity * (0.5 + intensity * 0.5);
-            ctx.fillStyle = `rgb(${g},${g},${g})`;
+            ctx.globalAlpha = layer.opacity * (0.45 + intensity * 0.55);
+            ctx.fillStyle = getCachedColor(ri, gi, bi);
             ctx.fillRect(cellX, cellY, SQ, SQ);
-            break; // Only draw one layer per cell — topmost visible wins
+            break; // Topmost visible layer handles this pixel grid cell
           }
         }
       }
