@@ -16,9 +16,9 @@ import { useEffect, useRef } from "react";
   bottom on mobile).
 */
 
-const CELL = 6;   // square pixel size
-const GAP  = 1;   // gap between pixels
-const SQ   = CELL - GAP; // 5px drawn square
+const CELL = 10;  // square pixel size — matches reference image
+const GAP  = 2;   // gap between pixels
+const SQ   = CELL - GAP; // 8px drawn square
 
 // Seeded PRNG — gives deterministic random layout on every resize
 function mulberry32(seed: number) {
@@ -140,27 +140,36 @@ export default function PixelBackground() {
       ctx.fillStyle = "#090909";
       ctx.fillRect(0, 0, W, H);
 
-      // Draw pixels with slow opacity breathing
+      // Base colour: cool grey  rgb(200, 196, 208)
+      // Hover colour: soft purple  rgb(167, 139, 250)  = #A78BFA
+      const BR = 200, BG = 196, BB = 208;
+      const HR = 167, HG = 139, HB = 250;
+
       for (let i = 0; i < pixels.length; i++) {
         const p = pixels[i];
 
         // Sine fade: oscillates between 0 and 1
         const sine = (Math.sin(t * p.freq + p.phase) + 1) * 0.5;
-        let op = p.baseOp * (0.3 + sine * 0.7); // min 30% of baseOp
+        let op = p.baseOp * (0.3 + sine * 0.7);
 
-        // Hover spotlight: boost nearby pixels
+        // Hover spotlight: colour shift + opacity boost
         const hd = Math.hypot(p.x - lpx, p.y - lpy);
+        let blend = 0;
         if (hd < SPOT_R) {
           const hf = 1 - hd / SPOT_R;
-          const boost = hf * hf * (3 - 2 * hf); // smooth-step
-          op = Math.min(op + boost * 0.06, 0.28);
+          blend = hf * hf * (3 - 2 * hf); // smooth-step 0→1
+          op = Math.min(op + blend * 0.08, 0.32);
         }
 
         if (op < 0.005) continue;
 
+        // Lerp colour toward #A78BFA based on proximity
+        const r = Math.round(BR + (HR - BR) * blend);
+        const g = Math.round(BG + (HG - BG) * blend);
+        const b = Math.round(BB + (HB - BB) * blend);
+
         ctx.globalAlpha = op;
-        // Colour: very dark grey, near-neutral but very slightly warm
-        ctx.fillStyle = "#c8c4d0";
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.fillRect(p.x, p.y, SQ, SQ);
       }
 
