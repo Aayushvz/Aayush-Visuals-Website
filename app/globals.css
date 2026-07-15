@@ -3974,76 +3974,25 @@ html.past-hero .themeSwitch {
   pointer-events: none;
 }
 
-.aboutRulers__side {
+/* Vertical ruler rails — mirrors .heroRuler__rail from Hero */
+.aboutRulers__rail {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 56px;
+  width: 1px;
+  background: rgba(244, 241, 234, 0.45);
+  animation: rulerRail 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.aboutRulers__side--left {
-  left: 10px;
+.aboutRulers__rail--left {
+  left: clamp(14px, 5vw, 78px);
 }
 
-.aboutRulers__side--right {
-  right: 10px;
+.aboutRulers__rail--right {
+  right: clamp(14px, 5vw, 78px);
 }
 
-/* dense fine ticks hugging the edge… */
-.aboutRulers__side::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 7px;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(244, 241, 234, 0.18) 0 1px,
-    transparent 1px 7px
-  );
-}
-
-/* …with a longer tick at intervals */
-.aboutRulers__side::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 13px;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(244, 241, 234, 0.24) 0 1px,
-    transparent 1px 35px
-  );
-}
-
-.aboutRulers__side--left::before,
-.aboutRulers__side--left::after {
-  left: 0;
-}
-
-.aboutRulers__side--right::before,
-.aboutRulers__side--right::after {
-  right: 0;
-}
-
-.aboutRulers__num {
-  position: absolute;
-  left: 24px;
-  translate: 0 -50%;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: rgba(244, 241, 234, 0.3);
-  font-variant-numeric: tabular-nums;
-}
-
-.aboutRulers__side--right .aboutRulers__num {
-  left: auto;
-  right: 24px;
-  text-align: right;
-}
-
+/* Corner registration marks */
 .aboutRulers__cross {
   position: absolute;
   font-size: 16px;
@@ -4053,22 +4002,22 @@ html.past-hero .themeSwitch {
 }
 
 .aboutRulers__cross--tl {
-  left: 21px;
+  left: calc(clamp(14px, 5vw, 78px) - 7px);
   top: 18px;
 }
 
 .aboutRulers__cross--tr {
-  right: 21px;
+  right: calc(clamp(14px, 5vw, 78px) - 7px);
   top: 18px;
 }
 
 .aboutRulers__cross--bl {
-  left: 21px;
+  left: calc(clamp(14px, 5vw, 78px) - 7px);
   bottom: 74px;
 }
 
 .aboutRulers__cross--br {
-  right: 21px;
+  right: calc(clamp(14px, 5vw, 78px) - 7px);
   bottom: 74px;
 }
 
