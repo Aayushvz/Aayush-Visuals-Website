@@ -13,7 +13,7 @@ import { useEffect, useRef } from "react";
   Background grid covers the entire canvas, reacting seamlessly to the spotlight.
 */
 
-const BASE_CELL = 9; // Grid resolution (resting size), in CSS px. A bit smaller makes the face much more high-res and detailed!
+const BASE_CELL = 7; // Grid resolution (resting size), in CSS px. A bit smaller makes the face much more high-res and detailed!
 const SHIMMER_MS = 110;
 const BREATH_MS = 2500;
 
@@ -25,6 +25,45 @@ type Props = {
 const getInset = () => {
   const vw = typeof window !== "undefined" ? window.innerWidth : 1000;
   return Math.max(44, Math.min(132, vw * 0.09));
+};
+
+const lerpColor = (r1: number, g1: number, b1: number, r2: number, g2: number, b2: number, t: number) => {
+  return {
+    r: Math.round(r1 + (r2 - r1) * t),
+    g: Math.round(g1 + (g2 - g1) * t),
+    b: Math.round(b1 + (b2 - b1) * t)
+  };
+};
+
+// Grayscale and purple palette color lookup stops to avoid blurriness and create deep shadows
+const getPixelColor = (l: number, isHover: boolean) => {
+  let r = 0, g = 0, b = 0;
+  if (!isHover) {
+    // Coarse resting stops:
+    // Stop 0 (Deep charcoal purple shadow): #141118 (20, 17, 24)
+    // Stop 1 (Muted lavender midtone): #7c6a96 (124, 106, 150)
+    // Stop 2 (Warm cream highlight): #f4f1ea (244, 241, 234)
+    if (l < 0.5) {
+      const t = l / 0.5;
+      ({ r, g, b } = lerpColor(20, 17, 24, 124, 106, 150, t));
+    } else {
+      const t = (l - 0.5) / 0.5;
+      ({ r, g, b } = lerpColor(124, 106, 150, 244, 241, 234, t));
+    }
+  } else {
+    // Fine spotlight stops:
+    // Stop 0 (Deep black purple shadow): #12091f (18, 9, 31)
+    // Stop 1 (Rich violet midtone): #6d28d9 (109, 40, 217)
+    // Stop 2 (Bright lavender highlight): #a78bfa (167, 139, 250)
+    if (l < 0.5) {
+      const t = l / 0.5;
+      ({ r, g, b } = lerpColor(18, 9, 31, 109, 40, 217, t));
+    } else {
+      const t = (l - 0.5) / 0.5;
+      ({ r, g, b } = lerpColor(109, 40, 217, 167, 139, 250, t));
+    }
+  }
+  return `rgb(${r},${g},${b})`;
 };
 
 export default function AsciiPortrait({ src, onHoverChange }: Props) {
@@ -174,8 +213,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       const c = cell;
       const cf = c / 2;
 
-      /* 1. Coarse background and resting state (Cream tone #f4f1ea) */
-      ctx.fillStyle = "#f4f1ea";
+      /* 1. Coarse background and resting state (Cream tone base palette) */
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
           const i = y * cols + x;
@@ -183,29 +221,31 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const cy = y * c + c / 2;
           const f = falloff(cx, cy);
           
-          let size = c - 1.2; // uniform square size
+          let size = c - 1.0; // uniform square size to align perfectly with background
           let opacity = 0;
+          let colorVal = 0;
 
           if (alpC[i] >= 0.3) {
             // Face pixel
             const l = lumC[i];
             const jVal = jitter.get(i) || 0;
-            const lAdj = Math.max(0, Math.min(1, l + jVal * 0.1));
-            opacity = (0.08 + lAdj * 0.72) * (1 - f);
+            colorVal = Math.max(0, Math.min(1, l + jVal * 0.1));
+            opacity = (0.08 + colorVal * 0.72) * (1 - f);
           } else {
-            // Background screen grid (dots/squares)
-            opacity = 0.07 * (1 - f);
+            // Background screen grid (matching pixel size)
+            colorVal = 0;
+            opacity = 0.45 * (1 - f); // darker background shade
           }
 
           if (opacity < 0.01) continue;
           ctx.globalAlpha = opacity;
+          ctx.fillStyle = getPixelColor(colorVal, false);
           ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
         }
       }
 
-      /* 2. Fine Spotlight Hover overlay (Lavender tone #a78bfa) */
+      /* 2. Fine Spotlight Hover overlay (Lavender tone base palette, 2x resolution increase!) */
       if (br > 0.5) {
-        ctx.fillStyle = "#a78bfa";
         const x0 = Math.max(0, Math.floor((bx - br) / cf));
         const x1 = Math.min(colsF - 1, Math.ceil((bx + br) / cf));
         const y0 = Math.max(0, Math.floor((by - br) / cf));
@@ -219,20 +259,24 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             const f = falloff(cx, cy);
             if (f < 0.02) continue;
 
-            let size = cf - 0.8; // uniform fine square size
+            let size = cf - 0.6; // uniform fine square size
             let opacity = 0;
+            let colorVal = 0;
 
             if (alpF[i] >= 0.3) {
               // Detailed face pixel
               const l = lumF[i];
+              colorVal = l;
               opacity = (0.12 + l * 0.78) * f;
             } else {
-              // Spotlighted background screen grid (sharper)
-              opacity = 0.16 * f;
+              // Spotlighted background screen grid (matching fine pixel size)
+              colorVal = 0;
+              opacity = 0.5 * f;
             }
 
             if (opacity < 0.01) continue;
             ctx.globalAlpha = opacity;
+            ctx.fillStyle = getPixelColor(colorVal, true);
             ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
           }
         }
