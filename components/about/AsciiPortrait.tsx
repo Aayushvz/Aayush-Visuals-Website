@@ -14,7 +14,6 @@ import { useEffect, useRef } from "react";
 */
 
 const BASE_CELL = 7; // Grid resolution (resting size), in CSS px. A bit smaller makes the face much more high-res and detailed!
-const BREATH_MS = 2500;
 
 type Props = {
   src: string;
@@ -78,7 +77,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     let W = 0;
@@ -92,8 +90,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let sxc = 0, syc = 0, swc = 0, shc = 0;
 
     /* two sampling grids: coarse (resting) and fine (spotlight, 2×) */
-    let cell = BASE_CELL;
-    let cellTarget = BASE_CELL;
+    const cell = BASE_CELL;
     let cols = 0, rows = 0;
     let lumC: Float32Array = new Float32Array(0);
     let alpC: Float32Array = new Float32Array(0);
@@ -118,8 +115,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let br = 0, brTarget = 0;
     let hovering = false;
 
-    /* grid respiration */
-    let lastBreath = 0;
     let needsDraw = true;
 
     const sampleGrid = (c: number, r: number) => {
@@ -168,7 +163,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       cols = Math.max(8, Math.floor(W / cell));
       rows = Math.max(8, Math.floor(H / cell));
       
-      // Initialize a persistent dithered background noise grid (varying tones)
+      // Initialize a persistent dithered background noise grid (varying tones, only created on window resize)
       bgNoise = new Float32Array(cols * rows);
       for (let i = 0; i < cols * rows; i++) {
         const rand = Math.random();
@@ -238,7 +233,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const cy = y * c + c / 2;
           const f = falloff(cx, cy);
           
-          let size = c - 1.0; // uniform square size
+          let size = c - 1.0; // uniform square size to align perfectly with background
           let opacity = 0;
           let colorVal = 0;
 
@@ -257,7 +252,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             colorVal = Math.max(0, Math.min(1, l + waveBoost));
             opacity = (0.08 + colorVal * 0.72) * (1 - f);
           } else {
-            // Background screen grid (matching pixel size exactly)
+            // Background screen grid (matching pixel size exactly, completely solid/static)
             colorVal = Math.max(0, Math.min(1, bgNoise[i] + waveBoost * 0.7));
             opacity = 0.45 * (1 - f); // darker background shade
           }
@@ -337,7 +332,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         needsDraw = true;
       }
 
-      // Diagonal wave sweep sweep physics
+      // Diagonal wave sweep physics (100% path-directed movement, no random flicker)
       if (waveActive) {
         wavePos += 0.0035; // slow diagonal glide speed
         if (wavePos > 1.35) {
@@ -350,16 +345,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           waveActive = true;
           wavePos = -0.3; // reset off-screen left
         }
-      }
-
-      // Breathing effect on resolution grid size (subtle organic shimmer)
-      if (!reduced && now - lastBreath > BREATH_MS) {
-        lastBreath = now;
-        cellTarget = BASE_CELL + (Math.random() - 0.5) * 0.4;
-      }
-      if (!reduced && Math.abs(cell - cellTarget) > 0.01) {
-        cell += (cellTarget - cell) * 0.05;
-        resample();
       }
 
       if (needsDraw) {
