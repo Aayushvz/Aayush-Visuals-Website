@@ -70,7 +70,6 @@ export default function AboutPageClient() {
       <div className="aboutPage__bgMask" aria-hidden>
         <div className="aboutPage__bgMask--v">
           <PixelBackground />
-          <div className="aboutPage__gridPattern" />
         </div>
       </div>
       <Navbar />

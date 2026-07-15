@@ -3962,16 +3962,7 @@ html.past-hero .themeSwitch {
   pointer-events: none;
 }
 
-/* Stationary engineering dotted/line grid mirroring the hero exactly */
-.aboutPage__gridPattern {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  background-image: linear-gradient(var(--hero-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--hero-grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
+
 
 /* Background masks to fade out pixels and grid lines at corners/edges like hero */
 .aboutPage__bgMask {
