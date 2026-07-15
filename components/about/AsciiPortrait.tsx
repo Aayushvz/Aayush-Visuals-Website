@@ -104,6 +104,10 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     const sampler = document.createElement("canvas");
     const sctx = sampler.getContext("2d", { willReadFrequently: true })!;
 
+    /* background noise and organic shimmer simulation variables */
+    let bgNoise: Float32Array = new Float32Array(0);
+    let shimmerMap: Float32Array = new Float32Array(0);
+
     /* spotlight */
     let bx = 0, by = 0, btx = 0, bty = 0;
     let br = 0, brTarget = 0;
@@ -160,6 +164,17 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       if (!img || !W || !H) return;
       cols = Math.max(8, Math.floor(W / cell));
       rows = Math.max(8, Math.floor(H / cell));
+      
+      // Initialize a persistent dithered background noise grid
+      bgNoise = new Float32Array(cols * rows);
+      shimmerMap = new Float32Array(cols * rows);
+      for (let i = 0; i < cols * rows; i++) {
+        const rand = Math.random();
+        if (rand < 0.65) bgNoise[i] = 0; // black/empty
+        else if (rand < 0.92) bgNoise[i] = 0.06 + Math.random() * 0.08; // dark gray
+        else bgNoise[i] = 0.15 + Math.random() * 0.12; // light gray/cream
+      }
+
       ({ lum: lumC, alp: alpC } = sampleGrid(cols, rows));
       colsF = cols * 2;
       rowsF = rows * 2;
@@ -228,12 +243,14 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           if (alpC[i] >= 0.3) {
             // Face pixel
             const l = lumC[i];
+            const shim = shimmerMap[i] || 0;
             const jVal = jitter.get(i) || 0;
-            colorVal = Math.max(0, Math.min(1, l + jVal * 0.1));
+            colorVal = Math.max(0, Math.min(1, l + shim + jVal * 0.1));
             opacity = (0.08 + colorVal * 0.72) * (1 - f);
           } else {
-            // Background screen grid (matching pixel size)
-            colorVal = 0;
+            // Background screen grid (matching pixel size exactly)
+            const shim = shimmerMap[i] || 0;
+            colorVal = Math.max(0, Math.min(1, bgNoise[i] + shim));
             opacity = 0.45 * (1 - f); // darker background shade
           }
 
@@ -263,14 +280,22 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             let opacity = 0;
             let colorVal = 0;
 
+            // Map to corresponding coarse cell index for matching background noise and shimmer
+            const cxIdx = Math.floor(x / 2);
+            const cyIdx = Math.floor(y / 2);
+            const cIdx = cyIdx * cols + cxIdx;
+
             if (alpF[i] >= 0.3) {
               // Detailed face pixel
               const l = lumF[i];
-              colorVal = l;
-              opacity = (0.12 + l * 0.78) * f;
+              const shim = (cIdx >= 0 && cIdx < cols * rows) ? shimmerMap[cIdx] : 0;
+              colorVal = Math.max(0, Math.min(1, l + shim));
+              opacity = (0.12 + colorVal * 0.78) * f;
             } else {
               // Spotlighted background screen grid (matching fine pixel size)
-              colorVal = 0;
+              const bgN = (cIdx >= 0 && cIdx < cols * rows) ? bgNoise[cIdx] : 0;
+              const shim = (cIdx >= 0 && cIdx < cols * rows) ? shimmerMap[cIdx] : 0;
+              colorVal = Math.max(0, Math.min(1, bgN + shim));
               opacity = 0.5 * f;
             }
 
@@ -297,6 +322,38 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         needsDraw = true;
       }
 
+      // Evolve shimmer map (organic waves propagating at 60fps)
+      let evolved = false;
+      for (let i = 0; i < cols * rows; i++) {
+        if (shimmerMap[i] > 0.005) {
+          shimmerMap[i] *= 0.93; // decay shimmer waves
+          evolved = true;
+        } else {
+          shimmerMap[i] = 0;
+        }
+      }
+
+      // Spawn random shimmer clusters (very subtle, organic clusters)
+      if (Math.random() < 0.03) {
+        const rx = Math.floor(Math.random() * cols);
+        const ry = Math.floor(Math.random() * rows);
+        const rad = 2 + Math.floor(Math.random() * 3);
+        const amp = 0.06 + Math.random() * 0.08;
+        for (let dy = -rad; dy <= rad; dy++) {
+          for (let dx = -rad; dx <= rad; dx++) {
+            const tx = rx + dx;
+            const ty = ry + dy;
+            if (tx >= 0 && tx < cols && ty >= 0 && ty < rows) {
+              const dist = Math.hypot(dx, dy);
+              if (dist < rad) {
+                shimmerMap[ty * cols + tx] += amp * (1 - dist / rad);
+              }
+            }
+          }
+        }
+        evolved = true;
+      }
+
       // Breathing effect on resolution grid size (subtle organic shimmer)
       if (!reduced && now - lastBreath > BREATH_MS) {
         lastBreath = now;
@@ -319,7 +376,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         needsDraw = true;
       }
 
-      if (needsDraw) {
+      if (needsDraw || evolved) {
         needsDraw = false;
         draw();
       }

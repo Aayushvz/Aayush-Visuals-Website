@@ -70,7 +70,6 @@ export default function AboutPageClient() {
       <MobileNav />
       <Cursor />
       <div className="aboutPage__rails" aria-hidden />
-      <div className="aboutPage__pixels" aria-hidden />
       <div className="aboutPage__glows" aria-hidden />
       <div className="aboutPage__vignette" aria-hidden />
       <div className="aboutPage__grain" aria-hidden />
