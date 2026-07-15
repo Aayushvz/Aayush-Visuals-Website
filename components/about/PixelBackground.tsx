@@ -3,23 +3,22 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Procedural Pixel Environment — Dithered Grid Clusters
-  -----------------------------------------------------
-  Generates organic cloud clusters using Perlin noise.
-  Renders using a 4x4 Bayer ordered dither matrix to achieve
-  the exact checkerboard/dithered pixel texture from the user's screenshot.
+  Procedural Pixel Environment — Combined Hybrid Renderer with Hover Spotlight
+  ----------------------------------------------------------------------------
+  Combines:
+    1. Continuous infinite pixel field (digital fog) for overall movement.
+    2. Localized dithered cloud clusters for dense organic formations.
+    3. Interactive hover spotlight that increases density and brightens pixels
+       locally around the pointer on the unified grid.
   
-  Uses the portrait's color palette:
+  Renders both on a unified 7px cell / 6px square grid using a 4x4 Bayer dither matrix
+  and the portrait color palette:
     - Deep charcoal purple: rgb(20, 17, 24)
     - Muted lavender: rgb(124, 106, 150)
     - Warm cream: rgb(244, 241, 234)
-  
-  Grid parameters:
-    - Same 7px cell / 6px square grid as portrait.
-    - Flat shading, crisp edges (no blur).
 */
 
-// Perlin noise permutation table
+// Perlin noise
 const PERM = new Uint8Array([
   151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
   8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
@@ -57,7 +56,6 @@ function pnoise(x: number, y: number, z: number) {
              nlerp(u, grad(P[AB+1],x,y-1,z-1), grad(P[BB+1],x-1,y-1,z-1))));
 }
 
-// 3-octave fBm
 function fbm(x: number, y: number, z: number) {
   return (
     pnoise(x, y, z) * 0.5 +
@@ -79,10 +77,6 @@ const BAYER_4x4 = [
 
 // Color mapping matching image stops
 function getDitherColor(intensity: number): [number, number, number] {
-  // Map intensity (0..1) to portrait palette
-  // Stop 0: Deep charcoal purple (20, 17, 24)
-  // Stop 1: Muted lavender (124, 106, 150)
-  // Stop 2: Warm cream (244, 241, 234)
   if (intensity < 0.55) {
     const t = intensity / 0.55;
     return [
@@ -101,16 +95,16 @@ function getDitherColor(intensity: number): [number, number, number] {
 }
 
 type Cloud = {
-  scale: number;       // noise frequency (smaller = larger cloud size)
+  scale: number;
   speedX: number;
   speedY: number;
   zSeed: number;
-  cx: number;          // relative X center position (0-1)
-  cy: number;          // relative Y center position (0-1)
-  radius: number;      // cloud radius in pixels
-  parallax: number;    // pointer parallax multiplier
-  maxIntensity: number;// peak color intensity (0-1)
-  opacity: number;     // base opacity
+  cx: number;
+  cy: number;
+  radius: number;
+  parallax: number;
+  maxIntensity: number;
+  opacity: number;
 };
 
 export default function PixelBackground() {
@@ -127,6 +121,7 @@ export default function PixelBackground() {
     let destroyed = false;
     let raf = 0;
     let mx = 0, my = 0, tmx = 0, tmy = 0;
+    let px = -2000, py = -2000, lpx = -2000, lpy = -2000;
 
     const resize = () => {
       W = window.innerWidth;
@@ -139,12 +134,20 @@ export default function PixelBackground() {
     };
 
     const onPointerMove = (e: PointerEvent) => {
+      px = e.clientX;
+      py = e.clientY;
       tmx = (e.clientX / window.innerWidth) - 0.5;
       tmy = (e.clientY / window.innerHeight) - 0.5;
     };
 
+    const onPointerLeave = () => {
+      px = -2000;
+      py = -2000;
+    };
+
     window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
     resize();
 
     // 8 drifting clouds with large sizes (low scales) and portrait-matched attributes
@@ -159,7 +162,7 @@ export default function PixelBackground() {
       { scale: 0.006, speedX: 0.015, speedY: 0.010, zSeed: 89.4, cx: 0.75, cy: 0.85, radius: 360, parallax: 18, maxIntensity: 0.95, opacity: 0.18 }
     ];
 
-    // Portrait suppression coordinates (left 45% column)
+    // Portrait suppression coordinates
     const portraitCX = 0.28;
     const portraitCY = 0.62;
 
@@ -178,6 +181,15 @@ export default function PixelBackground() {
       mx += (tmx - mx) * 0.04;
       my += (tmy - my) * 0.04;
 
+      // Smooth pointer tracking interpolation
+      if (px < -1000) {
+        lpx += (-2000 - lpx) * 0.08;
+        lpy += (-2000 - lpy) * 0.08;
+      } else {
+        lpx += (px - lpx) * 0.08;
+        lpy += (py - lpy) * 0.08;
+      }
+
       ctx.clearRect(0, 0, W, H);
 
       // Deep dark background
@@ -194,7 +206,7 @@ export default function PixelBackground() {
           const cellX = gx * CELL;
           const nx2 = cellX / W;
 
-          // Calculate portrait suppression mask
+          // Portrait suppression mask
           const dpx = nx2 - portraitCX;
           const dpy = ny - portraitCY;
           const portraitDist = Math.sqrt(dpx * dpx + dpy * dpy);
@@ -204,18 +216,41 @@ export default function PixelBackground() {
             mask = f * f;
           }
 
-          // Accumulate density across the drifting clouds
-          let maxD = 0;
-          let activeOpacity = 0;
+          // Pointer hover spotlight math
+          const hdx = cellX - lpx;
+          const hdy = cellY - lpy;
+          const hoverDist = Math.sqrt(hdx * hdx + hdy * hdy);
+          const spotlightRadius = 220;
+          let hoverBoost = 0;
+          if (hoverDist < spotlightRadius) {
+            const hf = 1 - hoverDist / spotlightRadius;
+            hoverBoost = hf * hf * (3 - 2 * hf); // smoothstep envelope
+          }
+
+          // 1. Baseline continuous infinite noise field (slow, morphing digital fog)
+          const baseScale = 0.007;
+          const baseDriftX = t * 0.008;
+          const baseDriftY = t * 0.006;
+          const baseN = fbm(
+            (cellX + mx * 10) * baseScale + baseDriftX,
+            (cellY + my * 10) * baseScale + baseDriftY,
+            7.3
+          );
+          const baseNv = (baseN + 1) * 0.5;
+          // Very low density baseline
+          const baseDensity = Math.max(0, baseNv - 0.46) * 0.28;
+
+          // 2. Cloud clusters density
+          let clusterD = 0;
+          let activeOpacity = 0.12;
 
           for (const cloud of clouds) {
-            // Drift + parallax offset
             const driftX = t * cloud.speedX;
             const driftY = t * cloud.speedY;
-            const px = mx * cloud.parallax;
-            const py = my * cloud.parallax;
-            const ccx = cloud.cx * W + px;
-            const ccy = cloud.cy * H + py;
+            const pmx = mx * cloud.parallax;
+            const pmy = my * cloud.parallax;
+            const ccx = cloud.cx * W + pmx;
+            const ccy = cloud.cy * H + pmy;
 
             const dx = cellX - ccx;
             const dy = cellY - ccy;
@@ -224,36 +259,47 @@ export default function PixelBackground() {
             if (dist < cloud.radius) {
               const falloff = 1 - dist / cloud.radius;
               const n = fbm(
-                (cellX + driftX * W) * cloud.scale,
-                (cellY + driftY * H) * cloud.scale,
+                (cellX + pmx) * cloud.scale + driftX,
+                (cellY + pmy) * cloud.scale + driftY,
                 cloud.zSeed
               );
-              // Normalize noise to [0, 1]
               const nv = (n + 1) * 0.5;
               const density = falloff * nv * cloud.maxIntensity;
 
-              if (density > maxD) {
-                maxD = density;
+              if (density > clusterD) {
+                clusterD = density;
                 activeOpacity = cloud.opacity;
               }
             }
           }
 
+          // Combine baseline fog and cluster density
+          let finalD = Math.max(baseDensity, clusterD);
+
+          // Boost density within the hover spotlight region
+          if (hoverBoost > 0) {
+            finalD = Math.min(1.0, finalD + hoverBoost * 0.35);
+          }
+
           // Apply portrait suppression mask
-          maxD *= mask;
+          finalD *= mask;
 
-          if (maxD <= 0.01) continue;
+          if (finalD <= 0.01) continue;
 
-          // Ordered dithering check using Bayer 4x4 matrix
+          // Bayer 4x4 Dithering Check
           const ditherThreshold = BAYER_4x4[gy % 4][gx % 4];
-          if (maxD < ditherThreshold) continue;
+          if (finalD < ditherThreshold) continue;
 
-          // Determine color based on density intensity
-          const [r, g, b] = getDitherColor(maxD);
+          // Interpolated color stops (boosted locally in spotlight to cream highlights)
+          const toneVal = Math.min(1.0, finalD + hoverBoost * 0.18);
+          const [r, g, b] = getDitherColor(toneVal);
           const ri = Math.round(r), gi = Math.round(g), bi = Math.round(b);
 
-          // Alpha fade maps to density step
-          ctx.globalAlpha = activeOpacity * (0.5 + maxD * 0.5);
+          // Set opacity (hover spotlight brightens and solidifies the pixels)
+          const baseOpacity = finalD === baseDensity ? 0.08 : activeOpacity;
+          const op = Math.min(0.85, baseOpacity * (0.4 + finalD * 0.6) + hoverBoost * 0.38);
+
+          ctx.globalAlpha = op;
           ctx.fillStyle = getCachedColor(ri, gi, bi);
           ctx.fillRect(cellX, cellY, SQ, SQ);
         }
@@ -274,6 +320,7 @@ export default function PixelBackground() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
     };
   }, []);
 

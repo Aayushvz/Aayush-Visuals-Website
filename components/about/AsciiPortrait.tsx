@@ -103,13 +103,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     /* background noise grid mapping */
     let bgNoise: Float32Array = new Float32Array(0);
 
-    /* diagonal sweep wave of light */
-    let wavePos = -0.3;
-    const waveWidth = 0.18;
-    const waveAmp = 0.28;
-    let waveActive = true;
-    let lastWaveTime = 0;
-
     /* spotlight */
     let bx = 0, by = 0, btx = 0, bty = 0;
     let br = 0, brTarget = 0;
@@ -138,19 +131,17 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         const blue = data[i * 4 + 2];
         let a = data[i * 4 + 3] / 255;
         
-        // Treat solid white/near-white as transparent
         if (red > 235 && green > 235 && blue > 235) {
           a = 0;
         }
 
         alp[i] = a;
         
-        // Boost contrast and brightness for face recognition
         let l = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
         if (a > 0) {
-          l = (l - 0.08) / 0.84; // stretch contrast
+          l = (l - 0.08) / 0.84;
           l = Math.max(0, Math.min(1, l));
-          l = Math.pow(l, 0.72); // gamma midtone boost
+          l = Math.pow(l, 0.72);
         }
 
         lum[i] = l * a;
@@ -163,13 +154,12 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       cols = Math.max(8, Math.floor(W / cell));
       rows = Math.max(8, Math.floor(H / cell));
       
-      // Initialize a persistent dithered background noise grid (varying tones, only created on window resize)
       bgNoise = new Float32Array(cols * rows);
       for (let i = 0; i < cols * rows; i++) {
         const rand = Math.random();
-        if (rand < 0.65) bgNoise[i] = 0; // black
-        else if (rand < 0.92) bgNoise[i] = 0.06 + Math.random() * 0.08; // dark gray
-        else bgNoise[i] = 0.15 + Math.random() * 0.12; // light gray
+        if (rand < 0.65) bgNoise[i] = 0;
+        else if (rand < 0.92) bgNoise[i] = 0.06 + Math.random() * 0.08;
+        else bgNoise[i] = 0.15 + Math.random() * 0.12;
       }
 
       ({ lum: lumC, alp: alpC } = sampleGrid(cols, rows));
@@ -192,14 +182,12 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         const inset = getInset();
         const gridW = W - inset * 2;
         if (W > 900) {
-          // Desktop: center the portrait in the left 45% of the viewport width
-          const s = (H * 0.76) / shc; // scale to fit height nicely
+          const s = (H * 0.76) / shc;
           iw = swc * s;
           ih = shc * s;
           ix = inset + (gridW * 0.45 - iw) / 2;
           iy = H - ih;
         } else {
-          // Mobile: center horizontally at the bottom of the screen
           const s = Math.min(W * 0.78, H * 0.52) / shc;
           iw = swc * s;
           ih = shc * s;
@@ -215,10 +203,10 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       const d = Math.hypot(cx - bx, cy - by);
       if (d >= br) return 0;
       const f = 1 - d / br;
-      return f * f * (3 - 2 * f); // smoothstep
+      return f * f * (3 - 2 * f);
     };
 
-    const draw = () => {
+    const draw = (timeMs: number) => {
       if (!img || !cols) return;
       ctx.clearRect(0, 0, W, H);
       
@@ -233,24 +221,19 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const cy = y * c + c / 2;
           const f = falloff(cx, cy);
           
-          let size = c - 1.0; // uniform square size to align perfectly with background
+          let size = c - 1.0;
           let opacity = 0;
           let colorVal = 0;
 
-          // Calculate diagonal sweep boost
-          const diag = (x / cols + y / rows) / 2;
-          const dWave = Math.abs(diag - wavePos);
-          let waveBoost = 0;
-          if (dWave < waveWidth) {
-            const t = dWave / waveWidth;
-            waveBoost = waveAmp * (1 - t * t * (3 - 2 * t)); // smoothstep wave envelope
-          }
-
           if (alpC[i] >= 0.3) {
             // Face pixel
-            const l = lumC[i];
-            colorVal = Math.max(0, Math.min(1, l + waveBoost));
+            colorVal = lumC[i];
+            
+            // Subtle pixel-level refresh/flicker (CRT scanline drift + tiny noise)
+            const flicker = (Math.sin(timeMs * 0.0012 + x * 0.28 + y * 0.42) * 0.015) + (Math.random() - 0.5) * 0.012;
+            
             opacity = (0.08 + colorVal * 0.72) * (1 - f);
+            opacity = Math.max(0, Math.min(1, opacity + flicker));
 
             if (opacity < 0.01) continue;
             ctx.globalAlpha = opacity;
@@ -275,29 +258,19 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             const f = falloff(cx, cy);
             if (f < 0.02) continue;
 
-            let size = cf - 0.6; // uniform fine square size
+            let size = cf - 0.6;
             let opacity = 0;
             let colorVal = 0;
 
-            // Map to corresponding coarse cell index for matching background noise and wave sweeps
-            const cxIdx = Math.floor(x / 2);
-            const cyIdx = Math.floor(y / 2);
-            const cIdx = cyIdx * cols + cxIdx;
-
-            // Calculate diagonal sweep boost
-            const diag = (cxIdx / cols + cyIdx / rows) / 2;
-            const dWave = Math.abs(diag - wavePos);
-            let waveBoost = 0;
-            if (dWave < waveWidth) {
-              const t = dWave / waveWidth;
-              waveBoost = waveAmp * (1 - t * t * (3 - 2 * t));
-            }
-
             if (alpF[i] >= 0.3) {
               // Detailed face pixel
-              const l = lumF[i];
-              colorVal = Math.max(0, Math.min(1, l + waveBoost));
+              colorVal = lumF[i];
+              
+              // Subtle pixel-level refresh/flicker
+              const flicker = (Math.sin(timeMs * 0.0012 + x * 0.15 + y * 0.22) * 0.012) + (Math.random() - 0.5) * 0.008;
+
               opacity = (0.12 + colorVal * 0.78) * f;
+              opacity = Math.max(0, Math.min(1, opacity + flicker));
 
               if (opacity < 0.01) continue;
               ctx.globalAlpha = opacity;
@@ -314,34 +287,14 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     const loop = (now: number) => {
       if (destroyed) return;
 
-      // Lerp spotlight radius and coords
       const ease = 0.15;
       bx += (btx - bx) * ease;
       by += (bty - by) * ease;
       br += (brTarget - br) * ease;
-      if (Math.abs(br - brTarget) > 0.1 || (brTarget > 0 && Math.hypot(bx - btx, by - bty) > 0.5)) {
-        needsDraw = true;
-      }
+      
+      // Always redraw because of the constant subtle pixel refresh/flicker animation
+      draw(now);
 
-      // Diagonal wave sweep physics (100% path-directed movement, no random flicker)
-      if (waveActive) {
-        wavePos += 0.0035; // slow diagonal glide speed
-        if (wavePos > 1.35) {
-          waveActive = false;
-          lastWaveTime = now;
-        }
-        needsDraw = true;
-      } else {
-        if (now - lastWaveTime > 5500) { // sweep every 5.5 seconds
-          waveActive = true;
-          wavePos = -0.3; // reset off-screen left
-        }
-      }
-
-      if (needsDraw) {
-        needsDraw = false;
-        draw();
-      }
       raf = requestAnimationFrame(loop);
     };
 
