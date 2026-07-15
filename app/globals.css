@@ -4118,8 +4118,8 @@ html.past-hero .themeSwitch {
 .aboutPage__facts li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: clamp(6px, 0.47vw, 7px); /* reduced to 0.7x */
+  gap: 9px;
+  font-size: clamp(6.8px, 0.54vw, 8px); /* adjusted to 0.8x */
   font-weight: 500;
   letter-spacing: 0.18em; /* increased tracking slightly */
   text-transform: uppercase;
@@ -4128,8 +4128,8 @@ html.past-hero .themeSwitch {
 }
 
 .aboutPage__factMark {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   flex-shrink: 0;
   background: var(--purple-soft);
 }
