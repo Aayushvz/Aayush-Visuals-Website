@@ -4037,6 +4037,7 @@ html.past-hero .themeSwitch {
   grid-template-columns: 48% 52%; /* Pushes text column slightly further to the right */
   align-items: center;
   padding: 0 var(--page-content-inset); /* Safe margin inside vertical rulers */
+  padding-top: 60px; /* Visually balances text between top navbar and status bar */
   min-height: 0;
 }
 
