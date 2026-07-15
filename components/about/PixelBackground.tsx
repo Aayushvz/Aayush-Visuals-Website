@@ -3,22 +3,23 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Procedural Pixel Environment — Unified Grid & Portrait Colors
-  -------------------------------------------------------------
-  Combines continuous density with 8 drifting noise layers.
-  Uses the exact portrait image colors:
+  Procedural Pixel Environment — Dithered Grid Clusters
+  -----------------------------------------------------
+  Generates organic cloud clusters using Perlin noise.
+  Renders using a 4x4 Bayer ordered dither matrix to achieve
+  the exact checkerboard/dithered pixel texture from the user's screenshot.
+  
+  Uses the portrait's color palette:
     - Deep charcoal purple: rgb(20, 17, 24)
     - Muted lavender: rgb(124, 106, 150)
     - Warm cream: rgb(244, 241, 234)
   
-  Format:
-    - Large cloud sizes (lower scales)
-    - Increased number of clouds/layers (8 layers)
-    - Low opacity for subtle digital fog effect
-    - Grid cell size: 7px cell, 6px square
+  Grid parameters:
+    - Same 7px cell / 6px square grid as portrait.
+    - Flat shading, crisp edges (no blur).
 */
 
-// Perlin noise
+// Perlin noise permutation table
 const PERM = new Uint8Array([
   151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
   8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
@@ -56,32 +57,41 @@ function pnoise(x: number, y: number, z: number) {
              nlerp(u, grad(P[AB+1],x,y-1,z-1), grad(P[BB+1],x-1,y-1,z-1))));
 }
 
+// 3-octave fBm
 function fbm(x: number, y: number, z: number) {
   return (
     pnoise(x, y, z) * 0.5 +
-    pnoise(x * 2, y * 2, z) * 0.25 +
-    pnoise(x * 4, y * 4, z) * 0.125 +
-    pnoise(x * 8, y * 8, z) * 0.0625
-  ) / 0.9375;
+    pnoise(x * 2, y * 2, z) * 0.3 +
+    pnoise(x * 4, y * 4, z) * 0.2
+  );
 }
 
 const CELL = 7;
 const SQ = CELL - 1;
 
-// Image animation colors:
-// Stop 0: Deep charcoal purple (20, 17, 24)
-// Stop 1: Muted lavender       (124, 106, 150)
-// Stop 2: Warm cream           (244, 241, 234)
-function getLayerColor(intensity: number): [number, number, number] {
-  if (intensity < 0.6) {
-    const t = intensity / 0.6;
+// 4x4 Bayer Ordered Dither Matrix
+const BAYER_4x4 = [
+  [ 0.0625, 0.5625, 0.1875, 0.6875 ],
+  [ 0.8125, 0.3125, 0.9375, 0.4375 ],
+  [ 0.2500, 0.7500, 0.1250, 0.6250 ],
+  [ 1.0000, 0.5000, 0.8750, 0.3750 ]
+];
+
+// Color mapping matching image stops
+function getDitherColor(intensity: number): [number, number, number] {
+  // Map intensity (0..1) to portrait palette
+  // Stop 0: Deep charcoal purple (20, 17, 24)
+  // Stop 1: Muted lavender (124, 106, 150)
+  // Stop 2: Warm cream (244, 241, 234)
+  if (intensity < 0.55) {
+    const t = intensity / 0.55;
     return [
       20 + t * (124 - 20),
       17 + t * (106 - 17),
       24 + t * (150 - 24)
     ];
   } else {
-    const t = (intensity - 0.6) / 0.4;
+    const t = (intensity - 0.55) / 0.45;
     return [
       124 + t * (244 - 124),
       106 + t * (241 - 106),
@@ -90,14 +100,17 @@ function getLayerColor(intensity: number): [number, number, number] {
   }
 }
 
-type Layer = {
-  scale: number;      // scale factor (smaller = larger cloud size)
+type Cloud = {
+  scale: number;       // noise frequency (smaller = larger cloud size)
   speedX: number;
   speedY: number;
   zSeed: number;
-  threshold: number;  // lower = more dense coverage
-  opacity: number;    // transparency (subtle)
-  toneIntensity: number; // 0 (charcoal) to 1 (cream)
+  cx: number;          // relative X center position (0-1)
+  cy: number;          // relative Y center position (0-1)
+  radius: number;      // cloud radius in pixels
+  parallax: number;    // pointer parallax multiplier
+  maxIntensity: number;// peak color intensity (0-1)
+  opacity: number;     // base opacity
 };
 
 export default function PixelBackground() {
@@ -134,27 +147,22 @@ export default function PixelBackground() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     resize();
 
-    // 8 layers — larger sizes (lower scales) and higher number of layers
-    const layers: Layer[] = [
-      // Deep undertones (charcoal-purple, very large, slow)
-      { scale: 0.002, speedX: 0.005, speedY: 0.003, zSeed: 3.7,  threshold: 0.28, opacity: 0.32, toneIntensity: 0.02 },
-      { scale: 0.003, speedX: 0.007, speedY: 0.005, zSeed: 12.1, threshold: 0.32, opacity: 0.28, toneIntensity: 0.08 },
-      { scale: 0.004, speedX: 0.010, speedY: 0.007, zSeed: 24.5, threshold: 0.36, opacity: 0.24, toneIntensity: 0.16 },
-      // Lavender midtones (larger cloud sizes)
-      { scale: 0.006, speedX: 0.012, speedY: 0.009, zSeed: 38.9, threshold: 0.40, opacity: 0.20, toneIntensity: 0.28 },
-      { scale: 0.008, speedX: 0.015, speedY: 0.011, zSeed: 53.4, threshold: 0.44, opacity: 0.18, toneIntensity: 0.40 },
-      { scale: 0.011, speedX: 0.018, speedY: 0.013, zSeed: 67.2, threshold: 0.48, opacity: 0.15, toneIntensity: 0.52 },
-      // Light lavender details
-      { scale: 0.015, speedX: 0.022, speedY: 0.016, zSeed: 81.6, threshold: 0.52, opacity: 0.12, toneIntensity: 0.64 },
-      // Cream highlight touches (fastest, sparsest)
-      { scale: 0.020, speedX: 0.026, speedY: 0.019, zSeed: 95.3, threshold: 0.56, opacity: 0.08, toneIntensity: 0.76 },
+    // 8 drifting clouds with large sizes (low scales) and portrait-matched attributes
+    const clouds: Cloud[] = [
+      { scale: 0.003, speedX: 0.006, speedY: 0.004, zSeed: 10.3, cx: 0.15, cy: 0.20, radius: 480, parallax: 6,  maxIntensity: 0.65, opacity: 0.28 },
+      { scale: 0.004, speedX: 0.009, speedY: 0.006, zSeed: 28.7, cx: 0.85, cy: 0.15, radius: 450, parallax: 10, maxIntensity: 0.80, opacity: 0.24 },
+      { scale: 0.002, speedX: 0.004, speedY: 0.003, zSeed: 45.1, cx: 0.50, cy: 0.55, radius: 580, parallax: 8,  maxIntensity: 0.50, opacity: 0.32 },
+      { scale: 0.005, speedX: 0.012, speedY: 0.008, zSeed: 63.4, cx: 0.08, cy: 0.80, radius: 380, parallax: 16, maxIntensity: 0.90, opacity: 0.20 },
+      { scale: 0.0035,speedX: 0.008, speedY: 0.005, zSeed: 81.9, cx: 0.92, cy: 0.75, radius: 420, parallax: 12, maxIntensity: 0.70, opacity: 0.26 },
+      { scale: 0.0045,speedX: 0.011, speedY: 0.007, zSeed: 33.6, cx: 0.60, cy: 0.10, radius: 400, parallax: 14, maxIntensity: 0.85, opacity: 0.22 },
+      { scale: 0.0025,speedX: 0.005, speedY: 0.004, zSeed: 57.2, cx: 0.35, cy: 0.45, radius: 520, parallax: 7,  maxIntensity: 0.55, opacity: 0.30 },
+      { scale: 0.006, speedX: 0.015, speedY: 0.010, zSeed: 89.4, cx: 0.75, cy: 0.85, radius: 360, parallax: 18, maxIntensity: 0.95, opacity: 0.18 }
     ];
 
-    // Portrait suppression center
+    // Portrait suppression coordinates (left 45% column)
     const portraitCX = 0.28;
     const portraitCY = 0.62;
 
-    // Color string cache to optimize rendering performance
     const colorCache = new Map<number, string>();
     function getCachedColor(r: number, g: number, b: number): string {
       const key = (r << 16) | (g << 8) | b;
@@ -172,7 +180,7 @@ export default function PixelBackground() {
 
       ctx.clearRect(0, 0, W, H);
 
-      // Base black background matches portrait shadow stop
+      // Deep dark background
       ctx.fillStyle = "#090909";
       ctx.fillRect(0, 0, W, H);
 
@@ -186,50 +194,68 @@ export default function PixelBackground() {
           const cellX = gx * CELL;
           const nx2 = cellX / W;
 
-          // Portrait suppression mask (40% suppression around portrait)
+          // Calculate portrait suppression mask
           const dpx = nx2 - portraitCX;
           const dpy = ny - portraitCY;
           const portraitDist = Math.sqrt(dpx * dpx + dpy * dpy);
-          const vcx = nx2 - 0.5;
-          const vcy = ny - 0.5;
-          const centerDist = Math.sqrt(vcx * vcx + vcy * vcy);
-
           let mask = 1.0;
-          if (portraitDist < 0.40) {
-            const f = portraitDist / 0.40;
+          if (portraitDist < 0.42) {
+            const f = portraitDist / 0.42;
             mask = f * f;
           }
-          if (centerDist > 0.30) {
-            mask = Math.min(1.0, mask + (centerDist - 0.30) * 0.5);
+
+          // Accumulate density across the drifting clouds
+          let maxD = 0;
+          let activeOpacity = 0;
+
+          for (const cloud of clouds) {
+            // Drift + parallax offset
+            const driftX = t * cloud.speedX;
+            const driftY = t * cloud.speedY;
+            const px = mx * cloud.parallax;
+            const py = my * cloud.parallax;
+            const ccx = cloud.cx * W + px;
+            const ccy = cloud.cy * H + py;
+
+            const dx = cellX - ccx;
+            const dy = cellY - ccy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < cloud.radius) {
+              const falloff = 1 - dist / cloud.radius;
+              const n = fbm(
+                (cellX + driftX * W) * cloud.scale,
+                (cellY + driftY * H) * cloud.scale,
+                cloud.zSeed
+              );
+              // Normalize noise to [0, 1]
+              const nv = (n + 1) * 0.5;
+              const density = falloff * nv * cloud.maxIntensity;
+
+              if (density > maxD) {
+                maxD = density;
+                activeOpacity = cloud.opacity;
+              }
+            }
           }
 
-          // Render layers — darkest/largest to brightest/smallest
-          for (const layer of layers) {
-            const driftX = t * layer.speedX;
-            const driftY = t * layer.speedY;
+          // Apply portrait suppression mask
+          maxD *= mask;
 
-            // Parallax offset applied to grid coordinates
-            const sampleX = (cellX + mx * 12) * layer.scale + driftX;
-            const sampleY = (cellY + my * 12) * layer.scale + driftY;
+          if (maxD <= 0.01) continue;
 
-            const n = fbm(sampleX, sampleY, layer.zSeed);
-            const nv = (n + 1) * 0.5;
+          // Ordered dithering check using Bayer 4x4 matrix
+          const ditherThreshold = BAYER_4x4[gy % 4][gx % 4];
+          if (maxD < ditherThreshold) continue;
 
-            // Shift threshold based on the suppression mask
-            const thresh = layer.threshold + (1 - mask) * 0.35;
+          // Determine color based on density intensity
+          const [r, g, b] = getDitherColor(maxD);
+          const ri = Math.round(r), gi = Math.round(g), bi = Math.round(b);
 
-            if (nv <= thresh) continue;
-
-            const intensity = Math.min(1, (nv - thresh) / (1 - thresh));
-            const tone = layer.toneIntensity + intensity * 0.12;
-            const [r, g, b] = getLayerColor(Math.min(1, tone));
-            const ri = Math.round(r), gi = Math.round(g), bi = Math.round(b);
-
-            ctx.globalAlpha = layer.opacity * (0.45 + intensity * 0.55);
-            ctx.fillStyle = getCachedColor(ri, gi, bi);
-            ctx.fillRect(cellX, cellY, SQ, SQ);
-            break; // Topmost visible layer handles this pixel grid cell
-          }
+          // Alpha fade maps to density step
+          ctx.globalAlpha = activeOpacity * (0.5 + maxD * 0.5);
+          ctx.fillStyle = getCachedColor(ri, gi, bi);
+          ctx.fillRect(cellX, cellY, SQ, SQ);
         }
       }
 
