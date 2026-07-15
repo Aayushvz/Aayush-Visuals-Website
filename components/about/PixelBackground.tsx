@@ -202,7 +202,7 @@ export default function PixelBackground() {
       }
 
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#090909";
+      ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(0, 0, W, H);
 
       const cols = Math.ceil(W / CELL);

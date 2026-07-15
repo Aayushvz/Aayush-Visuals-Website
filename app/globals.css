@@ -3948,7 +3948,7 @@ html.past-hero .themeSwitch {
   flex-direction: column;
   /* exactly the PixelBackground canvas fill — any uncovered edge or
      overscroll reads as the same surface */
-  background: #090909;
+  background: #1a1a1a;
   color: #f4f1ea;
   overflow: hidden;
   font-family: var(--font-primary);
