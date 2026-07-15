@@ -4094,7 +4094,7 @@ html.past-hero .themeSwitch {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   line-height: 1.5;
-  color: rgba(244, 241, 234, 0.92);
+  color: var(--purple-soft); /* single line in purple shade */
 }
 
 .aboutPage__roleAmp {
@@ -4149,15 +4149,15 @@ html.past-hero .themeSwitch {
   padding: 0;
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  gap: 28px;
+  flex-wrap: nowrap; /* strictly single line on desktop */
+  gap: clamp(16px, 2.2vw, 38px);
 }
 
 .aboutPage__facts li {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: clamp(10px, 0.8vw, 12px);
+  font-size: clamp(9px, 0.72vw, 10.5px); /* reduced size to fit nicely */
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -4178,7 +4178,7 @@ html.past-hero .themeSwitch {
   position: relative;
   align-self: stretch;
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* Rest exactly on bottom status bar */
   justify-content: center;
   min-height: 0;
 }

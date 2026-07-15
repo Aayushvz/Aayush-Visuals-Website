@@ -29,8 +29,7 @@ const META_LINE = ["Product Design", "UI / UX", "Design Systems", "Creative Deve
 const FACTS = [
   "4+ years designing digital products",
   "30+ projects shipped",
-  "Product • Brand • Motion",
-  "Open for full-time offers",
+  "Open for full-time offer",
 ];
 
 export default function AboutPageClient() {
@@ -76,15 +75,6 @@ export default function AboutPageClient() {
       <div className="aboutPage__vignette" aria-hidden />
       <div className="aboutPage__grain" aria-hidden />
 
-      <div className="aboutPage__top">
-        <PageLink href="/" className="aboutPage__logo">
-          aayush<sup>vz</sup>
-        </PageLink>
-        <PageLink href="/" className="aboutPage__back">
-          ← Back to home
-        </PageLink>
-      </div>
-
       <main className="aboutPage__main">
         {/* portrait first in DOM, under the typography */}
         <div className="aboutPage__right" data-enter style={{ "--d": "0.28s" } as React.CSSProperties}>
@@ -94,9 +84,7 @@ export default function AboutPageClient() {
         <div className="aboutPage__left">
           <div>
             <p className="aboutPage__role" data-enter style={{ "--d": "0.05s" } as React.CSSProperties}>
-              Product Designer
-              <br />
-              <span className="aboutPage__roleAmp">&amp;</span> Design Engineer
+              Product Designer &amp; Design Engineer
             </p>
             <p className="aboutPage__meta" data-enter style={{ "--d": "0.13s" } as React.CSSProperties}>
               {META_LINE.map((m, i) => (

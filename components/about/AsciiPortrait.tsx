@@ -129,12 +129,27 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       const lum = new Float32Array(c * r);
       const alp = new Float32Array(c * r);
       for (let i = 0; i < c * r; i++) {
-        const a = data[i * 4 + 3] / 255;
+        const red = data[i * 4];
+        const green = data[i * 4 + 1];
+        const blue = data[i * 4 + 2];
+        let a = data[i * 4 + 3] / 255;
+        
+        // Treat solid white/near-white as transparent
+        if (red > 235 && green > 235 && blue > 235) {
+          a = 0;
+        }
+
         alp[i] = a;
-        lum[i] =
-          ((0.2126 * data[i * 4] + 0.7152 * data[i * 4 + 1] + 0.0722 * data[i * 4 + 2]) /
-            255) *
-          a;
+        
+        // Boost contrast and brightness for face recognition
+        let l = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+        if (a > 0) {
+          l = (l - 0.12) / 0.78; // stretch contrast
+          l = Math.max(0, Math.min(1, l));
+          l = Math.pow(l, 0.76); // gamma midtone boost
+        }
+
+        lum[i] = l * a;
       }
       return { lum, alp };
     };
@@ -195,15 +210,27 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
           const i = y * cols + x;
-          if (alpC[i] < 0.3) continue;
-          let idx = rampIdx(lumC[i], 0);
-          if (alpC[i] > 0.6) idx = Math.max(1, idx);
-          const j = jitter.get(i);
-          if (j) idx = Math.max(1, Math.min(RAMP.length - 1, idx + j));
-          if (idx === 0) continue;
           const f = falloff(x * c + c / 2, y * c + c / 2);
-          const a = (0.26 + lumC[i] * 0.58) * (1 - f);
-          if (a < 0.015) continue;
+          
+          let idx = 0;
+          let a = 0.06; // background grid density
+
+          if (alpC[i] >= 0.3) {
+            // Draw face/body
+            idx = rampIdx(lumC[i], 0);
+            if (alpC[i] > 0.6) idx = Math.max(1, idx);
+            const j = jitter.get(i);
+            if (j) idx = Math.max(1, Math.min(RAMP.length - 1, idx + j));
+            a = (0.24 + lumC[i] * 0.58) * (1 - f);
+          } else {
+            // Background noise grid
+            idx = ((x + y) % 3 === 0) ? 1 : 0; // occasional dot "."
+            const j = jitter.get(i);
+            if (j && idx > 0) idx = Math.max(0, idx + j);
+            a = 0.07 * (1 - f);
+          }
+
+          if (idx === 0 || a < 0.015) continue;
           ctx.globalAlpha = a;
           ctx.drawImage(atlasC, idx * acC, 0, acC, acC, x * c, y * c, c, c);
         }
@@ -220,14 +247,23 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         for (let y = y0; y <= y1; y++) {
           for (let x = x0; x <= x1; x++) {
             const i = y * colsF + x;
-            if (alpF[i] < 0.3) continue;
             const f = falloff(x * cf + cf / 2, y * cf + cf / 2);
             if (f < 0.02) continue;
-            let idx = rampIdx(lumF[i], f);
-            if (alpF[i] > 0.6) idx = Math.max(1, idx);
-            if (idx === 0) continue;
-            const a = (0.34 + lumF[i] * 0.66) * f;
-            if (a < 0.015) continue;
+
+            let idx = 0;
+            let a = 0;
+
+            if (alpF[i] >= 0.3) {
+              idx = rampIdx(lumF[i], f);
+              if (alpF[i] > 0.6) idx = Math.max(1, idx);
+              a = (0.34 + lumF[i] * 0.66) * f;
+            } else {
+              // Background spotlight grid: draw fine sharp dots/crosses
+              idx = ((x + y) % 4 === 0) ? 1 : 0;
+              a = 0.12 * f;
+            }
+
+            if (idx === 0 || a < 0.015) continue;
             ctx.globalAlpha = a;
             ctx.drawImage(atlasF, idx * acF, 0, acF, acF, x * cf, y * cf, cf, cf);
           }
@@ -323,7 +359,17 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       let minX = scanW, minY = scanH, maxX = 0, maxY = 0;
       for (let y = 0; y < scanH; y++) {
         for (let x = 0; x < scanW; x++) {
-          if (pd[(y * scanW + x) * 4 + 3] > 24) {
+          const idx = (y * scanW + x) * 4;
+          const rVal = pd[idx];
+          const gVal = pd[idx + 1];
+          const bVal = pd[idx + 2];
+          let aVal = pd[idx + 3];
+          
+          if (rVal > 235 && gVal > 235 && bVal > 235) {
+            aVal = 0;
+          }
+
+          if (aVal > 24) {
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;
             if (y < minY) minY = y;
