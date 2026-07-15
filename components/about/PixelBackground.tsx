@@ -11,14 +11,15 @@ import { useEffect, useRef } from "react";
     3. Interactive hover spotlight that increases density and brightens pixels
        locally around the pointer on the unified grid.
   
-  Renders both on a unified 7px cell / 6px square grid using a 4x4 Bayer dither matrix
-  and the portrait color palette:
-    - Deep charcoal purple: rgb(20, 17, 24)
-    - Muted lavender: rgb(124, 106, 150)
-    - Warm cream: rgb(244, 241, 234)
+  Grayscale/monochrome palette with subtle purple highlights toned down.
+  Maximum brightness and density of spotlight are capped to ensure premium look.
+  
+  Grid parameters:
+    - Same 7px cell / 6px square grid as portrait.
+    - Flat shading, crisp edges (no blur).
 */
 
-// Perlin noise
+// Perlin noise permutation table
 const PERM = new Uint8Array([
   151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
   8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
@@ -152,14 +153,14 @@ export default function PixelBackground() {
 
     // 8 drifting clouds with large sizes (low scales) and portrait-matched attributes
     const clouds: Cloud[] = [
-      { scale: 0.003, speedX: 0.006, speedY: 0.004, zSeed: 10.3, cx: 0.15, cy: 0.20, radius: 480, parallax: 6,  maxIntensity: 0.65, opacity: 0.28 },
-      { scale: 0.004, speedX: 0.009, speedY: 0.006, zSeed: 28.7, cx: 0.85, cy: 0.15, radius: 450, parallax: 10, maxIntensity: 0.80, opacity: 0.24 },
-      { scale: 0.002, speedX: 0.004, speedY: 0.003, zSeed: 45.1, cx: 0.50, cy: 0.55, radius: 580, parallax: 8,  maxIntensity: 0.50, opacity: 0.32 },
-      { scale: 0.005, speedX: 0.012, speedY: 0.008, zSeed: 63.4, cx: 0.08, cy: 0.80, radius: 380, parallax: 16, maxIntensity: 0.90, opacity: 0.20 },
-      { scale: 0.0035,speedX: 0.008, speedY: 0.005, zSeed: 81.9, cx: 0.92, cy: 0.75, radius: 420, parallax: 12, maxIntensity: 0.70, opacity: 0.26 },
-      { scale: 0.0045,speedX: 0.011, speedY: 0.007, zSeed: 33.6, cx: 0.60, cy: 0.10, radius: 400, parallax: 14, maxIntensity: 0.85, opacity: 0.22 },
-      { scale: 0.0025,speedX: 0.005, speedY: 0.004, zSeed: 57.2, cx: 0.35, cy: 0.45, radius: 520, parallax: 7,  maxIntensity: 0.55, opacity: 0.30 },
-      { scale: 0.006, speedX: 0.015, speedY: 0.010, zSeed: 89.4, cx: 0.75, cy: 0.85, radius: 360, parallax: 18, maxIntensity: 0.95, opacity: 0.18 }
+      { scale: 0.003, speedX: 0.006, speedY: 0.004, zSeed: 10.3, cx: 0.15, cy: 0.20, radius: 480, parallax: 6,  maxIntensity: 0.50, opacity: 0.22 },
+      { scale: 0.004, speedX: 0.009, speedY: 0.006, zSeed: 28.7, cx: 0.85, cy: 0.15, radius: 450, parallax: 10, maxIntensity: 0.60, opacity: 0.18 },
+      { scale: 0.002, speedX: 0.004, speedY: 0.003, zSeed: 45.1, cx: 0.50, cy: 0.55, radius: 580, parallax: 8,  maxIntensity: 0.40, opacity: 0.24 },
+      { scale: 0.005, speedX: 0.012, speedY: 0.008, zSeed: 63.4, cx: 0.08, cy: 0.80, radius: 380, parallax: 16, maxIntensity: 0.65, opacity: 0.15 },
+      { scale: 0.0035,speedX: 0.008, speedY: 0.005, zSeed: 81.9, cx: 0.92, cy: 0.75, radius: 420, parallax: 12, maxIntensity: 0.55, opacity: 0.20 },
+      { scale: 0.0045,speedX: 0.011, speedY: 0.007, zSeed: 33.6, cx: 0.60, cy: 0.10, radius: 400, parallax: 14, maxIntensity: 0.62, opacity: 0.16 },
+      { scale: 0.0025,speedX: 0.005, speedY: 0.004, zSeed: 57.2, cx: 0.35, cy: 0.45, radius: 520, parallax: 7,  maxIntensity: 0.45, opacity: 0.22 },
+      { scale: 0.006, speedX: 0.015, speedY: 0.010, zSeed: 89.4, cx: 0.75, cy: 0.85, radius: 360, parallax: 18, maxIntensity: 0.70, opacity: 0.14 }
     ];
 
     // Portrait suppression coordinates
@@ -216,15 +217,15 @@ export default function PixelBackground() {
             mask = f * f;
           }
 
-          // Pointer hover spotlight math
+          // Pointer hover spotlight math — reduced radius
           const hdx = cellX - lpx;
           const hdy = cellY - lpy;
           const hoverDist = Math.sqrt(hdx * hdx + hdy * hdy);
-          const spotlightRadius = 220;
+          const spotlightRadius = 150;
           let hoverBoost = 0;
           if (hoverDist < spotlightRadius) {
             const hf = 1 - hoverDist / spotlightRadius;
-            hoverBoost = hf * hf * (3 - 2 * hf); // smoothstep envelope
+            hoverBoost = hf * hf * (3 - 2 * hf);
           }
 
           // 1. Baseline continuous infinite noise field (slow, morphing digital fog)
@@ -238,11 +239,11 @@ export default function PixelBackground() {
           );
           const baseNv = (baseN + 1) * 0.5;
           // Very low density baseline
-          const baseDensity = Math.max(0, baseNv - 0.46) * 0.28;
+          const baseDensity = Math.max(0, baseNv - 0.48) * 0.20;
 
           // 2. Cloud clusters density
           let clusterD = 0;
-          let activeOpacity = 0.12;
+          let activeOpacity = 0.08;
 
           for (const cloud of clouds) {
             const driftX = t * cloud.speedX;
@@ -276,9 +277,9 @@ export default function PixelBackground() {
           // Combine baseline fog and cluster density
           let finalD = Math.max(baseDensity, clusterD);
 
-          // Boost density within the hover spotlight region
+          // Boost density within the hover spotlight region — reduced boost
           if (hoverBoost > 0) {
-            finalD = Math.min(1.0, finalD + hoverBoost * 0.35);
+            finalD = Math.min(1.0, finalD + hoverBoost * 0.08);
           }
 
           // Apply portrait suppression mask
@@ -290,14 +291,14 @@ export default function PixelBackground() {
           const ditherThreshold = BAYER_4x4[gy % 4][gx % 4];
           if (finalD < ditherThreshold) continue;
 
-          // Interpolated color stops (boosted locally in spotlight to cream highlights)
-          const toneVal = Math.min(1.0, finalD + hoverBoost * 0.18);
+          // Tone value capped at 0.45 to keep spotlight color subtle (no warm cream stops)
+          const toneVal = Math.min(0.45, finalD * 0.5 + hoverBoost * 0.12);
           const [r, g, b] = getDitherColor(toneVal);
           const ri = Math.round(r), gi = Math.round(g), bi = Math.round(b);
 
-          // Set opacity (hover spotlight brightens and solidifies the pixels)
-          const baseOpacity = finalD === baseDensity ? 0.08 : activeOpacity;
-          const op = Math.min(0.85, baseOpacity * (0.4 + finalD * 0.6) + hoverBoost * 0.38);
+          // Set opacity — lowered maximum opacity cap to 0.28 for high subtlety
+          const baseOpacity = finalD === baseDensity ? 0.05 : activeOpacity;
+          const op = Math.min(0.28, baseOpacity * (0.4 + finalD * 0.6) + hoverBoost * 0.10);
 
           ctx.globalAlpha = op;
           ctx.fillStyle = getCachedColor(ri, gi, bi);
