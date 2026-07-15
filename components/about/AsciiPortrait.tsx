@@ -188,11 +188,11 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           ix = inset + (gridW * 0.45 - iw) / 2;
           iy = H - ih;
         } else {
-          const s = Math.min(W * 0.78, H * 0.52) / shc;
+          const s = Math.min(W * 0.90, H * 0.58) / shc;
           iw = swc * s;
           ih = shc * s;
           ix = (W - iw) / 2;
-          iy = H - ih;
+          iy = H - ih - 52;
         }
         resample();
       }
