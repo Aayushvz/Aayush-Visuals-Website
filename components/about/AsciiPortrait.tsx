@@ -51,14 +51,14 @@ const getPixelColor = (l: number, isHover: boolean) => {
   } else {
     // Fine spotlight stops:
     // Stop 0 (Deep black purple shadow): #12091f (18, 9, 31)
-    // Stop 1 (Rich violet midtone): #6d28d9 (109, 40, 217)
-    // Stop 2 (Bright lavender highlight): #a78bfa (167, 139, 250)
+    // Stop 1 (Bright lavender accent): #a78bfa (167, 139, 250)
+    // Stop 2 (Warm cream highlight): #f4f1ea (244, 241, 234)
     if (l < 0.5) {
       const t = l / 0.5;
-      ({ r, g, b } = lerpColor(18, 9, 31, 109, 40, 217, t));
+      ({ r, g, b } = lerpColor(18, 9, 31, 167, 139, 250, t));
     } else {
       const t = (l - 0.5) / 0.5;
-      ({ r, g, b } = lerpColor(109, 40, 217, 167, 139, 250, t));
+      ({ r, g, b } = lerpColor(167, 139, 250, 244, 241, 234, t));
     }
   }
   return `rgb(${r},${g},${b})`;
