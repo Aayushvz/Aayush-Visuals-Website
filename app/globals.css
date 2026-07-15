@@ -2634,27 +2634,31 @@ html.past-hero .themeSwitch {
     margin-bottom: 0;
   }
 
-  /* Mobile CTA pill — pushed to bottom via margin-top: auto */
+  /* Mobile CTA pill — premium Apple glass effect */
   .projTile__mobileCta {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     padding: 7px 15px;
-    border: 1px solid rgba(31, 31, 31, 0.22);
+    border: 1px solid rgba(31, 31, 31, 0.13);
     border-radius: 999px;
     font-size: 10.5px;
     font-weight: 500;
     letter-spacing: 0.03em;
     color: var(--ink);
-    background: transparent;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    background: rgba(255, 255, 255, 0.52);
+    -webkit-backdrop-filter: blur(12px) saturate(1.8);
+    backdrop-filter: blur(12px) saturate(1.8);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     margin-top: auto;
     margin-bottom: 22px;
   }
 
   .projTile:active .projTile__mobileCta {
-    background: rgba(31, 31, 31, 0.06);
-    border-color: rgba(31, 31, 31, 0.4);
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(31, 31, 31, 0.22);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   /* Kill all hover states on touch — nothing to hover */
@@ -3784,7 +3788,7 @@ html.past-hero .themeSwitch {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 45; /* above global fixed .rails (z-index 40) to layer white lines on top */
 }
 
 .capRail {
@@ -3792,8 +3796,8 @@ html.past-hero .themeSwitch {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--cream);
-  opacity: 0.15;
+  background: #FFFDF9; /* crisp white */
+  opacity: 0.38;
 }
 
 .capRail--left {
@@ -3930,4 +3934,409 @@ html.past-hero .themeSwitch {
 
 .mobileNavCard__close:active {
   opacity: 0.5;
+}
+
+/* ==================== /about page ====================
+   Fully page-scoped (.aboutPage*) — shares the site's tokens and rail
+   geometry but is ALWAYS dark (#1a1a1a) regardless of the hero theme
+   toggle, so no reactive --hero-* tokens are used here. */
+
+.aboutPage {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  /* the statement section's micro-dot grid, page-wide */
+  background-image: radial-gradient(rgba(244, 241, 234, 0.055) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: #f4f1ea;
+  overflow: hidden;
+}
+
+/* same geometry as the global .rails, page-local so the light-section
+   hairline colour never leaks in */
+.aboutPage__rails {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.aboutPage__rails::before,
+.aboutPage__rails::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(244, 241, 234, 0.12);
+}
+
+.aboutPage__rails::before {
+  left: var(--page-rail-inset);
+}
+
+.aboutPage__rails::after {
+  right: var(--page-rail-inset);
+}
+
+/* ~2% animated film grain — steps() jumps the noise tile so it never
+   reads as a slide, GPU-cheap (background-position only) */
+.aboutPage__grain {
+  position: fixed;
+  inset: -100px;
+  pointer-events: none;
+  z-index: 90;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: aboutGrain 0.9s steps(6) infinite;
+}
+
+/* Faded pixel grid overlay, centered vignette */
+.aboutPage__pixels {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 41;
+  background-image:
+    linear-gradient(0deg, transparent 24%, rgba(244, 241, 234, 0.015) 25%, rgba(244, 241, 234, 0.015) 26%, transparent 27%, transparent 74%, rgba(244, 241, 234, 0.015) 75%, rgba(244, 241, 234, 0.015) 76%, transparent 77%),
+    linear-gradient(90deg, transparent 24%, rgba(244, 241, 234, 0.015) 25%, rgba(244, 241, 234, 0.015) 26%, transparent 27%, transparent 74%, rgba(244, 241, 234, 0.015) 75%, rgba(244, 241, 234, 0.015) 76%, transparent 77%);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+}
+
+.aboutPage__vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 48;
+  background: radial-gradient(circle, transparent 20%, rgba(20, 20, 20, 0.4) 100%);
+}
+
+@keyframes aboutGrain {
+  0% { background-position: 0 0; }
+  100% { background-position: 160px 96px; }
+}
+
+/* -------- top chrome -------- */
+
+.aboutPage__top {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px var(--page-content-inset) 0;
+}
+
+.aboutPage__logo {
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  color: #f4f1ea;
+}
+
+.aboutPage__logo sup {
+  color: var(--purple-soft);
+  font-size: 10px;
+}
+
+.aboutPage__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.55);
+  transition: color 0.3s ease, gap 0.3s ease;
+}
+
+.aboutPage__back:hover {
+  color: #f4f1ea;
+  gap: 11px;
+}
+
+/* -------- main two-column composition -------- */
+
+.aboutPage__main {
+  position: relative;
+  z-index: 45;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 55% 45%;
+  align-items: center;
+  padding: 0 var(--page-content-inset);
+  min-height: 0;
+}
+
+.aboutPage__left {
+  display: flex;
+  flex-direction: column;
+  padding: 4vh 0 6vh;
+}
+
+.aboutPage__role {
+  margin: 0;
+  font-size: clamp(15px, 1.4vw, 20px);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: rgba(244, 241, 234, 0.92);
+}
+
+.aboutPage__roleAmp {
+  color: var(--purple-soft);
+}
+
+.aboutPage__meta {
+  margin: 14px 0 0;
+  font-size: clamp(10px, 0.85vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.6);
+}
+
+.aboutPage__metaDot {
+  font-style: normal;
+  color: var(--purple-soft);
+  padding: 0 6px;
+}
+
+.aboutPage__name {
+  margin: clamp(24px, 5vh, 52px) 0 0;
+  font-stretch: 125%;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.92;
+  font-size: clamp(64px, 9.5vw, 158px);
+  color: #f4f1ea;
+}
+
+.aboutPage__namePeriod {
+  color: var(--purple);
+}
+
+.aboutPage__facts {
+  list-style: none;
+  margin: clamp(28px, 6vh, 60px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.aboutPage__facts li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(11px, 0.9vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.78);
+}
+
+.aboutPage__factMark {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  background: var(--purple-soft);
+}
+
+/* -------- portrait column -------- */
+
+.aboutPage__right {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.aboutPage__portrait {
+  position: relative;
+  width: 100%;
+  max-width: 42vw;
+  height: min(72svh, 46vw);
+  animation: aboutPortraitFloat 9s ease-in-out infinite;
+}
+
+@keyframes aboutPortraitFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+.aboutPage__portraitCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  filter: drop-shadow(0 26px 28px rgba(0, 0, 0, 0.11));
+  will-change: transform;
+}
+
+/* -------- entrance choreography -------- */
+
+[data-enter] {
+  opacity: 0;
+  translate: 0 22px;
+  animation: aboutEnter 0.85s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) forwards;
+}
+
+@keyframes aboutEnter {
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* -------- status bar -------- */
+
+.aboutPage__bar {
+  position: relative;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 13px var(--page-content-inset);
+  border-top: 1px solid rgba(244, 241, 234, 0.1);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.aboutPage__barGroup {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 40px);
+  min-width: 0;
+}
+
+.aboutPage__barGroup--center {
+  justify-content: center;
+}
+
+.aboutPage__barGroup--right {
+  justify-content: flex-end;
+}
+
+.aboutPage__barCell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.aboutPage__barKey {
+  color: rgba(244, 241, 234, 0.42);
+}
+
+.aboutPage__barVal {
+  color: rgba(244, 241, 234, 0.88);
+  font-variant-numeric: tabular-nums;
+}
+
+.aboutPage__barVal--status {
+  color: var(--purple-soft);
+  animation: aboutStatusIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes aboutStatusIn {
+  from {
+    opacity: 0;
+    translate: 0 5px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.aboutPage__barSection {
+  color: rgba(244, 241, 234, 0.55);
+}
+
+/* -------- responsive -------- */
+
+@media (max-width: 900px) {
+  .aboutPage__main {
+    grid-template-columns: 1fr;
+    align-items: start;
+    padding-top: 4vh;
+  }
+
+  .aboutPage__left {
+    padding: 2vh 0 0;
+  }
+
+  .aboutPage__right {
+    align-self: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .aboutPage__portrait {
+    max-width: min(78vw, 460px);
+    height: min(56svh, 92vw);
+  }
+
+  .aboutPage__name {
+    font-size: clamp(56px, 15vw, 110px);
+  }
+}
+
+@media (max-width: 640px) {
+  .aboutPage__top {
+    padding-top: 20px;
+  }
+
+  .aboutPage__facts {
+    gap: 11px;
+  }
+
+  /* touch has no cursor — drop CRSR and the centre section label */
+  .aboutPage__barCell--crsr,
+  .aboutPage__barGroup--center {
+    display: none;
+  }
+
+  .aboutPage__bar {
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    padding-top: 11px;
+    padding-bottom: max(11px, env(safe-area-inset-bottom));
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aboutPage__grain,
+  .aboutPage__portrait {
+    animation: none;
+  }
+
+  [data-enter] {
+    animation: none;
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .aboutPage__barVal--status {
+    animation: none;
+  }
 }

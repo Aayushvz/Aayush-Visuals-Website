@@ -1,25 +1,42 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import PageLink from "./PageLink";
+
+/*
+  Same glass pill, now route-aware: HOME and ABOUT are real pages (the
+  purple aria-current state follows the pathname), WORKS and CONTACT
+  remain homepage anchors that also work from subpages via /#hash.
+  Navigation between pages goes through PageLink's cinematic transition.
+*/
+
 const links = [
-  { label: "Home", href: "#top", current: true },
-  { label: "About", href: "#about", current: false },
-  { label: "Works", href: "#work", current: false },
-  { label: "Contact Us", href: "#contact", current: false },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Works", href: "/#work" },
+  { label: "Contact Us", href: "/#contact" },
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  const isCurrent = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href;
+
   return (
     <header className="navbar">
-      <a href="#top" className="navbar__logo">
+      <PageLink href="/" className="navbar__logo">
         aayush<sup>vz</sup>
-      </a>
+      </PageLink>
       <nav className="navbar__links" aria-label="Primary">
         {links.map((l) => (
-          <a
+          <PageLink
             key={l.href}
             href={l.href}
-            aria-current={l.current ? "page" : undefined}
+            aria-current={isCurrent(l.href) ? "page" : undefined}
           >
             {l.label}
-          </a>
+          </PageLink>
         ))}
       </nav>
     </header>

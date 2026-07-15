@@ -1,0 +1,135 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Navbar from "@/components/Navbar";
+import MobileNav from "@/components/MobileNav";
+import Cursor from "@/components/Cursor";
+import PageLink from "@/components/PageLink";
+import AsciiPortrait from "./AsciiPortrait";
+import StatusBar, { type AboutStatus } from "./StatusBar";
+
+/*
+  /about — Aayush Visuals × the Mauricio Juba interaction school.
+
+  One editorial composition, one artefact: the role block sits top-left,
+  the name dominates the lower-left almost filling the viewport, a single
+  horizontal metadata row runs along the bottom, and the living ASCII
+  portrait owns the right side — bleeding from below the navbar down to
+  the status bar and slipping UNDER the name's right edge (typography
+  always wins the overlap). Near-black canvas with vignette + faded pixel
+  clusters + film grain; the shared navbar/cursor/ruler system carries
+  over so the page reads as the same product, different room.
+
+  Status priority: SCROLLING > ASCII ACTIVE (portrait hover) >
+  AVAILABLE (after first interaction) > OPEN FOR FULL-TIME OFFERS.
+*/
+
+const META_LINE = ["Product Design", "UI / UX", "Design Systems", "Creative Development"];
+
+const FACTS = [
+  "4+ years designing digital products",
+  "30+ projects shipped",
+  "Product • Brand • Motion",
+  "Open for full-time offers",
+];
+
+export default function AboutPageClient() {
+  const [portraitHover, setPortraitHover] = useState(false);
+  const [scrolling, setScrolling] = useState(false);
+  const interacted = useRef(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onScroll = () => {
+      setScrolling(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setScrolling(false), 650);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const onHoverChange = (h: boolean) => {
+    if (h) interacted.current = true;
+    setPortraitHover(h);
+  };
+
+  const status: AboutStatus = scrolling
+    ? "SCROLLING"
+    : portraitHover
+      ? "ASCII ACTIVE"
+      : interacted.current
+        ? "AVAILABLE"
+        : "OPEN FOR FULL-TIME OFFERS";
+
+  return (
+    <div className="aboutPage">
+      <Navbar />
+      <MobileNav />
+      <Cursor />
+      <div className="aboutPage__rails" aria-hidden />
+      <div className="aboutPage__pixels" aria-hidden />
+      <div className="aboutPage__vignette" aria-hidden />
+      <div className="aboutPage__grain" aria-hidden />
+
+      <div className="aboutPage__top">
+        <PageLink href="/" className="aboutPage__logo">
+          aayush<sup>vz</sup>
+        </PageLink>
+        <PageLink href="/" className="aboutPage__back">
+          ← Back to home
+        </PageLink>
+      </div>
+
+      <main className="aboutPage__main">
+        {/* portrait first in DOM, under the typography */}
+        <div className="aboutPage__right" data-enter style={{ "--d": "0.28s" } as React.CSSProperties}>
+          <AsciiPortrait src="/about/portrait.png" onHoverChange={onHoverChange} />
+        </div>
+
+        <div className="aboutPage__left">
+          <div>
+            <p className="aboutPage__role" data-enter style={{ "--d": "0.05s" } as React.CSSProperties}>
+              Product Designer
+              <br />
+              <span className="aboutPage__roleAmp">&amp;</span> Design Engineer
+            </p>
+            <p className="aboutPage__meta" data-enter style={{ "--d": "0.13s" } as React.CSSProperties}>
+              {META_LINE.map((m, i) => (
+                <span key={m}>
+                  {m}
+                  {i < META_LINE.length - 1 && (
+                    <i className="aboutPage__metaDot" aria-hidden>
+                      {" "}
+                      •{" "}
+                    </i>
+                  )}
+                </span>
+              ))}
+            </p>
+          </div>
+
+          <h1 className="aboutPage__name" data-enter style={{ "--d": "0.2s" } as React.CSSProperties}>
+            Aayush
+            <br />
+            Raj<span className="aboutPage__namePeriod">.</span>
+          </h1>
+
+          <ul className="aboutPage__facts" data-enter style={{ "--d": "0.34s" } as React.CSSProperties}>
+            {FACTS.map((f) => (
+              <li key={f}>
+                <i className="aboutPage__factMark" aria-hidden />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </main>
+
+      <StatusBar status={status} />
+    </div>
+  );
+}

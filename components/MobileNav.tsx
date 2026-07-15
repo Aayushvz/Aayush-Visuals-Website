@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { SunIcon, MoonIcon } from "./icons";
 import { motion, AnimatePresence } from "framer-motion";
+import PageLink from "./PageLink";
 
 /*
   Mobile bottom navbar (phone widths only — the desktop top pill hides).
@@ -14,10 +15,10 @@ import { motion, AnimatePresence } from "framer-motion";
 */
 
 const links = [
-  { label: "Home", href: "#top" },
-  { label: "About Me", href: "#about" },
-  { label: "Works", href: "#work" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About Me", href: "/about" },
+  { label: "Works", href: "/#work" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 export default function MobileNav() {
@@ -65,9 +66,9 @@ export default function MobileNav() {
               </span>
             </button>
 
-            <a href="#top" className="mobileNav__logo">
+            <PageLink href="/" className="mobileNav__logo">
               aayush<sup>vz</sup>
-            </a>
+            </PageLink>
 
             <button
               type="button"
@@ -95,23 +96,23 @@ export default function MobileNav() {
             {/* Centered Navigation Links */}
             <div className="mobileNavCard__links">
               {links.map((l) => (
-                <a
+                <PageLink
                   key={l.href}
                   href={l.href}
                   className="mobileNavCard__link"
                   onClick={() => setOpen(false)}
                 >
                   {l.label}
-                </a>
+                </PageLink>
               ))}
             </div>
 
             {/* Bottom Row */}
             <div className="mobileNavCard__bottom">
               <span className="mobileNavCard__title">Menu</span>
-              <a href="#top" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
+              <PageLink href="/" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
                 aayush<sup>vz</sup>
-              </a>
+              </PageLink>
               <button
                 type="button"
                 className="mobileNavCard__close"
