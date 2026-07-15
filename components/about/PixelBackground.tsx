@@ -3,12 +3,14 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Procedural Pixel Field Background
-  ----------------------------------
-  One continuous infinite noise field across the entire viewport.
-  Density varies organically — dense toward edges/corners, sparse near portrait.
-  No individual clouds, blobs, or shapes. Just atmospheric pixel density.
+  Procedural Pixel Environment — Hybrid Approach
+  -----------------------------------------------
+  Combines a continuous density field with multiple drifting noise layers.
+  Each layer has its own gray tone, scale, speed, and Z-seed, creating
+  the multi-tonal atmospheric look of the reference.
+  
   Same 7px cell / 6px square grid as the portrait renderer.
+  Monochrome only. No purple, no glow, no blur.
 */
 
 // Perlin noise
@@ -30,7 +32,7 @@ const P = new Uint8Array(512);
 for (let i = 0; i < 256; i++) { P[i] = PERM[i]; P[256 + i] = PERM[i]; }
 
 function fade(t: number) { return t * t * t * (t * (t * 6 - 15) + 10); }
-function lerp(t: number, a: number, b: number) { return a + t * (b - a); }
+function nlerp(t: number, a: number, b: number) { return a + t * (b - a); }
 function grad(hash: number, x: number, y: number, z: number) {
   const h = hash & 15;
   const u = h < 8 ? x : y;
@@ -42,14 +44,13 @@ function pnoise(x: number, y: number, z: number) {
   x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
   const u = fade(x), v = fade(y), w = fade(z);
   const A = P[X]+Y, AA = P[A]+Z, AB = P[A+1]+Z, B = P[X+1]+Y, BA = P[B]+Z, BB = P[B+1]+Z;
-  return lerp(w,
-    lerp(v, lerp(u, grad(P[AA],x,y,z), grad(P[BA],x-1,y,z)),
-            lerp(u, grad(P[AB],x,y-1,z), grad(P[BB],x-1,y-1,z))),
-    lerp(v, lerp(u, grad(P[AA+1],x,y,z-1), grad(P[BA+1],x-1,y,z-1)),
-            lerp(u, grad(P[AB+1],x,y-1,z-1), grad(P[BB+1],x-1,y-1,z-1))));
+  return nlerp(w,
+    nlerp(v, nlerp(u, grad(P[AA],x,y,z), grad(P[BA],x-1,y,z)),
+             nlerp(u, grad(P[AB],x,y-1,z), grad(P[BB],x-1,y-1,z))),
+    nlerp(v, nlerp(u, grad(P[AA+1],x,y,z-1), grad(P[BA+1],x-1,y,z-1)),
+             nlerp(u, grad(P[AB+1],x,y-1,z-1), grad(P[BB+1],x-1,y-1,z-1))));
 }
 
-// 4-octave fBm for rich organic density
 function fbm(x: number, y: number, z: number) {
   return (
     pnoise(x, y, z) * 0.5 +
@@ -61,6 +62,17 @@ function fbm(x: number, y: number, z: number) {
 
 const CELL = 7;
 const SQ = CELL - 1;
+
+// Each layer drifts independently and has its own gray tone
+type Layer = {
+  scale: number;
+  speedX: number;
+  speedY: number;
+  zSeed: number;
+  gray: number;       // base gray value 0-255
+  threshold: number;  // noise cutoff
+  opacity: number;    // base alpha
+};
 
 export default function PixelBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -96,95 +108,92 @@ export default function PixelBackground() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     resize();
 
+    // 5 layers — each with a different gray tone, scale, speed, and density
+    // Deepest/darkest layers are large and slow; brightest layers are finer and faster
+    const layers: Layer[] = [
+      // Dark black undertone — large, slow, dense
+      { scale: 0.005, speedX: 0.006, speedY: 0.004, zSeed: 3.7,  gray: 22,  threshold: 0.32, opacity: 0.35 },
+      // Dark gray mid-layer
+      { scale: 0.008, speedX: 0.010, speedY: 0.007, zSeed: 18.4, gray: 45,  threshold: 0.40, opacity: 0.28 },
+      // Mid gray atmospheric layer
+      { scale: 0.012, speedX: 0.015, speedY: 0.011, zSeed: 41.9, gray: 75,  threshold: 0.46, opacity: 0.22 },
+      // Light gray detail layer
+      { scale: 0.018, speedX: 0.020, speedY: 0.014, zSeed: 67.3, gray: 110, threshold: 0.52, opacity: 0.18 },
+      // Brightest highlights — finest, fastest
+      { scale: 0.025, speedX: 0.025, speedY: 0.018, zSeed: 93.8, gray: 155, threshold: 0.58, opacity: 0.14 },
+    ];
+
+    // Portrait suppression center
+    const portraitCX = 0.28;
+    const portraitCY = 0.62;
+
     const draw = (t: number) => {
       mx += (tmx - mx) * 0.04;
       my += (tmy - my) * 0.04;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Base
+      // Base black
       ctx.fillStyle = "#090909";
       ctx.fillRect(0, 0, W, H);
 
-      // Subtle vignette
-      const vig = ctx.createRadialGradient(W * 0.5, H * 0.5, 10, W * 0.5, H * 0.5, Math.max(W, H) * 0.82);
-      vig.addColorStop(0, "rgba(18, 18, 18, 0.06)");
-      vig.addColorStop(0.55, "rgba(0, 0, 0, 0)");
-      vig.addColorStop(1, "rgba(0, 0, 0, 0.5)");
-      ctx.fillStyle = vig;
-      ctx.fillRect(0, 0, W, H);
-
-      // One continuous procedural pixel field
       const cols = Math.ceil(W / CELL);
       const rows = Math.ceil(H / CELL);
 
-      // Portrait center (left 45% column, vertically centered-low)
-      const portraitCX = W * 0.28;
-      const portraitCY = H * 0.62;
-
-      // Noise scale and drift
-      const scale = 0.009;
-      const drift = t * 0.012;
-
-      // Parallax offset — entire field shifts subtly with mouse
-      const px = mx * 10;
-      const py = my * 10;
-
+      // Pre-compute density mask per cell (portrait suppression + corner boost)
+      // This is shared across all layers
       for (let gy = 0; gy < rows; gy++) {
         const cellY = gy * CELL;
+        const ny = cellY / H;
         for (let gx = 0; gx < cols; gx++) {
           const cellX = gx * CELL;
+          const nx2 = cellX / W;
 
-          // --- Density mask ---
-          // Distance from portrait center (normalized 0-1 across viewport diagonal)
-          const dpx = (cellX - portraitCX) / W;
-          const dpy = (cellY - portraitCY) / H;
+          // Distance from portrait center
+          const dpx = nx2 - portraitCX;
+          const dpy = ny - portraitCY;
           const portraitDist = Math.sqrt(dpx * dpx + dpy * dpy);
 
-          // Distance from viewport center (normalized)
-          const vcx = (cellX / W) - 0.5;
-          const vcy = (cellY / H) - 0.5;
+          // Distance from viewport center
+          const vcx = nx2 - 0.5;
+          const vcy = ny - 0.5;
           const centerDist = Math.sqrt(vcx * vcx + vcy * vcy);
 
-          // Density mask: suppress near portrait, allow everywhere else,
-          // increase toward corners
-          // portraitDist < 0.2 → heavily suppressed
-          // portraitDist 0.2-0.45 → gradual transition
-          // corners (centerDist > 0.5) → boosted
+          // Density mask
           let mask = 1.0;
-
-          // Suppress around portrait
-          if (portraitDist < 0.45) {
-            const f = portraitDist / 0.45;
-            mask = f * f; // quadratic ramp — smooth suppression
+          if (portraitDist < 0.42) {
+            const f = portraitDist / 0.42;
+            mask = f * f;
+          }
+          if (centerDist > 0.32) {
+            mask = Math.min(1.0, mask + (centerDist - 0.32) * 0.4);
           }
 
-          // Boost toward corners
-          if (centerDist > 0.35) {
-            const cornerBoost = (centerDist - 0.35) * 1.2;
-            mask = Math.min(1.0, mask + cornerBoost * 0.3);
+          // Evaluate each layer — composite darkest to brightest
+          for (const layer of layers) {
+            const driftX = t * layer.speedX;
+            const driftY = t * layer.speedY;
+
+            const sampleX = (cellX + mx * 12) * layer.scale + driftX;
+            const sampleY = (cellY + my * 12) * layer.scale + driftY;
+
+            const n = fbm(sampleX, sampleY, layer.zSeed);
+            const nv = (n + 1) * 0.5;
+
+            // Raise threshold where mask is low (near portrait)
+            const thresh = layer.threshold + (1 - mask) * 0.35;
+
+            if (nv <= thresh) continue;
+
+            // Intensity drives subtle alpha variation
+            const intensity = Math.min(1, (nv - thresh) / (1 - thresh));
+            const g = layer.gray;
+
+            ctx.globalAlpha = layer.opacity * (0.5 + intensity * 0.5);
+            ctx.fillStyle = `rgb(${g},${g},${g})`;
+            ctx.fillRect(cellX, cellY, SQ, SQ);
+            break; // Only draw one layer per cell — topmost visible wins
           }
-
-          // Sample continuous noise field
-          const nx = (cellX + px) * scale + drift;
-          const ny = (cellY + py) * scale + drift * 0.7;
-          const n = fbm(nx, ny, 3.7);
-
-          // Normalize noise from [-1,1] to [0,1]
-          const nv = (n + 1) * 0.5;
-
-          // Apply mask to threshold — lower mask = higher threshold = sparser
-          const threshold = 0.52 + (1 - mask) * 0.3;
-
-          if (nv <= threshold) continue;
-
-          // Brightness varies with noise intensity — deeper areas darker
-          const intensity = (nv - threshold) / (1 - threshold);
-          const gray = Math.round(30 + intensity * 90);
-
-          ctx.globalAlpha = 0.12 + intensity * 0.28;
-          ctx.fillStyle = `rgb(${gray},${gray},${gray})`;
-          ctx.fillRect(cellX, cellY, SQ, SQ);
         }
       }
 
