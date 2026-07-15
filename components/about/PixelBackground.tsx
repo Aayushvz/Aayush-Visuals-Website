@@ -3,33 +3,86 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Premium Monochrome Pixel-Cloud Background
-  -----------------------------------------
-  Layer 1: Solid nearly black (#090909) with a soft radial vignette.
-  Layer 2: Giant atmospheric pixel clouds generated organically using noise fields (metaballs).
-           Dithered edges dissolving to black. Grayscale only. Custom cell grid per cloud.
-  Layer 3: Monochrome digital sensor noise (2% opacity).
-  Layer 4: Soft radial depth glows behind the clouds.
-  Parallax: Mouse-driven subtle depth offsets per cloud.
+  Procedural Pixel Environment Background
+  --------------------------------------
+  - solid black background (#090909) with a radial vignette
+  - 6-8 pixel clouds procedurally generated using Ken Perlin's Improved Noise
+  - Edges dissolve into black strictly by density reduction (no opacity gradients, no blur, no glow)
+  - Monochrome grayscale palette only
+  - Parallax mouse drifting
+  - requestAnimationFrame rendering at 60 FPS
 */
 
-type BlobNode = {
-  phaseX: number;
-  phaseY: number;
-  freqX: number;
-  freqY: number;
-  ampX: number;
-  ampY: number;
-  r: number; // radius
-};
+// Ken Perlin's Improved Noise implementation
+class ImprovedNoise {
+  p: Int32Array;
+  constructor() {
+    this.p = new Int32Array(256 * 2);
+    const permutation = [
+      151,160,137,91,90,15,131,13,201,95,96,53,194,233, 7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+      190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,
+      136,171,168, 68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+      102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,135,130,116,188,189,138,1,14,95,91,121,53,45,224,222,250,
+      254,164,198,172,182,29,130,241,120,30,81,125,58,114,248,84,185,15,44,186,162,191,124,6,150,248,0,0,18,22,254,99,85,121,229,111,172,3,
+      191,243,115,85,34,30,55,173,156,50,26,127,12,221,114,209,8,132,222,70,141,196,135,17,205,50,80,244,77,220,95,201,140,35,43,39,120,
+      24,190,197,144,48,206,238,101,17,147,136,12,77,246,94,213,248,168,17,172,239,24,120,247,21,121,128,167,81,223,109,85,21,241,206,122,230,196
+    ];
+    for (let i = 0; i < 256; i++) {
+      this.p[i] = permutation[i];
+      this.p[256 + i] = permutation[i];
+    }
+  }
+
+  noise(x: number, y: number, z: number) {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    const Z = Math.floor(z) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    z -= Math.floor(z);
+    const u = this.fade(x);
+    const v = this.fade(y);
+    const w = this.fade(z);
+    const A = this.p[X] + Y, AA = this.p[A] + Z, AB = this.p[A + 1] + Z,
+          B = this.p[X + 1] + Y, BA = this.p[B] + Z, BB = this.p[B + 1] + Z;
+
+    return this.lerp(w, this.lerp(v, this.lerp(u, this.grad(this.p[AA], x, y, z),
+                                                 this.grad(this.p[BA], x - 1, y, z)),
+                                     this.lerp(u, this.grad(this.p[AB], x, y - 1, z),
+                                                 this.grad(this.p[BB], x - 1, y - 1, z))),
+                         this.lerp(v, this.lerp(u, this.grad(this.p[AA + 1], x, y, z - 1),
+                                                 this.grad(this.p[BA + 1], x - 1, y, z - 1)),
+                                     this.lerp(u, this.grad(this.p[AB + 1], x, y - 1, z - 1),
+                                                 this.grad(this.p[BB + 1], x - 1, y - 1, z - 1))));
+  }
+
+  fade(t: number) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+
+  lerp(t: number, a: number, b: number) {
+    return a + t * (b - a);
+  }
+
+  grad(hash: number, x: number, y: number, z: number) {
+    const h = hash & 15;
+    const u = h < 8 ? x : y;
+    const v = h < 4 ? y : h === 12 || h === 14 ? x : z;
+    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+  }
+}
 
 type Cloud = {
   pixelSize: number;
-  baseOpacity: number;
-  parallax: number; // max offset in px
-  centerX: number; // normalized 0-1
-  centerY: number; // normalized 0-1
-  nodes: BlobNode[];
+  scale: number; // noise scale zoom factor
+  speed: number; // drift speed multiplier
+  seed: number; // unique Z coordinate in noise space
+  brightness: number; // grayscale color tone (40-200)
+  opacity: number; // constant square opacity
+  radius: number; // absolute boundary box radius
+  centerX: number; // normalized coordinate X
+  centerY: number; // normalized coordinate Y
+  parallax: number; // parallax offset speed
 };
 
 export default function PixelBackground() {
@@ -41,6 +94,7 @@ export default function PixelBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const noiseSolver = new ImprovedNoise();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = window.innerWidth;
     let H = window.innerHeight;
@@ -67,190 +121,94 @@ export default function PixelBackground() {
     window.addEventListener("resize", resize, { passive: true });
     resize();
 
-    // Mouse move handler
     const onPointerMove = (e: PointerEvent) => {
-      // Normalize mouse between -0.5 and 0.5
+      // Normalize mouse offset between -0.5 and 0.5
       targetMx = (e.clientX / window.innerWidth) - 0.5;
       targetMy = (e.clientY / window.innerHeight) - 0.5;
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
 
-    // Pre-render a 256x256 digital grain noise texture to save drawing cycles
-    const grainCanvas = document.createElement("canvas");
-    grainCanvas.width = 256;
-    grainCanvas.height = 256;
-    const grainCtx = grainCanvas.getContext("2d")!;
-    const grainImgData = grainCtx.createImageData(256, 256);
-    for (let i = 0; i < grainImgData.data.length; i += 4) {
-      const val = Math.floor(Math.random() * 255);
-      grainImgData.data[i] = val;
-      grainImgData.data[i + 1] = val;
-      grainImgData.data[i + 2] = val;
-      grainImgData.data[i + 3] = 6; // ~2.3% opacity
-    }
-    grainCtx.putImageData(grainImgData, 0, 0);
-    const grainPattern = ctx.createPattern(grainCanvas, "repeat")!;
-
-    // Define 4 distinct pixel clouds with organic metaball nodes
+    // Define 7 independent procedural pixel clouds
     const clouds: Cloud[] = [
-      {
-        pixelSize: 10,
-        baseOpacity: 0.12,
-        parallax: 6,
-        centerX: 0.25,
-        centerY: 0.3,
-        nodes: [
-          { phaseX: 0, phaseY: 2.1, freqX: 0.04, freqY: 0.05, ampX: 80, ampY: 70, r: 240 },
-          { phaseX: 1.5, phaseY: 0.5, freqX: 0.03, freqY: 0.06, ampX: 90, ampY: 100, r: 280 },
-          { phaseX: 3.1, phaseY: 1.8, freqX: 0.05, freqY: 0.03, ampX: 70, ampY: 80, r: 220 }
-        ]
-      },
-      {
-        pixelSize: 8,
-        baseOpacity: 0.18,
-        parallax: 12,
-        centerX: 0.75,
-        centerY: 0.4,
-        nodes: [
-          { phaseX: 0.5, phaseY: 0, freqX: 0.05, freqY: 0.04, ampX: 100, ampY: 80, r: 220 },
-          { phaseX: 2.2, phaseY: 1.2, freqX: 0.04, freqY: 0.05, ampX: 80, ampY: 90, r: 250 },
-          { phaseX: 4.1, phaseY: 3.0, freqX: 0.03, freqY: 0.03, ampX: 110, ampY: 70, r: 200 }
-        ]
-      },
-      {
-        pixelSize: 6,
-        baseOpacity: 0.26,
-        parallax: 18,
-        centerX: 0.35,
-        centerY: 0.7,
-        nodes: [
-          { phaseX: 1.1, phaseY: 2.5, freqX: 0.06, freqY: 0.05, ampX: 70, ampY: 60, r: 180 },
-          { phaseX: 2.8, phaseY: 0.9, freqX: 0.05, freqY: 0.07, ampX: 60, ampY: 80, r: 210 },
-          { phaseX: 0.2, phaseY: 3.8, freqX: 0.04, freqY: 0.04, ampX: 80, ampY: 70, r: 170 }
-        ]
-      },
-      {
-        pixelSize: 4,
-        baseOpacity: 0.36,
-        parallax: 24,
-        centerX: 0.8,
-        centerY: 0.8,
-        nodes: [
-          { phaseX: 2.0, phaseY: 1.0, freqX: 0.07, freqY: 0.06, ampX: 50, ampY: 50, r: 130 },
-          { phaseX: 0.5, phaseY: 3.2, freqX: 0.06, freqY: 0.05, ampX: 60, ampY: 45, r: 150 },
-          { phaseX: 3.5, phaseY: 0.2, freqX: 0.05, freqY: 0.08, ampX: 40, ampY: 60, r: 120 }
-        ]
-      }
+      { pixelSize: 8, scale: 0.012, speed: 0.04, seed: 15.2, brightness: 120, opacity: 0.28, radius: 260, centerX: 0.22, centerY: 0.30, parallax: 8 },
+      { pixelSize: 6, scale: 0.018, speed: 0.03, seed: 42.8, brightness: 150, opacity: 0.22, radius: 310, centerX: 0.78, centerY: 0.25, parallax: 14 },
+      { pixelSize: 10, scale: 0.009, speed: 0.02, seed: 73.1, brightness: 100, opacity: 0.20, radius: 360, centerX: 0.45, centerY: 0.65, parallax: 18 },
+      { pixelSize: 4, scale: 0.024, speed: 0.05, seed: 91.5, brightness: 180, opacity: 0.32, radius: 210, centerX: 0.15, centerY: 0.80, parallax: 26 },
+      { pixelSize: 6, scale: 0.015, speed: 0.035, seed: 28.3, brightness: 140, opacity: 0.26, radius: 290, centerX: 0.85, centerY: 0.75, parallax: 16 },
+      { pixelSize: 8, scale: 0.020, speed: 0.025, seed: 57.6, brightness: 110, opacity: 0.18, radius: 240, centerX: 0.58, centerY: 0.15, parallax: 10 },
+      { pixelSize: 10, scale: 0.011, speed: 0.018, seed: 84.9, brightness: 90, opacity: 0.14, radius: 280, centerX: 0.30, centerY: 0.48, parallax: 12 }
     ];
 
     const draw = (timeSec: number) => {
-      // Lerp mouse coordinates for ultra-smooth parallax
+      // Lerp mouse coordinate values for fluid parallax transitions
       mx += (targetMx - mx) * 0.08;
       my += (targetMy - my) * 0.08;
 
       ctx.clearRect(0, 0, W, H);
 
       // ----------------------------------------------------
-      // LAYER 1 — BASE & VIGNETTE
+      // LAYER 1 — BASE & SUBTLE VIGNETTE
       // ----------------------------------------------------
       ctx.fillStyle = "#090909";
       ctx.fillRect(0, 0, W, H);
 
       const vignette = ctx.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, Math.max(W, H) * 0.85);
-      vignette.addColorStop(0, "rgba(255, 255, 255, 0.025)");
+      vignette.addColorStop(0, "rgba(255, 255, 255, 0.015)");
       vignette.addColorStop(0.5, "rgba(0, 0, 0, 0)");
       vignette.addColorStop(1, "rgba(0, 0, 0, 0.65)");
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, W, H);
 
       // ----------------------------------------------------
-      // LAYER 4 — DEPTH (SOFT RADIAL GLOWS BEHIND CLOUDS)
-      // ----------------------------------------------------
-      clouds.forEach((cloud, idx) => {
-        const px = mx * cloud.parallax;
-        const py = my * cloud.parallax;
-        const cx = cloud.centerX * W + px;
-        const cy = cloud.centerY * H + py;
-
-        const glowSize = Math.max(250, W * (0.18 + idx * 0.08));
-        const glow = ctx.createRadialGradient(cx, cy, 10, cx, cy, glowSize);
-        glow.addColorStop(0, `rgba(60, 60, 60, ${0.11 - idx * 0.02})`);
-        glow.addColorStop(0.6, `rgba(20, 20, 20, ${0.03 - idx * 0.007})`);
-        glow.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = glow;
-        ctx.fillRect(0, 0, W, H);
-      });
-
-      // ----------------------------------------------------
-      // LAYER 2 — PIXEL CLOUD SYSTEM
+      // LAYER 2 — PROCEDURAL PERLIN PIXEL CLOUDS
       // ----------------------------------------------------
       clouds.forEach((cloud) => {
         const pSize = cloud.pixelSize;
         const px = mx * cloud.parallax;
         const py = my * cloud.parallax;
 
-        // Calculate absolute center for this cloud frame
+        // Calculate absolute center for this cloud
         const ccx = cloud.centerX * W + px;
         const ccy = cloud.centerY * H + py;
+        const R = cloud.radius;
 
-        // Calculate absolute positions of the moving nodes
-        const activeNodes = cloud.nodes.map((node) => {
-          const nx = ccx + Math.sin(timeSec * node.freqX + node.phaseX) * node.ampX;
-          const ny = ccy + Math.cos(timeSec * node.freqY + node.phaseY) * node.ampY;
-          return { x: nx, y: ny, r: node.r };
-        });
+        // Bounding box for this cloud
+        const startX = Math.max(0, Math.floor((ccx - R) / pSize) * pSize);
+        const endX = Math.min(W, Math.ceil((ccx + R) / pSize) * pSize);
+        const startY = Math.max(0, Math.floor((ccy - R) / pSize) * pSize);
+        const endY = Math.min(H, Math.ceil((ccy + R) / pSize) * pSize);
 
-        // Determine bounding box around all nodes to save rendering computations
-        let minX = W, maxX = 0, minY = H, maxY = 0;
-        activeNodes.forEach((node) => {
-          minX = Math.min(minX, node.x - node.r);
-          maxX = Math.max(maxX, node.x + node.r);
-          minY = Math.min(minY, node.y - node.r);
-          maxY = Math.max(maxY, node.y + node.r);
-        });
+        // Drift offset over time
+        const driftX = timeSec * cloud.speed * 8;
+        const driftY = timeSec * cloud.speed * 6;
 
-        // Align bounding box to pixel grid
-        const startX = Math.max(0, Math.floor(minX / pSize) * pSize);
-        const endX = Math.min(W, Math.ceil(maxX / pSize) * pSize);
-        const startY = Math.max(0, Math.floor(minY / pSize) * pSize);
-        const endY = Math.min(H, Math.ceil(maxY / pSize) * pSize);
+        ctx.globalAlpha = cloud.opacity;
+        ctx.fillStyle = `rgb(${cloud.brightness},${cloud.brightness},${cloud.brightness})`;
 
-        // Draw squares inside bounding box matching noise density
         for (let y = startY; y < endY; y += pSize) {
           for (let x = startX; x < endX; x += pSize) {
-            const cellCenterValX = x + pSize / 2;
-            const cellCenterValY = y + pSize / 2;
+            // Distance from cloud center (normalized 0 to 1)
+            const dx = x - ccx;
+            const dy = y - ccy;
+            const distSq = dx * dx + dy * dy;
+            const Rsq = R * R;
 
-            // Calculate metaball density sum at this cell
-            let density = 0;
-            activeNodes.forEach((node) => {
-              const dist = Math.hypot(cellCenterValX - node.x, cellCenterValY - node.y);
-              if (dist < node.r) {
-                // Smooth weight falloff curve
-                const f = 1 - dist / node.r;
-                density += f * f * (3 - 2 * f);
-              }
-            });
+            if (distSq >= Rsq) continue;
 
-            // If density matches threshold, render the square cell
-            // We introduce a tiny dither offset based on coordinates to make edges look beautifully organic
-            const dither = ((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) * 0.15;
-            if (density > 0.32 + dither) {
-              const alphaScale = Math.min(1.0, (density - 0.3) * 1.5);
-              const op = cloud.baseOpacity * alphaScale;
+            const distNorm = Math.sqrt(distSq) / R;
+            // Radial weight falloff (reaches 0 at the boundary radius edges)
+            const falloff = 1 - distNorm;
 
-              // Determine monochrome color tone based on density (Stop 0: Dark gray to Stop 2: Almost white)
-              let grayTone = 45; // Dark gray base #2d2d2d
-              if (density > 0.7) {
-                grayTone = Math.round(45 + (density - 0.7) * 230); // interpolates up to #e0e0e0
-              } else if (density > 0.4) {
-                grayTone = Math.round(45 + (density - 0.4) * 80); // interpolates up to #7d7d7d
-              }
-              const clampTone = Math.max(0, Math.min(240, grayTone));
+            // SampleKen Perlin Noise: inputs scaled & animated by drift
+            // noise() returns [-1, 1], normalize to [0, 1]
+            const noiseVal = (noiseSolver.noise(x * cloud.scale + driftX, y * cloud.scale + driftY, cloud.seed) + 1.0) / 2.0;
 
-              ctx.globalAlpha = op;
-              ctx.fillStyle = `rgb(${clampTone},${clampTone},${clampTone})`;
-              // Exact crisp square
+            // Density envelope fades out pixels towards the boundary edges
+            const density = noiseVal * falloff;
+
+            // Threshold checks: edges dissolve because fewer pixels are drawn, NOT due to blur/opacity gradients
+            if (density > 0.44) {
+              // Crisp monochrome square
               ctx.fillRect(x, y, pSize, pSize);
             }
           }
@@ -258,12 +216,6 @@ export default function PixelBackground() {
       });
 
       ctx.globalAlpha = 1;
-
-      // ----------------------------------------------------
-      // LAYER 3 — DIGITAL GRAIN (SUBTLE MONOCHROME NOISE)
-      // ----------------------------------------------------
-      ctx.fillStyle = grainPattern;
-      ctx.fillRect(0, 0, W, H);
     };
 
     const loop = (now: number) => {
@@ -288,7 +240,7 @@ export default function PixelBackground() {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 5, // Behind text/nav/portrait
+        zIndex: 5, // Behind typography, nav, and portrait layers
         pointerEvents: "none",
         display: "block"
       }}
