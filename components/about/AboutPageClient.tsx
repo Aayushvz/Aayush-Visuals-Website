@@ -8,6 +8,7 @@ import PageLink from "@/components/PageLink";
 import AsciiPortrait from "./AsciiPortrait";
 import StatusBar, { type AboutStatus } from "./StatusBar";
 import PixelBackground from "./PixelBackground";
+import AboutRulers from "./AboutRulers";
 
 /*
   /about — Aayush Visuals × the Mauricio Juba interaction school.
@@ -29,8 +30,7 @@ const META_LINE = ["Product Design", "UI / UX", "Creative Development"];
 
 const FACTS = [
   "4+ years designing digital products",
-  "30+ projects shipped",
-  "Open for full-time offer",
+  "Open for full-time opportunities",
 ];
 
 export default function AboutPageClient() {
@@ -71,7 +71,7 @@ export default function AboutPageClient() {
       <Navbar />
       <MobileNav />
       <Cursor />
-      <div className="aboutPage__rails" aria-hidden />
+      <AboutRulers />
 
       {/* Full-screen background halftone matrix */}
       <div className="aboutPage__canvasBg">
@@ -79,13 +79,10 @@ export default function AboutPageClient() {
       </div>
 
       <main className="aboutPage__main">
-        {/* Placeholder column to preserve layout balance */}
-        <div className="aboutPage__right" />
-
         <div className="aboutPage__left">
           <div>
             <p className="aboutPage__role" data-enter style={{ "--d": "0.05s" } as React.CSSProperties}>
-              Product Designer &amp; Design Engineer
+              Product Designer and Design Engineer
             </p>
             <p className="aboutPage__meta" data-enter style={{ "--d": "0.13s" } as React.CSSProperties}>
               {META_LINE.map((m, i) => (
@@ -118,6 +115,10 @@ export default function AboutPageClient() {
             ))}
           </ul>
         </div>
+
+        {/* placeholder column — the portrait renders in the full-screen
+            canvas behind, centred on this zone */}
+        <div className="aboutPage__right" />
       </main>
 
       <StatusBar status={status} />

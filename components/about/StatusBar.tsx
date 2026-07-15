@@ -77,45 +77,41 @@ export default function StatusBar({ status }: { status: AboutStatus }) {
     };
   }, []);
 
+  /* one row of bordered cells, per the Figma: SCRL | CRSR | 02 — ABOUT
+     (flexible centre) | STATUS | THEME | IST — keys grey, values purple */
   return (
     <footer className="aboutPage__bar" aria-label="Page telemetry">
-      <div className="aboutPage__barGroup aboutPage__barGroup--left">
-        <span className="aboutPage__barCell">
-          <span className="aboutPage__barKey">SCRL</span>
-          <span className="aboutPage__barVal" ref={scrlRef}>
-            0.00
-          </span>
+      <span className="aboutPage__barCell">
+        <span className="aboutPage__barKey">SCRL</span>
+        <span className="aboutPage__barVal" ref={scrlRef}>
+          0.00
         </span>
-        <span className="aboutPage__barCell aboutPage__barCell--crsr">
-          <span className="aboutPage__barKey">CRSR</span>
-          <span className="aboutPage__barVal" ref={crsrRef}>
-            0 0
-          </span>
+      </span>
+      <span className="aboutPage__barCell aboutPage__barCell--crsr">
+        <span className="aboutPage__barKey">CRSR</span>
+        <span className="aboutPage__barVal" ref={crsrRef}>
+          0 0
         </span>
-      </div>
+      </span>
 
-      <div className="aboutPage__barGroup aboutPage__barGroup--center">
+      <span className="aboutPage__barCell aboutPage__barCell--section">
         <span className="aboutPage__barSection">02 — ABOUT</span>
-      </div>
+      </span>
 
-      <div className="aboutPage__barGroup aboutPage__barGroup--right">
-        <span className="aboutPage__barCell">
-          <span className="aboutPage__barKey">STATUS</span>
-          <span className="aboutPage__barVal aboutPage__barVal--status" key={status}>
-            {status}
-          </span>
+      <span className="aboutPage__barCell aboutPage__barCell--status">
+        <span className="aboutPage__barKey">STATUS</span>
+        <span className="aboutPage__barVal aboutPage__barVal--status" key={status}>
+          {status}
         </span>
-        <span className="aboutPage__barCell aboutPage__barCell--theme">
-          <span className="aboutPage__barKey">THEME</span>
-          <span className="aboutPage__barVal">
-            <i className="aboutPage__barSwatch" aria-hidden /> DARK
-          </span>
-        </span>
-        <span className="aboutPage__barCell">
-          <span className="aboutPage__barKey">IST</span>
-          <span className="aboutPage__barVal">{time}</span>
-        </span>
-      </div>
+      </span>
+      <span className="aboutPage__barCell aboutPage__barCell--theme">
+        <span className="aboutPage__barKey">THEME</span>
+        <span className="aboutPage__barVal aboutPage__barVal--cream">DARK</span>
+      </span>
+      <span className="aboutPage__barCell aboutPage__barCell--time">
+        <span className="aboutPage__barKey">IST</span>
+        <span className="aboutPage__barVal">{time}</span>
+      </span>
     </footer>
   );
 }

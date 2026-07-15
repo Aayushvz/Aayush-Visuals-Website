@@ -3,110 +3,32 @@
 import { useEffect, useRef } from "react";
 
 /*
-  Procedural Pixel Environment — Combined Hybrid Renderer with Hover Spotlight
-  ----------------------------------------------------------------------------
-  Combines:
-    1. Continuous infinite pixel field (digital fog) for overall movement.
-    2. Localized dithered cloud clusters for dense organic formations.
-    3. Interactive hover spotlight that increases density and brightens pixels
-       locally around the pointer on the unified grid.
+  Pixel Starfield Background
+  -----------------------------------------------------------------------
+  Mimics the reference: dark canvas with tiny scattered square pixels,
+  very low opacity, random distribution with denser clusters in certain
+  regions (matching the portrait area). No blobs, no clouds, no movement.
   
-  Grayscale/monochrome palette with subtle purple highlights toned down.
-  Maximum brightness and density of spotlight are capped to ensure premium look.
+  Only animation: extremely slow per-pixel opacity breathing (fade in/out).
   
-  Grid parameters:
-    - Same 7px cell / 6px square grid as portrait.
-    - Flat shading, crisp edges (no blur).
+  Grid cells: 6px squares with 1px gap, randomly placed based on a
+  seeded probability map. Denser near the portrait zone (right on desktop,
+  bottom on mobile).
 */
 
-// Perlin noise permutation table
-const PERM = new Uint8Array([
-  151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
-  8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
-  35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,
-  134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,
-  55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,
-  18,169,200,196,135,130,116,188,189,138,234,14,95,121,53,45,224,222,250,254,
-  164,198,172,182,29,107,241,120,30,81,125,58,114,248,84,185,15,44,186,162,191,
-  124,6,150,127,0,0,18,22,254,99,85,121,229,111,172,3,191,243,115,85,34,30,55,
-  173,156,50,26,127,12,221,114,209,8,132,222,70,141,196,135,17,205,50,80,244,
-  77,220,95,201,140,35,43,39,120,24,190,197,144,48,206,238,101,17,147,136,12,
-  77,246,94,213,248,168,17,172,239,24,120,247,21,121,128,167,81,223,109,85,21,
-  241,206,122,230,196
-]);
-const P = new Uint8Array(512);
-for (let i = 0; i < 256; i++) { P[i] = PERM[i]; P[256 + i] = PERM[i]; }
+const CELL = 6;   // square pixel size
+const GAP  = 1;   // gap between pixels
+const SQ   = CELL - GAP; // 5px drawn square
 
-function fade(t: number) { return t * t * t * (t * (t * 6 - 15) + 10); }
-function nlerp(t: number, a: number, b: number) { return a + t * (b - a); }
-function grad(hash: number, x: number, y: number, z: number) {
-  const h = hash & 15;
-  const u = h < 8 ? x : y;
-  const v = h < 4 ? y : h === 12 || h === 14 ? x : z;
-  return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+// Seeded PRNG — gives deterministic random layout on every resize
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
 }
-function pnoise(x: number, y: number, z: number) {
-  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
-  x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
-  const u = fade(x), v = fade(y), w = fade(z);
-  const A = P[X]+Y, AA = P[A]+Z, AB = P[A+1]+Z, B = P[X+1]+Y, BA = P[B]+Z, BB = P[B+1]+Z;
-  return nlerp(w,
-    nlerp(v, nlerp(u, grad(P[AA],x,y,z), grad(P[BA],x-1,y,z)),
-             nlerp(u, grad(P[AB],x,y-1,z), grad(P[BB],x-1,y-1,z))),
-    nlerp(v, nlerp(u, grad(P[AA+1],x,y,z-1), grad(P[BA+1],x-1,y,z-1)),
-             nlerp(u, grad(P[AB+1],x,y-1,z-1), grad(P[BB+1],x-1,y-1,z-1))));
-}
-
-function fbm(x: number, y: number, z: number) {
-  return (
-    pnoise(x, y, z) * 0.5 +
-    pnoise(x * 2, y * 2, z) * 0.3 +
-    pnoise(x * 4, y * 4, z) * 0.2
-  );
-}
-
-const CELL = 7;
-const SQ = CELL - 1;
-
-// 4x4 Bayer Ordered Dither Matrix
-const BAYER_4x4 = [
-  [ 0.0625, 0.5625, 0.1875, 0.6875 ],
-  [ 0.8125, 0.3125, 0.9375, 0.4375 ],
-  [ 0.2500, 0.7500, 0.1250, 0.6250 ],
-  [ 1.0000, 0.5000, 0.8750, 0.3750 ]
-];
-
-// Color mapping matching image stops
-function getDitherColor(intensity: number): [number, number, number] {
-  if (intensity < 0.55) {
-    const t = intensity / 0.55;
-    return [
-      20 + t * (124 - 20),
-      17 + t * (106 - 17),
-      24 + t * (150 - 24)
-    ];
-  } else {
-    const t = (intensity - 0.55) / 0.45;
-    return [
-      124 + t * (244 - 124),
-      106 + t * (241 - 106),
-      150 + t * (234 - 150)
-    ];
-  }
-}
-
-type Cloud = {
-  scale: number;
-  speedX: number;
-  speedY: number;
-  zSeed: number;
-  cx: number;
-  cy: number;
-  radius: number;
-  parallax: number;
-  maxIntensity: number;
-  opacity: number;
-};
 
 export default function PixelBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,189 +43,125 @@ export default function PixelBackground() {
     let W = 0, H = 0;
     let destroyed = false;
     let raf = 0;
-    let mx = 0, my = 0, tmx = 0, tmy = 0;
-    let px = -2000, py = -2000, lpx = -2000, lpy = -2000;
 
-    const resize = () => {
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = W * dpr;
-      canvas.height = H * dpr;
-      canvas.style.width = `${W}px`;
-      canvas.style.height = `${H}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
+    // Pointer for hover spotlight
+    let lpx = -9999, lpy = -9999;
+    const SPOT_R = 160;
 
-    const onPointerMove = (e: PointerEvent) => {
-      px = e.clientX;
-      py = e.clientY;
-      tmx = (e.clientX / window.innerWidth) - 0.5;
-      tmy = (e.clientY / window.innerHeight) - 0.5;
-    };
-
-    const onPointerLeave = () => {
-      px = -2000;
-      py = -2000;
-    };
-
-    window.addEventListener("resize", resize, { passive: true });
+    const onPointerMove = (e: PointerEvent) => { lpx = e.clientX; lpy = e.clientY; };
+    const onPointerLeave = () => { lpx = -9999; lpy = -9999; };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerleave", onPointerLeave, { passive: true });
-    resize();
 
-    // 8 drifting clouds with large sizes (low scales) and portrait-matched attributes
-    const clouds: Cloud[] = [
-      { scale: 0.003, speedX: 0.006, speedY: 0.004, zSeed: 10.3, cx: 0.15, cy: 0.20, radius: 480, parallax: 6,  maxIntensity: 0.50, opacity: 0.22 },
-      { scale: 0.004, speedX: 0.009, speedY: 0.006, zSeed: 28.7, cx: 0.85, cy: 0.15, radius: 450, parallax: 10, maxIntensity: 0.60, opacity: 0.18 },
-      { scale: 0.002, speedX: 0.004, speedY: 0.003, zSeed: 45.1, cx: 0.50, cy: 0.55, radius: 580, parallax: 8,  maxIntensity: 0.40, opacity: 0.24 },
-      { scale: 0.005, speedX: 0.012, speedY: 0.008, zSeed: 63.4, cx: 0.08, cy: 0.80, radius: 380, parallax: 16, maxIntensity: 0.65, opacity: 0.15 },
-      { scale: 0.0035,speedX: 0.008, speedY: 0.005, zSeed: 81.9, cx: 0.92, cy: 0.75, radius: 420, parallax: 12, maxIntensity: 0.55, opacity: 0.20 },
-      { scale: 0.0045,speedX: 0.011, speedY: 0.007, zSeed: 33.6, cx: 0.60, cy: 0.10, radius: 400, parallax: 14, maxIntensity: 0.62, opacity: 0.16 },
-      { scale: 0.0025,speedX: 0.005, speedY: 0.004, zSeed: 57.2, cx: 0.35, cy: 0.45, radius: 520, parallax: 7,  maxIntensity: 0.45, opacity: 0.22 },
-      { scale: 0.006, speedX: 0.015, speedY: 0.010, zSeed: 89.4, cx: 0.75, cy: 0.85, radius: 360, parallax: 18, maxIntensity: 0.70, opacity: 0.14 }
-    ];
+    // Static pixel array (recalculated on resize)
+    type Pixel = {
+      x: number; y: number;        // canvas position
+      baseOp: number;              // resting opacity (0.02–0.12)
+      phase: number;               // sine phase offset
+      freq: number;                // sine frequency (very slow)
+    };
+    let pixels: Pixel[] = [];
 
-    // Portrait suppression coordinates
-    const portraitCX = 0.28;
-    const portraitCY = 0.62;
+    const buildPixels = () => {
+      pixels = [];
+      const rng = mulberry32(0xdeadbeef); // deterministic seed
 
-    const colorCache = new Map<number, string>();
-    function getCachedColor(r: number, g: number, b: number): string {
-      const key = (r << 16) | (g << 8) | b;
-      let c = colorCache.get(key);
-      if (!c) {
-        c = `rgb(${r},${g},${b})`;
-        colorCache.set(key, c);
-      }
-      return c;
-    }
+      const isMobile = W <= 900;
+      // Portrait cluster centre — right half on desktop, bottom-centre on mobile
+      const clusterX = isMobile ? W * 0.5  : W * 0.72;
+      const clusterY = isMobile ? H * 0.75 : H * 0.60;
+      const clusterR = isMobile ? Math.min(W, H) * 0.55 : Math.min(W, H) * 0.50;
 
-    const draw = (t: number) => {
-      mx += (tmx - mx) * 0.04;
-      my += (tmy - my) * 0.04;
-
-      // Smooth pointer tracking interpolation
-      if (px < -1000) {
-        lpx += (-2000 - lpx) * 0.08;
-        lpy += (-2000 - lpy) * 0.08;
-      } else {
-        lpx += (px - lpx) * 0.08;
-        lpy += (py - lpy) * 0.08;
-      }
-
-      ctx.clearRect(0, 0, W, H);
-
-      // Deep dark background
-      ctx.fillStyle = "#090909";
-      ctx.fillRect(0, 0, W, H);
+      // Secondary sparse cluster (upper-left in reference)
+      const cluster2X = isMobile ? W * 0.15 : W * 0.15;
+      const cluster2Y = isMobile ? H * 0.55 : H * 0.65;
+      const cluster2R = clusterR * 0.45;
 
       const cols = Math.ceil(W / CELL);
       const rows = Math.ceil(H / CELL);
 
-      for (let gy = 0; gy < rows; gy++) {
-        const cellY = gy * CELL;
-        const ny = cellY / H;
-        for (let gx = 0; gx < cols; gx++) {
-          const cellX = gx * CELL;
-          const nx2 = cellX / W;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const px = col * CELL;
+          const py = row * CELL;
 
-          // Portrait suppression mask
-          const dpx = nx2 - portraitCX;
-          const dpy = ny - portraitCY;
-          const portraitDist = Math.sqrt(dpx * dpx + dpy * dpy);
-          let mask = 1.0;
-          if (portraitDist < 0.42) {
-            const f = portraitDist / 0.42;
-            mask = f * f;
+          // Distance from primary cluster (portrait zone)
+          const d1 = Math.hypot(px - clusterX, py - clusterY);
+          const d2 = Math.hypot(px - cluster2X, py - cluster2Y);
+
+          // Primary cluster density: very dense near portrait, sparse far
+          const t1 = Math.max(0, 1 - d1 / clusterR);
+          const probCluster = t1 * t1 * 0.80; // up to 80% probability at centre
+
+          // Secondary cluster density
+          const t2 = Math.max(0, 1 - d2 / cluster2R);
+          const probCluster2 = t2 * t2 * 0.45;
+
+          // Sparse global field — ~4% chance anywhere
+          const probGlobal = 0.04;
+
+          const prob = Math.max(probGlobal, probCluster, probCluster2);
+
+          if (rng() < prob) {
+            // Opacity scales with cluster density + slight global random
+            const densityFactor = Math.max(t1, t2 * 0.5, 0.1);
+            const baseOp = 0.025 + densityFactor * 0.10 + rng() * 0.04;
+
+            pixels.push({
+              x: px,
+              y: py,
+              baseOp: Math.min(baseOp, 0.18),
+              phase: rng() * Math.PI * 2,
+              freq: 0.08 + rng() * 0.25,   // very slow: 0.08–0.33 rad/s
+            });
           }
-
-          // Pointer hover spotlight math — reduced radius
-          const hdx = cellX - lpx;
-          const hdy = cellY - lpy;
-          const hoverDist = Math.sqrt(hdx * hdx + hdy * hdy);
-          const spotlightRadius = 150;
-          let hoverBoost = 0;
-          if (hoverDist < spotlightRadius) {
-            const hf = 1 - hoverDist / spotlightRadius;
-            hoverBoost = hf * hf * (3 - 2 * hf);
-          }
-
-          // 1. Baseline continuous infinite noise field (slow, morphing digital fog)
-          const baseScale = 0.007;
-          const baseDriftX = t * 0.008;
-          const baseDriftY = t * 0.006;
-          const baseN = fbm(
-            (cellX + mx * 10) * baseScale + baseDriftX,
-            (cellY + my * 10) * baseScale + baseDriftY,
-            7.3
-          );
-          const baseNv = (baseN + 1) * 0.5;
-          // Very low density baseline
-          const baseDensity = Math.max(0, baseNv - 0.48) * 0.20;
-
-          // 2. Cloud clusters density
-          let clusterD = 0;
-          let activeOpacity = 0.08;
-
-          for (const cloud of clouds) {
-            const driftX = t * cloud.speedX;
-            const driftY = t * cloud.speedY;
-            const pmx = mx * cloud.parallax;
-            const pmy = my * cloud.parallax;
-            const ccx = cloud.cx * W + pmx;
-            const ccy = cloud.cy * H + pmy;
-
-            const dx = cellX - ccx;
-            const dy = cellY - ccy;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < cloud.radius) {
-              const falloff = 1 - dist / cloud.radius;
-              const n = fbm(
-                (cellX + pmx) * cloud.scale + driftX,
-                (cellY + pmy) * cloud.scale + driftY,
-                cloud.zSeed
-              );
-              const nv = (n + 1) * 0.5;
-              const density = falloff * nv * cloud.maxIntensity;
-
-              if (density > clusterD) {
-                clusterD = density;
-                activeOpacity = cloud.opacity;
-              }
-            }
-          }
-
-          // Combine baseline fog and cluster density
-          let finalD = Math.max(baseDensity, clusterD);
-
-          // Boost density within the hover spotlight region — reduced boost
-          if (hoverBoost > 0) {
-            finalD = Math.min(1.0, finalD + hoverBoost * 0.08);
-          }
-
-          // Apply portrait suppression mask
-          finalD *= mask;
-
-          if (finalD <= 0.01) continue;
-
-          // Bayer 4x4 Dithering Check
-          const ditherThreshold = BAYER_4x4[gy % 4][gx % 4];
-          if (finalD < ditherThreshold) continue;
-
-          // Tone value capped at 0.45 to keep spotlight color subtle (no warm cream stops)
-          const toneVal = Math.min(0.45, finalD * 0.5 + hoverBoost * 0.12);
-          const [r, g, b] = getDitherColor(toneVal);
-          const ri = Math.round(r), gi = Math.round(g), bi = Math.round(b);
-
-          // Set opacity — lowered maximum opacity cap to 0.28 for high subtlety
-          const baseOpacity = finalD === baseDensity ? 0.05 : activeOpacity;
-          const op = Math.min(0.28, baseOpacity * (0.4 + finalD * 0.6) + hoverBoost * 0.10);
-
-          ctx.globalAlpha = op;
-          ctx.fillStyle = getCachedColor(ri, gi, bi);
-          ctx.fillRect(cellX, cellY, SQ, SQ);
         }
+      }
+    };
+
+    const resize = () => {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width  = `${W}px`;
+      canvas.style.height = `${H}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildPixels();
+    };
+
+    window.addEventListener("resize", resize, { passive: true });
+    resize();
+
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, W, H);
+
+      // Pure dark background
+      ctx.fillStyle = "#090909";
+      ctx.fillRect(0, 0, W, H);
+
+      // Draw pixels with slow opacity breathing
+      for (let i = 0; i < pixels.length; i++) {
+        const p = pixels[i];
+
+        // Sine fade: oscillates between 0 and 1
+        const sine = (Math.sin(t * p.freq + p.phase) + 1) * 0.5;
+        let op = p.baseOp * (0.3 + sine * 0.7); // min 30% of baseOp
+
+        // Hover spotlight: boost nearby pixels
+        const hd = Math.hypot(p.x - lpx, p.y - lpy);
+        if (hd < SPOT_R) {
+          const hf = 1 - hd / SPOT_R;
+          const boost = hf * hf * (3 - 2 * hf); // smooth-step
+          op = Math.min(op + boost * 0.06, 0.28);
+        }
+
+        if (op < 0.005) continue;
+
+        ctx.globalAlpha = op;
+        // Colour: very dark grey, near-neutral but very slightly warm
+        ctx.fillStyle = "#c8c4d0";
+        ctx.fillRect(p.x, p.y, SQ, SQ);
       }
 
       ctx.globalAlpha = 1;
@@ -333,7 +191,7 @@ export default function PixelBackground() {
         inset: 0,
         zIndex: 5,
         pointerEvents: "none",
-        display: "block"
+        display: "block",
       }}
     />
   );

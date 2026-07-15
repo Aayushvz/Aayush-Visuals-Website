@@ -185,8 +185,9 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const s = (H * 0.76) / shc;
           iw = swc * s;
           ih = shc * s;
-          ix = inset + (gridW * 0.45 - iw) / 2;
-          iy = H - ih;
+          // figure centred in the RIGHT 45% zone — text owns the left (Figma)
+          ix = inset + gridW * 0.55 + (gridW * 0.45 - iw) / 2;
+          iy = H - ih - Math.round(H * 0.06);
         } else {
           const s = Math.min(W * 0.90, H * 0.58) / shc;
           iw = swc * s;

@@ -3946,11 +3946,13 @@ html.past-hero .themeSwitch {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: #111111; /* near-black canvas */
+  /* exactly the PixelBackground canvas fill — any uncovered edge or
+     overscroll reads as the same surface */
+  background: #090909;
   color: #f4f1ea;
   overflow: hidden;
   font-family: var(--font-primary);
-  padding-bottom: 52px; /* space for the fixed status bar */
+  padding-bottom: 58px; /* space for the fixed status bar */
 }
 
 .aboutPage__canvasBg {
@@ -3960,31 +3962,114 @@ html.past-hero .themeSwitch {
   pointer-events: none;
 }
 
-/* same geometry as the global .rails, page-local so the light-section
-   hairline colour never leaks in */
-.aboutPage__rails {
+/* -------- numbered measurement rulers (per the Figma) --------
+   fine tick strips at both window edges, 100→1000 scale labels, and "+"
+   registration marks in the four corners. Above the portrait canvas
+   (z 46 > canvasBg 40), below the status bar. */
+
+.aboutRulers {
   position: fixed;
   inset: 0;
+  z-index: 46;
   pointer-events: none;
-  z-index: 40;
 }
 
-.aboutPage__rails::before,
-.aboutPage__rails::after {
+.aboutRulers__side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 56px;
+}
+
+.aboutRulers__side--left {
+  left: 10px;
+}
+
+.aboutRulers__side--right {
+  right: 10px;
+}
+
+/* dense fine ticks hugging the edge… */
+.aboutRulers__side::before {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: rgba(244, 241, 234, 0.12);
+  width: 7px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(244, 241, 234, 0.18) 0 1px,
+    transparent 1px 7px
+  );
 }
 
-.aboutPage__rails::before {
-  left: var(--page-rail-inset);
+/* …with a longer tick at intervals */
+.aboutRulers__side::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 13px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(244, 241, 234, 0.24) 0 1px,
+    transparent 1px 35px
+  );
 }
 
-.aboutPage__rails::after {
-  right: var(--page-rail-inset);
+.aboutRulers__side--left::before,
+.aboutRulers__side--left::after {
+  left: 0;
+}
+
+.aboutRulers__side--right::before,
+.aboutRulers__side--right::after {
+  right: 0;
+}
+
+.aboutRulers__num {
+  position: absolute;
+  left: 24px;
+  translate: 0 -50%;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: rgba(244, 241, 234, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+.aboutRulers__side--right .aboutRulers__num {
+  left: auto;
+  right: 24px;
+  text-align: right;
+}
+
+.aboutRulers__cross {
+  position: absolute;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+  color: rgba(167, 139, 250, 0.7);
+}
+
+.aboutRulers__cross--tl {
+  left: 21px;
+  top: 18px;
+}
+
+.aboutRulers__cross--tr {
+  right: 21px;
+  top: 18px;
+}
+
+.aboutRulers__cross--bl {
+  left: 21px;
+  bottom: 74px;
+}
+
+.aboutRulers__cross--br {
+  right: 21px;
+  bottom: 74px;
 }
 
 /* -------- top chrome -------- */
@@ -4034,7 +4119,7 @@ html.past-hero .themeSwitch {
   z-index: 45;
   flex: 1;
   display: grid;
-  grid-template-columns: 48% 52%; /* Pushes text column slightly further to the right */
+  grid-template-columns: 55% 45%; /* text left, portrait zone right (Figma) */
   align-items: center;
   padding: 0 var(--page-content-inset); /* Safe margin inside vertical rulers */
   padding-top: 60px; /* Visually balances text between top navbar and status bar */
@@ -4097,11 +4182,11 @@ html.past-hero .themeSwitch {
   font-stretch: 125%;
   font-weight: 800; /* Ultra bold blocky weight */
   display: block;
-  color: var(--purple-soft); /* Lavender / soft purple accent */
+  color: #8b5cf6; /* the Figma's vivid purple, period included */
 }
 
 .aboutPage__namePeriod {
-  color: var(--purple);
+  color: inherit;
 }
 
 .aboutPage__facts {
@@ -4110,28 +4195,32 @@ html.past-hero .themeSwitch {
   padding: 0;
   display: flex;
   flex-direction: row;
+  /* one editorial line that runs past the column, under the portrait,
+     exactly like the Figma */
   flex-wrap: nowrap;
+  width: max-content;
   justify-content: flex-start;
-  gap: clamp(24px, 3.5vw, 60px); /* more breathing room */
+  gap: clamp(24px, 3vw, 56px);
 }
 
 .aboutPage__facts li {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: clamp(6.8px, 0.54vw, 8px); /* adjusted to 0.8x */
+  gap: 10px;
+  /* sized to the Figma — same optical weight as the status bar text */
+  font-size: clamp(9.5px, 0.78vw, 12px);
   font-weight: 500;
-  letter-spacing: 0.18em; /* increased tracking slightly */
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.72);
+  color: rgba(244, 241, 234, 0.78);
   white-space: nowrap;
 }
 
 .aboutPage__factMark {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   flex-shrink: 0;
-  background: var(--purple-soft);
+  background: #8b5cf6;
 }
 
 /* -------- portrait column -------- */
@@ -4189,60 +4278,64 @@ html.past-hero .themeSwitch {
 
 /* -------- status bar -------- */
 
+/* one row of bordered cells spanning the full width, per the Figma:
+   vertical hairline dividers, grey keys, purple values */
 .aboutPage__bar {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   z-index: 50;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 16px;
-  padding: 13px var(--page-content-inset);
-  border-top: 1px solid rgba(244, 241, 234, 0.1);
-  background: rgba(17, 17, 17, 0.85); /* matching deep canvas bg */
+  display: flex;
+  align-items: stretch;
+  height: 58px;
+  border-top: 1px solid rgba(244, 241, 234, 0.09);
+  background: rgba(9, 9, 9, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-}
-
-.aboutPage__barGroup {
-  display: flex;
-  align-items: center;
-  gap: clamp(16px, 2.4vw, 40px);
-  min-width: 0;
-}
-
-.aboutPage__barGroup--center {
-  justify-content: center;
-}
-
-.aboutPage__barGroup--right {
-  justify-content: flex-end;
 }
 
 .aboutPage__barCell {
   display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 11px;
+  padding: 0 clamp(18px, 2.4vw, 40px);
+  border-left: 1px solid rgba(244, 241, 234, 0.08);
   white-space: nowrap;
 }
 
+.aboutPage__barCell:first-child {
+  border-left: 0;
+  padding-left: clamp(22px, 3.4vw, 56px);
+}
+
+.aboutPage__barCell--section {
+  flex: 1;
+  justify-content: center;
+}
+
+.aboutPage__barCell--time {
+  padding-right: clamp(22px, 3.4vw, 56px);
+}
+
 .aboutPage__barKey {
-  color: rgba(244, 241, 234, 0.42);
+  color: rgba(244, 241, 234, 0.4);
 }
 
 .aboutPage__barVal {
-  color: rgba(244, 241, 234, 0.88);
+  color: var(--purple-soft);
   font-variant-numeric: tabular-nums;
 }
 
+.aboutPage__barVal--cream {
+  color: rgba(244, 241, 234, 0.92);
+}
+
 .aboutPage__barVal--status {
-  color: var(--purple-soft);
   animation: aboutStatusIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -4258,12 +4351,16 @@ html.past-hero .themeSwitch {
 }
 
 .aboutPage__barSection {
-  color: rgba(244, 241, 234, 0.55);
+  color: rgba(244, 241, 234, 0.5);
 }
 
 /* -------- responsive -------- */
 
 @media (max-width: 900px) {
+  .aboutRulers {
+    display: none;
+  }
+
   .aboutPage__main {
     display: flex;
     flex-direction: column;
@@ -4311,18 +4408,26 @@ html.past-hero .themeSwitch {
     gap: 11px;
   }
 
-  /* touch has no cursor — drop CRSR and the centre section label */
+  /* touch has no cursor — keep only SCRL, STATUS and IST; the centre
+     stays clear for the floating mobile navbar pill */
   .aboutPage__barCell--crsr,
-  .aboutPage__barGroup--center {
+  .aboutPage__barCell--theme,
+  .aboutPage__barCell--section {
     display: none;
   }
 
   .aboutPage__bar {
-    grid-template-columns: auto 1fr;
-    gap: 10px;
-    padding-top: 11px;
-    padding-bottom: max(11px, env(safe-area-inset-bottom));
-    font-size: 10px;
+    height: 46px;
+    font-size: 9.5px;
+    justify-content: space-between;
+  }
+
+  .aboutPage__barCell {
+    border-left: 0;
+  }
+
+  .aboutPage {
+    padding-bottom: 46px;
   }
 }
 
