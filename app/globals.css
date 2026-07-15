@@ -4082,10 +4082,10 @@ html.past-hero .themeSwitch {
   z-index: 45;
   flex: 1;
   display: grid;
-  grid-template-columns: 55% 45%;
+  grid-template-columns: 45% 55%; /* Left is portrait spacer (45%), right is text (55%) */
   grid-template-rows: 1fr auto;
   align-items: center;
-  padding: 0 var(--page-rail-inset); /* Align exactly within vertical rulers */
+  padding: 0 var(--page-content-inset); /* Safe margin inside vertical rulers */
   min-height: 0;
   row-gap: 20px;
 }

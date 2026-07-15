@@ -22,6 +22,11 @@ type Props = {
   onHoverChange?: (hovering: boolean) => void;
 };
 
+const getInset = () => {
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1000;
+  return Math.max(44, Math.min(132, vw * 0.09));
+};
+
 export default function AsciiPortrait({ src, onHoverChange }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -102,9 +107,9 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         // Boost contrast and brightness for face recognition
         let l = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
         if (a > 0) {
-          l = (l - 0.10) / 0.82; // stretch contrast
+          l = (l - 0.08) / 0.84; // stretch contrast
           l = Math.max(0, Math.min(1, l));
-          l = Math.pow(l, 0.70); // gamma midtone boost
+          l = Math.pow(l, 0.72); // gamma midtone boost
         }
 
         lum[i] = l * a;
@@ -133,12 +138,14 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       canvas.style.height = `${H}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (img) {
+        const inset = getInset();
+        const gridW = W - inset * 2;
         if (W > 900) {
-          // Desktop: center the portrait in the right 45% of the viewport width
+          // Desktop: center the portrait in the left 45% of the viewport width
           const s = (H * 0.76) / shc; // scale to fit height nicely
           iw = swc * s;
           ih = shc * s;
-          ix = W * 0.52 + (W * 0.48 - iw) / 2;
+          ix = inset + (gridW * 0.45 - iw) / 2;
           iy = H - ih;
         } else {
           // Mobile: center horizontally at the bottom of the screen
@@ -176,23 +183,21 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const cy = y * c + c / 2;
           const f = falloff(cx, cy);
           
-          let size = 0;
+          let size = c - 1.2; // uniform square size
           let opacity = 0;
 
           if (alpC[i] >= 0.3) {
-            // Face cell
+            // Face pixel
             const l = lumC[i];
             const jVal = jitter.get(i) || 0;
-            const lAdj = Math.max(0, Math.min(1, l + jVal * 0.12));
-            size = c * Math.pow(lAdj, 0.52) * (1 - f);
-            opacity = (0.28 + lAdj * 0.54) * (1 - f);
+            const lAdj = Math.max(0, Math.min(1, l + jVal * 0.1));
+            opacity = (0.08 + lAdj * 0.72) * (1 - f);
           } else {
             // Background screen grid (dots/squares)
-            size = 1.6;
-            opacity = 0.08 * (1 - f);
+            opacity = 0.07 * (1 - f);
           }
 
-          if (size <= 0.25 || opacity < 0.015) continue;
+          if (opacity < 0.01) continue;
           ctx.globalAlpha = opacity;
           ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
         }
@@ -214,21 +219,19 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             const f = falloff(cx, cy);
             if (f < 0.02) continue;
 
-            let size = 0;
+            let size = cf - 0.8; // uniform fine square size
             let opacity = 0;
 
             if (alpF[i] >= 0.3) {
-              // Detailed face cell
+              // Detailed face pixel
               const l = lumF[i];
-              size = cf * Math.pow(l, 0.48) * f;
-              opacity = (0.42 + l * 0.58) * f;
+              opacity = (0.12 + l * 0.78) * f;
             } else {
               // Spotlighted background screen grid (sharper)
-              size = 1.2;
-              opacity = 0.18 * f;
+              opacity = 0.16 * f;
             }
 
-            if (size <= 0.25 || opacity < 0.015) continue;
+            if (opacity < 0.01) continue;
             ctx.globalAlpha = opacity;
             ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
           }
