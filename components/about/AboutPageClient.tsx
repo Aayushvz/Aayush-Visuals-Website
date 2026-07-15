@@ -110,16 +110,16 @@ export default function AboutPageClient() {
               Raj<span className="aboutPage__namePeriod">.</span>
             </span>
           </h1>
-        </div>
 
-        <ul className="aboutPage__facts" data-enter style={{ "--d": "0.34s" } as React.CSSProperties}>
-          {FACTS.map((f) => (
-            <li key={f}>
-              <i className="aboutPage__factMark" aria-hidden />
-              {f}
-            </li>
-          ))}
-        </ul>
+          <ul className="aboutPage__facts" data-enter style={{ "--d": "0.34s" } as React.CSSProperties}>
+            {FACTS.map((f) => (
+              <li key={f}>
+                <i className="aboutPage__factMark" aria-hidden />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
 
       <StatusBar status={status} />

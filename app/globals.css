@@ -4082,18 +4082,17 @@ html.past-hero .themeSwitch {
   z-index: 45;
   flex: 1;
   display: grid;
-  grid-template-columns: 45% 55%; /* Left is portrait spacer (45%), right is text (55%) */
-  grid-template-rows: 1fr auto;
+  grid-template-columns: 48% 52%; /* Pushes text column slightly further to the right */
   align-items: center;
   padding: 0 var(--page-content-inset); /* Safe margin inside vertical rulers */
   min-height: 0;
-  row-gap: 20px;
 }
 
 .aboutPage__left {
   display: flex;
   flex-direction: column;
   padding: 4vh 0 6vh;
+  padding-right: clamp(40px, 8vw, 120px); /* Keeps text column safely away from right rail */
 }
 
 .aboutPage__role {
@@ -4153,15 +4152,14 @@ html.past-hero .themeSwitch {
 }
 
 .aboutPage__facts {
-  grid-column: 1 / span 2; /* Span full page width inside vertical rulers */
   list-style: none;
-  margin: 0 0 clamp(20px, 4.5svh, 36px) 0;
+  margin: clamp(28px, 6vh, 60px) 0 0;
   padding: 0;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  justify-content: space-between; /* Fact 1 aligns left rail, Fact 3 aligns right rail */
-  gap: 20px;
+  justify-content: flex-start;
+  gap: clamp(18px, 2.5vw, 44px);
 }
 
 .aboutPage__facts li {
