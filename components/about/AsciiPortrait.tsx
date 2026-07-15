@@ -97,13 +97,13 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let lastBreath = 0;
     let needsDraw = true;
 
-    const buildAtlas = (target: HTMLCanvasElement, cellPx: number) => {
+    const buildAtlas = (target: HTMLCanvasElement, cellPx: number, color: string) => {
       const s = Math.max(3, Math.round(cellPx)) * dpr;
       target.width = s * RAMP.length;
       target.height = s;
       const a = target.getContext("2d")!;
       a.clearRect(0, 0, target.width, target.height);
-      a.fillStyle = "#f4f1ea";
+      a.fillStyle = color;
       a.font = `${Math.ceil(s * 1.02)}px ${ATLAS_FONT}`;
       a.textAlign = "center";
       a.textBaseline = "middle";
@@ -147,8 +147,8 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       colsF = cols * 2;
       rowsF = rows * 2;
       ({ lum: lumF, alp: alpF } = sampleGrid(colsF, rowsF));
-      atlasCellC = buildAtlas(atlasC, cell);
-      atlasCellF = buildAtlas(atlasF, cell / 2);
+      atlasCellC = buildAtlas(atlasC, cell, "#f4f1ea");
+      atlasCellF = buildAtlas(atlasF, cell / 2, "#a78bfa");
       needsDraw = true;
     };
 
@@ -288,7 +288,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         hovering = true;
         bx = btx;
         by = bty;
-        brTarget = Math.min(W, H) * 0.3;
+        brTarget = Math.min(W, H) * 0.38;
         hoverCb.current?.(true);
       }
     };

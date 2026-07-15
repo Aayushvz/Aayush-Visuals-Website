@@ -72,6 +72,7 @@ export default function AboutPageClient() {
       <Cursor />
       <div className="aboutPage__rails" aria-hidden />
       <div className="aboutPage__pixels" aria-hidden />
+      <div className="aboutPage__glows" aria-hidden />
       <div className="aboutPage__vignette" aria-hidden />
       <div className="aboutPage__grain" aria-hidden />
 
@@ -113,9 +114,10 @@ export default function AboutPageClient() {
           </div>
 
           <h1 className="aboutPage__name" data-enter style={{ "--d": "0.2s" } as React.CSSProperties}>
-            Aayush
-            <br />
-            Raj<span className="aboutPage__namePeriod">.</span>
+            <span className="aboutPage__nameLine1">Aayush</span>
+            <span className="aboutPage__nameLine2">
+              Raj<span className="aboutPage__namePeriod">.</span>
+            </span>
           </h1>
 
           <ul className="aboutPage__facts" data-enter style={{ "--d": "0.34s" } as React.CSSProperties}>
