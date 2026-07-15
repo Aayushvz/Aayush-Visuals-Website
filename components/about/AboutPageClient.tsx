@@ -68,6 +68,7 @@ export default function AboutPageClient() {
   return (
     <div className="aboutPage">
       <PixelBackground />
+      <div className="aboutPage__gridPattern" aria-hidden />
       <Navbar />
       <MobileNav />
       <Cursor />

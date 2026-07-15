@@ -107,6 +107,7 @@ export default function PixelBackground() {
 
     // Pointer tracking
     let px = -9999, py = -9999, lpx = -9999, lpy = -9999;
+    let hoverAlpha = 0;
     let mx = 0, my = 0, tmx = 0, tmy = 0;
     const SPOT_R = 200;
 
@@ -196,9 +197,15 @@ export default function PixelBackground() {
       if (px < -1000) {
         lpx += (-9999 - lpx) * 0.08;
         lpy += (-9999 - lpy) * 0.08;
+        hoverAlpha += (0 - hoverAlpha) * 0.1;
       } else {
+        if (lpx < -1000) {
+          lpx = px;
+          lpy = py;
+        }
         lpx += (px - lpx) * 0.08;
         lpy += (py - lpy) * 0.08;
+        hoverAlpha += (1 - hoverAlpha) * 0.1;
       }
 
       ctx.clearRect(0, 0, W, H);
@@ -301,6 +308,60 @@ export default function PixelBackground() {
         ctx.globalAlpha = op;
         ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.fillRect(p.x, p.y, SQ, SQ);
+      }
+
+      // 3. Draw Interactive Engineer Telemetry overlay
+      if (hoverAlpha > 0.01) {
+        ctx.globalAlpha = hoverAlpha;
+
+        const railLeft = Math.max(14, Math.min(W * 0.05, 78));
+        const railRight = W - railLeft;
+
+        // Alignment guide lines
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.14)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]); // dashed guides for a technical look
+        
+        ctx.beginPath();
+        // Horiz line from left rail to right rail
+        ctx.moveTo(railLeft, lpy);
+        ctx.lineTo(railRight, lpy);
+        // Vert line from top navbar boundary to bottom status bar boundary
+        ctx.moveTo(lpx, 60);
+        ctx.lineTo(lpx, H - 58);
+        ctx.stroke();
+        ctx.setLineDash([]); // reset
+
+        // Radar / scope lens circle
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.10)";
+        ctx.beginPath();
+        ctx.arc(lpx, lpy, SPOT_R, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Target crosshair at center
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.35)";
+        ctx.beginPath();
+        ctx.moveTo(lpx - 5, lpy); ctx.lineTo(lpx + 5, lpy);
+        ctx.moveTo(lpx, lpy - 5); ctx.lineTo(lpx, lpy + 5);
+        ctx.stroke();
+
+        // Scope ticks at cardinal points
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.20)";
+        ctx.beginPath();
+        // North tick
+        ctx.moveTo(lpx, lpy - SPOT_R); ctx.lineTo(lpx, lpy - SPOT_R + 6);
+        // South tick
+        ctx.moveTo(lpx, lpy + SPOT_R); ctx.lineTo(lpx, lpy + SPOT_R - 6);
+        // West tick
+        ctx.moveTo(lpx - SPOT_R, lpy); ctx.lineTo(lpx - SPOT_R + 6, lpy);
+        // East tick
+        ctx.moveTo(lpx + SPOT_R, lpy); ctx.lineTo(lpx + SPOT_R - 6, lpy);
+        ctx.stroke();
+
+        // Coordinates tag
+        ctx.fillStyle = "rgba(167, 139, 250, 0.60)";
+        ctx.font = "9px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+        ctx.fillText(`[X: ${Math.round(lpx)} / Y: ${Math.round(lpy)}]`, lpx + 14, lpy - 8);
       }
 
       ctx.globalAlpha = 1;

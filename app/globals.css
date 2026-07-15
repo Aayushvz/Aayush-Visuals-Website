@@ -3962,6 +3962,17 @@ html.past-hero .themeSwitch {
   pointer-events: none;
 }
 
+/* Stationary engineering dotted/line grid mirroring the hero exactly */
+.aboutPage__gridPattern {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background-image: linear-gradient(var(--hero-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
 /* -------- numbered measurement rulers (per the Figma) --------
    fine tick strips at both window edges, 100→1000 scale labels, and "+"
    registration marks in the four corners. Above the portrait canvas
