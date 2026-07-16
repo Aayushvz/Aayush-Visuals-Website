@@ -108,24 +108,26 @@ a {
    ============================================================ */
 
 /* Outgoing page: content lifts up and fades */
-html.page-leaving main {
+html.page-leaving .pageEnter > main,
+html.page-leaving .aboutPage__content {
   animation: pageLeave 0.38s cubic-bezier(0.76, 0, 0.24, 1) forwards;
   pointer-events: none;
 }
 
 @keyframes pageLeave {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(-18px); }
 }
 
 /* Incoming page: content rises up from slight below */
-.pageEnter {
+.pageEnter > main,
+.aboutPage__content {
   animation: pageEnter 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes pageEnter {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* ============================================================ */

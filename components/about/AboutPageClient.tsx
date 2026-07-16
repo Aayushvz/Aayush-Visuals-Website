@@ -133,8 +133,9 @@ export default function AboutPageClient() {
       <Cursor />
       <div className="rails" aria-hidden />
 
-      {/* ---- HERO (dark, 100svh, untouched) ---- */}
-      <div className="aboutPage__hero" ref={(el) => { sectionRefs.current[0] = el; }}>
+      <div className="aboutPage__content">
+        {/* ---- HERO (dark, 100svh, untouched) ---- */}
+        <div className="aboutPage__hero" ref={(el) => { sectionRefs.current[0] = el; }}>
         <div className="aboutPage__bgMask" aria-hidden>
           <div className="aboutPage__bgMask--v">
             <PixelBackground />
@@ -487,8 +488,9 @@ export default function AboutPageClient() {
       <div ref={(el) => { sectionRefs.current[7] = el; }}>
         <Footer />
       </div>
-
-      <StatusBar status={status} section={currentSection} />
     </div>
+
+    <StatusBar status={status} section={currentSection} />
+  </div>
   );
 }
