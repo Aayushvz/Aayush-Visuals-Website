@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import PageLink from "./PageLink";
 
 /*
   White "About / Impact" section — the bridge between the dark draggable
@@ -173,9 +174,11 @@ function AboutIdentityCard() {
         design, visual systems, and prototyping, from early ideas to polished, usable
         products.
       </motion.p>
-      <motion.a href="#work" className="aboutCard__cta" variants={cardChild}>
-        About me
-      </motion.a>
+      <motion.div variants={cardChild}>
+        <PageLink href="/about" className="aboutCard__cta">
+          About me
+        </PageLink>
+      </motion.div>
     </motion.div>
   );
 }

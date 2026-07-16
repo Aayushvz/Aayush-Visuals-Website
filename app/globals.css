@@ -79,6 +79,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -89,6 +90,12 @@ body {
   font-size: 17px;
   line-height: 1.5;
   overflow-x: hidden;
+}
+
+/* Page specific backgrounds */
+html.about-page-active,
+html.about-page-active body {
+  background-color: #1A1A1A;
 }
 
 a {
@@ -4123,6 +4130,7 @@ html.past-hero .themeSwitch {
   position: relative;
   font-family: var(--font-primary);
   padding-bottom: 58px;
+  background: #1A1A1A;
 }
 
 .aboutPage__hero {
@@ -4197,7 +4205,7 @@ html.past-hero .themeSwitch {
 }
 
 .aboutRulers__rail--right {
-  right: clamp(14px, 5vw, 78px);
+  display: none;
 }
 
 /* Corner registration marks */
@@ -4319,6 +4327,10 @@ html.past-hero .themeSwitch {
   padding: 0 6px;
 }
 
+.aboutPage__iam {
+  display: none;
+}
+
 .aboutPage__name {
   margin: clamp(24px, 4.5vh, 48px) 0 0;
   text-transform: uppercase;
@@ -4403,6 +4415,11 @@ html.past-hero .themeSwitch {
   max-width: 42vw;
   height: min(72svh, 46vw);
   animation: aboutPortraitFloat 9s ease-in-out infinite;
+}
+
+.aboutPortrait {
+  width: 100%;
+  height: 100%;
 }
 
 @keyframes aboutPortraitFloat {
@@ -5442,6 +5459,8 @@ html.past-hero .themeSwitch {
     font-size: 10.5px;
     justify-content: space-between;
     z-index: 95;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
   }
 
   .aboutPage__barCell {
@@ -5450,11 +5469,23 @@ html.past-hero .themeSwitch {
 
   .aboutPage {
     padding-bottom: 0;
+    background: #1A1A1A;
   }
 
   .aboutPage__main {
     height: calc(100svh - 46px);
-    padding-top: calc(46px + 20px);
+    padding-top: calc(46px + 36px);
+  }
+
+  .aboutPage__iam {
+    display: block;
+    font-size: 15.6px;
+    font-weight: 400;
+    text-transform: lowercase;
+    color: rgba(244, 241, 234, 0.76);
+    margin-bottom: 6px;
+    margin-left: 5px;
+    letter-spacing: 0.1em;
   }
 
   /* smoke gradient at hero bottom so text over portrait is legible */

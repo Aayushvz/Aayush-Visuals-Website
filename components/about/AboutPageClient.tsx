@@ -81,6 +81,13 @@ export default function AboutPageClient() {
   }, []);
 
   useEffect(() => {
+    document.documentElement.classList.add("about-page-active");
+    return () => {
+      document.documentElement.classList.remove("about-page-active");
+    };
+  }, []);
+
+  useEffect(() => {
     const ratios = new Map<Element, number>();
     const observer = new IntersectionObserver(
       (entries) => {
@@ -159,6 +166,7 @@ export default function AboutPageClient() {
             </div>
             <div className="aboutPage__bottom">
               <h1 className="aboutPage__name" data-enter style={{ "--d": "0.2s" } as React.CSSProperties}>
+                <span className="aboutPage__iam">i am</span>
                 <span className="aboutPage__nameLine1">Aayush</span>
                 <span className="aboutPage__nameLine2">
                   Raj<span className="aboutPage__namePeriod">.</span>
