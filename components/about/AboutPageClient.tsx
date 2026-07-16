@@ -412,8 +412,8 @@ export default function AboutPageClient() {
             </p>
             <div className="aboutContact__socials">
               <a href="https://www.behance.net/AAYUSHVISUALS" target="_blank" rel="noreferrer" className="aboutContact__social">Behance</a>
-              <a href="https://www.instagram.com/aayushvisuals" target="_blank" rel="noreferrer" className="aboutContact__social">Instagram</a>
-              <a href="https://www.linkedin.com/in/aayushvisuals" target="_blank" rel="noreferrer" className="aboutContact__social">LinkedIn</a>
+              <a href="https://www.instagram.com/aayush.visuals" target="_blank" rel="noreferrer" className="aboutContact__social">Instagram</a>
+              <a href="https://www.linkedin.com/in/aayushvz" target="_blank" rel="noreferrer" className="aboutContact__social">LinkedIn</a>
             </div>
           </div>
           <form

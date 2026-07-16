@@ -18,7 +18,7 @@ const links = [
   { label: "Home", href: "/" },
   { label: "About Me", href: "/about" },
   { label: "Works", href: "/#work" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function MobileNav() {

@@ -1,8 +1,9 @@
 import { PixelWebHero } from "./doodles";
+import PageLink from "./PageLink";
 
 export default function Footer() {
   return (
-    <footer className="footer dotsInk" id="contact">
+    <footer className="footer dotsInk">
       <div className="footer__glow" aria-hidden />
       <div className="railsLight" aria-hidden>
         <span className="railsLight__line railsLight__line--left" />
@@ -27,7 +28,12 @@ export default function Footer() {
           </p>
         </div>
         <div className="footer__reach">
-          <span>Reach out</span>
+          <PageLink href="/contact" className="footer__contactCta">
+            Get in touch
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </PageLink>
           <div className="footer__icons">
             <a
               href="https://www.behance.net/AAYUSHVISUALS"
@@ -41,7 +47,7 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="https://www.instagram.com/aayushvisuals"
+              href="https://www.instagram.com/aayush.visuals"
               target="_blank"
               rel="noreferrer"
               aria-label="Instagram"
@@ -53,7 +59,7 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="https://www.linkedin.com/in/aayushvisuals"
+              href="https://www.linkedin.com/in/aayushvz"
               target="_blank"
               rel="noreferrer"
               aria-label="LinkedIn"
