@@ -7,17 +7,17 @@ import { useEffect, useRef } from "react";
   -----------------------------------------------------------------------
   Combines:
     1. Static scattered pixel starfield (seeded, deterministic layout)
-    2. 8 large drifting noise cloud layers that slowly morph and drift
-    3. Coherent hover animation: a "reveal lens" — when you hover, nearby
-       pixels get revealed at higher resolution and shift toward #A78BFA
-       purple, as if the cursor is a magnifying glass peering into the
-       digital substrate. The reveal radius is generous (200px) and has a
-       warm bloom that creates a soft glow at the centre of the spotlight.
-       
-  Design rationale: The hover doesn't feel random — it feels like you're
-  peering deeper into the engineering grid, exposing the hidden structure.
-  The purple accent ties it to the brand palette. The clouds give organic
-  depth and movement without being distracting.
+    2. 8 large drifting noise cloud layers that slowly morph and drift,
+       purely ambient — not cursor-reactive
+    3. Magnetic ripple hover: each nearby starfield pixel is a tiny spring
+       body. The cursor repels pixels within its radius (stronger the
+       closer they are), and every pixel constantly springs back toward
+       its rest position with damping, so the grid visibly pushes away
+       from the cursor and settles back with a soft, physical wobble once
+       it leaves — instead of a static reveal/magnifying lens. Displaced
+       pixels also tint toward the brand purple in proportion to how far
+       they've been pushed, so the ripple reads clearly against the grey
+       resting state.
 */
 
 // ---- Perlin noise ----
@@ -91,6 +91,13 @@ type Cloud = {
   maxIntensity: number; opacity: number;
 };
 
+// magnetic ripple tuning
+const RIPPLE_R = 210;
+const PUSH_POWER = 1800;
+const SPRING_K = 95;
+const DAMPING = 0.86;
+const MAX_DISPLACE = 15;
+
 export default function PixelBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -104,12 +111,11 @@ export default function PixelBackground() {
     let W = 0, H = 0;
     let destroyed = false;
     let raf = 0;
+    let lastT = 0;
 
     // Pointer tracking
     let px = -9999, py = -9999, lpx = -9999, lpy = -9999;
-    let hoverAlpha = 0;
     let mx = 0, my = 0, tmx = 0, tmy = 0;
-    const SPOT_R = 200;
 
     const onPointerMove = (e: PointerEvent) => {
       px = e.clientX; py = e.clientY;
@@ -120,8 +126,12 @@ export default function PixelBackground() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerleave", onPointerLeave, { passive: true });
 
-    // Static starfield
-    type Pixel = { x: number; y: number; baseOp: number; phase: number; freq: number };
+    // Static starfield — each pixel is also a tiny spring body for the
+    // magnetic ripple (dx/dy = current displacement, vx/vy = velocity)
+    type Pixel = {
+      x: number; y: number; baseOp: number; phase: number; freq: number;
+      dx: number; dy: number; vx: number; vy: number;
+    };
     let pixels: Pixel[] = [];
 
     const buildPixels = () => {
@@ -150,14 +160,15 @@ export default function PixelBackground() {
               x: cx, y: cy,
               baseOp: Math.min(0.025 + df * 0.10 + rng() * 0.04, 0.18),
               phase: rng() * Math.PI * 2,
-              freq: 0.08 + rng() * 0.25
+              freq: 0.08 + rng() * 0.25,
+              dx: 0, dy: 0, vx: 0, vy: 0,
             });
           }
         }
       }
     };
 
-    // 10 cloud layers — large, slow, organic fog
+    // 10 cloud layers — large, slow, organic fog, purely ambient
     const clouds: Cloud[] = [
       { scale: 0.003,  speedX: 0.006,  speedY: 0.004,  zSeed: 10.3, cx: 0.15, cy: 0.20, radius: 520, parallax: 6,  maxIntensity: 0.45, opacity: 0.16 },
       { scale: 0.004,  speedX: 0.009,  speedY: 0.006,  zSeed: 28.7, cx: 0.85, cy: 0.15, radius: 480, parallax: 10, maxIntensity: 0.55, opacity: 0.13 },
@@ -189,15 +200,14 @@ export default function PixelBackground() {
     const BASE_R = 200, BASE_G = 196, BASE_B = 208; // cool grey
     const HOVER_R = 167, HOVER_G = 139, HOVER_B = 250; // #A78BFA
 
-    const draw = (t: number) => {
+    const draw = (t: number, dt: number) => {
       mx += (tmx - mx) * 0.04;
       my += (tmy - my) * 0.04;
 
-      // Smooth pointer lerp
+      // Smooth pointer lerp (still used as the ripple's push origin)
       if (px < -1000) {
         lpx += (-9999 - lpx) * 0.08;
         lpy += (-9999 - lpy) * 0.08;
-        hoverAlpha += (0 - hoverAlpha) * 0.1;
       } else {
         if (lpx < -1000) {
           lpx = px;
@@ -205,7 +215,6 @@ export default function PixelBackground() {
         }
         lpx += (px - lpx) * 0.08;
         lpy += (py - lpy) * 0.08;
-        hoverAlpha += (1 - hoverAlpha) * 0.1;
       }
 
       ctx.clearRect(0, 0, W, H);
@@ -215,21 +224,12 @@ export default function PixelBackground() {
       const cols = Math.ceil(W / CELL);
       const rows = Math.ceil(H / CELL);
 
-      // 1. Draw cloud layers on the grid
+      // 1. Draw ambient cloud layers on the grid — no cursor reactivity
       for (let gy = 0; gy < rows; gy++) {
         const cellY = gy * CELL;
         for (let gx = 0; gx < cols; gx++) {
           const cellX = gx * CELL;
 
-          // Hover lens — smooth-step falloff
-          const hd = Math.hypot(cellX - lpx, cellY - lpy);
-          let hoverBlend = 0;
-          if (hd < SPOT_R) {
-            const hf = 1 - hd / SPOT_R;
-            hoverBlend = hf * hf * (3 - 2 * hf);
-          }
-
-          // Cloud density accumulation
           let cloudD = 0;
           let cloudOp = 0.08;
 
@@ -262,106 +262,67 @@ export default function PixelBackground() {
             }
           }
 
-          // Hover boosts cloud density
-          if (hoverBlend > 0) {
-            cloudD = Math.min(1.0, cloudD + hoverBlend * 0.12);
-          }
-
           if (cloudD <= 0.01) continue;
 
           // Bayer dither
           if (cloudD < BAYER[gy % 4][gx % 4]) continue;
 
-          // Colour: lerp from grey base toward #A78BFA under the spotlight
-          const r = Math.round(BASE_R + (HOVER_R - BASE_R) * hoverBlend);
-          const g = Math.round(BASE_G + (HOVER_G - BASE_G) * hoverBlend);
-          const b = Math.round(BASE_B + (HOVER_B - BASE_B) * hoverBlend);
-
-          const op = Math.min(0.30, cloudOp * (0.4 + cloudD * 0.6) + hoverBlend * 0.08);
+          const op = Math.min(0.30, cloudOp * (0.4 + cloudD * 0.6));
           ctx.globalAlpha = op;
-          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillStyle = `rgb(${BASE_R},${BASE_G},${BASE_B})`;
           ctx.fillRect(cellX, cellY, SQ, SQ);
         }
       }
 
-      // 2. Draw static starfield pixels (on top of clouds, with breathing)
+      // 2. Starfield pixels — magnetic ripple spring physics + breathing
+      const pushOriginActive = lpx > -1000;
       for (let i = 0; i < pixels.length; i++) {
         const p = pixels[i];
+
+        // magnetic repulsion from the cursor, falling off with distance
+        if (pushOriginActive) {
+          const rdx = p.x - lpx;
+          const rdy = p.y - lpy;
+          const dist = Math.hypot(rdx, rdy);
+          if (dist < RIPPLE_R && dist > 0.01) {
+            const falloff = 1 - dist / RIPPLE_R;
+            const push = falloff * falloff * PUSH_POWER * dt;
+            p.vx += (rdx / dist) * push;
+            p.vy += (rdy / dist) * push;
+          }
+        }
+
+        // spring back toward rest + damping
+        p.vx += -p.dx * SPRING_K * dt;
+        p.vy += -p.dy * SPRING_K * dt;
+        p.vx *= DAMPING;
+        p.vy *= DAMPING;
+        p.dx += p.vx * dt;
+        p.dy += p.vy * dt;
+
+        const dmag = Math.hypot(p.dx, p.dy);
+        if (dmag > MAX_DISPLACE) {
+          const k = MAX_DISPLACE / dmag;
+          p.dx *= k;
+          p.dy *= k;
+        }
+
         const sine = (Math.sin(t * p.freq + p.phase) + 1) * 0.5;
         let op = p.baseOp * (0.3 + sine * 0.7);
 
-        // Hover: boost and colour shift
-        const hd = Math.hypot(p.x - lpx, p.y - lpy);
-        let hoverBlend = 0;
-        if (hd < SPOT_R) {
-          const hf = 1 - hd / SPOT_R;
-          hoverBlend = hf * hf * (3 - 2 * hf);
-          op = Math.min(op + hoverBlend * 0.10, 0.35);
-        }
+        // tint toward brand purple in proportion to how far it's been pushed
+        const tint = Math.min(1, dmag / MAX_DISPLACE);
+        op = Math.min(op + tint * 0.16, 0.4);
 
         if (op < 0.005) continue;
 
-        const r = Math.round(BASE_R + (HOVER_R - BASE_R) * hoverBlend);
-        const g = Math.round(BASE_G + (HOVER_G - BASE_G) * hoverBlend);
-        const b = Math.round(BASE_B + (HOVER_B - BASE_B) * hoverBlend);
+        const r = Math.round(BASE_R + (HOVER_R - BASE_R) * tint);
+        const g = Math.round(BASE_G + (HOVER_G - BASE_G) * tint);
+        const b = Math.round(BASE_B + (HOVER_B - BASE_B) * tint);
 
         ctx.globalAlpha = op;
         ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(p.x, p.y, SQ, SQ);
-      }
-
-      // 3. Draw Interactive Engineer Telemetry overlay
-      if (hoverAlpha > 0.01) {
-        ctx.globalAlpha = hoverAlpha;
-
-        const railLeft = Math.max(14, Math.min(W * 0.05, 78));
-        const railRight = W - railLeft;
-
-        // Alignment guide lines
-        ctx.strokeStyle = "rgba(167, 139, 250, 0.14)";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]); // dashed guides for a technical look
-        
-        ctx.beginPath();
-        // Horiz line from left rail to right rail
-        ctx.moveTo(railLeft, lpy);
-        ctx.lineTo(railRight, lpy);
-        // Vert line from top navbar boundary to bottom status bar boundary
-        ctx.moveTo(lpx, 60);
-        ctx.lineTo(lpx, H - 58);
-        ctx.stroke();
-        ctx.setLineDash([]); // reset
-
-        // Radar / scope lens circle
-        ctx.strokeStyle = "rgba(167, 139, 250, 0.10)";
-        ctx.beginPath();
-        ctx.arc(lpx, lpy, SPOT_R, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Target crosshair at center
-        ctx.strokeStyle = "rgba(167, 139, 250, 0.35)";
-        ctx.beginPath();
-        ctx.moveTo(lpx - 5, lpy); ctx.lineTo(lpx + 5, lpy);
-        ctx.moveTo(lpx, lpy - 5); ctx.lineTo(lpx, lpy + 5);
-        ctx.stroke();
-
-        // Scope ticks at cardinal points
-        ctx.strokeStyle = "rgba(167, 139, 250, 0.20)";
-        ctx.beginPath();
-        // North tick
-        ctx.moveTo(lpx, lpy - SPOT_R); ctx.lineTo(lpx, lpy - SPOT_R + 6);
-        // South tick
-        ctx.moveTo(lpx, lpy + SPOT_R); ctx.lineTo(lpx, lpy + SPOT_R - 6);
-        // West tick
-        ctx.moveTo(lpx - SPOT_R, lpy); ctx.lineTo(lpx - SPOT_R + 6, lpy);
-        // East tick
-        ctx.moveTo(lpx + SPOT_R, lpy); ctx.lineTo(lpx + SPOT_R - 6, lpy);
-        ctx.stroke();
-
-        // Coordinates tag
-        ctx.fillStyle = "rgba(167, 139, 250, 0.60)";
-        ctx.font = "9px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
-        ctx.fillText(`[X: ${Math.round(lpx)} / Y: ${Math.round(lpy)}]`, lpx + 14, lpy - 8);
+        ctx.fillRect(p.x + p.dx, p.y + p.dy, SQ, SQ);
       }
 
       ctx.globalAlpha = 1;
@@ -369,7 +330,10 @@ export default function PixelBackground() {
 
     const loop = (now: number) => {
       if (destroyed) return;
-      draw(now / 1000);
+      const tSec = now / 1000;
+      const dt = lastT ? Math.min(0.05, tSec - lastT) : 1 / 60;
+      lastT = tSec;
+      draw(tSec, dt);
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);

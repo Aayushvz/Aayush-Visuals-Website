@@ -182,18 +182,21 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         const inset = getInset();
         const gridW = W - inset * 2;
         if (W > 900) {
-          const s = (H * 0.76) / shc;
+          const s = (H * 0.76 * 1.1) / shc;
           iw = swc * s;
           ih = shc * s;
           // figure centred in the RIGHT 45% zone — text owns the left (Figma)
           ix = inset + gridW * 0.55 + (gridW * 0.45 - iw) / 2;
-          iy = H - ih - Math.round(H * 0.06);
+          iy = H - ih;
         } else {
-          const s = Math.min(W * 0.90, H * 0.58) / shc;
+          // mobile: portrait fills the hero like a background — full viewport
+          // width, starting just below the role/meta text so it bleeds down
+          // and overlaps the name text at the bottom (Juba-style layout).
+          const s = (W * 1.4) / swc;
           iw = swc * s;
           ih = shc * s;
           ix = (W - iw) / 2;
-          iy = H - ih - 52;
+          iy = H - ih;
         }
         resample();
       }
@@ -324,6 +327,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
 
     const ro = new ResizeObserver(layout);
     ro.observe(wrap);
+    layout(); // explicit initial call — ResizeObserver may not fire in StrictMode double-effect
 
     const image = new Image();
     image.src = src;

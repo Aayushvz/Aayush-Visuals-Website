@@ -44,45 +44,36 @@ export default function MobileNav() {
 
   return (
     <>
-      <AnimatePresence>
-        {!open && (
-          <motion.nav 
-            className="mobileNav" 
-            aria-label="Mobile navigation"
-            initial={{ opacity: 0, y: 15, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
+      {!open && (
+        <nav className="mobileNav" aria-label="Mobile navigation">
+          <button
+            type="button"
+            className="mobileNav__menu"
+            aria-label="Open menu"
+            onClick={() => setOpen(true)}
           >
-            <button
-              type="button"
-              className="mobileNav__menu"
-              aria-label="Open menu"
-              onClick={() => setOpen(true)}
-            >
-              <span className="mobileNav__menuIcon" aria-hidden>
-                <i />
-                <i />
-              </span>
-            </button>
+            <span className="mobileNav__menuIcon" aria-hidden>
+              <i />
+              <i />
+            </span>
+          </button>
 
-            <PageLink href="/" className="mobileNav__logo">
-              aayush<sup>vz</sup>
-            </PageLink>
+          <PageLink href="/" className="mobileNav__logo">
+            aayush<sup>vz</sup>
+          </PageLink>
 
-            <button
-              type="button"
-              className="mobileNav__theme"
-              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              onClick={toggleTheme}
-            >
-              <span key={theme} className="mobileNav__themeIcon">
-                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-              </span>
-            </button>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+          <button
+            type="button"
+            className="mobileNav__theme"
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={toggleTheme}
+          >
+            <span key={theme} className="mobileNav__themeIcon">
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </span>
+          </button>
+        </nav>
+      )}
 
       <AnimatePresence>
         {open && (

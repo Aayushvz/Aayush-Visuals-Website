@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 40" fill="none">
+  <path d="M4 10l12 10L4 30V10z" fill="#007ACC"/>
+  <path d="M16 10l-12 10 12 10 10-3V13L16 10z" fill="#1E9EF5"/>
+  <path d="M26 13v14l-10 3V10l10 3z" fill="#007ACC"/>
+  <text x="40" y="28" font-family="system-ui,sans-serif" font-size="22" font-weight="700" fill="#57A143">N</text>
+</svg>

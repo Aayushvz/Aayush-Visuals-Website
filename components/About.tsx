@@ -170,7 +170,7 @@ function AboutIdentityCard() {
       <motion.p className="aboutCard__desc" variants={cardChild}>
         I&rsquo;m a product designer and builder focused on turning complex problems into
         clear, intuitive digital experiences. I work across product thinking, interaction
-        design, visual systems, and prototyping — from early ideas to polished, usable
+        design, visual systems, and prototyping, from early ideas to polished, usable
         products.
       </motion.p>
       <motion.a href="#work" className="aboutCard__cta" variants={cardChild}>

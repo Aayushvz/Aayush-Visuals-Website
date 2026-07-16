@@ -24,7 +24,7 @@ export default function ProjectPreview({ preview, title, mounted }: Props) {
           {mounted ? (
             <iframe
               src={`https://www.behance.net/embed/project/${preview.embedId}?ilo0=1`}
-              title={`${title} — Behance embed`}
+              title={`${title} - Behance embed`}
               allowFullScreen
               loading="lazy"
               frameBorder={0}
@@ -40,7 +40,7 @@ export default function ProjectPreview({ preview, title, mounted }: Props) {
       return (
         <div className="projPreview projPreview--website">
           {preview.image ? (
-            <img src={preview.image} alt={`${title} — live site preview`} loading="lazy" />
+            <img src={preview.image} alt={`${title} - live site preview`} loading="lazy" />
           ) : (
             <div className="projPreview__placeholder">
               <span className="projPreview__placeholderLabel">Live site</span>

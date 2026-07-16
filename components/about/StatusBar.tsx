@@ -19,7 +19,7 @@ export type AboutStatus =
   | "AVAILABLE"
   | "SCROLLING";
 
-export default function StatusBar({ status }: { status: AboutStatus }) {
+export default function StatusBar({ status, section }: { status: AboutStatus; section: string }) {
   const scrlRef = useRef<HTMLSpanElement>(null);
   const crsrRef = useRef<HTMLSpanElement>(null);
   const [time, setTime] = useState("--:--:--");
@@ -81,7 +81,7 @@ export default function StatusBar({ status }: { status: AboutStatus }) {
      (flexible centre) | STATUS | THEME | IST — keys grey, values purple */
   return (
     <footer className="aboutPage__bar" aria-label="Page telemetry">
-      <span className="aboutPage__barCell">
+      <span className="aboutPage__barCell aboutPage__barCell--scrl">
         <span className="aboutPage__barKey">SCRL</span>
         <span className="aboutPage__barVal" ref={scrlRef}>
           0.00
@@ -95,7 +95,7 @@ export default function StatusBar({ status }: { status: AboutStatus }) {
       </span>
 
       <span className="aboutPage__barCell aboutPage__barCell--section">
-        <span className="aboutPage__barSection">02 — ABOUT</span>
+        <span className="aboutPage__barSection" key={section}>{section}</span>
       </span>
 
       <span className="aboutPage__barCell aboutPage__barCell--status">

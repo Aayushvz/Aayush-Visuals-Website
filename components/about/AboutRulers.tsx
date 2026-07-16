@@ -9,12 +9,6 @@
 export default function AboutRulers() {
   return (
     <div className="aboutRulers" aria-hidden>
-      {/* Corner registration marks */}
-      <span className="aboutRulers__cross aboutRulers__cross--tl">+</span>
-      <span className="aboutRulers__cross aboutRulers__cross--tr">+</span>
-      <span className="aboutRulers__cross aboutRulers__cross--bl">+</span>
-      <span className="aboutRulers__cross aboutRulers__cross--br">+</span>
-
       {/* Vertical rails — same styling as heroRuler__rail */}
       <span className="aboutRulers__rail aboutRulers__rail--left" />
       <span className="aboutRulers__rail aboutRulers__rail--right" />

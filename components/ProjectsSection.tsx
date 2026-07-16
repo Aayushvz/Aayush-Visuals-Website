@@ -8,7 +8,7 @@ export default function ProjectsSection() {
       </h2>
       <p className="projects__sub" data-reveal>
         Selection of projects across product design, branding, websites and
-        visual systems—crafted with intention and built for real users.
+        visual systems, crafted with intention and built for real users.
       </p>
       <ProjectGrid />
     </section>

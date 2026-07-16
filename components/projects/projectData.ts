@@ -50,7 +50,7 @@ export const PROJECTS: Project[] = [
     role: "Design & Build",
     tools: ["Webflow", "Figma", "Motion"],
     description:
-      "A high-impact tournament site for the Mike Tyson Invitational — built for momentum, clarity and a heavyweight first impression.",
+      "A high-impact tournament site for the Mike Tyson Invitational, built for momentum, clarity and a heavyweight first impression.",
     highlights: [
       "Countdown-driven landing built around a hard launch deadline",
       "Custom Webflow interactions tuned for mobile performance",
@@ -74,7 +74,7 @@ export const PROJECTS: Project[] = [
     role: "Web Design",
     tools: ["Framer", "Figma", "Motion"],
     description:
-      "Website design for Riviera — one of the country's largest student fests — built to carry the scale and energy of the event.",
+      "Website design for Riviera, one of the country's largest student fests, built to carry the scale and energy of the event.",
     highlights: [
       "Website built to carry one of the country's largest student fests",
       "Motion-forward homepage designed to signal scale and energy",
@@ -94,7 +94,7 @@ export const PROJECTS: Project[] = [
     role: "Product Design",
     tools: ["Figma", "Prototyping"],
     description:
-      "Product design for Layover — turning a complex travel-stopover problem into a clean, intuitive booking experience.",
+      "Product design for Layover, turning a complex travel-stopover problem into a clean, intuitive booking experience.",
     highlights: [
       "End-to-end booking flow redesigned around traveller trust",
       "Component system built for fast iteration on a startup roadmap",
@@ -118,7 +118,7 @@ export const PROJECTS: Project[] = [
     role: "Brand + Web Design",
     tools: ["Figma", "Illustrator", "Framer"],
     description:
-      "An end-to-end brand system and website for Gravitas — a flagship techno-management fest — scaled across every touchpoint.",
+      "An end-to-end brand system and website for Gravitas, a flagship techno-management fest, scaled across every touchpoint.",
     highlights: [
       "Unified identity system scaled across print, stage and digital",
       "Signature visual language built around a bold techno-management theme",
@@ -142,7 +142,7 @@ export const PROJECTS: Project[] = [
     role: "Product Design",
     tools: ["Figma", "Prototyping"],
     description:
-      "Product design and visual identity for DropBy — a location-first social app — from flows to a cohesive interface system.",
+      "Product design and visual identity for DropBy, a location-first social app, from flows to a cohesive interface system.",
     highlights: [
       "Location-first interaction model designed from first principles",
       "Full visual identity built alongside the product from day one",
@@ -166,7 +166,7 @@ export const PROJECTS: Project[] = [
     role: "Web Design",
     tools: ["Framer", "Figma"],
     description:
-      "An event website for Futurepreneurs — a founders' initiative — presented with a confident, startup-grade identity.",
+      "An event website for Futurepreneurs, a founders' initiative, presented with a confident, startup-grade identity.",
     highlights: [
       "Founder-first narrative translated into a confident startup-grade site",
       "Built for fast content updates across a multi-week event",

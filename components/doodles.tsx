@@ -195,6 +195,70 @@ export function Portrait({ className }: { className?: string }) {
   );
 }
 
+/* Original pixel-art mascot: a masked hero rendered in the site's own brand
+   palette (purple/near-black/cream), built with the same rect-grid
+   technique as PixelDude. No red/blue suit, no lens-shaped eyes, no spider
+   emblem, just a simple square-eyed full mask and an abstract diamond chest
+   mark, so it reads as its own character rather than a licensed likeness. A
+   loose hand-drawn thread trails from the raised hand to suggest
+   web-slinging without depicting a copyrighted design. */
+export function PixelWebHero({ className }: { className?: string }) {
+  const p = 8; // pixel size
+  const px = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    fill: string,
+    key: string
+  ) => (
+    <rect key={key} x={x * p} y={y * p} width={w * p} height={h * p} fill={fill} />
+  );
+  const mask = "#6d28d9";
+  const suit = "#1a1a1a";
+  const trim = "#f4f1ea";
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 140 216"
+      xmlns="http://www.w3.org/2000/svg"
+      shapeRendering="crispEdges"
+      aria-hidden
+    >
+      {px(4, 0, 4, 1, mask, "m1")}
+      {px(3, 1, 6, 2, mask, "m2")}
+      {px(3, 3, 1, 3, mask, "m3")}
+      {px(8, 3, 1, 3, mask, "m4")}
+      {px(4, 3, 4, 4, mask, "m5")}
+      {px(4, 4, 1, 1, trim, "eyeL")}
+      {px(7, 4, 1, 1, trim, "eyeR")}
+      {px(5, 7, 2, 1, mask, "neck")}
+      {px(3, 8, 6, 6, suit, "torso")}
+      {px(2, 8, 1, 5, mask, "armL")}
+      {px(9, 8, 1, 5, mask, "armR")}
+      {px(5, 9, 2, 2, trim, "chest")}
+      {px(2, 13, 1, 1, trim, "handL")}
+      {px(9, 13, 1, 1, trim, "handR")}
+      {px(3, 14, 6, 1, mask, "hem")}
+      {px(3, 15, 2, 8, suit, "legL")}
+      {px(7, 15, 2, 8, suit, "legR")}
+      {px(2, 23, 3, 2, trim, "bootL")}
+      {px(7, 23, 3, 2, trim, "bootR")}
+      {px(2, 24, 3, 1, mask, "soleL")}
+      {px(7, 24, 3, 1, mask, "soleR")}
+      <path
+        className="pixelWebHero__thread"
+        d="M 76 108 C 95 95, 100 130, 118 100 C 130 82, 122 55, 138 40"
+        fill="none"
+        stroke={trim}
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+    </svg>
+  );
+}
+
 export function PixelDude({ className }: { className?: string }) {
   const p = 8; // pixel size
   const px = (
