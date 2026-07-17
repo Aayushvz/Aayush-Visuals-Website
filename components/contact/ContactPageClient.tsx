@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
 import Footer from "@/components/Footer";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const SOCIALS = [
   {
@@ -175,24 +176,48 @@ function InteractiveGlobe() {
     window.addEventListener("resize", onResize);
     onResize();
 
+    const isLight = () => document.documentElement.dataset.theme === "light";
+
+    const darkTheme = {
+      dark: 1 as number,
+      diffuse: 1.4,
+      mapBrightness: 4,
+      mapBaseBrightness: 0.02,
+      baseColor: [0.15, 0.15, 0.18] as [number, number, number],
+      markerColor: [0.486, 0.231, 0.929] as [number, number, number],
+      glowColor: [0.08, 0.05, 0.14] as [number, number, number],
+    };
+
+    const lightTheme = {
+      dark: 0 as number,
+      diffuse: 2,
+      mapBrightness: 1.8,
+      mapBaseBrightness: 0.04,
+      baseColor: [0.92, 0.9, 0.86] as [number, number, number],
+      markerColor: [0.486, 0.231, 0.929] as [number, number, number],
+      glowColor: [0.9, 0.88, 0.84] as [number, number, number],
+    };
+
+    const initTheme = isLight() ? lightTheme : darkTheme;
+
     const globe = createGlobe(canvas, {
       devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
       width: width * 2,
       height: width * 2,
       phi: 1.2,
       theta: 0.25,
-      dark: 1,
-      diffuse: 1.4,
       mapSamples: 16000,
-      mapBrightness: 4,
-      mapBaseBrightness: 0.02,
-      baseColor: [0.15, 0.15, 0.18],
-      markerColor: [0.486, 0.231, 0.929],
-      glowColor: [0.08, 0.05, 0.14],
       markers: [
         { location: [28.6139, 77.209], size: 0.08 },
       ],
+      ...initTheme,
     });
+
+    const observer = new MutationObserver(() => {
+      const t = isLight() ? lightTheme : darkTheme;
+      globe.update(t);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
     let raf: number;
     function animate() {
@@ -210,6 +235,7 @@ function InteractiveGlobe() {
 
     return () => {
       cancelAnimationFrame(raf);
+      observer.disconnect();
       globe.destroy();
       window.removeEventListener("resize", onResize);
     };
@@ -284,6 +310,7 @@ export default function ContactPageClient() {
       <Navbar />
       <MobileNav />
       <Cursor />
+      <ThemeToggle />
 
       <div className="contactPage__stage">
         <MagneticDotField />

@@ -5584,17 +5584,39 @@ html.contact-page-active body {
   background-color: #0e0e10;
 }
 
+html.contact-page-active[data-theme="light"],
+html.contact-page-active[data-theme="light"] body {
+  background-color: #f5f2ec;
+}
+
 .contactPage {
+  --cp-bg: #0e0e10;
+  --cp-fg: #f4f1ea;
+  --cp-fg-muted: rgba(244, 241, 234, 0.55);
+  --cp-fg-dim: rgba(244, 241, 234, 0.4);
+  --cp-fg-faint: rgba(244, 241, 234, 0.18);
+  --cp-line: rgba(244, 241, 234, 0.1);
+  --cp-border: rgba(244, 241, 234, 0.06);
   position: relative;
   min-height: 100vh;
-  background: #0e0e10;
-  color: #f4f1ea;
+  background: var(--cp-bg);
+  color: var(--cp-fg);
+}
+
+[data-theme="light"] .contactPage {
+  --cp-bg: #f5f2ec;
+  --cp-fg: #26221d;
+  --cp-fg-muted: rgba(38, 34, 29, 0.55);
+  --cp-fg-dim: rgba(38, 34, 29, 0.4);
+  --cp-fg-faint: rgba(38, 34, 29, 0.25);
+  --cp-line: rgba(31, 31, 31, 0.1);
+  --cp-border: rgba(31, 31, 31, 0.08);
 }
 
 .contactPage__stage {
   position: relative;
   z-index: 2;
-  background: #0e0e10;
+  background: var(--cp-bg);
   overflow: hidden;
 }
 
@@ -5649,7 +5671,7 @@ html.contact-page-active body {
   gap: 40px;
   padding-top: clamp(120px, 18vh, 200px);
   padding-bottom: clamp(48px, 8vh, 80px);
-  border-bottom: 1px solid rgba(167, 139, 250, 0.1);
+  border-bottom: 1px solid var(--cp-line);
 }
 
 .contactPage__heroInner {
@@ -5676,7 +5698,7 @@ html.contact-page-active body {
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.6);
+  color: var(--cp-fg-muted);
   white-space: nowrap;
 }
 
@@ -5709,7 +5731,7 @@ html.contact-page-active body {
   font-weight: 700;
   line-height: 0.95;
   margin: 0 0 28px;
-  color: #f4f1ea;
+  color: var(--cp-fg);
   text-transform: none;
 }
 
@@ -5736,7 +5758,7 @@ html.contact-page-active body {
 .contactPage__subtitle {
   font-size: clamp(15px, 1.4vw, 19px);
   line-height: 1.65;
-  color: rgba(244, 241, 234, 0.5);
+  color: var(--cp-fg-muted);
   max-width: 480px;
   margin: 0;
 }
@@ -5776,7 +5798,7 @@ html.contact-page-active body {
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.4);
+  color: var(--cp-fg-dim);
 }
 
 .contactPage__input,
@@ -5787,7 +5809,7 @@ html.contact-page-active body {
   outline: none;
   font-family: var(--font-primary);
   font-size: 16px;
-  color: #f4f1ea;
+  color: var(--cp-fg);
   padding: 12px 0;
   resize: none;
   transition: color 0.2s ease;
@@ -5795,13 +5817,13 @@ html.contact-page-active body {
 
 .contactPage__input::placeholder,
 .contactPage__textarea::placeholder {
-  color: rgba(244, 241, 234, 0.18);
+  color: var(--cp-fg-faint);
 }
 
 .contactPage__inputLine {
   display: block;
   height: 1px;
-  background: rgba(244, 241, 234, 0.1);
+  background: var(--cp-line);
   position: relative;
 }
 
@@ -5891,14 +5913,14 @@ html.contact-page-active body {
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.35);
+  color: var(--cp-fg-dim);
   margin: 0;
 }
 
 .contactPage__infoText {
   margin: 0;
   font-size: 16px;
-  color: rgba(244, 241, 234, 0.7);
+  color: var(--cp-fg-muted);
 }
 
 .contactPage__emailLink {
@@ -5925,10 +5947,10 @@ html.contact-page-active body {
   gap: 12px;
   padding: 10px 0;
   font-size: 15px;
-  color: rgba(244, 241, 234, 0.55);
+  color: var(--cp-fg-muted);
   text-decoration: none;
   transition: color 0.2s ease, transform 0.2s ease;
-  border-bottom: 1px solid rgba(244, 241, 234, 0.06);
+  border-bottom: 1px solid var(--cp-border);
 }
 
 .contactPage__socialLink:last-child {
@@ -5956,7 +5978,7 @@ html.contact-page-active body {
   border: 1px solid rgba(167, 139, 250, 0.1);
   font-size: 14px;
   font-weight: 500;
-  color: rgba(244, 241, 234, 0.7);
+  color: var(--cp-fg-muted);
   margin-top: auto;
 }
 
@@ -5975,6 +5997,29 @@ html.contact-page-active body {
 }
 
 /* --- footer (uses shared Footer component) --- */
+
+/* --- light mode (themeSwitch + hero border) --- */
+
+html.contact-page-active .themeSwitch {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-theme="light"] .contactPage__hero {
+  border-bottom-color: var(--cp-border);
+}
+
+[data-theme="light"] .contactPage__rail {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+[data-theme="light"] .contactPage__emailLink {
+  color: var(--purple);
+}
+
+[data-theme="light"] .contactPage__emailLink:hover {
+  color: var(--purple-mid);
+}
 
 /* --- responsive --- */
 
