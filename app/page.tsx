@@ -5,6 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Statement from "@/components/Statement";
+import Process from "@/components/Process";
 import Capabilities from "@/components/Capabilities";
 import ProjectsSection from "@/components/ProjectsSection";
 import Footer from "@/components/Footer";
@@ -30,7 +31,10 @@ export default function Home() {
           <About />
         </div>
         <Statement />
-        <Capabilities />
+        <div className="processStage">
+          <Process />
+          <Capabilities />
+        </div>
         <ProjectsSection />
         <Footer />
       </main>

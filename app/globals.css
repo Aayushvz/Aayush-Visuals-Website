@@ -1659,6 +1659,239 @@ html.past-hero .themeSwitch {
   }
 }
 
+/* ---------- process ---------- */
+
+.process {
+  position: relative;
+  background: var(--cream);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.process__rails {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.process__rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(31, 31, 31, 0.08);
+}
+
+.process__rail--left { left: var(--page-rail-inset); }
+.process__rail--right { right: var(--page-rail-inset); }
+
+.process__inner {
+  width: min(1320px, calc(100vw - 240px));
+  margin-inline: auto;
+  padding-block: clamp(48px, 8vh, 96px);
+}
+
+.process__marker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.48);
+  margin-bottom: 18px;
+}
+
+.process__markerNum {
+  color: var(--purple);
+  font-weight: 600;
+}
+
+.process__markerLabel {
+  font-weight: 500;
+}
+
+.process__heading {
+  font-size: clamp(42px, 3.2vw, 58px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+  margin: 0 0 clamp(40px, 5.5vh, 64px);
+}
+
+.process__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.process__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 44px 24px;
+  border-top: 1px solid rgba(31, 31, 31, 0.1);
+  border-radius: 12px;
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.4s ease;
+  transition-delay: calc(var(--step-i) * 0.12s);
+}
+
+.process--visible .process__step {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.process__step:last-child {
+  border-bottom: 1px solid rgba(31, 31, 31, 0.1);
+}
+
+.process__step:hover {
+  background: var(--purple);
+  border-color: transparent;
+  border-radius: 12px;
+}
+
+.process__step:hover + .process__step {
+  border-top-color: transparent;
+}
+
+.process__stepLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.process__num {
+  font-family: var(--font-mono, "SF Mono", "Fira Code", monospace);
+  font-size: 14px;
+  color: var(--purple);
+  opacity: 0.5;
+  transition: color 0.4s ease, opacity 0.4s ease;
+  flex-shrink: 0;
+}
+
+.process__step:hover .process__num {
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+.process__title {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.process__step:hover .process__title {
+  color: #fff;
+  transform: translateX(8px);
+}
+
+.process__stepRight {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.process__desc {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  opacity: 0.55;
+  max-width: 440px;
+  transition: color 0.4s ease, opacity 0.4s ease;
+}
+
+.process__step:hover .process__desc {
+  color: #fff;
+  opacity: 0.75;
+}
+
+.process__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.process__tag {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 7px 16px;
+  border-radius: 100px;
+  background: rgba(31, 31, 31, 0.06);
+  color: var(--ink);
+  opacity: 0.7;
+  transition: background 0.4s ease, color 0.4s ease, opacity 0.4s ease;
+}
+
+.process__step:hover .process__tag {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  opacity: 1;
+}
+
+/* parallax: capabilities sits behind, process slides up to reveal it */
+.processStage {
+  position: relative;
+}
+.processStage .capabilities {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* mobile */
+@media (max-width: 640px) {
+  .process__inner {
+    width: 100%;
+    padding: 64px 24px;
+  }
+
+  .process__step {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 28px 16px;
+  }
+
+  .process__stepLeft {
+    gap: 12px;
+  }
+
+  .process__title {
+    font-size: 32px;
+  }
+
+  .process__desc {
+    font-size: 14px;
+  }
+
+  .process__heading {
+    font-size: clamp(26px, 7.5vw, 38px);
+    letter-spacing: -0.03em;
+    margin-bottom: clamp(16px, 3vh, 24px);
+  }
+
+  .process__tag {
+    font-size: 10px;
+    padding: 6px 12px;
+  }
+
+  .process__rail--left,
+  .process__rail--right {
+    display: none;
+  }
+}
+
 /* ---------- capabilities (skills vault) ----------
    A deep-violet scene lifted from the reference clip: soft radial glow,
    drifting blurred bokeh orbs, and holographic card objects. The holder
@@ -4772,6 +5005,13 @@ html.past-hero .themeSwitch {
   font-weight: 600;
   color: #1a1a1a;
   flex-shrink: 0;
+}
+
+.aboutSection__cardLogo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: grayscale(1);
 }
 
 .aboutSection__cardInfo {

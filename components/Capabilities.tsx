@@ -133,7 +133,7 @@ export default function Capabilities() {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ position: "relative" }}
+      style={{}}
     >
       {/* Subtle mouse-following spotlight glow (replaces individual dot hover triggers) */}
       {!reduce && isHovered && (

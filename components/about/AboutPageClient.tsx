@@ -22,10 +22,10 @@ const FACTS = [
 
 const EDUCATION = [
   { icon: "G", title: "Google UX Design Certificate", place: "Google", year: "2024" },
-  { icon: "\u{1F393}", title: "Generative AI", place: "IBM", year: "2024" },
-  { icon: "\u{1F393}", title: "Bachelor of Technology in Computer Science Engineering", titleShort: "B.Tech", place: "Vellore Institute of Technology, Vellore", year: "2023 – Present" },
-  { icon: "\u{1F393}", title: "Higher Secondary School", place: "Dav Public School", year: "2020–2022" },
-  { icon: "\u{1F393}", title: "Senior Secondary School", place: "Bishop Scott Boys' School", year: "2020" },
+  { icon: "/logos/education/ibm.png", title: "Generative AI", place: "IBM", year: "2024" },
+  { icon: "/logos/education/vit.png", title: "Bachelor of Technology in Computer Science Engineering", titleShort: "B.Tech", place: "Vellore Institute of Technology, Vellore", year: "2023 - Present" },
+  { icon: "/logos/education/dav.png", title: "Higher Secondary School", place: "DAV Public School", year: "2020-2022" },
+  { icon: "/logos/education/bishop-scott.png", title: "Senior Secondary School", place: "Bishop Scott Boys' School", year: "2020" },
 ];
 
 const TOOLKIT = [
@@ -253,7 +253,13 @@ export default function AboutPageClient() {
           <div className="aboutSection__gridRight">
             {EDUCATION.map((e) => (
               <div className="aboutSection__card" key={e.title}>
-                <span className="aboutSection__cardIcon">{e.icon}</span>
+                <span className="aboutSection__cardIcon">
+                  {e.icon.startsWith("/") ? (
+                    <img src={e.icon} alt={e.place} className="aboutSection__cardLogo" />
+                  ) : (
+                    e.icon
+                  )}
+                </span>
                 <div className="aboutSection__cardInfo">
                   <span className="aboutSection__cardTitle">
                     {e.titleShort ? (
