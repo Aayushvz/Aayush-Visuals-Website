@@ -1,3 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="#1a1a1a">
-  <text x="0" y="31" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800" letter-spacing="0.06em">KPMG</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 60" fill="#1a1a1a">
+  <!-- KPMG logo - bold italic text with angled bars behind -->
+  <g>
+    <!-- Background bars (tilted rectangles) -->
+    <rect x="42" y="0" width="26" height="36" rx="1" fill="#1a1a1a" transform="skewX(-6)"/>
+    <rect x="72" y="0" width="26" height="36" rx="1" fill="#1a1a1a" transform="skewX(-6)"/>
+    <rect x="102" y="0" width="26" height="36" rx="1" fill="#1a1a1a" transform="skewX(-6)"/>
+    <rect x="132" y="0" width="26" height="36" rx="1" fill="#1a1a1a" transform="skewX(-6)"/>
+  </g>
+  <!-- KPMG text -->
+  <text x="90" y="53" text-anchor="middle" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" font-size="34" font-weight="800" font-style="italic" letter-spacing="0.06em" fill="#1a1a1a">KPMG</text>
 </svg>

@@ -174,7 +174,7 @@ function AboutIdentityCard() {
         design, visual systems, and prototyping, from early ideas to polished, usable
         products.
       </motion.p>
-      <motion.div variants={cardChild}>
+      <motion.div variants={cardChild} style={{ marginTop: 28 }}>
         <PageLink href="/about" className="aboutCard__cta">
           About me
         </PageLink>

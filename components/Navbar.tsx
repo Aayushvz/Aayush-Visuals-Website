@@ -10,11 +10,10 @@ import PageLink from "./PageLink";
   Navigation between pages goes through PageLink's cinematic transition.
 */
 
-const links = [
+const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Works", href: "/#work" },
-  { label: "Contact Us", href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -29,7 +28,7 @@ export default function Navbar() {
         aayush<sup>vz</sup>
       </PageLink>
       <nav className="navbar__links" aria-label="Primary">
-        {links.map((l) => (
+        {navLinks.map((l) => (
           <PageLink
             key={l.href}
             href={l.href}
@@ -39,6 +38,9 @@ export default function Navbar() {
           </PageLink>
         ))}
       </nav>
+      <PageLink href="/contact" className="navbar__contact">
+        Contact
+      </PageLink>
     </header>
   );
 }

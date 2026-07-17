@@ -46,11 +46,11 @@
     0 48px 100px rgba(0, 0, 0, 0.5);
 
   /* apple-style glass */
-  --glass-bg: rgba(26, 26, 30, 0.34);
+  --glass-bg: rgba(16, 16, 20, 0.58);
   --glass-fg: #f4f1ea;
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-highlight: rgba(255, 255, 255, 0.09);
-  --glass-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 20px 56px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.24), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 :root[data-theme="light"] {
@@ -66,11 +66,11 @@
   --heroCard-shadow-hover: 0 4px 10px rgba(88, 78, 62, 0.18), 0 20px 42px rgba(88, 78, 62, 0.2),
     0 52px 110px rgba(88, 78, 62, 0.22);
 
-  --glass-bg: rgba(255, 252, 246, 0.46);
+  --glass-bg: rgba(255, 254, 250, 0.60);
   --glass-fg: #26221d;
-  --glass-border: rgba(31, 31, 31, 0.09);
-  --glass-highlight: rgba(255, 255, 255, 0.65);
-  --glass-shadow: 0 10px 30px rgba(31, 31, 31, 0.1);
+  --glass-border: rgba(31, 31, 31, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 20px 56px rgba(0, 0, 0, 0.1), 0 4px 14px rgba(0, 0, 0, 0.07), inset 0 -1px 0 rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -311,12 +311,12 @@ html.has-cursor .cursorRing {
   z-index: 90;
   display: flex;
   align-items: center;
-  gap: clamp(20px, 4vw, 46px);
-  padding: 11px 26px 11px 22px;
+  gap: clamp(16px, 3.2vw, 36px);
+  padding: 8px 10px 8px 20px;
   border-radius: 999px;
   background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(18px) saturate(1.7);
-  backdrop-filter: blur(18px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(2) brightness(1.04);
+  backdrop-filter: blur(28px) saturate(2) brightness(1.04);
   border: 1px solid var(--glass-border);
   box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
   color: var(--glass-fg);
@@ -342,10 +342,10 @@ html.has-cursor .cursorRing {
 
 .navbar__links {
   display: flex;
-  gap: clamp(14px, 2.6vw, 30px);
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  gap: clamp(4px, 1.6vw, 20px);
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .navbar__links a {
@@ -367,6 +367,28 @@ html.has-cursor .cursorRing {
   outline: 2px solid var(--hero-brand);
   outline-offset: 4px;
   border-radius: 3px;
+}
+
+.navbar__contact {
+  display: flex;
+  align-items: center;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.4);
+}
+
+.navbar__contact:hover {
+  background: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.55);
 }
 
 /* ---------- hero ---------- */
@@ -1668,10 +1690,51 @@ html.past-hero .themeSwitch {
   z-index: 2;
 }
 
+/* rough brush-stroke SVG pinned to Process top, dark fill matches Statement above */
+.process__brushTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.process__brushTop svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.process__brushTop .process__brushSvg--mobile { display: none; }
+
+/* Dot grid div — comes after SVG in DOM so it paints on top of the dark fill */
+.process__brushDots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(244, 241, 234, 0.13) 1px, transparent 1px);
+  background-size: 16px 16px;
+  pointer-events: none;
+}
+
+/* Light vertical rails over the dark brush area — match Statement rail style */
+.process__brushRail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(244, 241, 234, 0.35);
+}
+
+.process__brushRail--left { left: var(--page-rail-inset); }
+.process__brushRail--right { right: var(--page-rail-inset); }
+
 .process__rails {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 4;
 }
 
 .process__rail {
@@ -1689,6 +1752,7 @@ html.past-hero .themeSwitch {
   width: min(1320px, calc(100vw - 240px));
   margin-inline: auto;
   padding-block: clamp(48px, 8vh, 96px);
+  padding-top: calc(clamp(48px, 8vh, 96px) + 100px);
 }
 
 .process__marker {
@@ -1852,9 +1916,16 @@ html.past-hero .themeSwitch {
 
 /* mobile */
 @media (max-width: 640px) {
+  .process__brushTop {
+    height: 60px;
+  }
+
+  .process__brushTop .process__brushSvg--desktop { display: none; }
+  .process__brushTop .process__brushSvg--mobile { display: block; }
+
   .process__inner {
     width: 100%;
-    padding: 64px 24px;
+    padding: calc(60px + 40px) 24px 64px;
   }
 
   .process__step {

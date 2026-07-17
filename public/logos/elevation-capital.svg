@@ -1,3 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" fill="#1a1a1a">
-  <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" letter-spacing="-0.02em">Elevation Capital</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 60" fill="#1a1a1a">
+  <!-- Elevation Capital - arrow icon + ELEVATION text -->
+  <g transform="translate(0, 5)">
+    <!-- Arrow/star icon -->
+    <polygon points="0,50 18,25 0,25" fill="#1a1a1a" opacity="0.6"/>
+    <polygon points="8,38 22,12 40,38" fill="#1a1a1a"/>
+    <polygon points="22,12 40,0 40,38" fill="#1a1a1a" opacity="0.75"/>
+  </g>
+  <!-- ELEVATION text -->
+  <text x="56" y="40" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" font-size="32" font-weight="300" letter-spacing="0.18em" fill="#1a1a1a">ELEVATION</text>
 </svg>
