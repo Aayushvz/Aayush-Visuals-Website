@@ -4865,6 +4865,11 @@ html.past-hero .themeSwitch {
 
 /* -------- about page: content sections below hero -------- */
 
+.aboutPostBanner {
+  position: relative;
+  z-index: 2;
+}
+
 .aboutSection {
   position: relative;
   background: #fff;
@@ -5126,18 +5131,19 @@ html.past-hero .themeSwitch {
 /* ---- Purple Banner ---- */
 
 .aboutBanner {
-  position: relative;
+  position: sticky;
+  top: 0;
+  height: 100svh;
   background: #0d0315;
-  padding: clamp(100px, 14vw, 180px) var(--page-content-inset);
-  text-align: center;
   overflow: hidden;
+  z-index: 1;
 }
 
 .aboutBanner__bg {
   position: absolute;
   inset: 0;
   background: url("/about/banner-bg.png.png") center / cover no-repeat;
-  opacity: 0.55;
+  opacity: 0.82;
 }
 
 .aboutBanner__glow {

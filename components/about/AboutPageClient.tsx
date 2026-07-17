@@ -280,19 +280,14 @@ export default function AboutPageClient() {
         </div>
       </section>
 
-      {/* 4. Purple Banner */}
+      {/* 4. Purple Banner — sticky full-viewport image; sections below slide over it */}
       <div className="aboutBanner">
         <div className="aboutBanner__bg" aria-hidden />
         <div className="aboutBanner__glow" aria-hidden />
-        <div className="railsLight" aria-hidden>
-          <span className="railsLight__line railsLight__line--left" />
-          <span className="railsLight__line railsLight__line--right" />
-        </div>
-        <div className="aboutBanner__content">
-          <h2 className="aboutBanner__title">aayush<span className="aboutBanner__dot">&middot;</span>vz</h2>
-          <p className="aboutBanner__sub">Crafting one more <em>Modern</em> Legacy</p>
-        </div>
       </div>
+
+      {/* Post-banner block: slides as one unit over the sticky banner */}
+      <div className="aboutPostBanner">
 
       {/* 5. Experience */}
       <section className="aboutSection aboutSection--exp" ref={(el) => { sectionRefs.current[3] = el; }}>
@@ -494,6 +489,8 @@ export default function AboutPageClient() {
       <div ref={(el) => { sectionRefs.current[7] = el; }}>
         <Footer />
       </div>
+
+      </div> {/* end .aboutPostBanner */}
     </div>
 
     <StatusBar status={status} section={currentSection} />
