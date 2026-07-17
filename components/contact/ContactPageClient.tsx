@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import createGlobe from "cobe";
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
@@ -157,6 +158,99 @@ function MagneticDotField() {
   return <canvas className="contactPage__dots" ref={canvasRef} aria-hidden />;
 }
 
+function InteractiveGlobe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pointerInteracting = useRef<number | null>(null);
+  const pointerInteractionMovement = useRef(0);
+  const phiRef = useRef(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let width = 0;
+    const onResize = () => {
+      width = canvas.offsetWidth;
+    };
+    window.addEventListener("resize", onResize);
+    onResize();
+
+    const globe = createGlobe(canvas, {
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      width: width * 2,
+      height: width * 2,
+      phi: 1.2,
+      theta: 0.25,
+      dark: 1,
+      diffuse: 1.4,
+      mapSamples: 16000,
+      mapBrightness: 4,
+      mapBaseBrightness: 0.02,
+      baseColor: [0.15, 0.15, 0.18],
+      markerColor: [0.486, 0.231, 0.929],
+      glowColor: [0.08, 0.05, 0.14],
+      markers: [
+        { location: [28.6139, 77.209], size: 0.08 },
+      ],
+    });
+
+    let raf: number;
+    function animate() {
+      if (pointerInteracting.current === null) {
+        phiRef.current += 0.003;
+      }
+      globe.update({
+        phi: phiRef.current + pointerInteractionMovement.current,
+        width: width * 2,
+        height: width * 2,
+      });
+      raf = requestAnimationFrame(animate);
+    }
+    raf = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      globe.destroy();
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    pointerInteracting.current = e.clientX;
+    if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
+  }, []);
+
+  const onPointerUp = useCallback(() => {
+    pointerInteracting.current = null;
+    if (canvasRef.current) canvasRef.current.style.cursor = "grab";
+  }, []);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (pointerInteracting.current !== null) {
+      const delta = e.clientX - pointerInteracting.current;
+      pointerInteractionMovement.current += delta / 200;
+      pointerInteracting.current = e.clientX;
+    }
+  }, []);
+
+  return (
+    <div className="contactPage__globe">
+      <canvas
+        ref={canvasRef}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerOut={onPointerUp}
+        onPointerMove={onPointerMove}
+        style={{ width: "100%", height: "100%", cursor: "grab", contain: "layout paint size" }}
+      />
+      <div className="contactPage__globeLabel">
+        <span className="contactPage__globePulse" aria-hidden />
+        New Delhi, India
+      </div>
+    </div>
+  );
+}
+
 export default function ContactPageClient() {
   const [formState, setFormState] = useState<"idle" | "sending" | "sent">("idle");
   const [name, setName] = useState("");
@@ -220,6 +314,7 @@ export default function ContactPageClient() {
               Drop me a message and I will get back to you soon.
             </p>
           </div>
+          <InteractiveGlobe />
         </div>
 
         <div className="contactPage__body">
