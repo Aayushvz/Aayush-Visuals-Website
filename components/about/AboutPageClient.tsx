@@ -11,7 +11,8 @@ import PixelBackground from "./PixelBackground";
 import AboutRulers from "./AboutRulers";
 import LogoStrip from "@/components/LogoStrip";
 import Footer from "@/components/Footer";
-import { Scribble } from "@/components/doodles";
+import HomeContact from "@/components/HomeContact";
+import Testimonials from "./Testimonials";
 
 const META_LINE = ["UI/UX Design", "Design Systems", "Product Strategy"];
 
@@ -46,7 +47,8 @@ const SECTION_MARKS = [
   { label: "02 - FIELD WORK" },
   { label: "03 - SKILLS" },
   { label: "04 - TOOLS" },
-  { label: "05 - CONTACT" },
+  { label: "05 - KIND WORDS" },
+  { label: "06 - CONTACT" },
   { label: "FOOTER" },
 ];
 
@@ -61,8 +63,7 @@ const EXPERIENCE = [
 export default function AboutPageClient() {
   const [portraitHover, setPortraitHover] = useState(false);
   const [scrolling, setScrolling] = useState(false);
-  const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
+const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
   const interacted = useRef(false);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -391,104 +392,28 @@ export default function AboutPageClient() {
         </div>
       </section>
 
-      {/* 8. Contact */}
-      <section className="aboutContact" id="get-in-touch" ref={(el) => { sectionRefs.current[6] = el; }}>
-        <div className="aboutSection__topBar aboutContact__topBar">
-          <span className="aboutSection__badge">
-            <span className="aboutSection__badgeDot" />
-            Contact
-          </span>
-          <span className="aboutSection__topCenter">(AV&reg; - 05)</span>
-          <span className="aboutSection__topRight">&copy;2026</span>
-        </div>
-        <div className="aboutContact__inner">
-          <div className="aboutContact__left">
-            <div className="aboutContact__headingWrap">
-              <h2 className="aboutContact__heading">get in touch.</h2>
-              <Scribble className="aboutContact__scribble" />
-            </div>
-            <p className="aboutContact__desc">
-              Have a project in mind or just want to say hello?
-              Drop me a message and I&#39;ll get back to you soon.
-            </p>
-            <div className="aboutContact__socials">
-              <a href="https://www.behance.net/AAYUSHVISUALS" target="_blank" rel="noreferrer" className="aboutContact__social">Behance</a>
-              <a href="https://www.instagram.com/aayush.visuals" target="_blank" rel="noreferrer" className="aboutContact__social">Instagram</a>
-              <a href="https://www.linkedin.com/in/aayushvz" target="_blank" rel="noreferrer" className="aboutContact__social">LinkedIn</a>
-            </div>
-          </div>
-          <form
-            className="aboutContact__form"
-            action="https://formsubmit.co/ajax/aayushvisuals@gmail.com"
-            method="POST"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const form = e.currentTarget;
-              setContactStatus("sending");
-              try {
-                const res = await fetch(form.action, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", Accept: "application/json" },
-                  body: JSON.stringify(Object.fromEntries(new FormData(form))),
-                });
-                if (res.ok) {
-                  setContactStatus("sent");
-                  form.reset();
-                  setTimeout(() => setContactStatus("idle"), 3000);
-                } else {
-                  setContactStatus("error");
-                }
-              } catch {
-                setContactStatus("error");
-              }
-            }}
-          >
-            <input type="hidden" name="_captcha" value="false" />
-            <input type="hidden" name="_template" value="table" />
-            <div className="aboutContact__field">
-              <label className="aboutContact__label" htmlFor="contact-name">Name</label>
-              <div className="aboutContact__inputWrap">
-                <input className="aboutContact__input" type="text" id="contact-name" name="name" required placeholder="Your name" />
-              </div>
-            </div>
-            <div className="aboutContact__field">
-              <label className="aboutContact__label" htmlFor="contact-email">Email</label>
-              <div className="aboutContact__inputWrap">
-                <input className="aboutContact__input" type="email" id="contact-email" name="email" required placeholder="you@example.com" />
-              </div>
-            </div>
-            <div className="aboutContact__field">
-              <label className="aboutContact__label" htmlFor="contact-message">Message</label>
-              <div className="aboutContact__inputWrap">
-                <textarea className="aboutContact__textarea" id="contact-message" name="message" required placeholder="Tell me about your project..." rows={5} />
-              </div>
-            </div>
-            <button className="aboutContact__submit" type="submit" disabled={contactStatus === "sending"}>
-              <span className="aboutContact__submitText">
-                {contactStatus === "sent"
-                  ? "Sent"
-                  : contactStatus === "sending"
-                    ? "Sending"
-                    : contactStatus === "error"
-                      ? "Something went wrong, try again"
-                      : "Send Message"}
-              </span>
-              {contactStatus === "sent" ? (
-                <svg className="aboutContact__submitCheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <polyline points="4 12 9 17 20 6" />
-                </svg>
-              ) : (
-                <span className="aboutContact__submitArrow" aria-hidden>&#x2192;</span>
-              )}
-            </button>
-          </form>
-        </div>
-      </section>
+      {/* Parallax: testi + contact slide over sticky footer */}
+      <div className="aboutParallax">
+      <div className="aboutParallax__stage">
+      {/* 8. Testimonials */}
+      <div ref={(el) => { sectionRefs.current[6] = el; }}>
+        <Testimonials />
+      </div>
 
-      {/* 9. Footer */}
-      <div ref={(el) => { sectionRefs.current[7] = el; }}>
+      {/* 9. Contact */}
+      <div id="get-in-touch" ref={(el) => { sectionRefs.current[7] = el; }}>
+        <HomeContact />
+      </div>
+
+      </div>{/* end .aboutParallax__stage */}
+
+      {/* 10. Footer — the wrapper (not .footer) is the sticky element:
+          sticky can only move within its direct parent, and this wrapper's
+          parent .aboutParallax spans stage + footer */}
+      <div className="aboutParallax__footerWrap" ref={(el) => { sectionRefs.current[8] = el; }}>
         <Footer />
       </div>
+      </div>{/* end .aboutParallax */}
 
       </div> {/* end .aboutPostBanner */}
     </div>

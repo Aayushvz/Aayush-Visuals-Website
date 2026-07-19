@@ -8,6 +8,8 @@ import Statement from "@/components/Statement";
 import Process from "@/components/Process";
 import Capabilities from "@/components/Capabilities";
 import ProjectsSection from "@/components/ProjectsSection";
+import Testimonials from "@/components/about/Testimonials";
+import HomeContact from "@/components/HomeContact";
 import Footer from "@/components/Footer";
 import Reveals from "@/components/Reveals";
 
@@ -35,8 +37,14 @@ export default function Home() {
           <Process />
           <Capabilities />
         </div>
-        <ProjectsSection />
-        <Footer />
+        <div className="hpParallax">
+          <div className="hpParallax__stage">
+            <ProjectsSection />
+            <Testimonials hideHeader />
+            <HomeContact />
+          </div>
+          <Footer />
+        </div>
       </main>
     </>
   );
