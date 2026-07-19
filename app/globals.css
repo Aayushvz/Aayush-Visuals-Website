@@ -7788,4 +7788,81 @@ html.contact-page-active .themeSwitch {
   }
 }
 
+/* ==========================================================================
+   MOBILE SIDE RULERS OVERRIDE (PHONE VIEW ONLY <= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Hide side rulers on phone view for Skills (Capabilities), Process (including top dark area brush rails), Hero, About, Statement, Services, Contact */
+  .rails,
+  .heroRuler__rail,
+  .heroRuler,
+  .statement__rail,
+  .process__rails,
+  .process__rail,
+  .process__brushRail,
+  .process__brushRail--left,
+  .process__brushRail--right,
+  .process__top::before,
+  .process__top::after,
+  .capRails,
+  .capRail,
+  .capRail--left,
+  .capRail--right,
+  .capabilities__rails,
+  .capabilities__rail,
+  .aboutRulers,
+  .aboutRulers__rail,
+  .contactPage__rails,
+  .contactPage__rail,
+  .services-section::before,
+  .services-section::after,
+  .services-pin::before,
+  .services-pin::after {
+    display: none !important;
+  }
+
+  /* Keep side rulers in Footer */
+  footer .railsLight,
+  footer .railsLight__line,
+  .railsLight,
+  .railsLight__line,
+  .railsLight__line--left,
+  .railsLight__line--right {
+    display: block !important;
+    opacity: 1 !important;
+  }
+
+  /* Curated Projects (.projects): side rulers with top & bottom gradient fadeout */
+  .projects {
+    position: relative;
+  }
+
+  .projects::before,
+  .projects::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      var(--ink-soft, rgba(31, 31, 31, 0.14)) 12%,
+      var(--ink-soft, rgba(31, 31, 31, 0.14)) 88%,
+      transparent 100%
+    ) !important;
+    z-index: 10;
+    pointer-events: none;
+    display: block !important;
+  }
+
+  .projects::before {
+    left: clamp(14px, 5vw, 78px);
+  }
+
+  .projects::after {
+    right: clamp(14px, 5vw, 78px);
+  }
+}
+
 
