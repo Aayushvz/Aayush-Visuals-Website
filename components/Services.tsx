@@ -15,29 +15,32 @@ const services = [
 const allCards = [...services, ...services]; // 12 cards total across 6 arms
 
 export default function Services() {
+  const sectionRef = useRef<HTMLElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const deckContainerRef = useRef<HTMLDivElement>(null);
   const deckCardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Desktop 3D Framer Carousel Physics
+  // 1. Desktop 3D Scroll Physics & Bi-directional Drag Interaction (UNTOUCHED DESKTOP LOGIC)
   useEffect(() => {
-    if (window.innerWidth <= 768) return;
-
+    const section = sectionRef.current;
     const carousel = carouselRef.current;
-    if (!carousel) return;
+    if (!section || !carousel) return;
 
+    /* ------------------------------------------------------------------
+       Framer 3D Physics Engine:
+       Combines cumulative drag offset & page scroll rotation seamlessly
+    ------------------------------------------------------------------ */
     const SENSITIVITY = 2;
     const STIFFNESS = 600;
     const DAMPING = 100;
     const MASS = 1;
 
-    let target = 0;
+    let dragOffset = 0;
+    let initialDragOffset = 0;
     let current = 0;
     let springVel = 0;
 
     let isDragging = false;
     let dragStartX = 0;
-    let dragStartRotation = 0;
 
     let lastTime = performance.now();
     let frameId = 0;
@@ -45,6 +48,23 @@ export default function Services() {
     function renderLoop(now: number) {
       let dt = Math.min((now - lastTime) / 1000, 0.064);
       lastTime = now;
+
+      let scrollRotation = 0;
+      if (section && window.innerWidth > 768) {
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight || 1;
+        const totalScrollable = section.offsetHeight - vh;
+
+        if (totalScrollable > 0) {
+          const scrolled = -rect.top;
+          const scrollProgress = Math.max(0, Math.min(1, scrolled / totalScrollable));
+          // Start at 0deg (UI/UX centered) and rotate 150deg across vertical scroll
+          scrollRotation = scrollProgress * -150;
+        }
+      }
+
+      // Total target angle combines cumulative drag + vertical scroll
+      const target = dragOffset + scrollRotation;
 
       const steps = Math.max(1, Math.ceil(dt / 0.008));
       const h = dt / steps;
@@ -54,7 +74,7 @@ export default function Services() {
         current += springVel * h;
       }
 
-      if (carousel) {
+      if (carousel && window.innerWidth > 768) {
         carousel.style.transform = `rotateY(${current}deg)`;
       }
 
@@ -67,17 +87,18 @@ export default function Services() {
     }
 
     function startDrag(e: MouseEvent | TouchEvent) {
+      if (window.innerWidth <= 768) return;
       isDragging = true;
       carousel?.classList.add("dragging");
       dragStartX = pointerX(e);
-      dragStartRotation = target;
+      initialDragOffset = dragOffset;
     }
 
     function drag(e: MouseEvent | TouchEvent) {
-      if (!isDragging) return;
+      if (!isDragging || window.innerWidth <= 768) return;
       if (e.cancelable) e.preventDefault();
       const dx = pointerX(e) - dragStartX;
-      target = dragStartRotation + dx * (SENSITIVITY / 10);
+      dragOffset = initialDragOffset + dx * (SENSITIVITY / 10);
     }
 
     function endDrag() {
@@ -94,13 +115,6 @@ export default function Services() {
     const onTouchMove = (e: TouchEvent) => drag(e);
     const onTouchEnd = () => endDrag();
 
-    const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        e.preventDefault();
-        target -= e.deltaX * 0.4;
-      }
-    };
-
     carousel.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
@@ -108,7 +122,6 @@ export default function Services() {
     carousel.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd);
-    carousel.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
       cancelAnimationFrame(frameId);
@@ -119,58 +132,66 @@ export default function Services() {
       carousel.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
-      carousel.removeEventListener("wheel", onWheel);
     };
   }, []);
 
-  // Mobile On-Scroll Card Deck Stacking Animation
+  // 2. ISOLATED Mobile-Only On-Scroll Sequential Card Deck Stacking
   useEffect(() => {
-    if (window.innerWidth > 768) return;
-
-    const container = deckContainerRef.current;
-    if (!container) return;
+    const section = sectionRef.current;
+    if (!section) return;
 
     const cards = deckCardRefs.current;
     const N = services.length;
 
     const handleScroll = () => {
-      const rect = container.getBoundingClientRect();
+      if (window.innerWidth > 768) return;
+
+      const rect = section.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-      const totalScrollable = container.offsetHeight - vh;
+      const totalScrollable = section.offsetHeight - vh;
 
       if (totalScrollable <= 0) return;
 
       const scrolled = -rect.top;
       const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
 
+      // Card 0 (UI/UX) is the initial base card visible at start
+      // Cards 1..5 (Graphic, Brand, Video, Website, Product) rise sequentially from below
       for (let i = 0; i < N; i++) {
         const card = cards[i];
         if (!card) continue;
 
-        const cardStart = (i / N) * 0.85;
-        const cardEnd = cardStart + 0.15;
-
-        if (progress < cardStart) {
-          // Below the deck (waiting to slide up)
-          const offset = 140 + (cardStart - progress) * 250;
-          card.style.transform = `translate3d(-50%, calc(-50% + ${offset}px), 0) scale(0.92)`;
-          card.style.opacity = "0";
-        } else if (progress >= cardStart && progress <= cardEnd) {
-          // Sliding up & landing onto the card deck
-          const p = (progress - cardStart) / (cardEnd - cardStart);
-          const yOffset = (1 - p) * 140;
-          const scale = 0.92 + p * 0.08;
-          const rot = (1 - p) * (i % 2 === 0 ? 4 : -4);
-          card.style.transform = `translate3d(-50%, calc(-50% + ${yOffset}px), 0) scale(${scale}) rotate(${rot}deg)`;
-          card.style.opacity = `${p}`;
-        } else {
-          // Stacked on top of the deck
-          const depth = progress - cardEnd;
-          const stackScale = Math.max(0.82, 1 - depth * 0.14);
-          const stackY = -depth * 25;
-          const rot = (i % 2 === 0 ? 1 : -1) * Math.min(3, depth * 8);
-          card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale}) rotate(${rot}deg)`;
+        if (i === 0) {
+          const depth = Math.max(0, (progress - 0.1) / 0.9);
+          const stackScale = Math.max(0.86, 1 - depth * 0.1);
+          const stackY = -depth * 18;
+          card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale})`;
           card.style.opacity = "1";
+        } else {
+          const segStart = ((i - 1) / 5) * 0.80;
+          const segEnd = segStart + 0.16;
+
+          if (progress < segStart) {
+            // Positioned below viewport waiting to rise
+            card.style.transform = `translate3d(-50%, calc(-50% + 110vh), 0) scale(0.92)`;
+            card.style.opacity = "0";
+          } else if (progress >= segStart && progress <= segEnd) {
+            // Rising smoothly upward onto the deck on scroll
+            const p = (progress - segStart) / (segEnd - segStart);
+            const yOffset = (1 - p) * 110;
+            const scale = 0.92 + p * 0.08;
+            const rot = (1 - p) * (i % 2 === 0 ? 4 : -4);
+            card.style.transform = `translate3d(-50%, calc(-50% + ${yOffset}vh), 0) scale(${scale}) rotate(${rot}deg)`;
+            card.style.opacity = `${p}`;
+          } else {
+            // Stacked in the deck; stays pinned while newer cards stack over it
+            const depth = progress - segEnd;
+            const stackScale = Math.max(0.86, 1 - depth * 0.08);
+            const stackY = -depth * 18;
+            const rot = (i % 2 === 0 ? 1 : -1) * Math.min(2, depth * 5);
+            card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale}) rotate(${rot}deg)`;
+            card.style.opacity = "1";
+          }
         }
       }
     };
@@ -181,9 +202,9 @@ export default function Services() {
   }, []);
 
   return (
-    <section className="services-section" id="services">
-      {/* Desktop Composition */}
-      <div className="services-viewport services-viewport--desktop">
+    <section className="services-section" id="services" ref={sectionRef}>
+      {/* Desktop Sticky 3D Carousel Stage (PROTECTED UNTOUCHED DESKTOP) */}
+      <div className="services-pin">
         <div className="services-header" data-reveal>
           <h2 className="services-heading">Every Services Clicked.</h2>
           <p className="services-desc">
@@ -241,54 +262,52 @@ export default function Services() {
         </div>
       </div>
 
-      {/* Mobile On-Scroll Card Deck Stacking Animation */}
-      <div className="services-mobile-deck" ref={deckContainerRef}>
-        <div className="services-mobile-sticky">
-          <div className="services-header services-header--mobile">
-            <h2 className="services-heading">Every Services Clicked.</h2>
-            <p className="services-desc">
-              Branding, UI/UX, graphic design &amp; video editing to help your brand stand out.
-            </p>
+      {/* ISOLATED Mobile Sticky On-Scroll Card Deck Stacking Stage */}
+      <div className="services-mobile-deck">
+        <div className="services-header services-header--mobile">
+          <h2 className="services-heading">Every Services Clicked.</h2>
+          <p className="services-desc">
+            Branding, UI/UX, graphic design &amp; video editing to help your brand stand out.
+          </p>
 
-            <a href="#contact" className="services-cta">
-              <span className="services-cta__icon">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </span>
-              Book a Service
-            </a>
-          </div>
-
-          <div className="services-deck-stage">
-            {services.map((service, index) => (
-              <div
-                key={service.id}
-                ref={(el) => {
-                  deckCardRefs.current[index] = el;
-                }}
-                className="services-deck-card"
-                style={{ zIndex: index + 1 }}
+          <a href="#contact" className="services-cta">
+            <span className="services-cta__icon">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="services-card__img"
-                  draggable={false}
-                />
-              </div>
-            ))}
-          </div>
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </span>
+            Book a Service
+          </a>
+        </div>
+
+        <div className="services-deck-stage">
+          {services.map((service, index) => (
+            <div
+              key={service.id}
+              ref={(el) => {
+                deckCardRefs.current[index] = el;
+              }}
+              className="services-deck-card"
+              style={{ zIndex: index + 1 }}
+            >
+              <img
+                src={service.image}
+                alt={service.title}
+                className="services-card__img"
+                draggable={false}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </section>
