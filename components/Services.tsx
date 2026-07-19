@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-// Exact sequence of 6 unique service cards
+// Exact sequence of 6 unique service card images
 const services = [
   { id: "uiux", title: "UI/UX Design", image: "/services/ui-ux.png" },
   { id: "graphic", title: "Graphic Design", image: "/services/graphic-design.png" },
@@ -16,52 +16,31 @@ const allCards = [...services, ...services]; // 12 cards total across 6 arms
 
 export default function Services() {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // Only initialize 3D Framer carousel physics on desktop screens (>768px)
+    if (window.innerWidth <= 768) return;
+
     const carousel = carouselRef.current;
-    const section = sectionRef.current;
-    if (!carousel || !section) return;
-    /* narrowed aliases: hoisted closures below don't keep the null guard */
-    const carouselEl: HTMLDivElement = carousel;
-    const sectionEl: HTMLElement = section;
+    if (!carousel) return;
 
     /* ------------------------------------------------------------------
        Exact Framer "3D Look" physics engine:
        SENSITIVITY = 2 -> target = dragStart + deltaPx * (2 / 10)
-       spring: STIFFNESS 600, DAMPING 85, MASS 1
-
-       One position system: target = scrollRot + dragOffset.
-       - scrollRot: pinned-scroll progress mapped onto one logical
-         sequence (6 unique cards x 30deg = -180deg). UI/UX faces center
-         at rotation 0, so the sequence starts and ends composed.
-       - dragOffset: manual drag + horizontal wheel, infinite both ways,
-         with velocity-based release momentum.
-       Both feed the same spring, so scroll and drag can never produce a
-       position jump.
+       spring: STIFFNESS 600, DAMPING 100, MASS 1
     ------------------------------------------------------------------ */
     const SENSITIVITY = 2;
     const STIFFNESS = 600;
-    const DAMPING = 85;
+    const DAMPING = 100;
     const MASS = 1;
-    const SEQUENCE_DEG = -180; // one full pass of the 6 unique cards
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const desktop = window.matchMedia("(min-width: 901px)");
-
-    let scrollRot = 0;
-    let dragOffset = 0;
+    let target = 0;
     let current = 0;
     let springVel = 0;
 
     let isDragging = false;
     let dragStartX = 0;
-    let dragStartOffset = 0;
-
-    // release-momentum velocity tracking (deg/s, low-pass filtered)
-    let lastMoveX = 0;
-    let lastMoveT = 0;
-    let dragVel = 0;
+    let dragStartRotation = 0;
 
     let lastTime = performance.now();
     let frameId = 0;
@@ -69,23 +48,6 @@ export default function Services() {
     function renderLoop(now: number) {
       let dt = Math.min((now - lastTime) / 1000, 0.064);
       lastTime = now;
-
-      // Pinned scroll -> rotation. Reading the rect each frame keeps the
-      // mapping correct through resize without extra listeners; outside
-      // the pinned range it clamps to the sequence ends, so reverse
-      // scrolling deterministically retraces the exact same path.
-      if (desktop.matches && !reduceMotion.matches) {
-        const span = sectionEl.offsetHeight - window.innerHeight;
-        if (span > 0) {
-          const top = sectionEl.getBoundingClientRect().top;
-          const p = Math.min(1, Math.max(0, -top / span));
-          scrollRot = SEQUENCE_DEG * p;
-        }
-      } else {
-        scrollRot = 0;
-      }
-
-      const target = scrollRot + dragOffset;
 
       // Sub-step integration for stiffness stability
       const steps = Math.max(1, Math.ceil(dt / 0.008));
@@ -96,7 +58,9 @@ export default function Services() {
         current += springVel * h;
       }
 
-      carouselEl.style.transform = `rotateY(${current}deg)`;
+      if (carousel) {
+        carousel.style.transform = `rotateY(${current}deg)`;
+      }
 
       frameId = requestAnimationFrame(renderLoop);
     }
@@ -110,43 +74,20 @@ export default function Services() {
       isDragging = true;
       carousel?.classList.add("dragging");
       dragStartX = pointerX(e);
-      dragStartOffset = dragOffset;
-      lastMoveX = dragStartX;
-      lastMoveT = performance.now();
-      dragVel = 0;
+      dragStartRotation = target;
     }
 
     function drag(e: MouseEvent | TouchEvent) {
       if (!isDragging) return;
       if (e.cancelable) e.preventDefault();
-      const x = pointerX(e);
-      dragOffset = dragStartOffset + (x - dragStartX) * (SENSITIVITY / 10);
-
-      const t = performance.now();
-      const dtMs = t - lastMoveT;
-      if (dtMs > 0) {
-        const instVel = ((x - lastMoveX) * (SENSITIVITY / 10)) / (dtMs / 1000);
-        dragVel = dragVel * 0.8 + instVel * 0.2;
-        lastMoveX = x;
-        lastMoveT = t;
-      }
+      const dx = pointerX(e) - dragStartX;
+      target = dragStartRotation + dx * (SENSITIVITY / 10);
     }
 
     function endDrag() {
       if (!isDragging) return;
       isDragging = false;
       carousel?.classList.remove("dragging");
-
-      // Momentum: project release velocity into extra travel through the
-      // same spring (smooth deceleration, no separate animation system).
-      // A stale velocity (pointer paused before release) carries nothing.
-      if (performance.now() - lastMoveT < 80) {
-        const MOMENTUM = 0.14; // seconds of projected glide
-        const MAX_CARRY = 90; // deg, keeps flicks composed
-        const carry = Math.max(-MAX_CARRY, Math.min(MAX_CARRY, dragVel * MOMENTUM));
-        dragOffset += carry;
-      }
-      dragVel = 0;
     }
 
     const onMouseDown = (e: MouseEvent) => startDrag(e);
@@ -157,12 +98,11 @@ export default function Services() {
     const onTouchMove = (e: TouchEvent) => drag(e);
     const onTouchEnd = () => endDrag();
 
-    // Wheel support for trackpads (horizontal swipes only; vertical wheel
-    // stays with the page so the pinned scroll owns it)
+    // Wheel support for trackpads
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
         e.preventDefault();
-        dragOffset -= e.deltaX * 0.4;
+        target -= e.deltaX * 0.4;
       }
     };
 
@@ -189,12 +129,8 @@ export default function Services() {
   }, []);
 
   return (
-    <section className="services-section" id="services" ref={sectionRef}>
-      {/* Sticky stage: on desktop the section pins for one 6-card scroll
-          sequence while the driver height above provides the scroll room;
-          on mobile / reduced motion this wrapper is display:contents */}
-      <div className="services-pin">
-      {/* Header Section with About section font sizing & weights */}
+    <section className="services-section" id="services">
+      {/* Header Section */}
       <div className="services-header" data-reveal>
         <h2 className="services-heading">Every Services Clicked.</h2>
         <p className="services-desc">
@@ -221,8 +157,8 @@ export default function Services() {
         </a>
       </div>
 
-      {/* 3D Framer Carousel Full-Width Viewport (No side fades, corner-to-corner animation) */}
-      <div className="services-viewport">
+      {/* Desktop 3D Framer Carousel (Hidden on Phone View) */}
+      <div className="services-viewport services-viewport--desktop">
         <div className="services-wrapper">
           <div className="services-carousel" id="carousel" ref={carouselRef}>
             {Array.from({ length: 6 }).map((_, i) => (
@@ -232,10 +168,7 @@ export default function Services() {
                 style={{ transform: `rotateY(${90 + i * 30}deg)` }}
               >
                 {/* Left Card Slot */}
-                <div
-                  className="services-card"
-                  style={{ transform: `rotateY(90deg)` }}
-                >
+                <div className="services-card" style={{ transform: `rotateY(90deg)` }}>
                   <img
                     src={allCards[i].image}
                     alt={allCards[i].title}
@@ -245,10 +178,7 @@ export default function Services() {
                 </div>
 
                 {/* Right Card Slot */}
-                <div
-                  className="services-card"
-                  style={{ transform: `rotateY(-90deg)` }}
-                >
+                <div className="services-card" style={{ transform: `rotateY(-90deg)` }}>
                   <img
                     src={allCards[i + 6].image}
                     alt={allCards[i + 6].title}
@@ -261,7 +191,27 @@ export default function Services() {
           </div>
         </div>
       </div>
-      </div>{/* end .services-pin */}
+
+      {/* Mobile On-Scroll Card Stacking Animation (Hidden on Desktop) */}
+      <div className="services-mobile-stack">
+        {services.map((service, index) => (
+          <div
+            key={service.id}
+            className="services-mobile-card"
+            style={{
+              top: `calc(120px + ${index * 16}px)`,
+              zIndex: index + 1,
+            }}
+          >
+            <img
+              src={service.image}
+              alt={service.title}
+              className="services-card__img"
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
