@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SunIcon, MoonIcon } from "./icons";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLink from "./PageLink";
+import useSurfaceTone from "./useSurfaceTone";
 
 /*
   Mobile bottom navbar (phone widths only — the desktop top pill hides).
@@ -25,6 +26,8 @@ export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeHash, setActiveHash] = useState("#top");
+  const pillRef = useRef<HTMLElement>(null);
+  const tone = useSurfaceTone(pillRef, open);
 
   useEffect(() => {
     setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
@@ -45,7 +48,11 @@ export default function MobileNav() {
   return (
     <>
       {!open && (
-        <nav className="mobileNav" aria-label="Mobile navigation">
+        <nav
+          className={`mobileNav mobileNav--over${tone === "light" ? "Light" : "Dark"}`}
+          aria-label="Mobile navigation"
+          ref={pillRef}
+        >
           <button
             type="button"
             className="mobileNav__menu"

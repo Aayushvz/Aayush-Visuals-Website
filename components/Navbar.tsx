@@ -1,13 +1,17 @@
 "use client";
 
+import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import PageLink from "./PageLink";
+import useSurfaceTone from "./useSurfaceTone";
 
 /*
   Same glass pill, now route-aware: HOME and ABOUT are real pages (the
   purple aria-current state follows the pathname), WORKS and CONTACT
   remain homepage anchors that also work from subpages via /#hash.
   Navigation between pages goes through PageLink's cinematic transition.
+  The pill also samples the section beneath it while scrolling and flips
+  between light and dark chrome to match.
 */
 
 const navLinks = [
@@ -18,12 +22,14 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const ref = useRef<HTMLElement>(null);
+  const tone = useSurfaceTone(ref, pathname);
 
   const isCurrent = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href;
 
   return (
-    <header className="navbar">
+    <header className={`navbar navbar--over${tone === "light" ? "Light" : "Dark"}`} ref={ref}>
       <PageLink href="/" className="navbar__logo">
         aayush<sup>vz</sup>
       </PageLink>
