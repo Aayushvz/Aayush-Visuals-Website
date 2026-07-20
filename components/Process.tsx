@@ -96,7 +96,7 @@ export default function Process() {
   }, []);
 
   return (
-    <section className="process" ref={wrapperRef}>
+    <section className={`process${cardsVisible > 0 ? " process--active" : ""}`} ref={wrapperRef}>
       <div className="process__sticky">
         <div className="process__brushTop" aria-hidden>
           <svg className="process__brushSvg--desktop" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -144,7 +144,7 @@ export default function Process() {
             Idea to impact, every step.
           </h2>
 
-          <div className="procCards">
+          <div className={`procCards${cardsVisible > 0 ? " procCards--visible" : ""}`}>
             <div
               className="procLine"
               style={{ transform: `scaleX(${lineScale})` }}

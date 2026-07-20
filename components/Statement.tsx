@@ -21,9 +21,9 @@ import { useEffect, useRef, useState } from "react";
   than half-completing during the rise.
 */
 
-const WORDS: { t: string; strong?: boolean; br?: boolean }[] = [
+const WORDS: { t: string; strong?: boolean; br?: boolean; isDot?: boolean }[] = [
   { t: "4+", strong: true },
-  { t: "years", strong: true, br: true },
+  { t: "years", strong: true },
   { t: "of" },
   { t: "turning", br: true },
   { t: "complex" },
@@ -33,7 +33,8 @@ const WORDS: { t: string; strong?: boolean; br?: boolean }[] = [
   { t: "people" },
   { t: "want" },
   { t: "to" },
-  { t: "use." },
+  { t: "use" },
+  { t: ".", isDot: true },
 ];
 
 function FigmaMark() {
@@ -91,6 +92,7 @@ export default function Statement() {
   const innerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const toolRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const dotRef = useRef<HTMLSpanElement>(null);
   const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
@@ -119,8 +121,8 @@ export default function Statement() {
     // ---- magnetic dot field ----
     const canvas = canvasRef.current;
     const ctx = canvas ? canvas.getContext("2d") : null;
-    const GAP = 16; // matches the .dotsLight CSS pitch
-    const OFF = 8; // CSS dot centre within each tile
+    const GAP = 16;
+    const OFF = 8;
     const RADIUS = 165;
     const DECAY = 0.9;
     let cw = 0;
@@ -128,7 +130,7 @@ export default function Statement() {
     let cols = 0;
     let rows = 0;
     let heat = new Float32Array(0);
-    let heatActive = false; // gate: only redraw while there's a glow to show
+    let heatActive = false;
     if (ctx) ctx.fillStyle = "rgba(244, 241, 234, 1)";
 
     // ---- per-tile smoothed cursor proximity ----
@@ -147,17 +149,27 @@ export default function Statement() {
         setRevealed(true);
       }
 
-      // DELAYED reveal window: words 0.45→0.92, ruler 0.45→0.8 — begins
-      // after the section has entered, completes while fully visible.
-      const tp = Math.min(1, Math.max(0, (rise - 0.45) / 0.47));
-      section.style.setProperty("--tp", tp.toFixed(4));
-      const lp = Math.min(1, Math.max(0, (rise - 0.45) / 0.35));
+      // DELAYED reveal window: begin at 60% visibility (r.top = 0.4 * vh).
+      // Pin/hold continues for 140vh scroll distance (r.top = -1.0 * vh).
+      const startTrigger = 0.4 * vh;
+      const endTrigger = -1.0 * vh;
+      const p = Math.min(1, Math.max(0, (startTrigger - r.top) / (startTrigger - endTrigger)));
+
+      section.style.setProperty("--tp", p.toFixed(4));
+      
+      const lp = Math.min(1, p * 1.3);
       section.style.setProperty("--lineP", lp.toFixed(4));
 
-      // scroll drift of the typography plane
+      // scroll drift of the typography plane is removed to keep it fully pinned
       const sp = Math.min(1, Math.max(0, -r.top / vh));
-      if (innerRef.current) {
-        innerRef.current.style.transform = `translate3d(0, ${(-sp * 16).toFixed(1)}px, 0)`;
+
+      // dot animation trigger
+      if (dotRef.current) {
+        if (p > 0.99) {
+          dotRef.current.classList.add("animated-period--active");
+        } else {
+          dotRef.current.classList.remove("animated-period--active");
+        }
       }
 
       // is the pointer over the section right now?
@@ -167,13 +179,11 @@ export default function Statement() {
         ptr.cx <= r.right &&
         ptr.cy >= r.top &&
         ptr.cy <= r.bottom;
-      const px = ptr.cx - r.left;
-      const py = ptr.cy - r.top;
 
       // ---- dots ----
       if (canvas && ctx) {
-        const w = r.width;
-        const h = r.height;
+        const w = window.innerWidth || 1;
+        const h = window.innerHeight || 1;
         if (w !== cw || h !== ch) {
           cw = w;
           ch = h;
@@ -188,9 +198,10 @@ export default function Statement() {
           rows = Math.ceil(h / GAP) + 1;
           heat = new Float32Array(cols * rows);
         }
-        // Only touch the canvas while the pointer is over the section or
-        // dots are still fading — otherwise the layer stays static, so the
-        // compositor (and headless capture) isn't perpetually invalidated.
+
+        const px = ptr.cx;
+        const py = ptr.cy;
+
         if (inside || heatActive) {
           ctx.clearRect(0, 0, w, h);
           let anyHeat = false;
@@ -255,51 +266,96 @@ export default function Statement() {
 
   return (
     <section
-      className={`statement dotsLight${revealed ? " statement--revealed" : ""}`}
+      className={`statement${revealed ? " statement--revealed" : ""}`}
       id="statement"
       ref={sectionRef}
+      style={{
+        display: "block",
+        padding: 0,
+        overflow: "visible",
+        minHeight: "250svh",
+      }}
     >
-      {/* magnetic light field: additive glow over the static CSS base dots */}
-      <canvas className="statement__dotsCanvas" ref={canvasRef} aria-hidden />
+      <div 
+        className="statement__sticky dotsLight"
+        style={{
+          position: "sticky",
+          top: 0,
+          height: "100svh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          padding: "clamp(72px, 12vh, 120px) clamp(20px, 5vw, 64px)",
+        }}
+      >
+        <style>{`
+          .animated-period {
+            display: inline-block;
+            transform-origin: bottom center;
+          }
+          .animated-period--active {
+            animation: periodPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes periodPop {
+            0% { transform: scale(1) translateY(0) rotate(0); color: inherit; }
+            40% { transform: scale(1.5) translateY(-8px) rotate(10deg); color: #8B5CF6; }
+            100% { transform: scale(1) translateY(0) rotate(0); color: inherit; }
+          }
+          .statement__rulerGap {
+            flex: 0 0 min(68vw, 980px) !important;
+          }
+          @media (min-width: 641px) {
+            .statement__br--desktop { display: block; }
+            .statement__text { text-wrap: unset !important; }
+          }
+          @media (max-width: 640px) {
+            .statement__br--desktop { display: none; }
+          }
+        `}</style>
 
-      {/* ruler frame — same architecture as the hero (.heroRuler): two
-          light vertical rails at the shared --page-rail-inset, plus a flex
-          row whose central gap is a protected clearance zone, so the
-          horizontal segments grow inward from the rails but can never
-          enter the headline area. Segments scaleX scrubbed by --lineP. */}
-      <div className="statement__ruler" aria-hidden>
-        <span className="statement__rail statement__rail--left" />
-        <span className="statement__rail statement__rail--right" />
-        <div className="statement__rulerRow">
-          <span className="statement__seg statement__seg--left" />
-          <span className="statement__rulerGap" />
-          <span className="statement__seg statement__seg--right" />
+        {/* magnetic light field: additive glow over the static CSS base dots */}
+        <canvas className="statement__dotsCanvas" ref={canvasRef} aria-hidden />
+
+        {/* ruler frame — same architecture as the hero (.heroRuler): two
+            light vertical rails at the shared --page-rail-inset, plus a flex
+            row whose central gap is a protected clearance zone, so the
+            horizontal segments grow inward from the rails but can never
+            enter the headline area. Segments scaleX scrubbed by --lineP. */}
+        <div className="statement__ruler" aria-hidden>
+          <span className="statement__rail statement__rail--left" />
+          <span className="statement__rail statement__rail--right" />
+          <div className="statement__rulerRow">
+            <span className="statement__seg statement__seg--left" />
+            <span className="statement__rulerGap" />
+            <span className="statement__seg statement__seg--right" />
+          </div>
         </div>
-      </div>
-      
-      {/* Mobile wavy line behind the vector tool */}
-      <div className="statement__wavyLine" aria-hidden>
-        <svg viewBox="0 0 400 100" fill="none" preserveAspectRatio="none">
-          <path d="M-10,70 Q90,30 200,80 T410,20" stroke="var(--cream)" strokeWidth="2.5" />
-        </svg>
-      </div>
+        
+        {/* Mobile wavy line behind the vector tool */}
+        <div className="statement__wavyLine" aria-hidden>
+          <svg viewBox="0 0 400 100" fill="none" preserveAspectRatio="none">
+            <path d="M-10,70 Q90,30 200,80 T410,20" stroke="var(--cream)" strokeWidth="2.5" />
+          </svg>
+        </div>
 
-      <div className="statement__inner" ref={innerRef}>
-        <h2 className="statement__text">
-          {WORDS.map((w, i) => (
-            <span key={i} style={{ display: "contents" }}>
-              <span
-                className={`statement__word${w.strong ? " statement__word--strong" : ""}`}
-                style={{ "--i": i } as React.CSSProperties}
-              >
-                {w.t}
-                {i < WORDS.length - 1 ? " " : ""}
+        <div className="statement__inner" ref={innerRef}>
+          <h2 className="statement__text">
+            {WORDS.map((w, i) => (
+              <span key={i} style={{ display: "contents" }}>
+                <span
+                  ref={w.isDot ? dotRef : null}
+                  className={`statement__word${w.strong ? " statement__word--strong" : ""}${w.isDot ? " animated-period" : ""}`}
+                  style={{ "--i": i } as React.CSSProperties}
+                >
+                  {w.t}
+                </span>
+                {i < WORDS.length - 1 && !WORDS[i + 1]?.isDot ? " " : ""}
+                {w.br ? <br className="statement__br--desktop" /> : null}
               </span>
-              {w.br ? <br className="statement__br" /> : null}
-            </span>
-          ))}
-        </h2>
-      </div>
+            ))}
+          </h2>
+        </div>
 
       <div className="statement__tools">
         {TOOLS.map((tool, i) => (
@@ -316,6 +372,7 @@ export default function Statement() {
             </span>
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

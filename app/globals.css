@@ -1779,6 +1779,12 @@ html.past-hero .themeSwitch {
   inset: 0;
   pointer-events: none;
   z-index: 4;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.process--active .process__rails {
+  opacity: 1;
 }
 
 .process__rail {
@@ -2033,6 +2039,11 @@ html.past-hero .themeSwitch {
   border-radius: 2px;
   background: rgba(26, 26, 26, 0.07);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.procCards--visible::before {
+  opacity: 1;
 }
 
 /* Real div controlled by inline style scaleX() — smooth continuous growth */
@@ -2074,9 +2085,13 @@ html.past-hero .themeSwitch {
 .procCard {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(26, 26, 26, 0.08);
-  transition: background 0.35s ease;
+  border-right: 1px solid transparent;
+  transition: background 0.35s ease, border-color 0.5s ease;
   cursor: default;
+}
+
+.procCard--visible {
+  border-right-color: rgba(26, 26, 26, 0.08);
 }
 
 .procCard:last-child {
