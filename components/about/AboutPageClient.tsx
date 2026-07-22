@@ -23,10 +23,10 @@ const FACTS = [
 
 const EDUCATION = [
   { icon: "G", title: "Google UX Design Certificate", place: "Google", year: "2024" },
-  { icon: "/logos/education/ibm.png", title: "Generative AI", place: "IBM", year: "2024" },
-  { icon: "/logos/education/vit.png", title: "Bachelor of Technology in Computer Science Engineering", titleShort: "B.Tech", place: "Vellore Institute of Technology, Vellore", year: "2023 - Present" },
-  { icon: "/logos/education/dav.png", title: "Higher Secondary School", place: "DAV Public School", year: "2020-2022" },
-  { icon: "/logos/education/bishop-scott.png", title: "Senior Secondary School", place: "Bishop Scott Boys' School", year: "2020" },
+  { icon: "/logos/education/ibm.webp", title: "Generative AI", place: "IBM", year: "2024" },
+  { icon: "/logos/education/vit.webp", title: "Bachelor of Technology in Computer Science Engineering", titleShort: "B.Tech", place: "Vellore Institute of Technology, Vellore", year: "2023 - Present" },
+  { icon: "/logos/education/dav.webp", title: "Higher Secondary School", place: "DAV Public School", year: "2020-2022" },
+  { icon: "/logos/education/bishop-scott.webp", title: "Senior Secondary School", place: "Bishop Scott Boys' School", year: "2020" },
 ];
 
 const TOOLKIT = [
@@ -144,7 +144,7 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
         </div>
         <AboutRulers />
         <div className="aboutPage__canvasBg">
-          <AsciiPortrait src="/about/portrait.png" onHoverChange={onHoverChange} />
+          <AsciiPortrait src="/about/portrait.webp" onHoverChange={onHoverChange} />
         </div>
         <div className="aboutPage__heroSmoke" aria-hidden />
         <main className="aboutPage__main">

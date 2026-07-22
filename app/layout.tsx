@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, Instrument_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -17,6 +18,21 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
+// General Sans self-hosted (was a render-blocking fontshare.com <link>).
+// next/font inlines the @font-face, preloads the files, and adds a size-
+// adjusted fallback so there's no layout shift or third-party round-trip.
+const generalSans = localFont({
+  variable: "--font-general",
+  display: "swap",
+  fallback: ["system-ui", "sans-serif"],
+  src: [
+    { path: "../public/fonts/GeneralSans-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/GeneralSans-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../public/fonts/GeneralSans-Semibold.woff2", weight: "600", style: "normal" },
+    { path: "../public/fonts/GeneralSans-Bold.woff2", weight: "700", style: "normal" },
+  ],
+});
+
 export const metadata: Metadata = {
   title: "Aayush Visuals",
   description:
@@ -31,15 +47,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://api.fontshare.com" />
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={`${archivo.variable} ${instrumentSerif.variable}`}>
+    <html
+      lang="en"
+      className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable}`}
+      suppressHydrationWarning
+    >
+      <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         {children}
       </body>

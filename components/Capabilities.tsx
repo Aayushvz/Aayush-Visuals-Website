@@ -361,7 +361,7 @@ export default function Capabilities() {
               >
                 <img
                   className="capCard__img"
-                  src={`/skills/${card.slug}.png`}
+                  src={`/skills/${card.slug}.webp`}
                   alt={card.title}
                   draggable={false}
                 />

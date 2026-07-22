@@ -25,7 +25,7 @@
   /* global interface typeface — the hero identity lockup (aayush / Visuals)
      keeps its own explicit --font-serif / --font-archivo declarations and
      is untouched by this. Everything else inherits from body. */
-  --font-primary: "General Sans", system-ui, sans-serif;
+  --font-primary: var(--font-general), "General Sans", system-ui, sans-serif;
 
   /* global ruler frame geometry (.rails) — content below the hero stays
      clear of these fixed left/right lines by --page-content-inset. */
@@ -2439,7 +2439,7 @@ html.past-hero .themeSwitch {
   content: "";
   position: absolute;
   inset: 0;
-  background: url("/purple_ice_background.png") no-repeat center/cover;
+  background: url("/purple_ice_background.webp") no-repeat center/cover;
   opacity: 0.12; /* subtle purple ice texture */
   mix-blend-mode: overlay;
   pointer-events: none;
@@ -5825,7 +5825,7 @@ html.past-hero .themeSwitch {
 .aboutBanner__bg {
   position: absolute;
   inset: 0;
-  background: url("/about/banner-bg.png.png") center / cover no-repeat;
+  background: url("/about/banner-bg.webp") center / cover no-repeat;
   opacity: 0.82;
 }
 

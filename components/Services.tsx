@@ -4,12 +4,12 @@ import { useEffect, useRef } from "react";
 
 // Exact sequence of 6 unique service card images
 const services = [
-  { id: "uiux", title: "UI/UX Design", image: "/services/ui-ux.png" },
-  { id: "graphic", title: "Graphic Design", image: "/services/graphic-design.png" },
-  { id: "brand", title: "Brand Building", image: "/services/brand-building.png" },
-  { id: "video", title: "Video Production", image: "/services/video-production.png" },
-  { id: "website", title: "Website Development", image: "/services/website-development.png" },
-  { id: "product", title: "Product Design", image: "/services/product-design.png" },
+  { id: "uiux", title: "UI/UX Design", image: "/services/ui-ux.webp" },
+  { id: "graphic", title: "Graphic Design", image: "/services/graphic-design.webp" },
+  { id: "brand", title: "Brand Building", image: "/services/brand-building.webp" },
+  { id: "video", title: "Video Production", image: "/services/video-production.webp" },
+  { id: "website", title: "Website Development", image: "/services/website-development.webp" },
+  { id: "product", title: "Product Design", image: "/services/product-design.webp" },
 ];
 
 const allCards = [...services, ...services]; // 12 cards total across 6 arms
