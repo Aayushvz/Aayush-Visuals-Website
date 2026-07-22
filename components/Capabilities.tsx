@@ -1,277 +1,388 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useMotionValueEvent,
+} from "framer-motion";
 
 /*
-  Capabilities — a "skills wallet". A tactile card-holder sits centred and
-  closed; click it and the skill cards spring out one-by-one into a loose,
-  readable scatter you can drag and throw around (bounded to the canvas, so
-  nothing leaves the rulers). A gather control pulls them back into the
-  wallet and re-closes it. framer-motion drives the spring pop-out and the
-  drag/throw physics; no scroll-jacking — normal vertical scroll.
+  Capabilities — the "skills deck". Six credit-card skill designs live
+  inside a 3D holographic wallet. The pinned section (desktop AND mobile,
+  pulled up 100vh under Process for the slide-away parallax) deals cards
+  out of the wallet slot as you scroll — desktop into a symmetric
+  constellation, mobile into a tidy 2x3 grid above the wallet. Every card
+  is shown complete (exact 2150x1350 ratio, contained, never cropped).
+  Tapping the wallet throws all remaining cards out; tapping again
+  collects them; scrolling always regains control afterwards. On mobile
+  the wallet shakes periodically while cards remain inside. Backdrop:
+  cursor-reactive deep-space nebula, two-layer parallax starfield, and
+  slow aurora curtains (no streaks, no glare).
 */
 
-type Cap = { category: string; title: string };
+type Card = { slug: string; title: string };
 
-const CAPS: Cap[] = [
-  { category: "Product", title: "Product Design" },
-  { category: "UI / UX", title: "Interface Design" },
-  { category: "System", title: "Design Systems" },
-  { category: "Brand", title: "Brand Identity" },
-  { category: "Website", title: "Web Experiences" },
-  { category: "Motion", title: "Motion Design" },
-  { category: "Creative", title: "Creative Development" },
+const CARDS: Card[] = [
+  { slug: "product-design", title: "Product Design" },
+  { slug: "ui-ux-design", title: "UI/UX Design" },
+  { slug: "design-systems", title: "Design Systems" },
+  { slug: "brand-identity", title: "Brand Identity" },
+  { slug: "creative-development", title: "Creative Development" },
+  { slug: "motion-design", title: "Motion Design" },
 ];
 
-/* loose, readable spread — fractions of the canvas half-extent. Every card
-   keeps |fx| ≥ 0.5 so the whole centre column stays clear: scattered cards
-   never land on the holder (and z-order keeps them under it even when
-   dragged across). r = resting rotation. */
+/* desktop: symmetric 3+3 constellation around the centred wallet */
 const SCATTER_DESKTOP = [
-  { fx: -0.85, fy: -0.58, r: -8 },  // 0: Product Design (top-left)
-  { fx: -0.6, fy: 0.22, r: 6 },     // 1: Interface Design (bottom-left-center)
-  { fx: -1.02, fy: 0.26, r: -6 },   // 2: Design Systems (bottom-left-left)
-  { fx: 0.92, fy: -0.65, r: -8 },   // 3: Brand Identity (top-right)
-  { fx: 0.68, fy: -0.12, r: -7 },   // 4: Web Experiences (middle-right)
-  { fx: 0.96, fy: 0.58, r: -7 },    // 5: Motion Design (bottom-right-right)
-  { fx: 0.64, fy: 0.42, r: 6 },     // 6: Creative Development (bottom-right-center)
+  { fx: -0.9, fy: -0.7, r: -5 },
+  { fx: 0.9, fy: -0.7, r: 5 },
+  { fx: -0.92, fy: 0.02, r: -4 },
+  { fx: 0.92, fy: 0.02, r: 4 },
+  { fx: -0.88, fy: 0.72, r: -4 },
+  { fx: 0.88, fy: 0.72, r: 4 },
 ];
 
+/* mobile: tidy 2x3 grid filling the area above the bottom wallet */
 const SCATTER_MOBILE = [
-  { fx: -0.85, fy: -0.52, r: -10 }, // 0: Product Design (top-left, tilted left)
-  { fx: -0.82, fy: 0.58, r: -8 },   // 1: Interface Design (bottom-left, tilted left)
-  { fx: 0.85, fy: -0.25, r: 8 },    // 2: Design Systems (middle-right, tilted right)
-  { fx: -0.2, fy: -0.48, r: -6 },   // 3: Brand Identity (center-top-left, tilted left)
-  { fx: 0.42, fy: -0.72, r: -5 },   // 4: Web Experiences (top-center-right, tilted left)
-  { fx: 0.82, fy: 0.62, r: -6 },    // 5: Motion Design (bottom-right, tilted left)
-  { fx: -0.05, fy: 0.72, r: -4 },   // 6: Creative Development (bottom-center, tilted left)
+  { fx: -0.72, fy: -1.0, r: -3 },
+  { fx: 0.72, fy: -1.0, r: 3 },
+  { fx: -0.72, fy: -0.44, r: 2 },
+  { fx: 0.72, fy: -0.44, r: -2 },
+  { fx: -0.72, fy: 0.12, r: -2 },
+  { fx: 0.72, fy: 0.12, r: 3 },
+];
+
+/* tucked-in layout (option B): 4 cards fanned so their tops peek above the
+   rim, 2 nested lower behind them. dx = fan spread, rz = tilt, peek = px the
+   top rises above the wallet rim, z = stack order (centre cards forward). */
+const CLOSED_SCALE = 0.92;
+const CLOSED = [
+  { dx: -1.5, rz: -9, peek: 42, z: 3 },
+  { dx: -0.5, rz: -3, peek: 54, z: 5 },
+  { dx: 0.5, rz: 3, peek: 54, z: 6 },
+  { dx: 1.5, rz: 9, peek: 42, z: 4 },
+  { dx: -0.32, rz: -2, peek: 18, z: 1 },
+  { dx: 0.32, rz: 2, peek: 18, z: 2 },
+];
+
+/* pin timeline over a 450vh scroll span: 100vh parallax reveal, 100vh
+   closed-wallet dwell, then the deal, then ~175vh dwell before release */
+const DEAL_START = 0.445;
+const DEAL_STEP = 0.0333;
+
+function countRevealed(p: number) {
+  let n = 0;
+  for (let i = 0; i < CARDS.length; i++) {
+    if (p >= DEAL_START + i * DEAL_STEP) n = i + 1;
+  }
+  return n;
+}
+
+/* deterministic starfield layers (no hydration mismatch) */
+const FAR_STARS = [
+  { l: 5, t: 14, s: 1.5, d: 0 }, { l: 13, t: 66, s: 1.5, d: 1.4 },
+  { l: 21, t: 32, s: 2, d: 2.2 }, { l: 28, t: 84, s: 1.5, d: 0.7 },
+  { l: 36, t: 9, s: 1.5, d: 1.9 }, { l: 45, t: 47, s: 2, d: 2.7 },
+  { l: 52, t: 18, s: 1.5, d: 1 }, { l: 59, t: 76, s: 1.5, d: 1.6 },
+  { l: 67, t: 30, s: 2, d: 2.4 }, { l: 74, t: 62, s: 1.5, d: 0.4 },
+  { l: 82, t: 12, s: 1.5, d: 1.2 }, { l: 89, t: 42, s: 2, d: 2.9 },
+  { l: 95, t: 78, s: 1.5, d: 0.8 }, { l: 9, t: 92, s: 1.5, d: 2 },
+];
+
+const NEAR_STARS = [
+  { l: 16, t: 22, s: 3, d: 0.5 }, { l: 31, t: 71, s: 2.5, d: 1.8 },
+  { l: 48, t: 12, s: 3, d: 2.6 }, { l: 64, t: 86, s: 2.5, d: 0.9 },
+  { l: 77, t: 26, s: 3, d: 1.3 }, { l: 91, t: 58, s: 2.5, d: 2.1 },
+  { l: 6, t: 52, s: 3, d: 1.6 }, { l: 55, t: 94, s: 2.5, d: 0.2 },
 ];
 
 export default function Capabilities() {
+  const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
-  const [half, setHalf] = useState({ w: 380, h: 240 });
-  const [isMobile, setIsMobile] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-  const topZ = useRef(10);
+  const topZ = useRef(50);
+  const overrideP = useRef(0);
   const reduce = useReducedMotion();
+
+  const walletBodyRef = useRef<HTMLSpanElement>(null);
+  const [desktop, setDesktop] = useState(true);
+  const [scrollRevealed, setScrollRevealed] = useState(0);
+  /* tap override: "all" throws every card out, "none" collects them; a
+     real scroll afterwards clears it and resumes the scroll-driven deal */
+  const [override, setOverride] = useState<null | "all" | "none">(null);
+  /* walletTop: the wallet body's top edge relative to the canvas centre;
+     cardH: a card's untransformed height — both drive the tucked-in peeks */
+  const [half, setHalf] = useState({ w: 450, h: 260, walletTop: 0, cardH: 0 });
+
+  const pinned = !reduce;
+
+  /* cursor-reactive nebula + starfield parallax (motion values — no
+     re-render per mousemove) */
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const smx = useSpring(mx, { stiffness: 42, damping: 18, mass: 0.6 });
+  const smy = useSpring(my, { stiffness: 42, damping: 18, mass: 0.6 });
+  const nebulaX = useTransform(smx, (v) => v * 42);
+  const nebulaY = useTransform(smy, (v) => v * 30);
+  const nearX = useTransform(smx, (v) => v * -26);
+  const nearY = useTransform(smy, (v) => v * -18);
+  const farX = useTransform(smx, (v) => v * -11);
+  const farY = useTransform(smy, (v) => v * -8);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 641px)");
+    const apply = () => setDesktop(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    if (!pinned) setScrollRevealed(CARDS.length);
+  }, [pinned]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const measure = () => {
       const r = canvas.getBoundingClientRect();
-      // subtract an (approx) card half-size so the spread scales down on
-      // narrow canvases and cards never cross the rulers
-      const cw = Math.min(83, r.width * 0.11);
-      const ch = Math.min(105, r.height * 0.14);
-      const mobile = r.width < 640;
-      setIsMobile(mobile);
-      
-      const scaleX = mobile ? 1.2 : 1;
-      const scaleY = mobile ? 1.15 : 1;
-      setHalf({ 
-        w: Math.max(40, r.width / 2 - cw - 12) * scaleX, 
-        h: Math.max(80, r.height / 2 - ch - 12) * scaleY 
+      const cw = Math.min(122, r.width * 0.12);
+      const ch = Math.min(78, r.height * 0.12);
+      const body = walletBodyRef.current;
+      const card = canvas.querySelector<HTMLElement>(".capCard");
+      const walletTop = body
+        ? body.getBoundingClientRect().top - (r.top + r.height / 2)
+        : 0;
+      setHalf({
+        w: Math.max(60, r.width / 2 - cw - 14),
+        h: Math.max(80, r.height / 2 - ch - 14),
+        walletTop,
+        cardH: card ? card.offsetHeight : 0,
       });
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(canvas);
     return () => ro.disconnect();
-  }, []);
+  }, [desktop]);
 
-  // reduced motion: reveal the spread immediately, no burst
-  useEffect(() => {
-    if (reduce) setOpen(true);
-  }, [reduce]);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+  useMotionValueEvent(scrollYProgress, "change", (p) => {
+    if (!pinned) return;
+    if (override !== null && Math.abs(p - overrideP.current) > 0.015) {
+      setOverride(null);
+    }
+    const n = countRevealed(p);
+    setScrollRevealed((prev) => (prev === n ? prev : n));
+  });
 
-  const container: Variants = {
-    closed: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
-    open: { transition: { staggerChildren: 0.07, delayChildren: 0.12 } },
+  const revealed =
+    override === "all" ? CARDS.length : override === "none" ? 0 : scrollRevealed;
+  const allOut = revealed === CARDS.length;
+
+  const onWalletClick = () => {
+    if (!pinned) return;
+    overrideP.current = scrollYProgress.get();
+    /* cards still inside -> throw them all; everything out -> collect */
+    setOverride(allOut ? "none" : "all");
   };
 
-  const cardVariants: Variants = {
-    closed: {
-      x: 0,
-      y: 0,
-      rotate: 0,
-      scale: 0.55,
-      opacity: 0,
-      transition: reduce
-        ? { duration: 0 }
-        : { type: "spring", stiffness: 320, damping: 30 },
-    },
-    open: (i: number) => {
-      const coord = isMobile ? SCATTER_MOBILE[i] : SCATTER_DESKTOP[i];
-      return {
-        x: coord.fx * half.w,
-        y: coord.fy * half.h,
-        rotate: coord.r,
-        scale: 1,
-        opacity: 1,
-        transition: reduce
-          ? { duration: 0 }
-          : { type: "spring", stiffness: 300, damping: 22, mass: 0.9 },
-      };
-    },
-  };
+  /* wallet idle motion: desktop floats; mobile shakes for attention while
+     cards remain inside, floats once everything is out */
+  const liftAnimate = reduce
+    ? undefined
+    : !desktop && !allOut
+      ? { y: [0, -6, 0], rotate: [0, -2.4, 2.4, -2.4, 2.4, 0] }
+      : { y: [0, -6, 0], rotate: 0 };
+  const liftTransition =
+    !desktop && !allOut
+      ? { duration: 0.6, repeat: Infinity, repeatDelay: 1.6, ease: "easeInOut" as const }
+      : { duration: 6, repeat: Infinity, ease: "easeInOut" as const };
+
+  const wallet = (
+    <div
+      className="wallet"
+      role="button"
+      tabIndex={0}
+      aria-label={allOut ? "Collect the skill cards" : "Reveal the skill cards"}
+      onClick={onWalletClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onWalletClick();
+        }
+      }}
+    >
+      <motion.span className="wallet__lift" animate={liftAnimate} transition={liftTransition}>
+        <span className="wallet__body" ref={walletBodyRef}>
+          <span className="wallet__slot" aria-hidden />
+          <span className="wallet__pocket" aria-hidden>
+            <span className="wallet__emboss" aria-hidden>
+              aayush<sup>vz</sup> · skills
+            </span>
+            <span className="wallet__chip" aria-hidden />
+            <span className="wallet__dot" aria-hidden />
+          </span>
+          <span className="wallet__edge" aria-hidden />
+        </span>
+      </motion.span>
+      <span className="wallet__shadow" aria-hidden />
+      <span className="wallet__count">
+        {String(Math.min(revealed, CARDS.length)).padStart(2, "0")} / 06
+      </span>
+    </div>
+  );
+
+  const scatter = desktop ? SCATTER_DESKTOP : SCATTER_MOBILE;
 
   return (
     <section
-      className="capabilities"
+      className={`capabilities${pinned ? " capabilities--pinned" : ""}`}
       id="capabilities"
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        });
-        if (!isHovered) setIsHovered(true);
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{}}
+      ref={sectionRef}
     >
-      {/* Subtle mouse-following spotlight glow (replaces individual dot hover triggers) */}
-      {!reduce && isHovered && (
-        <motion.div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: 440,
-            height: 440,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(235, 226, 255, 0.08) 0%, rgba(139, 92, 246, 0.03) 45%, transparent 70%)",
-            filter: "blur(28px)",
-            pointerEvents: "none",
-            zIndex: 1,
-            x: mousePos.x - 220,
-            y: mousePos.y - 220,
-          }}
-        />
-      )}
+      <div
+        className="capabilities__pin"
+        onMouseMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          mx.set(((e.clientX - r.left) / r.width) * 2 - 1);
+          my.set(((e.clientY - r.top) / r.height) * 2 - 1);
+        }}
+        onMouseLeave={() => {
+          mx.set(0);
+          my.set(0);
+        }}
+      >
+        {/* ---- deep-space backdrop: nebula + aurora curtains + starfield ---- */}
+        <div className="capAurora" aria-hidden>
+          <motion.div className="capNebula" style={reduce ? undefined : { x: nebulaX, y: nebulaY }}>
+            {[
+              { c: "capAuroraBlob--a", x: [0, 70, -50, 0], y: [0, -55, 40, 0], s: [1, 1.16, 0.95, 1], dur: 26 },
+              { c: "capAuroraBlob--b", x: [0, -60, 50, 0], y: [0, 45, -60, 0], s: [1, 0.92, 1.18, 1], dur: 31 },
+              { c: "capAuroraBlob--c", x: [0, 55, -70, 0], y: [0, -40, 30, 0], s: [1, 1.22, 1, 1], dur: 23 },
+              { c: "capAuroraBlob--d", x: [0, -50, 40, 0], y: [0, 60, -35, 0], s: [1, 1.12, 0.94, 1], dur: 35 },
+            ].map((b, i) => (
+              <motion.span
+                key={i}
+                className={`capAuroraBlob ${b.c}`}
+                animate={reduce ? undefined : { x: b.x, y: b.y, scale: b.s }}
+                transition={{ duration: b.dur, repeat: Infinity, ease: "easeInOut" }}
+              />
+            ))}
+          </motion.div>
 
-      {/* drifting bokeh field — 5 circular dots moving in random directions (no hover handlers) */}
-      <div className="capOrbs" aria-hidden>
-        {[
-          { id: 1, x: [0, 20, -15, 10, -25, 0], y: [0, -10, 20, -25, 15, 0], scale: [1, 1.15, 1], dur: 14, size: 90, left: "6%", top: "16%" },
-          { id: 2, x: [0, -12, 25, -8, 18, 0], y: [0, 18, -10, 22, -15, 0], scale: [1, 1.2, 1], dur: 17, size: 46, left: "22%", top: "68%", opacity: 0.26 },
-          { id: 3, x: [0, 15, -20, 12, -8, 0], y: [0, -15, 18, -10, 25, 0], scale: [1, 1.1, 1], dur: 12, size: 34, left: "44%", top: "8%", opacity: 0.2 },
-          { id: 4, x: [0, -25, 15, -12, 20, 0], y: [0, 10, -22, 18, -10, 0], scale: [1, 1.25, 1], dur: 20, size: 110, right: "8%", top: "24%" },
-          { id: 5, x: [0, 18, -10, 25, -15, 0], y: [0, -20, 12, -28, 15, 0], scale: [1, 1.15, 1], dur: 16, size: 60, right: "24%", bottom: "12%", opacity: 0.28 },
-        ].map((orb) => (
-          <motion.span
-            key={orb.id}
-            className={`capOrb capOrb--${orb.id}`}
-            style={{
-              position: "absolute",
-              width: orb.size,
-              height: orb.size,
-              left: orb.left,
-              top: orb.top,
-              right: orb.right,
-              bottom: orb.bottom,
-              opacity: orb.opacity ?? 0.34,
-              pointerEvents: "none",
-            }}
-            animate={reduce ? undefined : {
-              x: orb.x,
-              y: orb.y,
-              scale: orb.scale,
-            }}
-            transition={{
-              duration: orb.dur,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          />
-        ))}
-      </div>
+          {/* aurora borealis curtains — slow wavering light bands */}
+          {!reduce && (
+            <>
+              <span className="capCurtain capCurtain--a" />
+              <span className="capCurtain capCurtain--b" />
+            </>
+          )}
 
-      {/* Vertical side rails (matching statement section rails) */}
-      <div className="capRails" aria-hidden>
-        <span className="capRail capRail--left" />
-        <span className="capRail capRail--right" />
-      </div>
+          <motion.div className="capStars capStars--far" style={reduce ? undefined : { x: farX, y: farY }}>
+            {FAR_STARS.map((st, i) => (
+              <span
+                key={i}
+                className="capStar"
+                style={{ left: `${st.l}%`, top: `${st.t}%`, width: st.s, height: st.s, animationDelay: `${st.d}s` }}
+              />
+            ))}
+          </motion.div>
+          <motion.div className="capStars capStars--near" style={reduce ? undefined : { x: nearX, y: nearY }}>
+            {NEAR_STARS.map((st, i) => (
+              <span
+                key={i}
+                className="capStar capStar--near"
+                style={{ left: `${st.l}%`, top: `${st.t}%`, width: st.s, height: st.s, animationDelay: `${st.d}s` }}
+              />
+            ))}
+          </motion.div>
+        </div>
 
-      <div className="capabilities__canvas" ref={canvasRef}>
-        {/* the holo vault / card-holder, centred */}
-        <motion.div
-          className={`wallet${open ? " wallet--open" : ""}`}
-          animate={
-            reduce
-              ? undefined
-              : open
-              ? { scale: 0.94, x: 0, rotate: 0 }
-              : { scale: 1, x: [0, -3, 3, -3, 3, 0], rotate: [0, -1, 1, -1, 1, 0] }
-          }
-          transition={
-            open
-              ? { type: "spring", stiffness: 260, damping: 24 }
-              : { duration: 0.4, repeat: Infinity, repeatDelay: 1.5, ease: "easeInOut" }
-          }
-          onClick={() => setOpen(!open)}
-          style={{ cursor: "pointer" }}
-        >
-          <span className="wallet__body">
-            <span className="wallet__peek wallet__peek--a" aria-hidden />
-            <span className="wallet__peek wallet__peek--b" aria-hidden />
-            <span className="wallet__peek wallet__peek--c" aria-hidden />
-            <span className="wallet__pocket" aria-hidden>
-              <span className="wallet__actionBtn" aria-hidden>
-                {open ? "Collect" : "Open"}
-              </span>
-              <span className="wallet__emboss" aria-hidden>
-                aayush<sup>vz</sup> · skills
-              </span>
-              <span className="wallet__chip" aria-hidden />
-              <span className="wallet__dot" aria-hidden />
-            </span>
-          </span>
-          <span className="wallet__hint">{open ? "" : "TAP TO OPEN"}</span>
-        </motion.div>
+        {/* side rails */}
+        <div className="capRails" aria-hidden>
+          <span className="capRail capRail--left" />
+          <span className="capRail capRail--right" />
+        </div>
 
-        {/* the scattered skill cards */}
-        <motion.div
-          className="capCards"
-          initial="closed"
-          animate={open ? "open" : "closed"}
-          variants={container}
-          style={{ pointerEvents: open ? "auto" : "none" }}
-        >
-          {CAPS.map((cap, i) => (
-            <motion.article
-              key={cap.title}
-              className="capCard"
-              custom={i}
-              variants={cardVariants}
-              drag={open && !reduce}
-              dragConstraints={canvasRef}
-              dragElastic={0.14}
-              dragMomentum
-              whileHover={open ? { scale: 1.04 } : undefined}
-              whileTap={{ cursor: "grabbing" }}
-              onPointerDown={(e) => {
-                (e.currentTarget as HTMLElement).style.zIndex = String(++topZ.current);
-              }}
-            >
-              <span className="capCard__index">{String(i + 1).padStart(2, "0")}</span>
-              <span className="capCard__category">{cap.category}</span>
-              <h3 className="capCard__title">{cap.title}</h3>
-              <div className="capCard__art" aria-hidden />
-            </motion.article>
-          ))}
-        </motion.div>
-      </div>
+        <div className="capabilities__canvas" ref={canvasRef}>
+          {wallet}
+          {CARDS.map((card, i) => {
+            const open = i < revealed;
+            const s = scatter[i];
+            const c = CLOSED[i];
+            /* closed: real cards tucked into the tilted sleeve — 4 fanned so
+               their tops peek above the rim, 2 nested lower behind them. Each
+               card reads top→bottom as crisp top (above rim) → colour dimmed
+               through the frosted upper pocket → hidden behind the lower
+               pocket. rotateX matches the wallet's 3D tilt so they sit in it. */
+            const target = open
+              ? { x: s.fx * half.w, y: s.fy * half.h, rotate: s.r, rotateX: 0, scale: 1 }
+              : half.cardH > 0
+                ? {
+                    x: c.dx * 40,
+                    y: half.walletTop - c.peek + (half.cardH * CLOSED_SCALE) / 2,
+                    rotate: c.rz,
+                    rotateX: 11,
+                    scale: CLOSED_SCALE,
+                  }
+                : { x: c.dx * 30, y: 24, rotate: c.rz, rotateX: 0, scale: 0.7 };
+            return (
+              <motion.article
+                key={card.slug}
+                className="capCard"
+                style={{ zIndex: open ? 40 + i : c.z }}
+                animate={target}
+                transition={
+                  reduce
+                    ? { duration: 0 }
+                    : {
+                        type: "spring",
+                        stiffness: 230,
+                        damping: 26,
+                        mass: 0.9,
+                        delay: override === "all" ? i * 0.06 : 0,
+                      }
+                }
+                drag={open && !reduce}
+                dragConstraints={canvasRef}
+                dragElastic={0.12}
+                dragMomentum
+                whileHover={open ? { scale: 1.06 } : undefined}
+                onPointerDown={(e) => {
+                  (e.currentTarget as HTMLElement).style.zIndex = String(++topZ.current);
+                }}
+              >
+                <img
+                  className="capCard__img"
+                  src={`/skills/${card.slug}.png`}
+                  alt={card.title}
+                  draggable={false}
+                />
+              </motion.article>
+            );
+          })}
+        </div>
 
-      {/* Footer text — OUTSIDE the canvas, pinned to section bottom */}
-      <div className="capabilities__footer">
-        <h2 className="capabilities__footerTitle">Skills</h2>
-        <p className="capabilities__footerSub">Hold the wallet to reveal</p>
+        {/* footer */}
+        <div className="capabilities__footer">
+          <h2 className="capabilities__footerTitle">Skills</h2>
+          <p className="capabilities__footerSub">
+            {!pinned
+              ? "The disciplines I carry"
+              : desktop
+                ? "Scroll to deal · tap the wallet to collect"
+                : allOut
+                  ? "Tap the wallet to collect"
+                  : "Tap the wallet to reveal skills"}
+          </p>
+        </div>
       </div>
     </section>
   );

@@ -1954,14 +1954,12 @@ html.past-hero .themeSwitch {
   opacity: 1;
 }
 
-/* parallax: capabilities sits behind, process slides up to reveal it */
+/* parallax: the Process panel rides above the Capabilities section (which
+   is pulled up 100vh beneath it) and slides away to reveal the pinned
+   wallet scene */
 .processStage {
   position: relative;
-}
-.processStage .capabilities {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* mobile */
@@ -2437,7 +2435,7 @@ html.past-hero .themeSwitch {
    ("vault") floats centred; the skill cards scatter into the wings and
    always render BELOW the holder in z, so nothing ever covers it. */
 
-.capabilities::before {
+.capabilities__pin::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -2448,31 +2446,102 @@ html.past-hero .themeSwitch {
   z-index: 1;
 }
 
+/* -------- Skills deck: levitating credit-card stack that deals on scroll -------- */
+
+/* the section is a scroll driver; the pin stage holds the visible stage */
 .capabilities {
-  /* single source of truth for the holder height — the on-holder Collect
-     button derives its resting spot from it (and the open-state 0.94 scale) */
-  --walletH: clamp(180px, 22vw, 260px);
+  position: relative;
+  z-index: 1;
+}
+
+/* pulled up 100vh under the Process panel (which carries a higher z), so
+   Process slides away revealing the pinned wallet scene — the parallax.
+   Driver timeline (550vh = 100vh pin base + 450vh scroll span):
+   100vh parallax → 100vh closed-wallet dwell → ~90vh deal → ~175vh exit dwell */
+.capabilities--pinned {
+  min-height: 550vh;
+  margin-top: -100vh;
+}
+
+.capabilities__pin {
   position: relative;
   min-height: 100svh;
   display: flex;
+  overflow: hidden;
   background: radial-gradient(120% 90% at 50% 42%, #4a3a78 0%, #322558 38%, #1e1538 70%, #140d26 100%);
-  overflow: visible;
 }
 
-/* -------- drifting bokeh field -------- */
-.capOrbs {
+.capabilities--pinned .capabilities__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+}
+
+/* -------- aurora mesh background -------- */
+.capAurora {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
 }
 
-.capOrb {
+.capAuroraBlob {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(235, 226, 255, 0.55), rgba(200, 180, 255, 0.12) 60%, transparent 75%);
-  filter: blur(14px);
-  transition: filter 0.4s ease;
+  filter: blur(105px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.capAuroraBlob--a {
+  width: 46vw;
+  height: 46vw;
+  left: -6vw;
+  top: -10vh;
+  background: radial-gradient(circle, #7c3aed 0%, rgba(124, 58, 237, 0) 68%);
+}
+
+.capAuroraBlob--b {
+  width: 40vw;
+  height: 40vw;
+  right: -4vw;
+  top: 4vh;
+  background: radial-gradient(circle, #d946ef 0%, rgba(217, 70, 239, 0) 68%);
+  opacity: 0.4;
+}
+
+.capAuroraBlob--c {
+  width: 42vw;
+  height: 42vw;
+  right: 6vw;
+  bottom: -14vh;
+  background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0) 68%);
+  opacity: 0.36;
+}
+
+.capAuroraBlob--d {
+  width: 36vw;
+  height: 36vw;
+  left: 4vw;
+  bottom: -10vh;
+  background: radial-gradient(circle, #a855f7 0%, rgba(168, 85, 247, 0) 68%);
+  opacity: 0.44;
+}
+
+.capSpotlight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(235, 226, 255, 0.1) 0%, rgba(139, 92, 246, 0.04) 45%, transparent 70%);
+  filter: blur(30px);
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* the play canvas — constrained inside the rulers; drag is bounded to it */
@@ -2481,6 +2550,243 @@ html.past-hero .themeSwitch {
   flex: 1 1 auto;
   margin: clamp(64px, 10vh, 120px) var(--page-content-inset);
   border-radius: 4px;
+  perspective: 1800px;
+  z-index: 3;
+}
+
+.capDeck {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* exact credit-card ratio (2150x1350 art). The artwork is shown complete:
+   contain-fit, no clipping radius, no crop — the design IS the card. */
+.capCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(190px, 16.5vw, 244px);
+  aspect-ratio: 2150 / 1350;
+  margin: 0;
+  translate: -50% -50%;
+  transform-style: preserve-3d;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 26px 44px rgba(8, 4, 24, 0.55));
+}
+
+.capCard:active {
+  cursor: grabbing;
+}
+
+.capCard__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* -------- 3D wallet: tilted body with thickness, card slot, ground shadow -------- */
+.wallet__lift {
+  display: block;
+  transform-style: preserve-3d;
+  perspective: 1100px;
+}
+
+/* the card slot opening along the wallet's top edge — the deck lives in here */
+.wallet__slot {
+  position: absolute;
+  top: 9px;
+  left: 6%;
+  right: 6%;
+  height: 13px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #070412, #1c1338 85%);
+  box-shadow:
+    inset 0 3px 7px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 0 rgba(233, 223, 255, 0.14);
+  z-index: 3;
+}
+
+/* bottom thickness face selling the 3D volume */
+.wallet__edge {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: -11px;
+  height: 14px;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(180deg, #2b2050, #120b26);
+  box-shadow: 0 4px 10px rgba(8, 4, 24, 0.5);
+  z-index: 0;
+}
+
+/* soft breathing ground shadow beneath the floating wallet */
+.wallet__shadow {
+  position: absolute;
+  top: calc(var(--w-h) + 26px);
+  left: 50%;
+  translate: -50% 0;
+  width: 115%;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(8, 4, 24, 0.55), transparent 68%);
+  filter: blur(10px);
+  animation: walletShadowBreathe 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes walletShadowBreathe {
+  0%, 100% { transform: scaleX(1); opacity: 0.9; }
+  50% { transform: scaleX(0.86); opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet__shadow {
+    animation: none;
+  }
+}
+
+.wallet__count {
+  margin-top: 14px;
+  font-family: var(--font-mono, "SF Mono", monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: rgba(233, 223, 255, 0.6);
+}
+
+/* -------- deep-space nebula backdrop -------- */
+
+/* cursor-reactive nebula wrapper (framer drives its x/y) */
+.capNebula {
+  position: absolute;
+  inset: -8%;
+  will-change: transform;
+}
+
+/* parallax starfield layers */
+.capStars {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.capStar {
+  position: absolute;
+  border-radius: 50%;
+  background: #e9dfff;
+  opacity: 0.22;
+  animation: capTwinkle 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.capStar--near {
+  box-shadow: 0 0 8px rgba(233, 223, 255, 0.65);
+}
+
+@keyframes capTwinkle {
+  0%, 100% { opacity: 0.14; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.45); }
+}
+
+/* aurora borealis curtains — tall soft light bands that slowly waver,
+   shimmer, and drift; large-scale organic motion with zero hard edges */
+.capCurtain {
+  position: absolute;
+  top: -12%;
+  height: 78%;
+  width: 34%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: blur(34px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 62%, transparent 100%);
+}
+
+.capCurtain--a {
+  left: 6%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.22) 22%,
+    rgba(56, 189, 248, 0.16) 46%,
+    rgba(217, 70, 239, 0.18) 68%,
+    transparent 100%
+  );
+  animation: capCurtainWaver 17s ease-in-out infinite;
+}
+
+.capCurtain--b {
+  right: 4%;
+  width: 28%;
+  background: linear-gradient(
+    80deg,
+    transparent 0%,
+    rgba(56, 189, 248, 0.16) 26%,
+    rgba(168, 85, 247, 0.2) 52%,
+    rgba(52, 211, 153, 0.1) 74%,
+    transparent 100%
+  );
+  animation: capCurtainWaver 23s ease-in-out infinite reverse;
+}
+
+@keyframes capCurtainWaver {
+  0%, 100% {
+    transform: skewX(-6deg) translateX(0) scaleY(1);
+    opacity: 0.75;
+  }
+  25% {
+    transform: skewX(4deg) translateX(4%) scaleY(1.06);
+    opacity: 1;
+  }
+  50% {
+    transform: skewX(-3deg) translateX(-3%) scaleY(0.96);
+    opacity: 0.6;
+  }
+  75% {
+    transform: skewX(6deg) translateX(3%) scaleY(1.04);
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capStar {
+    animation: none;
+  }
+}
+
+/* -------- phones: pinned canvas — 2x3 card grid above the bottom wallet
+   (extra specificity: a later base rule re-centers the canvas) -------- */
+@media (max-width: 640px) {
+  .capabilities .capabilities__canvas {
+    margin: 152px 14px 92px;
+    justify-content: flex-end;
+    padding-bottom: 6px;
+  }
+
+  .capCard {
+    width: min(44vw, 190px);
+  }
+
+  .wallet {
+    --w-w: clamp(190px, 52vw, 235px);
+    --w-h: calc(var(--w-w) * 0.66);
+  }
+
+  .wallet__count {
+    margin-top: 10px;
+    font-size: 11px;
+  }
+}
+
+/* -------- legacy bokeh (unused; deck replaces it) -------- */
+.capOrbs,
+.capOrb {
+  display: none;
 }
 
 /* -------- the holder: a holographic vault sleeve -------- */
@@ -2505,9 +2811,11 @@ html.past-hero .themeSwitch {
   cursor: default;
 }
 
-/* holo rim: a gradient border via padding + inner surface */
+/* holo rim: a gradient border via padding + inner surface; tilted in 3D
+   so the wallet reads as a physical object with the slot facing up */
 .wallet__body {
   position: relative;
+  display: block;
   width: var(--w-w);
   height: var(--w-h);
   border-radius: 18px;
@@ -2515,21 +2823,31 @@ html.past-hero .themeSwitch {
   background: linear-gradient(135deg, rgba(233, 223, 255, 0.75), rgba(139, 92, 246, 0.35) 30%, rgba(56, 189, 248, 0.3) 62%, rgba(233, 223, 255, 0.6));
   box-shadow: 0 34px 70px rgba(8, 4, 24, 0.55), 0 10px 22px rgba(8, 4, 24, 0.4),
     0 0 44px rgba(139, 92, 246, 0.22);
-  animation: walletFloat 5.5s ease-in-out infinite;
-  transition: box-shadow 0.4s ease;
+  transform: perspective(950px) rotateX(12deg);
+  transform-style: preserve-3d;
+  transition: box-shadow 0.4s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* inner glass face — carries the embossed circuit texture from the clip */
+.wallet:hover .wallet__body {
+  transform: perspective(950px) rotateX(7deg) scale(1.03);
+}
+
+/* frosted-glass upper pocket window: translucent + blur so the real cards
+   tucked behind show through, dimmed and glassy (grid = frost texture). The
+   opaque .wallet__pocket sits over the lower 58%, hiding card bottoms. */
 .wallet__body::before {
   content: "";
   position: absolute;
   inset: 1.5px;
   border-radius: 17px;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 9px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 13px),
-    linear-gradient(155deg, rgba(55, 42, 94, 0.78), rgba(36, 26, 68, 0.68) 55%, rgba(26, 18, 51, 0.68));
-  backdrop-filter: blur(20px);
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 15px),
+    linear-gradient(155deg, rgba(46, 33, 74, 0.52), rgba(30, 20, 52, 0.58) 60%, rgba(22, 14, 42, 0.6));
+  -webkit-backdrop-filter: blur(11px);
+  backdrop-filter: blur(11px);
+  box-shadow: inset 0 1px 0 rgba(233, 223, 255, 0.16);
+  z-index: 1;
 }
 
 .wallet:hover .wallet__body {
@@ -2585,9 +2903,10 @@ html.past-hero .themeSwitch {
   bottom: 1.5px;
   height: 58%;
   border-radius: 4px 4px 17px 17px;
-  background: linear-gradient(rgba(26, 17, 48, 0.92), rgba(16, 10, 32, 0.96));
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(233, 223, 255, 0.14);
+  background: linear-gradient(rgba(26, 17, 48, 0.98), rgba(14, 9, 30, 0.99));
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(233, 223, 255, 0.16);
   overflow: visible;
+  z-index: 2;
 }
 
 /* small metal chip, like the reference cards */
@@ -2656,105 +2975,8 @@ html.past-hero .themeSwitch {
   min-height: 14px;
 }
 
-/* -------- scattered skill cards (below the holder in z) -------- */
-.capCards {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-}
-
-.capCard {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin: 0;
-  width: clamp(134px, 12vw, 166px);
-  height: clamp(168px, 16vw, 211px);
-  translate: -50% -50%;
-  padding: 18px 18px 0;
-  display: flex;
-  flex-direction: column;
-  border-radius: 18px;
-  border: 1px solid rgba(233, 223, 255, 0.14);
-  background: linear-gradient(160deg, rgba(30, 20, 60, 0.78), rgba(15, 10, 35, 0.68) 65%);
-  backdrop-filter: blur(20px);
-  overflow: hidden;
-  box-shadow: 0 26px 54px rgba(8, 4, 24, 0.5), 0 8px 16px rgba(8, 4, 24, 0.36);
-  cursor: grab;
-  touch-action: none;
-  will-change: transform;
-}
-
-/* holographic sheen sweeping the face — the Alloy-card wash */
-.capCard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    118deg,
-    transparent 22%,
-    rgba(139, 92, 246, 0.2) 42%,
-    rgba(56, 189, 248, 0.14) 58%,
-    rgba(52, 211, 153, 0.1) 70%,
-    transparent 86%
-  );
-  pointer-events: none;
-}
-
-/* per-card hue shift so no two cards read identical */
-.capCard:nth-child(2n)::before {
-  filter: hue-rotate(24deg);
-}
-
-.capCard:nth-child(3n)::before {
-  filter: hue-rotate(-28deg);
-}
-
-.capCard:active {
-  cursor: grabbing;
-}
-
-.capCard__index {
-  position: absolute;
-  top: 18px;
-  right: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  color: rgba(233, 223, 255, 0.42);
-}
-
-.capCard__category {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: rgba(233, 223, 255, 0.62);
-}
-
-.capCard__title {
-  margin: 7px 0 0;
-  font-size: clamp(19px, 1.5vw, 24px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: #e9dfff;
-  text-shadow: 0 0 24px rgba(167, 139, 250, 0.35);
-  pointer-events: none;
-}
-
-/* artwork slot — holo bloom + fine dot grain, image drops in later */
-.capCard__art {
-  margin-top: auto;
-  height: 42%;
-  border-radius: 12px 12px 0 0;
-  background:
-    radial-gradient(80% 90% at 28% 88%, rgba(139, 92, 246, 0.4), rgba(56, 189, 248, 0.14) 55%, transparent 75%),
-    radial-gradient(rgba(233, 223, 255, 0.14) 1px, transparent 1px);
-  background-size: 100% 100%, 13px 13px;
-  -webkit-mask-image: linear-gradient(to top, #000 55%, transparent);
-  mask-image: linear-gradient(to top, #000 55%, transparent);
-  pointer-events: none;
-}
+/* legacy text-card styles removed — the deck now renders the real credit
+   card artwork (see .capCard in the skills-deck block above) */
 
 /* -------- collect / reset: a button ON the holder's pocket face -------- */
 .capGather {
@@ -4634,29 +4856,23 @@ html.past-hero .themeSwitch {
 
 /* ======== CAPABILITIES REDESIGN (pixel-perfect) ======== */
 
-.capabilities {
-  position: relative;
-  display: flex;
+/* the visible stage (pin) fills the viewport; the section itself is the
+   scroll driver, so these live on .capabilities__pin now */
+.capabilities__pin {
   flex-direction: column;
-  height: 100vh; /* fallback */
-  height: 100dvh;
-  min-height: 100vh; /* fallback */
-  min-height: 100dvh;
-  overflow: hidden;
-  padding-bottom: 0;
 }
 
-/* Canvas fills available space, wallet + cards live here */
+/* Canvas fills available space, cards live here */
 .capabilities__canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
-  padding-bottom: 0; /* center wallet perfectly */
+  padding-bottom: 0;
 }
 
-/* Footer pinned to absolute bottom of the section in desktop */
+/* Footer pinned to absolute bottom of the stage */
 .capabilities__footer {
   position: absolute;
   bottom: 0;
@@ -4689,10 +4905,11 @@ html.past-hero .themeSwitch {
   font-style: normal; /* changed from italic to normal */
 }
 
-/* Wallet sizing */
+/* Wallet sizing — landscape sleeve proportioned for the credit-card deck,
+   kept clear of the dealt constellation around it */
 .wallet {
-  --w-w: clamp(272px, 40vw, 448px);
-  --w-h: calc(var(--w-w) * 0.65);
+  --w-w: clamp(280px, 26vw, 375px);
+  --w-h: calc(var(--w-w) * 0.66);
 }
 
 /* Action label on the wallet pocket (visual only — whole wallet is clickable) */
@@ -4739,7 +4956,8 @@ html.past-hero .themeSwitch {
   text-align: center;
 }
 
-/* Mobile Optimizations - Skills header at top left, centered wallet lower down, smaller cards */
+/* Mobile: Skills header at the top; the deck canvas (2x3 grid + bottom
+   wallet) fills the rest. Card sizing lives in the skills-deck block. */
 @media (max-width: 640px) {
   .capabilities__footer {
     position: absolute;
@@ -4750,42 +4968,16 @@ html.past-hero .themeSwitch {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
-    padding: 0 calc(var(--page-rail-inset) + 10px); /* 10px spacing from vertical side rails/rulers */
+    padding: 0 calc(var(--page-rail-inset) + 10px);
   }
   .capabilities__footerTitle {
-    font-size: 44px; /* bold, prominent title matching design scale */
-    font-weight: 500; /* decreased weight slightly per request */
+    font-size: 44px;
+    font-weight: 500;
   }
   .capabilities__footerSub {
     font-size: 15px;
     padding-bottom: 0;
     font-style: normal;
-  }
-  .capabilities__canvas {
-    margin: 140px var(--page-rail-inset) 40px; /* clear top header, stretch to rail edges */
-    justify-content: center;
-    padding-bottom: 0; /* center wallet vertically in remaining space */
-  }
-  .wallet {
-    --w-w: clamp(232px, 65vw, 276px); /* 0.8x scaled down size */
-    --w-h: calc(var(--w-w) * 0.65); /* maintain aspect ratio */
-  }
-  .capCard {
-    width: 112px !important; /* 0.8x scaled down card size */
-    height: 148px !important;
-    padding: 10px 10px 0 !important;
-    border-radius: 12px !important;
-  }
-  .capCard__index {
-    font-size: 12px !important;
-  }
-  .capCard__category {
-    font-size: 9.5px !important;
-    margin-bottom: 5px !important;
-  }
-  .capCard__title {
-    font-size: 14px !important;
-    line-height: 1.25 !important;
   }
 }
 

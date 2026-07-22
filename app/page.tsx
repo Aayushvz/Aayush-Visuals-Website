@@ -36,8 +36,8 @@ export default function Home() {
         <Statement />
         <div className="processStage">
           <Process />
-          <Capabilities />
         </div>
+        <Capabilities />
         <div className="hpParallax">
           <div className="hpParallax__stage">
             <ProjectsSection />

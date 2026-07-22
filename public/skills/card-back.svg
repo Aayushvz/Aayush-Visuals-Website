@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1261" fill="none">
+  <defs>
+    <linearGradient id="cbBody" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#141019"/>
+      <stop offset="0.55" stop-color="#0c0910"/>
+      <stop offset="1" stop-color="#050406"/>
+    </linearGradient>
+    <radialGradient id="cbGlow" cx="0.82" cy="0.12" r="0.7">
+      <stop offset="0" stop-color="#7c3aed" stop-opacity="0.42"/>
+      <stop offset="0.5" stop-color="#7c3aed" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cbGlow2" cx="0.06" cy="0.95" r="0.6">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cbHolo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a855f7"/>
+      <stop offset="0.28" stop-color="#38bdf8"/>
+      <stop offset="0.52" stop-color="#e9d5ff"/>
+      <stop offset="0.74" stop-color="#f0abfc"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="cbStripe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000000"/>
+      <stop offset="0.5" stop-color="#1a1a1e"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="cbSign" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efeaf6"/>
+      <stop offset="1" stop-color="#dcd5ea"/>
+    </linearGradient>
+    <pattern id="cbGuilloche" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="26" stroke="#b3a7cc" stroke-width="1" stroke-opacity="0.5"/>
+    </pattern>
+    <filter id="cbNoise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0"/>
+    </filter>
+    <clipPath id="cbClip">
+      <rect x="6" y="6" width="1988" height="1249" rx="92"/>
+    </clipPath>
+  </defs>
+
+  <!-- body -->
+  <rect x="6" y="6" width="1988" height="1249" rx="92" fill="url(#cbBody)"/>
+
+  <g clip-path="url(#cbClip)">
+    <!-- ambient brand glows -->
+    <rect x="0" y="0" width="2000" height="1261" fill="url(#cbGlow)"/>
+    <rect x="0" y="0" width="2000" height="1261" fill="url(#cbGlow2)"/>
+    <!-- fine grain -->
+    <rect x="0" y="0" width="2000" height="1261" filter="url(#cbNoise)" opacity="0.05"/>
+
+    <!-- magnetic stripe -->
+    <rect x="0" y="150" width="2000" height="228" fill="url(#cbStripe)"/>
+    <rect x="0" y="150" width="2000" height="3" fill="#2a2a30"/>
+    <rect x="0" y="375" width="2000" height="3" fill="#000000"/>
+    <!-- holographic security thread -->
+    <rect x="0" y="398" width="2000" height="30" fill="url(#cbHolo)" opacity="0.85"/>
+
+    <!-- signature panel -->
+    <rect x="120" y="486" width="1420" height="168" rx="16" fill="url(#cbSign)"/>
+    <rect x="120" y="486" width="1420" height="168" rx="16" fill="url(#cbGuilloche)"/>
+    <text x="150" y="556" font-family="'General Sans','Helvetica Neue',Arial,sans-serif" font-size="30" letter-spacing="3" fill="#6b6480">AUTHORIZED — CREATIVE SIGNATURE</text>
+    <text x="150" y="624" font-family="'Brush Script MT','Segoe Script',cursive" font-size="64" fill="#2a2338">Aayush Raj</text>
+    <!-- cvv box -->
+    <rect x="1576" y="486" width="304" height="168" rx="16" fill="#f4f0fa"/>
+    <text x="1728" y="600" text-anchor="middle" font-family="'SF Mono',ui-monospace,monospace" font-size="52" letter-spacing="8" fill="#1a1a1a">079</text>
+    <text x="1728" y="640" text-anchor="middle" font-family="'General Sans',Arial,sans-serif" font-size="22" letter-spacing="3" fill="#8a8398">CVC</text>
+
+    <!-- contactless glyph echo, top-left over stripe area muted -->
+    <g transform="translate(150 232)" stroke="#ffffff" stroke-opacity="0.5" stroke-width="9" stroke-linecap="round" fill="none">
+      <path d="M4 20 A26 26 0 0 1 4 76"/>
+      <path d="M34 8 A44 44 0 0 1 34 88"/>
+      <path d="M64 -2 A62 62 0 0 1 64 98"/>
+    </g>
+
+    <!-- wordmark bottom-left -->
+    <text x="128" y="1070" font-family="'General Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="118" letter-spacing="-3" fill="#f4f1ea">aayush<tspan dy="-42" font-size="52" fill="#8b5cf6">vz</tspan></text>
+    <text x="132" y="1140" font-family="'General Sans',Arial,sans-serif" font-weight="600" font-size="30" letter-spacing="10" fill="rgba(244,241,234,0.5)">SKILLS · DESIGN SERVICES</text>
+
+    <!-- brand two-circle motif bottom-right -->
+    <circle cx="1704" cy="1052" r="86" fill="#7c3aed" fill-opacity="0.85"/>
+    <circle cx="1820" cy="1052" r="86" fill="#e9d5ff" fill-opacity="0.7"/>
+
+    <!-- card number ghost, top -->
+    <text x="128" y="112" font-family="'SF Mono',ui-monospace,monospace" font-size="34" letter-spacing="6" fill="rgba(244,241,234,0.35)">AV · 00 · 07</text>
+    <text x="1872" y="112" text-anchor="end" font-family="'General Sans',Arial,sans-serif" font-weight="600" font-size="34" letter-spacing="2" fill="rgba(244,241,234,0.7)">skills</text>
+  </g>
+
+  <!-- crisp inner frame -->
+  <rect x="6.5" y="6.5" width="1987" height="1248" rx="91.5" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="1.5"/>
+</svg>
