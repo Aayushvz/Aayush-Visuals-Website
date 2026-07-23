@@ -69,15 +69,17 @@ const CLOSED = [
   { dx: 0.32, rz: 2, peek: 18, z: 2 },
 ];
 
-/* pin timeline over a 450vh scroll span: 100vh parallax reveal, 100vh
-   closed-wallet dwell, then the deal, then ~175vh dwell before release */
-const DEAL_START = 0.445;
-const DEAL_STEP = 0.0333;
+/* pin timeline (fractions of the scroll span):
+   - desktop: 550vh driver (450vh span), deal ends ~0.61 -> long calm exit
+   - mobile: shorter 440vh driver (340vh span) AND deal finishes ~0.75, so
+     only ~1 viewport of exit dwell after the 6th card lands (was 3-4 swipes) */
+const DEAL_DESKTOP = { start: 0.445, step: 0.0333 };
+const DEAL_MOBILE = { start: 0.46, step: 0.058 };
 
-function countRevealed(p: number) {
+function countRevealed(p: number, start: number, step: number) {
   let n = 0;
   for (let i = 0; i < CARDS.length; i++) {
-    if (p >= DEAL_START + i * DEAL_STEP) n = i + 1;
+    if (p >= start + i * step) n = i + 1;
   }
   return n;
 }
@@ -173,12 +175,13 @@ export default function Capabilities() {
     target: sectionRef,
     offset: ["start start", "end end"],
   });
+  const deal = desktop ? DEAL_DESKTOP : DEAL_MOBILE;
   useMotionValueEvent(scrollYProgress, "change", (p) => {
     if (!pinned) return;
     if (override !== null && Math.abs(p - overrideP.current) > 0.015) {
       setOverride(null);
     }
-    const n = countRevealed(p);
+    const n = countRevealed(p, deal.start, deal.step);
     setScrollRevealed((prev) => (prev === n ? prev : n));
   });
 

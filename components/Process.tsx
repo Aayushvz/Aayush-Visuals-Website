@@ -112,15 +112,18 @@ export default function Process() {
               filter="url(#processBrushFilter)"
             />
           </svg>
-          <svg className="process__brushSvg--mobile" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className="process__brushSvg--mobile" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="processBrushFilterMobile" x="-5%" y="-600%" width="110%" height="1300%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.04 0.055" numOctaves="3" seed="31" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+              {/* two-band fractal noise: low horizontal freq = broad tears,
+                  high vertical freq = fine dry-brush fibres; strong displace
+                  turns the base edge into a torn-paper / dry-brush stroke */}
+              <filter id="processBrushFilterMobile" x="-8%" y="-700%" width="116%" height="1500%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.019 0.13" numOctaves="4" seed="9" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
               </filter>
             </defs>
             <path
-              d="M0,-500 L1440,-500 L1440,60 C1100,38 800,28 600,32 C400,36 200,44 0,60 Z"
+              d="M0,-500 L1440,-500 L1440,72 C1400,54 1360,47 1320,44 C1280,41 1240,46 1200,43 C1160,40 1120,46 1080,42 C1040,38 1000,45 960,41 C920,38 880,44 840,41 C800,37 760,43 720,39 C680,36 640,43 600,39 C560,36 520,42 480,38 C440,35 400,41 360,38 C320,34 280,40 240,37 C200,33 160,40 120,36 C80,49 40,62 0,72 Z"
               fill="#1a1a1a"
               filter="url(#processBrushFilterMobile)"
             />

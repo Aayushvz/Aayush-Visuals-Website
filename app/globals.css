@@ -1965,7 +1965,7 @@ html.past-hero .themeSwitch {
 /* mobile */
 @media (max-width: 640px) {
   .process__brushTop {
-    height: 60px;
+    height: 68px;
   }
 
   .process__brushTop .process__brushSvg--desktop { display: none; }
@@ -2762,6 +2762,13 @@ html.past-hero .themeSwitch {
 /* -------- phones: pinned canvas — 2x3 card grid above the bottom wallet
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
+  /* shorter pin driver on phones: paired with the later mobile deal timing
+     (DEAL_MOBILE), this leaves only ~1 viewport of exit dwell after the deal
+     instead of the desktop ~175vh tail */
+  .capabilities--pinned {
+    min-height: 440vh;
+  }
+
   .capabilities .capabilities__canvas {
     margin: 152px 14px 92px;
     justify-content: flex-end;
