@@ -8,8 +8,8 @@ export default function ProjectsSection() {
           <h2 className="display selWorks__title" data-reveal>
             Selected
             <br />
-            works
-            <span className="selWorks__tag">from 2024-now</span>
+            Projects
+            <span className="selWorks__tag">from 2020-now</span>
           </h2>
           <span className="selWorks__arrow" aria-hidden data-reveal>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
