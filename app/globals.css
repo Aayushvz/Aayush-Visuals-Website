@@ -3040,6 +3040,304 @@ html.past-hero .themeSwitch {
 /* the section sits at the rail inset (not the deeper content inset) so
    .projGrid's edges can land exactly on the rulers with zero gap; the
    header text gets its own extra inset to stay visually centred */
+/* ============================================================
+   Selected works — numbered rows, alternating full-width + pairs
+   ============================================================ */
+.selWorks {
+  background: var(--cream);
+  padding: 13vh var(--page-rail-inset) 9vh;
+}
+
+/* the projects sit just inside the fixed global side rails so the rails
+   frame them (rail = --page-rail-inset; this small gap keeps images off
+   the line) — "connected to the side rulers" */
+.selWorks {
+  --selw-gap: clamp(14px, 2vw, 34px);
+  --selw-line: rgba(31, 31, 31, 0.16);
+}
+
+.selWorks__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: clamp(24px, 5vw, 80px);
+  padding: 0 var(--selw-gap);
+  margin-bottom: clamp(28px, 4vh, 48px);
+}
+
+.selWorks__title {
+  position: relative;
+  font-size: clamp(52px, 8.5vw, 120px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  color: var(--ink);
+  margin: 0;
+  text-transform: none;
+}
+
+/* small highlighted sticker sitting beside "works" */
+.selWorks__tag {
+  display: inline-block;
+  margin-left: 0.5em;
+  transform: translateY(-0.35em) rotate(-3deg);
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--purple);
+  color: #fff;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  vertical-align: middle;
+}
+
+.selWorks__arrow {
+  display: inline-flex;
+  margin-top: clamp(24px, 3vh, 40px);
+  color: var(--ink);
+}
+.selWorks__arrow svg {
+  width: 30px;
+  height: 30px;
+}
+
+.selWorks__headRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: clamp(28px, 5vh, 64px);
+  padding-top: 10px;
+}
+
+.selWorks__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(15px, 1.4vw, 19px);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.selWorks__count svg {
+  width: 22px;
+  height: 22px;
+  color: var(--purple);
+}
+
+.selWorks__note {
+  max-width: 300px;
+  text-align: right;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(31, 31, 31, 0.5);
+  margin: 0;
+}
+
+/* full-width divider under the header, edge to edge with the list */
+/* top ruler line of the grid (full width, meets the side rails) */
+.selWorks__divider {
+  height: 1px;
+  margin: 0;
+  background: var(--selw-line);
+}
+
+.selWorks__list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* each project row is a ruled cell: a bottom line, and content padded off
+   the lines. Pair rows split into two cells with a centre divider that
+   runs the full row height. */
+.selWorks__row {
+  border-bottom: 1px solid var(--selw-line);
+  padding-block: clamp(40px, 6vh, 78px);
+}
+
+.selWorks__row--full > .selWork {
+  padding-inline: var(--selw-gap);
+}
+
+.selWorks__row--pair {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.selWorks__row--pair::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--selw-line);
+}
+
+.selWorks__row--pair > .selWork:first-child {
+  padding-left: var(--selw-gap);
+  padding-right: clamp(22px, 2.6vw, 52px);
+}
+
+.selWorks__row--pair > .selWork:last-child {
+  padding-left: clamp(22px, 2.6vw, 52px);
+  padding-right: var(--selw-gap);
+}
+
+/* -------- a single work: flat, square-cornered image + quiet caption -------- */
+.selWork {
+  display: block;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.selWork__frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #e7e1d7;
+}
+
+.selWork__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.selWork:hover .selWork__img,
+.selWork:focus-visible .selWork__img {
+  transform: scale(1.04);
+}
+
+.selWork:focus-visible .selWork__frame {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+/* ledger caption row: [YEAR]  [NAME / CATEGORY + platform]  [NUMBER],
+   spanning the full column so year sits by the left rail, number by the
+   right — all in mono, matching the reference */
+.selWork__meta {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(18px, 4vw, 64px);
+  margin-top: clamp(16px, 1.5vw, 22px);
+  padding-bottom: clamp(20px, 3vw, 41px);
+}
+
+.selWork__year {
+  flex: 0 0 auto;
+  padding-top: 3px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11px, 0.95vw, 13px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.55);
+}
+
+.selWork__info {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+/* NAME bold, "/ category" regular — mono uppercase */
+.selWork__name {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(12.5px, 1.05vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.selWork__cat {
+  font-weight: 400;
+  color: rgba(31, 31, 31, 0.5);
+}
+
+/* platform/domain subline — mono, mixed case, muted */
+.selWork__role {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11px, 0.9vw, 13px);
+  letter-spacing: 0.01em;
+  color: rgba(31, 31, 31, 0.42);
+}
+
+/* big thin index numeral (reference weight), no hover */
+.selWork__index {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: clamp(48px, 6.2vw, 108px);
+  font-weight: 400;
+  line-height: 0.7;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.selWorks__row--pair .selWork__index {
+  font-size: clamp(38px, 4.6vw, 70px);
+}
+
+@media (max-width: 760px) {
+  .selWorks__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .selWorks__headRight {
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+  }
+  .selWorks__note {
+    text-align: left;
+    max-width: 100%;
+  }
+  .selWorks__arrow {
+    display: none;
+  }
+  /* pairs stack; the centre divider becomes a line between the two */
+  .selWorks__row--pair {
+    grid-template-columns: 1fr;
+  }
+  .selWorks__row--pair::after {
+    display: none;
+  }
+  .selWorks__row {
+    border-bottom: none;
+    padding-block: clamp(10px, 2vh, 16px);
+  }
+  .selWorks__row--full > .selWork,
+  .selWorks__row--pair > .selWork,
+  .selWorks__row--pair > .selWork:first-child,
+  .selWorks__row--pair > .selWork:last-child {
+    padding-inline: 0;
+  }
+  .selWork__meta {
+    padding-inline: var(--selw-gap);
+  }
+  .selWork__year {
+    display: none;
+  }
+  .selWorks__row--pair > .selWork:first-child {
+    padding-bottom: clamp(10px, 2vh, 16px);
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+}
+
 .projects {
   padding: 14vh var(--page-rail-inset) 9vh;
 }
