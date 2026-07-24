@@ -396,7 +396,7 @@ html.has-cursor .cursorRing {
    flips between dark and light glass, independent of the hero theme ---- */
 
 .navbar--overDark {
-  background: rgba(16, 16, 20, 0.58);
+  background: rgba(14, 14, 18, 0.86);
   border-color: rgba(255, 255, 255, 0.14);
   color: #f4f1ea;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
@@ -800,33 +800,14 @@ html.has-cursor .cursorRing {
   user-select: none;
 }
 
-/* ---------- theme switcher (fixed, centre-right, vertical glass pill) ---------- */
+/* ---------- theme switcher (inline navbar icon button) ---------- */
 
 .themeSwitch {
-  position: fixed;
-  right: 28px;
-  top: 50%;
-  translate: 0 -50%;
-  z-index: 95;
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 999px;
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(16px) saturate(1.7);
-  backdrop-filter: blur(16px) saturate(1.7);
-  border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
-  transition: background-color 0.55s ease, border-color 0.55s ease, box-shadow 0.55s ease,
-    opacity 0.45s ease, translate 0.45s ease;
-}
-
-/* hero-only: fades out once the user scrolls past the hero */
-html.past-hero .themeSwitch {
-  opacity: 0;
-  translate: 14px -50%;
-  pointer-events: none;
+  align-items: center;
+  justify-content: center;
+  margin-right: -4px; /* offset inner padding */
 }
 
 .themeSwitch:hover {
@@ -836,52 +817,31 @@ html.past-hero .themeSwitch {
 .themeSwitch button {
   position: relative;
   z-index: 1;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: none;
+  background: rgba(255, 255, 255, 0.05);
   color: var(--glass-fg);
-  opacity: 0.55;
   cursor: pointer;
-  transition: opacity 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.themeSwitch button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .themeSwitch button:hover {
-  opacity: 0.85;
-}
-
-.themeSwitch button[aria-pressed="true"] {
-  opacity: 1;
-  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .themeSwitch button:focus-visible {
   outline: 2px solid var(--hero-brand);
   outline-offset: 2px;
-}
-
-.themeSwitch__thumb {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--purple);
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
-  transition: translate 0.42s cubic-bezier(0.22, 1, 0.36, 1), scale 0.3s ease;
-}
-
-.themeSwitch[data-active="dark"] .themeSwitch__thumb {
-  translate: 0 50px;
-}
-
-.themeSwitch:hover .themeSwitch__thumb {
-  scale: 1.06;
 }
 
 /* ---------- logo strip ---------- */
@@ -8377,6 +8337,610 @@ html.contact-page-active .themeSwitch {
 
   .projects::after {
     right: clamp(14px, 5vw, 78px);
+  }
+}
+
+/* ============================================================
+   WORK PAGE HERO  (components/work/WorkHero.tsx)
+   A single choreographed hero: "Creative Projects" enters, the two
+   words split to opposite sides, then an auto-cycling stack of project
+   cards fills the centre. The tall wrapper + sticky pin lets scroll
+   drive the deck before releasing to the Selected Projects list below.
+   ============================================================ */
+.workHero {
+  position: relative;
+  min-height: 320vh; /* pin travel = height - 100vh -> ~3 card advances */
+  background: var(--hero-bg);
+}
+
+.workHero__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--hero-bg);
+}
+
+/* homepage-hero dotted grid: nested horizontal x vertical fade masks multiply
+   so all four edges dissolve and the corners fade hardest. Theme-reactive via
+   --hero-grid-line (faint light lines on dark, faint dark lines on cream). */
+.workHero__grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+.workHero__gridV {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+.workHero__gridPattern {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--hero-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
+/* accessible heading; the animated words below are aria-hidden */
+.workHero__srHeading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- heading: two independent words on the vertical centre axis --- */
+.workHero__heading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.workHero__word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: clamp(34px, 6.8vw, 100px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  color: var(--hero-fg);
+  white-space: nowrap;
+  will-change: transform, opacity, filter;
+  transition:
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* STATE 1 pre-entrance: centred pair, lifted + blurred + transparent */
+.workHero__word--left {
+  transform: translate(calc(-100% - 0.16em), calc(-50% + 20px));
+  opacity: 0;
+  filter: blur(8px);
+}
+.workHero__word--right {
+  transform: translate(0.16em, calc(-50% + 20px));
+  opacity: 0;
+  filter: blur(8px);
+}
+
+/* entrance settled (still centred as one line) */
+[data-in="true"] .workHero__word--left {
+  transform: translate(calc(-100% - 0.16em), -50%);
+  opacity: 1;
+  filter: blur(0);
+}
+[data-in="true"] .workHero__word--right {
+  transform: translate(0.16em, -50%);
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* STATE 2 split: Creative left edge -> ~7vw, Projects right edge -> ~93vw */
+[data-phase="split"] .workHero__word--left,
+[data-phase="stack"] .workHero__word--left,
+[data-phase="cycling"] .workHero__word--left {
+  transform: translate(-43vw, -50%);
+}
+[data-phase="split"] .workHero__word--right,
+[data-phase="stack"] .workHero__word--right,
+[data-phase="cycling"] .workHero__word--right {
+  transform: translate(calc(43vw - 100%), -50%);
+}
+
+/* --- STATE 3/4: the centred project card stack --- */
+.workHero__stack {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  z-index: 5;
+  width: clamp(284px, 46.2vw, 886px); /* increased by 10% more */
+  aspect-ratio: 16 / 9;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
+.workHero__card {
+  position: absolute;
+  inset: 0;
+  border-radius: clamp(16px, 1.6vw, 24px);
+  overflow: hidden;
+  background: var(--dark);
+  border: 1px solid var(--heroCard-border, rgba(0, 0, 0, 0.08));
+  box-shadow: var(--heroCard-shadow);
+  pointer-events: none; /* purely visual; never blocks scroll/touch */
+  will-change: transform, opacity;
+}
+
+.workHero__cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+}
+
+/* --- scroll prompt --- */
+.workHero__scrollPrompt {
+  position: absolute;
+  bottom: clamp(32px, 5vh, 64px);
+  right: clamp(24px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 200;
+  color: var(--ink);
+  transition: opacity 0.3s ease;
+  mix-blend-mode: difference;
+}
+
+.workHero__scrollPrompt:hover {
+  opacity: 1 !important;
+  cursor: pointer;
+}
+
+.workHero__scrollText {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  writing-mode: vertical-rl;
+  color: #fff;
+}
+
+.workHero__scrollArrow {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  animation: heroScrollBob 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes heroScrollBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* --- tablet / mobile: smaller type, wider cards, shorter pin --- */
+@media (max-width: 900px) {
+  .workHero {
+    min-height: 260vh;
+  }
+  .workHero__stack {
+    width: 69vw;
+  }
+}
+
+@media (max-width: 640px) {
+  .workHero__word {
+    font-size: clamp(25px, 11vw, 53px);
+  }
+  .workHero__stack {
+    width: 90vw;
+  }
+  /* Mobile only: Creative Projects moves UP to sit above the cards */
+  [data-phase="split"] .workHero__word--left,
+  [data-phase="stack"] .workHero__word--left,
+  [data-phase="cycling"] .workHero__word--left {
+    transform: translate(calc(-100% - 0.16em), calc(-50% - 35vh));
+  }
+  [data-phase="split"] .workHero__word--right,
+  [data-phase="stack"] .workHero__word--right,
+  [data-phase="cycling"] .workHero__word--right {
+    transform: translate(0.16em, calc(-50% - 35vh));
+  }
+}
+
+/* --- reduced motion: no pin, no autoplay, clean static composition --- */
+@media (prefers-reduced-motion: reduce) {
+  .workHero {
+    min-height: 100vh;
+  }
+  .workHero__pin {
+    position: relative;
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+  .workHero__word {
+    transition: none;
+    will-change: auto;
+  }
+}
+
+/* ============================================================
+   WORK PAGE — PROJECTS LISTING  (components/work/WorksSection.tsx)
+   Editorial header + working search/category filters + a two-column
+   grid of large project cards. Hover blurs the image while the centred
+   wordmark stays sharp and the three header dots turn red/yellow/green.
+   Everything here is scoped to .worksSection / .workCard.
+   ============================================================ */
+.worksSection {
+  background: var(--cream);
+  /* deeper top gap off the hero; reference-style shallow side margins now the
+     global side rulers are gone so the large cards dominate the width */
+  padding: clamp(80px, 14vh, 190px) clamp(20px, 2.4vw, 46px) clamp(64px, 10vh, 130px);
+  color: var(--ink);
+}
+
+/* --- editorial header --- */
+.worksSection__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: clamp(24px, 5vw, 90px);
+  margin-bottom: clamp(48px, 8vh, 96px);
+}
+
+.worksSection__title {
+  margin: 0;
+  font-size: clamp(52px, 9vw, 128px);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  text-transform: none;
+}
+
+.worksSection__dot {
+  color: var(--purple);
+}
+
+.worksSection__intro {
+  max-width: 380px;
+  padding-bottom: clamp(6px, 1.4vw, 18px);
+}
+
+.worksSection__meta {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: rgba(31, 31, 31, 0.55);
+}
+
+.worksSection__desc {
+  margin: 0;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.5;
+  color: rgba(31, 31, 31, 0.6);
+}
+
+/* --- search + category filters --- */
+.worksControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: clamp(48px, 7vh, 84px);
+}
+
+.worksSearch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  width: clamp(240px, 26vw, 320px);
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(31, 31, 31, 0.07);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.worksSearch:focus-within {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.worksSearch svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: rgba(31, 31, 31, 0.45);
+}
+
+.worksSearch__input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.worksSearch__input::placeholder {
+  color: rgba(31, 31, 31, 0.4);
+}
+
+.worksFilters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.worksChip {
+  flex: 0 0 auto;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(31, 31, 31, 0.07);
+  color: rgba(31, 31, 31, 0.7);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+
+.worksChip:hover {
+  color: var(--ink);
+  border-color: rgba(31, 31, 31, 0.16);
+}
+
+.worksChip--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.worksChip:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+/* --- two-column grid --- */
+.worksGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* reference spacing: very tight rows and columns */
+  gap: clamp(4px, 0.4vw, 8px);
+}
+
+.worksEmpty {
+  padding: clamp(40px, 8vh, 90px) 0;
+  font-size: 17px;
+  color: rgba(31, 31, 31, 0.5);
+}
+
+/* --- project card: header + media --- */
+.workCard {
+  display: block;
+  cursor: pointer;
+  outline: none;
+}
+
+.workCard:focus-visible .workCard__media {
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.55);
+}
+
+.workCard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: clamp(6px, 0.5vw, 10px);
+  padding: 16px clamp(18px, 1.6vw, 24px);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.workCard__label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.workCard__title {
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workCard__year {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(31, 31, 31, 0.4);
+}
+
+.workCard__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.workCard__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(31, 31, 31, 0.16);
+  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.workCard:hover .workCard__dot:nth-child(1),
+.workCard:focus-visible .workCard__dot:nth-child(1) {
+  background: #ff5f57;
+}
+.workCard:hover .workCard__dot:nth-child(2),
+.workCard:focus-visible .workCard__dot:nth-child(2) {
+  background: #febc2e;
+}
+.workCard:hover .workCard__dot:nth-child(3),
+.workCard:focus-visible .workCard__dot:nth-child(3) {
+  background: #28c840;
+}
+
+.workCard__media {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--dark);
+  /* white stroke framing the thumbnail, like the reference */
+  border: 4px solid #fff;
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.05);
+  transition: box-shadow 0.25s ease;
+}
+
+.workCard__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1);
+  filter: blur(0);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, filter;
+}
+
+/* blurred + slightly scaled on hover so no transparent edge is revealed */
+.workCard:hover .workCard__img,
+.workCard:focus-visible .workCard__img {
+  transform: scale(1.06);
+  filter: blur(15px);
+}
+
+/* separate sharp layer above the image — never blurred. The wrap owns the
+   centring + subtle hover rise; the logo image or text wordmark sits inside. */
+.workCard__logoWrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  opacity: 0.9;
+  transform: scale(0.97);
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.workCard:hover .workCard__logoWrap,
+.workCard:focus-visible .workCard__logoWrap {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.workCard__logo {
+  width: auto;
+  height: auto;
+  max-width: min(62%, 360px);
+  max-height: 40%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 20px rgba(0, 0, 0, 0.35));
+}
+
+.workCard__wordmark {
+  text-align: center;
+  color: #fff;
+  font-size: clamp(24px, 2.6vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.4);
+}
+
+/* --- tablet --- */
+@media (max-width: 900px) {
+  .worksSection__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .worksSection__intro {
+    max-width: 520px;
+  }
+}
+
+/* --- mobile: single column, full-width search, scrollable filters --- */
+@media (max-width: 640px) {
+  .worksControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .worksSearch {
+    width: 100%;
+    height: 50px;
+  }
+  .worksFilters {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .worksFilters::-webkit-scrollbar {
+    display: none;
+  }
+  .worksChip {
+    height: 46px;
+    font-size: 14px;
+  }
+  .worksGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .workCard__media {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+/* touch devices have no hover — keep the logo/wordmark clearly visible */
+@media (hover: none) {
+  .workCard__logoWrap {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

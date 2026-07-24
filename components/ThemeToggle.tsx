@@ -16,7 +16,8 @@ export default function ThemeToggle() {
     setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
   }, []);
 
-  const set = (next: "dark" | "light") => {
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     try {
       localStorage.setItem("theme", next);
@@ -26,22 +27,14 @@ export default function ThemeToggle() {
 
   return (
     <div className="themeSwitch" data-active={theme}>
-      <span className="themeSwitch__thumb" aria-hidden />
       <button
         type="button"
-        aria-label="Switch to light mode"
-        aria-pressed={theme === "light"}
-        onClick={() => set("light")}
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        onClick={toggleTheme}
       >
-        <SunIcon />
-      </button>
-      <button
-        type="button"
-        aria-label="Switch to dark mode"
-        aria-pressed={theme === "dark"}
-        onClick={() => set("dark")}
-      >
-        <MoonIcon />
+        <span key={theme} className="themeSwitch__icon">
+          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+        </span>
       </button>
     </div>
   );

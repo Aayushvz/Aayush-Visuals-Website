@@ -1,35 +1,31 @@
 "use client";
 
-import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import PageLink from "./PageLink";
-import useSurfaceTone from "./useSurfaceTone";
+import ThemeToggle from "./ThemeToggle";
 
 /*
-  Same glass pill, now route-aware: HOME and ABOUT are real pages (the
-  purple aria-current state follows the pathname), WORKS and CONTACT
-  remain homepage anchors that also work from subpages via /#hash.
-  Navigation between pages goes through PageLink's cinematic transition.
-  The pill also samples the section beneath it while scrolling and flips
-  between light and dark chrome to match.
+  Glass pill navbar, route-aware: HOME, ABOUT and WORKS are real pages (the
+  purple aria-current state follows the pathname), CONTACT is its own page too.
+  Navigation between pages goes through PageLink's cinematic transition. The
+  pill stays on the dark glass chrome over every section (no surface-tone
+  flip) for a consistent look on both light and dark screens.
 */
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Works", href: "/#work" },
+  { label: "Works", href: "/work" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
-  const ref = useRef<HTMLElement>(null);
-  const tone = useSurfaceTone(ref, pathname);
 
   const isCurrent = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href;
 
   return (
-    <header className={`navbar navbar--over${tone === "light" ? "Light" : "Dark"}`} ref={ref}>
+    <header className="navbar navbar--overDark">
       <PageLink href="/" className="navbar__logo">
         aayush<sup>vz</sup>
       </PageLink>
@@ -44,9 +40,12 @@ export default function Navbar() {
           </PageLink>
         ))}
       </nav>
-      <PageLink href="/contact" className="navbar__contact">
-        Contact
-      </PageLink>
+      <div className="navbar__actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <ThemeToggle />
+        <PageLink href="/contact" className="navbar__contact">
+          Contact
+        </PageLink>
+      </div>
     </header>
   );
 }

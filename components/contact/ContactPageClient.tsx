@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
 import Footer from "@/components/Footer";
-import ThemeToggle from "@/components/ThemeToggle";
+
 
 const SOCIALS = [
   {
@@ -310,7 +310,7 @@ export default function ContactPageClient() {
       <Navbar />
       <MobileNav />
       <Cursor />
-      <ThemeToggle />
+
 
       <div className="contactPage__stage">
         <MagneticDotField />

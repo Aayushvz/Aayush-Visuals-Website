@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
-import ThemeToggle from "@/components/ThemeToggle";
+
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Statement from "@/components/Statement";
@@ -20,7 +20,7 @@ export default function Home() {
       <Navbar />
       <MobileNav />
       <Cursor />
-      <ThemeToggle />
+
       <Reveals />
       <div className="rails" aria-hidden />
       <main>

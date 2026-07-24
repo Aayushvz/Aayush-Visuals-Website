@@ -18,7 +18,7 @@ import useSurfaceTone from "./useSurfaceTone";
 const links = [
   { label: "Home", href: "/" },
   { label: "About Me", href: "/about" },
-  { label: "Works", href: "/#work" },
+  { label: "Works", href: "/work" },
   { label: "Contact", href: "/contact" },
 ];
 
