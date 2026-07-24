@@ -359,7 +359,11 @@ export default function Capabilities() {
                 dragMomentum
                 whileHover={open ? { scale: 1.06 } : undefined}
                 onPointerDown={(e) => {
-                  (e.currentTarget as HTMLElement).style.zIndex = String(++topZ.current);
+                  /* lift the grabbed card above its siblings, but never above
+                     the wallet (z 100) — cap below it so it tucks behind */
+                  (e.currentTarget as HTMLElement).style.zIndex = String(
+                    Math.min(90, ++topZ.current)
+                  );
                 }}
               >
                 <img

@@ -2801,8 +2801,10 @@ html.past-hero .themeSwitch {
   --w-w: clamp(200px, 22vw, 260px);
   --w-h: clamp(146px, 16vw, 186px);
   position: relative;
-  /* above the cards (z 10): dragged cards pass UNDER the holder */
-  z-index: 30;
+  /* always the top element: every card (base 40+i, tap-bumped up to 90)
+     stays below this, so a tapped/dragged card can never cover the wallet —
+     it tucks behind, like slotting back into the holder */
+  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: center;
