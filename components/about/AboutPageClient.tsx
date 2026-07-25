@@ -130,7 +130,7 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
   return (
     <div className="aboutPage">
       <Navbar />
-      <MobileNav position="bottom" />
+      <MobileNav position="top" />
       <Cursor />
       <div className="rails" aria-hidden />
 
