@@ -312,13 +312,13 @@ html.has-cursor .cursorRing {
   display: flex;
   align-items: center;
   gap: clamp(16px, 3.2vw, 36px);
-  padding: 8px 10px 8px 20px;
+  padding: 8px 12px 8px 24px;
   border-radius: 999px;
   background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(28px) saturate(2) brightness(1.04);
-  backdrop-filter: blur(28px) saturate(2) brightness(1.04);
+  -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.12);
+  backdrop-filter: blur(40px) saturate(220%) brightness(1.12);
   border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45), var(--glass-shadow);
   color: var(--glass-fg);
   white-space: nowrap;
   transition: background-color 0.55s ease, color 0.55s ease, border-color 0.55s ease,
@@ -326,7 +326,7 @@ html.has-cursor .cursorRing {
 }
 
 .navbar__logo {
-  font-weight: 800;
+  font-weight: 600;
   font-size: 20px;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -334,8 +334,8 @@ html.has-cursor .cursorRing {
 
 .navbar__logo sup {
   color: var(--hero-brand);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 600;
   margin-left: 1px;
   transition: color 0.55s ease;
 }
@@ -392,16 +392,16 @@ html.has-cursor .cursorRing {
   box-shadow: 0 4px 18px rgba(124, 58, 237, 0.55);
 }
 
-/* ---- section-aware chrome: the pill samples the surface beneath it and
-   flips between dark and light glass, independent of the hero theme ---- */
+/* ---- section-aware chrome: heavy Apple glassmorphism effect ---- */
 
 .navbar--overDark {
-  background: rgba(14, 14, 18, 0.86);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(18, 18, 26, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.42);
   color: #f4f1ea;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 20px 56px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.24),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.24),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .navbar--overDark .navbar__logo sup,
@@ -410,12 +410,13 @@ html.has-cursor .cursorRing {
 }
 
 .navbar--overLight {
-  background: rgba(255, 254, 250, 0.72);
-  border-color: rgba(31, 31, 31, 0.09);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.9);
   color: #26221d;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 20px 56px rgba(0, 0, 0, 0.1), 0 4px 14px rgba(0, 0, 0, 0.07),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.95),
+    0 24px 60px rgba(0, 0, 0, 0.12), 0 4px 14px rgba(0, 0, 0, 0.07),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.06);
 }
 
 .navbar--overLight .navbar__logo sup,
@@ -2730,9 +2731,9 @@ html.has-cursor .cursorRing {
   }
 
   .capabilities .capabilities__canvas {
-    margin: 152px 14px 92px;
+    margin: 70px 14px 160px;
     justify-content: flex-end;
-    padding-bottom: 6px;
+    padding-bottom: 12px;
   }
 
   .capCard {
@@ -4280,178 +4281,141 @@ html.has-cursor .cursorRing {
 
 /* ---------- mobile bottom navbar (phone widths only) ---------- */
 
+/* ---------- mobile bottom navbar (phone widths only) ---------- */
+
 .mobileNav {
   position: fixed;
   left: 50%;
-  bottom: max(16px, env(safe-area-inset-bottom, 16px));
   translate: -50% 0;
-  z-index: 96;
+  z-index: 250;
   display: none;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  max-width: calc(100vw - 24px);
-  border-radius: 999px;
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(18px) saturate(1.7);
-  backdrop-filter: blur(18px) saturate(1.7);
-  border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
-  color: var(--glass-fg);
-  transition: background-color 0.55s ease, color 0.55s ease, border-color 0.55s ease, box-shadow 0.55s ease;
+  justify-content: center;
+  width: min(380px, calc(100vw - 32px));
+  height: 58px;
+  border-radius: 16px; /* 16px rounded rectangle corners per reference screenshot */
+  padding: 0 8px;
+  background: rgba(6, 6, 10, 0.88); /* darker obsidian Apple glassmorphism */
+  -webkit-backdrop-filter: blur(72px) saturate(240%) brightness(0.95);
+  backdrop-filter: blur(72px) saturate(240%) brightness(0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.38); /* Apple glass specular rim highlight */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* section-aware chrome, same sampling as the desktop pill */
-.mobileNav--overDark {
-  background: rgba(16, 16, 20, 0.62);
-  border-color: rgba(255, 255, 255, 0.14);
-  color: #f4f1ea;
+[data-theme="light"] .mobileNav {
+  background: rgba(12, 12, 16, 0.90);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
 }
 
-.mobileNav--overDark .mobileNav__logo sup {
-  color: #8b5cf6;
+.mobileNav--top {
+  top: max(16px, env(safe-area-inset-top, 16px)) !important;
+  bottom: auto !important;
 }
 
-.mobileNav--overLight {
-  background: rgba(255, 254, 250, 0.78);
-  border-color: rgba(31, 31, 31, 0.1);
-  color: #26221d;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 16px 44px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+.mobileNav--bottom {
+  bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+  top: auto !important;
 }
 
-.mobileNav--overLight .mobileNav__logo sup {
-  color: #7c3aed;
+.mobileNav__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
 }
 
-/* equal-width side zones keep the logo optically centred when closed */
-.mobileNav__menu,
-.mobileNav__theme {
+.mobileNav__menuBtn,
+.mobileNav__themeBtn {
   flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  border-radius: 50%;
   background: none;
-  color: inherit;
+  border: none;
+  color: #ffffff;
   cursor: pointer;
+  padding: 0;
 }
 
-.mobileNav__menu:focus-visible,
-.mobileNav__theme:focus-visible {
+.mobileNav__menuBtn:focus-visible,
+.mobileNav__themeBtn:focus-visible {
   outline: 2px solid var(--hero-brand);
   outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.mobileNav__hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+}
+
+.mobileNav__hamburger i {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.mobileNav__closeIcon {
+  font-size: 20px;
+  font-weight: 400;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  line-height: 1;
 }
 
 .mobileNav__logo {
   flex: 1 1 auto;
   text-align: center;
-  padding: 0 6px;
-  font-weight: 800;
-  font-size: 17px;
+  font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
+  font-size: 34px; /* increased by 30% from 26px (26 * 1.30 = 33.8px ~ 34px) */
+  font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1;
+  color: #ffffff;
+  text-decoration: none;
   white-space: nowrap;
+  transition: opacity 0.2s ease;
 }
 
-.mobileNav__logo sup {
-  color: var(--hero-brand);
-  font-size: 10px;
-  font-weight: 800;
-  margin-left: 1px;
+.mobileNav__logo:active {
+  opacity: 0.7;
 }
 
-/* hamburger → close morph */
-.mobileNav__menuIcon {
-  position: relative;
-  display: block;
-  width: 16px;
-  height: 12px;
-}
-
-.mobileNav__menuIcon i {
-  position: absolute;
-  left: 0;
-  width: 16px;
-  height: 1.6px;
-  border-radius: 2px;
-  background: currentColor;
-  transition: translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    rotate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.mobileNav__menuIcon i:first-child {
-  top: 2px;
-}
-
-.mobileNav__menuIcon i:last-child {
-  bottom: 2px;
-}
-
-.mobileNav--open .mobileNav__menuIcon i:first-child {
-  translate: 0 3.2px;
-  rotate: 45deg;
-}
-
-.mobileNav--open .mobileNav__menuIcon i:last-child {
-  translate: 0 -3.2px;
-  rotate: -45deg;
-}
-
-/* links live INSIDE the same pill; the pill widens as they reveal */
-.mobileNav__links {
+.mobileNav__themeBadge {
   display: flex;
   align-items: center;
-  gap: 9px;
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: max-width 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px; /* matched roundness according to navbar corners (16px bar -> 8px badge) */
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
-.mobileNav--open .mobileNav__links {
-  max-width: 72vw;
-  opacity: 1;
-}
-
-/* open state trades a little logo size for full link visibility */
-.mobileNav--open .mobileNav__logo {
-  font-size: 14px;
-}
-
-.mobileNav__links a {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  opacity: 0;
-  translate: 0 8px;
-  transition: opacity 0.35s ease, translate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.mobileNav--open .mobileNav__links a {
-  opacity: 0.85;
-  translate: 0 0;
-}
-
-.mobileNav__themeIcon {
-  display: flex;
-  animation: mobileThemeIconIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes mobileThemeIconIn {
-  from {
-    opacity: 0;
-    transform: scale(0.6) rotate(-40deg);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+.mobileNav__themeBtn:active .mobileNav__themeBadge {
+  transform: scale(0.92);
 }
 
 /* ---------- reveal ---------- */
@@ -5224,19 +5188,18 @@ html.has-cursor .cursorRing {
   text-align: center;
 }
 
-/* Mobile: Skills header at the top; the deck canvas (2x3 grid + bottom
-   wallet) fills the rest. Card sizing lives in the skills-deck block. */
+/* Mobile: Skills header at the bottom with spacing; the deck canvas (2x3 grid + wallet) sits above it. */
 @media (max-width: 640px) {
   .capabilities__footer {
     position: absolute;
-    top: 48px;
-    bottom: auto; /* reset absolute bottom stretching */
+    top: auto;
+    bottom: 36px; /* clean spacing from bottom */
     left: 0;
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
-    padding: 0 calc(var(--page-rail-inset) + 10px);
+    padding: 0 calc(var(--page-rail-inset) + 16px);
   }
   .capabilities__footerTitle {
     font-size: 44px;
@@ -5274,154 +5237,91 @@ html.has-cursor .cursorRing {
   right: var(--page-rail-inset);
 }
 
-/* Floating apple glass card menu overlay */
 .mobileNavCard {
   position: fixed;
   left: 50%;
-  bottom: max(16px, env(safe-area-inset-bottom, 16px));
   translate: -50% 0;
-  z-index: 200;
-  width: 260px; /* same width as the closed navbar */
-  height: 270px; /* decreased height to be very compact */
-  border-radius: 40px; /* highly rounded per mockup */
-  background: rgba(30, 30, 30, 0.65); /* Apple glass dark backdrop */
-  -webkit-backdrop-filter: blur(28px) saturate(1.8);
-  backdrop-filter: blur(28px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  z-index: 250;
+  width: min(380px, calc(100vw - 32px));
+  border-radius: 20px; /* 20px rounded rectangle corners matching reference screenshot */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 30px 20px 54px; /* offset bottom padding to center links vertically */
+  justify-content: space-between;
+  overflow: hidden;
+  background: rgba(6, 6, 10, 0.90); /* darker obsidian Apple glassmorphism */
+  -webkit-backdrop-filter: blur(72px) saturate(240%) brightness(0.95);
+  backdrop-filter: blur(72px) saturate(240%) brightness(0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.38); /* Apple glass specular rim highlight */
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.6);
   color: #ffffff;
-  font-family: var(--font-primary), sans-serif;
+  font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
   transition: background-color 0.3s, border-color 0.3s;
 }
 
 [data-theme="light"] .mobileNavCard {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  color: #140a2d;
-}
-
-.mobileNav--top {
-  bottom: auto !important;
-  top: max(16px, env(safe-area-inset-top, 16px)) !important;
-}
-
-.mobileNav--bottom {
-  top: auto !important;
-  bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+  background: rgba(12, 12, 16, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .mobileNavCard--top {
-  bottom: auto !important;
   top: max(16px, env(safe-area-inset-top, 16px)) !important;
-  padding: 54px 20px 30px !important;
+  bottom: auto !important;
+  padding: 0 0 18px 0 !important;
 }
 
 .mobileNavCard--bottom {
-  top: auto !important;
   bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
-  padding: 30px 20px 54px !important;
+  top: auto !important;
+  padding: 18px 0 0 0 !important;
+}
+
+.mobileNavCard .mobileNav__bar {
+  height: 58px;
+  padding: 0 12px;
+  flex-shrink: 0;
 }
 
 .mobileNavCard__links {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 18px;
   width: 100%;
+  padding: 16px 0;
 }
 
 .mobileNavCard__link {
-  font-family: var(--font-primary), sans-serif; /* cleaner font */
-  font-size: 16px; /* reduced size */
-  font-weight: 500; /* reduced font-weight */
-  text-transform: uppercase;
-  color: #ffffff;
+  display: inline-block;
   text-decoration: none;
-  letter-spacing: 0.06em;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-[data-theme="light"] .mobileNavCard__link {
-  color: #140a2d;
+  color: #ffffff;
+  padding: 6px 16px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .mobileNavCard__link:active {
-  opacity: 0.6;
-  transform: scale(0.97);
+  transform: scale(0.95);
+  opacity: 0.7;
 }
 
-.mobileNavCard__bottom {
-  position: absolute;
-  bottom: 18px;
-  left: 28px;
-  right: 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.mobileNavCard__title {
-  font-family: var(--font-primary), sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-[data-theme="light"] .mobileNavCard__title {
-  color: rgba(20, 10, 45, 0.5);
-}
-
-.mobileNavCard__logo {
-  font-family: var(--font-primary), sans-serif;
-  font-weight: 800;
-  font-size: 17px;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  text-decoration: none;
+.mobileNavCard__linkText {
+  font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-transform: lowercase; /* lowercase General Sans per user instructions */
   color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-[data-theme="light"] .mobileNavCard__logo {
-  color: #140a2d;
-}
-
-.mobileNavCard__logo sup {
-  color: var(--hero-brand);
-  font-size: 10px;
-  font-weight: 800;
-  margin-left: 1px;
-  top: -0.4em;
-}
-
-.mobileNavCard__close {
-  background: none;
-  border: none;
-  color: #ffffff;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.75;
-  transition: opacity 0.2s ease;
-}
-
-[data-theme="light"] .mobileNavCard__close {
-  color: #140a2d;
-}
-
-.mobileNavCard__close:active {
-  opacity: 0.5;
+.mobileNavCard__link:hover .mobileNavCard__linkText {
+  color: var(--hero-brand, #8b5cf6);
+  transform: translateX(4px);
 }
 
 /* ==================== /about page ====================
@@ -8314,19 +8214,12 @@ html.contact-page-active .themeSwitch {
   .services-section::before,
   .services-section::after,
   .services-pin::before,
-  .services-pin::after {
-    display: none !important;
-  }
-
-  /* Keep side rulers in Footer */
-  footer .railsLight,
-  footer .railsLight__line,
+  .services-pin::after,
   .railsLight,
   .railsLight__line,
   .railsLight__line--left,
   .railsLight__line--right {
-    display: block !important;
-    opacity: 1 !important;
+    display: none !important;
   }
 
   /* Curated Projects (.projects): side rulers with top & bottom gradient fadeout */
@@ -8576,12 +8469,12 @@ html.contact-page-active .themeSwitch {
   [data-phase="split"] .workHero__word--left,
   [data-phase="stack"] .workHero__word--left,
   [data-phase="cycling"] .workHero__word--left {
-    transform: translate(calc(-100% - 0.16em), calc(-50% - 35vh));
+    transform: translate(calc(-100% - 0.16em), calc(-50% - 31vh));
   }
   [data-phase="split"] .workHero__word--right,
   [data-phase="stack"] .workHero__word--right,
   [data-phase="cycling"] .workHero__word--right {
-    transform: translate(0.16em, calc(-50% - 35vh));
+    transform: translate(0.16em, calc(-50% - 31vh));
   }
 }
 

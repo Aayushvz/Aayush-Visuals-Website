@@ -1,39 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SunIcon, MoonIcon } from "./icons";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLink from "./PageLink";
-import useSurfaceTone from "./useSurfaceTone";
-
-/*
-  Mobile bottom navbar (phone widths only — the desktop top pill hides).
-  One rounded glass pill, fixed above the safe area, outside the draggable
-  world, always visible across the site.
-
-  Closed:  [ MENU ] [ aayushᵛᶻ ] [ THEME ACTION ]
-  Open:    Toggles a full-screen dynamic overlay in a lilac-purple scheme.
-*/
 
 const links = [
-  { label: "Home", href: "/" },
-  { label: "About Me", href: "/about" },
-  { label: "Works", href: "/work" },
-  { label: "Contact", href: "/contact" },
+  { label: "home", href: "/" },
+  { label: "about me", href: "/about" },
+  { label: "works", href: "/work" },
+  { label: "contact", href: "/contact" },
 ];
 
 export default function MobileNav({ position = "top" }: { position?: "top" | "bottom" }) {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeHash, setActiveHash] = useState("#top");
-  const pillRef = useRef<HTMLElement>(null);
-  const tone = useSurfaceTone(pillRef, open);
 
   useEffect(() => {
     setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
-    if (typeof window !== "undefined") {
-      setActiveHash(window.location.hash || "#top");
-    }
   }, []);
 
   const toggleTheme = () => {
@@ -45,42 +29,50 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
     setTheme(next);
   };
 
+  const renderBar = (isOpen: boolean) => (
+    <div className="mobileNav__bar">
+      <button
+        type="button"
+        className="mobileNav__menuBtn"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+        onClick={() => setOpen(!isOpen)}
+      >
+        {isOpen ? (
+          <span className="mobileNav__closeIcon" aria-hidden>✕</span>
+        ) : (
+          <span className="mobileNav__hamburger" aria-hidden>
+            <i />
+            <i />
+            <i />
+          </span>
+        )}
+      </button>
+
+      <PageLink href="/" className="mobileNav__logo" onClick={() => setOpen(false)}>
+        aayush
+      </PageLink>
+
+      <button
+        type="button"
+        className="mobileNav__themeBtn"
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        onClick={toggleTheme}
+      >
+        <span key={theme} className="mobileNav__themeBadge">
+          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+        </span>
+      </button>
+    </div>
+  );
+
   return (
     <>
       {!open && (
         <nav
-          className={`mobileNav mobileNav--over${tone === "light" ? "Light" : "Dark"} ${
-            position === "top" ? "mobileNav--top" : "mobileNav--bottom"
-          }`}
+          className={`mobileNav ${position === "top" ? "mobileNav--top" : "mobileNav--bottom"}`}
           aria-label="Mobile navigation"
-          ref={pillRef}
         >
-          <button
-            type="button"
-            className="mobileNav__menu"
-            aria-label="Open menu"
-            onClick={() => setOpen(true)}
-          >
-            <span className="mobileNav__menuIcon" aria-hidden>
-              <i />
-              <i />
-            </span>
-          </button>
-
-          <PageLink href="/" className="mobileNav__logo">
-            aayush<sup>vz</sup>
-          </PageLink>
-
-          <button
-            type="button"
-            className="mobileNav__theme"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            onClick={toggleTheme}
-          >
-            <span key={theme} className="mobileNav__themeIcon">
-              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-            </span>
-          </button>
+          {renderBar(false)}
         </nav>
       )}
 
@@ -88,72 +80,36 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
         {open && (
           <motion.div
             className={`mobileNavCard ${position === "top" ? "mobileNavCard--top" : "mobileNavCard--bottom"}`}
-            initial={{ opacity: 0, scale: 0.85, y: position === "top" ? -40 : 40 }}
+            initial={{ opacity: 0, scale: 0.94, y: position === "top" ? -20 : 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: position === "top" ? -40 : 40 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
+            exit={{ opacity: 0, scale: 0.94, y: position === "top" ? -20 : 20 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
           >
-            {position === "top" ? (
-              <>
-                <div className="mobileNavCard__bottom" style={{ width: "100%", marginBottom: "18px" }}>
-                  <span className="mobileNavCard__title">Menu</span>
-                  <PageLink href="/" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
-                    aayush<sup>vz</sup>
-                  </PageLink>
-                  <button
-                    type="button"
-                    className="mobileNavCard__close"
-                    onClick={() => setOpen(false)}
-                    aria-label="Close menu"
-                  >
-                    ✕
-                  </button>
-                </div>
+            {position === "top" && renderBar(true)}
 
-                <div className="mobileNavCard__links">
-                  {links.map((l) => (
-                    <PageLink
-                      key={l.href}
-                      href={l.href}
-                      className="mobileNavCard__link"
-                      onClick={() => setOpen(false)}
-                    >
-                      {l.label}
-                    </PageLink>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mobileNavCard__links">
-                  {links.map((l) => (
-                    <PageLink
-                      key={l.href}
-                      href={l.href}
-                      className="mobileNavCard__link"
-                      onClick={() => setOpen(false)}
-                    >
-                      {l.label}
-                    </PageLink>
-                  ))}
-                </div>
-
-                <div className="mobileNavCard__bottom" style={{ width: "100%", marginTop: "18px" }}>
-                  <span className="mobileNavCard__title">Menu</span>
-                  <PageLink href="/" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
-                    aayush<sup>vz</sup>
-                  </PageLink>
-                  <button
-                    type="button"
-                    className="mobileNavCard__close"
+            <div className={`mobileNavCard__links ${position === "top" ? "mobileNavCard__links--top" : "mobileNavCard__links--bottom"}`}>
+              {links.map((l, idx) => (
+                <motion.div
+                  key={l.href}
+                  initial={{ opacity: 0, y: position === "top" ? -10 : 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.04 + 0.06, type: "spring", stiffness: 400, damping: 26 }}
+                  style={{ width: "100%", display: "flex", justifyContent: "center" }}
+                >
+                  <PageLink
+                    href={l.href}
+                    className="mobileNavCard__link"
                     onClick={() => setOpen(false)}
-                    aria-label="Close menu"
                   >
-                    ✕
-                  </button>
-                </div>
-              </>
-            )}
+                    <span className="mobileNavCard__linkText">
+                      {l.label}
+                    </span>
+                  </PageLink>
+                </motion.div>
+              ))}
+            </div>
+
+            {position !== "top" && renderBar(true)}
           </motion.div>
         )}
       </AnimatePresence>
