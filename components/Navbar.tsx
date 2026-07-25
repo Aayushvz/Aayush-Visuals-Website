@@ -8,8 +8,8 @@ import ThemeToggle from "./ThemeToggle";
   Glass pill navbar, route-aware: HOME, ABOUT and WORKS are real pages (the
   purple aria-current state follows the pathname), CONTACT is its own page too.
   Navigation between pages goes through PageLink's cinematic transition. The
-  pill stays on the dark glass chrome over every section (no surface-tone
-  flip) for a consistent look on both light and dark screens.
+  pill stays on the black/dark glass chrome over every section (no surface-tone
+  flip) for a consistent look across all screens and themes.
 */
 
 const navLinks = [
