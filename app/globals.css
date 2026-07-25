@@ -4402,7 +4402,7 @@ html.has-cursor .cursorRing {
   flex: 1 1 auto;
   text-align: center;
   font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
-  font-size: 14px; /* decreased by 60% from 34px (34 * 0.40 = 13.6px ~ 14px) */
+  font-size: 18px; /* increased by 1.3x from 14px (14 * 1.30 = 18.2px ~ 18px) */
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #ffffff;
