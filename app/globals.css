@@ -8786,8 +8786,8 @@ html.contact-page-active .themeSwitch {
   align-items: center;
   justify-content: center;
   padding: 0 24px;
-  opacity: 0.9;
-  transform: scale(0.97);
+  opacity: 0;
+  transform: scale(0.92);
   transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
