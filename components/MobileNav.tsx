@@ -22,7 +22,7 @@ const links = [
   { label: "Contact", href: "/contact" },
 ];
 
-export default function MobileNav() {
+export default function MobileNav({ position = "top" }: { position?: "top" | "bottom" }) {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeHash, setActiveHash] = useState("#top");
@@ -49,7 +49,9 @@ export default function MobileNav() {
     <>
       {!open && (
         <nav
-          className={`mobileNav mobileNav--over${tone === "light" ? "Light" : "Dark"}`}
+          className={`mobileNav mobileNav--over${tone === "light" ? "Light" : "Dark"} ${
+            position === "top" ? "mobileNav--top" : "mobileNav--bottom"
+          }`}
           aria-label="Mobile navigation"
           ref={pillRef}
         >
@@ -85,41 +87,73 @@ export default function MobileNav() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="mobileNavCard"
-            initial={{ opacity: 0, scale: 0.85, y: 40 }}
+            className={`mobileNavCard ${position === "top" ? "mobileNavCard--top" : "mobileNavCard--bottom"}`}
+            initial={{ opacity: 0, scale: 0.85, y: position === "top" ? -40 : 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: 40 }}
+            exit={{ opacity: 0, scale: 0.85, y: position === "top" ? -40 : 40 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
           >
-            {/* Centered Navigation Links */}
-            <div className="mobileNavCard__links">
-              {links.map((l) => (
-                <PageLink
-                  key={l.href}
-                  href={l.href}
-                  className="mobileNavCard__link"
-                  onClick={() => setOpen(false)}
-                >
-                  {l.label}
-                </PageLink>
-              ))}
-            </div>
+            {position === "top" ? (
+              <>
+                <div className="mobileNavCard__bottom" style={{ width: "100%", marginBottom: "18px" }}>
+                  <span className="mobileNavCard__title">Menu</span>
+                  <PageLink href="/" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
+                    aayush<sup>vz</sup>
+                  </PageLink>
+                  <button
+                    type="button"
+                    className="mobileNavCard__close"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close menu"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-            {/* Bottom Row */}
-            <div className="mobileNavCard__bottom">
-              <span className="mobileNavCard__title">Menu</span>
-              <PageLink href="/" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
-                aayush<sup>vz</sup>
-              </PageLink>
-              <button
-                type="button"
-                className="mobileNavCard__close"
-                onClick={() => setOpen(false)}
-                aria-label="Close menu"
-              >
-                ✕
-              </button>
-            </div>
+                <div className="mobileNavCard__links">
+                  {links.map((l) => (
+                    <PageLink
+                      key={l.href}
+                      href={l.href}
+                      className="mobileNavCard__link"
+                      onClick={() => setOpen(false)}
+                    >
+                      {l.label}
+                    </PageLink>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mobileNavCard__links">
+                  {links.map((l) => (
+                    <PageLink
+                      key={l.href}
+                      href={l.href}
+                      className="mobileNavCard__link"
+                      onClick={() => setOpen(false)}
+                    >
+                      {l.label}
+                    </PageLink>
+                  ))}
+                </div>
+
+                <div className="mobileNavCard__bottom" style={{ width: "100%", marginTop: "18px" }}>
+                  <span className="mobileNavCard__title">Menu</span>
+                  <PageLink href="/" className="mobileNavCard__logo" onClick={() => setOpen(false)}>
+                    aayush<sup>vz</sup>
+                  </PageLink>
+                  <button
+                    type="button"
+                    className="mobileNavCard__close"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close menu"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

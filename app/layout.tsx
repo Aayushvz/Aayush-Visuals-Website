@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Instrument_Serif } from "next/font/google";
+import { Archivo, Instrument_Serif, Cinzel_Decorative, Cinzel } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -15,6 +15,20 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
   style: ["normal", "italic"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+const cinzelDec = Cinzel_Decorative({
+  subsets: ["latin"],
+  weight: ["700", "900"],
+  variable: "--font-cinzel-dec",
+  display: "swap",
+});
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["600", "700", "800", "900"],
+  variable: "--font-cinzel",
   display: "swap",
 });
 
@@ -49,7 +63,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable}`}
+      className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable}`}
       suppressHydrationWarning
     >
       <body>
