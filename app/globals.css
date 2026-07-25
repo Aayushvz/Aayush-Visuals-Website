@@ -8863,13 +8863,15 @@ html.contact-page-active .themeSwitch {
   .workCard__media {
     aspect-ratio: 3 / 2;
   }
+  .workCard__logoWrap {
+    display: none !important;
+  }
 }
 
-/* touch devices have no hover — keep the logo/wordmark clearly visible */
+/* touch devices / phone view — do not show logo over thumbnails */
 @media (hover: none) {
   .workCard__logoWrap {
-    opacity: 1;
-    transform: scale(1);
+    display: none !important;
   }
 }
 
