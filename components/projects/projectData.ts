@@ -58,6 +58,30 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "elevation-capital",
+    title: "Elevation Capital",
+    logoText: "ELEVATION",
+    logoUrl: "/logos/elevation-capital.webp",
+    category: "Website Development",
+    year: "2025",
+    cover: "/projects/elevation-ai-cover.webp",
+    preview: {
+      kind: "website",
+      href: "https://stateofaiadoption.elevationcapital.com/",
+      image: "/projects/elevation-ai-cover.webp",
+    },
+    cta: "Visit Live Website",
+    role: "Website Development",
+    tools: ["Framer", "Figma", "AI"],
+    description:
+      "Elevation Capital’s The State of AI Adoption in Indian Startups report reveals that 86% of startup founders plan to increase AI spending, 85% of engineering teams have moved AI into production, and productivity has become the primary proving ground.",
+    highlights: [
+      "Interactive report detailing AI adoption across 86% of Indian startup founders",
+      "Developed natively on Framer with dynamic data visualizations and smooth motion",
+      "Highlighting engineering teams moving AI into production and driving productivity",
+    ],
+  },
+  {
     id: "riviera",
     title: "Riviera",
     logoText: "RIVIERA",

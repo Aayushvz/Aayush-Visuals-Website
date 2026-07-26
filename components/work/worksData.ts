@@ -44,6 +44,10 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     categories: ["UI/UX", "Brand Design"],
     tags: ["website", "webflow", "sports", "boxing", "branding", "motion"],
   },
+  "elevation-capital": {
+    categories: ["UI/UX", "Brand Design"],
+    tags: ["website", "framer", "ai", "report", "startups", "development"],
+  },
   riviera: {
     categories: ["UI/UX", "Brand Design"],
     tags: ["website", "festival", "framer", "event", "identity"],

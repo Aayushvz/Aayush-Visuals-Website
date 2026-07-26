@@ -41,9 +41,17 @@ const SLOTS: Record<number, Slot> = {
   1: { y: 28, s: 0.95, o: 1 },
   2: { y: 52, s: 0.9, o: 0.78 },
   3: { y: 73, s: 0.86, o: 0.32 },
+  4: { y: 90, s: 0.82, o: 0 },
+  5: { y: 105, s: 0.78, o: 0 },
+  6: { y: 118, s: 0.74, o: 0 },
+  7: { y: 130, s: 0.70, o: 0 },
   [-1]: { y: -28, s: 0.95, o: 1 },
   [-2]: { y: -52, s: 0.9, o: 0.78 },
   [-3]: { y: -73, s: 0.86, o: 0.32 },
+  [-4]: { y: -90, s: 0.82, o: 0 },
+  [-5]: { y: -105, s: 0.78, o: 0 },
+  [-6]: { y: -118, s: 0.74, o: 0 },
+  [-7]: { y: -130, s: 0.70, o: 0 },
 };
 
 /* Mobile-specific slots: extreme scaling and vertical fanning, fully opaque */
@@ -52,9 +60,17 @@ const MOBILE_SLOTS: Record<number, Slot> = {
   1: { y: 65, s: 0.85, o: 1 },
   2: { y: 120, s: 0.70, o: 1 },
   3: { y: 165, s: 0.55, o: 1 },
+  4: { y: 200, s: 0.40, o: 0 },
+  5: { y: 230, s: 0.30, o: 0 },
+  6: { y: 250, s: 0.20, o: 0 },
+  7: { y: 265, s: 0.10, o: 0 },
   [-1]: { y: -65, s: 0.85, o: 1 },
   [-2]: { y: -120, s: 0.70, o: 1 },
   [-3]: { y: -165, s: 0.55, o: 1 },
+  [-4]: { y: -200, s: 0.40, o: 0 },
+  [-5]: { y: -230, s: 0.30, o: 0 },
+  [-6]: { y: -250, s: 0.20, o: 0 },
+  [-7]: { y: -265, s: 0.10, o: 0 },
 };
 
 const HIDDEN_ENTER: Slot = { y: 63, s: 0.9, o: 0 };
@@ -198,11 +214,15 @@ export default function WorkHero() {
             const d = signedOffset(i, front);
             const activeSlots = isMobile ? MOBILE_SLOTS : SLOTS;
             const activeHidden = isMobile ? MOBILE_HIDDEN_ENTER : HIDDEN_ENTER;
-            const slot = !entered ? activeHidden : activeSlots[d];
+            const slot =
+              !entered
+                ? activeHidden
+                : activeSlots[d] ?? (d > 0 ? activeSlots[3] : activeSlots[-3]);
             /* the one card that jumped across the seam (top -> bottom) is
                snapped so it never slides through the centre of the stack */
             const prev = prevOffset.current[p.id];
-            const wrapped = prev !== undefined && Math.abs(d - prev) > 3;
+            const wrapped =
+              prev !== undefined && Math.abs(d - prev) > Math.floor(N / 2) - 1;
             prevOffset.current[p.id] = d;
             return (
               <motion.article

@@ -8805,7 +8805,7 @@ html.contact-page-active .themeSwitch {
   max-width: min(62%, 360px);
   max-height: 40%;
   object-fit: contain;
-  filter: drop-shadow(0 2px 20px rgba(0, 0, 0, 0.35));
+  filter: brightness(0) invert(1) drop-shadow(0 2px 20px rgba(0, 0, 0, 0.35));
 }
 
 .workCard__wordmark {
