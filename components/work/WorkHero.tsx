@@ -239,7 +239,7 @@ export default function WorkHero() {
               >
                 <img
                   className="workHero__cardImg"
-                  src={p.cover}
+                  src={p.bgVideoUrl ?? p.cover}
                   alt={p.title}
                   loading={i < 4 ? "eager" : "lazy"}
                   fetchPriority={i < 2 ? "high" : "auto"}
