@@ -24,7 +24,7 @@ export default function HomeContact() {
             </li>
             <li className="hc__bullet">
               <span className="hc__bulletMark" aria-hidden>+</span>
-              Based in New Delhi, India
+              Based in India
             </li>
             <li className="hc__bullet">
               <span className="hc__bulletMark" aria-hidden>+</span>

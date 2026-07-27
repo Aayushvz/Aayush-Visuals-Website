@@ -271,7 +271,7 @@ function InteractiveGlobe() {
       />
       <div className="contactPage__globeLabel">
         <span className="contactPage__globePulse" aria-hidden />
-        New Delhi, India
+        India
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, Instrument_Serif, Cinzel_Decorative, Cinzel } from "next/font/google";
 import localFont from "next/font/local";
 import Preloader from "@/components/Preloader";
+import PageTransition from "@/components/PageTransition";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -70,6 +71,7 @@ export default function RootLayout({
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <Preloader />
+        <PageTransition />
         {children}
       </body>
     </html>

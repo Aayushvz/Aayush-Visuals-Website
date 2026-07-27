@@ -135,11 +135,11 @@ export const PROJECTS: Project[] = [
     logoText: "Yantra",
     category: "3d interactive website",
     year: "2026",
-    cover: "/projects/yantra-cover.jpg.png",
+    cover: "/projects/yantra-cover.webp",
     preview: {
       kind: "website",
       href: "https://yantra-xi.vercel.app/",
-      image: "/projects/yantra-cover.jpg.png",
+      image: "/projects/yantra-cover.webp",
     },
     cta: "Visit Live Website",
     role: "Web Design",

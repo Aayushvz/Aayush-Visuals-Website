@@ -5,16 +5,15 @@ import { useRouter } from "next/navigation";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 /*
-  Route link with the site's cinematic page transition: on click the
-  current page's <main> lifts upward and fades (html.page-leaving, see
-  globals.css), then the route swaps and the incoming page's <main> plays
-  its entrance (app/template.tsx). Fixed chrome — navbar, cursor, rails —
-  never animates, so navigation reads as content changing inside a
-  persistent shell. Falls back to an instant push under reduced motion,
-  and never intercepts modified clicks (new-tab etc.).
+  Route link with the site's page-transition wipe (see
+  components/PageTransition.tsx): on click, dispatches a "page-transition"
+  event carrying the link's own screen position, so the brand-color circle
+  grows from wherever the user actually clicked. PageTransition owns the
+  timing, including the real router.push, so the destination route is
+  never visible until the circle has fully covered the screen. Falls back
+  to an instant push under reduced motion, and never intercepts modified
+  clicks (new-tab etc.).
 */
-
-const LEAVE_MS = 380;
 
 type Props = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string;
@@ -32,7 +31,7 @@ export default function PageLink({ href, children, onClick, ...rest }: Props) {
         onClick?.(e);
         if (e.defaultPrevented) return;
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-        // same-route hash hops shouldn't play the leave animation
+        // same-route hash hops shouldn't play the transition
         const [path] = href.split("#");
         if (path === "" || path === window.location.pathname) return;
         e.preventDefault();
@@ -40,8 +39,12 @@ export default function PageLink({ href, children, onClick, ...rest }: Props) {
           router.push(href);
           return;
         }
-        document.documentElement.classList.add("page-leaving");
-        window.setTimeout(() => router.push(href), LEAVE_MS);
+        const rect = e.currentTarget.getBoundingClientRect();
+        window.dispatchEvent(
+          new CustomEvent("page-transition", {
+            detail: { href, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+          })
+        );
       }}
     >
       {children}

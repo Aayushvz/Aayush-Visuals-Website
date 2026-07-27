@@ -103,22 +103,12 @@ a {
 }
 
 /* ============================================================
-   PAGE TRANSITIONS  (PageLink + app/template.tsx)
+   PAGE TRANSITIONS  (PageLink + app/template.tsx + PageTransition.tsx)
    ============================================================ */
 
-/* Outgoing page: content lifts up and fades */
-html.page-leaving .pageEnter > main,
-html.page-leaving .aboutPage__content {
-  animation: pageLeave 0.38s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-  pointer-events: none;
-}
-
-@keyframes pageLeave {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-/* Incoming page: content rises up from slight below */
+/* Incoming page: content rises up from slight below. The outgoing page's
+   own leave motion is unnecessary now — PageTransition's circle fully
+   covers the screen before any route swap happens underneath it. */
 .pageEnter > main,
 .aboutPage__content {
   animation: pageEnter 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -127,6 +117,58 @@ html.page-leaving .aboutPage__content {
 @keyframes pageEnter {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* ---------- page-transition wipe (components/PageTransition.tsx) ----------
+   A circle in the exact preloader brand color grows from the clicked nav
+   link's screen position, fully covering the viewport; the real logo mark
+   appears at dead-center for a beat while the route swaps invisibly
+   underneath, then both reverse — the circle shrinking back into the same
+   point it grew from. Same easing family as the preloader's split. */
+.pageWipe {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.pageWipe__circle {
+  position: fixed;
+  border-radius: 50%;
+  background: #6a1eed;
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  will-change: transform;
+}
+
+.pageWipe__circle--covered {
+  transform: scale(1);
+}
+
+.pageWipe__mark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: clamp(48px, 6vw, 84px);
+  height: auto;
+  transform: translate(-50%, -50%) translateY(8px);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pageWipe__mark--visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageWipe {
+    display: none;
+  }
 }
 
 /* ============================================================ */
@@ -4437,7 +4479,7 @@ html.has-cursor .cursorRing {
 [data-reveal] {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 [data-reveal].revealed {
@@ -8278,7 +8320,7 @@ html.contact-page-active .themeSwitch {
    ============================================================ */
 .workHero {
   position: relative;
-  min-height: 320vh; /* pin travel = height - 100vh -> ~3 card advances */
+  min-height: 213vh; /* pin travel = height - 100vh -> ~2 card advances */
   background: var(--hero-bg);
 }
 
@@ -8465,7 +8507,7 @@ html.contact-page-active .themeSwitch {
 /* --- tablet / mobile: smaller type, wider cards, shorter pin --- */
 @media (max-width: 900px) {
   .workHero {
-    min-height: 260vh;
+    min-height: 173vh;
   }
   .workHero__stack {
     width: 69vw;
@@ -9693,6 +9735,15 @@ html.contact-page-active .themeSwitch {
 
   .bootLoader__aside {
     display: none;
+  }
+
+  /* +25% over the desktop-clamp's mobile floor (44px / 14px) */
+  .preloader__logo {
+    width: 55px;
+  }
+
+  .preloader__word {
+    font-size: 17.5px;
   }
 }
 
