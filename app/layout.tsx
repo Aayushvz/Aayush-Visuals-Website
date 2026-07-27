@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Instrument_Serif, Cinzel_Decorative, Cinzel } from "next/font/google";
 import localFont from "next/font/local";
+import Preloader from "@/components/Preloader";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -68,6 +69,7 @@ export default function RootLayout({
     >
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <Preloader />
         {children}
       </body>
     </html>

@@ -9468,3 +9468,246 @@ html.contact-page-active .themeSwitch {
     height: 38px;
   }
 }
+
+/* ============================================================
+   ENTRANCE PRELOADER (components/Preloader.tsx)
+   Phase 1: a retro system-initialization interface (.bootLoader) runs
+   over the flat brand-color background. Phase 2: once it dissolves, two
+   brand panels — already meeting at the exact vertical center — reveal
+   the logo/wordmark, hold, then split apart (top up / bottom down) on
+   cubic-bezier(0.76,0,0.24,1) (same easing as the page-leave transition
+   above), revealing the homepage that is already rendered underneath.
+   ============================================================ */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.preloader__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  /* fixed brand purple, not the theme-toggling --hero-brand — the
+     preloader background should read as one consistent color regardless
+     of light/dark mode */
+  background: #6a1eed;
+  will-change: transform;
+  transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.preloader__panel--top {
+  top: 0;
+  align-items: flex-end;
+  padding-bottom: calc(clamp(8px, 1.4vh, 16px) - 6px);
+}
+
+.preloader__panel--bottom {
+  bottom: 0;
+  align-items: flex-start;
+  padding-top: clamp(8px, 1.4vh, 16px);
+}
+
+.preloader--split .preloader__panel--top {
+  transform: translateY(-100%);
+}
+
+.preloader--split .preloader__panel--bottom {
+  transform: translateY(100%);
+}
+
+.preloader--fade {
+  transition: opacity 0.26s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.preloader__logo,
+.preloader__word {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.preloader__brand--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.preloader__logo {
+  width: clamp(44px, 5.6vw, 76px);
+  height: auto;
+  display: block;
+  user-select: none;
+  /* the source PNG's visible mark sits ~2.3% left of the file's own
+     bounding-box center (asymmetric transparent margin), so nudge right
+     to optically center it under the wordmark */
+  transform: translateY(8px) translateX(2.3%);
+}
+
+.preloader__logo.preloader__brand--visible {
+  transform: translateY(0) translateX(2.3%);
+}
+
+.preloader__word {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 20px);
+  letter-spacing: -0.08em;
+  color: var(--cream);
+}
+
+.preloader__word.preloader__brand--visible {
+  opacity: 0.92;
+}
+
+/* ---------- phase 1: system-initialization boot screen ----------
+   Three zones on one invisible grid (no cards, no borders): commands
+   left, percentage dead-center (guaranteed by the two equal 1fr tracks
+   regardless of side content width), secondary note right. Reuses the
+   site's existing mono stack (see .hero__hint) and rail inset so it
+   aligns with the rest of the page's measurement system. */
+.bootLoader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding-inline: var(--page-content-inset);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.bootLoader--visible {
+  opacity: 1;
+}
+
+.bootLoader--exit {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.bootLoader__commands {
+  grid-column: 1;
+  justify-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.4vh, 15px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(10px, 0.85vw, 12px);
+  letter-spacing: 0.02em;
+  color: var(--cream);
+}
+
+.bootLoader__cmd {
+  padding: 2px 6px;
+  margin: -2px -6px;
+  white-space: nowrap;
+  transform: translateX(0);
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+
+.bootLoader__cmd--active {
+  background: var(--cream);
+  color: var(--hero-brand);
+  transform: translateX(3px);
+}
+
+.bootLoader__percent {
+  grid-column: 2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(14px, 1.6vw, 18px);
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bootLoader__aside {
+  grid-column: 3;
+  justify-self: end;
+  max-width: 230px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(9px, 0.75vw, 11px);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  opacity: 0.72;
+}
+
+.bootLoader__aside p {
+  margin: 0;
+}
+
+.bootLoader__cursor {
+  display: inline-block;
+  margin-left: 1px;
+  animation: bootCursorBlink 1s steps(1, end) infinite;
+}
+
+@keyframes bootCursorBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .bootLoader {
+    display: block;
+    padding-inline: 0;
+  }
+
+  .bootLoader__commands {
+    position: absolute;
+    top: clamp(56px, 15vh, 100px);
+    left: var(--page-content-inset);
+    right: var(--page-content-inset);
+    font-size: 10px;
+  }
+
+  .bootLoader__cmd {
+    white-space: normal;
+  }
+
+  .bootLoader__percent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+  }
+
+  .bootLoader__aside {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader__panel {
+    transition-duration: 0.001s;
+  }
+
+  .preloader__logo,
+  .preloader__word {
+    transition-duration: 0.2s;
+    transform: none;
+  }
+
+  .bootLoader__cursor {
+    animation: none;
+  }
+}
