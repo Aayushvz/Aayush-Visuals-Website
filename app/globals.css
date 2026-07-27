@@ -204,53 +204,29 @@ html.has-cursor .cursorRing {
   display: block;
 }
 
+/* pixel-art gem — crisp blocky edges scaled up from a 16x16 source, with a
+   soft dark drop-shadow so it still reads against similarly-hued sections
+   (e.g. the purple footer) without needing mix-blend-mode tricks */
 .cursorDot {
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: #fff;
-  mix-blend-mode: difference;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 2px 3px rgba(20, 10, 40, 0.45));
+  user-select: none;
 }
 
 .cursorRing {
-  width: 38px;
-  height: 38px;
-  margin: -19px 0 0 -19px;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
 }
 
-/* the plain ring border stays difference-blended for legibility over both
-   hero themes; the project CTA pill (below) deliberately opts out, since a
-   solid pill needs to stay a clean opaque white regardless of backdrop */
-.cursorRing i {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 1.5px solid #fff;
-  border-radius: 50%;
-  mix-blend-mode: difference;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.28s ease,
-    opacity 0.28s ease;
-}
-
-.cursorRing--active i {
-  transform: scale(1.55);
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.cursorRing--drag i {
-  transform: scale(1.3);
-  border-style: dashed;
-}
-
-.cursorRing--down i {
-  transform: scale(0.82);
-}
-
-/* project tiles: the ring's plain circle hides and a "View project" pill
-   fades/scales in on top instead — the tile itself never renders a button.
-   Slim outline pill, plain chevron (no filled circle), arrow nudges right
-   on a soft loop to invite the click. */
+/* the ring itself is invisible — it only exists to host and position the
+   "View project" pill over project tiles; the tile itself never renders
+   a button. Solid opaque white so it stays legible over any preview
+   image; the arrow nudges right on a soft loop to invite the click. */
 .cursorRing__cta {
   position: absolute;
   top: 50%;
@@ -263,11 +239,10 @@ html.has-cursor .cursorRing {
   height: 42px;
   padding: 0 22px;
   border-radius: 999px;
-  background: rgba(255, 253, 250, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1.2px solid rgba(26, 26, 26, 0.76);
-  color: rgba(26, 26, 26, 0.9);
+  background: var(--cream);
+  border: 1.5px solid rgba(20, 16, 14, 0.85);
+  box-shadow: 0 10px 28px rgba(20, 10, 40, 0.28);
+  color: #14100e;
   white-space: nowrap;
   opacity: 0;
   scale: 0.6;
@@ -284,11 +259,7 @@ html.has-cursor .cursorRing {
 .cursorRing__ctaArrow {
   display: flex;
   align-items: center;
-  color: rgba(26, 26, 26, 0.9);
-}
-
-.cursorRing--project i {
-  opacity: 0;
+  color: #14100e;
 }
 
 .cursorRing--project .cursorRing__cta {

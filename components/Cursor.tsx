@@ -4,17 +4,16 @@ import { useEffect, useRef } from "react";
 import { PROJECT_CURSOR_LABEL } from "./projects/ProjectCursor";
 
 /*
-  Custom cursor for fine-pointer devices. The dot tracks the pointer 1:1;
-  the ring trails it via rAF lerp. Rendered with mix-blend-mode: difference
-  so it stays legible over both hero themes and the light sections below.
-  Disabled on touch devices and for reduced-motion users.
+  Custom cursor for fine-pointer devices. A small pixel-art gem tracks the
+  pointer 1:1 and is the only thing visible at rest. Disabled on touch
+  devices and for reduced-motion users.
 
-  Over a project tile the ring morphs into a "View Project" pill instead of
-  scaling up as a plain circle — the tile itself never shows a button, the
+  Its only special state: over a project tile the trailing ring morphs
+  into a "View Project" pill — the tile itself never shows a button, the
   cursor carries the CTA.
 */
 export default function Cursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLImageElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,48 +38,41 @@ export default function Cursor() {
     };
 
     const loop = () => {
-      rx += (tx - rx) * 0.16;
-      ry += (ty - ry) * 0.16;
+      rx += (tx - rx) * 0.24;
+      ry += (ty - ry) * 0.24;
       ring.style.transform = `translate(${rx}px, ${ry}px)`;
       raf = requestAnimationFrame(loop);
     };
 
     const onOver = (e: PointerEvent) => {
       const t = e.target as Element | null;
-      // Project tiles win over every other state; cards over drag; links/buttons are interactive.
       const project = !!t?.closest?.('[data-cursor="project"]');
-      const card = !project && !!t?.closest?.('[data-cursor="card"]');
-      const interactive = !project && (card || !!t?.closest?.("a, button"));
-      const draggable = !project && !interactive && !!t?.closest?.('[data-cursor="drag"]');
       ring.classList.toggle("cursorRing--project", project);
-      ring.classList.toggle("cursorRing--active", interactive);
-      ring.classList.toggle("cursorRing--drag", draggable);
     };
-
-    const onDown = () => ring.classList.add("cursorRing--down");
-    const onUp = () => ring.classList.remove("cursorRing--down");
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerover", onOver, { passive: true });
-    window.addEventListener("pointerdown", onDown, { passive: true });
-    window.addEventListener("pointerup", onUp, { passive: true });
     raf = requestAnimationFrame(loop);
 
     return () => {
       document.documentElement.classList.remove("has-cursor");
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerover", onOver);
-      window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointerup", onUp);
       cancelAnimationFrame(raf);
     };
   }, []);
 
   return (
     <div aria-hidden>
-      <div ref={dotRef} className="cursorDot" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={dotRef}
+        className="cursorDot"
+        src="/cursor-gem-16.png"
+        alt=""
+        draggable={false}
+      />
       <div ref={ringRef} className="cursorRing">
-        <i />
         <span className="cursorRing__cta">
           <span className="cursorRing__ctaText">{PROJECT_CURSOR_LABEL}</span>
           <span className="cursorRing__ctaArrow">

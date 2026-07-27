@@ -332,7 +332,6 @@ function ProjectCard({
       ref={cardEl}
       className={`heroCard heroCard--c${index} ${card.mobile ? "" : "heroCard--mHide"}`}
       data-draggable-card
-      data-cursor="card"
       style={
         {
           width: card.w,
@@ -522,7 +521,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="heroWorld" ref={worldRef} data-cursor="drag">
+          <div className="heroWorld" ref={worldRef}>
             <div className="hero__mark">
               <motion.span
                 className="hero__mobileLabel hero__mobileLabel--top"
