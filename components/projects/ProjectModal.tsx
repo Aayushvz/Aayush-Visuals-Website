@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import type { Project } from "./projectData";
+import { PROJECTS, type Project } from "./projectData";
 import ProjectPreview from "./ProjectPreview";
 import CTAButton from "./CTAButton";
 
@@ -14,6 +14,13 @@ import CTAButton from "./CTAButton";
   focus, closes on Escape or an outside click, and locks page scroll while
   open. The Behance iframe (or any embed) only mounts once the modal has
   fully opened.
+
+  Layout is an editorial split rather than a stacked "image then details"
+  card: a full-height preview pane on one side, an independently
+  scrolling info pane on the other carrying a giant ghost index numeral
+  (the same numbering identity as the Selected Works list), tool chips
+  instead of a joined string, and a single floating close button instead
+  of a duplicate in-modal navbar.
 */
 
 type Props = {
@@ -76,6 +83,9 @@ export default function ProjectModal({ project, onClose }: Props) {
 
   if (!portalReady) return null;
 
+  const activeIndex = project ? PROJECTS.findIndex((p) => p.id === project.id) : -1;
+  const indexLabel = activeIndex >= 0 ? String(activeIndex + 1).padStart(2, "0") : "";
+
   return createPortal(
     <AnimatePresence>
       {project && (
@@ -100,32 +110,17 @@ export default function ProjectModal({ project, onClose }: Props) {
             exit={{ opacity: 0, scale: 0.96, y: 10 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="projModal__nav">
-              <span className="projModal__navLogo">
-                aayush<sup>vz</sup>
-              </span>
-              <div className="projModal__navActions">
-                <CTAButton
-                  variant="solid"
-                  href={previewHref(project)}
-                  icon={<ArrowIcon />}
-                  className="projModal__navCta"
-                >
-                  {project.cta}
-                </CTAButton>
-                <button
-                  type="button"
-                  className="projModal__close"
-                  onClick={onClose}
-                  ref={closeRef}
-                  aria-label="Close project"
-                >
-                  <CloseIcon />
-                </button>
-              </div>
-            </div>
+            <button
+              type="button"
+              className="projModal__close"
+              onClick={onClose}
+              ref={closeRef}
+              aria-label="Close project"
+            >
+              <CloseIcon />
+            </button>
 
-            <div className="projModal__preview">
+            <div className="projModal__previewPane">
               <ProjectPreview
                 preview={project.preview}
                 title={project.title}
@@ -133,36 +128,58 @@ export default function ProjectModal({ project, onClose }: Props) {
               />
             </div>
 
-            <div className="projModal__body">
-              <div className="projModal__heading">
-                <h3 id="projModal__title" className="display projModal__title">
-                  {project.title}
-                </h3>
+            <div className="projModal__infoPane">
+              <span className="projModal__indexWatermark" aria-hidden>
+                {indexLabel}
+              </span>
+
+              <div className="projModal__infoContent">
                 <span className="projModal__tag">
                   {project.category} · {project.year}
                 </span>
-              </div>
 
-              <p className="projModal__desc">{project.description}</p>
+                <h3 id="projModal__title" className="display projModal__title">
+                  {project.title}
+                </h3>
 
-              <dl className="projModal__facts">
-                <div>
-                  <dt>Role</dt>
-                  <dd>{project.role}</dd>
+                <p className="projModal__desc">{project.description}</p>
+
+                <CTAButton
+                  variant="solid"
+                  href={previewHref(project)}
+                  icon={<ArrowIcon />}
+                  className="projModal__cta"
+                >
+                  {project.cta}
+                </CTAButton>
+
+                <div className="projModal__divider" aria-hidden />
+
+                <dl className="projModal__facts">
+                  <div>
+                    <dt>Role</dt>
+                    <dd>{project.role}</dd>
+                  </div>
+                  <div>
+                    <dt>Tools</dt>
+                    <dd className="projModal__toolList" aria-label={project.tools.join(", ")}>
+                      {project.tools.map((t) => (
+                        <span key={t} className="projModal__toolChip" aria-hidden>
+                          {t}
+                        </span>
+                      ))}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="projModal__highlights">
+                  <span className="projModal__highlightsLabel">Highlights</span>
+                  <ul>
+                    {project.highlights.map((h) => (
+                      <li key={h}>{h}</li>
+                    ))}
+                  </ul>
                 </div>
-                <div>
-                  <dt>Tools</dt>
-                  <dd>{project.tools.join(", ")}</dd>
-                </div>
-              </dl>
-
-              <div className="projModal__highlights">
-                <span className="projModal__highlightsLabel">Highlights</span>
-                <ul>
-                  {project.highlights.map((h) => (
-                    <li key={h}>{h}</li>
-                  ))}
-                </ul>
               </div>
             </div>
           </motion.div>

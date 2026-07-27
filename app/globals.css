@@ -3707,81 +3707,43 @@ html.has-cursor .cursorRing {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5vh 24px;
+  padding: 4vh 24px;
   background: rgba(20, 16, 14, 0.55);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   backdrop-filter: blur(14px) saturate(1.4);
 }
 
+/* -------- editorial split: full-height preview pane + independently
+   scrolling info pane, rather than a stacked "image then details" card -------- */
 .projModal {
   position: relative;
-  width: min(960px, 100%);
-  max-height: 88vh;
-  overflow-y: auto;
-  border-radius: 32px;
-  background: rgba(255, 253, 249, 0.94);
-  -webkit-backdrop-filter: blur(24px) saturate(1.6);
-  backdrop-filter: blur(24px) saturate(1.6);
+  width: min(1140px, 94vw);
+  height: min(680px, 88vh);
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  border-radius: 28px;
+  overflow: hidden;
+  background: rgba(255, 253, 249, 0.97);
   border: 1px solid rgba(31, 31, 31, 0.07);
-  box-shadow: 0 20px 60px rgba(31, 31, 31, 0.16), 0 4px 16px rgba(31, 31, 31, 0.08);
+  box-shadow: 0 30px 70px rgba(45, 24, 74, 0.28), 0 6px 20px rgba(45, 24, 74, 0.14);
   color: var(--ink);
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.projModal::-webkit-scrollbar {
-  display: none;
-}
-
-/* -------- in-modal "navbar": brand mark left, primary action + close right —
-   pinned so it reads as standalone app chrome while the content scrolls -------- */
-.projModal__nav {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px 16px 26px;
-  background: rgba(255, 253, 249, 0.86);
-  -webkit-backdrop-filter: blur(18px) saturate(1.6);
-  backdrop-filter: blur(18px) saturate(1.6);
-  border-bottom: 1px solid rgba(31, 31, 31, 0.07);
-}
-
-.projModal__navLogo {
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
-.projModal__navLogo sup {
-  color: var(--purple);
-  font-size: 9px;
-}
-
-.projModal__navActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.projModal__navCta {
-  padding: 9px 18px;
-  font-size: 12px;
 }
 
 .projModal__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border-radius: 50%;
   border: 1px solid rgba(31, 31, 31, 0.12);
-  background: transparent;
+  background: rgba(255, 253, 249, 0.75);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   color: var(--ink);
   cursor: pointer;
   transition: background 0.3s ease, border-color 0.3s ease,
@@ -3789,17 +3751,16 @@ html.has-cursor .cursorRing {
 }
 
 .projModal__close:hover {
-  background: rgba(31, 31, 31, 0.06);
+  background: rgba(255, 253, 249, 0.95);
   border-color: rgba(31, 31, 31, 0.2);
   transform: rotate(90deg);
 }
 
-.projModal__preview {
+.projModal__previewPane {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: var(--dark);
+  height: 100%;
   overflow: hidden;
+  background: var(--dark);
 }
 
 .projPreview,
@@ -3860,44 +3821,80 @@ html.has-cursor .cursorRing {
   color: rgba(244, 241, 234, 0.9);
 }
 
-.projModal__body {
-  padding: clamp(28px, 4vw, 48px);
+.projModal__infoPane {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  padding: clamp(32px, 3.6vw, 52px);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.projModal__heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
+.projModal__infoPane::-webkit-scrollbar {
+  display: none;
 }
 
-.projModal__title {
-  font-size: clamp(24px, 3vw, 36px);
-  margin: 0;
+/* giant ghost numeral — the same numbering identity as the Selected
+   Works list, sitting behind the copy as a quiet watermark rather than
+   competing with it */
+.projModal__indexWatermark {
+  position: absolute;
+  top: -0.05em;
+  right: clamp(18px, 2.6vw, 36px);
+  z-index: 0;
+  font-family: var(--font-primary);
+  font-size: clamp(90px, 11vw, 168px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(31, 31, 31, 0.05);
+  pointer-events: none;
+  user-select: none;
+}
+
+.projModal__infoContent {
+  position: relative;
+  z-index: 1;
 }
 
 .projModal__tag {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: rgba(31, 31, 31, 0.5);
-  white-space: nowrap;
+  margin-bottom: 14px;
+}
+
+.projModal__title {
+  font-size: clamp(26px, 3vw, 38px);
+  margin: 0 0 16px;
 }
 
 .projModal__desc {
-  max-width: 60ch;
+  max-width: 46ch;
   color: rgba(31, 31, 31, 0.72);
   line-height: 1.6;
-  margin: 0 0 28px;
+  margin: 0 0 26px;
+}
+
+.projModal__cta {
+  text-decoration: none;
+  margin-bottom: 30px;
+}
+
+.projModal__divider {
+  height: 1px;
+  background: rgba(31, 31, 31, 0.1);
+  margin: 0 0 26px;
 }
 
 .projModal__facts {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  margin: 0 0 28px;
+  margin: 0 0 30px;
 }
 
 .projModal__facts dt {
@@ -3905,7 +3902,7 @@ html.has-cursor .cursorRing {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: rgba(31, 31, 31, 0.45);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .projModal__facts dd {
@@ -3914,8 +3911,26 @@ html.has-cursor .cursorRing {
   font-weight: 500;
 }
 
+.projModal__toolList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.projModal__toolChip {
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(31, 31, 31, 0.14);
+  background: rgba(31, 31, 31, 0.035);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(31, 31, 31, 0.75);
+  white-space: nowrap;
+}
+
 .projModal__highlights {
-  margin: 0 0 32px;
+  margin: 0;
 }
 
 .projModal__highlightsLabel {
@@ -3953,10 +3968,6 @@ html.has-cursor .cursorRing {
   height: 6px;
   border-radius: 50%;
   background: var(--purple);
-}
-
-.projModal__cta {
-  text-decoration: none;
 }
 
 @media (max-width: 640px) {
@@ -4117,26 +4128,60 @@ html.has-cursor .cursorRing {
     align-items: flex-end;
   }
 
+  /* stack: preview on top, info pane below, the whole sheet scrolls as
+     one unit instead of the two independent panes used on desktop */
   .projModal {
+    display: block;
     width: 100%;
+    height: auto;
     max-height: 92vh;
+    overflow-y: auto;
     border-radius: 22px 22px 0 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .projModal__navLogo {
+  .projModal::-webkit-scrollbar {
     display: none;
   }
 
-  .projModal__nav {
-    padding: 10px 14px;
-    justify-content: flex-end;
-    gap: 8px;
+  .projModal__previewPane {
+    height: 42vh;
+    min-height: 220px;
   }
 
-  .projModal__navCta {
-    padding: 6px 12px;
-    font-size: 11px;
-    letter-spacing: 0.02em;
+  .projModal__infoPane {
+    height: auto;
+    overflow-y: visible;
+    padding: 26px 22px 36px;
+  }
+
+  .projModal__indexWatermark {
+    font-size: clamp(64px, 22vw, 100px);
+    top: -4px;
+    right: 16px;
+  }
+
+  .projModal__desc {
+    max-width: none;
+  }
+
+  .projModal__cta {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* the close button now overlaps the preview image at the top of the
+     stack, so it needs to stay legible against arbitrary photo/video
+     content rather than the cream info-pane background */
+  .projModal__close {
+    background: rgba(20, 16, 14, 0.45);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+
+  .projModal__close:hover {
+    background: rgba(20, 16, 14, 0.6);
   }
 }
 
