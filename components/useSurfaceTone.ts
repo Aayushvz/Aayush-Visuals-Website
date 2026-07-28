@@ -16,11 +16,23 @@ export default function useSurfaceTone(
 
   useEffect(() => {
     let raf = 0;
+    let lastY = Number.NaN;
 
-    const sample = () => {
+    const sample = (force = false) => {
       raf = 0;
       const el = ref.current;
       if (!el) return;
+      /* elementsFromPoint is a hit test and getComputedStyle resolves
+         style — both force synchronous layout/recalc, so doing this on
+         every scroll frame was a per-frame stall. The tone only flips at
+         section boundaries (hundreds of px apart), so sampling once per
+         ~16px of travel is indistinguishable and much cheaper. Mount,
+         resize and the post-transition settle pass force=true, since
+         those can change the tone without any scrolling at all. */
+      const y0 = window.scrollY;
+      if (!force && Math.abs(y0 - lastY) < 16) return;
+      lastY = y0;
+
       const rect = el.getBoundingClientRect();
       const x = Math.min(window.innerWidth - 1, Math.max(1, rect.left + rect.width / 2));
       const y = Math.min(window.innerHeight - 1, Math.max(1, rect.top + rect.height / 2));
@@ -46,18 +58,22 @@ export default function useSurfaceTone(
     };
 
     const queue = () => {
-      if (!raf) raf = requestAnimationFrame(sample);
+      if (!raf) raf = requestAnimationFrame(() => sample());
+    };
+    const queueForced = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => sample(true));
     };
 
     window.addEventListener("scroll", queue, { passive: true });
-    window.addEventListener("resize", queue, { passive: true });
+    window.addEventListener("resize", queueForced, { passive: true });
     /* first paint + after the page-enter transition settles */
-    sample();
-    const settle = setTimeout(sample, 600);
+    sample(true);
+    const settle = setTimeout(() => sample(true), 600);
 
     return () => {
       window.removeEventListener("scroll", queue);
-      window.removeEventListener("resize", queue);
+      window.removeEventListener("resize", queueForced);
       cancelAnimationFrame(raf);
       clearTimeout(settle);
     };

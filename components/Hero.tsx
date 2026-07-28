@@ -420,6 +420,7 @@ export default function Hero() {
       if (!dragging) return;
       target.x = clamp(e.clientX - start.x, window.innerWidth * 0.3);
       target.y = clamp(e.clientY - start.y, window.innerHeight * 0.3);
+      wake();
     };
 
     const endDrag = (e: PointerEvent) => {
@@ -439,9 +440,11 @@ export default function Hero() {
       if ((e.target as Element).closest?.("[data-draggable-card]")) return;
       target.x = 0;
       target.y = 0;
+      wake();
     };
 
     const onScroll = () => {
+      wake();
       scrollP = Math.min(1, Math.max(0, window.scrollY / window.innerHeight));
       // the standalone theme switcher is hero-only: fade it once the panel
       // has mostly covered the hero (reuses this handler — no new observer)
@@ -451,7 +454,10 @@ export default function Hero() {
       );
     };
 
+    let lastT = "";
+
     const loop = () => {
+      raf = 0;
       pos.x += (target.x - pos.x) * lerpK;
       pos.y += (target.y - pos.y) * lerpK;
       // linear parallax exit: the world rides up at a fraction of scroll
@@ -460,11 +466,26 @@ export default function Hero() {
       // live-site recording).
       const py = pos.y - scrollP * (window.innerHeight || 0) * 0.38;
       const t = `translate3d(${pos.x.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;
-      world.style.transform = t;
-      // grid pattern pans with the world; its fade mask stays put
-      if (gridPattern) gridPattern.style.transform = t;
-      if (ruler) ruler.style.transform = `translate3d(0, ${py.toFixed(2)}px, 0)`;
+      // skip the writes when nothing moved — assigning an identical
+      // transform still invalidates style for three elements every frame
+      if (t !== lastT) {
+        lastT = t;
+        world.style.transform = t;
+        // grid pattern pans with the world; its fade mask stays put
+        if (gridPattern) gridPattern.style.transform = t;
+        if (ruler) ruler.style.transform = `translate3d(0, ${py.toFixed(2)}px, 0)`;
+      }
+      // park the loop once the world has settled and the hero is scrolled
+      // well out of view — otherwise this rAF keeps running for the entire
+      // length of the page. Any scroll or pointer input wakes it again.
+      const settled =
+        Math.abs(target.x - pos.x) < 0.05 && Math.abs(target.y - pos.y) < 0.05;
+      if (settled && !dragging && window.scrollY > window.innerHeight * 1.2) return;
       raf = requestAnimationFrame(loop);
+    };
+
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(loop);
     };
 
     world.addEventListener("pointerdown", onPointerDown);

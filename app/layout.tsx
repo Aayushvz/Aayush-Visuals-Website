@@ -3,6 +3,7 @@ import { Archivo, Instrument_Serif, Cinzel_Decorative, Cinzel } from "next/font/
 import localFont from "next/font/local";
 import Preloader from "@/components/Preloader";
 import PageTransition from "@/components/PageTransition";
+import AnimationBudget from "@/components/AnimationBudget";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -72,6 +73,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <Preloader />
         <PageTransition />
+        <AnimationBudget />
         {children}
       </body>
     </html>

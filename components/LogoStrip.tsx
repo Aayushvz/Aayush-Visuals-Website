@@ -25,6 +25,7 @@ export default function LogoStrip() {
                 className="logoStrip__img"
                 style={l.h ? { height: l.h } : undefined}
                 loading="lazy"
+                decoding="async"
                 draggable={false}
               />
               <span className="logoStrip__dot" aria-hidden>&#x2666;</span>

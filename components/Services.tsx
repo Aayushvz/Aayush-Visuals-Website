@@ -45,8 +45,38 @@ export default function Services() {
     let lastTime = performance.now();
     let frameId = 0;
 
+    /* This loop reads layout (getBoundingClientRect + offsetHeight) and
+       writes a transform on every frame. Left unconditional it forces a
+       synchronous layout ~60x a second for the entire life of the page,
+       even while the carousel is several screens away — one of the
+       largest always-on costs on the site. Park it unless the section is
+       actually near the viewport; scroll/drag wake it again. */
+    let visible = false;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible) wake();
+      },
+      { rootMargin: "200px 0px" }
+    );
+    io.observe(section);
+
+    let snapOnResume = true;
+
+    function wake() {
+      if (frameId) return;
+      lastTime = performance.now();
+      /* the spring didn't track scroll while parked, so land directly on
+         the current target instead of visibly winding to catch up */
+      snapOnResume = true;
+      frameId = requestAnimationFrame(renderLoop);
+    }
+
     function renderLoop(now: number) {
-      let dt = Math.min((now - lastTime) / 1000, 0.064);
+      frameId = 0;
+      if (!visible) return;
+
+      const dt = Math.min((now - lastTime) / 1000, 0.064);
       lastTime = now;
 
       let scrollRotation = 0;
@@ -66,12 +96,18 @@ export default function Services() {
       // Total target angle combines cumulative drag + vertical scroll
       const target = dragOffset + scrollRotation;
 
-      const steps = Math.max(1, Math.ceil(dt / 0.008));
-      const h = dt / steps;
-      for (let s = 0; s < steps; s++) {
-        const accel = (STIFFNESS * (target - current) - DAMPING * springVel) / MASS;
-        springVel += accel * h;
-        current += springVel * h;
+      if (snapOnResume) {
+        snapOnResume = false;
+        current = target;
+        springVel = 0;
+      } else {
+        const steps = Math.max(1, Math.ceil(dt / 0.008));
+        const h = dt / steps;
+        for (let s = 0; s < steps; s++) {
+          const accel = (STIFFNESS * (target - current) - DAMPING * springVel) / MASS;
+          springVel += accel * h;
+          current += springVel * h;
+        }
       }
 
       if (carousel && window.innerWidth > 768) {
@@ -80,7 +116,7 @@ export default function Services() {
 
       frameId = requestAnimationFrame(renderLoop);
     }
-    frameId = requestAnimationFrame(renderLoop);
+    wake();
 
     function pointerX(e: MouseEvent | TouchEvent) {
       return "touches" in e && e.touches.length > 0 ? e.touches[0].clientX : (e as MouseEvent).clientX;
@@ -99,6 +135,7 @@ export default function Services() {
       if (e.cancelable) e.preventDefault();
       const dx = pointerX(e) - dragStartX;
       dragOffset = initialDragOffset + dx * (SENSITIVITY / 10);
+      wake();
     }
 
     function endDrag() {
@@ -125,6 +162,7 @@ export default function Services() {
 
     return () => {
       cancelAnimationFrame(frameId);
+      io.disconnect();
       carousel.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
@@ -196,9 +234,24 @@ export default function Services() {
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    /* rAF-throttled: handleScroll reads layout and then writes transforms
+       for six cards, so running it per scroll event (which can fire many
+       times between frames) was pure duplicated work */
+    let raf = 0;
+    const onScroll = () => {
+      if (!raf)
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          handleScroll();
+        });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
@@ -244,6 +297,8 @@ export default function Services() {
                     src={allCards[i].image}
                     alt={allCards[i].title}
                     className="services-card__img"
+                    loading="lazy"
+                    decoding="async"
                     draggable={false}
                   />
                 </div>
@@ -253,6 +308,8 @@ export default function Services() {
                     src={allCards[i + 6].image}
                     alt={allCards[i + 6].title}
                     className="services-card__img"
+                    loading="lazy"
+                    decoding="async"
                     draggable={false}
                   />
                 </div>
@@ -304,6 +361,8 @@ export default function Services() {
                 src={service.image}
                 alt={service.title}
                 className="services-card__img"
+                loading="lazy"
+                decoding="async"
                 draggable={false}
               />
             </div>

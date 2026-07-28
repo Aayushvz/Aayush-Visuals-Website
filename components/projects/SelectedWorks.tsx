@@ -58,6 +58,7 @@ export default function SelectedWorks() {
                       src={src}
                       alt={p.title}
                       loading="lazy"
+                      decoding="async"
                       draggable={false}
                     />
                   </div>

@@ -9,6 +9,7 @@ import {
   useSpring,
   useTransform,
   useMotionValueEvent,
+  useInView,
 } from "framer-motion";
 
 /*
@@ -130,6 +131,11 @@ export default function Capabilities() {
   const [half, setHalf] = useState({ w: 450, h: 260, walletTop: 0, cardH: 0 });
 
   const pinned = !reduce;
+  /* The aurora blobs are four viewport-sized layers under a 105px blur,
+     animating scale — every frame re-rasterizes that blur. framer drives
+     them from JS, so the CSS `.anim-idle` pause can't reach them; this
+     stops them outright whenever the section is away from the viewport. */
+  const inView = useInView(sectionRef, { margin: "300px 0px" });
 
   /* cursor-reactive nebula + starfield parallax (motion values — no
      re-render per mousemove) */
@@ -314,7 +320,7 @@ export default function Capabilities() {
               <motion.span
                 key={i}
                 className={`capAuroraBlob ${b.c}`}
-                animate={reduce ? undefined : { x: b.x, y: b.y, scale: b.s }}
+                animate={reduce || !inView ? undefined : { x: b.x, y: b.y, scale: b.s }}
                 transition={{ duration: b.dur, repeat: Infinity, ease: "easeInOut" }}
               />
             ))}
@@ -410,6 +416,7 @@ export default function Capabilities() {
                   className="capCard__img"
                   src={`/skills/${card.slug}.webp`}
                   alt={card.title}
+                  decoding="async"
                   draggable={false}
                 />
               </motion.article>

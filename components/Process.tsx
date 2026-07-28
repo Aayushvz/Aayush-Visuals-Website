@@ -60,39 +60,56 @@ const ARTWORKS = [
 
 export default function Process() {
   const wrapperRef = useRef<HTMLElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
   const [cardsVisible, setCardsVisible] = useState(0);
-  const [lineScale, setLineScale] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
+    let raf = 0;
+
+    const measure = () => {
+      raf = 0;
       const el = wrapperRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const scrollable = el.offsetHeight - window.innerHeight;
+      const progress =
+        scrollable <= 0 ? 1 : Math.max(0, Math.min(1, -rect.top / scrollable));
 
-      if (scrollable <= 0) {
-        setCardsVisible(3);
-        setLineScale(1);
-        return;
-      }
-
-      const scrolled = -rect.top;
-      const progress = Math.max(0, Math.min(1, scrolled / scrollable));
-
-      const visible = progress >= 0.65 ? 3 : progress >= 0.35 ? 2 : progress >= 0.02 ? 1 : 0;
-      setCardsVisible(visible);
+      /* discrete — React bails when the value is unchanged, so this only
+         re-renders at the three card thresholds */
+      setCardsVisible(progress >= 0.65 ? 3 : progress >= 0.35 ? 2 : progress >= 0.02 ? 1 : 0);
 
       const scale =
         progress < 0.02 ? 0 :
         progress < 0.35 ? 0.05 + (progress - 0.02) / 0.33 * 0.43 :
         progress < 0.65 ? 0.48 + (progress - 0.35) / 0.30 * 0.46 :
         1;
-      setLineScale(scale);
+
+      /* continuous — written straight to the DOM. Held in React state this
+         re-rendered the entire section (every card, tile and SVG filter)
+         on every scroll event, which was the section's main scroll cost. */
+      if (lineRef.current) lineRef.current.style.transform = `scaleX(${scale})`;
+      if (tipRef.current) {
+        tipRef.current.style.left = `${scale * 100}%`;
+        tipRef.current.style.opacity = scale > 0.01 && scale < 0.99 ? "1" : "0";
+      }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    /* rAF-throttled: scroll fires far more often than the screen refreshes,
+       and this handler reads layout (getBoundingClientRect/offsetHeight) */
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    measure();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
@@ -150,15 +167,14 @@ export default function Process() {
           <div className={`procCards${cardsVisible > 0 ? " procCards--visible" : ""}`}>
             <div
               className="procLine"
-              style={{ transform: `scaleX(${lineScale})` }}
+              ref={lineRef}
+              style={{ transform: "scaleX(0)" }}
               aria-hidden
             />
             <div
               className="procTip"
-              style={{
-                left: `${lineScale * 100}%`,
-                opacity: lineScale > 0.01 && lineScale < 0.99 ? 1 : 0,
-              }}
+              ref={tipRef}
+              style={{ left: "0%", opacity: 0 }}
               aria-hidden
             />
 

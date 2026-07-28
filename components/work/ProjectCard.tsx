@@ -57,6 +57,7 @@ export default function ProjectCard({ item, index, onOpen }: Props) {
           src={item.thumbnail}
           alt={item.title}
           loading="lazy"
+          decoding="async"
           draggable={false}
         />
         <span className="workCard__logoWrap">
@@ -66,6 +67,7 @@ export default function ProjectCard({ item, index, onOpen }: Props) {
               src={item.logo}
               alt={`${item.title} logo`}
               loading="lazy"
+              decoding="async"
               draggable={false}
             />
           ) : (
