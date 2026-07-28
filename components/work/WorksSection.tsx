@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { PROJECTS } from "@/components/projects/projectData";
-import ProjectModal from "@/components/projects/ProjectModal";
 import ProjectCard from "./ProjectCard";
 import { WORKS, WORK_CATEGORIES, filterWorks } from "./worksData";
 
@@ -10,17 +8,14 @@ import { WORKS, WORK_CATEGORIES, filterWorks } from "./worksData";
   The /work projects listing: an editorial header, a working search field, a
   row of category filter chips, and a two-column grid of large project cards.
   Search + category filter together (data-driven via filterWorks). Clicking a
-  card opens the site's existing data-driven ProjectModal (no new routes), so
-  project detail behaviour stays exactly as it is elsewhere.
+  card opens the project's full Figma-styled case study page at /work/[id].
 */
 
 export default function WorksSection() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("All");
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   const results = useMemo(() => filterWorks(WORKS, category, query), [category, query]);
-  const activeProject = PROJECTS.find((p) => p.id === activeId) ?? null;
 
   return (
     <section className="worksSection" id="work">
@@ -72,14 +67,12 @@ export default function WorksSection() {
       {results.length > 0 ? (
         <div className="worksGrid">
           {results.map((item, i) => (
-            <ProjectCard key={item.id} item={item} index={i} onOpen={setActiveId} />
+            <ProjectCard key={item.id} item={item} index={i} />
           ))}
         </div>
       ) : (
         <p className="worksEmpty">No projects found.</p>
       )}
-
-      <ProjectModal project={activeProject} onClose={() => setActiveId(null)} />
     </section>
   );
 }

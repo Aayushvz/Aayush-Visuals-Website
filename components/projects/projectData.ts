@@ -1,8 +1,10 @@
 /*
   Single source of truth for the Projects section. Adding a future project =
-  append one object here. `preview` is a tagged union so the modal (and any
-  future full case-study page) can grow to support live sites, Behance,
-  images, video, or local routes without touching component code.
+  append one object here. Every project also gets a full case-study page at
+  /work/[id] (see components/projects/figma/FigmaProjectPage), rendered off
+  this same array. `preview` is a tagged union so that page's CTA link can
+  point at a live site, Behance, an image/video, or a local route without
+  touching component code.
 
   `cover` and `logoText` are placeholders — real transparent PNG/SVG logos
   and cover photography will be dropped in later (see notes on ProjectTile).

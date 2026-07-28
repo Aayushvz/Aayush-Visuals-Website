@@ -1,0 +1,1106 @@
+/*
+  ============ FIGMA PROJECT PAGE ============
+  A full-page case study styled as an open Figma file: a canvas, a fixed tab
+  bar, a Pages/Layers sidebar on the left, a Properties panel on the right,
+  and the project's own content sitting where the artboard would be. Chrome
+  speaks Figma's own two UI themes (dark canvas / light canvas, same
+  #0D99FF selection blue in both) — toggled from the bottom dock, sharing the
+  site's own html[data-theme] switch rather than a separate preference.
+
+  Everything here is scoped by the .figp-* prefix so it can be imported as
+  plain global CSS without colliding with the rest of the site.
+*/
+.figp {
+  /* ---- dark theme (default) ---- */
+  --figp-bg: #1e1e1e;
+  --figp-ink: #ebebeb;
+  --figp-dim: #a0a0a0;
+  --figp-line: rgba(255, 255, 255, 0.11);
+  --figp-panel: #2c2c2c;
+  --figp-panel-line: #1a1a1a;
+  --figp-text-strong: #e5e5e5;
+  --figp-text-mid: #c4c4c4;
+  --figp-text-dim: #8c8c8c;
+  --figp-text-faint: #9b9b9b;
+  --figp-hover: rgba(255, 255, 255, 0.06);
+  --figp-border-soft: rgba(255, 255, 255, 0.08);
+  --figp-scrollbar: rgba(255, 255, 255, 0.13);
+  --figp-scrollbar-hover: rgba(255, 255, 255, 0.3);
+  --figp-swatch-border: rgba(255, 255, 255, 0.2);
+  --figp-dotgrid: rgba(255, 255, 255, 0.05);
+  --figp-body-text: #c9c9c9;
+  --figp-fact-value: #d8d8d8;
+  --figp-chip-border: rgba(255, 255, 255, 0.14);
+  --figp-shot-ring: rgba(255, 255, 255, 0.09);
+  --figp-empty-border: rgba(255, 255, 255, 0.16);
+  --figp-grab: #5a5a5a;
+
+  /* theme-invariant: Figma's own selection blue and the one personal accent */
+  --figp-blue: #0d99ff;
+  --figp-accent: var(--purple-soft, #a78bfa);
+
+  position: relative;
+  min-height: 100dvh;
+  background: var(--figp-bg);
+  color: var(--figp-ink);
+  font-family: var(--font-primary);
+  overflow-x: clip;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ---- light theme: Figma's own light UI (white panels, grey canvas) ---- */
+html[data-theme="light"] .figp {
+  --figp-bg: #e5e5e5;
+  --figp-ink: #1e1e1e;
+  --figp-dim: #6b6b6b;
+  --figp-line: rgba(0, 0, 0, 0.12);
+  --figp-panel: #ffffff;
+  --figp-panel-line: #e0e0e0;
+  --figp-text-strong: #1a1a1a;
+  --figp-text-mid: #4a4a4a;
+  --figp-text-dim: #767676;
+  --figp-text-faint: #8a8a8a;
+  --figp-hover: rgba(0, 0, 0, 0.05);
+  --figp-border-soft: rgba(0, 0, 0, 0.08);
+  --figp-scrollbar: rgba(0, 0, 0, 0.16);
+  --figp-scrollbar-hover: rgba(0, 0, 0, 0.3);
+  --figp-swatch-border: rgba(0, 0, 0, 0.18);
+  --figp-dotgrid: rgba(0, 0, 0, 0.06);
+  --figp-body-text: #333333;
+  --figp-fact-value: #262626;
+  --figp-chip-border: rgba(0, 0, 0, 0.16);
+  --figp-shot-ring: rgba(0, 0, 0, 0.12);
+  --figp-empty-border: rgba(0, 0, 0, 0.18);
+  --figp-grab: #c2c2c2;
+}
+
+.figp a {
+  color: inherit;
+}
+
+.figp ::selection {
+  background: rgba(13, 153, 255, 0.75);
+  color: #fff;
+}
+
+@media (min-width: 769px) {
+  .figp {
+    padding-top: 44px;
+  }
+  .figp-canvas {
+    margin-left: 240px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .figp-canvas {
+    margin-right: 240px;
+  }
+}
+
+/* ============ tab bar ============ */
+.figp-tabbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  height: 44px;
+  background: var(--figp-panel);
+  border-bottom: 1px solid var(--figp-panel-line);
+  font-size: 0.8rem;
+  font-weight: 600;
+  user-select: none;
+}
+
+.figp-home {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.85rem;
+  color: var(--figp-text-mid);
+  text-decoration: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.figp-home:hover,
+.figp-home:focus-visible {
+  color: var(--figp-ink);
+  background: var(--figp-hover);
+}
+
+.figp-home img {
+  height: 18px;
+  width: auto;
+  display: block;
+}
+
+.figp-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.9rem;
+  background: var(--figp-bg);
+  color: var(--figp-ink);
+  font: inherit;
+  margin-bottom: -1px;
+}
+
+.figp-tab-icon {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  opacity: 0.85;
+}
+
+.figp-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--figp-text-dim);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.figp-close:hover,
+.figp-close:focus-visible {
+  opacity: 1;
+  background: var(--figp-hover);
+}
+
+@media (max-width: 768px) {
+  .figp-tabbar {
+    display: none;
+  }
+}
+
+/* ============ mobile toolbar (replaces the tab bar under 769px) ============ */
+.figp-mtop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .figp-mtop {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 55;
+    height: 48px;
+    padding: 0 0.75rem;
+    background: var(--figp-panel);
+    border-bottom: 1px solid var(--figp-panel-line);
+  }
+
+  .figp-mmark {
+    display: inline-flex;
+    align-items: center;
+    align-self: stretch;
+    padding: 0 0.5rem;
+    text-decoration: none;
+  }
+
+  .figp-mmark img {
+    height: 16px;
+    width: auto;
+    display: block;
+  }
+
+  .figp-mfile {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--figp-text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .figp-mfile img {
+    width: 12px;
+    height: 12px;
+    flex: none;
+    opacity: 0.85;
+  }
+
+  .figp-mlayers,
+  .figp-mclose {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    position: relative;
+    height: 34px;
+    padding: 0 0.7rem;
+    border: 1px solid var(--figp-panel-line);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--figp-text-mid);
+    font-family: var(--font-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .figp-mlayers {
+    margin-left: auto;
+  }
+
+  .figp-mlayers.is-on {
+    background: var(--figp-blue);
+    border-color: var(--figp-blue);
+    color: #fff;
+  }
+}
+
+/* ============ layers panel (Pages + Layers, left) ============ */
+.figp-layers {
+  position: fixed;
+  top: 44px;
+  left: 0;
+  bottom: 0;
+  width: 240px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--figp-panel);
+  border-right: 1px solid var(--figp-panel-line);
+  font-size: 12px;
+  user-select: none;
+}
+
+.figp-lfile {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: none;
+  height: 42px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--figp-border-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--figp-text-strong);
+}
+
+.figp-lfile img {
+  opacity: 0.9;
+}
+
+.figp-label {
+  flex: none;
+  padding: 12px 16px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--figp-text-dim);
+}
+
+.figp-div {
+  flex: none;
+  height: 1px;
+  margin: 8px 0 0;
+  background: var(--figp-border-soft);
+}
+
+.figp-pages {
+  flex: none;
+  padding: 0 8px;
+}
+
+.figp-page {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 5px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--figp-text-mid);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.figp-page:hover,
+.figp-page:focus-visible {
+  background: var(--figp-hover);
+  color: var(--figp-ink);
+}
+
+.figp-page.is-current {
+  background: rgba(13, 153, 255, 0.25);
+  color: #fff;
+  font-weight: 600;
+}
+
+.figp-page.is-current:hover,
+.figp-page.is-current:focus-visible {
+  background: rgba(13, 153, 255, 0.32);
+}
+
+.figp-page-check {
+  display: inline-flex;
+  width: 16px;
+  margin-right: 4px;
+  flex: none;
+}
+
+.figp-page-check svg {
+  width: 11px;
+  height: 11px;
+}
+
+.figp-tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 8px 16px;
+}
+
+.figp-tree::-webkit-scrollbar {
+  width: 8px;
+}
+
+.figp-tree::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.figp-tree::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background: var(--figp-scrollbar);
+  background-clip: padding-box;
+}
+
+.figp-tree::-webkit-scrollbar-thumb:hover {
+  background: var(--figp-scrollbar-hover);
+  background-clip: padding-box;
+}
+
+.figp-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 6px 0 12px;
+  border-radius: 5px;
+  color: var(--figp-text-mid);
+}
+
+.figp-row-glyph {
+  display: inline-flex;
+  flex: none;
+  opacity: 0.75;
+}
+
+.figp-row-glyph svg {
+  width: 12px;
+  height: 12px;
+}
+
+.figp-row-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.figp-row--child {
+  padding-left: 26px;
+}
+
+/* the sheet grab handle: mobile only */
+.figp-grab {
+  display: none;
+}
+
+/* ---- mobile: the sidebar becomes a bottom sheet ---- */
+@media (max-width: 768px) {
+  .figp-layers {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 70dvh;
+    z-index: 70;
+    border-right: 0;
+    border-top: 1px solid var(--figp-panel-line);
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.55);
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(101%);
+    visibility: hidden;
+    transition: transform 0.28s ease, visibility 0.28s linear;
+  }
+
+  .figp-layers.is-open {
+    transform: none;
+    visibility: visible;
+  }
+
+  .figp-grab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 100%;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .figp-grab span {
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--figp-grab);
+  }
+
+  .figp-row,
+  .figp-page {
+    height: 40px;
+  }
+}
+
+.figp-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(1.5px);
+}
+
+@media (min-width: 769px) {
+  .figp-scrim {
+    display: none;
+  }
+}
+
+/* ============ properties panel (right) ============ */
+.figp-props {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .figp-props {
+    display: block;
+    position: fixed;
+    top: 44px;
+    right: 0;
+    bottom: 0;
+    width: 240px;
+    z-index: 40;
+    background: var(--figp-panel);
+    border-left: 1px solid var(--figp-panel-line);
+    font-size: 11.5px;
+    color: var(--figp-text-mid);
+    user-select: none;
+    overflow-y: auto;
+  }
+}
+
+.figp-phead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--figp-border-soft);
+}
+
+.figp-ptab {
+  font-weight: 600;
+  color: var(--figp-text-strong);
+}
+
+.figp-pzoom {
+  color: var(--figp-text-dim);
+}
+
+.figp-pselected {
+  padding: 12px 14px 4px;
+  font-weight: 600;
+  color: var(--figp-text-strong);
+}
+
+.figp-pgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 8px 14px 4px;
+}
+
+.figp-pcell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--figp-hover);
+  border-radius: 4px;
+  padding: 5px 8px;
+}
+
+.figp-pk {
+  color: var(--figp-text-dim);
+}
+
+.figp-pv {
+  color: var(--figp-text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.figp-psec {
+  padding: 10px 14px 0;
+  margin-top: 6px;
+  border-top: 1px solid var(--figp-border-soft);
+}
+
+.figp-plabel {
+  font-weight: 600;
+  color: var(--figp-text-dim);
+  margin-bottom: 8px;
+}
+
+.figp-pfill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.figp-pswatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--figp-swatch-border);
+  background-size: cover;
+  background-position: center;
+}
+
+.figp-pexport {
+  color: var(--figp-text-mid);
+  padding-bottom: 14px;
+}
+
+/* ============ the canvas ============ */
+.figp-canvas {
+  position: relative;
+  min-height: calc(100dvh - 44px);
+  background-image: radial-gradient(circle, var(--figp-dotgrid) 1px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.figp-page-body {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3.6rem 2rem 10rem; /* deep tail: the dock floats over the bottom */
+}
+
+.figp-head {
+  position: relative;
+  max-width: 62ch;
+}
+
+.figp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 2.6rem;
+  font-size: 0.82rem;
+  color: var(--figp-dim);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.figp-back:hover,
+.figp-back:focus-visible {
+  color: var(--figp-blue);
+}
+
+.figp-file {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--figp-text-faint);
+  margin-bottom: 0.5rem;
+  user-select: none;
+}
+
+.figp-name {
+  margin: 0;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--figp-ink);
+}
+
+.figp-what {
+  margin: 0.7rem 0 0;
+  font-size: 0.9rem;
+  color: var(--figp-accent);
+}
+
+.figp-summary {
+  margin: 1.6rem 0 0;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--figp-body-text);
+}
+
+.figp-facts {
+  margin: 2.4rem 0 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--figp-line);
+}
+
+.figp-fact {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 1.2rem;
+  padding: 0.72rem 0;
+  border-bottom: 1px solid var(--figp-line);
+}
+
+.figp-fact dt {
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+.figp-fact dd {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--figp-fact-value);
+}
+
+.figp-toolchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.figp-toolchip {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--figp-chip-border);
+  font-size: 0.78rem;
+  color: var(--figp-fact-value);
+}
+
+.figp-ext {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 2rem;
+  font-size: 0.86rem;
+  color: var(--figp-blue);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.figp-ext:hover,
+.figp-ext:focus-visible {
+  border-bottom-color: currentColor;
+}
+
+/* ---- highlights ---- */
+.figp-highlights {
+  margin-top: 2.8rem;
+  max-width: 62ch;
+}
+
+.figp-highlights-label {
+  display: block;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+  margin-bottom: 0.8rem;
+}
+
+.figp-highlights ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.figp-highlights li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--figp-fact-value);
+}
+
+.figp-highlights li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--figp-accent);
+}
+
+/* ---- shots ---- */
+.figp-shots {
+  margin-top: 4.5rem;
+}
+
+.figp-shot {
+  position: relative;
+  margin: 0;
+}
+
+.figp-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+}
+
+.figp-shot figcaption {
+  margin-top: 0.9rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 54ch;
+}
+
+.figp-empty {
+  margin-top: 3.5rem;
+  padding: 1.6rem 1.8rem;
+  border: 1px dashed var(--figp-empty-border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--figp-text-faint);
+  max-width: 52ch;
+}
+
+@media (max-width: 768px) {
+  /* extra headroom above the title, reserved for the relocated comment pin
+     (see .figp-pin--head below) — an empty stretch of canvas rather than
+     space any text sits in */
+  .figp-page-body {
+    padding: 4.8rem 1.25rem 9rem;
+  }
+
+  .figp-fact {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
+/* ============ comment pins ============ */
+.figp-pin {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-decoration: none;
+  z-index: 2;
+}
+
+.figp-pin--head {
+  top: -14px;
+  right: 0;
+}
+
+.figp-pin--shot {
+  top: -14px;
+  right: 20px;
+}
+
+.figp-pin-dot {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  background: var(--figp-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 50% 50% 50% 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 2.5px var(--figp-bg), inset 0 1.5px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.figp-pin:hover .figp-pin-dot,
+.figp-pin:focus-visible .figp-pin-dot {
+  transform: scale(1.08) translateY(-1px);
+}
+
+.figp-pin-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fff;
+  color: #1c1b19;
+  font-size: 12.5px;
+  font-weight: 450;
+  line-height: 1.45;
+  padding: 10px 13px 11px;
+  border-radius: 3px 12px 12px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22), 0 14px 34px rgba(0, 0, 0, 0.5);
+  max-width: 216px;
+}
+
+.figp-pin-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #5b5960;
+}
+
+.figp-pin-avatar {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--figp-accent);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  /* the head pin used to float right on top of .figp-head, which put it
+     directly on top of the "Selected work" back-link underneath — there's
+     no spare corner for it beside that link at this width. Moved up into
+     the empty canvas band reserved above the title (.figp-page-body's extra
+     top padding) instead, well clear of both the sticky toolbar above it
+     and the back-link below it, so "Selected work" stays put on the left,
+     undisturbed, on its own line. */
+  .figp-pin--head {
+    top: -3.8rem;
+    right: 0;
+  }
+
+  .figp-pin--shot {
+    top: -10px;
+    left: 0;
+    right: auto;
+  }
+
+  /* smaller everywhere on phones — the note only needs to read as a label,
+     not a full card, at this width */
+  .figp-pin-dot {
+    width: 24px;
+    height: 24px;
+    font-size: 10.5px;
+  }
+
+  .figp-pin-note {
+    gap: 2px;
+    padding: 7px 10px 8px;
+    font-size: 11px;
+    max-width: min(190px, calc(100vw - 5rem));
+  }
+
+  .figp-pin-author {
+    font-size: 10px;
+  }
+
+  .figp-pin-avatar {
+    width: 14px;
+    height: 14px;
+    font-size: 8px;
+  }
+}
+
+/* ============ collaborator cursor ============ */
+@media (pointer: fine) {
+  .figp {
+    cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E")
+      3 2, auto;
+  }
+
+  .figp a,
+  .figp button,
+  .figp summary,
+  .figp [role="button"] {
+    cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M17.6%2013.6%2021.6%2017.6%2017.6%2021.6%2013.6%2017.6Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M17.6%2013.6%2021.6%2017.6%2017.6%2021.6%2013.6%2017.6Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E")
+      3 2, pointer;
+  }
+}
+
+.figp-tag {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  margin: 17px 0 0 13px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--figp-accent);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.55;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  will-change: transform;
+}
+
+.figp-tag.is-live {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .figp-tag {
+    display: none;
+  }
+}
+
+/* ============ bottom dock: site pages + prev/next + theme ============ */
+.figp-dock-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.figp-dock-wrap.is-hidden {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.figp-dock {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--figp-panel);
+  border: 1px solid var(--figp-panel-line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* solid, not glass, at this width — it sits directly over page content on a
+   phone, so it needs to read as a fully opaque bar rather than let whatever
+   is scrolling underneath show or bleed through */
+@media (max-width: 768px) {
+  .figp-dock {
+    background: var(--figp-panel);
+    border-color: var(--figp-text-dim);
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.figp-dock-sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 2px;
+  background: var(--figp-panel-line);
+  flex: none;
+}
+
+.figp-dock-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--figp-text-mid);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.figp-dock-item svg {
+  width: 17px;
+  height: 17px;
+}
+
+.figp-dock-item:hover,
+.figp-dock-item:focus-visible {
+  color: var(--figp-ink);
+  background: var(--figp-hover);
+  transform: scale(1.08);
+}
+
+.figp-dock-item.is-current {
+  color: var(--figp-blue);
+}
+
+.figp-dock-item-dot {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--figp-blue);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.figp-dock-item.is-current .figp-dock-item-dot {
+  opacity: 1;
+}
+
+@media (max-width: 480px) {
+  .figp-dock {
+    gap: 0;
+    padding: 5px;
+  }
+  .figp-dock-item {
+    width: 34px;
+    height: 34px;
+  }
+  .figp-dock-item svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-layers,
+  .figp-dock-wrap,
+  .figp-dock-item {
+    transition: none;
+  }
+}
