@@ -83,6 +83,25 @@ html[data-theme="light"] .figp {
   color: #fff;
 }
 
+/* ---- Figma's own UI typeface, on the interface only ----
+   The tab bar, both sidebars, the dock, the comment pins and the cursor tag
+   are all app CHROME, not the project's own content — so they speak Inter,
+   same as Figma's real UI does. The project details underneath (title,
+   summary, facts, tool chips, highlights, CTA) are unaffected: they keep
+   inheriting var(--font-primary)/var(--font-archivo) from .figp, the site's
+   own fonts, straight through this rule. */
+.figp-tabbar,
+.figp-mtop,
+.figp-layers,
+.figp-props,
+.figp-dock,
+.figp-pin,
+.figp-tag,
+.figp-file,
+.figp-back {
+  font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
 @media (min-width: 769px) {
   .figp {
     padding-top: 44px;
@@ -246,7 +265,6 @@ html[data-theme="light"] .figp {
     border-radius: 7px;
     background: transparent;
     color: var(--figp-text-mid);
-    font-family: var(--font-primary);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
