@@ -17,6 +17,17 @@ export type ProjectPreview =
   | { kind: "video"; src: string; poster?: string; href?: string }
   | { kind: "page"; href: string }; // future: local case-study route
 
+/** one captioned image in a case study's gallery */
+export type ProjectShot = {
+  src: string;
+  /** shown under the image on the case-study page */
+  caption: string;
+  /** screen-reader description of what the image actually shows */
+  alt: string;
+  /** full-bleed within the column; non-wide shots sit inset for rhythm */
+  wide?: boolean;
+};
+
 export type Project = {
   id: string;
   title: string;
@@ -35,6 +46,11 @@ export type Project = {
   tools: string[];
   description: string;
   highlights: string[];
+  /** project-specific facts appended after Role/Category/Year on the
+      case-study page (e.g. Surfaces, Airports) */
+  extraFacts?: [string, string][];
+  /** case-study gallery. Without it the page falls back to `cover` alone. */
+  shots?: ProjectShot[];
 };
 
 export const PROJECTS: Project[] = [
@@ -116,19 +132,62 @@ export const PROJECTS: Project[] = [
     title: "Layover",
     logoText: "layover*",
     logoUrl: "/projects/layover-logo.webp",
-    category: "Product Design",
+    category: "Brand & Product Design",
     year: "2025",
     cover: "/projects/layover-cover.webp",
     preview: { kind: "website", href: "https://mylayover.in/", image: "/projects/layover-cover.webp" },
     cta: "Visit Website",
-    role: "Product Design",
+    role: "Brand identity · UI · product design",
     tools: ["Figma", "Prototyping"],
     description:
-      "Product design for Layover, turning a complex travel-stopover problem into a clean, intuitive booking experience.",
+      "A layover is dead time you’ve already paid for. Layover turns it into something usable: enter your airport or PNR and it shows what’s actually open in your terminal right now — order a meal to your gate, or book into a lounge. Built around Indian airports (Delhi, Mumbai, Bengaluru, Hyderabad) and the details that matter there: terminal-aware delivery, veg and non-veg filters as a first-class control, and a live prep timer so you know whether you have time before boarding.",
+    extraFacts: [
+      ["Surfaces", "Marketing site, web app, mobile app"],
+      ["Airports", "Delhi IGI, Mumbai CSIA, Bengaluru KIA, Hyderabad RGIA"],
+    ],
     highlights: [
-      "End-to-end booking flow redesigned around traveller trust",
-      "Component system built for fast iteration on a startup roadmap",
-      "Motion details tuned to make a complex flow feel effortless",
+      "Terminal-aware delivery — every restaurant card carries its pier",
+      "Veg and non-veg filters promoted to a first-class control",
+      "Live prep timer, so you know whether you have time before boarding",
+    ],
+    shots: [
+      {
+        src: "/projects/layover/hero.webp",
+        wide: true,
+        caption:
+          "The landing page. One question — which airport are you in — and the whole product follows from the answer.",
+        alt:
+          "Layover’s landing page over a photograph of an airport atrium, headline “Order Meals, Access Lounges. All In One App.”, with a panel listing Hyderabad RGIA, Bengaluru KIA, Mumbai CSIA and Delhi IGI above a field reading “enter your airport / PNR”.",
+      },
+      {
+        src: "/projects/layover/brand.webp",
+        wide: true,
+        caption:
+          "The wordmark, with the rotated “e” — a plane turning back on itself, which is the whole idea of a layover in one letter.",
+        alt:
+          "The LayOver wordmark in white on a black billboard on a tree-lined street, the “e” rotated 180 degrees.",
+      },
+      {
+        src: "/projects/layover/app.webp",
+        caption:
+          "The app’s ordering surface, warm where the marketing site is dark — this is the part you use standing at a gate.",
+        alt:
+          "Two phone screens showing Layover’s food ordering interface in cream and gold: a delivery destination of “Layover office”, a greeting, a dish search field, category chips for fries and burgers, and an “Open Stalls” section.",
+      },
+      {
+        src: "/projects/layover/order.webp",
+        caption:
+          "Browse by terminal, then track the order. Every restaurant card carries its pier, because in an airport “where” is the only question that matters.",
+        alt:
+          "Layover’s restaurant directory on desktop showing Tim Hortons, Starbucks, Theobroma, McDonald’s, Berco’s, Idli.com, KFC and Subway, each labelled “t3 domestic departure piers”, beside a mobile order-confirmed screen with a twenty-minute prep timer, itemised order and a map.",
+      },
+      {
+        src: "/projects/layover/system.webp",
+        wide: true,
+        caption: "Site and app as one system — the dark front door, the warm room behind it.",
+        alt:
+          "Layover’s marketing site and mobile app shown together, the dark landing page beside the two cream ordering screens.",
+      },
     ],
   },
   {

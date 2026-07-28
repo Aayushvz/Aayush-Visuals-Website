@@ -3,14 +3,20 @@
   A full-page case study styled as an open Figma file: a canvas, a fixed tab
   bar, a Pages/Layers sidebar on the left, a Properties panel on the right,
   and the project's own content sitting where the artboard would be. Chrome
-  speaks Figma's own two UI themes (dark canvas / light canvas, same
-  #0D99FF selection blue in both) — toggled from the bottom dock, sharing the
-  site's own html[data-theme] switch rather than a separate preference.
+  speaks Figma's own two UI themes (dark canvas / light canvas) — toggled from
+  the bottom dock, sharing the site's own html[data-theme] switch rather than a
+  separate preference. The accent is Figma's #0D99FF on dark and a slightly
+  deeper shade on light, where the brand value fails contrast on white.
 
   Everything here is scoped by the .figp-* prefix so it can be imported as
   plain global CSS without colliding with the rest of the site.
 */
-.figp {
+/* The token scope deliberately includes .figp-share-backdrop: that dialog is
+   portaled to <body>, so it sits OUTSIDE .figp and inherits none of these
+   otherwise — its panel background, borders and shadows all resolved to
+   nothing. Any future portaled surface needs adding here too. */
+.figp,
+.figp-share-backdrop {
   /* ---- dark theme (default) ---- */
   --figp-bg: #1e1e1e;
   --figp-ink: #ebebeb;
@@ -20,7 +26,10 @@
   --figp-panel-line: #1a1a1a;
   --figp-text-strong: #e5e5e5;
   --figp-text-mid: #c4c4c4;
-  --figp-text-dim: #8c8c8c;
+  /* was #8c8c8c, which cleared 4.5:1 on the #1e1e1e canvas but only managed
+     4.15 on the lighter #2c2c2c panels where it's mostly used (layers and
+     properties labels, share dialog). Lifted to pass on both surfaces. */
+  --figp-text-dim: #9a9a9a;
   --figp-text-faint: #9b9b9b;
   --figp-hover: rgba(255, 255, 255, 0.06);
   --figp-border-soft: rgba(255, 255, 255, 0.08);
@@ -35,10 +44,32 @@
   --figp-empty-border: rgba(255, 255, 255, 0.16);
   --figp-grab: #5a5a5a;
 
+  /* Elevation. These were literal rgba(0,0,0,0.35–0.55) at every call site,
+     which is right over a #1e1e1e canvas and far too heavy over a light grey
+     one — the floating chrome read as black smudges in light mode. Tokenised
+     so each theme carries its own weight, the way Figma's own UI does. */
+  --figp-shadow-dock: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --figp-shadow-dock-mobile: 0 -2px 20px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5);
+  --figp-shadow-sheet: 0 -18px 44px rgba(0, 0, 0, 0.55);
+  --figp-shadow-note: 0 2px 6px rgba(0, 0, 0, 0.22), 0 14px 34px rgba(0, 0, 0, 0.5);
+  --figp-shadow-pin: 0 1px 2px rgba(0, 0, 0, 0.4), 0 5px 14px rgba(0, 0, 0, 0.5);
+  --figp-shadow-tag: 0 2px 9px rgba(0, 0, 0, 0.28);
+  --figp-scrim: rgba(0, 0, 0, 0.5);
+  --figp-note-border: transparent;
+  --figp-dock-border-strong: rgba(255, 255, 255, 0.22);
+
   /* theme-invariant: Figma's own selection blue and the one personal accent */
   --figp-blue: #0d99ff;
+  /* --figp-blue is an accent for TEXT and borders. White text sitting ON it
+     only reaches 2.99:1 in either theme, so filled controls (Share button,
+     active Layers toggle) use this deeper shade instead — 4.8:1 with white. */
+  --figp-blue-solid: #0b72d4;
   --figp-accent: var(--purple-soft, #a78bfa);
+}
 
+/* layout stays on the page root only — the token scope above is shared with
+   the portaled dialog, which must not inherit any of this */
+.figp {
   position: relative;
   min-height: 100dvh;
   background: var(--figp-bg);
@@ -49,7 +80,8 @@
 }
 
 /* ---- light theme: Figma's own light UI (white panels, grey canvas) ---- */
-html[data-theme="light"] .figp {
+html[data-theme="light"] .figp,
+html[data-theme="light"] .figp-share-backdrop {
   --figp-bg: #e5e5e5;
   --figp-ink: #1e1e1e;
   --figp-dim: #6b6b6b;
@@ -58,8 +90,13 @@ html[data-theme="light"] .figp {
   --figp-panel-line: #e0e0e0;
   --figp-text-strong: #1a1a1a;
   --figp-text-mid: #4a4a4a;
-  --figp-text-dim: #767676;
-  --figp-text-faint: #8a8a8a;
+  /* these were #767676 / #8a8a8a — greys picked against white, but the
+     canvas here is #e5e5e5, which cost them ~30% of their contrast: the
+     fact labels landed at 3.6:1 and the file label and shot captions at
+     2.7:1. Darkened to clear 4.5:1 on the actual canvas while keeping dim
+     the stronger of the two, as before. */
+  --figp-text-dim: #545454;
+  --figp-text-faint: #666666;
   --figp-hover: rgba(0, 0, 0, 0.05);
   --figp-border-soft: rgba(0, 0, 0, 0.08);
   --figp-scrollbar: rgba(0, 0, 0, 0.16);
@@ -72,6 +109,33 @@ html[data-theme="light"] .figp {
   --figp-shot-ring: rgba(0, 0, 0, 0.12);
   --figp-empty-border: rgba(0, 0, 0, 0.18);
   --figp-grab: #c2c2c2;
+
+  /* light UI elevation: short, soft and low-opacity. A white surface on a
+     grey canvas separates by a hairline plus a small shadow, not by depth. */
+  --figp-shadow-dock: 0 1px 3px rgba(0, 0, 0, 0.06), 0 6px 18px rgba(0, 0, 0, 0.1);
+  --figp-shadow-dock-mobile: 0 1px 3px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.14);
+  --figp-shadow-sheet: 0 -8px 28px rgba(0, 0, 0, 0.14);
+  --figp-shadow-note: 0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 22px rgba(0, 0, 0, 0.14);
+  --figp-shadow-pin: 0 1px 2px rgba(0, 0, 0, 0.14), 0 4px 10px rgba(0, 0, 0, 0.16);
+  --figp-shadow-tag: 0 2px 8px rgba(0, 0, 0, 0.16);
+  --figp-scrim: rgba(0, 0, 0, 0.32);
+  /* the comment note is white in both themes — on the light canvas it needs
+     a hairline or it dissolves into the artboard behind it */
+  --figp-note-border: rgba(0, 0, 0, 0.08);
+  --figp-dock-border-strong: rgba(0, 0, 0, 0.16);
+
+  /* The accent was declared theme-invariant, but #a78bfa is a dark-mode
+     lavender: on this canvas it measured 2.2:1, which made the category ·
+     year line under the title almost unreadable. The site's own deeper
+     purple is the same hue at a weight that works on light, and it also
+     improves the white-on-accent comment pins and cursor tag. */
+  --figp-accent: var(--purple, #7c3aed);
+
+  /* Figma's #0D99FF clears 4.5:1 against the dark canvas (4.59) but only
+     manages 2.99 on white, which fails for the Share button and the "Copy
+     link" action. Same hue, darkened just enough to pass (4.77) — the dark
+     theme keeps the exact brand blue. */
+  --figp-blue: #0b72d4;
 }
 
 .figp a {
@@ -98,7 +162,8 @@ html[data-theme="light"] .figp {
 .figp-pin,
 .figp-tag,
 .figp-file,
-.figp-back {
+.figp-back,
+.figp-share {
   font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -155,6 +220,16 @@ html[data-theme="light"] .figp {
   display: block;
 }
 
+/* The wordmark asset is pure white artwork, so on light mode's white panels
+   it was invisible. brightness(0) drives any opaque pixel to black while
+   leaving alpha alone — more durable than invert(1) if the mark ever gains
+   colour. Covers all three placements: tab bar, mobile header, layers head. */
+html[data-theme="light"] .figp-home img,
+html[data-theme="light"] .figp-mmark img,
+html[data-theme="light"] .figp-lfile img {
+  filter: brightness(0);
+}
+
 .figp-tab {
   display: inline-flex;
   align-items: center;
@@ -167,8 +242,8 @@ html[data-theme="light"] .figp {
 }
 
 .figp-tab-icon {
-  width: 13px;
-  height: 13px;
+  width: 9px;
+  height: 13.5px;
   flex: none;
   opacity: 0.85;
 }
@@ -178,7 +253,6 @@ html[data-theme="light"] .figp {
   align-items: center;
   justify-content: center;
   width: 34px;
-  margin-left: auto;
   border: 0;
   background: none;
   color: var(--figp-text-dim);
@@ -191,6 +265,38 @@ html[data-theme="light"] .figp {
 .figp-close:focus-visible {
   opacity: 1;
   background: var(--figp-hover);
+}
+
+/* Share sits top-right ahead of the close, and now carries the auto margin
+   that used to push .figp-close over — the pair travels right together */
+.figp-share-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 6px;
+  align-self: center;
+  height: 26px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--figp-blue-solid);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.figp-share-btn:hover,
+.figp-share-btn:focus-visible,
+.figp-share-btn.is-on {
+  filter: brightness(1.14);
+}
+
+.figp-share-btn--m {
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -245,11 +351,13 @@ html[data-theme="light"] .figp {
     text-overflow: ellipsis;
   }
 
-  .figp-mfile img {
-    width: 12px;
+  /* the mark here is an inline <svg>, not an <img> — the old img-only rule
+     never matched it, so it had no intrinsic size to lay out against */
+  .figp-mfile img,
+  .figp-mfile svg {
+    width: 8px;
     height: 12px;
     flex: none;
-    opacity: 0.85;
   }
 
   .figp-mlayers,
@@ -277,9 +385,215 @@ html[data-theme="light"] .figp {
   }
 
   .figp-mlayers.is-on {
-    background: var(--figp-blue);
-    border-color: var(--figp-blue);
+    background: var(--figp-blue-solid);
+    border-color: var(--figp-blue-solid);
     color: #fff;
+  }
+
+  /* on phones Share joins the mobile toolbar; the desktop variant's auto
+     margin would fight .figp-mlayers for the same slot, so it's reset */
+  .figp-share-btn--m {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0;
+    height: 34px;
+    padding: 0 0.75rem;
+    border-radius: 7px;
+    font-size: 12px;
+  }
+}
+
+/* ============ share dialog ============
+   Figma's "Share this file", built on the --figp-* tokens rather than the
+   literal greys of Figma's dark UI, so it themes with everything else. */
+.figp-share-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 16px 16px;
+  background: var(--figp-scrim);
+  overflow-y: auto;
+}
+
+.figp-share {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: min(440px, 100%);
+}
+
+.figp-share-card {
+  background: var(--figp-panel);
+  border: 1px solid var(--figp-panel-line);
+  border-radius: 12px;
+  box-shadow: var(--figp-shadow-note);
+  /* padding lives on the header and body separately so the divider between
+     them can run the full width of the card, as it does in Figma */
+  padding: 0;
+  overflow: hidden;
+  color: var(--figp-ink);
+}
+
+.figp-share-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px 12px 16px;
+  border-bottom: 1px solid var(--figp-panel-line);
+}
+
+.figp-share-body {
+  padding: 13px 16px 15px;
+}
+
+.figp-share-title {
+  margin: 0;
+  margin-right: auto;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.figp-share-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--figp-blue);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.figp-share-copy:hover,
+.figp-share-copy:focus-visible {
+  background: var(--figp-hover);
+}
+
+.figp-share-x {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--figp-ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.figp-share-x:hover,
+.figp-share-x:focus-visible {
+  background: var(--figp-hover);
+  color: var(--figp-ink);
+}
+
+.figp-share-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--figp-ink);
+}
+
+.figp-share-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+/* the globe rides bare in the reference — no filled disc behind it */
+.figp-share-globe {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  color: var(--figp-text-mid);
+}
+
+.figp-share-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--figp-accent);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.figp-share-who {
+  margin-right: auto;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.figp-share-perm {
+  font-size: 13px;
+  color: var(--figp-text-dim);
+}
+
+.figp-share-card--menu {
+  padding: 7px;
+}
+
+.figp-share-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--figp-ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* the leading glyph keeps its size; the label takes the slack so any
+   trailing chevron/gear parks hard right, as in the reference */
+.figp-share-item > svg:first-child {
+  flex: none;
+  color: var(--figp-text-mid);
+}
+
+.figp-share-item span {
+  margin-right: auto;
+}
+
+.figp-share-item:hover,
+.figp-share-item:focus-visible {
+  background: var(--figp-hover);
+}
+
+.figp-share-chev {
+  flex: none;
+  color: var(--figp-text-dim);
+}
+
+@media (max-width: 768px) {
+  .figp-share-backdrop {
+    align-items: flex-end;
+    padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
   }
 }
 
@@ -457,7 +771,7 @@ html[data-theme="light"] .figp {
     border-right: 0;
     border-top: 1px solid var(--figp-panel-line);
     border-radius: 14px 14px 0 0;
-    box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.55);
+    box-shadow: var(--figp-shadow-sheet);
     padding-bottom: env(safe-area-inset-bottom);
     transform: translateY(101%);
     visibility: hidden;
@@ -499,7 +813,7 @@ html[data-theme="light"] .figp {
   position: fixed;
   inset: 0;
   z-index: 65;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--figp-scrim);
   backdrop-filter: blur(1.5px);
 }
 
@@ -784,11 +1098,31 @@ html[data-theme="light"] .figp {
 /* ---- shots ---- */
 .figp-shots {
   margin-top: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
 }
 
 .figp-shot {
   position: relative;
   margin: 0;
+}
+
+/* shots not marked `wide` sit inset, so a gallery reads with some rhythm
+   instead of as one uniform stack of full-width frames */
+.figp-shot--inset {
+  width: 82%;
+  align-self: center;
+}
+
+@media (max-width: 720px) {
+  .figp-shots {
+    gap: 2.75rem;
+  }
+
+  .figp-shot--inset {
+    width: 100%;
+  }
 }
 
 .figp-shot img {
@@ -863,8 +1197,8 @@ html[data-theme="light"] .figp {
   font-size: 13px;
   font-weight: 700;
   border-radius: 50% 50% 50% 3px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 5px 14px rgba(0, 0, 0, 0.5),
-    0 0 0 2.5px var(--figp-bg), inset 0 1.5px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: var(--figp-shadow-pin), 0 0 0 2.5px var(--figp-bg),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.4);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -883,8 +1217,9 @@ html[data-theme="light"] .figp {
   font-weight: 450;
   line-height: 1.45;
   padding: 10px 13px 11px;
+  border: 1px solid var(--figp-note-border);
   border-radius: 3px 12px 12px 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22), 0 14px 34px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--figp-shadow-note);
   max-width: 216px;
 }
 
@@ -985,7 +1320,7 @@ html[data-theme="light"] .figp {
   line-height: 1.55;
   white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--figp-shadow-tag);
   opacity: 0;
   transition: opacity 0.2s ease;
   will-change: transform;
@@ -1028,7 +1363,7 @@ html[data-theme="light"] .figp {
   border-radius: 999px;
   background: var(--figp-panel);
   border: 1px solid var(--figp-panel-line);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--figp-shadow-dock);
 }
 
 /* solid, not glass, at this width — it sits directly over page content on a
@@ -1037,8 +1372,10 @@ html[data-theme="light"] .figp {
 @media (max-width: 768px) {
   .figp-dock {
     background: var(--figp-panel);
-    border-color: var(--figp-text-dim);
-    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5);
+    /* was --figp-text-dim: a #767676 rule around a white pill in light mode,
+       much heavier than any other border on the page */
+    border-color: var(--figp-dock-border-strong);
+    box-shadow: var(--figp-shadow-dock-mobile);
   }
 }
 

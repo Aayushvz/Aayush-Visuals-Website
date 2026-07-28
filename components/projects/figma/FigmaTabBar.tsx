@@ -13,9 +13,17 @@ type Props = {
   fileLabel: string;
   layersOpen: boolean;
   onToggleLayers: () => void;
+  onShare: () => void;
+  shareOpen: boolean;
 };
 
-export default function FigmaTabBar({ fileLabel, layersOpen, onToggleLayers }: Props) {
+export default function FigmaTabBar({
+  fileLabel,
+  layersOpen,
+  onToggleLayers,
+  onShare,
+  shareOpen,
+}: Props) {
   return (
     <>
       <nav className="figp-tabbar" aria-label="Open file">
@@ -28,6 +36,17 @@ export default function FigmaTabBar({ fileLabel, layersOpen, onToggleLayers }: P
           <FigmaMark className="figp-tab-icon" />
           <span>{fileLabel}</span>
         </span>
+
+        {/* top-right, ahead of the close — where Figma puts Share */}
+        <button
+          type="button"
+          className={`figp-share-btn${shareOpen ? " is-on" : ""}`}
+          onClick={onShare}
+          aria-haspopup="dialog"
+          aria-expanded={shareOpen}
+        >
+          Share
+        </button>
 
         <PageLink className="figp-close" href="/work" aria-label="Close and return to Work">
           <CloseIcon />
@@ -56,6 +75,16 @@ export default function FigmaTabBar({ fileLabel, layersOpen, onToggleLayers }: P
           Layers
         </button>
 
+        <button
+          type="button"
+          className={`figp-share-btn figp-share-btn--m${shareOpen ? " is-on" : ""}`}
+          onClick={onShare}
+          aria-haspopup="dialog"
+          aria-expanded={shareOpen}
+        >
+          Share
+        </button>
+
         <PageLink className="figp-mclose" href="/work" aria-label="Close and return to Work">
           <CloseIcon />
         </PageLink>
@@ -64,18 +93,19 @@ export default function FigmaTabBar({ fileLabel, layersOpen, onToggleLayers }: P
   );
 }
 
+/* The Figma mark, monochrome: the real five-shape geometry on a 38x57 grid
+   (the previous hand-drawn 12x18 version read as a blob at small sizes), but
+   tinted with currentColor so it sits in the chrome rather than shouting in
+   brand colour. The five shapes tile edge-to-edge, so they're separated by
+   opacity — flat single-opacity fill would collapse into one silhouette. */
 function FigmaMark({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 12 18" fill="none" aria-hidden="true">
-      <path
-        d="M4 1a3 3 0 1 0 0 6h2V1H4Z"
-        fill="currentColor"
-        fillOpacity="0.55"
-      />
-      <path d="M6 7H4a3 3 0 1 0 3 3V7Z" fill="currentColor" fillOpacity="0.75" />
-      <path d="M8 1H6v6h2a3 3 0 1 0 0-6Z" fill="currentColor" />
-      <path d="M8 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" fill="currentColor" fillOpacity="0.85" />
-      <path d="M4 10a3 3 0 1 0 3 3v-3H4Z" fill="currentColor" fillOpacity="0.4" />
+    <svg className={className} viewBox="0 0 38 57" fill="none" aria-hidden="true">
+      <path d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0Z" fill="currentColor" fillOpacity="0.9" />
+      <path d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 0 1-19 0Z" fill="currentColor" fillOpacity="0.45" />
+      <path d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19Z" fill="currentColor" fillOpacity="0.72" />
+      <path d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5Z" fill="currentColor" />
+      <path d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5Z" fill="currentColor" fillOpacity="0.6" />
     </svg>
   );
 }

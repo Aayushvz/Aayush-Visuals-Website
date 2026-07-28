@@ -10,6 +10,7 @@ import FigmaLayersPanel from "./FigmaLayersPanel";
 import FigmaPropertiesPanel from "./FigmaPropertiesPanel";
 import FigmaCursorTag from "./FigmaCursorTag";
 import FigmaDock from "./FigmaDock";
+import FigmaShareDialog from "./FigmaShareDialog";
 import CommentPin from "./CommentPin";
 import "./figma-project.css";
 
@@ -24,6 +25,7 @@ const EMAIL = "mailto:aayushrajvz@gmail.com";
 */
 export default function FigmaProjectPage({ project }: { project: Project }) {
   const [layersOpen, setLayersOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     if (!layersOpen) return;
@@ -39,7 +41,14 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     ["Role", project.role],
     ["Category", project.category],
     ["Year", project.year],
+    ...(project.extraFacts ?? []),
   ];
+
+  /* a project with a real gallery shows it; everything else still gets the
+     single cover frame it had before */
+  const shots = project.shots?.length
+    ? project.shots
+    : [{ src: project.cover, alt: project.title, caption: "", wide: true }];
 
   const layers: { icon: "image" | "text" | "component"; name: string }[] = [
     { icon: "image", name: "cover" },
@@ -55,6 +64,13 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
         fileLabel={fileLabel}
         layersOpen={layersOpen}
         onToggleLayers={() => setLayersOpen((v) => !v)}
+        onShare={() => setShareOpen(true)}
+        shareOpen={shareOpen}
+      />
+      <FigmaShareDialog
+        project={project}
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
       />
       <FigmaLayersPanel
         activeId={project.id}
@@ -72,8 +88,12 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
 
       <main className="figp-canvas">
         <article className="figp-page-body">
+          {/* data-figp-node / data-figp-fill let the properties panel report
+              whatever the cursor is over; names match the Layers tree above */}
           <motion.header
             className="figp-head"
+            data-figp-node="summary"
+            data-figp-fill="var(--figp-body-text)"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
@@ -99,7 +119,11 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
             </p>
             <p className="figp-summary">{project.description}</p>
 
-            <dl className="figp-facts">
+            <dl
+              className="figp-facts"
+              data-figp-node="facts"
+              data-figp-fill="var(--figp-fact-value)"
+            >
               {facts.map(([k, v]) => (
                 <div className="figp-fact" key={k}>
                   <dt>{k}</dt>
@@ -127,7 +151,11 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
           </motion.header>
 
           {project.highlights.length > 0 && (
-            <div className="figp-highlights">
+            <div
+              className="figp-highlights"
+              data-figp-node="highlights"
+              data-figp-fill="var(--figp-body-text)"
+            >
               <span className="figp-highlights-label">Highlights</span>
               <ul>
                 {project.highlights.map((h) => (
@@ -138,27 +166,50 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
           )}
 
           <div className="figp-shots">
-            <motion.figure
-              className="figp-shot"
-              initial={{ opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.55, ease: EASE }}
-            >
-              <CommentPin
-                number={2}
-                variant="shot"
-                href={ctaHref}
-                external
-                note={`Built with ${project.tools.join(", ")}`}
-              />
-              <img src={project.cover} alt={project.title} loading="lazy" decoding="async" draggable={false} />
-            </motion.figure>
+            {shots.map((shot, i) => (
+              <motion.figure
+                className={`figp-shot${shot.wide ? "" : " figp-shot--inset"}`}
+                key={shot.src}
+                data-figp-node={shotNodeName(shot.src, i)}
+                data-figp-fill={`image:${shot.src}`}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.55, ease: EASE }}
+              >
+                {/* the pin belongs on the first frame only — one comment per
+                    page, the way a real file would carry it */}
+                {i === 0 && (
+                  <CommentPin
+                    number={2}
+                    variant="shot"
+                    href={ctaHref}
+                    external
+                    note={`Built with ${project.tools.join(", ")}`}
+                  />
+                )}
+                <img
+                  src={shot.src}
+                  alt={shot.alt}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+                {shot.caption && <figcaption>{shot.caption}</figcaption>}
+              </motion.figure>
+            ))}
           </div>
         </article>
       </main>
     </div>
   );
+}
+
+/* layer name for a gallery frame: the file's own basename reads like a real
+   layer ("hero", "brand"), falling back to a numbered frame */
+function shotNodeName(src: string, i: number) {
+  const base = src.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "");
+  return base || `frame ${i + 1}`;
 }
 
 function previewHref(project: Project) {
