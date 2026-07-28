@@ -2444,10 +2444,12 @@ html.has-cursor .cursorRing {
 
 /* pulled up 100vh under the Process panel (which carries a higher z), so
    Process slides away revealing the pinned wallet scene — the parallax.
-   Driver timeline (550vh = 100vh pin base + 450vh scroll span):
-   100vh parallax → 100vh closed-wallet dwell → ~90vh deal → ~175vh exit dwell */
+   Driver timeline (520.83vh = 100vh pin base + 420.83vh scroll span):
+   100vh parallax → 100vh closed-wallet dwell → ~75vh deal → ~145.8vh exit
+   dwell (~2.5 scrolls after the last card lands; one "scroll" ≈ 58.3vh,
+   derived from the original ~175vh/~3-scroll tail) */
 .capabilities--pinned {
-  min-height: 550vh;
+  min-height: 520.83vh;
   margin-top: -100vh;
 }
 

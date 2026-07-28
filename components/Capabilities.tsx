@@ -70,10 +70,11 @@ const CLOSED = [
 ];
 
 /* pin timeline (fractions of the scroll span):
-   - desktop: 550vh driver (450vh span), deal ends ~0.61 -> long calm exit
+   - desktop: 520.83vh driver (420.83vh span), deal ends ~0.653 -> ~145.8vh
+     exit dwell after the 6th card lands (~2.5 scrolls)
    - mobile: shorter 440vh driver (340vh span) AND deal finishes ~0.75, so
      only ~1 viewport of exit dwell after the 6th card lands (was 3-4 swipes) */
-const DEAL_DESKTOP = { start: 0.445, step: 0.0333 };
+const DEAL_DESKTOP = { start: 0.4752, step: 0.0356 };
 const DEAL_MOBILE = { start: 0.46, step: 0.058 };
 
 function countRevealed(p: number, start: number, step: number) {
@@ -106,15 +107,24 @@ export default function Capabilities() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const topZ = useRef(50);
-  const overrideP = useRef(0);
+  const clickTimer = useRef<number | null>(null);
   const reduce = useReducedMotion();
 
   const walletBodyRef = useRef<HTMLSpanElement>(null);
   const [desktop, setDesktop] = useState(true);
+  /* scrollRevealed is the single source of truth for how many cards are
+     out — always a live function of scrollYProgress (see the
+     useMotionValueEvent below), in BOTH scroll directions. There is no
+     separate "override" state that shadows it: the wallet click doesn't
+     fake a different visual state, it moves the *actual* scroll position
+     to where the deal would finish, and this same handler picks that up
+     like any other scroll. That's what makes it reversible for free —
+     scrolling back up naturally decreases scrollRevealed again. */
   const [scrollRevealed, setScrollRevealed] = useState(0);
-  /* tap override: "all" throws every card out, "none" collects them; a
-     real scroll afterwards clears it and resumes the scroll-driven deal */
-  const [override, setOverride] = useState<null | "all" | "none">(null);
+  /* purely cosmetic: which direction the wallet was just clicked, so the
+     cards' stagger delay (below) can tell a click-triggered reveal from a
+     scroll-driven one. Auto-clears; never gates what revealed count is. */
+  const [clickDirection, setClickDirection] = useState<null | "all" | "none">(null);
   /* walletTop: the wallet body's top edge relative to the canvas centre;
      cardH: a card's untransformed height — both drive the tucked-in peeks */
   const [half, setHalf] = useState({ w: 450, h: 260, walletTop: 0, cardH: 0 });
@@ -147,6 +157,12 @@ export default function Capabilities() {
   }, [pinned]);
 
   useEffect(() => {
+    return () => {
+      if (clickTimer.current) window.clearTimeout(clickTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const measure = () => {
@@ -176,24 +192,48 @@ export default function Capabilities() {
     offset: ["start start", "end end"],
   });
   const deal = desktop ? DEAL_DESKTOP : DEAL_MOBILE;
+  // single, always-on, bidirectional mapping from scroll progress to reveal
+  // count — no gating, no "already done" flag. Scrolling up naturally
+  // decreases n again, which is exactly the reverse/collect animation.
   useMotionValueEvent(scrollYProgress, "change", (p) => {
     if (!pinned) return;
-    if (override !== null && Math.abs(p - overrideP.current) > 0.015) {
-      setOverride(null);
-    }
     const n = countRevealed(p, deal.start, deal.step);
     setScrollRevealed((prev) => (prev === n ? prev : n));
   });
 
-  const revealed =
-    override === "all" ? CARDS.length : override === "none" ? 0 : scrollRevealed;
+  const revealed = scrollRevealed;
   const allOut = revealed === CARDS.length;
 
   const onWalletClick = () => {
     if (!pinned) return;
-    overrideP.current = scrollYProgress.get();
-    /* cards still inside -> throw them all; everything out -> collect */
-    setOverride(allOut ? "none" : "all");
+    const sectionEl = sectionRef.current;
+    const revealing = !allOut;
+
+    // cosmetic stagger flag for the transition below, auto-clears once the
+    // click-triggered spring has had time to settle
+    if (clickTimer.current) window.clearTimeout(clickTimer.current);
+    setClickDirection(revealing ? "all" : "none");
+    clickTimer.current = window.setTimeout(() => setClickDirection(null), 900);
+
+    // instant visual feedback — matches exactly what the scroll-position
+    // sync below will settle on, so there's nothing to reconcile later
+    setScrollRevealed(revealing ? CARDS.length : 0);
+
+    // sync the *actual* scroll position to where this reveal state would
+    // naturally live on the timeline. Because the section is pinned, this
+    // is visually seamless (the same pinned canvas fills the viewport
+    // either way) — but it means the next real scroll input picks up
+    // exactly where the click left off, in either direction, instead of
+    // crossing several viewports of "dead" pre-deal scroll distance.
+    if (!sectionEl) return;
+    const rect = sectionEl.getBoundingClientRect();
+    const top = rect.top + window.scrollY;
+    const range = sectionEl.offsetHeight - window.innerHeight;
+    if (range <= 0) return;
+    const targetP = revealing
+      ? Math.min(1, deal.start + (CARDS.length - 1) * deal.step + 0.01)
+      : Math.max(0, deal.start - 0.05);
+    window.scrollTo({ top: top + targetP * range, behavior: "instant" });
   };
 
   /* wallet idle motion: desktop floats; mobile shakes for attention while
@@ -350,7 +390,7 @@ export default function Capabilities() {
                         stiffness: 230,
                         damping: 26,
                         mass: 0.9,
-                        delay: override === "all" ? i * 0.06 : 0,
+                        delay: clickDirection === "all" ? i * 0.06 : 0,
                       }
                 }
                 drag={open && !reduce}
