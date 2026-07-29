@@ -1,8 +1,16 @@
 import SelectedWorks from "./projects/SelectedWorks";
+import PrefetchWorkMedia from "./projects/PrefetchWorkMedia";
+import { PROJECTS } from "./projects/projectData";
 
 export default function ProjectsSection() {
+  /* first row's media — the animated WebP that dominates this section's
+     weight. Read from the same source SelectedWorks renders from so the two
+     can't drift apart. */
+  const firstMedia = PROJECTS[0].bgVideoUrl ?? PROJECTS[0].cover;
+
   return (
     <section className="selWorks" id="work">
+      <PrefetchWorkMedia src={firstMedia} />
       <div className="selWorks__head">
         <div className="selWorks__headLeft">
           <h2 className="display selWorks__title" data-reveal>
