@@ -13,7 +13,7 @@ export const PERSON_NAME = "Aayush Raj";
 export const BRAND_NAME = "Aayush Visuals";
 export const ROLE = "Product Designer & Design Engineer";
 
-export const DEFAULT_TITLE = `${PERSON_NAME} — ${ROLE}`;
+export const DEFAULT_TITLE = `${PERSON_NAME} - ${ROLE}`;
 
 export const DEFAULT_DESCRIPTION =
   "Aayush Raj (Aayush Visuals) is a product designer and design engineer in India, crafting digital products, brand identity, UI/UX and motion for real launches.";

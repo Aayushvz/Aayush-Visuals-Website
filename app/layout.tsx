@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     default: DEFAULT_TITLE,
     /* every child page sets a bare title and inherits this suffix, so the
        name is present in every search result headline */
-    template: `%s — ${PERSON_NAME}`,
+    template: `%s - ${PERSON_NAME}`,
   },
   description: DEFAULT_DESCRIPTION,
   applicationName: BRAND_NAME,

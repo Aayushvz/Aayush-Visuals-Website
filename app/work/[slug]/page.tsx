@@ -17,7 +17,7 @@ export async function generateMetadata({
   const project = PROJECTS.find((p) => p.id === slug);
   if (!project) return {};
 
-  const title = `${project.title} — ${project.category}`;
+  const title = `${project.title} - ${project.category}`;
   /* the summary can run long; search snippets cut around 160 characters */
   const description =
     project.description.length > 160
@@ -30,7 +30,7 @@ export async function generateMetadata({
     alternates: { canonical: `/work/${project.id}` },
     openGraph: {
       type: "article",
-      title: `${project.title} — ${PERSON_NAME}`,
+      title: `${project.title} - ${PERSON_NAME}`,
       description,
       url: `/work/${project.id}`,
       /* the project's own artwork beats the generic card when a case study

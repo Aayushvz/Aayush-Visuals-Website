@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
   /* images repeated on purpose — a child openGraph replaces the parent's */
   openGraph: {
-    title: "Contact — Aayush Raj",
+    title: "Contact - Aayush Raj",
     description,
     url: "/contact",
     images: [OG_IMAGE],
