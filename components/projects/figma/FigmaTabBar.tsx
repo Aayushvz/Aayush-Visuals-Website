@@ -15,6 +15,9 @@ type Props = {
   onToggleLayers: () => void;
   onShare: () => void;
   shareOpen: boolean;
+  /** where closing the file returns to — the listing it was opened from */
+  backHref: string;
+  onBack: () => void;
 };
 
 export default function FigmaTabBar({
@@ -23,6 +26,8 @@ export default function FigmaTabBar({
   onToggleLayers,
   onShare,
   shareOpen,
+  backHref,
+  onBack,
 }: Props) {
   return (
     <>
@@ -48,7 +53,12 @@ export default function FigmaTabBar({
           Share
         </button>
 
-        <PageLink className="figp-close" href="/work" aria-label="Close and return to Work">
+        <PageLink
+          className="figp-close"
+          href={backHref}
+          onClick={onBack}
+          aria-label="Close and return to the project list"
+        >
           <CloseIcon />
         </PageLink>
       </nav>
@@ -85,7 +95,12 @@ export default function FigmaTabBar({
           Share
         </button>
 
-        <PageLink className="figp-mclose" href="/work" aria-label="Close and return to Work">
+        <PageLink
+          className="figp-mclose"
+          href={backHref}
+          onClick={onBack}
+          aria-label="Close and return to the project list"
+        >
           <CloseIcon />
         </PageLink>
       </header>

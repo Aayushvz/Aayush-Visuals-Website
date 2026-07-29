@@ -7,6 +7,7 @@ import Cursor from "@/components/Cursor";
 import Reveals from "@/components/Reveals";
 import Footer from "@/components/Footer";
 import WorksSection from "./WorksSection";
+import CaseStudiesSection from "./CaseStudiesSection";
 import WorkHero from "./WorkHero";
 
 /*
@@ -27,6 +28,7 @@ export default function WorkPageClient() {
       <main>
         <WorkHero />
         <WorksSection />
+        <CaseStudiesSection />
         <Footer />
       </main>
     </>

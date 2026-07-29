@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import PageLink from "@/components/PageLink";
 import { projectCursorProps } from "@/components/projects/ProjectCursor";
+import { saveOrigin } from "@/lib/navOrigin";
 import type { WorkItem } from "./worksData";
 
 /*
@@ -30,6 +31,9 @@ export default function ProjectCard({ item, index }: Props) {
         className="workCard"
         href={`/work/${item.id}`}
         aria-label={`View ${item.title} project`}
+        /* remember this spot so the project's back control returns to the
+           grid rather than replaying the hero above it */
+        onClick={() => saveOrigin("/work")}
         {...projectCursorProps}
       >
         <div className="workCard__header">

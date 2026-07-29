@@ -74,7 +74,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   },
 };
 
-export const WORKS: WorkItem[] = PROJECTS.map((p) => ({
+const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   id: p.id,
   title: p.title,
   year: p.year,
@@ -83,7 +83,18 @@ export const WORKS: WorkItem[] = PROJECTS.map((p) => ({
   thumbnail: p.bgVideoUrl ?? p.cover,
   logo: p.logoUrl,
   wordmark: p.logoText,
-}));
+});
+
+/* Shipped product/brand work — the filterable grid. Case studies are split
+   out so they can't surface through a category chip or a search query. */
+export const WORKS: WorkItem[] = PROJECTS.filter(
+  (p) => p.kind !== "case-study"
+).map(toWorkItem);
+
+/* Long-form process work, listed in its own section below Projects */
+export const CASE_STUDIES: WorkItem[] = PROJECTS.filter(
+  (p) => p.kind === "case-study"
+).map(toWorkItem);
 
 /** shared filter predicate so search + category always agree */
 export function filterWorks(items: WorkItem[], category: string, query: string) {

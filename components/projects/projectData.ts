@@ -17,9 +17,7 @@ export type ProjectPreview =
   | { kind: "video"; src: string; poster?: string; href?: string }
   | { kind: "page"; href: string }; // future: local case-study route
 
-/** one captioned image in a case study's gallery */
-export type ProjectShot = {
-  src: string;
+type ShotBase = {
   /** shown under the image on the case-study page */
   caption: string;
   /** screen-reader description of what the image actually shows */
@@ -28,8 +26,38 @@ export type ProjectShot = {
   wide?: boolean;
 };
 
+/*
+  A shot is either one image, or a tall export sliced into stacked pieces.
+
+  The strip form exists because WebP tops out at 16383px per side: a 22,306px
+  case-study export physically cannot be one file, and a bitmap that tall
+  would be ~125MB of RGBA to decode on the main thread even if it could. The
+  slices carry their own dimensions so the page can reserve the exact box for
+  each before it loads and not twitch as 18 images arrive.
+*/
+export type ProjectShot =
+  | (ShotBase & { src: string })
+  | (ShotBase & {
+      strip: string[];
+      sliceW: number;
+      sliceH: number;
+      /** the export rarely divides evenly, so the final piece is shorter */
+      lastSliceH: number;
+    });
+
+export function isStripShot(
+  shot: ProjectShot
+): shot is ShotBase & { strip: string[]; sliceW: number; sliceH: number; lastSliceH: number } {
+  return "strip" in shot;
+}
+
 export type Project = {
   id: string;
+  /* Long-form process work is listed in its own section on /work rather than
+     the Projects grid. Kept as a flag on the one array instead of a second
+     parallel list, so the two can't drift and /work/[slug], the sitemap and
+     the file-page dock all keep working with no extra wiring. */
+  kind?: "project" | "case-study";
   title: string;
   /** short wordmark shown on the tile until a real logo asset lands */
   logoText: string;
@@ -283,6 +311,53 @@ export const PROJECTS: Project[] = [
       "Unified identity system scaled across print, stage and digital",
       "Signature visual language built around a bold techno-management theme",
       "Website structured to carry the fest's scale without losing clarity",
+    ],
+  },
+  {
+    id: "meal-maestro",
+    kind: "case-study",
+    title: "Meal Maestro",
+    logoText: "Meal Maestro",
+    category: "UI Design",
+    year: "2025",
+    cover: "/projects/meal-maestro/cover.webp",
+    preview: {
+      kind: "website",
+      href: "https://www.behance.net/AAYUSHVISUALS",
+      image: "/projects/meal-maestro/cover.webp",
+    },
+    cta: "View on Behance",
+    role: "UI design",
+    tools: ["Figma"],
+    description:
+      "A meal-planning app built around one idea: the hard part isn’t cooking, it’s deciding. Meal Maestro takes what you like, what you avoid and what’s already in the kitchen, and turns it into a week of recipes and the one grocery list that covers them. Placed third at the GDG Design-a-thon.",
+    extraFacts: [
+      ["Recognition", "3rd — GDG Design-a-thon"],
+      ["Research", "12 interviews · 140 survey responses · 5 weeks"],
+    ],
+    highlights: [
+      "Grounded in primary research — 12 discovery interviews, 140 survey responses and 4 comparison teardowns",
+      "Built on why people abandon meal planning, not on what an app could do",
+      "Full design system: Poppins for display and headings, Open Sans for body",
+    ],
+    shots: [
+      {
+        /* The complete case study, exported at 1400x22306 and sliced into 18
+           pieces — see the note on the strip shot type above for why it
+           cannot ship as a single file. */
+        strip: Array.from(
+          { length: 18 },
+          (_, i) => `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`
+        ),
+        sliceW: 1400,
+        sliceH: 1240,
+        lastSliceH: 1226,
+        wide: true,
+        caption:
+          "The full case study — research with real users, the insights it earned, the design system, and the flows it produced.",
+        alt:
+          "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type — Poppins for display and headings, Open Sans for body — and finally the home, recipe detail, tracker and explore flows.",
+      },
     ],
   },
 ];

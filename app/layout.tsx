@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import Preloader from "@/components/Preloader";
 import PageTransition from "@/components/PageTransition";
 import AnimationBudget from "@/components/AnimationBudget";
+import ScrollRestore from "@/components/ScrollRestore";
 import {
   SITE_URL,
   PERSON_NAME,
@@ -171,6 +172,7 @@ export default function RootLayout({
         <Preloader />
         <PageTransition />
         <AnimationBudget />
+        <ScrollRestore />
         {children}
       </body>
     </html>

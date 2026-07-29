@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import PageLink from "@/components/PageLink";
 import type { Project } from "@/components/projects/projectData";
-import { PROJECTS } from "@/components/projects/projectData";
+import { PROJECTS, isStripShot } from "@/components/projects/projectData";
+import { readOrigin, armRestore, FALLBACK_ORIGIN } from "@/lib/navOrigin";
 import FigmaTabBar from "./FigmaTabBar";
 import FigmaLayersPanel from "./FigmaLayersPanel";
 import FigmaPropertiesPanel from "./FigmaPropertiesPanel";
@@ -26,6 +27,27 @@ const EMAIL = "mailto:aayushrajvz@gmail.com";
 export default function FigmaProjectPage({ project }: { project: Project }) {
   const [layersOpen, setLayersOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  /*
+    Where "back" goes. Resolved after mount, not during render: it comes from
+    sessionStorage, which doesn't exist on the server, and rendering a
+    different href on the client than the server sent would be a hydration
+    mismatch. Until it resolves, the control points at the fallback — which is
+    also exactly what a direct visitor with no recorded origin should get.
+  */
+  const [backHref, setBackHref] = useState(FALLBACK_ORIGIN.path);
+
+  useEffect(() => {
+    const origin = readOrigin();
+    if (origin) setBackHref(origin.path);
+  }, []);
+
+  /* arm the scroll restore as the click happens, so ScrollRestore can apply
+     it once the destination lays out */
+  const onBack = () => {
+    armRestore();
+  };
+
+  const backLabel = backHref === "/" ? "Selected projects" : "Selected work";
 
   useEffect(() => {
     if (!layersOpen) return;
@@ -66,6 +88,8 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
         onToggleLayers={() => setLayersOpen((v) => !v)}
         onShare={() => setShareOpen(true)}
         shareOpen={shareOpen}
+        backHref={backHref}
+        onBack={onBack}
       />
       <FigmaShareDialog
         project={project}
@@ -105,9 +129,9 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               note="Open to new projects — say hello"
             />
 
-            <PageLink className="figp-back" href="/work">
+            <PageLink className="figp-back" href={backHref} onClick={onBack}>
               <ArrowLeftIcon />
-              Selected work
+              {backLabel}
             </PageLink>
 
             <p className="figp-file" aria-hidden="true">
@@ -169,9 +193,12 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
             {shots.map((shot, i) => (
               <motion.figure
                 className={`figp-shot${shot.wide ? "" : " figp-shot--inset"}`}
-                key={shot.src}
-                data-figp-node={shotNodeName(shot.src, i)}
-                data-figp-fill={`image:${shot.src}`}
+                key={isStripShot(shot) ? shot.strip[0] : shot.src}
+                data-figp-node={shotNodeName(
+                  isStripShot(shot) ? shot.strip[0] : shot.src,
+                  i
+                )}
+                data-figp-fill={`image:${isStripShot(shot) ? shot.strip[0] : shot.src}`}
                 initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
@@ -188,13 +215,36 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
                     note={`Built with ${project.tools.join(", ")}`}
                   />
                 )}
-                <img
-                  src={shot.src}
-                  alt={shot.alt}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                />
+
+                {isStripShot(shot) ? (
+                  /* one tall export, stacked back together. width/height on
+                     each slice reserve the exact box up front so the page
+                     doesn't jump as eighteen lazy images land. */
+                  <span className="figp-strip">
+                    {shot.strip.map((src, si) => (
+                      <img
+                        key={src}
+                        src={src}
+                        alt={si === 0 ? shot.alt : ""}
+                        aria-hidden={si === 0 ? undefined : true}
+                        width={shot.sliceW}
+                        height={si === shot.strip.length - 1 ? shot.lastSliceH : shot.sliceH}
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                      />
+                    ))}
+                  </span>
+                ) : (
+                  <img
+                    src={shot.src}
+                    alt={shot.alt}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                )}
+
                 {shot.caption && <figcaption>{shot.caption}</figcaption>}
               </motion.figure>
             ))}

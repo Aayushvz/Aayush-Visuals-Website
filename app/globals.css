@@ -8638,6 +8638,13 @@ html.contact-page-active .themeSwitch {
   color: var(--ink);
 }
 
+/* Case Studies follows Projects directly. The default top padding is sized to
+   clear the hero, which stacked against the previous section's bottom padding
+   would open a ~320px hole between the two lists. */
+.worksSection--cases {
+  padding-top: clamp(24px, 5vh, 64px);
+}
+
 /* --- editorial header --- */
 .worksSection__head {
   display: flex;

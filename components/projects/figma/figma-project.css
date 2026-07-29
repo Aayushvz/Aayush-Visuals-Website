@@ -1133,6 +1133,26 @@ html[data-theme="light"] .figp-lfile img {
   box-shadow: 0 0 0 1px var(--figp-shot-ring);
 }
 
+/* a sliced tall export, reassembled. flex column (not inline images) is the
+   point: inline <img> sit on a text baseline, which leaves a gap under every
+   slice and turns all seventeen seams into visible hairlines. */
+.figp-strip {
+  display: flex;
+  flex-direction: column;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+}
+
+.figp-strip img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* each slice is a full-bleed band; never let one round differently or the
+     seam shows as a notch */
+  border-radius: 0;
+}
+
 .figp-shot figcaption {
   margin-top: 0.9rem;
   font-size: 0.83rem;

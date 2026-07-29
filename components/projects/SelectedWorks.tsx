@@ -1,6 +1,9 @@
+"use client";
+
 import PageLink from "@/components/PageLink";
 import { PROJECTS } from "./projectData";
 import { projectCursorProps } from "./ProjectCursor";
+import { saveOrigin } from "@/lib/navOrigin";
 
 /*
   Selected-works list: numbered rows that alternate full-width and
@@ -34,6 +37,9 @@ export default function SelectedWorks() {
                 data-reveal
                 href={`/work/${p.id}`}
                 aria-label={`View ${p.title} project`}
+                /* remember this spot so the project's back control returns
+                   here, rather than to the top of /work */
+                onClick={() => saveOrigin("/")}
                 {...projectCursorProps}
               >
                 <div className="selWork__frame">
