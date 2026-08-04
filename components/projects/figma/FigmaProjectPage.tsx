@@ -12,6 +12,7 @@ import FigmaPropertiesPanel from "./FigmaPropertiesPanel";
 import FigmaCursorTag from "./FigmaCursorTag";
 import FigmaDock from "./FigmaDock";
 import FigmaShareDialog from "./FigmaShareDialog";
+import FigmaCaseSections from "./FigmaCaseSections";
 import CommentPin from "./CommentPin";
 import "./figma-project.css";
 
@@ -66,17 +67,24 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     ...(project.extraFacts ?? []),
   ];
 
+  /* a long-form project puts its images inside the sections that argue for
+     them, so the flat gallery stands down entirely */
+  const sections = project.sections?.length ? project.sections : null;
+
   /* a project with a real gallery shows it; everything else still gets the
      single cover frame it had before */
   const shots = project.shots?.length
     ? project.shots
     : [{ src: project.cover, alt: project.title, caption: "", wide: true }];
 
-  const layers: { icon: "image" | "text" | "component"; name: string }[] = [
+  /* the Layers tree is the page's table of contents: the fixed blocks every
+     project has, then one row per case-study section in scroll order */
+  const layers: { icon: "image" | "text" | "component" | "frame"; name: string }[] = [
     { icon: "image", name: "cover" },
     { icon: "text", name: "summary" },
     { icon: "component", name: "facts" },
     ...(project.highlights.length ? [{ icon: "component" as const, name: "highlights" }] : []),
+    ...(sections ?? []).map((s) => ({ icon: "frame" as const, name: s.name })),
   ];
 
   return (
@@ -126,7 +134,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               number={1}
               variant="head"
               href={EMAIL}
-              note="Open to new projects — say hello"
+              note="Open to new projects, say hello"
             />
 
             <PageLink className="figp-back" href={backHref} onClick={onBack}>
@@ -189,6 +197,20 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
             </div>
           )}
 
+          {sections ? (
+            <FigmaCaseSections
+              sections={sections}
+              pin={
+                <CommentPin
+                  number={2}
+                  variant="shot"
+                  href={ctaHref}
+                  external
+                  note={`Built with ${project.tools.join(", ")}`}
+                />
+              }
+            />
+          ) : (
           <div className="figp-shots">
             {shots.map((shot, i) => (
               <motion.figure
@@ -249,6 +271,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               </motion.figure>
             ))}
           </div>
+          )}
         </article>
       </main>
     </div>

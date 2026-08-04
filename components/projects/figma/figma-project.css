@@ -1172,6 +1172,553 @@ html[data-theme="light"] .figp-lfile img {
   max-width: 52ch;
 }
 
+/* ============ long-form case study sections ============
+   A run of named frames down the canvas. The measure is deliberately split:
+   the section box runs the full 1100px so figures can breathe, while every
+   text block inside it is capped near 62ch — the same measure the summary
+   uses. Prose that ran the full canvas width would be unreadable and would
+   also stop the images from registering as wider than the argument.
+
+   The small label above each section is Figma's own frame name, sitting
+   above the frame edge (the hairline under it). It costs one line and it is
+   what keeps a page of paragraphs reading as a design file. */
+.figp-sections {
+  margin-top: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.figp-section {
+  position: relative;
+  border-top: 1px solid var(--figp-line);
+  padding-top: 0.55rem;
+}
+
+/* Rhythm between blocks is owned here rather than by each block type. Pairing
+   them individually (prose + stats, stats + prose, numbered + prose …) means
+   every new CaseBlock kind needs N new rules and the one nobody writes is the
+   one that ships flush against its neighbour. One adjacent-sibling rule can't
+   have that gap. The two exceptions are the label and the heading, which
+   introduce what follows them and carry their own tighter spacing. */
+.figp-section > * + * {
+  margin-top: 2.4rem;
+}
+
+/* Text into image needs more air than text into text. A paragraph ending and
+   a frame starting 2.4rem later reads as the image being part of the
+   sentence; the reader needs a beat to switch from reading to looking. */
+.figp-prose + .figp-shot,
+.figp-prose + .figp-gallery-fig,
+.figp-prose + .figp-grid-fig,
+.figp-prose + .figp-flow-fig,
+.figp-numbered + .figp-shot,
+.figp-numbered + .figp-gallery-fig,
+.figp-numbered + .figp-grid-fig,
+.figp-statement + .figp-shot,
+.figp-specs + .figp-shot,
+.figp-stats + .figp-shot {
+  margin-top: 3.6rem;
+}
+
+/* and coming back out of an image into text */
+.figp-shot + .figp-prose,
+.figp-gallery-fig + .figp-prose,
+.figp-grid-fig + .figp-prose,
+.figp-flow-fig + .figp-prose {
+  margin-top: 3.2rem;
+}
+
+.figp-frame-label + *,
+.figp-section-head + * {
+  margin-top: 0;
+}
+
+.figp-frame-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--figp-text-faint);
+  user-select: none;
+  /* pulled above its own frame edge, the way Figma draws a frame name */
+  margin: -1.55rem 0 1.9rem;
+}
+
+.figp-section-head {
+  margin: 0 0 1.4rem;
+  max-width: 24ch;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.5rem, 3.2vw, 2.05rem);
+  line-height: 1.14;
+  letter-spacing: -0.018em;
+  color: var(--figp-ink);
+}
+
+/* ---- prose ---- */
+.figp-prose {
+  max-width: 62ch;
+}
+
+.figp-prose p {
+  margin: 0 0 1.05rem;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--figp-body-text);
+}
+
+.figp-prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* a figure directly after prose belongs to it; the default section gap would
+   read as a new thought */
+.figp-prose + .figp-shot--in-section,
+.figp-prose + .figp-numbered,
+.figp-prose + .figp-stats,
+.figp-prose + .figp-specs {
+  margin-top: 2.4rem;
+}
+
+/* ---- numbered rows ---- */
+.figp-numbered {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 62ch;
+  display: grid;
+  gap: 1.7rem;
+}
+
+.figp-numbered li {
+  display: grid;
+  grid-template-columns: 2.9rem 1fr;
+  align-items: start;
+}
+
+.figp-num {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--figp-accent);
+  padding-top: 0.28em;
+}
+
+.figp-num-body strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.99rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--figp-ink);
+}
+
+.figp-num-body span {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--figp-body-text);
+}
+
+/* ---- stat row ---- */
+.figp-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1.6rem 2rem;
+}
+
+.figp-stat {
+  border-top: 1px solid var(--figp-line);
+  padding-top: 0.85rem;
+}
+
+.figp-stat-value {
+  display: block;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--figp-ink);
+}
+
+.figp-stat-label {
+  display: block;
+  margin-top: 0.55rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+/* ---- the one-line statement ---- */
+.figp-statement {
+  margin: 0;
+  max-width: 34ch;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--figp-accent);
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.32rem, 3.1vw, 1.95rem);
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  color: var(--figp-ink);
+}
+
+.figp-statement + .figp-prose {
+  margin-top: 2.4rem;
+}
+
+/* ---- design-system rows ---- */
+.figp-specs {
+  margin: 0;
+  max-width: 62ch;
+  border-top: 1px solid var(--figp-line);
+}
+
+.figp-spec {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 1.2rem;
+  padding: 0.68rem 0;
+  border-bottom: 1px solid var(--figp-line);
+}
+
+.figp-spec dt {
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+  padding-top: 0.12em;
+}
+
+.figp-spec dd {
+  margin: 0;
+}
+
+.figp-spec-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--figp-fact-value);
+}
+
+.figp-spec-swatch {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 2px;
+  /* the light swatches would vanish on the light canvas without a ring */
+  box-shadow: inset 0 0 0 1px var(--figp-swatch-border);
+}
+
+.figp-spec-note {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+/* ---- a row of phone screens ---- */
+.figp-gallery-fig {
+  margin: 0;
+}
+
+/* 190px is the floor that keeps four phones on one row at this canvas width.
+   Any lower and auto-fit packs a fifth in at ~163px, where the UI inside the
+   screen stops being legible and the frames read as ribbons. */
+.figp-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.figp-gallery-item {
+  display: block;
+}
+
+.figp-gallery-frame {
+  display: block;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+}
+
+.figp-gallery-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* a phone-shaped window, not the whole screen — see the gallery note in
+     projectData. Tied to the column width rather than a fixed height so the
+     crop stays proportional as the row reflows. */
+  aspect-ratio: 9 / 19;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* softens the crop so a cut-off screen reads as deliberate framing rather
+   than a broken image */
+.figp-gallery-frame::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 56px;
+  background: linear-gradient(to top, var(--figp-bg), transparent);
+  pointer-events: none;
+}
+
+.figp-gallery-label {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--figp-text-faint);
+}
+
+.figp-gallery-fig figcaption {
+  margin-top: 1.1rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 54ch;
+}
+
+/* ---- the redrawn user flow ---- */
+.figp-flow-fig {
+  margin: 0;
+}
+
+/* Four fixed columns rather than auto-fit: the step count is known and even,
+   so a fixed grid guarantees full rows. auto-fit produced five columns, which
+   left the fifth step's connector pointing at the end of a row into nothing. */
+.figp-flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  /* the column gap carries the connector, so it has to be wide enough to
+     read as a link between two cards rather than as padding */
+  gap: 1.6rem 1.9rem;
+}
+
+.figp-flow-step {
+  position: relative;
+  padding: 0.85rem 0.9rem 0.95rem;
+  border: 1px solid var(--figp-line);
+  border-radius: 4px;
+  background: var(--figp-panel);
+}
+
+/* the connector: a hairline crossing the column gap into the next card.
+   Drawn from the step's right edge so a row that wraps simply loses it. */
+.figp-flow-step::after {
+  content: "";
+  position: absolute;
+  top: 1.55rem;
+  left: 100%;
+  width: 1.9rem;
+  height: 1px;
+  background: var(--figp-line);
+}
+
+/* end of a row has nothing to its right, and neither does the final step */
+.figp-flow-step:nth-child(4n)::after,
+.figp-flow-step:last-child::after {
+  display: none;
+}
+
+.figp-flow-step--decision {
+  border-color: var(--figp-accent);
+}
+
+.figp-flow-index {
+  display: block;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--figp-text-dim);
+}
+
+.figp-flow-step--decision .figp-flow-index {
+  color: var(--figp-accent);
+}
+
+.figp-flow-label {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--figp-ink);
+}
+
+.figp-flow-sub {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.figp-flow-sub span {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+.figp-flow-fig figcaption {
+  margin-top: 1.1rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 54ch;
+}
+
+/* ---- two desktop screens side by side ---- */
+.figp-grid-fig {
+  margin: 0;
+}
+
+.figp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.figp-grid-item {
+  display: block;
+}
+
+.figp-grid-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+}
+
+.figp-grid-label {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--figp-text-faint);
+}
+
+.figp-grid-fig figcaption {
+  margin-top: 1.1rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 54ch;
+}
+
+/* a lone phone screen. Left-aligned rather than centred so it reads as one
+   more piece of evidence in the column, not a hero moment. */
+.figp-shot--narrow {
+  width: min(300px, 100%);
+}
+
+/* ---- figures inside a section ---- */
+.figp-shot--in-section {
+  margin-top: 2.4rem;
+}
+
+.figp-shot--in-section + .figp-shot--in-section {
+  margin-top: 2.8rem;
+}
+
+.figp-shot--in-section + .figp-prose {
+  margin-top: 2.8rem;
+}
+
+@media (max-width: 720px) {
+  .figp-sections {
+    margin-top: 3rem;
+    gap: 3.4rem;
+  }
+
+  .figp-frame-label {
+    margin-bottom: 1.4rem;
+  }
+
+  .figp-numbered li {
+    grid-template-columns: 2.3rem 1fr;
+  }
+
+  /* one column would stack four phones into a 2800px tower, and two columns
+     shrinks each screen to ~160px. A swipe strip keeps them at a size where
+     the UI is still legible. */
+  .figp-gallery {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    /* bleed to the page edge so the row reads as scrollable */
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    /* No scrollbar. On a touch screen it is a permanent grey line under the
+       screens that nobody can grab; the partially visible next card is the
+       affordance. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .figp-gallery::-webkit-scrollbar {
+    display: none;
+  }
+
+  .figp-gallery-item {
+    /* leaves a sliver of the next screen showing, which is what tells you
+       the row moves */
+    flex: 0 0 66%;
+    scroll-snap-align: center;
+  }
+
+  /* a wide desktop screen at 335px is unreadable, so those scroll too */
+  .figp-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .figp-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .figp-grid-item {
+    flex: 0 0 88%;
+    scroll-snap-align: center;
+  }
+
+  /* one step per row reads as a list; two keeps it feeling like a flow */
+  .figp-flow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1.1rem;
+  }
+
+  .figp-flow-step::after {
+    width: 1.1rem;
+  }
+
+  /* the connector on the right-hand column would point into the page edge */
+  .figp-flow-step:nth-child(2n)::after {
+    display: none;
+  }
+
+  /* at this width the label column would leave the value on a two-word line */
+  .figp-spec {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+}
+
 @media (max-width: 768px) {
   /* extra headroom above the title, reserved for the relocated comment pin
      (see .figp-pin--head below) — an empty stretch of canvas rather than

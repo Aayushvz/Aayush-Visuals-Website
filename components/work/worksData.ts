@@ -91,9 +91,11 @@ export const WORKS: WorkItem[] = PROJECTS.filter(
   (p) => p.kind !== "case-study"
 ).map(toWorkItem);
 
-/* Long-form process work, listed in its own section below Projects */
+/* Long-form process work, listed in its own section below Projects.
+   `alsoCaseStudy` opts a project in here while leaving it in the grid above,
+   for work that is both a shipped product and a deep dive. */
 export const CASE_STUDIES: WorkItem[] = PROJECTS.filter(
-  (p) => p.kind === "case-study"
+  (p) => p.kind === "case-study" || p.alsoCaseStudy
 ).map(toWorkItem);
 
 /** shared filter predicate so search + category always agree */
