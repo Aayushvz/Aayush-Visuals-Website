@@ -34,7 +34,7 @@ export default function FigmaTabBar({
       <nav className="figp-tabbar" aria-label="Open file">
         <PageLink className="figp-home" href="/" aria-label="Aayush Raj — home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/av%20logo%20png.png" alt="Aayush Visuals" draggable={false} />
+          <img src="/logos/av-logo.webp" alt="Aayush Visuals" draggable={false} />
         </PageLink>
 
         <span className="figp-tab" aria-current="page">
@@ -66,7 +66,7 @@ export default function FigmaTabBar({
       <header className="figp-mtop">
         <PageLink className="figp-mmark" href="/" aria-label="Aayush Raj — home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/av%20logo%20png.png" alt="Aayush Visuals" draggable={false} />
+          <img src="/logos/av-logo.webp" alt="Aayush Visuals" draggable={false} />
         </PageLink>
 
         <span className="figp-mfile">

@@ -119,7 +119,7 @@ export default function PageTransition() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         className={`pageWipe__mark${logoVisible ? " pageWipe__mark--visible" : ""}`}
-        src="/logos/av%20logo%20png.png"
+        src="/logos/av-logo.webp"
         alt=""
         draggable={false}
       />

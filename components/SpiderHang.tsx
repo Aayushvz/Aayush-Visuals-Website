@@ -22,11 +22,11 @@ import {
   Only `rotate` is animated (GPU), driven by one MotionValue, so pointer moves
   never trigger React re-renders. Under prefers-reduced-motion it hangs still.
 
-  The figure image is a user-supplied asset at /footer/spiderman.png. If it is
+  The figure image is a user-supplied asset at /footer/spiderman.webp. If it is
   not present yet, a neutral placeholder keeps the mechanism visible.
 */
 
-const ASSET = "/footer/spiderman.png";
+const ASSET = "/footer/spiderman.webp";
 
 export default function SpiderHang() {
   const reduce = useReducedMotion();

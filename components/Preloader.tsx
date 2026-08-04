@@ -202,7 +202,7 @@ export default function Preloader() {
       <div className="preloader__panel preloader__panel--top">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logos/av%20logo%20png.png"
+          src="/logos/av-logo.webp"
           alt="Aayush Visuals"
           draggable={false}
           className={`preloader__logo${brandedClass}`}

@@ -65,7 +65,7 @@ export default function FigmaLayersPanel({ activeId, allProjects, fileLabel, lay
 
       <div className="figp-lfile">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logos/av%20logo%20png.png" alt="" aria-hidden="true" height={13} draggable={false} />
+        <img src="/logos/av-logo.webp" alt="" aria-hidden="true" height={13} draggable={false} />
         <span>aayush &middot; portfolio</span>
       </div>
 
