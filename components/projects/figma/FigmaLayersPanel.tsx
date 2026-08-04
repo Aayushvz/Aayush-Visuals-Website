@@ -2,6 +2,7 @@
 
 import PageLink from "@/components/PageLink";
 import type { Project } from "@/components/projects/projectData";
+import { layerId } from "./FigmaProjectPage";
 
 /*
   The left sidebar: Figma's own Pages list (every case study is a page of
@@ -43,20 +44,44 @@ const ICONS = {
       <path d="M2.5 6.5l2.4 2.4L9.7 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  /* Figma's own show/hide panels glyph: a rounded frame with one side filled */
+  panel: (
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="1.75" y="2.75" width="12.5" height="10.5" rx="1.75" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M6.25 3v10" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M2.4 3.4h3.2v9.2H2.4z" fill="currentColor" fillOpacity="0.55" />
+    </svg>
+  ),
 };
 
 type Layer = { icon: keyof typeof ICONS; name: string };
 
 type Props = {
   activeId: string;
-  allProjects: Project[];
+  /** pages split into Case studies / Projects, in the order they render */
+  pageGroups: { label: string; items: Project[] }[];
   fileLabel: string;
   layers: Layer[];
+  /** the layer whose section is currently on screen */
+  activeLayer: string | null;
+  onSelectLayer: (id: string) => void;
   open: boolean;
   onClose: () => void;
+  /** hides both sidebars and the tab bar (desktop) */
+  onCollapse: () => void;
 };
 
-export default function FigmaLayersPanel({ activeId, allProjects, fileLabel, layers, open, onClose }: Props) {
+export default function FigmaLayersPanel({
+  activeId,
+  pageGroups,
+  fileLabel,
+  layers,
+  activeLayer,
+  onSelectLayer,
+  open,
+  onClose,
+  onCollapse,
+}: Props) {
   return (
     <aside className={`figp-layers${open ? " is-open" : ""}`} id="figp-layers" aria-label="Pages and layers">
       <button type="button" className="figp-grab" onClick={onClose} aria-label="Close layers">
@@ -67,39 +92,75 @@ export default function FigmaLayersPanel({ activeId, allProjects, fileLabel, lay
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logos/av-logo.webp" alt="" aria-hidden="true" height={13} draggable={false} />
         <span>aayush &middot; portfolio</span>
+        <button
+          type="button"
+          className="figp-collapse"
+          onClick={onCollapse}
+          aria-label="Hide panels"
+          title="Hide panels"
+        >
+          {ICONS.panel}
+        </button>
       </div>
 
-      <p className="figp-label">Pages</p>
-      <div className="figp-pages">
-        <PageLink className="figp-page" href="/work" onClick={onClose}>
-          <span className="figp-page-check" />
-          Selected work
-        </PageLink>
-        {allProjects.map((p) => {
-          const current = p.id === activeId;
-          return (
-            <PageLink key={p.id} className={`figp-page${current ? " is-current" : ""}`} href={`/work/${p.id}`} onClick={onClose}>
-              <span className="figp-page-check">{current && ICONS.check}</span>
-              {p.id}
-            </PageLink>
-          );
-        })}
-      </div>
-
-      <div className="figp-div" aria-hidden="true" />
-
-      <p className="figp-label">Layers</p>
-      <div className="figp-tree">
-        <div className="figp-row">
-          <span className="figp-row-glyph">{ICONS.frame}</span>
-          <span className="figp-row-name">{fileLabel}</span>
+      <div className="figp-lscroll">
+        <p className="figp-label">Pages</p>
+        <div className="figp-pages">
+          <PageLink className="figp-page figp-page--index" href="/work" onClick={onClose}>
+            <span className="figp-page-check" />
+            Selected work
+          </PageLink>
         </div>
-        {layers.map((l) => (
-          <div className="figp-row figp-row--child" key={l.name}>
-            <span className="figp-row-glyph">{ICONS[l.icon]}</span>
-            <span className="figp-row-name">{l.name}</span>
+
+        {pageGroups.map((group) => (
+          <div className="figp-pgroup" key={group.label}>
+            <p className="figp-glabel">{group.label}</p>
+            <div className="figp-pages">
+              {group.items.map((p) => {
+                const current = p.id === activeId;
+                return (
+                  <PageLink
+                    key={p.id}
+                    className={`figp-page${current ? " is-current" : ""}`}
+                    href={`/work/${p.id}`}
+                    onClick={onClose}
+                  >
+                    <span className="figp-page-check">{current && ICONS.check}</span>
+                    {p.id}
+                  </PageLink>
+                );
+              })}
+            </div>
           </div>
         ))}
+
+        <div className="figp-div" aria-hidden="true" />
+
+        <p className="figp-label">Layers</p>
+        <div className="figp-tree">
+          <div className="figp-row">
+            <span className="figp-row-glyph">{ICONS.frame}</span>
+            <span className="figp-row-name">{fileLabel}</span>
+          </div>
+          {layers.map((l) => {
+            const id = layerId(l.name);
+            const current = activeLayer === id;
+            return (
+              /* a button, not a link: these move you within the page you are
+                 already on, so there is no href that would mean anything */
+              <button
+                type="button"
+                className={`figp-row figp-row--child figp-row--btn${current ? " is-active" : ""}`}
+                key={l.name}
+                onClick={() => onSelectLayer(id)}
+                aria-current={current ? "true" : undefined}
+              >
+                <span className="figp-row-glyph">{ICONS[l.icon]}</span>
+                <span className="figp-row-name">{l.name}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </aside>
   );

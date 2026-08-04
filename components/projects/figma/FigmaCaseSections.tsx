@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { CaseBlock, ProjectSection, ProjectShot } from "@/components/projects/projectData";
 import { isStripShot } from "@/components/projects/projectData";
 import { dimsFor } from "@/components/projects/imageDims";
+import { layerId } from "./FigmaProjectPage";
 
 /*
   The long-form body of a case study, rendered as a run of named frames on
@@ -37,6 +38,7 @@ export default function FigmaCaseSections({
           className="figp-section"
           key={section.name}
           data-figp-node={section.name}
+          data-figp-layer={layerId(section.name)}
           data-figp-fill="var(--figp-body-text)"
           initial={{ opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}

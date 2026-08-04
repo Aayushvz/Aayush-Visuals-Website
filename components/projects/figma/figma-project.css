@@ -43,6 +43,9 @@
   --figp-shot-ring: rgba(255, 255, 255, 0.09);
   --figp-empty-border: rgba(255, 255, 255, 0.16);
   --figp-grab: #5a5a5a;
+  /* selected layer row, matching Figma's own blue-tinted selection */
+  --figp-row-active: rgba(13, 153, 255, 0.18);
+  --figp-pill-bg: #2c2c2c;
 
   /* Elevation. These were literal rgba(0,0,0,0.35–0.55) at every call site,
      which is right over a #1e1e1e canvas and far too heavy over a light grey
@@ -109,6 +112,10 @@ html[data-theme="light"] .figp-share-backdrop {
   --figp-shot-ring: rgba(0, 0, 0, 0.12);
   --figp-empty-border: rgba(0, 0, 0, 0.18);
   --figp-grab: #c2c2c2;
+  /* the dark value is a translucent blue over #2c2c2c; on white it needs to
+     be lighter or the row reads as a solid selected block */
+  --figp-row-active: rgba(13, 153, 255, 0.12);
+  --figp-pill-bg: #ffffff;
 
   /* light UI elevation: short, soft and low-opacity. A white surface on a
      grey canvas separates by a hairline plus a small shadow, not by depth. */
@@ -167,19 +174,184 @@ html[data-theme="light"] .figp-share-backdrop {
   font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/*
+  ============ chrome on / off ============
+  `data-chrome="off"` on the root hides the tab bar and both sidebars and
+  hands the canvas the full width, with the floating pills taking over the
+  controls. Driven by one attribute rather than a class per element so the
+  whole layout switches in one place and nothing can end up half-collapsed.
+
+  Only meaningful from 769px up: below that the sidebar is already a bottom
+  sheet and the top bar is the mobile one, so there is nothing to collapse.
+*/
 @media (min-width: 769px) {
   .figp {
     padding-top: 44px;
+    --figp-rail-l: 240px;
+    --figp-rail-r: 0px;
   }
+
+  /*
+    The rails change instantly and only the panels animate. Transitioning
+    these margins would relayout the whole document every frame for 280ms,
+    and this document is 29,000px of lazy images — the reflow cost lands
+    exactly on the interaction meant to feel light. Panels sliding out on
+    transform while the canvas snaps reads as one movement anyway.
+  */
   .figp-canvas {
-    margin-left: 240px;
+    margin-left: var(--figp-rail-l);
+    margin-right: var(--figp-rail-r);
+  }
+
+  .figp[data-chrome="off"] {
+    padding-top: 0;
+    --figp-rail-l: 0px;
+    --figp-rail-r: 0px;
+  }
+
+  .figp[data-chrome="off"] .figp-tabbar {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /*
+    The panels slide out on transform and only then stop existing for hit
+    testing and assistive tech. `visibility` is deliberately NOT transitioned
+    — it is a discrete property, and animating it means the panel's real
+    state depends on an animation having run. It is delayed instead: 0s
+    duration, 0.28s delay on the way out, no delay on the way back in.
+  */
+  .figp[data-chrome="off"] .figp-layers,
+  .figp[data-chrome="off"] .figp-props {
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.28s;
+  }
+
+  .figp[data-chrome="off"] .figp-layers {
+    transform: translateX(-100%);
+  }
+
+  .figp[data-chrome="off"] .figp-props {
+    transform: translateX(100%);
+  }
+
+  .figp-layers,
+  .figp-props {
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear;
   }
 }
 
 @media (min-width: 1100px) {
-  .figp-canvas {
-    margin-right: 240px;
+  .figp {
+    --figp-rail-r: 240px;
   }
+}
+
+/* ============ collapsed-state floating pills ============
+   Only ever visible at >=769px with chrome off. Hidden by default rather
+   than mounted conditionally so the toggle is a style change, which keeps
+   the transition running both ways. */
+.figp-pill {
+  position: fixed;
+  top: 12px;
+  z-index: 62;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 6px 0 12px;
+  border: 1px solid var(--figp-panel-line);
+  border-radius: 10px;
+  background: var(--figp-pill-bg);
+  box-shadow: var(--figp-shadow-dock);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--figp-text-strong);
+  user-select: none;
+}
+
+.figp-pill--file {
+  left: 12px;
+}
+
+.figp-pill--actions {
+  right: 12px;
+  padding-left: 6px;
+}
+
+@media (min-width: 769px) {
+  .figp[data-chrome="off"] .figp-pill {
+    display: flex;
+    animation: figp-pill-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes figp-pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp[data-chrome="off"] .figp-pill {
+    animation: none;
+  }
+}
+
+.figp-pill-mark {
+  width: 12px;
+  height: 18px;
+  flex: none;
+  color: var(--figp-text-strong);
+}
+
+.figp-pill-name {
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.figp-pill-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--figp-text-dim);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.figp-pill-btn:hover,
+.figp-pill-btn:focus-visible {
+  background: var(--figp-hover);
+  color: var(--figp-text-strong);
+}
+
+.figp-pill-share {
+  height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--figp-blue-solid, #0b72d4);
+  font: inherit;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.figp-pill-share:hover,
+.figp-pill-share:focus-visible,
+.figp-pill-share.is-on {
+  filter: brightness(1.08);
 }
 
 /* ============ tab bar ============ */
@@ -631,6 +803,76 @@ html[data-theme="light"] .figp-lfile img {
   opacity: 0.9;
 }
 
+.figp-collapse {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--figp-text-dim);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.figp-collapse svg {
+  width: 15px;
+  height: 15px;
+}
+
+.figp-collapse:hover,
+.figp-collapse:focus-visible {
+  background: var(--figp-hover);
+  color: var(--figp-text-strong);
+}
+
+/* The panel scrolls as one column; the file header stays put above it.
+   No visible scrollbar: this is chrome pretending to be an app panel, and a
+   platform scrollbar (with stepper arrows on Windows) breaks the illusion
+   harder than anything else on the page. The list is short and the wheel,
+   trackpad and keyboard all still work. */
+.figp-lscroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.figp-lscroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* ---- page groups ---- */
+.figp-pgroup + .figp-pgroup {
+  margin-top: 2px;
+  padding-top: 8px;
+  /* the divider Figma draws between page groups */
+  border-top: 1px solid var(--figp-border-soft);
+}
+
+.figp-glabel {
+  margin: 0;
+  padding: 8px 16px 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+/* the index row sits above the groups, so it needs its own separation */
+.figp-page--index {
+  margin-bottom: 6px;
+}
+
 .figp-label {
   flex: none;
   padding: 12px 16px 6px;
@@ -694,32 +936,39 @@ html[data-theme="light"] .figp-lfile img {
   height: 11px;
 }
 
+/* the scroll moved up to .figp-lscroll, which now owns pages + layers as one
+   column — two nested scrollers meant the tree could scroll while the pages
+   above it stayed put, which is not how the real panel behaves */
 .figp-tree {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 0 8px 16px;
 }
 
-.figp-tree::-webkit-scrollbar {
-  width: 8px;
+/* a layer row is a jump-to control now, so it needs to look pressable and
+   carry the state of where you actually are */
+.figp-row--btn {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.figp-tree::-webkit-scrollbar-track {
-  background: transparent;
+.figp-row--btn:hover,
+.figp-row--btn:focus-visible {
+  background: var(--figp-hover);
+  color: var(--figp-text-strong);
 }
 
-.figp-tree::-webkit-scrollbar-thumb {
-  border: 2px solid transparent;
-  border-radius: 4px;
-  background: var(--figp-scrollbar);
-  background-clip: padding-box;
+.figp-row--btn.is-active {
+  background: var(--figp-row-active);
+  color: var(--figp-ink);
 }
 
-.figp-tree::-webkit-scrollbar-thumb:hover {
-  background: var(--figp-scrollbar-hover);
-  background-clip: padding-box;
+.figp-row--btn.is-active .figp-row-glyph {
+  opacity: 1;
+  color: var(--figp-accent);
 }
 
 .figp-row {
@@ -828,6 +1077,12 @@ html[data-theme="light"] .figp-lfile img {
   display: none;
 }
 
+.figp-props::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 @media (min-width: 1100px) {
   .figp-props {
     display: block;
@@ -843,6 +1098,9 @@ html[data-theme="light"] .figp-lfile img {
     color: var(--figp-text-mid);
     user-select: none;
     overflow-y: auto;
+    /* same reasoning as .figp-lscroll: no platform scrollbar in app chrome */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 }
 

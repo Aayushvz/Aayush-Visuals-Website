@@ -18,6 +18,12 @@ import "./figma-project.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const EMAIL = "mailto:aayushrajvz@gmail.com";
+const CHROME_KEY = "figp:chrome";
+
+/** layer name -> the id its anchor carries, so both sides can't drift */
+export function layerId(name: string) {
+  return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
 
 /*
   A full page of the "design file": the tab bar, the Pages/Layers sidebar,
@@ -28,6 +34,16 @@ const EMAIL = "mailto:aayushrajvz@gmail.com";
 export default function FigmaProjectPage({ project }: { project: Project }) {
   const [layersOpen, setLayersOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  /*
+    Whether the two sidebars and the tab bar are showing. Starts true on both
+    server and client — reading localStorage during render would either
+    hydrate-mismatch or force everything below into a client-only tree, and
+    the far more common case is a first-time visitor with nothing stored.
+    The effect below corrects it a frame later for people who collapsed it.
+  */
+  const [chromeOn, setChromeOn] = useState(true);
+  /** the layer row to highlight: whichever section is on screen */
+  const [activeLayer, setActiveLayer] = useState<string | null>(null);
   /*
     Where "back" goes. Resolved after mount, not during render: it comes from
     sessionStorage, which doesn't exist on the server, and rendering a
@@ -56,6 +72,73 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     document.addEventListener("keydown", esc);
     return () => document.removeEventListener("keydown", esc);
   }, [layersOpen]);
+
+  /* the collapse survives moving between projects, the way Figma remembers */
+  useEffect(() => {
+    if (localStorage.getItem(CHROME_KEY) === "off") setChromeOn(false);
+  }, []);
+
+  const toggleChrome = () => {
+    setChromeOn((on) => {
+      localStorage.setItem(CHROME_KEY, on ? "off" : "on");
+      return !on;
+    });
+  };
+
+  /*
+    Highlight whichever section is being read. The bottom margin shrinks the
+    observed band to the top third of the viewport: without it, a tall
+    section and the short one after it are both "intersecting" for thousands
+    of pixels and the highlight flickers between them.
+  */
+  useEffect(() => {
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-figp-layer]"));
+    if (!nodes.length) return;
+
+    const visible = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.figpLayer;
+          if (!id) continue;
+          if (entry.isIntersecting) visible.add(id);
+          else visible.delete(id);
+        }
+        /* document order decides, so scrolling into a section's tail doesn't
+           hand the highlight to the one starting below it */
+        const first = nodes.find((n) => n.dataset.figpLayer && visible.has(n.dataset.figpLayer));
+        setActiveLayer(first?.dataset.figpLayer ?? null);
+      },
+      { rootMargin: "-56px 0px -68% 0px" }
+    );
+
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, [project.id]);
+
+  /*
+    Selecting a layer jumps, it does not glide. Two reasons: the page is
+    ~29,000px, so smooth-scrolling from the top to "admin portal" is a
+    ten-second animation nobody asked for, and Figma's own layer selection
+    is instant. "instant" rather than "auto" is load-bearing — this site
+    sets `scroll-behavior: smooth` globally, which "auto" inherits.
+  */
+  const goToLayer = (id: string) => {
+    setLayersOpen(false);
+    /* the cover is the page itself, not an element inside it */
+    if (id === "cover") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    const el = document.querySelector<HTMLElement>(`[data-figp-layer="${CSS.escape(id)}"]`);
+    if (!el) return;
+    /* clear the fixed tab bar, which only occupies space while chrome is on */
+    const offset = chromeOn ? 60 : 24;
+    window.scrollTo({
+      top: el.getBoundingClientRect().top + window.scrollY - offset,
+      behavior: "instant",
+    });
+  };
 
   const fileLabel = `${project.id}.fig`;
   const ctaHref = previewHref(project);
@@ -87,11 +170,30 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     ...(sections ?? []).map((s) => ({ icon: "frame" as const, name: s.name })),
   ];
 
+  /*
+    Pages, grouped the way the /work listing groups them: deep dives first,
+    then the rest. Derived from the same two predicates worksData uses rather
+    than a hand-kept list, so the sidebar can't drift from the real split.
+    A project can be in both arrays (`alsoCaseStudy`), so the projects group
+    subtracts the case studies to avoid listing it twice.
+  */
+  const caseStudies = PROJECTS.filter((p) => p.kind === "case-study" || p.alsoCaseStudy);
+  const caseIds = new Set(caseStudies.map((p) => p.id));
+  const pageGroups = [
+    { label: "Case studies", items: caseStudies },
+    {
+      label: "Projects",
+      items: PROJECTS.filter((p) => p.kind !== "case-study" && !caseIds.has(p.id)),
+    },
+  ].filter((g) => g.items.length > 0);
+
   return (
-    <div className="figp">
+    <div className="figp" data-chrome={chromeOn ? "on" : "off"}>
       <FigmaCursorTag />
       <FigmaTabBar
         fileLabel={fileLabel}
+        chromeOn={chromeOn}
+        onToggleChrome={toggleChrome}
         layersOpen={layersOpen}
         onToggleLayers={() => setLayersOpen((v) => !v)}
         onShare={() => setShareOpen(true)}
@@ -106,11 +208,14 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
       />
       <FigmaLayersPanel
         activeId={project.id}
-        allProjects={PROJECTS}
+        pageGroups={pageGroups}
         fileLabel={fileLabel}
         layers={layers}
+        activeLayer={activeLayer}
+        onSelectLayer={goToLayer}
         open={layersOpen}
         onClose={() => setLayersOpen(false)}
+        onCollapse={toggleChrome}
       />
       <FigmaPropertiesPanel name={fileLabel} width={1440} height={900} fillImage={project.cover} />
 
@@ -125,6 +230,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
           <motion.header
             className="figp-head"
             data-figp-node="summary"
+            data-figp-layer="summary"
             data-figp-fill="var(--figp-body-text)"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -154,6 +260,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
             <dl
               className="figp-facts"
               data-figp-node="facts"
+              data-figp-layer="facts"
               data-figp-fill="var(--figp-fact-value)"
             >
               {facts.map(([k, v]) => (
@@ -186,6 +293,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
             <div
               className="figp-highlights"
               data-figp-node="highlights"
+              data-figp-layer="highlights"
               data-figp-fill="var(--figp-body-text)"
             >
               <span className="figp-highlights-label">Highlights</span>

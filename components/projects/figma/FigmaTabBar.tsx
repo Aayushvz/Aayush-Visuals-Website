@@ -11,6 +11,9 @@ import PageLink from "@/components/PageLink";
 */
 type Props = {
   fileLabel: string;
+  /** false = both sidebars and this bar are hidden, pills take over */
+  chromeOn: boolean;
+  onToggleChrome: () => void;
   layersOpen: boolean;
   onToggleLayers: () => void;
   onShare: () => void;
@@ -22,6 +25,8 @@ type Props = {
 
 export default function FigmaTabBar({
   fileLabel,
+  chromeOn,
+  onToggleChrome,
   layersOpen,
   onToggleLayers,
   onShare,
@@ -104,7 +109,60 @@ export default function FigmaTabBar({
           <CloseIcon />
         </PageLink>
       </header>
+
+      {/*
+        Collapsed state. Figma does not leave a toolbar behind when you hide
+        the panels — it floats a compact file pill top-left and the actions
+        top-right over the canvas, so nothing is lost and the artboard gets
+        the full width. Rendered always and revealed by CSS, so toggling is a
+        style change rather than a mount.
+      */}
+      <div className="figp-pill figp-pill--file">
+        <FigmaMark className="figp-pill-mark" />
+        <span className="figp-pill-name">{fileLabel}</span>
+        <button
+          type="button"
+          className="figp-pill-btn"
+          onClick={onToggleChrome}
+          aria-label="Show panels"
+          aria-expanded={chromeOn}
+          title="Show panels"
+        >
+          <PanelIcon />
+        </button>
+      </div>
+
+      <div className="figp-pill figp-pill--actions">
+        <button
+          type="button"
+          className={`figp-pill-share${shareOpen ? " is-on" : ""}`}
+          onClick={onShare}
+          aria-haspopup="dialog"
+          aria-expanded={shareOpen}
+        >
+          Share
+        </button>
+        <PageLink
+          className="figp-pill-btn"
+          href={backHref}
+          onClick={onBack}
+          aria-label="Close and return to the project list"
+        >
+          <CloseIcon />
+        </PageLink>
+      </div>
     </>
+  );
+}
+
+/* the same glyph the sidebar header uses, so the two controls read as one */
+function PanelIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+      <rect x="1.75" y="2.75" width="12.5" height="10.5" rx="1.75" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M6.25 3v10" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M2.4 3.4h3.2v9.2H2.4z" fill="currentColor" fillOpacity="0.55" />
+    </svg>
   );
 }
 
