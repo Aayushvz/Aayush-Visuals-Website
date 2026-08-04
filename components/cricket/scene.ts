@@ -328,117 +328,238 @@ export function paintBowler(ctx: CanvasRenderingContext2D, s: Scene, t: number) 
 }
 
 /*
-  The batter, over the shoulder. Cropped at the waist by the bottom edge,
-  which is what the camera does in every cricket game and what stops the
-  figure from becoming a full-body doll standing in the middle of the pitch.
-  Sat left of centre so the strip stays visible past them.
+  The batter, over the shoulder, cropped at the thigh by the bottom edge.
 
-  `swing` runs 0 (stance) to 1 (follow through).
+  The swing is four phases rather than one rotation, because a single sweep
+  from A to B reads as a windscreen wiper. A real shot lifts the bat first,
+  accelerates down through the line, then decelerates high over the
+  shoulder, and the head stays still the whole time while the shoulders
+  turn under it. `batAngle` is that shape, and the body rotation is driven
+  off the same number so the two can never desync.
+
+  `swing` runs 0 (stance) to 1 (follow through). `now` drives the idle bat
+  tap, which stops the figure being a statue between deliveries.
 */
-export function paintBatter(ctx: CanvasRenderingContext2D, s: Scene, swing: number) {
+const KIT = {
+  shirt: "#1e5bb8",
+  shirtLit: "#3b82d6",
+  trim: "#ff9933",
+  white: "#f7fafc",
+  skin: "#c98b5e",
+  helmet: "#14315c",
+};
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+function ease(t: number) {
+  const c = Math.max(0, Math.min(1, t));
+  return c * c * (3 - 2 * c);
+}
+
+/* radians from "pointing right"; larger means further behind the body */
+function batAngle(e: number) {
+  if (e < 0.18) return lerp(1.2, 1.85, ease(e / 0.18)); /* backlift */
+  if (e < 0.55) return lerp(1.85, -0.5, ease((e - 0.18) / 0.37)); /* down the line */
+  return lerp(-0.5, -1.75, ease((e - 0.55) / 0.45)); /* high finish */
+}
+
+export function paintBatter(ctx: CanvasRenderingContext2D, s: Scene, swing: number, now: number) {
   const { w, h, cx } = s;
-  /*
-    Scale off width as well as height. Sizing purely by height means a tall
-    narrow phone canvas renders a batter whose helmet is a third of the
-    screen, because the figure grew with the height it had nothing to do
-    with. `u` keeps the figure sane in both orientations.
-  */
+  /* scale off width as well as height: sizing purely by height renders a
+     helmet a third of the screen tall on a narrow phone canvas */
   const u = Math.min(h, w * 1.35);
-  const x = cx - w * 0.105;
-  const headR = u * 0.062;
-  const headY = h * 0.665;
-  const shoulderY = headY + headR * 1.85;
-  const shoulderW = u * 0.08;
+  const x = cx - w * 0.1;
+  const headR = u * 0.053;
+  const shoulderY = h * 0.685;
+  /* neck length is what stops the helmet reading as a ball balanced on a box */
+  const neckY = shoulderY - headR * 0.5;
+  const headY = neckY - headR * 0.95;
+  const shoulderW = u * 0.098;
+  const e = ease(swing);
+  /* between balls the bat taps; during the shot the tap is gone */
+  const tap = swing > 0 ? 0 : Math.sin(now / 260) * u * 0.006;
+  const rot = -0.42 * e; /* shoulders turn through the shot */
+  const padTop = shoulderY + u * 0.15;
 
-  /* contact shadow, so the figure sits on the pitch instead of floating */
+  /* ---- shadow ---- */
   ctx.beginPath();
-  ctx.ellipse(x + u * 0.02, h * 0.985, u * 0.14, u * 0.022, 0, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(24,58,32,0.28)";
+  ctx.ellipse(x + u * 0.03, h * 0.985, u * 0.16, u * 0.026, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(24,58,32,0.3)";
   ctx.fill();
-  const e = swing * swing * (3 - 2 * swing); /* smoothstep, so the bat accelerates */
 
-  /* torso, running off the bottom of the frame */
+  /* ---- pads, outside the rotation so the legs stay planted ---- */
+  const pads: [number, number][] = [
+    [x - shoulderW * 0.78, u * 0.082],
+    [x + shoulderW * 0.1, u * 0.082],
+  ];
+  for (const [px, pw] of pads) {
+    ctx.beginPath();
+    ctx.roundRect(px, padTop, pw, h - padTop + 20, u * 0.016);
+    ctx.fillStyle = KIT.white;
+    ctx.fill();
+    outline(ctx, 3);
+    ctx.strokeStyle = "rgba(26,40,56,0.4)";
+    ctx.lineWidth = 1.6;
+    for (let i = 1; i <= 3; i++) {
+      const sy = padTop + i * u * 0.045;
+      ctx.beginPath();
+      ctx.moveTo(px + 2, sy);
+      ctx.lineTo(px + pw - 2, sy);
+      ctx.stroke();
+    }
+  }
+
+  ctx.save();
+  ctx.translate(x, shoulderY);
+  ctx.rotate(rot);
+  ctx.translate(-x, -shoulderY);
+
+  /* ---- shirt ---- */
+  /* neck, drawn before the shirt so the collar overlaps it */
   ctx.beginPath();
-  ctx.moveTo(x - shoulderW, shoulderY + headR * 0.2);
-  ctx.quadraticCurveTo(x - shoulderW * 1.15, shoulderY - headR * 0.5, x, shoulderY - headR * 0.62);
-  ctx.quadraticCurveTo(x + shoulderW * 1.15, shoulderY - headR * 0.5, x + shoulderW, shoulderY + headR * 0.2);
-  ctx.lineTo(x + shoulderW * 1.1, h + 20);
-  ctx.lineTo(x - shoulderW * 1.1, h + 20);
-  ctx.closePath();
-  ctx.fillStyle = "#f7fafc";
+  ctx.roundRect(x - headR * 0.34, neckY - headR * 0.7, headR * 0.68, headR * 1.1, headR * 0.2);
+  ctx.fillStyle = KIT.skin;
+  ctx.fill();
+  outline(ctx, 3);
+
+  /* Sloped shoulders that taper to the waist. Straight sides read as a
+     barrel; the taper is most of what makes it read as a torso. */
+  const shirtPath = () => {
+    ctx.beginPath();
+    ctx.moveTo(x - shoulderW, shoulderY + headR * 0.15);
+    ctx.quadraticCurveTo(x - shoulderW * 0.92, neckY - headR * 0.1, x - headR * 0.42, neckY - headR * 0.2);
+    ctx.quadraticCurveTo(x, neckY + headR * 0.12, x + headR * 0.42, neckY - headR * 0.2);
+    ctx.quadraticCurveTo(x + shoulderW * 0.92, neckY - headR * 0.1, x + shoulderW, shoulderY + headR * 0.15);
+    ctx.lineTo(x + shoulderW * 0.86, padTop + u * 0.02);
+    ctx.lineTo(x - shoulderW * 0.86, padTop + u * 0.02);
+    ctx.closePath();
+  };
+  shirtPath();
+  ctx.fillStyle = KIT.shirt;
   ctx.fill();
   outline(ctx, 3.5);
 
-  /* shirt number, because a blank back reads as unfinished */
-  ctx.fillStyle = "#12324a";
-  ctx.font = `${Math.round(headR * 1.35)}px var(--ckt-display), Impact, sans-serif`;
+  /* yoke and trim, so the kit reads as a kit rather than a blue box */
+  ctx.save();
+  shirtPath();
+  ctx.clip();
+  ctx.fillStyle = KIT.shirtLit;
+  ctx.fillRect(x - shoulderW * 1.2, neckY - headR * 0.3, shoulderW * 2.4, headR * 0.62);
+  ctx.fillStyle = KIT.trim;
+  ctx.fillRect(x - shoulderW * 1.2, neckY + headR * 0.42, shoulderW * 2.4, u * 0.008);
+  ctx.restore();
+
+  ctx.fillStyle = KIT.white;
+  ctx.font = Math.round(headR * 1.25) + "px var(--ckt-display), Impact, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("07", x, shoulderY + headR * 1.9);
+  ctx.fillText("07", x, shoulderY + u * 0.085);
   ctx.textAlign = "left";
 
-  /* helmet: navy shell, white grille bars at the cheek */
+  /* ---- arm to the grip ---- */
+  const pivotX = x + shoulderW * 0.66;
+  const pivotY = shoulderY + headR * 0.5;
+  const angle = batAngle(e);
+  const reach = u * 0.105;
+  const gripX = pivotX + Math.cos(angle) * reach;
+  const gripY = pivotY + Math.sin(angle) * reach + tap;
+  /*
+    Two segments, not one. A single skin-coloured bar from shoulder to grip
+    is the same width, colour and angle as a bat, and at a glance that is
+    exactly what it reads as. Sleeve to the elbow, forearm to the glove, with
+    the elbow kicked slightly out of the straight line so the arm bends.
+  */
+  const shoulderX = x - shoulderW * 0.55;
+  const elbowX = (shoulderX + gripX) / 2 - (gripY - pivotY) * 0.16;
+  const elbowY = (pivotY + gripY) / 2 + (gripX - shoulderX) * 0.16;
+  limb(ctx, shoulderX, pivotY, elbowX, elbowY, u * 0.032, KIT.shirt);
+  limb(ctx, elbowX, elbowY, gripX, gripY, u * 0.022, KIT.skin);
+  /* cuff, so the sleeve ends somewhere rather than just stopping */
   ctx.beginPath();
-  ctx.arc(x, headY, headR, Math.PI * 0.86, Math.PI * 2.2);
+  ctx.arc(elbowX, elbowY, u * 0.018, 0, Math.PI * 2);
+  ctx.fillStyle = KIT.shirtLit;
+  ctx.fill();
+  outline(ctx, 2.2);
+
+  ctx.restore();
+
+  /* ---- helmet: outside the rotation, because the head stays still ---- */
+  ctx.beginPath();
+  ctx.arc(x, headY, headR, Math.PI * 0.84, Math.PI * 2.22);
   ctx.closePath();
-  ctx.fillStyle = "#1d3557";
+  ctx.fillStyle = KIT.helmet;
   ctx.fill();
   outline(ctx, 3.5);
   ctx.beginPath();
-  ctx.ellipse(x, headY + headR * 0.42, headR * 0.92, headR * 0.42, 0, 0, Math.PI);
-  ctx.fillStyle = "#0f2440";
+  ctx.ellipse(x, headY - headR * 0.52, headR * 1.02, headR * 0.3, 0, Math.PI, Math.PI * 2);
+  ctx.fillStyle = "#0e2447";
+  ctx.fill();
+  outline(ctx, 2.4);
+  ctx.beginPath();
+  ctx.ellipse(x, headY + headR * 0.44, headR * 0.9, headR * 0.42, 0, 0, Math.PI);
+  ctx.fillStyle = "#0b1e3c";
   ctx.fill();
   ctx.strokeStyle = "#cfd8e3";
   ctx.lineWidth = 2;
   for (let i = -1; i <= 1; i++) {
     ctx.beginPath();
-    ctx.moveTo(x - headR * 0.75, headY + headR * 0.42 + i * headR * 0.16);
-    ctx.lineTo(x + headR * 0.75, headY + headR * 0.42 + i * headR * 0.16);
+    ctx.moveTo(x - headR * 0.72, headY + headR * 0.4 + i * headR * 0.17);
+    ctx.lineTo(x + headR * 0.72, headY + headR * 0.4 + i * headR * 0.17);
     ctx.stroke();
   }
 
-  /*
-    Arms and bat rotate together about the shoulder. The stance angle points
-    the blade down behind the body; the follow through carries it up and
-    across, which is where the ball has just gone.
-  */
-  const pivotX = x + shoulderW * 0.75;
-  const pivotY = shoulderY + headR * 0.6;
-  const angle = 1.15 - e * 2.55;
-  const reach = u * 0.1;
-  const gripX = pivotX + Math.cos(angle) * reach;
-  const gripY = pivotY + Math.sin(angle) * reach;
-
-  limb(ctx, x - shoulderW * 0.7, pivotY, gripX, gripY, u * 0.024, "#f0d2b4");
-
+  /* ---- bat, drawn last so it passes in front of the body ---- */
   ctx.save();
   ctx.translate(gripX, gripY);
   ctx.rotate(angle - Math.PI * 0.5);
-  /* handle */
   ctx.beginPath();
-  ctx.roundRect(-u * 0.011, -u * 0.038, u * 0.022, u * 0.07, u * 0.005);
-  ctx.fillStyle = "#3d2b1f";
+  ctx.roundRect(-u * 0.011, -u * 0.042, u * 0.022, u * 0.076, u * 0.005);
+  ctx.fillStyle = "#2f2118";
   ctx.fill();
   outline(ctx, 2.5);
-  /* blade */
+  ctx.strokeStyle = "rgba(255,255,255,0.22)";
+  ctx.lineWidth = 1.4;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(-u * 0.011, -u * 0.03 + i * u * 0.015);
+    ctx.lineTo(u * 0.011, -u * 0.03 + i * u * 0.015);
+    ctx.stroke();
+  }
+  /* blade with a shoulder taper and a face seam */
   ctx.beginPath();
-  ctx.roundRect(-u * 0.024, u * 0.026, u * 0.048, u * 0.155, u * 0.008);
-  ctx.fillStyle = "#e0b072";
+  ctx.moveTo(-u * 0.018, u * 0.03);
+  ctx.lineTo(u * 0.018, u * 0.03);
+  ctx.lineTo(u * 0.026, u * 0.062);
+  ctx.lineTo(u * 0.026, u * 0.176);
+  ctx.quadraticCurveTo(u * 0.026, u * 0.19, u * 0.012, u * 0.19);
+  ctx.lineTo(-u * 0.012, u * 0.19);
+  ctx.quadraticCurveTo(-u * 0.026, u * 0.19, -u * 0.026, u * 0.176);
+  ctx.lineTo(-u * 0.026, u * 0.062);
+  ctx.closePath();
+  ctx.fillStyle = "#e3b478";
   ctx.fill();
   outline(ctx, 3);
   ctx.beginPath();
-  ctx.moveTo(0, u * 0.04);
-  ctx.lineTo(0, u * 0.165);
-  ctx.strokeStyle = "rgba(61,43,31,0.35)";
-  ctx.lineWidth = 1.5;
+  ctx.moveTo(0, u * 0.07);
+  ctx.lineTo(0, u * 0.182);
+  ctx.strokeStyle = "rgba(90,62,38,0.35)";
+  ctx.lineWidth = 1.6;
   ctx.stroke();
+  ctx.fillStyle = KIT.trim;
+  ctx.fillRect(-u * 0.016, u * 0.095, u * 0.032, u * 0.03);
   ctx.restore();
 
-  /* the glove sits on top of the grip so the arm doesn't just end */
-  ctx.beginPath();
-  ctx.arc(gripX, gripY, u * 0.022, 0, Math.PI * 2);
-  ctx.fillStyle = "#f7fafc";
-  ctx.fill();
-  outline(ctx, 2.5);
+  /* ---- gloves on the grip ---- */
+  for (const off of [-0.016, 0.012]) {
+    const gx = gripX + Math.cos(angle - Math.PI * 0.5) * u * off;
+    const gy = gripY + Math.sin(angle - Math.PI * 0.5) * u * off;
+    ctx.beginPath();
+    ctx.arc(gx, gy, u * 0.021, 0, Math.PI * 2);
+    ctx.fillStyle = KIT.white;
+    ctx.fill();
+    outline(ctx, 2.5);
+  }
 }
 
 export function paintFielders(ctx: CanvasRenderingContext2D, s: Scene) {

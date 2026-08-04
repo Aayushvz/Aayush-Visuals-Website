@@ -325,7 +325,7 @@ export default function CricketGame() {
 
       /* the batter eases into the follow through, then holds it */
       if (swingAnimRef.current > 0) swingAnimRef.current = Math.min(1, swingAnimRef.current + 0.11);
-      paintBatter(ctx, scene, swingAnimRef.current);
+      paintBatter(ctx, scene, swingAnimRef.current, now);
       paintAim(ctx, w, batY, cx, aimRef.current, phase === "flight");
       paintForegroundGrass(ctx, scene);
       ctx.restore();
@@ -351,82 +351,60 @@ export default function CricketGame() {
 
   return (
     <div className="ckt">
-      <header className="ckt-top">
-        <PageLink className="ckt-back" href="/">
-          Aayush Visuals
-        </PageLink>
-        <button type="button" className="ckt-mute" onClick={toggleMute} aria-pressed={muted}>
-          {muted ? "Sound off" : "Sound on"}
-        </button>
-      </header>
+      <div className="ckt-stage" ref={stageRef}>
+        <canvas ref={canvasRef} className="ckt-canvas" aria-hidden="true" />
+      </div>
 
-      <div className="ckt-board" role="status" aria-live="polite">
+      <PageLink className="ckt-glass ckt-brand" href="/">
+        Aayush Visuals
+      </PageLink>
+
+      <div className="ckt-glass ckt-board" role="status" aria-live="polite">
         <span className="ckt-score">
           {score}
           <span className="ckt-score-sub">{out ? "-1" : "-0"}</span>
         </span>
-        <span className="ckt-over">
-          {out || phase === "over" ? BALLS : ballIdx + (phase === "idle" ? 0 : 1)}
-          <i>/</i>
-          {BALLS}
+        <span className="ckt-divider" aria-hidden="true" />
+        <span className="ckt-meta">
+          <span className="ckt-meta-label">Balls</span>
+          <span className="ckt-meta-value">
+            {out || phase === "over" ? BALLS : ballIdx + (phase === "idle" ? 0 : 1)}/{BALLS}
+          </span>
         </span>
-        <span className="ckt-bowler">
-          {phase === "idle" ? "One over. Six balls." : `${delivery.label} · ${delivery.bowler}`}
+        <span className="ckt-divider" aria-hidden="true" />
+        <span className="ckt-meta">
+          <span className="ckt-meta-label">Bowling</span>
+          <span className="ckt-meta-value">{phase === "idle" ? "TO COME" : delivery.label}</span>
         </span>
       </div>
 
-      <div className="ckt-stage" ref={stageRef}>
-        <canvas ref={canvasRef} className="ckt-canvas" aria-hidden="true" />
-
-        {phase === "idle" && (
-          <div className="ckt-overlay">
-            <p className="ckt-kicker">Face one over</p>
-            <h1 className="ckt-title">
-              Six balls.
-              <br />
-              One innings.
-            </h1>
-            <p className="ckt-rule">
-              Click, tap or press Space as the ball reaches you. Time it well for runs. Where you
-              aim decides where it goes. Get out and the over ends there.
-            </p>
-            <button type="button" className="ckt-cta" onClick={start}>
-              Take guard
-            </button>
-          </div>
-        )}
-
-        {phase === "over" && (
-          <div className="ckt-overlay ckt-overlay--result">
-            <p className="ckt-kicker">{out ? "Over ended early" : "Over complete"}</p>
-            <h2 className="ckt-title ckt-title--result">{finalVerdict.title}</h2>
-            <p className="ckt-final">
-              {score} <span>off {out ? ballIdx + 1 : BALLS}</span>
-            </p>
-            <p className="ckt-rule">{finalVerdict.note}</p>
-            <div className="ckt-actions">
-              <button type="button" className="ckt-cta" onClick={start}>
-                Bat again
-              </button>
-              <PageLink className="ckt-link" href="/work">
-                See the actual work
-              </PageLink>
-            </div>
-          </div>
-        )}
-
-        {last && phase !== "over" && (
-          <p className={`ckt-shout ckt-shout--${last.contact}`}>
-            {last.contact === "six" && "SIX"}
-            {last.contact === "four" && "FOUR"}
-            {last.contact === "single" && `${last.runs}`}
-            {last.contact === "dot" && "DOT"}
-            {last.contact === "wicket" && "OUT"}
-          </p>
-        )}
+      <div className="ckt-glass ckt-controls">
+        <button
+          type="button"
+          className="ckt-icon"
+          onClick={toggleMute}
+          aria-pressed={muted}
+          aria-label={muted ? "Turn sound on" : "Turn sound off"}
+          title={muted ? "Sound off" : "Sound on"}
+        >
+          {muted ? <MutedIcon /> : <SoundIcon />}
+        </button>
+        <PageLink className="ckt-icon" href="/work" aria-label="Leave the game">
+          <CloseIcon />
+        </PageLink>
       </div>
 
-      <div className="ckt-under">
+      {last && phase !== "over" && (
+        <p className={`ckt-shout ckt-shout--${last.contact}`}>
+          {last.contact === "six" && "SIX"}
+          {last.contact === "four" && "FOUR"}
+          {last.contact === "single" && `${last.runs}`}
+          {last.contact === "dot" && "DOT"}
+          {last.contact === "wicket" && "OUT"}
+        </p>
+      )}
+
+      <div className="ckt-glass ckt-say">
         <p className="ckt-commentary">
           {last
             ? last.commentary
@@ -443,7 +421,11 @@ export default function CricketGame() {
           <p className="ckt-timing">
             <span
               className="ckt-timing-bar"
-              style={{ "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%` } as React.CSSProperties}
+              style={
+                {
+                  "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%`,
+                } as React.CSSProperties
+              }
             >
               <i />
             </span>
@@ -456,16 +438,85 @@ export default function CricketGame() {
             </span>
           </p>
         )}
+      </div>
 
+      <div className="ckt-glass ckt-wheel">
+        <span className="ckt-wheel-label">Wagon wheel</span>
         <Wagon plots={plots} />
       </div>
 
-      <p className="ckt-foot">
-        Built with canvas, Web Audio and no game engine. {reduced ? "Reduced motion is on." : "Arrow keys aim, Space plays."}
+      {phase === "idle" && (
+        <div className="ckt-glass ckt-card">
+          <p className="ckt-kicker">Face one over</p>
+          <h1 className="ckt-title">
+            Six balls.
+            <br />
+            One innings.
+          </h1>
+          <p className="ckt-rule">
+            Click, tap or press Space as the ball reaches you. Time it well for runs, and where
+            you aim decides where it goes. Get out and the over ends there.
+          </p>
+          <div className="ckt-actions">
+            <button type="button" className="ckt-cta" onClick={start}>
+              Take guard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "over" && (
+        <div className="ckt-glass ckt-card">
+          <p className="ckt-kicker">{out ? "Over ended early" : "Over complete"}</p>
+          <h2 className="ckt-title ckt-title--result">{finalVerdict.title}</h2>
+          <p className="ckt-final">
+            {score} <span>off {out ? ballIdx + 1 : BALLS}</span>
+          </p>
+          <p className="ckt-rule">{finalVerdict.note}</p>
+          <div className="ckt-actions">
+            <button type="button" className="ckt-cta" onClick={start}>
+              Bat again
+            </button>
+            <PageLink className="ckt-link" href="/work">
+              See the actual work
+            </PageLink>
+          </div>
+        </div>
+      )}
+
+      <p className="ckt-hint">
+        {reduced ? "Reduced motion is on" : "Arrow keys aim · Space plays the shot"}
       </p>
     </div>
   );
 }
+
+function SoundIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M4 8v4h3l4 3V5L7 8H4Z" fill="currentColor" />
+      <path d="M13.5 7.5a3.5 3.5 0 0 1 0 5M15.8 5.2a6.8 6.8 0 0 1 0 9.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MutedIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M4 8v4h3l4 3V5L7 8H4Z" fill="currentColor" />
+      <path d="M13.5 8l4 4m0-4l-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M5.5 5.5l9 9m0-9l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 
 /* ---------------- wagon wheel ---------------- */
 
