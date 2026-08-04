@@ -5,6 +5,18 @@ import PageLink from "@/components/PageLink";
 import { OVER, clamp, resolveShot, runUpDelay, verdict } from "./engine";
 import type { Delivery, ShotResult } from "./engine";
 import { isMuted, playCrowd, playHit, playRelease, playStumps, setMuted, unlockAudio } from "./sound";
+import {
+  buildScene,
+  paintBatter,
+  paintBowler,
+  paintField,
+  paintFielders,
+  paintForegroundGrass,
+  paintSky,
+  paintStadium,
+  paintStumps,
+} from "./scene";
+import type { Scene } from "./scene";
 import "./cricket.css";
 
 /*
@@ -57,6 +69,10 @@ export default function CricketGame() {
   const shakeRef = useRef(0);
   const rafRef = useRef(0);
   const reducedRef = useRef(false);
+  /* the static world, rebuilt only when the canvas resizes */
+  const sceneRef = useRef<Scene | null>(null);
+  /* 0 = stance, 1 = full follow through; eased toward on contact */
+  const swingAnimRef = useRef(0);
 
   const setPhaseBoth = useCallback((p: Phase) => {
     phaseRef.current = p;
@@ -83,6 +99,7 @@ export default function CricketGame() {
       swungRef.current = false;
       shotRef.current = null;
       trailRef.current = [];
+      swingAnimRef.current = 0;
       setLast(null);
       setBallIdx(index);
       setPhaseBoth("runup");
@@ -140,6 +157,7 @@ export default function CricketGame() {
     if (phaseRef.current !== "flight" || swungRef.current) return;
 
     swungRef.current = true;
+    swingAnimRef.current = 0.0001;
     const delivery = deliveryRef.current;
     const ideal = releaseAtRef.current + delivery.travelMs;
     const offset = performance.now() - ideal;
@@ -253,6 +271,7 @@ export default function CricketGame() {
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      sceneRef.current = buildScene(w, h);
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -260,22 +279,32 @@ export default function CricketGame() {
 
     const draw = (now: number) => {
       rafRef.current = requestAnimationFrame(draw);
+      const scene = sceneRef.current;
+      if (!scene) return;
       const d = deliveryRef.current;
-      const horizon = h * 0.3;
-      const batY = h * 0.82;
-      const cx = w / 2;
+      const phase = phaseRef.current;
+      const horizon = scene.horizon;
+      const batY = h * 0.86;
+      const cx = scene.cx;
 
       ctx.save();
       if (shakeRef.current > 0.01) {
-        const s = shakeRef.current * 7;
+        const s = shakeRef.current * 8;
         ctx.translate((Math.random() - 0.5) * s, (Math.random() - 0.5) * s);
         shakeRef.current *= 0.88;
       }
 
-      paintGround(ctx, w, h, horizon, batY, cx, now);
+      paintSky(ctx, scene, now);
+      paintStadium(ctx, scene);
+      paintField(ctx, scene);
+      paintFielders(ctx, scene);
+      paintStumps(ctx, scene, phase === "resolved" && swungRef.current && trailRef.current.length === 0);
 
-      /* the ball, mid-flight */
-      if (phaseRef.current === "flight" || (phaseRef.current === "resolved" && !shotRef.current)) {
+      /* the bowler only exists between the run-up and release */
+      if (phase === "runup") paintBowler(ctx, scene, 0.5 + Math.sin(now / 120) * 0.25);
+      else if (phase === "flight") paintBowler(ctx, scene, 1);
+
+      if (phase === "flight" || (phase === "resolved" && !shotRef.current)) {
         const p = clamp((now - releaseAtRef.current) / d.travelMs, 0, 1.12);
         const pos = ballAt(p, d, w, h, horizon, batY, cx);
         pushTrail(trailRef.current, pos, reducedRef.current);
@@ -283,19 +312,22 @@ export default function CricketGame() {
         paintBall(ctx, pos);
       }
 
-      /* the ball, struck and on its way */
       if (shotRef.current) {
-        const s = shotRef.current;
-        const t = clamp((now - s.at) / 900, 0, 1);
-        const x = cx + s.dir * w * 0.85 * t;
-        const y = batY - Math.sin(t * Math.PI) * h * (0.35 + s.power * 0.4) - t * h * 0.1;
-        const r = 13 * (1 - t * 0.75);
+        const st = shotRef.current;
+        const t = clamp((now - st.at) / 900, 0, 1);
+        const x = cx + st.dir * w * 0.95 * t;
+        const y = batY - Math.sin(t * Math.PI) * h * (0.4 + st.power * 0.45) - t * h * 0.22;
+        const r = 14 * (1 - t * 0.8);
         pushTrail(trailRef.current, { x, y, r }, reducedRef.current);
         paintTrail(ctx, trailRef.current);
         if (t < 1) paintBall(ctx, { x, y, r });
       }
 
-      paintAim(ctx, w, batY, cx, aimRef.current, phaseRef.current === "flight");
+      /* the batter eases into the follow through, then holds it */
+      if (swingAnimRef.current > 0) swingAnimRef.current = Math.min(1, swingAnimRef.current + 0.11);
+      paintBatter(ctx, scene, swingAnimRef.current);
+      paintAim(ctx, w, batY, cx, aimRef.current, phase === "flight");
+      paintForegroundGrass(ctx, scene);
       ctx.restore();
     };
 
@@ -542,104 +574,4 @@ function paintAim(ctx: CanvasRenderingContext2D, w: number, batY: number, cx: nu
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
-}
-
-function paintGround(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-  horizon: number,
-  batY: number,
-  cx: number,
-  now: number
-) {
-  /* night sky */
-  const sky = ctx.createLinearGradient(0, 0, 0, horizon);
-  sky.addColorStop(0, "#05070c");
-  sky.addColorStop(1, "#0d1520");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, w, horizon);
-
-  /* floodlights, with a slow flicker that never quite repeats */
-  for (const fx of [w * 0.16, w * 0.84]) {
-    const flicker = 0.86 + Math.sin(now / 700 + fx) * 0.05;
-    const g = ctx.createRadialGradient(fx, horizon * 0.18, 0, fx, horizon * 0.18, h * 0.55);
-    g.addColorStop(0, `rgba(226,238,255,${0.2 * flicker})`);
-    g.addColorStop(0.45, "rgba(180,205,255,0.05)");
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h * 0.9);
-  }
-
-  /* outfield */
-  const turf = ctx.createLinearGradient(0, horizon, 0, h);
-  turf.addColorStop(0, "#123021");
-  turf.addColorStop(1, "#0a1c14");
-  ctx.fillStyle = turf;
-  ctx.fillRect(0, horizon, w, h - horizon);
-
-  /* mown stripes, converging so the ground reads as receding */
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, horizon, w, h - horizon);
-  ctx.clip();
-  for (let i = -6; i <= 6; i++) {
-    ctx.beginPath();
-    ctx.moveTo(cx + i * w * 0.035, horizon);
-    ctx.lineTo(cx + i * w * 0.5, h);
-    ctx.lineTo(cx + (i + 0.5) * w * 0.5, h);
-    ctx.lineTo(cx + (i + 0.5) * w * 0.035, horizon);
-    ctx.closePath();
-    ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.018)" : "rgba(0,0,0,0.05)";
-    ctx.fill();
-  }
-  ctx.restore();
-
-  /* the strip */
-  const pitchFarW = w * 0.045;
-  const pitchNearW = w * 0.3;
-  ctx.beginPath();
-  ctx.moveTo(cx - pitchFarW, horizon);
-  ctx.lineTo(cx + pitchFarW, horizon);
-  ctx.lineTo(cx + pitchNearW, h);
-  ctx.lineTo(cx - pitchNearW, h);
-  ctx.closePath();
-  const strip = ctx.createLinearGradient(0, horizon, 0, h);
-  strip.addColorStop(0, "#8a7a56");
-  strip.addColorStop(1, "#b8a273");
-  ctx.fillStyle = strip;
-  ctx.fill();
-
-  /* creases */
-  ctx.strokeStyle = "rgba(255,255,255,0.5)";
-  ctx.lineWidth = 1.4;
-  for (const [t, spread] of [
-    [0.02, pitchFarW * 1.5],
-    [1, pitchNearW * 1.05],
-  ] as const) {
-    const y = horizon + (h - horizon) * t;
-    ctx.beginPath();
-    ctx.moveTo(cx - spread, y);
-    ctx.lineTo(cx + spread, y);
-    ctx.stroke();
-  }
-
-  /* bowler's stumps */
-  ctx.strokeStyle = "rgba(240,235,225,0.85)";
-  ctx.lineWidth = 1.6;
-  for (let i = -1; i <= 1; i++) {
-    const x = cx + i * pitchFarW * 0.32;
-    ctx.beginPath();
-    ctx.moveTo(x, horizon);
-    ctx.lineTo(x, horizon - h * 0.045);
-    ctx.stroke();
-  }
-
-  /* the batter's crease, drawn as the near edge of play */
-  ctx.strokeStyle = "rgba(255,255,255,0.28)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(cx - pitchNearW * 0.8, batY);
-  ctx.lineTo(cx + pitchNearW * 0.8, batY);
-  ctx.stroke();
 }

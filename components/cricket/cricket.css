@@ -1,8 +1,8 @@
 /*
   ============ CRICKET ============
-  A floodlit night, shot like a broadcast rather than drawn like a cartoon.
-  The canvas supplies the world; everything here is the overlay furniture:
-  scoreboard, commentary, timing readout, wagon wheel.
+  A day match, drawn as a flat-colour poster. The canvas supplies the world
+  (sky, stands, crowd, hoardings, outfield, figures); everything here is the
+  overlay furniture: scoreboard, commentary, timing readout, wagon wheel.
 
   This page deliberately does NOT inherit the site's cream and purple system.
   It borrows the typography so it still reads as the same author and nothing
@@ -11,21 +11,26 @@
   without touching anything else.
 */
 .ckt {
-  --ckt-night: #05070c;
-  --ckt-turf: #0a1c14;
-  --ckt-line: rgba(246, 231, 200, 0.16);
-  --ckt-ink: #f6e7c8;
-  --ckt-dim: #9aa7ae;
-  --ckt-ball: #e2452a;
-  --ckt-six: #ffca3a;
-  --ckt-four: #7ee081;
-  --ckt-panel: rgba(8, 12, 18, 0.72);
+  /* A day match, so the page is loud on purpose. The palette is pulled off
+     the canvas scene rather than the site's cream and purple: sponsor-board
+     red and yellow, kit navy, outfield green. */
+  --ckt-night: #0e2a3f;
+  --ckt-turf: #2f8f43;
+  --ckt-line: rgba(255, 255, 255, 0.22);
+  --ckt-ink: #ffffff;
+  --ckt-dim: #a8c6dc;
+  --ckt-ball: #e63946;
+  --ckt-six: #ffd93d;
+  --ckt-four: #4ade80;
+  --ckt-navy: #12324a;
+  --ckt-panel: rgba(9, 30, 46, 0.82);
 
   position: relative;
-  min-height: 100dvh;
+  /* a single screen, always: this is a game, not a document */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.9rem, 2vw, 1.4rem);
+  gap: clamp(0.5rem, 1.4vw, 0.9rem);
   padding: clamp(1rem, 3vw, 1.9rem) clamp(1rem, 4vw, 2.6rem) clamp(1.4rem, 3vw, 2rem);
   background: var(--ckt-night);
   color: var(--ckt-ink);
@@ -35,6 +40,7 @@
 
 /* ---- top bar ---- */
 .ckt-top {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,20 +77,24 @@
 
 /* ---- scoreboard ---- */
 .ckt-board {
+  flex: none;
   display: grid;
   grid-template-columns: auto auto 1fr;
   align-items: baseline;
   gap: clamp(0.8rem, 2.5vw, 1.8rem);
-  padding-bottom: clamp(0.6rem, 1.6vw, 1rem);
-  border-bottom: 1px solid var(--ckt-line);
+  padding: clamp(0.6rem, 1.6vw, 0.9rem) clamp(0.9rem, 2.4vw, 1.4rem);
+  border-radius: 10px;
+  background: var(--ckt-navy);
+  border-bottom: 4px solid var(--ckt-six);
 }
 
 .ckt-score {
-  font-family: var(--font-archivo), var(--font-primary);
+  font-family: var(--ckt-display), var(--font-archivo), Impact, sans-serif;
   font-size: clamp(2.6rem, 8vw, 4.4rem);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 0.85;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
+  color: var(--ckt-six);
   font-variant-numeric: tabular-nums;
 }
 
@@ -95,7 +105,7 @@
 }
 
 .ckt-over {
-  font-family: var(--font-archivo), var(--font-primary);
+  font-family: var(--ckt-display), var(--font-archivo), Impact, sans-serif;
   font-size: clamp(0.95rem, 2.4vw, 1.25rem);
   font-variant-numeric: tabular-nums;
   color: var(--ckt-dim);
@@ -120,7 +130,7 @@
 .ckt-stage {
   position: relative;
   flex: 1;
-  min-height: clamp(340px, 52vh, 620px);
+  min-height: 0;
   border-radius: 10px;
   overflow: hidden;
   background: var(--ckt-turf);
@@ -146,8 +156,8 @@
   gap: 0.9rem;
   padding: clamp(1.2rem, 5vw, 3rem);
   text-align: center;
-  background: linear-gradient(to bottom, rgba(5, 7, 12, 0.82), rgba(5, 7, 12, 0.94));
-  backdrop-filter: blur(2px);
+  background: linear-gradient(to bottom, rgba(9, 30, 46, 0.72), rgba(9, 30, 46, 0.9));
+  backdrop-filter: blur(3px);
 }
 
 .ckt-kicker {
@@ -160,11 +170,12 @@
 
 .ckt-title {
   margin: 0;
-  font-family: var(--font-archivo), var(--font-primary);
-  font-size: clamp(2.1rem, 7vw, 3.6rem);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.035em;
+  font-family: var(--ckt-display), var(--font-archivo), Impact, sans-serif;
+  font-size: clamp(2.4rem, 8vw, 4.2rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
 }
 
 .ckt-title--result {
@@ -173,7 +184,7 @@
 
 .ckt-final {
   margin: 0;
-  font-family: var(--font-archivo), var(--font-primary);
+  font-family: var(--ckt-display), var(--font-archivo), Impact, sans-serif;
   font-size: clamp(2.4rem, 9vw, 4rem);
   font-weight: 700;
   line-height: 1;
@@ -206,23 +217,26 @@
 
 .ckt-cta {
   margin-top: 0.4rem;
-  padding: 0.75rem 1.9rem;
+  padding: 0.8rem 2.2rem;
   border: 0;
   border-radius: 999px;
-  background: var(--ckt-ink);
-  color: #0b1017;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  background: var(--ckt-six);
+  color: #12324a;
+  font-family: var(--ckt-display), var(--font-archivo), Impact, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 0 #c9a418;
   cursor: pointer;
   transition: transform 0.16s ease, background 0.16s ease;
 }
 
 .ckt-cta:hover,
 .ckt-cta:focus-visible {
-  background: var(--ckt-six);
-  transform: translateY(-1px);
+  background: #ffe680;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #c9a418;
 }
 
 .ckt-link {
@@ -247,12 +261,17 @@
   left: 50%;
   margin: 0;
   transform: translateX(-50%);
-  font-family: var(--font-archivo), var(--font-primary);
+  font-family: var(--ckt-shout), var(--ckt-display), Impact, sans-serif;
   font-size: clamp(2.4rem, 11vw, 6rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: 0.01em;
   line-height: 1;
   pointer-events: none;
+  /* the scene underneath is bright and busy, so the shout carries its own
+     contrast rather than relying on whatever it happens to land on */
+  -webkit-text-stroke: 3px #12324a;
+  paint-order: stroke fill;
+  text-shadow: 0 6px 0 rgba(18, 50, 74, 0.35);
   animation: ckt-shout 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -290,11 +309,12 @@
 
 /* ---- under the pitch ---- */
 .ckt-under {
+  flex: none;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: clamp(0.8rem, 3vw, 2rem);
-  min-height: 76px;
+  min-height: 68px;
 }
 
 .ckt-commentary {
