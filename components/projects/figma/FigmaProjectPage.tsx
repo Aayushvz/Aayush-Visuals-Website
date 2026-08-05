@@ -90,12 +90,23 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     survives untouched and the dock toggle still works from here.
   */
   useEffect(() => {
-    const previous = document.documentElement.dataset.theme;
     document.documentElement.dataset.theme = "light";
-    /* restore on the way out, so opening a case study from a dark homepage
-       does not leave the homepage light when you go back */
+    /*
+      On the way out, hand back what the reader actually chose rather than
+      whatever the DOM happened to say when this mounted. Those are not the
+      same value: land on a project by hard load and the pre-paint script has
+      already written "light", so restoring the mount-time reading would
+      carry light back out onto a site that is meant to be dark.
+    */
     return () => {
-      if (previous) document.documentElement.dataset.theme = previous;
+      let stored: string | null = null;
+      try {
+        stored = localStorage.getItem("theme");
+      } catch {
+        /* private mode, or storage denied; the default stands */
+      }
+      document.documentElement.dataset.theme =
+        stored === "light" ? "light" : "dark";
     };
   }, []);
 

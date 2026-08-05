@@ -153,13 +153,20 @@ const jsonLd = {
 /*
   Runs before first paint so the theme never flashes.
 
-  The rest of the site follows a stored choice, then the OS. Case studies
-  always open light regardless of either: the work on those pages is
-  screenshots of light interfaces, and a dark canvas around them fights the
-  thing it exists to present. The dock's toggle still works once you are
-  there — this sets where the page starts, not where it has to stay.
+  The site is dark by default and does not ask the OS. It used to: anyone
+  arriving from a light-set machine landed on a light homepage, which is not
+  the site as designed. A stored choice still wins here — the header toggle
+  would mean nothing otherwise — but absent one, dark is the answer.
+
+  A project page is the exception and opens light every time, stored choice
+  or not: those pages are screenshots of light interfaces, and a dark canvas
+  around them fights the thing they exist to present. Note the trailing
+  slash — this catches /work/<project> and deliberately not the /work index,
+  which is a listing and stays dark with everything else. The dock's toggle
+  still works once you are there; this sets where a page starts, not where
+  it has to stay.
 */
-const themeInit = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}if(location.pathname.indexOf("/work/")===0){t="light";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}})();`;
+const themeInit = `(function(){var d=document.documentElement,p=location.pathname.indexOf("/work/")===0;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark";}d.dataset.theme=p?"light":t;}catch(e){d.dataset.theme=p?"light":"dark";}})();`;
 
 export default function RootLayout({
   children,
