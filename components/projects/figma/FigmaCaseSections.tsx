@@ -193,6 +193,98 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
         </figure>
       );
 
+    case "compare":
+      return (
+        <figure className="figp-compare-fig">
+          <div className="figp-compare">
+            {block.lanes.map((lane) => (
+              <div className={`figp-lane figp-lane--${lane.tone}`} key={lane.label}>
+                <div className="figp-lane-head">
+                  <span className="figp-lane-label">{lane.label}</span>
+                  <span className="figp-lane-count">{lane.steps.length}</span>
+                </div>
+                {lane.note && <p className="figp-lane-note">{lane.note}</p>}
+                <ol className="figp-lane-steps">
+                  {lane.steps.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+          {block.caption && <figcaption>{block.caption}</figcaption>}
+        </figure>
+      );
+
+    case "bars":
+      return (
+        <figure className="figp-bars-fig">
+          <dl className="figp-bars">
+            {block.items.map((b) => (
+              <div className={`figp-bar figp-bar--${b.tone ?? "bad"}`} key={b.label}>
+                <dt>{b.label}</dt>
+                <dd>
+                  {/* the track is the remaining share, so the eye reads the
+                      gap as much as the fill */}
+                  <span className="figp-bar-track">
+                    <span className="figp-bar-fill" style={{ width: `${b.value}%` }} />
+                  </span>
+                  <span className="figp-bar-value">{b.display}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {block.caption && <figcaption>{block.caption}</figcaption>}
+        </figure>
+      );
+
+    case "coverage":
+      return (
+        <figure className="figp-cover-fig">
+          <div
+            className="figp-cover-grid"
+            role="img"
+            aria-label={`${block.filled} of ${block.total}: ${block.label}`}
+          >
+            {Array.from({ length: block.total }, (_, i) => (
+              <span className={`figp-cell${i < block.filled ? " is-on" : ""}`} key={i} />
+            ))}
+          </div>
+          <figcaption>
+            <strong>
+              {block.filled} of {block.total}
+            </strong>{" "}
+            {block.label}
+            {block.note && <span className="figp-cover-note">{block.note}</span>}
+          </figcaption>
+        </figure>
+      );
+
+    case "screens":
+      return (
+        <div className="figp-screens">
+          {block.items.map((item) => (
+            <section className="figp-screen" key={item.src}>
+              <header className="figp-screen-head">
+                <span className="figp-screen-step">{item.step}</span>
+                <h3 className="figp-screen-title">{item.title}</h3>
+                <p className="figp-screen-body">{item.body}</p>
+              </header>
+              <img
+                src={item.src}
+                alt={item.alt}
+                {...dimsFor(item.src)}
+                data-figp-node={shotNodeName(item.src)}
+                data-figp-fill={`image:${item.src}`}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
+            </section>
+          ))}
+        </div>
+      );
+
     case "specs":
       return (
         <dl className="figp-specs">

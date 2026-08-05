@@ -10,6 +10,7 @@ import { PROJECTS } from "@/components/projects/projectData";
 
 export const WORK_CATEGORIES = [
   "All",
+  "Case Study",
   "Product Design",
   "UI/UX",
   "Posters",
@@ -90,22 +91,38 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   },
 };
 
+/* A deep dive is a category you can filter by, not just a section further
+   down the page: someone looking for long-form process work should be able
+   to ask for it from the same control as everything else. Derived from the
+   project flags so the chip can never disagree with the Case Studies list. */
+const isDeepDive = (p: (typeof PROJECTS)[number]) =>
+  p.kind === "case-study" || p.alsoCaseStudy === true;
+
 const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   id: p.id,
   title: p.title,
   year: p.year,
-  categories: TAXONOMY[p.id]?.categories ?? [p.category],
+  categories: [
+    ...(isDeepDive(p) ? ["Case Study"] : []),
+    ...(TAXONOMY[p.id]?.categories ?? [p.category]),
+  ],
   tags: TAXONOMY[p.id]?.tags ?? [],
   thumbnail: p.bgVideoUrl ?? p.cover,
   logo: p.logoUrl,
   wordmark: p.logoText,
 });
 
-/* Shipped product/brand work — the filterable grid. Case studies are split
-   out so they can't surface through a category chip or a search query. */
-export const WORKS: WorkItem[] = PROJECTS.filter(
-  (p) => p.kind !== "case-study"
-).map(toWorkItem);
+/* The filterable grid. Deep dives lead it: they are the work that rewards
+   actually being read, so burying them under whichever project happened to
+   ship last is the wrong default. Order within each group is preserved.
+
+   Projects flagged `kind: "case-study"` still live only in the section
+   below; `alsoCaseStudy` ones appear in both, and carry the "Case Study"
+   chip so the filter can find them here too. */
+export const WORKS: WorkItem[] = [
+  ...PROJECTS.filter((p) => p.kind !== "case-study" && isDeepDive(p)),
+  ...PROJECTS.filter((p) => p.kind !== "case-study" && !isDeepDive(p)),
+].map(toWorkItem);
 
 /* Long-form process work, listed in its own section below Projects.
    `alsoCaseStudy` opts a project in here while leaving it in the grid above,
