@@ -74,6 +74,11 @@
      active Layers toggle) use this deeper shade instead — 4.8:1 with white. */
   --figp-blue-solid: #0b72d4;
   --figp-accent: var(--figp-accent-dark, var(--purple-soft, #a78bfa));
+  /* The brand colour at full strength, theme-invariant. Text uses
+     --figp-accent (which darkens on light for legibility); anything that is
+     a border, ring or fill uses this, so hover feedback stays the real
+     orange instead of the readable compromise. */
+  --figp-accent-solid: var(--figp-accent-solid-set, var(--figp-accent));
 }
 
 /* layout stays on the page root only — the token scope above is shared with
@@ -2411,27 +2416,27 @@ html[data-theme="light"] .figp-lfile img {
   .figp-grid-item:hover img,
   .figp-wire:hover .figp-wire-art,
   .figp-screen img:hover {
-    box-shadow: 0 0 0 1px var(--figp-accent), 0 10px 30px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 0 0 1.5px var(--figp-accent-solid), 0 10px 30px rgba(0, 0, 0, 0.16);
   }
 
   .figp-gallery-item:hover .figp-gallery-frame {
-    box-shadow: 0 0 0 1px var(--figp-accent), 0 10px 26px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 0 0 1.5px var(--figp-accent-solid), 0 10px 26px rgba(0, 0, 0, 0.16);
   }
 
   .figp-wire:hover .figp-wire-art {
-    border-color: var(--figp-accent);
+    border-color: var(--figp-accent-solid);
   }
 
   /* the stat and lane cards lift from a border rather than a shadow: they
      sit on the canvas, not on a surface, so a shadow would float them */
   .figp-stat:hover {
-    border-top-color: var(--figp-accent);
+    border-top-color: var(--figp-accent-solid);
     transform: translateY(-2px);
   }
 
   .figp-lane:hover,
   .figp-flow-step:hover {
-    border-color: var(--figp-accent);
+    border-color: var(--figp-accent-solid);
     transform: translateY(-2px);
   }
 }
@@ -2477,6 +2482,13 @@ html[data-theme="light"] .figp-lfile img {
 
 .figp-grid-item {
   display: block;
+}
+
+/* Reference art rather than a screen to be read. A component sheet at full
+   column width dominates a section it is only illustrating, so it is capped
+   at roughly a fifth of the area it would otherwise take. */
+.figp-grid-item--small {
+  max-width: 200px;
 }
 
 .figp-grid-item img {

@@ -95,7 +95,9 @@ export type CaseBlock =
      width and the supporting ones pair up. */
   | {
       kind: "grid";
-      items: { src: string; alt: string; label?: string }[];
+      /* `small` caps the frame for reference art like a component sheet,
+         which does not need to be read at full width to make its point */
+      items: { src: string; alt: string; label?: string; small?: boolean }[];
       caption?: string;
     }
   /* design-system rows. `swatch` paints a colour chip beside the value. */
@@ -233,7 +235,7 @@ export type Project = {
     and a #ffffff canvas — the light entry is normally a darker shade of
     the same hue.
   */
-  accent?: { dark: string; light: string };
+  accent?: { dark: string; light: string; solid?: string };
 };
 
 export const PROJECTS: Project[] = [
@@ -314,10 +316,12 @@ export const PROJECTS: Project[] = [
     id: "cpgrams",
     /* a shipped government product and a full deep dive, so it belongs in both */
     alsoCaseStudy: true,
-    /* the product's own saffron. #FE6700 clears 4.5:1 on the dark canvas but
-       only manages 3.2:1 on white, so light mode drops to a deeper shade of
-       the same hue rather than tinting the whole page. */
-    accent: { dark: "#FE6700", light: "#C2410C" },
+    /* the product's own orange. #FE700E measures 5.98:1 on the dark canvas
+       but only 2.79:1 on white, so light-mode TEXT drops to a deeper shade
+       of the same hue. `solid` stays the true brand orange in both themes
+       and is used only for hover borders and rings, where the 3:1 UI bar
+       applies rather than the 4.5:1 text bar. */
+    accent: { dark: "#FE700E", light: "#B35709", solid: "#FE700E" },
     title: "CPGRAMS",
     logoText: "CPGRAMS",
     category: "Product Design",
@@ -647,48 +651,24 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "This is the flow a citizen sees once, the first time they ever open the chatbot, and it carries more weight than anything else in the product. Everything after it assumes the person knows they can press a button and speak. Nothing in their experience of government websites has ever suggested that.",
-              "So the tutorial does not describe the interface. It points at it. The screen dims except the one control being discussed, Samadhan Didi stands beside it and says what it does in plain language, and the whole thing can be skipped from the first frame by anyone who does not need it.",
+              "Seen once, the first time a citizen ever opens the chatbot, and it carries more weight than anything else in the product. Everything after it assumes the person knows they can press a button and speak, and nothing in their experience of government websites has ever suggested that.",
             ],
           },
           {
-            kind: "screens",
+            kind: "grid",
             items: [
-              {
-                src: "/projects/cpgrams/demo-01.webp",
-                step: "Demo 01",
-                title: "Arriving with nothing to read",
-                body: "No account, no install. Two ways forward on screen, speaking or typing, instead of a login wall. The rural illustration signals the intended user before a word is read.",
-                alt: "The CPGRAMS chatbot opening screen with a welcome message and the option to register a grievance by speaking or typing.",
-              },
-              {
-                src: "/projects/cpgrams/demo-02.webp",
-                step: "Demo 02",
-                title: "The guide introduces herself",
-                body: "The guide is established before she gives instructions. Coming from a recognisable government figure, the tutorial reads as help rather than a test.",
-                alt: "Samadhan Didi introduced at full height beside the CPGRAMS chatbot interface.",
-              },
-              {
-                src: "/projects/cpgrams/demo-03.webp",
-                step: "Demo 03",
-                title: "Spotlight on one control at a time",
-                body: "Spotlight masking: one control lit at a time, so the instruction can never point ambiguously. This is why the tutorial stays short.",
-                alt: "The CPGRAMS chatbot with the interface dimmed and a single control spotlit during the tutorial.",
-              },
-              {
-                src: "/projects/cpgrams/demo-04.webp",
-                step: "Demo 04",
-                title: "The microphone, explained in one sentence",
-                body: "The primary control gets the plainest instruction. No mention of transcription or accuracy: the promise stays small enough to be believed.",
-                alt: "The CPGRAMS chatbot tutorial spotlighting the microphone with Samadhan Didi explaining to press it and share concerns in a preferred language.",
-              },
-              {
-                src: "/projects/cpgrams/demo-05.webp",
-                step: "Demo 05",
-                title: "Handing over, with an exit",
-                body: "Skip is available from frame one, not just at the end. Onboarding should never tax the confident user to help the uncertain one.",
-                alt: "The final tutorial screen of the CPGRAMS chatbot with a skip tutorial control visible.",
-              },
+              { src: "/projects/cpgrams/demo-01.webp", label: "01 Arrive", alt: "The CPGRAMS chatbot opening screen with a welcome message and the option to speak or type." },
+              { src: "/projects/cpgrams/demo-02.webp", label: "02 Meet the guide", alt: "Samadhan Didi introduced at full height beside the CPGRAMS chatbot interface." },
+              { src: "/projects/cpgrams/demo-03.webp", label: "03 Spotlight", alt: "The CPGRAMS chatbot with the interface dimmed and a single control spotlit during the tutorial." },
+              { src: "/projects/cpgrams/demo-04.webp", label: "04 The microphone", alt: "The tutorial spotlighting the microphone with Samadhan Didi explaining to press it and speak in a preferred language." },
+              { src: "/projects/cpgrams/demo-05.webp", label: "05 Hand over", alt: "The final tutorial screen of the CPGRAMS chatbot with a skip tutorial control visible." },
+            ],
+          },
+          {
+            kind: "prose",
+            body: [
+              "The tutorial does not describe the interface, it points at it. Spotlight masking dims everything except the control under discussion, so an instruction can never point ambiguously and the whole sequence stays short. The microphone gets the plainest sentence in the product: press it and speak in your language. No mention of transcription, supported languages or accuracy, because the promise has to stay small enough to be believed.",
+              "Two decisions carry it. The guide is established before she gives instructions, so the tutorial reads as help rather than a test. And Skip is available from the first frame, not the last, because onboarding should never tax the confident user to reassure the uncertain one.",
             ],
           },
           {
@@ -700,8 +680,12 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/m-demo-4.webp", label: "Microphone", alt: "The phone tutorial spotlighting the microphone button." },
               { src: "/projects/cpgrams/m-demo-5.webp", label: "Hand over", alt: "The final phone tutorial screen with a skip control." },
             ],
-            caption:
-              "The same five beats at 402px. On a phone the mascot drops to a corner presence rather than a full figure, because at this width she would otherwise cover the control she is pointing at.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "On the phone the mascot drops to a corner presence instead of a full figure. At 402px she would otherwise cover the control she is pointing at, which turns the guide into the obstacle.",
+            ],
           },
         ],
       },
@@ -712,97 +696,33 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "For a quarter of the country, reading and writing is the barrier. Voice is not a convenience feature layered on top of this product. It is the accessibility strategy, and the typed flow is the alternative rather than the default.",
-              "Press once, speak, and the system does the rest. Speech-to-text runs through Bhashini across all 22 scheduled languages, the language is detected rather than selected, and the reply comes back spoken as well as written. Filing a grievance becomes about as difficult as making a phone call, which for this audience is the correct level of difficulty.",
+              "For a quarter of the country, reading and writing is the barrier. Voice is not a convenience layered on top of this product, it is the accessibility strategy, and the typed flow is the alternative rather than the default.",
             ],
           },
           {
-            kind: "screens",
+            kind: "grid",
             items: [
-              {
-                src: "/projects/cpgrams/voice-01.webp",
-                step: "Voice 01",
-                title: "One obvious thing to do",
-                body: "One primary affordance, centred and weighted. No language picker or category dropdown, because each is a decision demanded before the citizen has said anything.",
-                alt: "The CPGRAMS voice flow resting state with a large central microphone control.",
-              },
-              {
-                src: "/projects/cpgrams/voice-02.webp",
-                step: "Voice 02",
-                title: "Press to speak",
-                body: "Single press, not press-and-hold. Hold gestures fail for tremor and arthritis, and the 60-plus group files the most grievances here.",
-                alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone.",
-              },
-              {
-                src: "/projects/cpgrams/voice-03.webp",
-                step: "Voice 03",
-                title: "Proof that it is listening",
-                body: "A live waveform, not a static indicator. Without real-time system feedback, an unsure user stops mid-sentence to check it is working.",
-                alt: "The CPGRAMS voice flow recording with a live waveform responding to speech.",
-              },
-              {
-                src: "/projects/cpgrams/voice-04.webp",
-                step: "Voice 04",
-                title: "Their words, kept",
-                body: "The audio persists in the thread rather than being converted and discarded. The citizen can replay exactly what the system is about to act on.",
-                alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player.",
-              },
-              {
-                src: "/projects/cpgrams/voice-05.webp",
-                step: "Voice 05",
-                title: "Transcription, shown not hidden",
-                body: "Transcription shown next to the audio. First point of error recovery, and far cheaper than catching a misheard place name after routing.",
-                alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio.",
-              },
-              {
-                src: "/projects/cpgrams/voice-06.webp",
-                step: "Voice 06",
-                title: "Language detected, not requested",
-                body: "Language detected, not selected. A picker is a reading test given to people who may not read, and the same trap as the ministry dropdown.",
-                alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface.",
-              },
-              {
-                src: "/projects/cpgrams/voice-07.webp",
-                step: "Voice 07",
-                title: "Answered out loud",
-                body: "Output parity with input. Voice in, text-only out abandons the user at the reply, which is the half carrying the answer.",
-                alt: "Samadhan Didi responding in the CPGRAMS chat with both written text and a voice response player.",
-              },
-              {
-                src: "/projects/cpgrams/voice-08.webp",
-                step: "Voice 08",
-                title: "Filling the gaps by asking, one at a time",
-                body: "Progressive disclosure. The fifteen-field form broken into single questions, asked only where a human answer is genuinely required.",
-                alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance.",
-              },
-              {
-                src: "/projects/cpgrams/voice-09.webp",
-                step: "Voice 09",
-                title: "The form, filled without being seen",
-                body: "Ministry, category, location and urgency inferred from speech. The dropdown that stops most people at the portal never appears.",
-                alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint.",
-              },
-              {
-                src: "/projects/cpgrams/voice-10.webp",
-                step: "Voice 10",
-                title: "Read back before it counts",
-                body: "The consent surface. Interpretation, detected state and category shown before anything is committed, because auto-filing a legal document unseen is a liability with the citizen's name on it.",
-                alt: "The CPGRAMS pre-submission review card showing the interpreted grievance, a detected state tag and a submit control.",
-              },
-              {
-                src: "/projects/cpgrams/voice-11.webp",
-                step: "Voice 11",
-                title: "A way out when the routing is wrong",
-                body: "One-tap escalation when routing is wrong. The system is allowed to be wrong; it is not allowed to be wrong with no exit.",
-                alt: "The CPGRAMS review card with a link to register with the Central Authority if the state categorisation is incorrect.",
-              },
-              {
-                src: "/projects/cpgrams/voice-12.webp",
-                step: "Voice 12",
-                title: "Submitted, and traceable",
-                body: "The registration ID starts the statutory clock and is the only thing worth keeping, so it persists in the thread rather than a dismissible toast.",
-                alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier.",
-              },
+              { src: "/projects/cpgrams/voice-01.webp", label: "01 Rest", alt: "The CPGRAMS voice flow resting state with a large central microphone control." },
+              { src: "/projects/cpgrams/voice-02.webp", label: "02 Press to speak", alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone." },
+              { src: "/projects/cpgrams/voice-03.webp", label: "03 Listening", alt: "The CPGRAMS voice flow recording with a live waveform responding to speech." },
+              { src: "/projects/cpgrams/voice-04.webp", label: "04 Audio kept", alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player." },
+              { src: "/projects/cpgrams/voice-05.webp", label: "05 Transcribed", alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio." },
+              { src: "/projects/cpgrams/voice-06.webp", label: "06 Language detected", alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface." },
+              { src: "/projects/cpgrams/voice-07.webp", label: "07 Answered aloud", alt: "Samadhan Didi responding with both written text and a voice response player." },
+              { src: "/projects/cpgrams/voice-08.webp", label: "08 One question", alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance." },
+              { src: "/projects/cpgrams/voice-09.webp", label: "09 Auto-filled", alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint." },
+              { src: "/projects/cpgrams/voice-10.webp", label: "10 Review", alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control." },
+              { src: "/projects/cpgrams/voice-11.webp", label: "11 Escalate", alt: "The CPGRAMS review card with a link to register with the Central Authority." },
+              { src: "/projects/cpgrams/voice-12.webp", label: "12 Filed", alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier." },
+            ],
+          },
+          {
+            kind: "prose",
+            body: [
+              "The resting state gives the microphone the centre and the weight, with no language picker and no category dropdown, because each of those is a decision demanded before the citizen has said anything. A single press starts recording rather than press-and-hold, which fails for tremor and arthritis in exactly the age group that files the most grievances here. A live waveform proves the system is listening: without real-time feedback an unsure speaker stops mid-sentence to check it is working.",
+              "The audio then persists in the thread instead of being converted and discarded, with the transcription beside it. That pairing is the first point of error recovery, and catching a misheard place name here costs nothing compared to catching it after the grievance has been routed. Language is detected rather than selected, because a picker is a reading test given to people who may not read.",
+              "From there the system infers ministry, category, jurisdiction and urgency, and asks single questions only where a human answer is genuinely required. Every reply is playable as well as readable: voice in with text-only out abandons the user at the half that carries the answer.",
+              "The review screen is the one the whole flow exists to reach. Interpretation, detected state and category are shown before anything is committed, because auto-filing a legal document unseen is a liability with the citizen's name on it. When the routing is wrong, escalation to the Central Authority is one tap. The system is allowed to be wrong; it is not allowed to be wrong with no exit.",
             ],
           },
           {
@@ -813,10 +733,14 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/m-voice-5.webp", label: "Transcribed", alt: "CPGRAMS phone screen showing transcribed speech." },
               { src: "/projects/cpgrams/m-voice-7.webp", label: "Answered", alt: "CPGRAMS phone screen with a spoken response player." },
               { src: "/projects/cpgrams/m-voice-9.webp", label: "Review", alt: "CPGRAMS review screen on a phone before submission." },
-              { src: "/projects/cpgrams/m-voice-10.webp", label: "Submitted", alt: "CPGRAMS phone confirmation screen with a registration identifier." },
+              { src: "/projects/cpgrams/m-voice-10.webp", label: "Filed", alt: "CPGRAMS phone confirmation screen with a registration identifier." },
             ],
-            caption:
-              "Voice matters more on the phone, not less. This is the device the low-literacy user actually owns, often on 2G or 3G, so the microphone stays in thumb reach and the review card takes the full screen rather than sitting below a fold.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "Voice matters more on the phone, not less. This is the device the low-literacy user actually owns, often on 2G, so the microphone stays inside thumb reach and the review card takes the full screen rather than sitting below a fold.",
+            ],
           },
         ],
       },
@@ -827,104 +751,33 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Voice is the priority, not the requirement. Plenty of citizens can type and would rather, and speaking a complaint out loud is not always possible in a shared house, an office, or a queue.",
-              "The typed path reaches the same destination through the same architecture. Describe it in plain language, let the system infer the classification, review before submitting. It is a conversation, never a form, and the difference from the portal is that the burden of knowing how government is organised never moves onto the person typing.",
+              "Voice is the priority, not the requirement. Plenty of citizens can type and would rather, and speaking a complaint aloud is not always possible in a shared house, an office or a queue.",
             ],
           },
           {
-            kind: "screens",
+            kind: "grid",
             items: [
-              {
-                src: "/projects/cpgrams/text-01.webp",
-                step: "Text 01",
-                title: "An empty field and a prompt",
-                body: "Input focused, nothing else required. The first thing asked has to be something the citizen can actually answer.",
-                alt: "The CPGRAMS text flow opening screen with the message input ready.",
-              },
-              {
-                src: "/projects/cpgrams/text-02.webp",
-                step: "Text 02",
-                title: "The complaint in their own words",
-                body: "Plain language, no required structure. Everything the portal demanded up front is extracted from this one sentence.",
-                alt: "A typed grievance in the CPGRAMS chat written in plain conversational language.",
-              },
-              {
-                src: "/projects/cpgrams/text-03.webp",
-                step: "Text 03",
-                title: "Understood and acknowledged",
-                body: "The reply restates the problem first. Earliest and cheapest error recovery, and it signals comprehension rather than keyword matching.",
-                alt: "The CPGRAMS chatbot restating the citizen's grievance back to them.",
-              },
-              {
-                src: "/projects/cpgrams/text-04.webp",
-                step: "Text 04",
-                title: "One question at a time",
-                body: "Sequential questions, not a block of fields. The form still gets filled, it just never appears as a form.",
-                alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow.",
-              },
-              {
-                src: "/projects/cpgrams/text-05.webp",
-                step: "Text 05",
-                title: "Answering with structure when structure helps",
-                body: "Closed sets get options, not an open field. Free text is the right default until it forces recall of an exact scheme name.",
-                alt: "The CPGRAMS chatbot offering selectable options for a question with a closed set of answers.",
-              },
-              {
-                src: "/projects/cpgrams/text-06.webp",
-                step: "Text 06",
-                title: "Documents, when they are needed",
-                body: "Attachments requested at the point of relevance. On the portal an unmet document requirement at step two ends the session.",
-                alt: "The CPGRAMS chatbot requesting a supporting document within the conversation.",
-              },
-              {
-                src: "/projects/cpgrams/text-07.webp",
-                step: "Text 07",
-                title: "History that survives the session",
-                body: "Conversations persist. The portal loses everything to a session timeout, which on a 2G connection is routine rather than rare.",
-                alt: "The CPGRAMS chat with recent conversations listed in the left sidebar.",
-              },
-              {
-                src: "/projects/cpgrams/text-08.webp",
-                step: "Text 08",
-                title: "Classification, done quietly",
-                body: "Classification resolved from the conversation. The highest-friction field on the portal, moved off the citizen and onto the system that owns the taxonomy.",
-                alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance.",
-              },
-              {
-                src: "/projects/cpgrams/text-09.webp",
-                step: "Text 09",
-                title: "Location and jurisdiction",
-                body: "Jurisdiction inferred, then shown. Wrong-state routing is the failure most likely to burn the statutory clock unnoticed.",
-                alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance.",
-              },
-              {
-                src: "/projects/cpgrams/text-10.webp",
-                step: "Text 10",
-                title: "The complete picture, assembled",
-                body: "Everything gathered is assembled into one object: complaint, classification, jurisdiction, attachments. Seen whole for the first time.",
-                alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details.",
-              },
-              {
-                src: "/projects/cpgrams/text-11.webp",
-                step: "Text 11",
-                title: "Read it back",
-                body: "Same review gate as the voice flow. Nothing becomes a legal submission unseen.",
-                alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance before submission.",
-              },
-              {
-                src: "/projects/cpgrams/text-12.webp",
-                step: "Text 12",
-                title: "Submit, or escalate",
-                body: "Primary, secondary and escalation, ranked by weight. Three outcomes, all reversible except the one explicitly chosen.",
-                alt: "The CPGRAMS review card with submit grievance, new chat and a central authority escalation link.",
-              },
-              {
-                src: "/projects/cpgrams/text-13.webp",
-                step: "Text 13",
-                title: "Filed, with a number",
-                body: "Filed. From here it sits in the same machinery, with the same clock, as one filed by a lawyer on a desktop.",
-                alt: "The CPGRAMS confirmation screen with a grievance registration identifier.",
-              },
+              { src: "/projects/cpgrams/text-01.webp", label: "01 Open", alt: "The CPGRAMS text flow opening screen with the message input ready." },
+              { src: "/projects/cpgrams/text-02.webp", label: "02 Describe", alt: "A typed grievance in the CPGRAMS chat written in plain conversational language." },
+              { src: "/projects/cpgrams/text-03.webp", label: "03 Acknowledged", alt: "The CPGRAMS chatbot restating the citizen's grievance back to them." },
+              { src: "/projects/cpgrams/text-04.webp", label: "04 One question", alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow." },
+              { src: "/projects/cpgrams/text-05.webp", label: "05 Options", alt: "The CPGRAMS chatbot offering selectable options for a closed-set question." },
+              { src: "/projects/cpgrams/text-06.webp", label: "06 Documents", alt: "The CPGRAMS chatbot requesting a supporting document within the conversation." },
+              { src: "/projects/cpgrams/text-07.webp", label: "07 History", alt: "The CPGRAMS chat with recent conversations listed in the left sidebar." },
+              { src: "/projects/cpgrams/text-08.webp", label: "08 Classified", alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance." },
+              { src: "/projects/cpgrams/text-09.webp", label: "09 Jurisdiction", alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance." },
+              { src: "/projects/cpgrams/text-10.webp", label: "10 Assembled", alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details." },
+              { src: "/projects/cpgrams/text-11.webp", label: "11 Review", alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance." },
+              { src: "/projects/cpgrams/text-12.webp", label: "12 Submit", alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link." },
+              { src: "/projects/cpgrams/text-13.webp", label: "13 Filed", alt: "The CPGRAMS confirmation screen with a grievance registration identifier." },
+            ],
+          },
+          {
+            kind: "prose",
+            body: [
+              "It opens with the input focused and nothing else required, because the first thing asked has to be something the citizen can actually answer. The grievance is typed in plain language with no structure imposed, and everything the portal demanded up front gets extracted from that one sentence instead.",
+              "The reply restates the problem before acting on it. That is the earliest and cheapest error recovery available, and it signals comprehension rather than keyword matching. Missing details arrive as sequential questions rather than a block of fields, so the fifteen-field form still gets filled but never appears as a form. Closed sets get options instead of an open field, and attachments are requested at the point of relevance rather than listed as a barrier at the start.",
+              "Conversations persist in the left rail. The portal loses everything to a session timeout, which on a 2G connection is routine rather than rare, and a half-written grievance lost is usually that grievance lost for good. Classification and jurisdiction are resolved quietly from the conversation, then shown at review, and the flow ends at the same consent surface as voice.",
             ],
           },
           {
@@ -937,8 +790,12 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/m-text-7.webp", label: "Review", alt: "The CPGRAMS review card on a phone." },
               { src: "/projects/cpgrams/m-text-8.webp", label: "Filed", alt: "The CPGRAMS confirmation screen on a phone." },
             ],
-            caption:
-              "On a phone the review card becomes a full screen. It is the one moment in the product where something below the fold would be a genuine failure rather than an inconvenience.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "On the phone the review card becomes a full screen. It is the one moment in the product where something below the fold would be a real failure rather than an inconvenience.",
+            ],
           },
         ],
       },
@@ -1010,11 +867,13 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cpgrams/components-1.webp",
+                small: true,
                 label: "Message and input components",
                 alt: "A Figma component set for the CPGRAMS chatbot showing message bubble and input variants.",
               },
               {
                 src: "/projects/cpgrams/components-2.webp",
+                small: true,
                 label: "State variants",
                 alt: "A Figma component set showing state variants for the CPGRAMS chatbot controls.",
               },

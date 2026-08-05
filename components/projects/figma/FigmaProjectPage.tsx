@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import PageLink from "@/components/PageLink";
 import type { Project } from "@/components/projects/projectData";
@@ -78,12 +78,43 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     if (localStorage.getItem(CHROME_KEY) === "off") setChromeOn(false);
   }, []);
 
+  /* set once the reader takes control of the collapse, so the auto-collapse
+     below never overrides a deliberate choice */
+  const chromeTouchedRef = useRef(false);
+
   const toggleChrome = () => {
+    chromeTouchedRef.current = true;
     setChromeOn((on) => {
       localStorage.setItem(CHROME_KEY, on ? "off" : "on");
       return !on;
     });
   };
+
+  /*
+    The panels are useful for orienting yourself and useless while reading.
+    Once scrolling starts they retract to the floating pills on their own,
+    handing the full width to the work.
+
+    Deliberately one-way and one-time: it fires once, only downward, and
+    never again after the reader has touched the control themselves. A
+    chrome that collapsed and expanded as you scrolled up and down would be
+    the page arguing with you.
+  */
+  useEffect(() => {
+    if (!chromeOn || chromeTouchedRef.current) return;
+    /* below the mobile breakpoint the sidebar is already a bottom sheet, so
+       there is nothing to retract */
+    if (window.matchMedia("(max-width: 768px)").matches) return;
+
+    const onScroll = () => {
+      if (window.scrollY > 120) {
+        setChromeOn(false);
+        window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [chromeOn]);
 
   /*
     Highlight whichever section is being read. The bottom margin shrinks the
@@ -196,6 +227,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
           ? ({
               "--figp-accent-dark": project.accent.dark,
               "--figp-accent-light": project.accent.light,
+              "--figp-accent-solid-set": project.accent.solid ?? project.accent.dark,
             } as React.CSSProperties)
           : undefined
       }

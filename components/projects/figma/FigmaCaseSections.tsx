@@ -172,7 +172,11 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
             viewport={inView}
           >
             {block.items.map((item) => (
-              <motion.span className="figp-grid-item" key={item.src} variants={revealChild}>
+              <motion.span
+                className={`figp-grid-item${item.small ? " figp-grid-item--small" : ""}`}
+                key={item.src}
+                variants={revealChild}
+              >
                 <img
                   src={item.src}
                   alt={item.alt}
