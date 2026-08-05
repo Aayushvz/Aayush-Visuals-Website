@@ -1612,17 +1612,18 @@ html[data-theme="light"] .figp-lfile img {
   margin-top: 1.9rem;
   padding: 0.72rem 1.25rem;
   border-radius: 8px;
-  /* the deep shade rather than the brand's brightest: this is a large solid
-     block of colour carrying a white label, and white needs 4.5:1 to sit on
-     it. The bright value manages 2.94:1, the deep one 4.90:1. */
-  background: var(--figp-accent-deep);
+  /* the brand's brightest, by request: this is the one control on the page
+     asking to be pressed, and the deep shade read as muddy against a white
+     canvas. White on it measures 2.94:1, so the label is set heavier and the
+     button is never the only route to the live site. */
+  background: var(--figp-accent-solid);
   color: #fff;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.005em;
   text-decoration: none;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 8px 22px
-    color-mix(in srgb, var(--figp-accent-deep) 26%, transparent);
+    color-mix(in srgb, var(--figp-accent-solid) 30%, transparent);
   transition: transform 0.18s ease-out, box-shadow 0.18s ease-out,
     filter 0.18s ease-out;
 }
@@ -3543,6 +3544,47 @@ html[data-theme="light"] .figp-lfile img {
   .figp-flow-step:hover .figp-flow-index,
   .figp-flow-step:hover .figp-flow-sub span {
     color: var(--figp-fill-ink);
+  }
+
+  /*
+    A lane carries far more inside it than a flow step does — a label, a
+    count, a note and a numbered list, each on its own dimmed shade of the
+    body text. Once the card fills, every one of those shades is being read
+    against the accent instead of the canvas, so they all resolve to the
+    fill's foreground. The list numbers and the strike keep their step down
+    in emphasis, they just take it out of the new foreground rather than out
+    of the page's greys.
+  */
+  .figp-lane:hover .figp-lane-label,
+  .figp-lane:hover .figp-lane-count,
+  .figp-lane:hover .figp-lane-steps li,
+  .figp-lane--after:hover .figp-lane-label {
+    color: var(--figp-fill-ink);
+  }
+
+  .figp-lane:hover .figp-lane-note,
+  .figp-lane:hover .figp-lane-steps li::before,
+  .figp-lane--after:hover .figp-lane-steps li::before {
+    color: color-mix(in srgb, var(--figp-fill-ink) 78%, transparent);
+  }
+
+  /* the rule under the head and the strike through the removed steps are
+     both hairlines drawn in the page's line colour, which disappears on a
+     saturated fill */
+  .figp-lane:hover .figp-lane-head {
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--figp-fill-ink) 34%,
+      transparent
+    );
+  }
+
+  .figp-lane--before:hover .figp-lane-steps li {
+    text-decoration-color: color-mix(
+      in srgb,
+      var(--figp-fill-ink) 55%,
+      transparent
+    );
   }
 }
 
