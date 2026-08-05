@@ -88,6 +88,8 @@
      either theme. The light-theme accent is already exactly this shade,
      which is why it is reused rather than being another thing to sync. */
   --figp-accent-deep: var(--figp-accent-light, var(--purple, #7c3aed));
+  /* the plate the open file sits on: a step off the toolbar, not the canvas */
+  --figp-tab-plate: rgba(255, 255, 255, 0.08);
   /* What a surface becomes when it fills with the accent. Deep by default,
      so an unaccented project stays readable; a project that names its own
      `fill` is choosing its brand colour over the contrast. */
@@ -170,6 +172,7 @@ html[data-theme="light"] .figp-share-backdrop {
   --figp-accent: var(--figp-accent-light, var(--purple, #7c3aed));
   /* the light theme's default accent is the deep purple, which takes white */
   --figp-accent-ink: var(--figp-accent-ink-set, #ffffff);
+  --figp-tab-plate: #f4f4f5;
   --figp-accent-hover: var(--figp-accent-hover-set, var(--figp-accent-solid));
   --figp-fill-ink: var(--figp-fill-ink-set, #ffffff);
 
@@ -454,15 +457,24 @@ html[data-theme="light"] .figp-lfile img {
   filter: brightness(0);
 }
 
+/*
+  The open file, sitting on the toolbar rather than cut into it.
+
+  It used to pull itself 1px down over the bar's bottom border, which is
+  how a browser tab joins its own content area. Here that just punched a
+  gap in the rule running the width of the app. The tab now floats inside
+  the bar on its own off-white plate and the rule stays continuous.
+*/
 .figp-tab {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0 0.9rem;
-  background: var(--figp-bg);
+  align-self: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  background: var(--figp-tab-plate);
   color: var(--figp-ink);
   font: inherit;
-  margin-bottom: -1px;
 }
 
 .figp-tab-icon {
@@ -518,10 +530,21 @@ html[data-theme="light"] .figp-lfile img {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/*
+  Filled state uses the deep shade, not the bright one. White on the bright
+  saffron is 2.94:1; on the deep it is 4.90:1, so the label stays readable
+  the moment the control becomes a solid block of colour.
+*/
 .figp a.figp-live-btn:hover,
 .figp a.figp-live-btn:focus-visible {
-  background: var(--figp-accent-solid);
-  color: var(--figp-accent-ink);
+  background: var(--figp-accent-deep);
+  border-color: var(--figp-accent-deep);
+  color: #fff;
+}
+
+.figp a.figp-live-btn:hover .figp-live-dot,
+.figp a.figp-live-btn:focus-visible .figp-live-dot {
+  background: #fff;
 }
 
 /* the pulse is the whole point of the control: it says running, not opens */
@@ -1589,14 +1612,17 @@ html[data-theme="light"] .figp-lfile img {
   margin-top: 1.9rem;
   padding: 0.72rem 1.25rem;
   border-radius: 8px;
-  background: var(--figp-accent-solid);
-  color: var(--figp-accent-ink);
+  /* the deep shade rather than the brand's brightest: this is a large solid
+     block of colour carrying a white label, and white needs 4.5:1 to sit on
+     it. The bright value manages 2.94:1, the deep one 4.90:1. */
+  background: var(--figp-accent-deep);
+  color: #fff;
   font-size: 0.88rem;
   font-weight: 600;
   letter-spacing: 0.005em;
   text-decoration: none;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 8px 22px
-    color-mix(in srgb, var(--figp-accent-solid) 28%, transparent);
+    color-mix(in srgb, var(--figp-accent-deep) 26%, transparent);
   transition: transform 0.18s ease-out, box-shadow 0.18s ease-out,
     filter 0.18s ease-out;
 }
