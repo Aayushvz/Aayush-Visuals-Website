@@ -82,6 +82,27 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     return () => document.removeEventListener("keydown", esc);
   }, [layersOpen]);
 
+  /*
+    The pre-paint script in the root layout handles a hard load, but a
+    client-side nav from the rest of the site never re-runs it. Same rule
+    here: an explicit stored choice is untouched, otherwise a case study
+    opens light. Restored on the way out so the preference does not leak
+    into the pages that did not ask for it.
+  */
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem("theme");
+    } catch {}
+    if (stored === "light" || stored === "dark") return;
+
+    const previous = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = "light";
+    return () => {
+      if (previous) document.documentElement.dataset.theme = previous;
+    };
+  }, []);
+
   /* the collapse survives moving between projects, the way Figma remembers */
   useEffect(() => {
     if (localStorage.getItem(CHROME_KEY) === "off") setChromeOn(false);
@@ -248,6 +269,8 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               "--figp-accent-solid-set": project.accent.solid ?? project.accent.dark,
               "--figp-accent-bright-set": accentBright,
               "--figp-accent-ink-set": project.accent.ink ?? "#ffffff",
+              "--figp-accent-hover-set": project.accent.hover ?? project.accent.solid ?? project.accent.dark,
+              "--figp-fill-ink-set": project.accent.fillInk ?? "#ffffff",
               ...(project.accent.fill ? { "--figp-accent-fill-set": project.accent.fill } : null),
               /* the arrow is a real CSS cursor, so its colour cannot come
                  from a variable — it has to be baked into the data URI */

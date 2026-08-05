@@ -97,6 +97,8 @@
      same slot holds a deep purple, overrides it back to white below. A
      project that declares its own `ink` beats both. */
   --figp-accent-ink: var(--figp-accent-ink-set, #1c1033);
+  --figp-accent-hover: var(--figp-accent-hover-set, var(--figp-accent-solid));
+  --figp-fill-ink: var(--figp-fill-ink-set, #ffffff);
 }
 
 /* layout stays on the page root only — the token scope above is shared with
@@ -168,6 +170,8 @@ html[data-theme="light"] .figp-share-backdrop {
   --figp-accent: var(--figp-accent-light, var(--purple, #7c3aed));
   /* the light theme's default accent is the deep purple, which takes white */
   --figp-accent-ink: var(--figp-accent-ink-set, #ffffff);
+  --figp-accent-hover: var(--figp-accent-hover-set, var(--figp-accent-solid));
+  --figp-fill-ink: var(--figp-fill-ink-set, #ffffff);
 
   /* Figma's #0D99FF clears 4.5:1 against the dark canvas (4.59) but only
      manages 2.99 on white, which fails for the Share button and the "Copy
@@ -1956,7 +1960,7 @@ html[data-theme="light"] .figp-lfile img {
   .figp-section-head:hover,
   .figp-screen-title:hover,
   .figp-name:hover {
-    color: var(--figp-accent-solid);
+    color: var(--figp-accent-hover);
   }
 }
 
@@ -2219,14 +2223,14 @@ html[data-theme="light"] .figp-lfile img {
 
   .figp-brief-card:hover dt,
   .figp-brief-card:hover dd {
-    color: #fff;
+    color: var(--figp-fill-ink);
   }
 
   /* the term marker is a tint of the accent, which is invisible once the
      card IS the accent — it becomes a translucent white wash instead */
   .figp-brief-card:hover .figp-term {
-    color: #fff;
-    box-shadow: inset 0 -0.42em 0 rgba(255, 255, 255, 0.22);
+    color: var(--figp-fill-ink);
+    box-shadow: inset 0 -0.42em 0 rgb(from var(--figp-fill-ink) r g b / 0.2);
   }
 }
 
@@ -3500,9 +3504,19 @@ html[data-theme="light"] .figp-lfile img {
   }
 
   .figp-lane:hover,
+  /* the step fills rather than outlines, so a hovered beat reads as the
+     selected one at a glance down the row */
   .figp-flow-step:hover {
-    border-color: var(--figp-accent-solid);
+    background: var(--figp-accent-fill);
+    border-color: var(--figp-accent-fill);
     transform: translateY(-2px);
+    box-shadow: var(--figp-shadow-dock);
+  }
+
+  .figp-flow-step:hover .figp-flow-label,
+  .figp-flow-step:hover .figp-flow-index,
+  .figp-flow-step:hover .figp-flow-sub span {
+    color: var(--figp-fill-ink);
   }
 }
 

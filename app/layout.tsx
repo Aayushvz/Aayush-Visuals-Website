@@ -150,7 +150,15 @@ const jsonLd = {
   ],
 };
 
-const themeInit = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="dark";}})();`;
+/*
+  Runs before first paint so the theme never flashes.
+
+  An explicit stored choice always wins. With nothing stored, case-study
+  routes default to LIGHT while the rest of the site follows the OS: the
+  work on those pages is screenshots of light interfaces, and a dark canvas
+  around them fights the thing it is meant to present.
+*/
+const themeInit = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=location.pathname.indexOf("/work/")===0?"light":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}})();`;
 
 export default function RootLayout({
   children,

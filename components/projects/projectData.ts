@@ -367,6 +367,12 @@ export type Project = {
     bright?: string;
     ink?: string;
     fill?: string;
+    /* what a heading turns on hover. Defaults to `solid`; a project whose
+       brand colour is too close to the body text can name a second one. */
+    hover?: string;
+    /* the foreground once a card has filled with `fill`. Defaults to white,
+       which only works while `fill` is dark enough to carry it. */
+    fillInk?: string;
   };
 };
 
@@ -1247,7 +1253,13 @@ export const PROJECTS: Project[] = [
       solid: "#C9A769",
       bright: "#D9B77A",
       ink: "#1B1405",
-      fill: "#7C6A46",
+      /* cards and flow steps fill with the brand gold itself, and gold needs
+         near-black on it: white measures 2.28:1, the dark ink 8.02:1 */
+      fill: "#C9A769",
+      fillInk: "#1B1405",
+      /* headings hover to the bronze rather than the gold, which sits too
+         close to the body text to register as a state change */
+      hover: "#7C6A46",
     },
     role: "Lead Product Designer",
     tools: ["Figma", "Prototyping"],
@@ -1275,10 +1287,33 @@ export const PROJECTS: Project[] = [
         heading: "Two hours nobody has a use for",
         blocks: [
           {
-            kind: "prose",
-            body: [
-              "A layover is **dead time you have already paid for**. You are inside a building full of food and lounges, with money and an appetite, and no reliable way to find out what is open, how far it is, or whether you have time.",
-              "LayOver is the layer that answers that. **FoodSync** puts every outlet in your terminal into one live menu. **LoungeSync** checks whether your card gets you in, books the seat, and opens the gate with a QR code. I joined at zero: no screens, no flows, no system, and took it to **four shipping-ready surfaces**.",
+            kind: "brief",
+            items: [
+              {
+                label: "What it is",
+                wide: true,
+                body: "The layer that turns a layover into usable time. **FoodSync** puts every outlet in your terminal into one live menu; **LoungeSync** checks whether your card gets you in, books the seat, and opens the gate with a QR code. I joined at zero and took it to **four shipping-ready surfaces**.",
+              },
+              {
+                label: "The problem",
+                body: "You are in a building full of food and lounges with **no way to know what is open, how far it is, or whether you have time**.",
+              },
+              {
+                label: "Key challenges",
+                body: "**Four user types, one brand.** No live airport data to design against, and the work had to win the partnerships it depended on.",
+              },
+              {
+                label: "Key decisions",
+                body: "**Prep time gets equal billing with price.** Login moves to the checkout. Dark for travellers, light for operators.",
+              },
+              {
+                label: "Outcome",
+                body: "**The company raised on this work**, with airport pilot conversations underway. The designs doubled as the product spec.",
+              },
+              {
+                label: "What I learned",
+                body: "I was asked for a food app. What the traveller needed was an answer to **will I make my flight** — identical on a wireframe, nothing alike in a terminal.",
+              },
             ],
           },
           {
