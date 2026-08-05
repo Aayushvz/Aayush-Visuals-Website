@@ -226,6 +226,14 @@ export type Project = {
   /** long-form body. When present it renders instead of the flat `shots`
       gallery — see CaseBlock above. */
   sections?: ProjectSection[];
+  /*
+    Overrides the case-study accent for this project only, so a piece of
+    work can be read in its own brand colour instead of the site purple.
+    Two values because one hue almost never clears 4.5:1 on both a #1e1e1e
+    and a #ffffff canvas — the light entry is normally a darker shade of
+    the same hue.
+  */
+  accent?: { dark: string; light: string };
 };
 
 export const PROJECTS: Project[] = [
@@ -306,6 +314,10 @@ export const PROJECTS: Project[] = [
     id: "cpgrams",
     /* a shipped government product and a full deep dive, so it belongs in both */
     alsoCaseStudy: true,
+    /* the product's own saffron. #FE6700 clears 4.5:1 on the dark canvas but
+       only manages 3.2:1 on white, so light mode drops to a deeper shade of
+       the same hue rather than tinting the whole page. */
+    accent: { dark: "#FE6700", light: "#C2410C" },
     title: "CPGRAMS",
     logoText: "CPGRAMS",
     category: "Product Design",

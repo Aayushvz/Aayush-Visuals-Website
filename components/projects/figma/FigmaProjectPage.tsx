@@ -188,7 +188,18 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
   ].filter((g) => g.items.length > 0);
 
   return (
-    <div className="figp" data-chrome={chromeOn ? "on" : "off"}>
+    <div
+      className="figp"
+      data-chrome={chromeOn ? "on" : "off"}
+      style={
+        project.accent
+          ? ({
+              "--figp-accent-dark": project.accent.dark,
+              "--figp-accent-light": project.accent.light,
+            } as React.CSSProperties)
+          : undefined
+      }
+    >
       <FigmaCursorTag />
       <FigmaTabBar
         fileLabel={fileLabel}

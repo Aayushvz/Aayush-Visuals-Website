@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { CaseBlock, ProjectSection, ProjectShot } from "@/components/projects/projectData";
 import { isStripShot } from "@/components/projects/projectData";
@@ -79,9 +80,15 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
        reordering the source array can never leave a stale 03 behind */
     case "numbered":
       return (
-        <ol className="figp-numbered">
+        <motion.ol
+          className="figp-numbered"
+          variants={revealParent}
+          initial="hidden"
+          whileInView="shown"
+          viewport={inView}
+        >
           {block.items.map((item, i) => (
-            <li key={item.label}>
+            <motion.li key={item.label} variants={revealChild}>
               <span className="figp-num" aria-hidden="true">
                 {String(i + 1).padStart(2, "0")}
               </span>
@@ -89,21 +96,29 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                 <strong>{item.label}</strong>
                 <span>{item.body}</span>
               </span>
-            </li>
+            </motion.li>
           ))}
-        </ol>
+        </motion.ol>
       );
 
     case "stats":
       return (
-        <div className="figp-stats">
+        <motion.div
+          className="figp-stats"
+          variants={revealParent}
+          initial="hidden"
+          whileInView="shown"
+          viewport={inView}
+        >
           {block.items.map((s) => (
-            <div className="figp-stat" key={s.label}>
-              <span className="figp-stat-value">{s.value}</span>
+            <motion.div className="figp-stat" key={s.label} variants={revealChild}>
+              <span className="figp-stat-value">
+                <CountUp value={s.value} />
+              </span>
               <span className="figp-stat-label">{s.label}</span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       );
 
     case "statement":
@@ -115,9 +130,15 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
     case "gallery":
       return (
         <figure className="figp-gallery-fig">
-          <div className="figp-gallery">
+          <motion.div
+            className="figp-gallery"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
             {block.items.map((item) => (
-              <span className="figp-gallery-item" key={item.src}>
+              <motion.span className="figp-gallery-item" key={item.src} variants={revealChild}>
                 <span
                   className="figp-gallery-frame"
                   data-figp-node={shotNodeName(item.src)}
@@ -133,9 +154,9 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                   />
                 </span>
                 {item.label && <span className="figp-gallery-label">{item.label}</span>}
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
           {block.caption && <figcaption>{block.caption}</figcaption>}
         </figure>
       );
@@ -143,9 +164,15 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
     case "grid":
       return (
         <figure className="figp-grid-fig">
-          <div className="figp-grid">
+          <motion.div
+            className="figp-grid"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
             {block.items.map((item) => (
-              <span className="figp-grid-item" key={item.src}>
+              <motion.span className="figp-grid-item" key={item.src} variants={revealChild}>
                 <img
                   src={item.src}
                   alt={item.alt}
@@ -157,9 +184,9 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                   draggable={false}
                 />
                 {item.label && <span className="figp-grid-label">{item.label}</span>}
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
           {block.caption && <figcaption>{block.caption}</figcaption>}
         </figure>
       );
@@ -169,11 +196,18 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
     case "flow":
       return (
         <figure className="figp-flow-fig">
-          <ol className="figp-flow">
+          <motion.ol
+            className="figp-flow"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
             {block.steps.map((step, i) => (
-              <li
+              <motion.li
                 className={`figp-flow-step${step.decision ? " figp-flow-step--decision" : ""}`}
                 key={step.label}
+                variants={revealChild}
               >
                 <span className="figp-flow-index" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
@@ -186,9 +220,9 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                     ))}
                   </span>
                 )}
-              </li>
+              </motion.li>
             ))}
-          </ol>
+          </motion.ol>
           {block.caption && <figcaption>{block.caption}</figcaption>}
         </figure>
       );
@@ -201,14 +235,24 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               <div className={`figp-lane figp-lane--${lane.tone}`} key={lane.label}>
                 <div className="figp-lane-head">
                   <span className="figp-lane-label">{lane.label}</span>
-                  <span className="figp-lane-count">{lane.steps.length}</span>
+                  <span className="figp-lane-count">
+                    <CountUp value={String(lane.steps.length)} />
+                  </span>
                 </div>
                 {lane.note && <p className="figp-lane-note">{lane.note}</p>}
-                <ol className="figp-lane-steps">
+                <motion.ol
+                  className="figp-lane-steps"
+                  variants={revealParent}
+                  initial="hidden"
+                  whileInView="shown"
+                  viewport={inView}
+                >
                   {lane.steps.map((s) => (
-                    <li key={s}>{s}</li>
+                    <motion.li key={s} variants={revealChild}>
+                      {s}
+                    </motion.li>
                   ))}
-                </ol>
+                </motion.ol>
               </div>
             ))}
           </div>
@@ -219,21 +263,42 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
     case "bars":
       return (
         <figure className="figp-bars-fig">
-          <dl className="figp-bars">
+          <motion.dl
+            className="figp-bars"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
             {block.items.map((b) => (
-              <div className={`figp-bar figp-bar--${b.tone ?? "bad"}`} key={b.label}>
+              <motion.div
+                className={`figp-bar figp-bar--${b.tone ?? "bad"}`}
+                key={b.label}
+                variants={revealChild}
+              >
                 <dt>{b.label}</dt>
                 <dd>
                   {/* the track is the remaining share, so the eye reads the
                       gap as much as the fill */}
                   <span className="figp-bar-track">
-                    <span className="figp-bar-fill" style={{ width: `${b.value}%` }} />
+                    {/* scaleX rather than width: width relayouts every frame,
+                        transform is composited */}
+                    <motion.span
+                      className="figp-bar-fill"
+                      style={{ width: `${b.value}%`, transformOrigin: "left" }}
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={inView}
+                      transition={{ type: "spring", bounce: 0, duration: 0.7, delay: 0.1 }}
+                    />
                   </span>
-                  <span className="figp-bar-value">{b.display}</span>
+                  <span className="figp-bar-value">
+                    <CountUp value={b.display} />
+                  </span>
                 </dd>
-              </div>
+              </motion.div>
             ))}
-          </dl>
+          </motion.dl>
           {block.caption && <figcaption>{block.caption}</figcaption>}
         </figure>
       );
@@ -241,18 +306,33 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
     case "coverage":
       return (
         <figure className="figp-cover-fig">
-          <div
+          <motion.div
             className="figp-cover-grid"
             role="img"
             aria-label={`${block.filled} of ${block.total}: ${block.label}`}
+            variants={{ hidden: {}, shown: { transition: { staggerChildren: 0.018 } } }}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
           >
             {Array.from({ length: block.total }, (_, i) => (
-              <span className={`figp-cell${i < block.filled ? " is-on" : ""}`} key={i} />
+              <motion.span
+                className={`figp-cell${i < block.filled ? " is-on" : ""}`}
+                key={i}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.7 },
+                  shown: {
+                    opacity: 1,
+                    scale: 1,
+                    transition: { type: "spring", bounce: 0, duration: 0.3 },
+                  },
+                }}
+              />
             ))}
-          </div>
+          </motion.div>
           <figcaption>
             <strong>
-              {block.filled} of {block.total}
+              <CountUp value={String(block.filled)} /> of <CountUp value={String(block.total)} />
             </strong>{" "}
             {block.label}
             {block.note && <span className="figp-cover-note">{block.note}</span>}
@@ -264,7 +344,14 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
       return (
         <div className="figp-screens">
           {block.items.map((item) => (
-            <section className="figp-screen" key={item.src}>
+            <motion.section
+              className="figp-screen"
+              key={item.src}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={inView}
+              transition={{ type: "spring", bounce: 0, duration: 0.45 }}
+            >
               <header className="figp-screen-head">
                 <span className="figp-screen-step">{item.step}</span>
                 <h3 className="figp-screen-title">{item.title}</h3>
@@ -280,7 +367,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                 decoding="async"
                 draggable={false}
               />
-            </section>
+            </motion.section>
           ))}
         </div>
       );
@@ -288,17 +375,23 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
     case "wireframes":
       return (
         <figure className="figp-wires-fig">
-          <div className="figp-wires">
+          <motion.div
+            className="figp-wires"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
             {block.items.map((item) => (
-              <div className="figp-wire" key={item.label}>
+              <motion.div className="figp-wire" key={item.label} variants={revealChild}>
                 <div className="figp-wire-art" aria-hidden="true">
                   <WireFrame layout={item.layout} />
                 </div>
                 <span className="figp-wire-label">{item.label}</span>
                 <span className="figp-wire-note">{item.note}</span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           {block.caption && <figcaption>{block.caption}</figcaption>}
         </figure>
       );
@@ -447,6 +540,88 @@ function WireFrame({ layout }: { layout: "entry" | "listen" | "chat" | "review" 
     </div>
   );
 }
+
+/*
+  A number that counts up the first time it is scrolled to.
+
+  Renders the final string on the server and on first paint, so there is no
+  hydration mismatch and no-JS still reads correctly. It only drops to zero
+  at the moment it enters view, which is also the moment its section is
+  fading in, so the reset is never seen.
+
+  Eases out rather than running linear: a linear counter reads like a
+  loading spinner, an eased one reads like a value settling.
+*/
+function CountUp({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [shown, setShown] = useState(value);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    /* find the first number inside strings like "20L+", "$5.71B", "60%" */
+    const match = value.match(/-?[\d.,]+/);
+    if (!match || match.index === undefined) return;
+    const raw = match[0].replace(/,/g, "");
+    const target = parseFloat(raw);
+    if (!Number.isFinite(target)) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const decimals = (raw.split(".")[1] ?? "").length;
+    const prefix = value.slice(0, match.index);
+    const suffix = value.slice(match.index + match[0].length);
+
+    let raf = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        const started = performance.now();
+        const run = (now: number) => {
+          const p = Math.min(1, (now - started) / 900);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setShown(prefix + (target * eased).toFixed(decimals) + suffix);
+          if (p < 1) raf = requestAnimationFrame(run);
+          /* land on the authored string, not a formatted approximation */
+          else setShown(value);
+        };
+        raf = requestAnimationFrame(run);
+      },
+      { rootMargin: "0px 0px -12% 0px" }
+    );
+
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [value]);
+
+  return <span ref={ref}>{shown}</span>;
+}
+
+/*
+  One reveal used by every staggered list on the page. Critically damped
+  with no overshoot: these are arrivals, not throws, and bounce on something
+  the user did not fling reads as decoration.
+*/
+const revealParent = {
+  hidden: {},
+  shown: { transition: { staggerChildren: 0.06 } },
+};
+
+const revealChild = {
+  hidden: { opacity: 0, y: 12 },
+  shown: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, bounce: 0, duration: 0.42 },
+  },
+};
+
+const inView = { once: true, margin: "-12%" } as const;
 
 function shotNodeName(src: string) {
   return src.split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || "frame";

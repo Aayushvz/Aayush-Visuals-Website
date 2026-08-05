@@ -63,11 +63,17 @@
 
   /* theme-invariant: Figma's own selection blue and the one personal accent */
   --figp-blue: #0d99ff;
+  /*
+    A project can override the accent with its own brand colour by setting
+    --figp-accent-dark / --figp-accent-light inline on .figp (see
+    Project.accent). Falls back to the site purple when unset, so every
+    other case study is untouched.
+  */
   /* --figp-blue is an accent for TEXT and borders. White text sitting ON it
      only reaches 2.99:1 in either theme, so filled controls (Share button,
      active Layers toggle) use this deeper shade instead — 4.8:1 with white. */
   --figp-blue-solid: #0b72d4;
-  --figp-accent: var(--purple-soft, #a78bfa);
+  --figp-accent: var(--figp-accent-dark, var(--purple-soft, #a78bfa));
 }
 
 /* layout stays on the page root only — the token scope above is shared with
@@ -85,7 +91,10 @@
 /* ---- light theme: Figma's own light UI (white panels, grey canvas) ---- */
 html[data-theme="light"] .figp,
 html[data-theme="light"] .figp-share-backdrop {
-  --figp-bg: #e5e5e5;
+  /* Pure white canvas. Figma's own light UI uses a grey canvas so its white
+     panels float off it; here the panels keep their 1px --figp-panel-line
+     instead, which separates them without tinting the reading surface. */
+  --figp-bg: #ffffff;
   --figp-ink: #1e1e1e;
   --figp-dim: #6b6b6b;
   --figp-line: rgba(0, 0, 0, 0.12);
@@ -93,11 +102,8 @@ html[data-theme="light"] .figp-share-backdrop {
   --figp-panel-line: #e0e0e0;
   --figp-text-strong: #1a1a1a;
   --figp-text-mid: #4a4a4a;
-  /* these were #767676 / #8a8a8a — greys picked against white, but the
-     canvas here is #e5e5e5, which cost them ~30% of their contrast: the
-     fact labels landed at 3.6:1 and the file label and shot captions at
-     2.7:1. Darkened to clear 4.5:1 on the actual canvas while keeping dim
-     the stronger of the two, as before. */
+  /* Darkened from #767676 / #8a8a8a when the canvas was grey. The canvas is
+     white again, so these now clear 4.5:1 comfortably rather than barely. */
   --figp-text-dim: #545454;
   --figp-text-faint: #666666;
   --figp-hover: rgba(0, 0, 0, 0.05);
@@ -105,7 +111,7 @@ html[data-theme="light"] .figp-share-backdrop {
   --figp-scrollbar: rgba(0, 0, 0, 0.16);
   --figp-scrollbar-hover: rgba(0, 0, 0, 0.3);
   --figp-swatch-border: rgba(0, 0, 0, 0.18);
-  --figp-dotgrid: rgba(0, 0, 0, 0.06);
+  --figp-dotgrid: rgba(0, 0, 0, 0.045);
   --figp-body-text: #333333;
   --figp-fact-value: #262626;
   --figp-chip-border: rgba(0, 0, 0, 0.16);
@@ -136,7 +142,7 @@ html[data-theme="light"] .figp-share-backdrop {
      year line under the title almost unreadable. The site's own deeper
      purple is the same hue at a weight that works on light, and it also
      improves the white-on-accent comment pins and cursor tag. */
-  --figp-accent: var(--purple, #7c3aed);
+  --figp-accent: var(--figp-accent-light, var(--purple, #7c3aed));
 
   /* Figma's #0D99FF clears 4.5:1 against the dark canvas (4.59) but only
      manages 2.99 on white, which fails for the Share button and the "Copy
@@ -2373,6 +2379,88 @@ html[data-theme="light"] .figp-lfile img {
   line-height: 1.55;
   color: var(--figp-text-faint);
   max-width: 54ch;
+}
+
+/* ============ card hover ============
+   One behaviour across every card on the page: lift a little, deepen the
+   shadow, warm the border to the accent. 180ms sits inside the
+   micro-interaction window, and only transform/opacity/shadow move so
+   nothing relayouts on a pointer pass.
+
+   Gated behind `hover: hover` — on touch these would fire on tap and stick,
+   which reads as a broken selected state. */
+@media (hover: hover) {
+  .figp-grid-item,
+  .figp-gallery-item,
+  .figp-wire,
+  .figp-stat,
+  .figp-lane,
+  .figp-screen img,
+  .figp-flow-step {
+    transition: transform 0.18s ease-out, box-shadow 0.18s ease-out,
+      border-color 0.18s ease-out;
+  }
+
+  .figp-grid-item:hover,
+  .figp-gallery-item:hover,
+  .figp-wire:hover,
+  .figp-screen img:hover {
+    transform: translateY(-3px);
+  }
+
+  .figp-grid-item:hover img,
+  .figp-wire:hover .figp-wire-art,
+  .figp-screen img:hover {
+    box-shadow: 0 0 0 1px var(--figp-accent), 0 10px 30px rgba(0, 0, 0, 0.16);
+  }
+
+  .figp-gallery-item:hover .figp-gallery-frame {
+    box-shadow: 0 0 0 1px var(--figp-accent), 0 10px 26px rgba(0, 0, 0, 0.16);
+  }
+
+  .figp-wire:hover .figp-wire-art {
+    border-color: var(--figp-accent);
+  }
+
+  /* the stat and lane cards lift from a border rather than a shadow: they
+     sit on the canvas, not on a surface, so a shadow would float them */
+  .figp-stat:hover {
+    border-top-color: var(--figp-accent);
+    transform: translateY(-2px);
+  }
+
+  .figp-lane:hover,
+  .figp-flow-step:hover {
+    border-color: var(--figp-accent);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+    Reduced motion is not "no feedback": the hover still resolves, it just
+    resolves as a colour change instead of a move. Every scroll reveal is
+    neutralised here too, since framer-motion reads the same query.
+  */
+  .figp-grid-item,
+  .figp-gallery-item,
+  .figp-wire,
+  .figp-stat,
+  .figp-lane,
+  .figp-screen img,
+  .figp-flow-step {
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .figp-grid-item:hover,
+  .figp-gallery-item:hover,
+  .figp-wire:hover,
+  .figp-screen img:hover,
+  .figp-stat:hover,
+  .figp-lane:hover,
+  .figp-flow-step:hover {
+    transform: none;
+  }
 }
 
 /* ---- two desktop screens side by side ---- */
