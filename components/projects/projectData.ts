@@ -164,6 +164,23 @@ export type CaseBlock =
   | {
       kind: "screens";
       items: { src: string; alt: string; step: string; title: string; body: string }[];
+    }
+  /*
+    Low-fidelity layouts, drawn in CSS rather than exported.
+
+    Wireframes are the one artefact that almost never survives a project:
+    they get thrown away the moment the visual design starts. Redrawing them
+    at low fidelity is honest about that and is also better than a
+    screenshot would be, because greyboxes show the structural decision
+    without the palette arguing over it.
+
+    `layout` selects a hand-built arrangement in the renderer; there is no
+    point encoding box coordinates in data nobody will hand-edit.
+  */
+  | {
+      kind: "wireframes";
+      items: { layout: "entry" | "listen" | "chat" | "review"; label: string; note: string }[];
+      caption?: string;
     };
 
 export type ProjectSection = {
@@ -455,6 +472,125 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
+        name: "thought process",
+        heading: "How I approached it",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Two constraints shaped every decision. The government's taxonomy could not change, and the audience could not be assumed to read.",
+              "That rules out the obvious move. A cleaner form is still a form, and a form is a reading test with a filing test attached. So the work became conversational architecture: decide what the system infers, what it asks, and what it must show before acting.",
+            ],
+          },
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "Move the cognitive load, do not reduce it",
+                body: "The complexity is real and cannot be deleted. It can only be carried by the software instead of the citizen.",
+              },
+              {
+                label: "Progressive disclosure over a single page",
+                body: "Fifteen fields at once is the failure. One question at a time keeps working memory free for the answer.",
+              },
+              {
+                label: "Input parity, output parity",
+                body: "Accepting voice but replying only in text solves the wrong half. Every response is playable.",
+              },
+              {
+                label: "Automation needs a consent surface",
+                body: "The system files on the citizen's behalf, so it has to show its interpretation before committing.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "ideation",
+        heading: "What got explored",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Three directions were considered before the conversational one won.",
+            ],
+          },
+          {
+            kind: "compare",
+            lanes: [
+              {
+                label: "Rejected",
+                tone: "before",
+                note: "Each fixes the surface and leaves the barrier standing.",
+                steps: [
+                  "Redesign the form: cleaner, still a reading and filing test",
+                  "Add a language toggle: a picker is itself a reading test",
+                  "Build a native app: an install barrier for 2G users",
+                ],
+              },
+              {
+                label: "Chosen",
+                tone: "after",
+                note: "Removes the two things that actually stop people.",
+                steps: [
+                  "Conversation over the existing system",
+                  "Voice as the primary input, not a feature",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "wireframing",
+        heading: "Structure before surface",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "You do not wireframe a chatbot the way you wireframe a page. There is no fixed layout to arrange, only a sequence of states and what each one is allowed to ask for.",
+              "Four greyboxes settled the structure: where the primary control sits, how the system proves it is listening, how the thread reads, and what the last screen before submission has to contain.",
+            ],
+          },
+          {
+            kind: "wireframes",
+            items: [
+              {
+                layout: "entry",
+                label: "01 Entry",
+                note: "One primary action, centred. History rail kept from the portal so returning users recognise it.",
+              },
+              {
+                layout: "listen",
+                label: "02 Capture",
+                note: "Live feedback while recording. A static indicator does not reassure a first-time user.",
+              },
+              {
+                layout: "chat",
+                label: "03 Thread",
+                note: "Alternating turns, input pinned. Every message persists so a dropped session is not a lost grievance.",
+              },
+              {
+                layout: "review",
+                label: "04 Review",
+                note: "Interpretation, detected tag, primary and secondary action. The consent surface.",
+              },
+            ],
+            caption:
+              "Redrawn at low fidelity. Greyboxes keep the argument on structure, which is the only thing these were ever deciding.",
+          },
+        ],
+      },
+      {
+        name: "principle",
+        blocks: [
+          {
+            kind: "statement",
+            text: "My main target was to design this in such a way that each page solves a problem with the minimum number of clicks.",
+          },
+        ],
+      },
+      {
         name: "samadhan didi",
         heading: "Samadhan Didi",
         blocks: [
@@ -462,26 +598,33 @@ export const PROJECTS: Project[] = [
             kind: "prose",
             body: [
               "A chat window is still an interface, and to somebody who has never used one it is still an exam. So the product has a face.",
-              "Samadhan Didi is a government worker in a saree with a departmental lanyard, and every part of that is a decision. Didi means elder sister. She is the person you already ask for help with a form, the one at the counter who does not make you feel stupid for asking. She is lip-synced to the spoken reply, so the answer is watched as well as heard, which matters when the person listening may not be able to read the same words on screen.",
-              "She is not an ornament on the product. She is the onboarding.",
+              "Samadhan Didi is a government worker in a saree with a departmental lanyard. Didi means elder sister: the person you already ask for help with a form. She is lip-synced to the spoken reply, so the answer is watched as well as heard.",
             ],
           },
           {
-            kind: "grid",
+            kind: "gallery",
             items: [
-              {
-                src: "/projects/cpgrams/mascot.webp",
-                label: "The mascot",
-                alt: "Samadhan Didi, an illustrated Indian government worker in a cream and orange saree with a departmental ID lanyard, smiling and gesturing.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-alt.webp",
-                label: "Expression set",
-                alt: "An alternate pose of Samadhan Didi used for other conversational states.",
-              },
+              { src: "/projects/cpgrams/mascot-v1.webp", label: "Direction 1", alt: "An early mascot exploration for CPGRAMS." },
+              { src: "/projects/cpgrams/mascot-v2.webp", label: "Direction 2", alt: "A second early mascot exploration for CPGRAMS." },
+              { src: "/projects/cpgrams/mascot-v3.webp", label: "Direction 3", alt: "A third early mascot exploration for CPGRAMS." },
+              { src: "/projects/cpgrams/mascot-v4.webp", label: "Direction 4", alt: "A fourth early mascot exploration for CPGRAMS." },
             ],
             caption:
-              "Built as a set of states rather than a single illustration, because a guide who holds one expression through a complaint about a missing pension reads as indifferent.",
+              "Four directions before the character settled. The test each one had to pass: would a first-time filer read her as staff who works here, or as a brand character?",
+          },
+          {
+            kind: "gallery",
+            items: [
+              { src: "/projects/cpgrams/mascot-a.webp", label: "Greeting", alt: "Samadhan Didi in a greeting pose." },
+              { src: "/projects/cpgrams/mascot-b.webp", label: "Explaining", alt: "Samadhan Didi in an explaining pose." },
+              { src: "/projects/cpgrams/mascot-c.webp", label: "Pointing", alt: "Samadhan Didi pointing at an interface control." },
+              { src: "/projects/cpgrams/mascot-d.webp", label: "Listening", alt: "Samadhan Didi in a listening pose." },
+              { src: "/projects/cpgrams/mascot-e.webp", label: "Reassuring", alt: "Samadhan Didi in a reassuring pose." },
+              { src: "/projects/cpgrams/mascot-f.webp", label: "Confirming", alt: "Samadhan Didi in a confirming pose." },
+              { src: "/projects/cpgrams/mascot-g.webp", label: "Closing", alt: "Samadhan Didi in a closing pose." },
+            ],
+            caption:
+              "The shipped set. Built as states, not one illustration: a guide holding a single expression through a complaint about a missing pension reads as indifferent.",
           },
         ],
       },
@@ -503,35 +646,35 @@ export const PROJECTS: Project[] = [
                 src: "/projects/cpgrams/demo-01.webp",
                 step: "Demo 01",
                 title: "Arriving with nothing to read",
-                body: "The chatbot opens from the CPGRAMS portal with no account, no install and no setup. The first thing on screen is a greeting and the two ways forward, speaking or typing, rather than a form or a login wall. The illustrated rural background is deliberate: it signals who this is for before a single word is read.",
+                body: "No account, no install. Two ways forward on screen, speaking or typing, instead of a login wall. The rural illustration signals the intended user before a word is read.",
                 alt: "The CPGRAMS chatbot opening screen with a welcome message and the option to register a grievance by speaking or typing.",
               },
               {
                 src: "/projects/cpgrams/demo-02.webp",
                 step: "Demo 02",
                 title: "The guide introduces herself",
-                body: "Samadhan Didi appears full-height and speaks. Establishing her before she starts giving instructions matters, because the tutorial that follows is a stranger telling you what to press. Coming from a recognisable figure in a government saree and lanyard, it reads as being helped rather than being tested.",
+                body: "The guide is established before she gives instructions. Coming from a recognisable government figure, the tutorial reads as help rather than a test.",
                 alt: "Samadhan Didi introduced at full height beside the CPGRAMS chatbot interface.",
               },
               {
                 src: "/projects/cpgrams/demo-03.webp",
                 step: "Demo 03",
                 title: "Spotlight on one control at a time",
-                body: "Everything dims except the element under discussion. Only one thing is ever lit, so there is no question about which control the sentence refers to. This is the pattern that carries the whole tutorial, and it is why the tutorial can be short.",
+                body: "Spotlight masking: one control lit at a time, so the instruction can never point ambiguously. This is why the tutorial stays short.",
                 alt: "The CPGRAMS chatbot with the interface dimmed and a single control spotlit during the tutorial.",
               },
               {
                 src: "/projects/cpgrams/demo-04.webp",
                 step: "Demo 04",
                 title: "The microphone, explained in one sentence",
-                body: "The most important control in the product gets the clearest instruction: press it and speak in your preferred language. No mention of transcription, languages supported, or accuracy. The promise is small enough to be believed and complete enough to act on.",
+                body: "The primary control gets the plainest instruction. No mention of transcription or accuracy: the promise stays small enough to be believed.",
                 alt: "The CPGRAMS chatbot tutorial spotlighting the microphone with Samadhan Didi explaining to press it and share concerns in a preferred language.",
               },
               {
                 src: "/projects/cpgrams/demo-05.webp",
                 step: "Demo 05",
                 title: "Handing over, with an exit",
-                body: "The tutorial ends by returning control, and Skip Tutorial is present from the first frame rather than appearing at the end. A confident user is never trapped inside an explanation of something they already understand, which is what keeps the tutorial from being a cost imposed on everyone to help some.",
+                body: "Skip is available from frame one, not just at the end. Onboarding should never tax the confident user to help the uncertain one.",
                 alt: "The final tutorial screen of the CPGRAMS chatbot with a skip tutorial control visible.",
               },
             ],
@@ -568,84 +711,84 @@ export const PROJECTS: Project[] = [
                 src: "/projects/cpgrams/voice-01.webp",
                 step: "Voice 01",
                 title: "One obvious thing to do",
-                body: "The resting state gives the microphone the centre and the visual weight. There is no language picker, no category dropdown and no form preview, because every one of those would be a decision demanded before the citizen has said anything.",
+                body: "One primary affordance, centred and weighted. No language picker or category dropdown, because each is a decision demanded before the citizen has said anything.",
                 alt: "The CPGRAMS voice flow resting state with a large central microphone control.",
               },
               {
                 src: "/projects/cpgrams/voice-02.webp",
                 step: "Voice 02",
                 title: "Press to speak",
-                body: "A single press starts recording. Press and hold was rejected early: it is a gesture that fails for users with tremors or arthritis, and the 60-plus group files the most grievances of anyone.",
+                body: "Single press, not press-and-hold. Hold gestures fail for tremor and arthritis, and the 60-plus group files the most grievances here.",
                 alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone.",
               },
               {
                 src: "/projects/cpgrams/voice-03.webp",
                 step: "Voice 03",
                 title: "Proof that it is listening",
-                body: "A live waveform responds to the voice. For a user who is not confident the machine can hear them, a static recording indicator is not enough reassurance, and stopping to check kills the sentence they were in the middle of.",
+                body: "A live waveform, not a static indicator. Without real-time system feedback, an unsure user stops mid-sentence to check it is working.",
                 alt: "The CPGRAMS voice flow recording with a live waveform responding to speech.",
               },
               {
                 src: "/projects/cpgrams/voice-04.webp",
                 step: "Voice 04",
                 title: "Their words, kept",
-                body: "The recording lands in the thread as a playable message with its own waveform rather than being silently converted to text and discarded. The citizen can hear back exactly what they said, which matters when the system is about to act on it.",
+                body: "The audio persists in the thread rather than being converted and discarded. The citizen can replay exactly what the system is about to act on.",
                 alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player.",
               },
               {
                 src: "/projects/cpgrams/voice-05.webp",
                 step: "Voice 05",
                 title: "Transcription, shown not hidden",
-                body: "The speech-to-text result is displayed alongside the audio. If Bhashini has misheard a place name or a scheme, this is the first moment it can be caught, and catching it here is far cheaper than catching it after the grievance has been routed.",
+                body: "Transcription shown next to the audio. First point of error recovery, and far cheaper than catching a misheard place name after routing.",
                 alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio.",
               },
               {
                 src: "/projects/cpgrams/voice-06.webp",
                 step: "Voice 06",
                 title: "Language detected, not requested",
-                body: "The interface adapts to the language it heard. A language picker is a reading test administered to people who may not read, and it is the same trap as the ministry dropdown: asking someone to classify themselves before they are allowed to speak.",
+                body: "Language detected, not selected. A picker is a reading test given to people who may not read, and the same trap as the ministry dropdown.",
                 alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface.",
               },
               {
                 src: "/projects/cpgrams/voice-07.webp",
                 step: "Voice 07",
                 title: "Answered out loud",
-                body: "Every response is playable, not just readable. Voice input with text-only output solves half the literacy problem and then abandons the user at the reply, which is the half that actually contains the answer.",
+                body: "Output parity with input. Voice in, text-only out abandons the user at the reply, which is the half carrying the answer.",
                 alt: "Samadhan Didi responding in the CPGRAMS chat with both written text and a voice response player.",
               },
               {
                 src: "/projects/cpgrams/voice-08.webp",
                 step: "Voice 08",
                 title: "Filling the gaps by asking, one at a time",
-                body: "Where the grievance is missing something the form requires, the bot asks for it as a single conversational question. This is the fifteen-field form, disassembled into the smallest possible units and delivered only where a human answer is genuinely needed.",
+                body: "Progressive disclosure. The fifteen-field form broken into single questions, asked only where a human answer is genuinely required.",
                 alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance.",
               },
               {
                 src: "/projects/cpgrams/voice-09.webp",
                 step: "Voice 09",
                 title: "The form, filled without being seen",
-                body: "Ministry, category, location and urgency are inferred from what was said. The citizen never encounters the dropdown that stops most people at the portal, because the system carries that knowledge instead of demanding it.",
+                body: "Ministry, category, location and urgency inferred from speech. The dropdown that stops most people at the portal never appears.",
                 alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint.",
               },
               {
                 src: "/projects/cpgrams/voice-10.webp",
                 step: "Voice 10",
                 title: "Read back before it counts",
-                body: "This is the screen the entire system exists to reach. The interpretation is shown in the citizen's own words with the detected state and category visible, and nothing is submitted until they agree. Auto-filing a legal document on somebody's behalf without showing them what it says is not assistance, it is a liability with their name on it.",
+                body: "The consent surface. Interpretation, detected state and category shown before anything is committed, because auto-filing a legal document unseen is a liability with the citizen's name on it.",
                 alt: "The CPGRAMS pre-submission review card showing the interpreted grievance, a detected state tag and a submit control.",
               },
               {
                 src: "/projects/cpgrams/voice-11.webp",
                 step: "Voice 11",
                 title: "A way out when the routing is wrong",
-                body: "If the state-level categorisation is wrong, escalation to the Central Authority is one tap rather than a fresh grievance. The system is allowed to be wrong; it is not allowed to be wrong with no exit.",
+                body: "One-tap escalation when routing is wrong. The system is allowed to be wrong; it is not allowed to be wrong with no exit.",
                 alt: "The CPGRAMS review card with a link to register with the Central Authority if the state categorisation is incorrect.",
               },
               {
                 src: "/projects/cpgrams/voice-12.webp",
                 step: "Voice 12",
                 title: "Submitted, and traceable",
-                body: "Confirmation returns the registration ID, which is the object that makes the statutory clock start and the only thing the citizen needs to keep. It is repeated in the thread so it survives a closed tab.",
+                body: "The registration ID starts the statutory clock and is the only thing worth keeping, so it persists in the thread rather than a dismissible toast.",
                 alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier.",
               },
             ],
@@ -683,91 +826,91 @@ export const PROJECTS: Project[] = [
                 src: "/projects/cpgrams/text-01.webp",
                 step: "Text 01",
                 title: "An empty field and a prompt",
-                body: "The typed flow opens on the same greeting with the input focused. No category selection, no ministry list, no required fields visible, because the first thing asked has to be something the citizen can actually answer.",
+                body: "Input focused, nothing else required. The first thing asked has to be something the citizen can actually answer.",
                 alt: "The CPGRAMS text flow opening screen with the message input ready.",
               },
               {
                 src: "/projects/cpgrams/text-02.webp",
                 step: "Text 02",
                 title: "The complaint in their own words",
-                body: "The grievance is typed the way it would be said out loud, with no formal structure required. Everything the portal would have demanded up front gets extracted from this sentence instead.",
+                body: "Plain language, no required structure. Everything the portal demanded up front is extracted from this one sentence.",
                 alt: "A typed grievance in the CPGRAMS chat written in plain conversational language.",
               },
               {
                 src: "/projects/cpgrams/text-03.webp",
                 step: "Text 03",
                 title: "Understood and acknowledged",
-                body: "The reply restates the problem before doing anything with it. This is not politeness, it is the earliest and cheapest place to catch a misunderstanding, and it tells the citizen they were heard by something that followed the meaning rather than matched a keyword.",
+                body: "The reply restates the problem first. Earliest and cheapest error recovery, and it signals comprehension rather than keyword matching.",
                 alt: "The CPGRAMS chatbot restating the citizen's grievance back to them.",
               },
               {
                 src: "/projects/cpgrams/text-04.webp",
                 step: "Text 04",
                 title: "One question at a time",
-                body: "Missing details are collected as single questions in sequence rather than as a block of fields. The fifteen-field form still gets filled; it just never appears as fifteen fields.",
+                body: "Sequential questions, not a block of fields. The form still gets filled, it just never appears as a form.",
                 alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow.",
               },
               {
                 src: "/projects/cpgrams/text-05.webp",
                 step: "Text 05",
                 title: "Answering with structure when structure helps",
-                body: "Where the answer is genuinely a small closed set, the bot offers options rather than an open field. Free text is the right default, but forcing someone to type an exact scheme name they may not know is a trap dressed as flexibility.",
+                body: "Closed sets get options, not an open field. Free text is the right default until it forces recall of an exact scheme name.",
                 alt: "The CPGRAMS chatbot offering selectable options for a question with a closed set of answers.",
               },
               {
                 src: "/projects/cpgrams/text-06.webp",
                 step: "Text 06",
                 title: "Documents, when they are needed",
-                body: "Attachments are requested at the point they become relevant, not listed as a requirement at the start. On the portal, an unmet document requirement at step two ends the session; here it arrives once the citizen is already invested and knows why it is being asked for.",
+                body: "Attachments requested at the point of relevance. On the portal an unmet document requirement at step two ends the session.",
                 alt: "The CPGRAMS chatbot requesting a supporting document within the conversation.",
               },
               {
                 src: "/projects/cpgrams/text-07.webp",
                 step: "Text 07",
                 title: "History that survives the session",
-                body: "Conversations persist in the left rail. The portal loses everything to a session timeout, which on a slow connection is a routine event, and losing a half-written grievance is usually the end of that grievance forever.",
+                body: "Conversations persist. The portal loses everything to a session timeout, which on a 2G connection is routine rather than rare.",
                 alt: "The CPGRAMS chat with recent conversations listed in the left sidebar.",
               },
               {
                 src: "/projects/cpgrams/text-08.webp",
                 step: "Text 08",
                 title: "Classification, done quietly",
-                body: "Ministry, department and category are resolved from the conversation. This is the single highest-friction field on the original portal, removed entirely from the citizen's job and handed to the system that already holds the taxonomy.",
+                body: "Classification resolved from the conversation. The highest-friction field on the portal, moved off the citizen and onto the system that owns the taxonomy.",
                 alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance.",
               },
               {
                 src: "/projects/cpgrams/text-09.webp",
                 step: "Text 09",
                 title: "Location and jurisdiction",
-                body: "State and jurisdiction are inferred and then shown, because routing a grievance to the wrong state is the failure most likely to waste the statutory clock before anyone notices.",
+                body: "Jurisdiction inferred, then shown. Wrong-state routing is the failure most likely to burn the statutory clock unnoticed.",
                 alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance.",
               },
               {
                 src: "/projects/cpgrams/text-10.webp",
                 step: "Text 10",
                 title: "The complete picture, assembled",
-                body: "Everything gathered across the conversation is brought together in one place: the complaint, the classification, the location and the attachments. The citizen sees the whole grievance for the first and only time as a single object.",
+                body: "Everything gathered is assembled into one object: complaint, classification, jurisdiction, attachments. Seen whole for the first time.",
                 alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details.",
               },
               {
                 src: "/projects/cpgrams/text-11.webp",
                 step: "Text 11",
                 title: "Read it back",
-                body: "The same pre-submission review as the voice flow, and for the same reason. Nothing becomes a legal submission until the person it belongs to has seen what the machine decided on their behalf.",
+                body: "Same review gate as the voice flow. Nothing becomes a legal submission unseen.",
                 alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance before submission.",
               },
               {
                 src: "/projects/cpgrams/text-12.webp",
                 step: "Text 12",
                 title: "Submit, or escalate",
-                body: "Submit Grievance and New Chat sit together, with the Central Authority escalation underneath for when the state-level categorisation is wrong. Three outcomes, all reversible except the one the citizen explicitly chooses.",
+                body: "Primary, secondary and escalation, ranked by weight. Three outcomes, all reversible except the one explicitly chosen.",
                 alt: "The CPGRAMS review card with submit grievance, new chat and a central authority escalation link.",
               },
               {
                 src: "/projects/cpgrams/text-13.webp",
                 step: "Text 13",
                 title: "Filed, with a number",
-                body: "Confirmation and the registration ID. From this moment the grievance is inside the same machinery as one filed by a lawyer on a desktop, with the same clock and the same escalation path, which was the entire point.",
+                body: "Filed. From here it sits in the same machinery, with the same clock, as one filed by a lawyer on a desktop.",
                 alt: "The CPGRAMS confirmation screen with a grievance registration identifier.",
               },
             ],

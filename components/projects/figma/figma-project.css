@@ -1447,10 +1447,10 @@ html[data-theme="light"] .figp-lfile img {
    above the frame edge (the hairline under it). It costs one line and it is
    what keeps a page of paragraphs reading as a design file. */
 .figp-sections {
-  margin-top: 4.5rem;
+  margin-top: 5.5rem;
   display: flex;
   flex-direction: column;
-  gap: 5rem;
+  gap: 6.5rem;
 }
 
 .figp-section {
@@ -1476,21 +1476,34 @@ html[data-theme="light"] .figp-lfile img {
 .figp-prose + .figp-gallery-fig,
 .figp-prose + .figp-grid-fig,
 .figp-prose + .figp-flow-fig,
+.figp-prose + .figp-compare-fig,
+.figp-prose + .figp-bars-fig,
+.figp-prose + .figp-cover-fig,
+.figp-prose + .figp-wires-fig,
+.figp-prose + .figp-screens,
 .figp-numbered + .figp-shot,
 .figp-numbered + .figp-gallery-fig,
 .figp-numbered + .figp-grid-fig,
+.figp-numbered + .figp-bars-fig,
 .figp-statement + .figp-shot,
 .figp-specs + .figp-shot,
-.figp-stats + .figp-shot {
-  margin-top: 3.6rem;
+.figp-stats + .figp-shot,
+.figp-stats + .figp-bars-fig {
+  margin-top: 4.4rem;
 }
 
 /* and coming back out of an image into text */
 .figp-shot + .figp-prose,
 .figp-gallery-fig + .figp-prose,
 .figp-grid-fig + .figp-prose,
-.figp-flow-fig + .figp-prose {
-  margin-top: 3.2rem;
+.figp-flow-fig + .figp-prose,
+.figp-compare-fig + .figp-prose,
+.figp-bars-fig + .figp-prose,
+.figp-cover-fig + .figp-prose,
+.figp-wires-fig + .figp-prose,
+.figp-screens + .figp-prose,
+.figp-screens + .figp-gallery-fig {
+  margin-top: 4rem;
 }
 
 .figp-frame-label + *,
@@ -1517,6 +1530,34 @@ html[data-theme="light"] .figp-lfile img {
   line-height: 1.14;
   letter-spacing: -0.018em;
   color: var(--figp-ink);
+}
+
+/*
+  Titles pick up the accent on hover. Purely decorative: none of these are
+  interactive, so the effect carries no meaning and its absence costs a
+  touch user nothing. 200ms sits inside the 150-300ms micro-interaction
+  window; anything slower reads as lag on a pointer move.
+*/
+.figp-section-head,
+.figp-screen-title,
+.figp-name {
+  transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .figp-section-head:hover,
+  .figp-screen-title:hover,
+  .figp-name:hover {
+    color: var(--figp-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-section-head,
+  .figp-screen-title,
+  .figp-name {
+    transition: none;
+  }
 }
 
 /* ---- prose ---- */
@@ -1691,11 +1732,16 @@ html[data-theme="light"] .figp-lfile img {
 /* 190px is the floor that keeps four phones on one row at this canvas width.
    Any lower and auto-fit packs a fifth in at ~163px, where the UI inside the
    screen stops being legible and the frames read as ribbons. */
+/* 150px floor, not 190px: a six-phone row at 190px forced a wrap and left
+   the strays rendering nearly twice the size of the rest. Phone frames are
+   supporting evidence next to the full-width desktop screens above them, so
+   they should read as a set rather than compete. */
 .figp-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   align-items: start;
+  max-width: 900px;
 }
 
 .figp-gallery-item {
@@ -1717,7 +1763,7 @@ html[data-theme="light"] .figp-lfile img {
   /* a phone-shaped window, not the whole screen — see the gallery note in
      projectData. Tied to the column width rather than a fixed height so the
      crop stays proportional as the row reflows. */
-  aspect-ratio: 9 / 19;
+  aspect-ratio: 9 / 17.5;
   object-fit: cover;
   object-position: top center;
 }
@@ -2050,12 +2096,12 @@ html[data-theme="light"] .figp-lfile img {
 /* ============ screens: frame plus real explanation ============ */
 .figp-screens {
   display: grid;
-  gap: 4.5rem;
+  gap: 6rem;
 }
 
 .figp-screen {
   display: grid;
-  gap: 1.4rem;
+  gap: 2rem;
 }
 
 .figp-screen-head {
@@ -2098,13 +2144,235 @@ html[data-theme="light"] .figp-lfile img {
 
 @media (max-width: 720px) {
   .figp-screens {
-    gap: 3rem;
+    gap: 3.6rem;
   }
 
   .figp-cover-grid {
     grid-template-columns: repeat(11, 1fr);
     max-width: 100%;
   }
+}
+
+/* ============ wireframes ============
+   Greyboxes, drawn rather than exported. Deliberately colourless: the point
+   of a wireframe is that structure is the only thing being argued about, so
+   the accent appears once per frame at most. */
+.figp-wires-fig {
+  margin: 0;
+}
+
+.figp-wires {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.4rem 1.2rem;
+}
+
+.figp-wire-label {
+  display: block;
+  margin-top: 0.8rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--figp-ink);
+}
+
+.figp-wire-note {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+.figp-wire-art {
+  border: 1px solid var(--figp-line);
+  border-radius: 4px;
+  background: var(--figp-panel);
+  padding: 8px;
+}
+
+.wf {
+  display: flex;
+  gap: 6px;
+  aspect-ratio: 4 / 3;
+  font-size: 0;
+}
+
+.wf-rail {
+  flex: 0 0 22%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px;
+  border-radius: 3px;
+  background: var(--figp-hover);
+}
+
+.wf-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wf-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--figp-line);
+}
+
+.wf-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.wf-body--center {
+  align-items: center;
+  justify-content: center;
+}
+
+/* generic greybox primitives */
+.wf-b,
+.wf-l {
+  display: block;
+  background: var(--figp-line);
+  border-radius: 2px;
+}
+
+.wf-l {
+  height: 5px;
+  width: 100%;
+}
+
+.wf-l--short {
+  width: 55%;
+}
+.wf-l--wide {
+  width: 70%;
+}
+.wf-l--title {
+  height: 7px;
+  width: 45%;
+}
+
+.wf-b--pill {
+  height: 11px;
+  border-radius: 999px;
+}
+
+.wf-b--sq {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 3px;
+}
+
+.wf-mic {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--figp-line);
+}
+
+/* the one place colour is allowed: the control the frame is about */
+.wf-mic--live {
+  border-color: var(--figp-accent);
+  background: color-mix(in srgb, var(--figp-accent) 22%, transparent);
+}
+
+.wf-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 22px;
+}
+
+.wf-wave i {
+  display: block;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--figp-line);
+}
+
+.wf-input {
+  display: block;
+  width: 100%;
+  height: 14px;
+  margin-top: auto;
+  border-radius: 999px;
+  border: 1px solid var(--figp-line);
+}
+
+.wf-bubble {
+  display: block;
+  height: 20px;
+  width: 62%;
+  border-radius: 6px;
+  background: var(--figp-line);
+}
+
+.wf-bubble--me {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--figp-accent) 30%, var(--figp-line));
+}
+
+.wf-bubble--bot {
+  align-self: flex-start;
+  width: 74%;
+}
+
+.wf-bubble--sm {
+  height: 12px;
+  width: 40%;
+}
+
+.wf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 78%;
+  padding: 8px;
+  border: 1px solid var(--figp-line);
+  border-radius: 4px;
+}
+
+.wf-tag {
+  display: block;
+  width: 34%;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--figp-accent) 40%, var(--figp-line));
+}
+
+.wf-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.wf-actions b {
+  flex: 1;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--figp-line);
+}
+
+.wf-actions b:first-child {
+  background: color-mix(in srgb, var(--figp-accent) 45%, var(--figp-line));
+}
+
+.figp-wires-fig figcaption {
+  margin-top: 1.4rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 54ch;
 }
 
 /* ---- two desktop screens side by side ---- */

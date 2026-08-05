@@ -285,6 +285,24 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
         </div>
       );
 
+    case "wireframes":
+      return (
+        <figure className="figp-wires-fig">
+          <div className="figp-wires">
+            {block.items.map((item) => (
+              <div className="figp-wire" key={item.label}>
+                <div className="figp-wire-art" aria-hidden="true">
+                  <WireFrame layout={item.layout} />
+                </div>
+                <span className="figp-wire-label">{item.label}</span>
+                <span className="figp-wire-note">{item.note}</span>
+              </div>
+            ))}
+          </div>
+          {block.caption && <figcaption>{block.caption}</figcaption>}
+        </figure>
+      );
+
     case "specs":
       return (
         <dl className="figp-specs">
@@ -358,6 +376,75 @@ function Figure({ shot, pin }: { shot: ProjectShot; pin?: React.ReactNode }) {
 
       {shot.caption && <figcaption>{shot.caption}</figcaption>}
     </figure>
+  );
+}
+
+/*
+  The greyboxes. Every wireframe shares the same shell (sidebar, header,
+  canvas) so the differences between them read as decisions rather than as
+  four unrelated drawings. `b` is a generic block, `l` a text line.
+*/
+function WireFrame({ layout }: { layout: "entry" | "listen" | "chat" | "review" }) {
+  return (
+    <div className="wf">
+      <div className="wf-rail">
+        <span className="wf-b wf-b--pill" />
+        <span className="wf-l" />
+        <span className="wf-l wf-l--short" />
+        <span className="wf-l wf-l--short" />
+      </div>
+      <div className="wf-main">
+        <div className="wf-head">
+          <span className="wf-b wf-b--sq" />
+          <span className="wf-l wf-l--title" />
+        </div>
+
+        {layout === "entry" && (
+          <div className="wf-body wf-body--center">
+            <span className="wf-l wf-l--wide" />
+            <span className="wf-mic" />
+            <span className="wf-l wf-l--short" />
+            <span className="wf-input" />
+          </div>
+        )}
+
+        {layout === "listen" && (
+          <div className="wf-body wf-body--center">
+            <span className="wf-mic wf-mic--live" />
+            <span className="wf-wave">
+              {Array.from({ length: 14 }, (_, i) => (
+                <i key={i} style={{ height: `${20 + ((i * 37) % 60)}%` }} />
+              ))}
+            </span>
+            <span className="wf-l wf-l--short" />
+          </div>
+        )}
+
+        {layout === "chat" && (
+          <div className="wf-body">
+            <span className="wf-bubble wf-bubble--me" />
+            <span className="wf-bubble wf-bubble--bot" />
+            <span className="wf-bubble wf-bubble--me wf-bubble--sm" />
+            <span className="wf-input" />
+          </div>
+        )}
+
+        {layout === "review" && (
+          <div className="wf-body wf-body--center">
+            <span className="wf-card">
+              <i className="wf-tag" />
+              <i className="wf-l" />
+              <i className="wf-l wf-l--short" />
+              <i className="wf-actions">
+                <b />
+                <b />
+              </i>
+            </span>
+            <span className="wf-l wf-l--short" />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
