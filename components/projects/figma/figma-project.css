@@ -79,6 +79,24 @@
      a border, ring or fill uses this, so hover feedback stays the real
      orange instead of the readable compromise. */
   --figp-accent-solid: var(--figp-accent-solid-set, var(--figp-accent));
+  /* Louder again, for the handful of surfaces meant to be spotted rather
+     than read through: the cursor, its name tag, the comment pins, the
+     selection highlight. --figp-accent-ink is whatever stays legible on
+     top of it — see Project.accent. */
+  --figp-accent-bright: var(--figp-accent-bright-set, var(--figp-accent-solid));
+  /* The deep end of the accent — the value white text is legible on in
+     either theme. The light-theme accent is already exactly this shade,
+     which is why it is reused rather than being another thing to sync. */
+  --figp-accent-deep: var(--figp-accent-light, var(--purple, #7c3aed));
+  /* What a surface becomes when it fills with the accent. Deep by default,
+     so an unaccented project stays readable; a project that names its own
+     `fill` is choosing its brand colour over the contrast. */
+  --figp-accent-fill: var(--figp-accent-fill-set, var(--figp-accent-deep));
+  /* The unaccented default is the dark theme's lavender, which white sits on
+     at 2.3:1 — so the fallback ink here is dark. The light theme, where the
+     same slot holds a deep purple, overrides it back to white below. A
+     project that declares its own `ink` beats both. */
+  --figp-accent-ink: var(--figp-accent-ink-set, #1c1033);
 }
 
 /* layout stays on the page root only — the token scope above is shared with
@@ -148,6 +166,8 @@ html[data-theme="light"] .figp-share-backdrop {
      purple is the same hue at a weight that works on light, and it also
      improves the white-on-accent comment pins and cursor tag. */
   --figp-accent: var(--figp-accent-light, var(--purple, #7c3aed));
+  /* the light theme's default accent is the deep purple, which takes white */
+  --figp-accent-ink: var(--figp-accent-ink-set, #ffffff);
 
   /* Figma's #0D99FF clears 4.5:1 against the dark canvas (4.59) but only
      manages 2.99 on white, which fails for the Share button and the "Copy
@@ -160,9 +180,20 @@ html[data-theme="light"] .figp-share-backdrop {
   color: inherit;
 }
 
-.figp ::selection {
-  background: rgba(13, 153, 255, 0.75);
-  color: #fff;
+/*
+  Selecting text in a case study highlights it in that case study's own
+  colour — orange inside CPGRAMS, the site purple in a project that has not
+  set an accent. The share dialog is portaled out of .figp, so it needs
+  naming separately or the one surface floating over the page would be the
+  one still highlighting Figma blue.
+
+  Kept a touch translucent so the glyphs underneath stay crisp, and paired
+  with --figp-accent-ink because white on a saturated orange is 2.3:1.
+*/
+.figp ::selection,
+.figp-share-backdrop ::selection {
+  background: color-mix(in srgb, var(--figp-accent-bright) 88%, transparent);
+  color: var(--figp-accent-ink);
 }
 
 /* ---- Figma's own UI typeface, on the interface only ----
@@ -347,6 +378,12 @@ html[data-theme="light"] .figp-share-backdrop {
   color: var(--figp-text-strong);
 }
 
+/* inside the collapsed pill there is no row to push right, so the desktop
+   auto margin is dropped and the two controls just sit side by side */
+.figp-live-btn--pill {
+  margin: 0;
+}
+
 .figp-pill-share {
   height: 26px;
   padding: 0 12px;
@@ -450,8 +487,74 @@ html[data-theme="light"] .figp-lfile img {
   background: var(--figp-hover);
 }
 
-/* Share sits top-right ahead of the close, and now carries the auto margin
-   that used to push .figp-close over — the pair travels right together */
+/*
+  ---- Live ----
+  Share hands somebody this page; Live hands them the product. They belong
+  next to each other, and Live goes first because it is the one that leaves
+  for the actual work. Outlined rather than filled so it reads as the
+  quieter of the pair up here — the hero button is where the loud version
+  of this invitation lives.
+*/
+.figp a.figp-live-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 8px;
+  align-self: center;
+  height: 26px;
+  padding: 0 11px;
+  border: 1px solid var(--figp-accent-solid);
+  border-radius: 6px;
+  color: var(--figp-accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.figp a.figp-live-btn:hover,
+.figp a.figp-live-btn:focus-visible {
+  background: var(--figp-accent-solid);
+  color: var(--figp-accent-ink);
+}
+
+/* the pulse is the whole point of the control: it says running, not opens */
+.figp-live-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+  animation: figp-live-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes figp-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-live-dot {
+    animation: none;
+  }
+}
+
+/* Share sits top-right ahead of the close. The auto margin that pushes the
+   pair right belongs to whichever control comes first, so when Live is
+   present it takes it and Share sits flush against it. */
+.figp-live-btn + .figp-share-btn {
+  margin-left: 0;
+}
+
 .figp-share-btn {
   display: inline-flex;
   align-items: center;
@@ -584,6 +687,7 @@ html[data-theme="light"] .figp-lfile img {
     border-radius: 7px;
     font-size: 12px;
   }
+
 }
 
 /* ============ share dialog ============
@@ -1208,16 +1312,105 @@ html[data-theme="light"] .figp-lfile img {
    3.6rem under a 44px tab bar reads as a document heading; the extra air
    is what makes it read as the opening of a piece of work. The tail stays
    deep because the dock floats over the bottom. */
+/* 1180 rather than 1100: the section rail costs the content column ~13rem,
+   and this gives most of it back rather than making every screenshot pay
+   for the heading beside it. */
 .figp-page-body {
   position: relative;
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: clamp(4.5rem, 9vw, 8rem) 2rem 10rem;
 }
 
+/* the head runs the full canvas now that the cover sits inside it; the
+   reading measure moved down to .figp-hero-copy, which still caps at 62ch */
 .figp-head {
   position: relative;
+}
+
+/*
+  The opening: the argument on the left, the artwork it is about on the
+  right. Deliberately not 50/50 — the copy is the thing being read and the
+  cover is the thing being recognised, so the split favours the text and
+  the image is allowed to be smaller than a hero image usually is.
+*/
+.figp-hero {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3.4rem);
+  align-items: start;
+}
+
+/*
+  1000px, not the 900 you would reach for. The canvas is not the viewport
+  here — both sidebars come out of it — so a 900px window leaves the head
+  around 580px, and splitting that in two gives a title column too narrow
+  for a project name to sit on one line. A viewport query rather than a
+  container query on purpose: the canvas widens when the chrome collapses
+  on scroll, and a container query would reflow the hero underneath a
+  reader who was only scrolling past it.
+*/
+@media (min-width: 1000px) {
+  .figp-hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: center;
+  }
+}
+
+.figp-hero-copy {
   max-width: 62ch;
+}
+
+.figp-hero-cover {
+  position: relative;
+  margin: 0;
+  border-radius: 6px;
+  background: var(--figp-panel);
+  box-shadow: 0 0 0 1px var(--figp-shot-ring), var(--figp-shadow-dock);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* the clip, kept off the figure so a comment pin can hang outside it */
+.figp-hero-frame {
+  display: block;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.figp-hero-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* a cover is a poster, not a screenshot: a common frame keeps the opening
+     the same shape whatever ratio a given project's artwork happens to be */
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .figp-hero-cover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 1.5px var(--figp-accent-solid), var(--figp-shadow-dock);
+  }
+
+  /* the frame stays put and the picture moves inside it, which reads as a
+     window onto the work rather than a card being nudged */
+  .figp-hero-cover:hover img {
+    transform: scale(1.035);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-hero-cover,
+  .figp-hero-cover img {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .figp-hero-cover:hover,
+  .figp-hero-cover:hover img {
+    transform: none;
+  }
 }
 
 .figp-back {
@@ -1268,33 +1461,98 @@ html[data-theme="light"] .figp-lfile img {
   color: var(--figp-body-text);
 }
 
+/*
+  ---- the at-a-glance summary ----
+  These were label/value rows in a bordered list, which read as small print
+  under the summary. As a row of cards the same facts read as the project's
+  own metadata — the panel a design file would show you about itself — and
+  they get somewhere for a hover to happen.
+*/
 .figp-facts {
-  margin: 2.4rem 0 0;
+  margin: clamp(2.8rem, 5vw, 4rem) 0 0;
   display: grid;
-  gap: 0;
-  border-top: 1px solid var(--figp-line);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
 }
 
 .figp-fact {
-  display: grid;
-  grid-template-columns: 8.5rem 1fr;
-  gap: 1.2rem;
-  padding: 0.72rem 0;
-  border-bottom: 1px solid var(--figp-line);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.95rem 1.05rem 1.05rem;
+  border: 1px solid var(--figp-line);
+  border-radius: 7px;
+  background: var(--figp-panel);
+  overflow: hidden;
+  transition: transform 0.2s ease-out, border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+}
+
+/* the accent rule that wipes in on hover. A pseudo-element rather than a
+   border so the card cannot change size as it arrives. */
+.figp-fact::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--figp-accent-solid);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Tools carries wrapping chips, so it takes the whole row rather than
+   being squeezed into a third of one */
+.figp-fact--wide {
+  grid-column: 1 / -1;
 }
 
 .figp-fact dt {
-  font-size: 0.76rem;
-  letter-spacing: 0.04em;
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--figp-text-dim);
+  transition: color 0.2s ease-out;
 }
 
 .figp-fact dd {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.94rem;
+  line-height: 1.45;
   color: var(--figp-fact-value);
+}
+
+@media (hover: hover) {
+  .figp-fact:hover {
+    transform: translateY(-2px);
+    border-color: var(--figp-border-soft);
+    box-shadow: var(--figp-shadow-dock);
+  }
+
+  .figp-fact:hover::before {
+    transform: scaleY(1);
+  }
+
+  .figp-fact:hover dt {
+    color: var(--figp-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-fact,
+  .figp-fact::before {
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .figp-fact:hover {
+    transform: none;
+  }
+
+  /* the rule still resolves, it just appears instead of wiping */
+  .figp-fact:hover::before {
+    transform: scaleY(1);
+  }
 }
 
 .figp-toolchips {
@@ -1311,21 +1569,65 @@ html[data-theme="light"] .figp-lfile img {
   color: var(--figp-fact-value);
 }
 
-.figp-ext {
+/*
+  The one link on the page that leaves for the shipped product. It was a
+  small underlined text link sitting under a wall of facts, which is where
+  a footnote goes, not where the main action goes. Now a filled button in
+  the project's own colour, immediately under the summary that just
+  described the thing it opens.
+*/
+/* `.figp a { color: inherit }` outranks a single class, so both of the new
+   link-shaped buttons have to name the root to keep their own colour */
+.figp a.figp-ext {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  margin-top: 2rem;
-  font-size: 0.86rem;
-  color: var(--figp-blue);
+  gap: 0.5rem;
+  margin-top: 1.9rem;
+  padding: 0.72rem 1.25rem;
+  border-radius: 8px;
+  background: var(--figp-accent-solid);
+  color: var(--figp-accent-ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 8px 22px
+    color-mix(in srgb, var(--figp-accent-solid) 28%, transparent);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out,
+    filter 0.18s ease-out;
+}
+
+.figp-ext svg {
+  transition: transform 0.18s ease-out;
 }
 
 .figp-ext:hover,
 .figp-ext:focus-visible {
-  border-bottom-color: currentColor;
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16), 0 12px 28px
+    color-mix(in srgb, var(--figp-accent-solid) 36%, transparent);
+}
+
+/* the arrow leaves in the direction it points, which is the whole reason
+   it is an up-right arrow and not a chevron */
+.figp-ext:hover svg,
+.figp-ext:focus-visible svg {
+  transform: translate(2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-ext,
+  .figp-ext svg {
+    transition: filter 0.15s ease;
+  }
+
+  .figp-ext:hover,
+  .figp-ext:focus-visible,
+  .figp-ext:hover svg,
+  .figp-ext:focus-visible svg {
+    transform: none;
+  }
 }
 
 /* ---- highlights ---- */
@@ -1457,26 +1759,86 @@ html[data-theme="light"] .figp-lfile img {
    The small label above each section is Figma's own frame name, sitting
    above the frame edge (the hairline under it). It costs one line and it is
    what keeps a page of paragraphs reading as a design file. */
+/* The gap is the separation; the rule only marks where the next frame
+   starts. Both got bigger together — a heavier divider with the old spacing
+   would have read as a boxed-in table rather than a run of frames. */
 .figp-sections {
   margin-top: 5.5rem;
   display: flex;
   flex-direction: column;
-  gap: 6.5rem;
+  gap: 7.5rem;
 }
 
+/*
+  Two columns from 1000px: the section's name and heading on a rail, the
+  work itself in the column beside it.
+
+  This page used to run every block at a 62ch measure starting from the left
+  edge, which left roughly a third of an 1100px canvas permanently blank
+  down the right-hand side. Moving the headings out of the flow and into
+  their own rail spends that space on the thing it was always missing —
+  somewhere for the reader's eye to find out where they are — and lets the
+  content column run wide enough to actually fill the frame.
+*/
+/*
+  The divider between two frames.
+
+  A plain 1px hairline running the full canvas read as a table row rule —
+  it separated the sections without ever saying which side of it you were
+  on. This is a short accent tick that hands over to the hairline: the tick
+  marks where the new frame starts, the hairline carries the separation
+  across, and the whole thing fades out before the right edge so the page
+  does not end on a hard line.
+*/
 .figp-section {
   position: relative;
-  border-top: 1px solid var(--figp-line);
-  padding-top: 0.55rem;
+  padding-top: 1.85rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 1.4rem;
+}
+
+.figp-section::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--figp-accent-solid) 0,
+    var(--figp-accent-solid) 2.75rem,
+    var(--figp-line) 2.75rem,
+    var(--figp-line) 62%,
+    transparent 100%
+  );
+}
+
+@media (min-width: 1000px) {
+  .figp-section {
+    /* the rail is deliberately tight. Every pixel it takes comes off the
+       screenshots beside it, and a section name plus a two-line heading
+       does not need more than this. */
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+    column-gap: clamp(1.75rem, 3vw, 2.75rem);
+  }
+
+  /* holds while the section scrolls past, so the frame you are inside is
+     always named on screen. `align-self: start` is load-bearing — a grid
+     item stretches by default, and a stretched box cannot stick. */
+  .figp-section-rail {
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+  }
 }
 
 /* Rhythm between blocks is owned here rather than by each block type. Pairing
    them individually (prose + stats, stats + prose, numbered + prose …) means
    every new CaseBlock kind needs N new rules and the one nobody writes is the
    one that ships flush against its neighbour. One adjacent-sibling rule can't
-   have that gap. The two exceptions are the label and the heading, which
-   introduce what follows them and carry their own tighter spacing. */
-.figp-section > * + * {
+   have that gap. */
+.figp-section-body > * + * {
   margin-top: 2.4rem;
 }
 
@@ -1496,6 +1858,10 @@ html[data-theme="light"] .figp-lfile img {
 .figp-numbered + .figp-gallery-fig,
 .figp-numbered + .figp-grid-fig,
 .figp-numbered + .figp-bars-fig,
+.figp-prose + .figp-palette-fig,
+.figp-prose + .figp-typeset-fig,
+.figp-prose + .figp-results-fig,
+.figp-prose + .figp-decisions,
 .figp-statement + .figp-shot,
 .figp-specs + .figp-shot,
 .figp-stats + .figp-shot,
@@ -1513,28 +1879,53 @@ html[data-theme="light"] .figp-lfile img {
 .figp-cover-fig + .figp-prose,
 .figp-wires-fig + .figp-prose,
 .figp-screens + .figp-prose,
-.figp-screens + .figp-gallery-fig {
+.figp-screens + .figp-gallery-fig,
+.figp-palette-fig + .figp-typeset-fig,
+.figp-typeset-fig + .figp-grid-fig,
+.figp-compare-fig + .figp-results-fig,
+.figp-results-fig + .figp-prose {
   margin-top: 4rem;
 }
 
-.figp-frame-label + *,
-.figp-section-head + * {
-  margin-top: 0;
+/*
+  The frame's name, as a proper tag.
+
+  It used to be 11px of lowercase grey hanging on a negative margin above
+  the frame edge — a faithful copy of how Figma draws a frame name, and at
+  this size on this page it just read as unstyled text somebody forgot to
+  finish. Now it is a chip: uppercase, tracked out, with an accent dot that
+  ties it to the tick on the rule above it.
+*/
+.figp-frame-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  margin: 0 0 1.1rem;
+  padding: 0.24rem 0.62rem 0.26rem 0.55rem;
+  border: 1px solid var(--figp-chip-border);
+  border-radius: 999px;
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--figp-text-dim);
+  user-select: none;
 }
 
-.figp-frame-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: var(--figp-text-faint);
-  user-select: none;
-  /* pulled above its own frame edge, the way Figma draws a frame name */
-  margin: -1.55rem 0 1.9rem;
+.figp-frame-label::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--figp-accent-solid);
 }
 
 .figp-section-head {
-  margin: 0 0 1.4rem;
+  margin: 0;
   max-width: 24ch;
   font-family: var(--font-archivo), var(--font-primary);
   font-size: clamp(1.5rem, 3.2vw, 2.05rem);
@@ -1548,6 +1939,12 @@ html[data-theme="light"] .figp-lfile img {
   interactive, so the effect carries no meaning and its absence costs a
   touch user nothing. 200ms sits inside the 150-300ms micro-interaction
   window; anything slower reads as lag on a pointer move.
+
+  --figp-accent-solid rather than --figp-accent: the latter darkens on the
+  light canvas to clear the 4.5:1 text bar, which is right for copy you
+  have to read and wrong for a heading that is only briefly tinted. These
+  get the brand colour at full strength in both themes; the resting state
+  is full-contrast ink, so nothing is ever only legible on hover.
 */
 .figp-section-head,
 .figp-screen-title,
@@ -1559,7 +1956,7 @@ html[data-theme="light"] .figp-lfile img {
   .figp-section-head:hover,
   .figp-screen-title:hover,
   .figp-name:hover {
-    color: var(--figp-accent);
+    color: var(--figp-accent-solid);
   }
 }
 
@@ -1571,9 +1968,14 @@ html[data-theme="light"] .figp-lfile img {
   }
 }
 
-/* ---- prose ---- */
+/* ---- prose ----
+   74ch rather than 62. The headings moved out to the rail, so this column
+   is what fills the canvas now; at 62 it left a wide strip of empty page
+   down the right of every paragraph. 74 is the top of the comfortable
+   measure rather than the middle of it — a deliberate trade, because the
+   alternative on this canvas is a third of the frame reading as blank. */
 .figp-prose {
-  max-width: 62ch;
+  max-width: 74ch;
 }
 
 .figp-prose p {
@@ -1601,7 +2003,7 @@ html[data-theme="light"] .figp-lfile img {
   margin: 0;
   padding: 0;
   list-style: none;
-  max-width: 62ch;
+  max-width: 74ch;
   display: grid;
   gap: 1.7rem;
 }
@@ -1685,7 +2087,7 @@ html[data-theme="light"] .figp-lfile img {
 /* ---- design-system rows ---- */
 .figp-specs {
   margin: 0;
-  max-width: 62ch;
+  max-width: 74ch;
   border-top: 1px solid var(--figp-line);
 }
 
@@ -1735,6 +2137,635 @@ html[data-theme="light"] .figp-lfile img {
   color: var(--figp-text-faint);
 }
 
+/* ---- the brief: the whole case study on one screen ----
+   Read as a set rather than a sequence, so it is a grid rather than a
+   stack, and every card is the same shape whatever it holds. The label is
+   the load: a reader skimming six accent words down the left should come
+   away with the shape of the project without reading a single body line. */
+.figp-brief {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.75rem;
+}
+
+.figp-brief-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1.1rem 1.2rem 1.2rem;
+  border: 1px solid var(--figp-line);
+  border-radius: 8px;
+  background: var(--figp-panel);
+  overflow: hidden;
+  transition: transform 0.2s ease-out, border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.figp-brief-card dt,
+.figp-brief-card dd,
+.figp-brief-card .figp-term {
+  transition: color 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+/* the overview is the sentence the other five qualify, so it takes the row */
+.figp-brief-card--wide {
+  grid-column: 1 / -1;
+}
+
+/* smaller and tracked further out than a heading would be — this is a
+   field label, and at 0.68rem/700 it was competing with the line under it */
+.figp-brief-card dt {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--figp-accent);
+}
+
+.figp-brief-card dd {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--figp-body-text);
+}
+
+.figp-brief-card--wide dd {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--figp-ink);
+  max-width: 74ch;
+}
+
+/*
+  The whole card fills with the accent on hover.
+
+  --figp-accent-fill is the project's own choice of what that fill is: the
+  deep shade by default, which white clears 4.9:1 on, or the brand colour
+  where a project would rather be recognisably itself. CPGRAMS takes the
+  second — white on its saffron measures 2.9:1, below the text bar, and
+  that is a deliberate call on a transient hover state whose resting state
+  is fully legible.
+*/
+@media (hover: hover) {
+  .figp-brief-card:hover {
+    transform: translateY(-2px);
+    background: var(--figp-accent-fill);
+    border-color: var(--figp-accent-fill);
+    box-shadow: var(--figp-shadow-dock);
+  }
+
+  .figp-brief-card:hover dt,
+  .figp-brief-card:hover dd {
+    color: #fff;
+  }
+
+  /* the term marker is a tint of the accent, which is invisible once the
+     card IS the accent — it becomes a translucent white wash instead */
+  .figp-brief-card:hover .figp-term {
+    color: #fff;
+    box-shadow: inset 0 -0.42em 0 rgba(255, 255, 255, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-brief-card:hover {
+    transform: none;
+  }
+}
+
+/* ---- one beat of a flow: two screens and what they decide ----
+   The gap inside a step is small and the gap between steps is large, which
+   is the whole structure: the explanation has to read as belonging to the
+   two screens above it rather than floating between two pairs. */
+.figp-step {
+  margin: 0;
+}
+
+.figp-step + .figp-step,
+.figp-prose + .figp-step,
+.figp-step + .figp-prose,
+.figp-step + .figp-gallery-fig,
+.figp-gallery-fig + .figp-step {
+  margin-top: clamp(3.4rem, 6vw, 5rem);
+}
+
+.figp-step-shots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.figp-step-shot {
+  display: block;
+  transition: transform 0.18s ease-out;
+}
+
+.figp-step-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+  transition: box-shadow 0.18s ease-out;
+}
+
+.figp-step-label {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--figp-text-faint);
+}
+
+/* tight to the screens above it, and set on the accent rule so the eye can
+   see at a glance which explanation belongs to which pair */
+.figp-step-body {
+  margin-top: 1.7rem;
+  padding-left: 1.15rem;
+  border-left: 2px solid color-mix(in srgb, var(--figp-accent-solid) 30%, transparent);
+  max-width: 74ch;
+}
+
+.figp-step-body p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.72;
+  color: var(--figp-body-text);
+}
+
+.figp-step-body p + p {
+  margin-top: 1rem;
+}
+
+@media (hover: hover) {
+  .figp-step-shot:hover {
+    transform: translateY(-3px);
+  }
+
+  .figp-step-shot:hover img {
+    box-shadow: 0 0 0 1.5px var(--figp-accent-solid), 0 10px 30px rgba(0, 0, 0, 0.16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-step-shot:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .figp-step-body {
+    margin-top: 1.3rem;
+    padding-left: 0.9rem;
+  }
+}
+
+/* ---- inline emphasis on the terms the argument turns on ----
+   A tint plus a low, thick underline rather than bold: at this measure a
+   bold run every other line makes the paragraph look moth-eaten, while an
+   underline sitting under the baseline reads as a marker pass over the
+   page — which is exactly what it is. The colour is the project's, so the
+   marked words also tie the prose to everything else on the canvas. */
+.figp-term {
+  font-weight: 600;
+  color: var(--figp-ink);
+  box-shadow: inset 0 -0.42em 0 color-mix(in srgb, var(--figp-accent-solid) 22%, transparent);
+  /* the shadow is painted behind the glyphs, so descenders stay readable */
+  padding: 0 0.06em;
+}
+
+/* ---- the decisions ----
+   A ruling and a reason, not a finding in a list. The ruling gets the type
+   size because it is the part somebody skimming can use on its own. */
+.figp-decisions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+  gap: 0.85rem;
+}
+
+.figp-decision {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.15rem 1.25rem 1.3rem;
+  border: 1px solid var(--figp-line);
+  border-radius: 8px;
+  background: var(--figp-panel);
+  overflow: hidden;
+  transition: transform 0.2s ease-out, border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+}
+
+.figp-decision-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.figp-decision-index {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--figp-accent);
+}
+
+/* matched to the frame-label chip, so every tag on the page is one shape */
+.figp-decision-tag {
+  padding: 0.2rem 0.58rem 0.22rem;
+  border: 1px solid var(--figp-chip-border);
+  border-radius: 999px;
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.61rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+  white-space: nowrap;
+}
+
+.figp-decision-label {
+  margin: 0;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: 1.02rem;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+  color: var(--figp-ink);
+}
+
+.figp-decision-body {
+  margin: 0;
+  font-size: 0.87rem;
+  line-height: 1.6;
+  color: var(--figp-body-text);
+}
+
+/* the big ghosted numeral. Purely ornamental and purely behind the text,
+   which is why it is a pseudo-element on the card and not the index span
+   the reader can actually select. */
+.figp-decision::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  bottom: -26px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--figp-accent-solid) 9%, transparent);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.28s ease-out, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .figp-decision:hover {
+    transform: translateY(-3px);
+    border-color: var(--figp-accent-solid);
+    box-shadow: var(--figp-shadow-dock);
+  }
+
+  .figp-decision:hover::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-decision,
+  .figp-decision::after {
+    transition: border-color 0.15s ease, opacity 0.15s ease;
+  }
+
+  .figp-decision:hover {
+    transform: none;
+  }
+
+  .figp-decision:hover::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---- the palette, at a size where the colours are the content ----
+   A 12px chip beside a hex is right for a spec row and useless for the
+   section that is about the palette: you cannot judge a colour you cannot
+   see enough of, or judge it against the one beside it. */
+.figp-palette-fig {
+  margin: 0;
+}
+
+.figp-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+}
+
+.figp-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.figp-swatch-chip {
+  display: flex;
+  align-items: flex-end;
+  height: 116px;
+  padding: 0.6rem 0.7rem;
+  margin-bottom: 0.6rem;
+  border-radius: 7px;
+  /* the ring is what stops #FFFBEF from disappearing into the light canvas */
+  box-shadow: inset 0 0 0 1px var(--figp-swatch-border);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease-out;
+}
+
+/* the hex lives inside the colour it names, and takes its legibility from
+   a scrim rather than from a guess about whether the tile is light or dark */
+.figp-swatch-hex {
+  padding: 0.16rem 0.42rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #fff;
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.figp-swatch-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--figp-ink);
+}
+
+.figp-swatch-use {
+  font-size: 0.79rem;
+  line-height: 1.45;
+  color: var(--figp-text-faint);
+}
+
+@media (hover: hover) {
+  .figp-swatch:hover .figp-swatch-chip {
+    transform: translateY(-3px);
+    box-shadow: inset 0 0 0 1px var(--figp-swatch-border), var(--figp-shadow-dock);
+  }
+
+  .figp-swatch:hover .figp-swatch-hex {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* no hover to reveal on a touch screen, so the value is simply always there */
+@media (hover: none) {
+  .figp-swatch-hex {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-swatch-chip,
+  .figp-swatch-hex {
+    transition: box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+
+  .figp-swatch:hover .figp-swatch-chip {
+    transform: none;
+  }
+
+  .figp-swatch:hover .figp-swatch-hex {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- typefaces, set in themselves ----
+   "Interface — Inter" as a table row tells the reader nothing a specimen
+   does not tell them better, and a page about a 22-language product has a
+   particular obligation to show the script it is claiming to support. */
+.figp-typeset-fig {
+  margin: 0;
+}
+
+.figp-typeset {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.figp-type {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.1rem 1.25rem 1.2rem;
+  border: 1px solid var(--figp-line);
+  border-radius: 8px;
+  background: var(--figp-panel);
+  transition: border-color 0.2s ease-out;
+}
+
+.figp-type-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.figp-type-role {
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+.figp-type-family {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--figp-accent);
+}
+
+.figp-type-sample {
+  font-size: clamp(1.35rem, 3.4vw, 1.95rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--figp-ink);
+  /* a specimen line runs on rather than wrapping into a paragraph */
+  overflow-wrap: anywhere;
+}
+
+.figp-type-use {
+  font-size: 0.79rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+@media (hover: hover) {
+  .figp-type:hover {
+    border-color: var(--figp-accent-solid);
+  }
+}
+
+/* ---- the outcome, with the provenance on the number ---- */
+.figp-results-fig {
+  margin: 0;
+}
+
+.figp-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.85rem;
+}
+
+.figp-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.25rem 1.25rem 1.35rem;
+  border: 1px solid var(--figp-line);
+  border-top: 2px solid var(--figp-accent-solid);
+  border-radius: 0 0 8px 8px;
+  background: var(--figp-panel);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+/* A projection is not a result. It keeps the card but loses the accent rule
+   and carries a label, so the two can never be skimmed as the same claim. */
+.figp-result--projected {
+  border-top-color: var(--figp-line);
+  border-top-style: dashed;
+  background: transparent;
+}
+
+.figp-result-value {
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.9rem, 4.6vw, 2.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--figp-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.figp-result--projected .figp-result-value {
+  color: var(--figp-text-mid);
+}
+
+.figp-result-label {
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--figp-fact-value);
+}
+
+.figp-result-note {
+  font-size: 0.79rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+.figp-result-flag {
+  margin-top: 0.35rem;
+  align-self: flex-start;
+  padding: 0.12rem 0.5rem;
+  border: 1px dashed var(--figp-chip-border);
+  border-radius: 999px;
+  font-size: 0.67rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+.figp-results-fig figcaption {
+  margin-top: 1.1rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 60ch;
+}
+
+@media (hover: hover) {
+  .figp-result:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--figp-shadow-dock);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figp-result:hover {
+    transform: none;
+  }
+}
+
+/* ---- what the work taught ----
+   Three claims with room around them, rather than three paragraphs of grey
+   nobody reaches the end of. The rule down the left is the only ornament:
+   it makes each lesson a block you can stop at. */
+.figp-lessons {
+  display: grid;
+  gap: 2.4rem;
+  max-width: 74ch;
+}
+
+.figp-lesson {
+  position: relative;
+  padding-left: 1.6rem;
+  border-left: 2px solid color-mix(in srgb, var(--figp-accent-solid) 32%, transparent);
+  transition: border-color 0.25s ease-out;
+}
+
+.figp-lesson-index {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--figp-accent);
+}
+
+.figp-lesson-title {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.15rem, 2.7vw, 1.45rem);
+  line-height: 1.25;
+  letter-spacing: -0.018em;
+  color: var(--figp-ink);
+}
+
+.figp-lesson-body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--figp-body-text);
+}
+
+@media (hover: hover) {
+  .figp-lesson:hover {
+    border-left-color: var(--figp-accent-solid);
+  }
+}
+
+@media (max-width: 720px) {
+  .figp-lessons {
+    gap: 1.9rem;
+  }
+
+  .figp-lesson {
+    padding-left: 1.1rem;
+  }
+}
+
 /* ---- a row of phone screens ---- */
 .figp-gallery-fig {
   margin: 0;
@@ -1753,6 +2784,40 @@ html[data-theme="light"] .figp-lfile img {
   gap: 1rem;
   align-items: start;
   max-width: 900px;
+}
+
+/*
+  Character art, not a phone screen.
+
+  The default frame is a 9:17.5 window because that is the shape of the
+  thing it usually holds. A mascot in that frame is a tall vertical slice
+  of a saree with her face cropped off the top, and at full column width
+  seven of them dominate a section that is only introducing her. Halved,
+  squared off, and the whole drawing shown.
+*/
+.figp-gallery--compact {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.85rem;
+  max-width: 620px;
+}
+
+.figp-gallery--compact .figp-gallery-frame img {
+  aspect-ratio: 1 / 1;
+  /* contain, not cover: cropping is the thing being fixed here */
+  object-fit: contain;
+  object-position: center;
+  background: var(--figp-hover);
+}
+
+/* the fade exists to soften a deliberate crop; there is no crop to soften
+   once the art is contained, so it would just be a grey band over her feet */
+.figp-gallery--compact .figp-gallery-frame::after {
+  display: none;
+}
+
+.figp-gallery--compact .figp-gallery-label {
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
 }
 
 .figp-gallery-item {
@@ -2011,7 +3076,7 @@ html[data-theme="light"] .figp-lfile img {
 
 .figp-bars {
   margin: 0;
-  max-width: 62ch;
+  max-width: 74ch;
   display: grid;
   gap: 1.15rem;
 }
@@ -2064,7 +3129,7 @@ html[data-theme="light"] .figp-lfile img {
 /* ============ coverage matrix ============ */
 .figp-cover-fig {
   margin: 0;
-  max-width: 62ch;
+  max-width: 74ch;
 }
 
 .figp-cover-grid {
@@ -2116,7 +3181,7 @@ html[data-theme="light"] .figp-lfile img {
 }
 
 .figp-screen-head {
-  max-width: 62ch;
+  max-width: 74ch;
 }
 
 .figp-screen-step {
@@ -2537,11 +3602,15 @@ html[data-theme="light"] .figp-lfile img {
 @media (max-width: 720px) {
   .figp-sections {
     margin-top: 3rem;
-    gap: 3.4rem;
+    gap: 4rem;
+  }
+
+  .figp-section {
+    padding-top: 1.5rem;
   }
 
   .figp-frame-label {
-    margin-bottom: 1.4rem;
+    margin-bottom: 1rem;
   }
 
   .figp-numbered li {
@@ -2577,6 +3646,22 @@ html[data-theme="light"] .figp-lfile img {
     scroll-snap-align: center;
   }
 
+  /* The swipe strip exists because a phone screenshot has to stay large
+     enough to read. Mascot art has no UI in it to read, so it stays a grid
+     and simply gets smaller — seven poses behind a horizontal scroll is a
+     set the reader never sees as a set. */
+  .figp-gallery--compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    overflow-x: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .figp-gallery--compact .figp-gallery-item {
+    flex: initial;
+  }
+
   /* a wide desktop screen at 335px is unreadable, so those scroll too */
   .figp-grid {
     display: flex;
@@ -2593,6 +3678,28 @@ html[data-theme="light"] .figp-lfile img {
   }
 
   .figp-grid-item {
+    flex: 0 0 88%;
+    scroll-snap-align: center;
+  }
+
+  /* a step's two screens are the same wide desktop shots, so they swipe for
+     the same reason. The explanation underneath stays put — it is the one
+     part of a step that has to be read, not looked at. */
+  .figp-step-shots {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .figp-step-shots::-webkit-scrollbar {
+    display: none;
+  }
+
+  .figp-step-shot {
     flex: 0 0 88%;
     scroll-snap-align: center;
   }
@@ -2653,14 +3760,30 @@ html[data-theme="light"] .figp-lfile img {
   right: 20px;
 }
 
+/* on the hero cover the note opens to the LEFT of its dot, back over the
+   copy column: anchored right like the others it would run off the canvas,
+   since this frame already sits against the right edge */
+.figp-pin--cover {
+  top: -14px;
+  left: -12px;
+  flex-direction: row-reverse;
+}
+
+.figp-pin--cover .figp-pin-note {
+  border-radius: 12px 3px 12px 12px;
+}
+
 .figp-pin-dot {
   display: grid;
   place-items: center;
   width: 32px;
   height: 32px;
   flex: none;
-  background: var(--figp-accent);
-  color: #fff;
+  /* a comment pin is a flag, not body copy: it takes the loud end of the
+     accent and the ink that stays legible on it, rather than the deeper
+     shade the running text has to use */
+  background: var(--figp-accent-bright);
+  color: var(--figp-accent-ink);
   font-size: 13px;
   font-weight: 700;
   border-radius: 50% 50% 50% 3px;
@@ -2705,8 +3828,8 @@ html[data-theme="light"] .figp-lfile img {
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: var(--figp-accent);
-  color: #fff;
+  background: var(--figp-accent-bright);
+  color: var(--figp-accent-ink);
   font-size: 9.5px;
   font-weight: 700;
 }
@@ -2756,19 +3879,32 @@ html[data-theme="light"] .figp-lfile img {
   }
 }
 
-/* ============ collaborator cursor ============ */
+/* ============ collaborator cursor ============
+   The arrow is a data URI, so its fill cannot come from a variable — the
+   colour is baked into the image. FigmaProjectPage builds the URI from the
+   project's own accent and hands it down as --figp-cursor; the literals
+   below are the fallback for a project with no accent set, which is the
+   site purple the page used to draw for everyone. */
 @media (pointer: fine) {
   .figp {
-    cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E")
-      3 2, auto;
+    cursor: var(
+        --figp-cursor,
+        url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E")
+          3 2
+      ),
+      auto;
   }
 
   .figp a,
   .figp button,
   .figp summary,
   .figp [role="button"] {
-    cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M17.6%2013.6%2021.6%2017.6%2017.6%2021.6%2013.6%2017.6Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M17.6%2013.6%2021.6%2017.6%2017.6%2021.6%2013.6%2017.6Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E")
-      3 2, pointer;
+    cursor: var(
+        --figp-cursor-pointer,
+        url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M3.4%201.95%2019.35%209.49%2012.24%2011.52%208.62%2019.35Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M17.6%2013.6%2021.6%2017.6%2017.6%2021.6%2013.6%2017.6Z'%20fill%3D'none'%20stroke%3D'rgba(0%2C0%2C0%2C.45)'%20stroke-width%3D'2.8'%20stroke-linejoin%3D'round'%2F%3E%3Cpath%20d%3D'M17.6%2013.6%2021.6%2017.6%2017.6%2021.6%2013.6%2017.6Z'%20fill%3D'%23a78bfa'%20stroke%3D'%23fff'%20stroke-width%3D'1.2'%20stroke-linejoin%3D'round'%2F%3E%3C%2Fsvg%3E")
+          3 2
+      ),
+      pointer;
   }
 }
 
@@ -2780,7 +3916,11 @@ html[data-theme="light"] .figp-lfile img {
   margin: 17px 0 0 13px;
   padding: 2px 7px;
   border-radius: 10px;
-  background: var(--figp-accent);
+  /* the tag belongs to the arrow above it, so it takes the same bright
+     value the cursor was drawn in rather than the readable body accent.
+     White label on it, the way Figma's own multiplayer cursors read — this
+     is a 10px decorative name tag, not copy anybody has to read. */
+  background: var(--figp-accent-bright);
   color: #fff;
   font-size: 10.5px;
   font-weight: 600;

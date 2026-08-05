@@ -46,23 +46,66 @@ export default function FigmaCaseSections({
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55, ease: EASE }}
         >
-          <span className="figp-frame-label" aria-hidden="true">
-            {section.name}
-          </span>
+          {/*
+            The section's name and heading ride a rail down the left, and
+            everything else takes the width that was previously empty beside
+            a 62ch column. The rail sticks while the section scrolls, so a
+            reader dropping into the middle of a long frame can always see
+            which one they are in.
+          */}
+          <header className="figp-section-rail">
+            <span className="figp-frame-label" aria-hidden="true">
+              {section.name}
+            </span>
 
-          {section.heading && <h2 className="figp-section-head">{section.heading}</h2>}
+            {section.heading && <h2 className="figp-section-head">{section.heading}</h2>}
+          </header>
 
-          {section.blocks.map((block, i) => (
-            <Block
-              block={block}
-              key={i}
-              pin={firstFigure && firstFigure.s === si && firstFigure.b === i ? pin : undefined}
-            />
-          ))}
+          <div className="figp-section-body">
+            {section.blocks.map((block, i) => (
+              <Block
+                block={block}
+                key={i}
+                pin={firstFigure && firstFigure.s === si && firstFigure.b === i ? pin : undefined}
+              />
+            ))}
+          </div>
         </motion.section>
       ))}
     </div>
   );
+}
+
+/*
+  Inline emphasis for the words the argument turns on.
+
+  A case study this long is an even wall of grey, and the terms actually
+  carrying it — the UX vocabulary, the numbers a paragraph exists to
+  deliver — read the same as the connective tissue around them. `**like
+  this**` in the source marks one.
+
+  It renders as a <b> rather than <strong> on purpose. This is emphasis for
+  an eye scanning the page, not a claim that the phrase is more important
+  than the sentence around it, and promoting forty words a page to <strong>
+  would leave a screen reader shouting most of the document.
+
+  Deliberately the smallest parser that does the job: one delimiter, no
+  nesting, no escape hatch. A Markdown dependency to resolve two asterisks
+  in copy written by the same person who reads it would be the wrong trade.
+*/
+function marked(text: string) {
+  /* splitting on one capture group alternates plain, marked, plain … */
+  return text
+    .split(/\*\*(.+?)\*\*/g)
+    .map((part, i) =>
+      i % 2 ? (
+        <b className="figp-term" key={i}>
+          {part}
+        </b>
+      ) : (
+        part
+      )
+    );
 }
 
 function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
@@ -71,7 +114,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
       return (
         <div className="figp-prose">
           {block.body.map((p) => (
-            <p key={p}>{p}</p>
+            <p key={p}>{marked(p)}</p>
           ))}
         </div>
       );
@@ -93,8 +136,8 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span className="figp-num-body">
-                <strong>{item.label}</strong>
-                <span>{item.body}</span>
+                <strong>{marked(item.label)}</strong>
+                <span>{marked(item.body)}</span>
               </span>
             </motion.li>
           ))}
@@ -122,16 +165,16 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
       );
 
     case "statement":
-      return <p className="figp-statement">{block.text}</p>;
+      return <p className="figp-statement">{marked(block.text)}</p>;
 
     case "figure":
       return <Figure shot={block.shot} pin={pin} />;
 
     case "gallery":
       return (
-        <figure className="figp-gallery-fig">
+        <figure className={`figp-gallery-fig${block.compact ? " figp-gallery-fig--compact" : ""}`}>
           <motion.div
-            className="figp-gallery"
+            className={`figp-gallery${block.compact ? " figp-gallery--compact" : ""}`}
             variants={revealParent}
             initial="hidden"
             whileInView="shown"
@@ -157,7 +200,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               </motion.span>
             ))}
           </motion.div>
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
         </figure>
       );
 
@@ -191,7 +234,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               </motion.span>
             ))}
           </motion.div>
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
         </figure>
       );
 
@@ -227,7 +270,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               </motion.li>
             ))}
           </motion.ol>
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
         </figure>
       );
 
@@ -243,7 +286,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                     <CountUp value={String(lane.steps.length)} />
                   </span>
                 </div>
-                {lane.note && <p className="figp-lane-note">{lane.note}</p>}
+                {lane.note && <p className="figp-lane-note">{marked(lane.note)}</p>}
                 <motion.ol
                   className="figp-lane-steps"
                   variants={revealParent}
@@ -260,7 +303,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               </div>
             ))}
           </div>
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
         </figure>
       );
 
@@ -303,7 +346,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               </motion.div>
             ))}
           </motion.dl>
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
         </figure>
       );
 
@@ -359,7 +402,7 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
               <header className="figp-screen-head">
                 <span className="figp-screen-step">{item.step}</span>
                 <h3 className="figp-screen-title">{item.title}</h3>
-                <p className="figp-screen-body">{item.body}</p>
+                <p className="figp-screen-body">{marked(item.body)}</p>
               </header>
               <img
                 src={item.src}
@@ -392,11 +435,11 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                   <WireFrame layout={item.layout} />
                 </div>
                 <span className="figp-wire-label">{item.label}</span>
-                <span className="figp-wire-note">{item.note}</span>
+                <span className="figp-wire-note">{marked(item.note)}</span>
               </motion.div>
             ))}
           </motion.div>
-          {block.caption && <figcaption>{block.caption}</figcaption>}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
         </figure>
       );
 
@@ -422,6 +465,199 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
             </div>
           ))}
         </dl>
+      );
+
+    case "brief":
+      return (
+        <motion.dl
+          className="figp-brief"
+          variants={revealParent}
+          initial="hidden"
+          whileInView="shown"
+          viewport={inView}
+        >
+          {block.items.map((item) => (
+            <motion.div
+              className={`figp-brief-card${item.wide ? " figp-brief-card--wide" : ""}`}
+              key={item.label}
+              variants={revealChild}
+            >
+              <dt>{item.label}</dt>
+              <dd>{marked(item.body)}</dd>
+            </motion.div>
+          ))}
+        </motion.dl>
+      );
+
+    case "step":
+      return (
+        <section className="figp-step">
+          <motion.div
+            className="figp-step-shots"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
+            {block.items.map((item) => (
+              <motion.span className="figp-step-shot" key={item.src} variants={revealChild}>
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  {...dimsFor(item.src)}
+                  data-figp-node={shotNodeName(item.src)}
+                  data-figp-fill={`image:${item.src}`}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+                {item.label && <span className="figp-step-label">{item.label}</span>}
+              </motion.span>
+            ))}
+          </motion.div>
+
+          <div className="figp-step-body">
+            {block.body.map((p) => (
+              <p key={p}>{marked(p)}</p>
+            ))}
+          </div>
+        </section>
+      );
+
+    case "decisions":
+      return (
+        <motion.ol
+          className="figp-decisions"
+          variants={revealParent}
+          initial="hidden"
+          whileInView="shown"
+          viewport={inView}
+        >
+          {block.items.map((item, i) => (
+            <motion.li className="figp-decision" key={item.label} variants={revealChild}>
+              <span className="figp-decision-head">
+                {/* watermark-scale: it orders the cards without competing
+                    with the ruling for the reader's first look */}
+                <span className="figp-decision-index" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {item.tag && <span className="figp-decision-tag">{item.tag}</span>}
+              </span>
+              <h3 className="figp-decision-label">{marked(item.label)}</h3>
+              <p className="figp-decision-body">{marked(item.body)}</p>
+            </motion.li>
+          ))}
+        </motion.ol>
+      );
+
+    case "palette":
+      return (
+        <figure className="figp-palette-fig">
+          <motion.div
+            className="figp-palette"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
+            {block.items.map((c) => (
+              <motion.div className="figp-swatch" key={c.hex} variants={revealChild}>
+                {/* the colour itself is the tile, and the hex rides inside
+                    it, so the value and the thing it names never separate */}
+                <span className="figp-swatch-chip" style={{ background: c.hex }}>
+                  <span className="figp-swatch-hex">{c.hex}</span>
+                </span>
+                <span className="figp-swatch-name">{c.name}</span>
+                <span className="figp-swatch-use">{c.use}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
+        </figure>
+      );
+
+    case "typeset":
+      return (
+        <figure className="figp-typeset-fig">
+          <motion.div
+            className="figp-typeset"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
+            {block.items.map((t) => (
+              <motion.div className="figp-type" key={t.name} variants={revealChild}>
+                <span className="figp-type-meta">
+                  <span className="figp-type-role">{t.name}</span>
+                  <span className="figp-type-family">{t.family}</span>
+                </span>
+                {/* set in the face it describes wherever the site can reach
+                    it; the stack falls back rather than faking the shapes */}
+                <span
+                  className="figp-type-sample"
+                  style={t.stack ? { fontFamily: t.stack } : undefined}
+                >
+                  {t.sample}
+                </span>
+                <span className="figp-type-use">{t.use}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
+        </figure>
+      );
+
+    case "results":
+      return (
+        <figure className="figp-results-fig">
+          <motion.div
+            className="figp-results"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
+            {block.items.map((r) => (
+              <motion.div
+                className={`figp-result${r.projected ? " figp-result--projected" : ""}`}
+                key={r.label}
+                variants={revealChild}
+              >
+                <span className="figp-result-value">
+                  <CountUp value={r.value} />
+                </span>
+                <span className="figp-result-label">{r.label}</span>
+                {r.note && <span className="figp-result-note">{r.note}</span>}
+                {/* the provenance sits ON the number rather than in a
+                    footnote — a projection printed at result size is the lie */}
+                {r.projected && <span className="figp-result-flag">Projected, not measured</span>}
+              </motion.div>
+            ))}
+          </motion.div>
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
+        </figure>
+      );
+
+    case "lessons":
+      return (
+        <motion.div
+          className="figp-lessons"
+          variants={revealParent}
+          initial="hidden"
+          whileInView="shown"
+          viewport={inView}
+        >
+          {block.items.map((l, i) => (
+            <motion.section className="figp-lesson" key={l.title} variants={revealChild}>
+              <span className="figp-lesson-index" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="figp-lesson-title">{marked(l.title)}</h3>
+              <p className="figp-lesson-body">{marked(l.body)}</p>
+            </motion.section>
+          ))}
+        </motion.div>
       );
   }
 }

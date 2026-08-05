@@ -88,6 +88,11 @@ export type CaseBlock =
       kind: "gallery";
       items: { src: string; alt: string; label?: string }[];
       caption?: string;
+      /* Character art and reference sheets, not phone screens. The default
+         frame crops to a 9:17.5 window because that is what a phone screen
+         wants; a mascot in that frame is a tall slice of a saree. Compact
+         halves the frame and lets the whole drawing show. */
+      compact?: boolean;
     }
   /* two desktop screens side by side, uncropped. A surface with a dozen
      screens can't give every one of them a full-width frame or the section
@@ -183,6 +188,115 @@ export type CaseBlock =
       kind: "wireframes";
       items: { layout: "entry" | "listen" | "chat" | "review"; label: string; note: string }[];
       caption?: string;
+    }
+  /*
+    The whole case study on one screen, before any of it.
+
+    A long-form page asks for twenty minutes before it tells you whether it
+    is worth twenty minutes. This is the answer up front: what it was, what
+    was wrong, what was hard, what got decided, what happened, what it
+    taught — a line or two each. Somebody who reads only this block should
+    still be able to say what the project was and what it cost to do.
+
+    Ordered as authored rather than by a fixed schema, so a project whose
+    story does not have "constraints" in it simply does not list one.
+  */
+  | {
+      kind: "brief";
+      items: {
+        /* Problem, Constraints, Decision … one or two words */
+        label: string;
+        /* one or two lines, no more — this is the summary, not the section */
+        body: string;
+        /* stretches the card across the row; use it for the overview */
+        wide?: boolean;
+      }[];
+    }
+  /*
+    One beat of a flow: the screens that make it, and what they decide.
+
+    A twelve-screen grid under a four-paragraph essay makes the reader hold
+    all twelve in their head while the prose catches up, and nobody does —
+    they scroll the images and skip the text. Two screens at a time with
+    their own explanation underneath means the argument is always next to
+    the evidence for it, and the section can be read a beat at a time.
+
+    Two is the deliberate limit. Three fits on the row and immediately
+    becomes a gallery again.
+  */
+  | {
+      kind: "step";
+      items: { src: string; alt: string; label?: string }[];
+      body: string[];
+    }
+  /*
+    The decisions, as cards rather than a list.
+
+    `numbered` is the right shape for findings — things that were observed,
+    in the order they were found. A decision is not a finding. It has a
+    ruling and a reason, and the ruling is the part somebody skimming the
+    page should be able to read on its own. So it gets a card, the ruling
+    gets the type size, and the reason sits underneath it.
+  */
+  | {
+      kind: "decisions";
+      items: {
+        /* the ruling, in the imperative — "Never ask for the ministry" */
+        label: string;
+        /* why, and what it cost */
+        body: string;
+        /* the thing it is a decision ABOUT, as a one- or two-word tag */
+        tag?: string;
+      }[];
+    }
+  /*
+    A palette, at a size where the colours are the content.
+
+    `specs` renders a colour as a 12px chip beside its hex, which is the
+    right weight for a spec table and the wrong weight for the section that
+    is about the palette. These tiles are big enough to actually judge a
+    colour against the one beside it, which is the only reason to put a
+    palette on a page at all.
+  */
+  | {
+      kind: "palette";
+      items: { name: string; hex: string; use: string }[];
+      caption?: string;
+    }
+  /* Typefaces, set in themselves. A row saying "Interface — Inter" tells
+     you nothing a specimen does not tell you better. */
+  | {
+      kind: "typeset";
+      items: {
+        name: string;
+        family: string;
+        use: string;
+        /* what to set in it; a script face should show its own script */
+        sample: string;
+        /* the CSS stack to render the sample in, when the site loads it */
+        stack?: string;
+      }[];
+      caption?: string;
+    }
+  /*
+    The outcome, as figures with their provenance attached.
+
+    Deliberately carries `projected` per item rather than a footnote under
+    the block: a projection presented in the same type as a result is the
+    single most common dishonesty in a portfolio, and the label has to sit
+    on the number itself for the reader to catch it.
+  */
+  | {
+      kind: "results";
+      items: { value: string; label: string; note?: string; projected?: boolean }[];
+      caption?: string;
+    }
+  /* What the work taught, one lesson per block. Reflection is normally
+     three paragraphs of grey that nobody finishes; these are three claims,
+     each with its own heading and room around it. */
+  | {
+      kind: "lessons";
+      items: { title: string; body: string }[];
     };
 
 export type ProjectSection = {
@@ -234,8 +348,26 @@ export type Project = {
     Two values because one hue almost never clears 4.5:1 on both a #1e1e1e
     and a #ffffff canvas — the light entry is normally a darker shade of
     the same hue.
+
+    `bright` is the loud end of the same hue, for surfaces the eye is meant
+    to find rather than read through: the collaborator cursor, its name tag,
+    the comment pins, the selection highlight. `ink` is what stays legible
+    sitting ON that — a saturated orange takes dark text, a deep purple
+    takes white — and defaults to white when a project does not say.
+
+    `fill` is what a whole surface turns when it fills with the accent, as
+    the overview cards do on hover. It defaults to the deepest value in the
+    set, because that is the only one white reliably reads on; a project
+    that would rather be loud than legible there can name its own.
   */
-  accent?: { dark: string; light: string; solid?: string };
+  accent?: {
+    dark: string;
+    light: string;
+    solid?: string;
+    bright?: string;
+    ink?: string;
+    fill?: string;
+  };
 };
 
 export const PROJECTS: Project[] = [
@@ -321,7 +453,23 @@ export const PROJECTS: Project[] = [
        of the same hue. `solid` stays the true brand orange in both themes
        and is used only for hover borders and rings, where the 3:1 UI bar
        applies rather than the 4.5:1 text bar. */
-    accent: { dark: "#FE700E", light: "#B35709", solid: "#FE700E" },
+    accent: {
+      dark: "#FE700E",
+      light: "#B35709",
+      /* the palette's own Saffron, the same value the design-system section
+         documents — so borders, rings, the frame ticks and the heading
+         hover all land on the colour the product actually ships */
+      solid: "#FE6700",
+      /* the cursor, its tag, the comment pins and the selection highlight
+         are meant to be spotted, not read through, so they run hotter than
+         the body accent. White on this measures 2.3:1, hence the dark ink. */
+      bright: "#FF7A1A",
+      ink: "#2A1000",
+      /* the product's own saffron, and the deliberate choice to keep filled
+         surfaces on brand rather than dropping to the deeper shade white
+         would read better on */
+      fill: "#FE6700",
+    },
     title: "CPGRAMS",
     logoText: "CPGRAMS",
     category: "Product Design",
@@ -348,15 +496,50 @@ export const PROJECTS: Project[] = [
     ],
     sections: [
       {
-        name: "the system",
-        heading: "A promise the state already makes",
+        name: "overview",
+        heading: "The short version",
+        blocks: [
+          {
+            kind: "brief",
+            items: [
+              {
+                label: "What it is",
+                wide: true,
+                body: "A **conversational layer** over India's national grievance system. You describe your complaint out loud in any of **22 languages**, and a chatbot files it — categorised, routed and legally identical to a form submission — without you ever seeing the form.",
+              },
+              {
+                label: "The problem",
+                body: "Filing required naming which of **90+ ministries** owned your problem, in English or Hindi, on a desktop form. **Six in ten people abandoned it.**",
+              },
+              {
+                label: "Key challenges",
+                body: "The government's **taxonomy could not change**, a quarter of the audience **cannot read or write**, and it had to work on a 2G phone.",
+              },
+              {
+                label: "Key decisions",
+                body: "Never ask for the ministry — **infer it**. Detect the language instead of offering a list. **Show the interpretation before filing anything.**",
+              },
+              {
+                label: "Outcome",
+                body: "Live at cpgramsaichatbot.com. The qualification for complaining to your government dropped from literacy plus filing knowledge to **being able to speak**.",
+              },
+              {
+                label: "What I learned",
+                body: "Accessibility was not a layer on this product, it **was** the product. And automation that hides its reasoning is **exposure, not convenience**.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "problem",
+        heading: "A working system with the wrong door",
         blocks: [
           {
             kind: "prose",
             body: [
-              "Most products begin by inventing a reason to exist. This one did not. CPGRAMS is already a constitutional-grade commitment: any citizen of India can lodge a grievance against any central government department, and an officer is obliged to answer it, usually inside 30 to 60 days, with automatic escalation to senior officers and a route to the Prime Minister's Office if they do not.",
-              "It is not a pilot or a portal somebody is trying to get adopted. It runs across more than 90 ministries and handles over 20 lakh grievances a year, and it disposes of 93% of them. The machinery works.",
-              "So this project was never about designing a service. The service exists. It was about the fact that the door into it could only be opened by people who least needed it.",
+              "CPGRAMS is a constitutional-grade commitment, not a startup idea. Any citizen can lodge a grievance against any central department and an officer must answer it. It runs across **90+ ministries**, handles **20 lakh grievances a year**, and disposes of **93%** of them. The machinery works.",
+              "The door does not. To reach it you fill a **15-field form**, and the second field asks which ministry and category your problem belongs to — a **filing decision**, demanded before you have described anything.",
             ],
           },
           {
@@ -367,37 +550,24 @@ export const PROJECTS: Project[] = [
               { value: "30-60", label: "days an officer has to respond, by mandate" },
             ],
           },
-        ],
-      },
-      {
-        name: "the door",
-        heading: "The door",
-        blocks: [
-          {
-            kind: "prose",
-            body: [
-              "To use that machinery, a citizen has to fill in a form. One page, fifteen or more fields, written in departmental language, on a layout built for a desktop computer.",
-              "The hardest field is the second one. Before describing anything, you must name the ministry and the category your problem belongs to. That is a filing decision. Ask a person whose pension has stopped which of ninety departments owns that, and the conversation is already over.",
-            ],
-          },
           {
             kind: "numbered",
             items: [
               {
                 label: "You must already know the answer to use it",
-                body: "Ministry and category are required before the complaint is written. The people most in need of the system are least able to classify their own problem inside it.",
+                body: "The people least able to **classify their own problem** are the ones the system exists for.",
               },
               {
                 label: "Built for a machine most users do not own",
-                body: "Desktop-first, in a country where roughly three quarters of internet users are mobile-first. Small targets, dense text, and a CAPTCHA that defeats exactly the age group filing the most grievances.",
+                body: "Desktop-first, in a country that is **three quarters mobile**, with a **CAPTCHA** that defeats the age group filing most grievances.",
               },
               {
                 label: "Two languages out of twenty-two",
-                body: "English and Hindi only. More than 550 million citizens communicate in a regional language and the portal has nothing to say to any of them.",
+                body: "More than **550 million citizens** think in a regional language the portal cannot read.",
               },
               {
                 label: "One mistake and the work is gone",
-                body: "Session timeouts wipe everything entered. No autosave, no drafts, no recovery path, and error messages that explain nothing.",
+                body: "**Session timeouts** wipe everything. No autosave, no drafts, no recovery path.",
               },
             ],
           },
@@ -409,52 +579,33 @@ export const PROJECTS: Project[] = [
               { label: "Of rural India uses the internet regularly", value: 31, display: "31%", tone: "bad" },
             ],
             caption:
-              "Three numbers from the audit, and the first one is the whole indictment. Six in ten people who start a grievance never finish it, which means the state never hears from them at all.",
+              "The first number is the whole indictment: **six in ten people who start a grievance never finish it**, so the state never hears from them at all.",
           },
-        ],
-      },
-      {
-        name: "who it serves",
-        heading: "Who it actually serves",
-        blocks: [
           {
             kind: "coverage",
             total: 22,
             filled: 2,
             label: "scheduled Indian languages supported by the portal",
-            note: "English and Hindi. Every other cell is a language the Constitution recognises and the interface does not.",
-          },
-          {
-            kind: "prose",
-            body: [
-              "Language is the clearest exclusion but not the only one. A quarter of the country cannot read or write at all, which makes any text interface a closed door regardless of which language it is written in. The 60-plus age group files the most grievances and has the lowest digital literacy, so their complaints get filed by somebody else, or filtered, or delayed, or never made.",
-              "Put those together and 78% of grievances arrive from urban, educated users.",
-            ],
+            note: "Every dark cell is a language the Constitution recognises and the interface does not.",
           },
           {
             kind: "statement",
-            text: "A channel built for 1.4 billion people was, in practice, being used by the top 15%.",
-          },
-          {
-            kind: "prose",
-            body: [
-              "That is not a usability score. It is a democratic problem. The feedback loop between a government and its citizens was quietly sampling only the citizens who were already doing fine.",
-            ],
+            text: "A channel built for **1.4 billion people** was, in practice, being used by the **top 15%**.",
           },
         ],
       },
       {
         name: "insight",
+        heading: "The reframe",
         blocks: [
           {
             kind: "statement",
-            text: "People were not failing to file grievances. They were failing to fill in a form. Only one of those is the citizen's problem.",
+            text: "People were not failing to file grievances. They were failing to **fill in a form**. Only one of those is the citizen's problem.",
           },
           {
             kind: "prose",
             body: [
-              "That reframe is the entire project. It moves the work from redesigning the portal to building a translation layer over it.",
-              "Nothing about the government changes. Same ministries, same categories, same statutory clock. What changes is who is required to understand any of it. The citizen describes what happened to them, in whatever language they think in, out loud if they cannot write. The system does the filing.",
+              "That moves the work from redesigning the portal to building a **translation layer** over it. Nothing about the government changes — same ministries, same categories, same **statutory clock**. What changes is **who has to understand any of it**.",
             ],
           },
           {
@@ -483,52 +634,18 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "The same grievance, the same destination, the same legal weight. The difference is who carries the knowledge of how government is organised, and the redesign moves that from the citizen to the software.",
+              "The same grievance, the same destination, the same **legal weight**. The difference is **who carries the knowledge** of how government is organised, and the redesign moves that from the citizen to the software.",
           },
         ],
       },
       {
-        name: "thought process",
-        heading: "How I approached it",
+        name: "constraints",
+        heading: "Constraints, and what they ruled out",
         blocks: [
           {
             kind: "prose",
             body: [
-              "Two constraints shaped every decision. The government's taxonomy could not change, and the audience could not be assumed to read.",
-              "That rules out the obvious move. A cleaner form is still a form, and a form is a reading test with a filing test attached. So the work became conversational architecture: decide what the system infers, what it asks, and what it must show before acting.",
-            ],
-          },
-          {
-            kind: "numbered",
-            items: [
-              {
-                label: "Move the cognitive load, do not reduce it",
-                body: "The complexity is real and cannot be deleted. It can only be carried by the software instead of the citizen.",
-              },
-              {
-                label: "Progressive disclosure over a single page",
-                body: "Fifteen fields at once is the failure. One question at a time keeps working memory free for the answer.",
-              },
-              {
-                label: "Input parity, output parity",
-                body: "Accepting voice but replying only in text solves the wrong half. Every response is playable.",
-              },
-              {
-                label: "Automation needs a consent surface",
-                body: "The system files on the citizen's behalf, so it has to show its interpretation before committing.",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: "ideation",
-        heading: "What got explored",
-        blocks: [
-          {
-            kind: "prose",
-            body: [
-              "Three directions were considered before the conversational one won.",
+              "Two fixed constraints: the government's **taxonomy could not change**, and the audience **could not be assumed to read**. Together they rule out the obvious move — a cleaner form is still a **reading test with a filing test attached**.",
             ],
           },
           {
@@ -555,6 +672,31 @@ export const PROJECTS: Project[] = [
               },
             ],
           },
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "Move the cognitive load, do not reduce it",
+                body: "The **cognitive load** is real. It can only be carried by the **software instead of the citizen**.",
+              },
+              {
+                label: "Progressive disclosure over a single page",
+                body: "**One question at a time** keeps **working memory** free for the answer.",
+              },
+              {
+                label: "Input parity, output parity",
+                body: "Accepting voice but replying only in text solves the wrong half.",
+              },
+              {
+                label: "Automation needs a consent surface",
+                body: "The system files on your behalf, so it must **show its interpretation before committing**.",
+              },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "Every screen had to solve its problem in the **minimum number of clicks**.",
+          },
         ],
       },
       {
@@ -564,8 +706,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "You do not wireframe a chatbot the way you wireframe a page. There is no fixed layout to arrange, only a sequence of states and what each one is allowed to ask for.",
-              "Four greyboxes settled the structure: where the primary control sits, how the system proves it is listening, how the thread reads, and what the last screen before submission has to contain.",
+              "You do not wireframe a chatbot the way you wireframe a page. There is no fixed layout, only a **sequence of states** and what each one is allowed to ask for. Four **greyboxes** settled it.",
             ],
           },
           {
@@ -574,35 +715,26 @@ export const PROJECTS: Project[] = [
               {
                 layout: "entry",
                 label: "01 Entry",
-                note: "One primary action, centred. History rail kept from the portal so returning users recognise it.",
+                note: "**One primary action**, centred. History rail kept from the portal so **returning users recognise it**.",
               },
               {
                 layout: "listen",
                 label: "02 Capture",
-                note: "Live feedback while recording. A static indicator does not reassure a first-time user.",
+                note: "**Live feedback** while recording. A static indicator does not reassure a first-time user.",
               },
               {
                 layout: "chat",
                 label: "03 Thread",
-                note: "Alternating turns, input pinned. Every message persists so a dropped session is not a lost grievance.",
+                note: "Alternating turns, input pinned. **Every message persists** so a dropped session is not a lost grievance.",
               },
               {
                 layout: "review",
                 label: "04 Review",
-                note: "Interpretation, detected tag, primary and secondary action. The consent surface.",
+                note: "Interpretation, detected tag, primary and secondary action. The **consent surface**.",
               },
             ],
             caption:
-              "Redrawn at low fidelity. Greyboxes keep the argument on structure, which is the only thing these were ever deciding.",
-          },
-        ],
-      },
-      {
-        name: "principle",
-        blocks: [
-          {
-            kind: "statement",
-            text: "My main target was to design this in such a way that each page solves a problem with the minimum number of clicks.",
+              "Redrawn at **low fidelity**. Greyboxes keep the argument on **structure**, which is the only thing these were ever deciding.",
           },
         ],
       },
@@ -613,12 +745,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "A chat window is still an interface, and to somebody who has never used one it is still an exam. So the product has a face.",
-              "Samadhan Didi is a government worker in a saree with a departmental lanyard. Didi means elder sister: the person you already ask for help with a form. She is lip-synced to the spoken reply, so the answer is watched as well as heard.",
+              "A chat window is still an interface, and to somebody who has never used one it is still an exam. So the product has a face. **Didi means elder sister** — the person you already ask for help with a form. She is a government worker in a saree with a departmental lanyard, **lip-synced** to the spoken reply.",
             ],
           },
           {
             kind: "gallery",
+            compact: true,
             items: [
               { src: "/projects/cpgrams/mascot-v1.webp", label: "Direction 1", alt: "An early mascot exploration for CPGRAMS." },
               { src: "/projects/cpgrams/mascot-v2.webp", label: "Direction 2", alt: "A second early mascot exploration for CPGRAMS." },
@@ -626,10 +758,11 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/mascot-v4.webp", label: "Direction 4", alt: "A fourth early mascot exploration for CPGRAMS." },
             ],
             caption:
-              "Four directions before the character settled. The test each one had to pass: would a first-time filer read her as staff who works here, or as a brand character?",
+              "Four directions before the character settled. The test each one had to pass: would a first-time filer read her as **staff who works here**, or as a brand character?",
           },
           {
             kind: "gallery",
+            compact: true,
             items: [
               { src: "/projects/cpgrams/mascot-a.webp", label: "Greeting", alt: "Samadhan Didi in a greeting pose." },
               { src: "/projects/cpgrams/mascot-b.webp", label: "Explaining", alt: "Samadhan Didi in an explaining pose." },
@@ -640,18 +773,18 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/mascot-g.webp", label: "Closing", alt: "Samadhan Didi in a closing pose." },
             ],
             caption:
-              "The shipped set. Built as states, not one illustration: a guide holding a single expression through a complaint about a missing pension reads as indifferent.",
+              "The shipped set. Built as **states, not one illustration**: a guide holding a single expression through a complaint about a missing pension reads as indifferent.",
           },
         ],
       },
       {
-        name: "demo",
+        name: "onboarding",
         heading: "First run: teaching the interface",
         blocks: [
           {
             kind: "prose",
             body: [
-              "Seen once, the first time a citizen ever opens the chatbot, and it carries more weight than anything else in the product. Everything after it assumes the person knows they can press a button and speak, and nothing in their experience of government websites has ever suggested that.",
+              "Seen once, the **first time a citizen ever opens the chatbot**. Everything after it assumes the person knows they can press a button and speak, and no government website has ever suggested that.",
             ],
           },
           {
@@ -667,8 +800,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The tutorial does not describe the interface, it points at it. Spotlight masking dims everything except the control under discussion, so an instruction can never point ambiguously and the whole sequence stays short. The microphone gets the plainest sentence in the product: press it and speak in your language. No mention of transcription, supported languages or accuracy, because the promise has to stay small enough to be believed.",
-              "Two decisions carry it. The guide is established before she gives instructions, so the tutorial reads as help rather than a test. And Skip is available from the first frame, not the last, because onboarding should never tax the confident user to reassure the uncertain one.",
+              "The tutorial does not describe the interface, **it points at it** — **spotlight masking** dims everything but the control under discussion. The microphone gets the plainest sentence in the product: press it and speak in your language.",
+              "**Skip sits on the first frame**, not the last, because **onboarding should never tax the confident user to reassure the uncertain one**.",
             ],
           },
           {
@@ -684,7 +817,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "On the phone the mascot drops to a corner presence instead of a full figure. At 402px she would otherwise cover the control she is pointing at, which turns the guide into the obstacle.",
+              "On the phone she drops to a **corner presence**. At **402px** a full figure covers the control she is pointing at, which **turns the guide into the obstacle**.",
             ],
           },
         ],
@@ -696,33 +829,67 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "For a quarter of the country, reading and writing is the barrier. Voice is not a convenience layered on top of this product, it is the accessibility strategy, and the typed flow is the alternative rather than the default.",
+              "For a quarter of the country, **reading and writing is the barrier**. Voice is not a convenience here, it is the **accessibility strategy** — the typed flow is the alternative.",
             ],
           },
           {
-            kind: "grid",
+            kind: "step",
             items: [
               { src: "/projects/cpgrams/voice-01.webp", label: "01 Rest", alt: "The CPGRAMS voice flow resting state with a large central microphone control." },
               { src: "/projects/cpgrams/voice-02.webp", label: "02 Press to speak", alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone." },
-              { src: "/projects/cpgrams/voice-03.webp", label: "03 Listening", alt: "The CPGRAMS voice flow recording with a live waveform responding to speech." },
-              { src: "/projects/cpgrams/voice-04.webp", label: "04 Audio kept", alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player." },
-              { src: "/projects/cpgrams/voice-05.webp", label: "05 Transcribed", alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio." },
-              { src: "/projects/cpgrams/voice-06.webp", label: "06 Language detected", alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface." },
-              { src: "/projects/cpgrams/voice-07.webp", label: "07 Answered aloud", alt: "Samadhan Didi responding with both written text and a voice response player." },
-              { src: "/projects/cpgrams/voice-08.webp", label: "08 One question", alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance." },
-              { src: "/projects/cpgrams/voice-09.webp", label: "09 Auto-filled", alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint." },
-              { src: "/projects/cpgrams/voice-10.webp", label: "10 Review", alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control." },
-              { src: "/projects/cpgrams/voice-11.webp", label: "11 Escalate", alt: "The CPGRAMS review card with a link to register with the Central Authority." },
-              { src: "/projects/cpgrams/voice-12.webp", label: "12 Filed", alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier." },
+            ],
+            body: [
+              "The microphone takes the **centre and the weight** — no language picker, no category dropdown, because each is a **decision demanded before you have said anything**. A single **press starts recording**: hold-to-record fails for **tremor and arthritis** in the 60-plus group that files the most grievances here.",
             ],
           },
           {
-            kind: "prose",
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/voice-03.webp", label: "03 Listening", alt: "The CPGRAMS voice flow recording with a live waveform responding to speech." },
+              { src: "/projects/cpgrams/voice-04.webp", label: "04 Audio kept", alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player." },
+            ],
             body: [
-              "The resting state gives the microphone the centre and the weight, with no language picker and no category dropdown, because each of those is a decision demanded before the citizen has said anything. A single press starts recording rather than press-and-hold, which fails for tremor and arthritis in exactly the age group that files the most grievances here. A live waveform proves the system is listening: without real-time feedback an unsure speaker stops mid-sentence to check it is working.",
-              "The audio then persists in the thread instead of being converted and discarded, with the transcription beside it. That pairing is the first point of error recovery, and catching a misheard place name here costs nothing compared to catching it after the grievance has been routed. Language is detected rather than selected, because a picker is a reading test given to people who may not read.",
-              "From there the system infers ministry, category, jurisdiction and urgency, and asks single questions only where a human answer is genuinely required. Every reply is playable as well as readable: voice in with text-only out abandons the user at the half that carries the answer.",
-              "The review screen is the one the whole flow exists to reach. Interpretation, detected state and category are shown before anything is committed, because auto-filing a legal document unseen is a liability with the citizen's name on it. When the routing is wrong, escalation to the Central Authority is one tap. The system is allowed to be wrong; it is not allowed to be wrong with no exit.",
+              "A **live waveform** proves the system is listening — without **real-time feedback** an unsure speaker stops mid-sentence to check. The audio then **persists in the thread** instead of being discarded: it is the one artefact in this flow the software cannot have got wrong.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/voice-05.webp", label: "05 Transcribed", alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio." },
+              { src: "/projects/cpgrams/voice-06.webp", label: "06 Language detected", alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface." },
+            ],
+            body: [
+              "Transcription sits **beside the audio**, which makes this the **first point of error recovery** — catching a misheard place name here costs nothing next to catching it after routing. Language is **detected, not selected**: a picker is a **reading test** given to people who may not read.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/voice-07.webp", label: "07 Answered aloud", alt: "Samadhan Didi responding with both written text and a voice response player." },
+              { src: "/projects/cpgrams/voice-08.webp", label: "08 One question", alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance." },
+            ],
+            body: [
+              "Every reply is **playable as well as readable** — voice in with text out abandons the user at the half carrying the answer. What cannot be inferred arrives as **one question at a time**: **progressive disclosure** collecting the same fifteen fields without ever showing a form.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/voice-09.webp", label: "09 Auto-filled", alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint." },
+              { src: "/projects/cpgrams/voice-10.webp", label: "10 Review", alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control." },
+            ],
+            body: [
+              "**Ministry, category, jurisdiction and urgency** are inferred — the reframe paying out. Then the review screen, which the whole flow exists to reach: everything assumed is shown **before anything is committed**, because **auto-filing a legal document unseen** is a liability with the citizen's name on it. This is the **consent surface**.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/voice-11.webp", label: "11 Escalate", alt: "The CPGRAMS review card with a link to register with the Central Authority." },
+              { src: "/projects/cpgrams/voice-12.webp", label: "12 Filed", alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier." },
+            ],
+            body: [
+              "When routing is wrong, **escalation to the Central Authority is one tap**. The system is allowed to be wrong; it is not allowed to be wrong **with no exit**. It closes on the **same registration number** the portal issues, carrying the same statutory clock.",
             ],
           },
           {
@@ -739,7 +906,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Voice matters more on the phone, not less. This is the device the low-literacy user actually owns, often on 2G, so the microphone stays inside thumb reach and the review card takes the full screen rather than sitting below a fold.",
+              "Voice matters **more** on the phone. This is the device the low-literacy user actually owns, often on **2G**, so the microphone stays in **thumb reach** and the review card takes the full screen.",
             ],
           },
         ],
@@ -751,33 +918,76 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Voice is the priority, not the requirement. Plenty of citizens can type and would rather, and speaking a complaint aloud is not always possible in a shared house, an office or a queue.",
+              "Voice is the **priority, not the requirement**. Plenty of citizens would rather type, and speaking a complaint aloud is not always possible in a shared house or a queue.",
             ],
           },
           {
-            kind: "grid",
+            kind: "step",
             items: [
               { src: "/projects/cpgrams/text-01.webp", label: "01 Open", alt: "The CPGRAMS text flow opening screen with the message input ready." },
               { src: "/projects/cpgrams/text-02.webp", label: "02 Describe", alt: "A typed grievance in the CPGRAMS chat written in plain conversational language." },
-              { src: "/projects/cpgrams/text-03.webp", label: "03 Acknowledged", alt: "The CPGRAMS chatbot restating the citizen's grievance back to them." },
-              { src: "/projects/cpgrams/text-04.webp", label: "04 One question", alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow." },
-              { src: "/projects/cpgrams/text-05.webp", label: "05 Options", alt: "The CPGRAMS chatbot offering selectable options for a closed-set question." },
-              { src: "/projects/cpgrams/text-06.webp", label: "06 Documents", alt: "The CPGRAMS chatbot requesting a supporting document within the conversation." },
-              { src: "/projects/cpgrams/text-07.webp", label: "07 History", alt: "The CPGRAMS chat with recent conversations listed in the left sidebar." },
-              { src: "/projects/cpgrams/text-08.webp", label: "08 Classified", alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance." },
-              { src: "/projects/cpgrams/text-09.webp", label: "09 Jurisdiction", alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance." },
-              { src: "/projects/cpgrams/text-10.webp", label: "10 Assembled", alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details." },
-              { src: "/projects/cpgrams/text-11.webp", label: "11 Review", alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance." },
-              { src: "/projects/cpgrams/text-12.webp", label: "12 Submit", alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link." },
-              { src: "/projects/cpgrams/text-13.webp", label: "13 Filed", alt: "The CPGRAMS confirmation screen with a grievance registration identifier." },
+            ],
+            body: [
+              "It opens with the **input focused and nothing else required**. The portal's first question was which of ninety ministries owns your problem; this one's is what happened. The grievance is typed in **plain language**, and everything the form demanded up front is **extracted from that one sentence**.",
             ],
           },
           {
-            kind: "prose",
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/text-03.webp", label: "03 Acknowledged", alt: "The CPGRAMS chatbot restating the citizen's grievance back to them." },
+              { src: "/projects/cpgrams/text-04.webp", label: "04 One question", alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow." },
+            ],
             body: [
-              "It opens with the input focused and nothing else required, because the first thing asked has to be something the citizen can actually answer. The grievance is typed in plain language with no structure imposed, and everything the portal demanded up front gets extracted from that one sentence instead.",
-              "The reply restates the problem before acting on it. That is the earliest and cheapest error recovery available, and it signals comprehension rather than keyword matching. Missing details arrive as sequential questions rather than a block of fields, so the fifteen-field form still gets filled but never appears as a form. Closed sets get options instead of an open field, and attachments are requested at the point of relevance rather than listed as a barrier at the start.",
-              "Conversations persist in the left rail. The portal loses everything to a session timeout, which on a 2G connection is routine rather than rare, and a half-written grievance lost is usually that grievance lost for good. Classification and jurisdiction are resolved quietly from the conversation, then shown at review, and the flow ends at the same consent surface as voice.",
+              "The reply **restates the problem before acting on it** — the earliest and cheapest **error recovery** there is, and a signal of **comprehension** rather than keyword matching. Missing details then arrive as **sequential questions**: the fifteen fields still get filled, they just never appear as a form.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/text-05.webp", label: "05 Options", alt: "The CPGRAMS chatbot offering selectable options for a closed-set question." },
+              { src: "/projects/cpgrams/text-06.webp", label: "06 Documents", alt: "The CPGRAMS chatbot requesting a supporting document within the conversation." },
+            ],
+            body: [
+              "A **closed set gets options**, not an open field — typing an answer the system already has the list of is a spelling test with a routing failure attached. Attachments are requested at the **point of relevance**: a documents checklist on screen one is a reason to leave.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/text-07.webp", label: "07 History", alt: "The CPGRAMS chat with recent conversations listed in the left sidebar." },
+              { src: "/projects/cpgrams/text-08.webp", label: "08 Classified", alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance." },
+            ],
+            body: [
+              "Conversations **persist in the left rail**, because on 2G a **session timeout** is routine and a half-written grievance lost is usually that grievance lost for good. **Classification happens quietly** in the background — the highest-friction field on the original form, resolved without ever being asked.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/text-09.webp", label: "09 Jurisdiction", alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance." },
+              { src: "/projects/cpgrams/text-10.webp", label: "10 Assembled", alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details." },
+            ],
+            body: [
+              "**Jurisdiction** resolves the same way, from what was described rather than a dropdown of states — the part the machinery cares about and the citizen has no way to get right. Then everything scattered across the conversation returns as the **single document that will be filed**.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/text-11.webp", label: "11 Review", alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance." },
+              { src: "/projects/cpgrams/text-12.webp", label: "12 Submit", alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link." },
+            ],
+            body: [
+              "The typed flow ends at the **same consent surface**. One architecture, two inputs — the review screen is not a voice feature, it is where **software stops acting on somebody's behalf without showing them what it decided**. Submit, start again, or **escalate**: three exits, none of them the fifteen fields again.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              { src: "/projects/cpgrams/text-13.webp", label: "13 Filed", alt: "The CPGRAMS confirmation screen with a grievance registration identifier." },
+            ],
+            body: [
+              "The same **registration number**, the same **30 to 60 day** obligation, the same escalation path. The destination never changed — only the qualification required to reach it.",
             ],
           },
           {
@@ -794,7 +1004,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "On the phone the review card becomes a full screen. It is the one moment in the product where something below the fold would be a real failure rather than an inconvenience.",
+              "On the phone the review card becomes a **full screen** — the one moment where something **below the fold** would be a real failure rather than an inconvenience.",
             ],
           },
         ],
@@ -804,63 +1014,96 @@ export const PROJECTS: Project[] = [
         heading: "The decisions",
         blocks: [
           {
-            kind: "numbered",
+            kind: "decisions",
             items: [
               {
+                tag: "Classification",
                 label: "Never ask for the ministry",
-                body: "The highest-friction field on the original portal and the one a citizen is least equipped to answer. Inferred from what they said, confirmed at review, never asked.",
+                body: "The **highest-friction field** on the original portal and the one a citizen is least equipped to answer. Inferred from what they said, confirmed at review, **never asked**.",
               },
               {
+                tag: "Language",
                 label: "Detect the language, do not offer a list",
-                body: "A language picker is a reading test given to people who may not read. Detection removes the test and the interface adapts to what it heard.",
+                body: "A language picker is a **reading test** given to people who may not read. Detection removes the test and the interface adapts to what it heard.",
               },
               {
+                tag: "Parity",
                 label: "Speak every answer, not just accept speech",
-                body: "Voice in with text out solves half the literacy problem and then abandons the user at the half containing the answer.",
+                body: "**Voice in with text out** solves half the literacy problem and then abandons the user at the half containing the answer.",
               },
               {
+                tag: "Motor access",
                 label: "Press, do not press and hold",
-                body: "Hold-to-record fails for tremor and arthritis, and the 60-plus group files more grievances than anyone else on the platform.",
+                body: "Hold-to-record fails for **tremor and arthritis**, and the **60-plus group** files more grievances than anyone else on the platform.",
               },
               {
+                tag: "Consent",
                 label: "Show the interpretation before submitting",
-                body: "Auto-filing a legal document for somebody requires their consent to what it says. The review screen is where the system admits what it assumed.",
+                body: "**Auto-filing a legal document** for somebody requires their consent to what it says. The review screen is where the system **admits what it assumed**.",
               },
               {
+                tag: "Recovery",
                 label: "Give a wrong answer somewhere to go",
-                body: "When state-level routing is wrong, escalation to the Central Authority is one tap rather than starting again.",
+                body: "When state-level routing is wrong, **escalation to the Central Authority is one tap** rather than starting again.",
               },
               {
+                tag: "Trust",
                 label: "Keep the state's own visual authority",
-                body: "The saffron, the emblem, the departmental masthead, the ministers. A grievance tool that looks unofficial does not get trusted with a grievance.",
+                body: "The saffron, the emblem, the departmental masthead, the ministers. A grievance tool that **looks unofficial** does not get trusted with a grievance.",
               },
             ],
           },
         ],
       },
       {
-        name: "system",
+        name: "design system",
         heading: "The system underneath",
         blocks: [
           {
             kind: "prose",
             body: [
-              "A component set built for a conversation rather than a page: message bubbles by speaker, audio players with waveforms, state and language tags, the review card, tutorial spotlights, and the mascot in each of her states.",
+              "Built for a **conversation rather than a page**: bubbles by speaker, audio players, state and language tags, the review card, spotlights, and the mascot's states. **Saffron is the state's own colour** — a grievance tool that invented its own would look like it belonged to nobody.",
             ],
           },
           {
-            kind: "specs",
+            kind: "palette",
             items: [
-              { name: "Saffron", value: "#FE6700", swatch: "#FE6700", note: "Primary action, government identity" },
-              { name: "Deep", value: "#9F2D00", swatch: "#9F2D00", note: "Pressed and emphasis" },
-              { name: "Warm", value: "#FFC196", swatch: "#FFC196", note: "Surfaces and user bubbles" },
-              { name: "Cream", value: "#FFFBEF", swatch: "#FFFBEF", note: "Chat canvas" },
-              { name: "Ink", value: "#333333", swatch: "#333333", note: "Body copy" },
-              { name: "Slate", value: "#4A505B", swatch: "#4A505B", note: "Secondary text and labels" },
-              { name: "Interface", value: "Inter", note: "Chat, controls, labels" },
-              { name: "Supporting", value: "General Sans", note: "Headings" },
-              { name: "Script", value: "Roboto", note: "Devanagari and regional coverage" },
+              { name: "Saffron", hex: "#FE6700", use: "Primary action and government identity" },
+              { name: "Deep", hex: "#9F2D00", use: "Pressed states and emphasis" },
+              { name: "Warm", hex: "#FFC196", use: "Surfaces and the citizen's own bubbles" },
+              { name: "Cream", hex: "#FFFBEF", use: "The chat canvas itself" },
+              { name: "Ink", hex: "#333333", use: "Body copy" },
+              { name: "Slate", hex: "#4A505B", use: "Secondary text and labels" },
             ],
+            caption:
+              "Only one of the six is loud. **Saffron carries every primary action**, which is what lets a user who cannot read the label still find the button.",
+          },
+          {
+            kind: "typeset",
+            items: [
+              {
+                name: "Interface",
+                family: "Inter",
+                sample: "Press and speak in your language",
+                stack: "var(--font-inter), Inter, sans-serif",
+                use: "Chat, controls and labels — the running voice of the product",
+              },
+              {
+                name: "Supporting",
+                family: "General Sans",
+                sample: "File a grievance",
+                use: "Headings and the few moments that need weight",
+              },
+              {
+                name: "Script",
+                family: "Roboto",
+                sample: "शिकायत दर्ज करें",
+                stack: "Roboto, 'Noto Sans Devanagari', sans-serif",
+                use: "Devanagari and regional script coverage",
+              },
+            ],
+            caption:
+              "Roboto is in the stack for one specific reason: it carries **Devanagari and most regional scripts**. A product claiming **22 languages** cannot ship a typeface that renders two of them.",
           },
           {
             kind: "grid",
@@ -879,7 +1122,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "Roboto is in the stack for one specific reason: it carries Devanagari and most regional scripts. A product claiming 22 languages cannot ship a typeface that renders two of them.",
+              "The component set behind all of it. Built as **variants rather than screens**, because a conversation has no fixed layout to hand a developer — only states and the rules for moving between them.",
           },
         ],
       },
@@ -890,10 +1133,64 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "It is live at cpgramsaichatbot.com, running against the real grievance system rather than standing as a concept.",
-              "For a citizen, the qualification required to complain to their own government dropped from reading English or Hindi and knowing how ninety ministries are organised, to being able to speak. For DARPG, grievances now arrive pre-categorised and correctly routed, which is work that previously landed on an officer before the statutory clock had even started.",
-              "The work was scoped against projections of 3x more grievances filed, a 40% reduction in incomplete submissions and 85% satisfaction. Those are targets rather than results, and post-launch numbers sit with the department.",
+              "It is **live at cpgramsaichatbot.com**, running against the real grievance system rather than standing as a concept.",
             ],
+          },
+          {
+            kind: "compare",
+            lanes: [
+              {
+                label: "What filing used to require",
+                tone: "before",
+                note: "A qualification test, sat before you were allowed to complain.",
+                steps: [
+                  "Reading English or Hindi",
+                  "Knowing which of 90+ ministries owns your problem",
+                  "Knowing the right category inside it",
+                  "A desktop, or a phone used like one",
+                  "Finishing before the session expired",
+                ],
+              },
+              {
+                label: "What it requires now",
+                tone: "after",
+                note: "Everything else moved into the software that already knew it.",
+                steps: ["Being able to speak", "Checking the system got it right"],
+              },
+            ],
+            caption:
+              "The service did not change. The **qualification required to reach it** did, and that is the entire outcome.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "For **DARPG**, grievances now arrive **pre-categorised and correctly routed** — work that used to land on an officer before the statutory clock started.",
+            ],
+          },
+          {
+            kind: "results",
+            items: [
+              {
+                value: "3x",
+                label: "more grievances filed",
+                note: "The scope was sized against reaching the people the portal never heard from.",
+                projected: true,
+              },
+              {
+                value: "40%",
+                label: "fewer incomplete submissions",
+                note: "Against a baseline where six in ten abandon the form partway through.",
+                projected: true,
+              },
+              {
+                value: "85%",
+                label: "citizen satisfaction",
+                note: "The target the conversational layer was commissioned against.",
+                projected: true,
+              },
+            ],
+            caption:
+              "These are the **targets the work was scoped against, not results it achieved**. Post-launch numbers sit with the department.",
           },
         ],
       },
@@ -902,11 +1199,20 @@ export const PROJECTS: Project[] = [
         heading: "What I learned",
         blocks: [
           {
-            kind: "prose",
-            body: [
-              "Designing for government taught me that accessibility is not a layer applied to a finished product. Here it was the product. Remove voice and you have not built a slightly less inclusive chatbot, you have rebuilt the thing that was already failing.",
-              "It also changed how I think about automation. The instinct with a form this painful is to remove it completely and let the system handle everything silently. But the moment software files a legal document on somebody's behalf, hiding its reasoning stops being convenience and becomes exposure. The review screen is the least clever thing in this project and almost certainly the most important.",
-              "And working at national scale reframed what a design decision costs. A dropdown that confuses 5% of users is a usability issue in most products. On a system serving 1.4 billion people it is tens of millions of citizens who never get heard, which is a different kind of number to be responsible for.",
+            kind: "lessons",
+            items: [
+              {
+                title: "Accessibility was not a layer. It was the product.",
+                body: "Remove voice from this product and you have not built a slightly less inclusive chatbot — you have rebuilt the portal that was already failing, with a friendlier surface on it.",
+              },
+              {
+                title: "Automation without a consent surface is exposure, not convenience.",
+                body: "The instinct with a form this painful is to delete it and let the system work silently. But once software **files a legal document on your behalf**, hiding its reasoning becomes exposure. The **review screen** is the least clever thing here and the most important.",
+              },
+              {
+                title: "At national scale, a usability issue is a different kind of number.",
+                body: "A dropdown that confuses **5% of users** is a usability issue in most products. On a system serving **1.4 billion people** it is tens of millions of citizens who never get heard.",
+              },
             ],
           },
         ],

@@ -20,6 +20,15 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const EMAIL = "mailto:aayushrajvz@gmail.com";
 const CHROME_KEY = "figp:chrome";
 
+/*
+  The two scroll thresholds the chrome switches on. Two rather than one
+  because a single boundary flips the panels on and off every frame for
+  anyone parked exactly on it; the band between them keeps whatever is
+  already showing.
+*/
+const COLLAPSE_AT = 140;
+const EXPAND_AT = 60;
+
 /** layer name -> the id its anchor carries, so both sides can't drift */
 export function layerId(name: string) {
   return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -78,12 +87,17 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     if (localStorage.getItem(CHROME_KEY) === "off") setChromeOn(false);
   }, []);
 
-  /* set once the reader takes control of the collapse, so the auto-collapse
-     below never overrides a deliberate choice */
-  const chromeTouchedRef = useRef(false);
+  /*
+    Which side of the two thresholds the scroll last resolved to. Null means
+    nobody has decided yet — either the page just mounted, or the reader took
+    the control themselves and the next scroll gets to speak again.
+  */
+  const zoneRef = useRef<"on" | "off" | null>(null);
 
   const toggleChrome = () => {
-    chromeTouchedRef.current = true;
+    /* a deliberate choice wins now and holds until the next crossing; the
+       scroll is how you hand the decision back */
+    zoneRef.current = null;
     setChromeOn((on) => {
       localStorage.setItem(CHROME_KEY, on ? "off" : "on");
       return !on;
@@ -92,29 +106,26 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
 
   /*
     The panels are useful for orienting yourself and useless while reading.
-    Once scrolling starts they retract to the floating pills on their own,
-    handing the full width to the work.
-
-    Deliberately one-way and one-time: it fires once, only downward, and
-    never again after the reader has touched the control themselves. A
-    chrome that collapsed and expanded as you scrolled up and down would be
-    the page arguing with you.
+    Scrolling retracts them to the floating pills, handing the full width to
+    the work; coming back to the top brings them out again, so the header
+    you left is the header you return to.
   */
   useEffect(() => {
-    if (!chromeOn || chromeTouchedRef.current) return;
     /* below the mobile breakpoint the sidebar is already a bottom sheet, so
        there is nothing to retract */
     if (window.matchMedia("(max-width: 768px)").matches) return;
 
     const onScroll = () => {
-      if (window.scrollY > 120) {
-        setChromeOn(false);
-        window.removeEventListener("scroll", onScroll);
-      }
+      const y = window.scrollY;
+      const zone = y > COLLAPSE_AT ? "off" : y < EXPAND_AT ? "on" : null;
+      if (!zone || zone === zoneRef.current) return;
+      zoneRef.current = zone;
+      setChromeOn(zone === "on");
     };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [chromeOn]);
+  }, []);
 
   /*
     Highlight whichever section is being read. The bottom margin shrinks the
@@ -173,6 +184,11 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
 
   const fileLabel = `${project.id}.fig`;
   const ctaHref = previewHref(project);
+  /* only a real destination gets a button; a Behance-less image preview
+     resolves to "#", which is not something to send anyone to */
+  const liveHref = ctaHref === "#" ? null : ctaHref;
+  const accentBright =
+    project.accent?.bright ?? project.accent?.solid ?? project.accent?.dark ?? "";
 
   const facts: [string, string][] = [
     ["Role", project.role],
@@ -185,11 +201,13 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
      them, so the flat gallery stands down entirely */
   const sections = project.sections?.length ? project.sections : null;
 
-  /* a project with a real gallery shows it; everything else still gets the
-     single cover frame it had before */
-  const shots = project.shots?.length
-    ? project.shots
-    : [{ src: project.cover, alt: project.title, caption: "", wide: true }];
+  /*
+    A project with a real gallery shows it. The fallback used to be a lone
+    frame holding the cover — but the cover now opens the page beside the
+    summary, so that frame is the same image twice, four screens apart.
+    Nothing rather than a repeat.
+  */
+  const shots = project.shots?.length ? project.shots : null;
 
   /* the Layers tree is the page's table of contents: the fixed blocks every
      project has, then one row per case-study section in scroll order */
@@ -228,6 +246,13 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               "--figp-accent-dark": project.accent.dark,
               "--figp-accent-light": project.accent.light,
               "--figp-accent-solid-set": project.accent.solid ?? project.accent.dark,
+              "--figp-accent-bright-set": accentBright,
+              "--figp-accent-ink-set": project.accent.ink ?? "#ffffff",
+              ...(project.accent.fill ? { "--figp-accent-fill-set": project.accent.fill } : null),
+              /* the arrow is a real CSS cursor, so its colour cannot come
+                 from a variable — it has to be baked into the data URI */
+              "--figp-cursor": cursorUrl(accentBright, false),
+              "--figp-cursor-pointer": cursorUrl(accentBright, true),
             } as React.CSSProperties)
           : undefined
       }
@@ -241,6 +266,8 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
         onToggleLayers={() => setLayersOpen((v) => !v)}
         onShare={() => setShareOpen(true)}
         shareOpen={shareOpen}
+        liveHref={liveHref}
+        liveLabel={project.cta}
         backHref={backHref}
         onBack={onBack}
       />
@@ -291,28 +318,83 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               {backLabel}
             </PageLink>
 
-            <p className="figp-file" aria-hidden="true">
-              {fileLabel}
-            </p>
-            <h1 className="figp-name">{project.title}</h1>
-            <p className="figp-what">
-              {project.category} · {project.year}
-            </p>
-            <p className="figp-summary">{project.description}</p>
+            {/* the opening is two columns from 900px up: the argument on the
+                left, the artwork it is about on the right. Below that the
+                cover drops under the summary, where it still lands before
+                the fold on a phone. */}
+            <div className="figp-hero">
+              <div className="figp-hero-copy">
+                <p className="figp-file" aria-hidden="true">
+                  {fileLabel}
+                </p>
+                <h1 className="figp-name">{project.title}</h1>
+                <p className="figp-what">
+                  {project.category} · {project.year}
+                </p>
+                <p className="figp-summary">{project.description}</p>
 
-            <dl
+                {liveHref && (
+                  <a className="figp-ext" href={liveHref} target="_blank" rel="noreferrer">
+                    {project.cta}
+                    <ArrowUpRightIcon />
+                  </a>
+                )}
+              </div>
+
+              {/* decorative here: the title beside it already names the
+                  project, and the same image carries a real alt in the
+                  gallery and the properties panel */}
+              <figure
+                className="figp-hero-cover"
+                data-figp-node="cover"
+                data-figp-fill={`image:${project.cover}`}
+              >
+                {/* One comment per frame, the way a real file carries them.
+                    The second pin normally lands on the first frame in the
+                    body — a project with neither sections nor a gallery has
+                    no frame down there any more, so it belongs up here. */}
+                {!sections && !shots && (
+                  <CommentPin
+                    number={2}
+                    variant="cover"
+                    href={ctaHref}
+                    external
+                    note={`Built with ${project.tools.join(", ")}`}
+                  />
+                )}
+                {/* the clip lives on this wrapper, not the figure: the figure
+                    is the positioning context for a pin that deliberately
+                    hangs outside the frame, and would otherwise crop it */}
+                <span className="figp-hero-frame">
+                  <img src={project.cover} alt="" fetchPriority="high" draggable={false} />
+                </span>
+              </figure>
+            </div>
+
+            {/*
+              The at-a-glance card. A dl of label/value rows read as small
+              print under the summary; as a row of cards the same facts read
+              as the project's own metadata, which is what they are.
+            */}
+            <motion.dl
               className="figp-facts"
               data-figp-node="facts"
               data-figp-layer="facts"
               data-figp-fill="var(--figp-fact-value)"
+              variants={factsParent}
+              initial="hidden"
+              whileInView="shown"
+              viewport={{ once: true, margin: "-8%" }}
             >
               {facts.map(([k, v]) => (
-                <div className="figp-fact" key={k}>
+                <motion.div className="figp-fact" key={k} variants={factChild}>
                   <dt>{k}</dt>
                   <dd>{v}</dd>
-                </div>
+                </motion.div>
               ))}
-              <div className="figp-fact">
+              {/* the chips wrap, so this one spans the full row rather than
+                  squeezing a third of it */}
+              <motion.div className="figp-fact figp-fact--wide" variants={factChild}>
                 <dt>Tools</dt>
                 <dd>
                   <span className="figp-toolchips">
@@ -323,13 +405,8 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
                     ))}
                   </span>
                 </dd>
-              </div>
-            </dl>
-
-            <a className="figp-ext" href={ctaHref} target="_blank" rel="noreferrer">
-              {project.cta}
-              <ArrowUpRightIcon />
-            </a>
+              </motion.div>
+            </motion.dl>
           </motion.header>
 
           {project.highlights.length > 0 && (
@@ -361,7 +438,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
                 />
               }
             />
-          ) : (
+          ) : shots ? (
           <div className="figp-shots">
             {shots.map((shot, i) => (
               <motion.figure
@@ -422,11 +499,60 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
               </motion.figure>
             ))}
           </div>
-          )}
+          ) : null}
         </article>
       </main>
     </div>
   );
+}
+
+/* the facts arrive as a set rather than one card at a time — they are one
+   piece of information split across six boxes, not six findings */
+const factsParent = {
+  hidden: {},
+  shown: { transition: { staggerChildren: 0.05 } },
+};
+
+const factChild = {
+  hidden: { opacity: 0, y: 10 },
+  shown: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, bounce: 0, duration: 0.4 },
+  },
+};
+
+/*
+  The collaborator cursor, drawn in the project's own colour.
+
+  It has to be built here rather than in the stylesheet because a CSS cursor
+  is a data URI — the fill is baked into the image, so `var()` cannot reach
+  inside it. Building the URI from the accent and handing it down as a
+  custom property gets the variable back: the CSS names the property, this
+  decides what colour it carries. Projects with no accent set nothing and
+  the stylesheet's own purple fallback stands.
+
+  `withPlus` is the pointer variant: Figma draws a small diamond beside the
+  arrow over anything clickable.
+*/
+function cursorUrl(fill: string, withPlus: boolean) {
+  const ARROW = "M3.4 1.95 19.35 9.49 12.24 11.52 8.62 19.35Z";
+  const PLUS = "M17.6 13.6 21.6 17.6 17.6 21.6 13.6 17.6Z";
+
+  /* each shape is drawn twice: a dark halo underneath so the cursor stays
+     visible over a light screenshot, then the coloured shape over it */
+  const shape = (d: string) =>
+    `<path d='${d}' fill='none' stroke='rgba(0,0,0,.45)' stroke-width='2.8' stroke-linejoin='round'/>` +
+    `<path d='${d}' fill='${fill}' stroke='#fff' stroke-width='1.2' stroke-linejoin='round'/>`;
+
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>` +
+    shape(ARROW) +
+    (withPlus ? shape(PLUS) : "") +
+    `</svg>`;
+
+  /* 3 2 is the hotspot: the arrow's own tip, not the corner of the box */
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 3 2`;
 }
 
 /* layer name for a gallery frame: the file's own basename reads like a real
