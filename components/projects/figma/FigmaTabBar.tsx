@@ -18,6 +18,10 @@ type Props = {
   onToggleLayers: () => void;
   onShare: () => void;
   shareOpen: boolean;
+  /** the shipped work itself; null when the project has no public URL */
+  liveHref: string | null;
+  /** the project's own wording for it, used as the control's title */
+  liveLabel: string;
   /** where closing the file returns to — the listing it was opened from */
   backHref: string;
   onBack: () => void;
@@ -31,9 +35,31 @@ export default function FigmaTabBar({
   onToggleLayers,
   onShare,
   shareOpen,
+  liveHref,
+  liveLabel,
   backHref,
   onBack,
 }: Props) {
+  /*
+    The one control on this page that leaves for the real thing. It sits
+    beside Share in all three toolbars — the desktop bar, the mobile bar and
+    the collapsed pill — because the reader who wants it wants it from
+    wherever they have got to, not only from the top of the page.
+  */
+  const live = (extra?: string) =>
+    liveHref && (
+      <a
+        className={`figp-live-btn${extra ? ` ${extra}` : ""}`}
+        href={liveHref}
+        target="_blank"
+        rel="noreferrer"
+        title={liveLabel}
+      >
+        <LiveDot />
+        Live preview
+      </a>
+    );
+
   return (
     <>
       <nav className="figp-tabbar" aria-label="Open file">
@@ -48,6 +74,8 @@ export default function FigmaTabBar({
         </span>
 
         {/* top-right, ahead of the close — where Figma puts Share */}
+        {live()}
+
         <button
           type="button"
           className={`figp-share-btn${shareOpen ? " is-on" : ""}`}
@@ -89,6 +117,10 @@ export default function FigmaTabBar({
           <LayersIcon />
           Layers
         </button>
+
+        {/* no Live control here: four buttons plus the file name is already
+            tight at 360px, and the hero's own CTA is a few hundred pixels
+            below on a phone rather than a page away */}
 
         <button
           type="button"
@@ -133,6 +165,8 @@ export default function FigmaTabBar({
       </div>
 
       <div className="figp-pill figp-pill--actions">
+        {live("figp-live-btn--pill")}
+
         <button
           type="button"
           className={`figp-pill-share${shareOpen ? " is-on" : ""}`}
@@ -152,6 +186,14 @@ export default function FigmaTabBar({
         </PageLink>
       </div>
     </>
+  );
+}
+
+/* a live indicator rather than an external-link arrow: the point of this
+   control is that the thing is running right now, not that it opens a tab */
+function LiveDot() {
+  return (
+    <span className="figp-live-dot" aria-hidden="true" />
   );
 }
 

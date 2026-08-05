@@ -1,0 +1,522 @@
+/*
+  ============ CRICKET ============
+  Full-bleed game. The canvas is the page: fixed to the viewport, edge to
+  edge, no chrome around it. Everything a person reads floats on top in
+  translucent panels.
+
+  The panel treatment is Apple's, and the parts that matter are the ones
+  people skip: a saturating backdrop blur rather than a plain one (colour
+  behind the glass should stay colourful, not go grey), a hairline border
+  brighter along the top edge than the bottom so the panel reads as catching
+  light, and a shadow soft enough to lift without stamping a box.
+
+  Scoped under .ckt so it can be imported as global CSS without touching
+  anything else on the site.
+*/
+.ckt {
+  /* pulled off the canvas scene, not the site's cream and purple */
+  --ckt-ink: #ffffff;
+  --ckt-dim: rgba(255, 255, 255, 0.66);
+  --ckt-ball: #e63946;
+  --ckt-six: #ffd93d;
+  --ckt-four: #4ade80;
+  --ckt-navy: #12324a;
+
+  /* the glass set */
+  --ckt-glass: rgba(14, 32, 48, 0.5);
+  --ckt-glass-strong: rgba(12, 28, 44, 0.74);
+  --ckt-glass-line: rgba(255, 255, 255, 0.18);
+  --ckt-glass-lit: rgba(255, 255, 255, 0.42);
+  --ckt-glass-shadow: 0 8px 32px rgba(4, 14, 26, 0.36), 0 1px 2px rgba(4, 14, 26, 0.2);
+
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0e2a3f;
+  color: var(--ckt-ink);
+  font-family: var(--font-primary);
+  /* the whole surface is the bat */
+  cursor: crosshair;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.ckt-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.ckt-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- the glass panel ---- */
+.ckt-glass {
+  position: absolute;
+  z-index: 3;
+  border-radius: 20px;
+  background: var(--ckt-glass);
+  border: 1px solid var(--ckt-glass-line);
+  /* saturate, or the colour behind the panel washes out to grey */
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--ckt-glass-shadow);
+}
+
+/* the lit top edge. A single flat border reads as a box; real glass catches
+   light on the edge facing it. */
+.ckt-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--ckt-glass-lit) 22%,
+    var(--ckt-glass-lit) 78%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* ---- top left: identity ---- */
+.ckt-brand {
+  top: clamp(0.8rem, 2vw, 1.4rem);
+  left: clamp(0.8rem, 2vw, 1.4rem);
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1.05rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ckt-ink);
+  text-decoration: none;
+}
+
+/* ---- top centre: the scoreboard ---- */
+.ckt-board {
+  top: clamp(0.8rem, 2vw, 1.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 2.4vw, 1.5rem);
+  padding: 0.55rem clamp(1rem, 2.6vw, 1.4rem);
+  white-space: nowrap;
+}
+
+.ckt-score {
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(1.9rem, 4.4vw, 2.7rem);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  color: var(--ckt-six);
+  font-variant-numeric: tabular-nums;
+}
+
+.ckt-score-sub {
+  font-size: 0.42em;
+  color: var(--ckt-dim);
+  margin-left: 0.12em;
+}
+
+.ckt-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--ckt-glass-line);
+}
+
+.ckt-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.ckt-meta-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ckt-dim);
+}
+
+.ckt-meta-value {
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: 0.96rem;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- top right: controls ---- */
+.ckt-controls {
+  top: clamp(0.8rem, 2vw, 1.4rem);
+  right: clamp(0.8rem, 2vw, 1.4rem);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.ckt-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ckt-ink);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s ease;
+}
+
+.ckt-icon:hover,
+.ckt-icon:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ckt-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---- bottom left: commentary + timing ---- */
+.ckt-say {
+  left: clamp(0.8rem, 2vw, 1.4rem);
+  bottom: clamp(0.8rem, 2vw, 1.4rem);
+  width: min(360px, calc(100vw - 2rem));
+  padding: 0.85rem 1.05rem 0.95rem;
+}
+
+.ckt-commentary {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.ckt-timing {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.7rem 0 0;
+}
+
+.ckt-timing-bar {
+  position: relative;
+  display: block;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(230, 57, 70, 0.75),
+    rgba(255, 255, 255, 0.28) 34%,
+    var(--ckt-six) 50%,
+    rgba(255, 255, 255, 0.28) 66%,
+    rgba(230, 57, 70, 0.75)
+  );
+}
+
+.ckt-timing-bar i {
+  position: absolute;
+  top: 50%;
+  left: var(--ckt-off, 50%);
+  width: 3px;
+  height: 15px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(4, 14, 26, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+.ckt-timing-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ckt-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- bottom right: wagon wheel ---- */
+.ckt-wheel {
+  right: clamp(0.8rem, 2vw, 1.4rem);
+  bottom: clamp(0.8rem, 2vw, 1.4rem);
+  padding: 0.75rem 0.9rem 0.55rem;
+}
+
+.ckt-wheel-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ckt-dim);
+  text-align: center;
+}
+
+.ckt-wagon {
+  display: block;
+  width: clamp(92px, 12vw, 120px);
+  height: auto;
+  overflow: visible;
+}
+
+.ckt-wagon-edge {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1;
+}
+
+.ckt-wagon-grid {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 3;
+}
+
+.ckt-wagon-shot {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  animation: ckt-draw 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ckt-wagon-shot--6 {
+  stroke: var(--ckt-six);
+  stroke-width: 2;
+}
+.ckt-wagon-shot--4 {
+  stroke: var(--ckt-four);
+}
+
+.ckt-wagon-pin {
+  fill: #fff;
+}
+
+@keyframes ckt-draw {
+  from {
+    opacity: 0;
+    stroke-dasharray: 0 60;
+  }
+  to {
+    opacity: 1;
+    stroke-dasharray: 60 0;
+  }
+}
+
+/* ---- the shout ---- */
+.ckt-shout {
+  position: absolute;
+  z-index: 4;
+  top: 17%;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-family: var(--ckt-shout), var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(2.6rem, 12vw, 7rem);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  pointer-events: none;
+  -webkit-text-stroke: 4px #12324a;
+  paint-order: stroke fill;
+  text-shadow: 0 8px 0 rgba(18, 50, 74, 0.3);
+  animation: ckt-shout 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ckt-shout--six {
+  color: var(--ckt-six);
+}
+.ckt-shout--four {
+  color: var(--ckt-four);
+}
+.ckt-shout--single,
+.ckt-shout--dot {
+  color: #fff;
+  font-size: clamp(1.8rem, 7vw, 3.4rem);
+}
+.ckt-shout--wicket {
+  color: var(--ckt-ball);
+}
+
+@keyframes ckt-shout {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  16% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- centred card: start and result ---- */
+.ckt-card {
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(470px, calc(100vw - 2.5rem));
+  padding: clamp(1.6rem, 4vw, 2.3rem);
+  text-align: center;
+  background: var(--ckt-glass-strong);
+  animation: ckt-card 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ckt-card {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+}
+
+.ckt-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ckt-dim);
+}
+
+.ckt-title {
+  margin: 0;
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(2.1rem, 6.5vw, 3.1rem);
+  line-height: 0.94;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+
+.ckt-title--result {
+  color: var(--ckt-six);
+}
+
+.ckt-final {
+  margin: 0.5rem 0 0;
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(2.6rem, 9vw, 3.6rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ckt-final span {
+  font-size: 0.3em;
+  color: var(--ckt-dim);
+  letter-spacing: 0.06em;
+}
+
+.ckt-rule {
+  margin: 0.8rem auto 0;
+  max-width: 38ch;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ckt-dim);
+}
+
+.ckt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem 1.3rem;
+  margin-top: 1.3rem;
+}
+
+.ckt-cta {
+  padding: 0.8rem 2.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ckt-six);
+  color: #12324a;
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #c9a418;
+  transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ckt-cta:hover,
+.ckt-cta:focus-visible {
+  background: #ffe680;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #c9a418;
+}
+
+.ckt-link {
+  font-size: 0.84rem;
+  color: var(--ckt-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ckt-glass-line);
+  padding-bottom: 2px;
+  transition: color 0.16s ease;
+}
+
+.ckt-link:hover,
+.ckt-link:focus-visible {
+  color: #fff;
+}
+
+.ckt-hint {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: clamp(0.8rem, 2vw, 1.4rem);
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---- narrow ---- */
+@media (max-width: 760px) {
+  .ckt-board {
+    gap: 0.75rem;
+    padding: 0.45rem 0.85rem;
+  }
+
+  /* the wordmark goes first: the score matters more than the byline */
+  .ckt-brand,
+  .ckt-hint {
+    display: none;
+  }
+
+  .ckt-say {
+    width: calc(100vw - 1.6rem);
+    bottom: calc(clamp(0.8rem, 2vw, 1.4rem) + 128px);
+  }
+
+  .ckt-wheel {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ckt-shout,
+  .ckt-wagon-shot,
+  .ckt-card {
+    animation-duration: 0.01ms;
+  }
+
+  .ckt-cta:hover,
+  .ckt-cta:focus-visible {
+    transform: none;
+  }
+}

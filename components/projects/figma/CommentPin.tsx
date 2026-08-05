@@ -7,7 +7,7 @@ type Props = {
   number: number;
   note: string;
   href: string;
-  variant: "head" | "shot";
+  variant: "head" | "shot" | "cover";
   external?: boolean;
 };
 

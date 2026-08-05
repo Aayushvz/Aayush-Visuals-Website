@@ -23,8 +23,19 @@ type Props = {
 export default function FigmaDock({ currentId, allProjects, hidden }: Props) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
+  /*
+    Watch the attribute rather than reading it once. The case-study page can
+    set the theme itself (see FigmaProjectPage), and a child's mount effect
+    runs before its parent's — so a single read on mount would show the
+    wrong icon until the next toggle.
+  */
   useEffect(() => {
-    setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    const read = () =>
+      setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => mo.disconnect();
   }, []);
 
   const toggleTheme = () => {
