@@ -1193,11 +1193,15 @@ html[data-theme="light"] .figp-lfile img {
   background-size: 24px 24px;
 }
 
+/* The top padding is deliberately generous. A case-study title landing
+   3.6rem under a 44px tab bar reads as a document heading; the extra air
+   is what makes it read as the opening of a piece of work. The tail stays
+   deep because the dock floats over the bottom. */
 .figp-page-body {
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 3.6rem 2rem 10rem; /* deep tail: the dock floats over the bottom */
+  padding: clamp(4.5rem, 9vw, 8rem) 2rem 10rem;
 }
 
 .figp-head {
@@ -1209,7 +1213,7 @@ html[data-theme="light"] .figp-lfile img {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  margin-bottom: 2.6rem;
+  margin-bottom: clamp(3rem, 6vw, 4.4rem);
   font-size: 0.82rem;
   color: var(--figp-dim);
   text-decoration: none;
@@ -1224,17 +1228,19 @@ html[data-theme="light"] .figp-lfile img {
 .figp-file {
   font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--figp-text-faint);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.9rem;
   user-select: none;
 }
 
 .figp-name {
   margin: 0;
   font-family: var(--font-archivo), var(--font-primary);
-  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
-  line-height: 1.04;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.4rem, 6.4vw, 4.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.028em;
   color: var(--figp-ink);
 }
 
@@ -1831,6 +1837,274 @@ html[data-theme="light"] .figp-lfile img {
   line-height: 1.55;
   color: var(--figp-text-faint);
   max-width: 54ch;
+}
+
+/* ============ compare: two paths, before and after ============
+   The count in each lane header is the argument. Everything else is
+   supporting evidence for a number the reader has already seen. */
+.figp-compare-fig {
+  margin: 0;
+}
+
+.figp-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.1rem;
+}
+
+.figp-lane {
+  padding: 1.1rem 1.2rem 1.3rem;
+  border: 1px solid var(--figp-line);
+  border-radius: 6px;
+}
+
+.figp-lane--after {
+  border-color: var(--figp-accent);
+  background: color-mix(in srgb, var(--figp-accent) 6%, transparent);
+}
+
+.figp-lane-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--figp-line);
+}
+
+.figp-lane-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+.figp-lane--after .figp-lane-label {
+  color: var(--figp-accent);
+}
+
+.figp-lane-count {
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: 1.9rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--figp-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.figp-lane-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--figp-text-faint);
+}
+
+.figp-lane-steps {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: lane;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.figp-lane-steps li {
+  position: relative;
+  padding-left: 1.7rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--figp-body-text);
+  counter-increment: lane;
+}
+
+.figp-lane-steps li::before {
+  content: counter(lane, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--figp-text-dim);
+}
+
+.figp-lane--after .figp-lane-steps li::before {
+  color: var(--figp-accent);
+}
+
+/* the work the redesign removed, shown as removed */
+.figp-lane--before .figp-lane-steps li {
+  color: var(--figp-text-faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--figp-line);
+}
+
+.figp-compare-fig figcaption,
+.figp-bars-fig figcaption {
+  margin-top: 1.1rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 54ch;
+}
+
+/* ============ bars ============ */
+.figp-bars-fig {
+  margin: 0;
+}
+
+.figp-bars {
+  margin: 0;
+  max-width: 62ch;
+  display: grid;
+  gap: 1.15rem;
+}
+
+.figp-bar dt {
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--figp-body-text);
+  margin-bottom: 0.45rem;
+}
+
+.figp-bar dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.figp-bar-track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--figp-hover);
+  box-shadow: inset 0 0 0 1px var(--figp-line);
+  overflow: hidden;
+}
+
+.figp-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--figp-accent);
+}
+
+.figp-bar--bad .figp-bar-fill {
+  background: #e05a4e;
+}
+
+.figp-bar-value {
+  min-width: 3.6em;
+  text-align: right;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--figp-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============ coverage matrix ============ */
+.figp-cover-fig {
+  margin: 0;
+  max-width: 62ch;
+}
+
+.figp-cover-grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 6px;
+  max-width: 340px;
+}
+
+.figp-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--figp-hover);
+  box-shadow: inset 0 0 0 1px var(--figp-line);
+}
+
+.figp-cell.is-on {
+  background: var(--figp-accent);
+  box-shadow: none;
+}
+
+.figp-cover-fig figcaption {
+  margin-top: 1rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+}
+
+.figp-cover-fig figcaption strong {
+  color: var(--figp-ink);
+  font-weight: 600;
+}
+
+.figp-cover-note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+}
+
+/* ============ screens: frame plus real explanation ============ */
+.figp-screens {
+  display: grid;
+  gap: 4.5rem;
+}
+
+.figp-screen {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.figp-screen-head {
+  max-width: 62ch;
+}
+
+.figp-screen-step {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--figp-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.figp-screen-title {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.014em;
+  color: var(--figp-ink);
+}
+
+.figp-screen-body {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: var(--figp-body-text);
+}
+
+.figp-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+}
+
+@media (max-width: 720px) {
+  .figp-screens {
+    gap: 3rem;
+  }
+
+  .figp-cover-grid {
+    grid-template-columns: repeat(11, 1fr);
+    max-width: 100%;
+  }
 }
 
 /* ---- two desktop screens side by side ---- */
