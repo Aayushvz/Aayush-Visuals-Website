@@ -3921,7 +3921,9 @@ html[data-theme="light"] .figp-lfile img {
      White label on it, the way Figma's own multiplayer cursors read — this
      is a 10px decorative name tag, not copy anybody has to read. */
   background: var(--figp-accent-bright);
-  color: #fff;
+  /* not #fff: on a light accent like LayOver's gold, white lands at 2.3:1.
+     --figp-accent-ink is whatever the project says stays legible on it. */
+  color: var(--figp-accent-ink);
   font-size: 10.5px;
   font-weight: 600;
   line-height: 1.55;
