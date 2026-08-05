@@ -237,6 +237,462 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "cpgrams",
+    /* a shipped government product and a full deep dive, so it belongs in both */
+    alsoCaseStudy: true,
+    title: "CPGRAMS",
+    logoText: "CPGRAMS",
+    category: "Product Design",
+    year: "2026",
+    cover: "/projects/cpgrams-cover.webp",
+    preview: { kind: "website", href: "https://cpgramsaichatbot.com/", image: "/projects/cpgrams-cover.webp" },
+    cta: "Visit Live Chatbot",
+    role: "Product Design · Conversational UX",
+    tools: ["Figma", "Conversational UX", "Prototyping"],
+    description:
+      "CPGRAMS is how a citizen of India formally complains to their own government. It handles over 20 lakh grievances a year across 90+ ministries, and until now it did it through a 15-field form in English or Hindi. This is a conversational layer over that system: you speak your problem in your own language, and a chatbot turns it into a correctly routed, correctly categorised grievance without you ever seeing the form.",
+    extraFacts: [
+      ["Client", "DARPG, Government of India"],
+      ["Delivered with", "KPMG India"],
+      ["Languages", "22 scheduled Indian languages"],
+      ["Scope", "Conversational architecture, voice UX, UI, mascot, design system"],
+      ["Surfaces", "Web chatbot, mobile web"],
+      ["Live at", "cpgramsaichatbot.com"],
+    ],
+    highlights: [
+      "Speech-to-text intake in 22 languages, so filing needs no reading or writing",
+      "Grievances auto-filled and routed to the correct ministry from plain speech",
+      "Samadhan Didi, a lip-synced mascot who teaches the interface as you use it",
+    ],
+    sections: [
+      {
+        name: "problem",
+        heading: "The form nobody could fill",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The hero of this story is a person the internet was not built for. A pensioner in a district town whose money has not arrived. A parent whose ration card is wrong. Someone in Vellore whose road has been broken for two years and who has complained three times already.",
+              "India has a real answer for them. CPGRAMS is a constitutional-grade promise: file a grievance against any central government department and an officer is obliged to respond, usually inside 30 to 60 days, with escalation to the PMO if they do not. Over 20 lakh people use it every year and 93% of cases are disposed.",
+              "The promise is not the problem. The front door is.",
+            ],
+          },
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "Fifteen fields and no guide",
+                body: "One page, dense departmental jargon, no tooltips, no progressive disclosure. To file correctly you must already know which of 90+ ministries owns your problem.",
+              },
+              {
+                label: "Built for a desktop nobody has",
+                body: "A desktop-first layout in a country where three quarters of internet users are mobile-first. Tiny targets, unreadable text, a CAPTCHA that defeats the elderly.",
+              },
+              {
+                label: "Two languages out of twenty-two",
+                body: "English and Hindi. Over 550 million citizens communicate in a regional language only, and the portal has nothing to say to them.",
+              },
+              {
+                label: "Failure with no way back",
+                body: "Session timeouts wipe everything entered. No autosave, no drafts, cryptic errors with no recovery path.",
+              },
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/research-problems.webp",
+              wide: true,
+              caption:
+                "The usability audit. Five failure classes, and the number underneath them: 60% of people who start a grievance abandon it before submitting.",
+              alt: "A research slide titled Current UX Problems listing cluttered interface, no mobile responsiveness, confusing navigation, poor error handling and no accessibility, concluding that 60% of users abandon the form midway.",
+            },
+          },
+        ],
+      },
+      {
+        name: "stakes",
+        heading: "Who the portal actually serves",
+        blocks: [
+          {
+            kind: "stats",
+            items: [
+              { value: "78%", label: "of grievances come from urban, educated users" },
+              { value: "25%", label: "of India's population cannot read or write" },
+              { value: "31%", label: "of rural India uses the internet regularly" },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "A system built for 1.4 billion people was, in practice, serving the top 15%.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "That is the sentence the whole project turns on. The grievance mechanism was not under-used because Indians have no grievances. It was under-used because the people with the most to complain about were the least able to operate the thing built to hear them.",
+              "The 60+ age group files the most grievances and has the lowest digital literacy. They rely on somebody else to file on their behalf, which means the complaint is filtered, delayed, or never made. Every one of those is a citizen quietly dropping out of their own government's feedback loop.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/research-divide.webp",
+              wide: true,
+              caption:
+                "The digital divide, laid out. Language exclusion, age and literacy, and infrastructure, and how each one narrows the funnel before a citizen ever reaches the form.",
+              alt: "A research slide titled Why Most Indians Can't Use the Portal, showing 31% rural internet use, 52% finding government sites confusing, 78% of grievances from urban users and 25% unable to read or write, with barriers grouped into language, age and infrastructure.",
+            },
+          },
+        ],
+      },
+      {
+        name: "research",
+        heading: "Mapping the real journey",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "I worked the official process end to end before designing anything: register, pick a ministry, pick a category, describe the issue, attach documents, receive a registration number, track, escalate. Six steps on paper, and every one of them assumes knowledge the person filing does not have.",
+              "The step that breaks it is the second one. Choosing the ministry and category is a filing decision, not a citizen decision. Ask someone whose pension has stopped which department owns that, and you have already lost them.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/research-process.webp",
+              wide: true,
+              caption:
+                "The official six-step process, including the part most people never reach: auto-escalation to senior officers, and the ability to flag an unresolved case to the PMO.",
+              alt: "A research slide titled Filing a Grievance showing six numbered steps from registering on the portal through to resolution and feedback, with a note that officers must resolve within 30 to 60 days.",
+            },
+          },
+          {
+            kind: "flow",
+            steps: [
+              { label: "Open", sub: ["Launched from the CPGRAMS portal", "No install, no new account"] },
+              { label: "Meet", sub: ["Mascot introduces the interface", "Skippable"] },
+              { label: "Speak or type", decision: true, sub: ["The only real choice made", "Everything after adapts"] },
+              { label: "Describe", sub: ["Plain language, own tongue", "No ministry, no category"] },
+              { label: "Understand", sub: ["Intent, urgency, location", "Detected, not asked"] },
+              { label: "Auto-fill", sub: ["The 15-field form, filled", "Citizen never sees it"] },
+              { label: "Review", sub: ["Read it back before it counts", "Correct or escalate"] },
+              { label: "Route", sub: ["Straight to the right ministry", "Registration ID returned"] },
+            ],
+            caption:
+              "The architecture, and the whole argument in one line: the citizen does the describing and the system does the filing. Every step that used to require knowing how government is organised now happens after they have already spoken.",
+          },
+        ],
+      },
+      {
+        name: "insight",
+        blocks: [
+          {
+            kind: "statement",
+            text: "People were not failing to file grievances. They were failing to fill in a form. Those are not the same problem, and only one of them is theirs.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "Once that was clear the design stopped being a redesign of the portal and became a translation layer over it. The government's structure does not change: the same ministries, the same categories, the same 30-day obligation. What changes is who is required to understand it.",
+              "So the chatbot never asks a citizen anything the system could work out for itself. It does not ask which ministry. It does not ask for a category. It asks what happened, and then it does the filing.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "samadhan didi",
+        heading: "Samadhan Didi",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "A chat window is still an interface, and to someone who has never used one it is still intimidating. So the product has a face.",
+              "Samadhan Didi is a government worker in a saree with a departmental lanyard, and every part of that is deliberate. Didi means elder sister. She is the person you already trust to help you with a form: familiar, local, unmistakably from the same world as the person filing. She is lip-synced to the spoken response, so the answer is watched as well as heard.",
+              "She is not decoration. She is the onboarding: she points at the microphone, tells you what it does, and gets out of the way.",
+            ],
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/cpgrams/mascot.webp",
+                label: "Samadhan Didi",
+                alt: "Samadhan Didi, an illustrated Indian government worker in a cream and orange saree with a departmental ID lanyard, smiling and gesturing.",
+              },
+              {
+                src: "/projects/cpgrams/onboard-1.webp",
+                label: "She teaches the interface",
+                alt: "The CPGRAMS chatbot onboarding, with the screen dimmed except a spotlight on the microphone button and Samadhan Didi pointing at it, saying to click the microphone and share your concerns in your preferred language.",
+              },
+            ],
+            caption:
+              "The tutorial dims everything except the one control it is talking about, and it can be skipped from the first frame. Nobody is trapped in an explanation of a thing they already understand.",
+          },
+        ],
+      },
+      {
+        name: "voice",
+        heading: "Speaking instead of typing",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "For a quarter of the country, reading and writing is the barrier, so voice is not a convenience feature here. It is the accessibility strategy.",
+              "You press once and talk. Speech-to-text runs through Bhashini across all 22 scheduled languages, the language is detected rather than selected, and the interface adapts to what it hears. Filing a complaint becomes as hard as making a phone call, which for this audience is the correct difficulty.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/voice-fill.webp",
+              wide: true,
+              caption:
+                "A grievance, spoken. The citizen's audio sits in the thread with its waveform, and the reply comes back both written and voiced, because a person who could not type the complaint may not be able to read the answer either.",
+              alt: "The CPGRAMS chatbot with a voice message from a user in Vellore about a broken road near their college, and a spoken and written response from Samadhan Didi acknowledging the repeated complaints.",
+            },
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/cpgrams/voice-listen.webp",
+                label: "Listening",
+                alt: "The CPGRAMS chatbot in listening state with the microphone active and a live waveform.",
+              },
+              {
+                src: "/projects/cpgrams/voice-detect.webp",
+                label: "Language detected",
+                alt: "The CPGRAMS chatbot showing a detected regional language and the transcribed grievance text.",
+              },
+            ],
+            caption:
+              "Language is detected, not chosen from a dropdown. Asking someone to identify their own language in a list they cannot read is the same trap as asking them to pick a ministry.",
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/research-voice.webp",
+              wide: true,
+              caption:
+                "The case for voice, including the piece that matters most operationally: tone analysis flags distressed and urgent cases so they can be prioritised rather than queued.",
+              alt: "A research slide titled Voice Chat Makes It Universal, covering mother-tongue speech-to-text via Bhashini, eliminating the literacy barrier, elderly accessibility, emotion detection and working on basic phones.",
+            },
+          },
+        ],
+      },
+      {
+        name: "review",
+        heading: "The screen before it counts",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "This is the screen the whole system is built to reach, and the one that took the longest to get right.",
+              "The chatbot has listened, understood, categorised and filled the form. Before any of that becomes a legal submission, it is read back to the citizen in their own words, with the state and category it has inferred shown plainly. Submit, or start again.",
+              "It exists because auto-filling a government complaint on somebody's behalf is a serious act. If the system silently mis-files a grievance, the citizen has not been helped, they have been quietly failed with a registration number as proof. So the machine's interpretation is always shown before it is committed, and there is a route out: if the state-level categorisation is wrong, one tap escalates to the Central Authority.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/text-submit.webp",
+              wide: true,
+              caption:
+                "The pre-submission review. The interpretation, the detected state, Submit Grievance, and an escape hatch for when the categorisation is wrong.",
+              alt: "The CPGRAMS chatbot review card showing the interpreted query, a Tamil Nadu state tag, Submit Grievance and New Chat buttons, an audio playback bar, and a link reading Not satisfied with the state categorization, register with the Central Authority.",
+            },
+          },
+        ],
+      },
+      {
+        name: "text",
+        heading: "The typed path",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Voice is the priority, not the requirement. Plenty of citizens can type and would rather, and in a noisy room or a shared house speaking a complaint out loud is not always possible.",
+              "The typed flow reaches the same place through the same architecture: describe it in plain language, let the system infer the rest, review before submitting. One question at a time, never a form.",
+            ],
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/cpgrams/text-start.webp",
+                label: "Opening state",
+                alt: "The CPGRAMS chatbot start screen with a welcome message and a prompt to register a grievance by speaking or typing.",
+              },
+              {
+                src: "/projects/cpgrams/text-chat.webp",
+                label: "Guided conversation",
+                alt: "The CPGRAMS chatbot mid-conversation, asking follow-up questions about a passport appointment grievance.",
+              },
+            ],
+            caption:
+              "Recent chats persist in the left rail, so a grievance interrupted by a dropped connection or a dead battery is not a grievance lost. The original portal loses everything on a session timeout.",
+          },
+        ],
+      },
+      {
+        name: "mobile",
+        heading: "On the phone it will actually be used on",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Three quarters of India's internet users are mobile-first and many are on 2G or 3G. The desktop layout was never the real product; this was.",
+              "Both flows were designed at phone width in parallel rather than squeezed down afterwards. The microphone stays within thumb reach, the mascot shrinks to a corner presence instead of a full figure, and the review card becomes a full screen so nothing important sits below a fold.",
+            ],
+          },
+          {
+            kind: "gallery",
+            items: [
+              {
+                src: "/projects/cpgrams/phone-onboard.webp",
+                label: "Onboarding",
+                alt: "The CPGRAMS chatbot onboarding on a phone, with Samadhan Didi introducing the interface.",
+              },
+              {
+                src: "/projects/cpgrams/phone-voice-1.webp",
+                label: "Press to speak",
+                alt: "The CPGRAMS chatbot on a phone with a large microphone button labelled press to speak.",
+              },
+              {
+                src: "/projects/cpgrams/phone-voice-3.webp",
+                label: "Voice thread",
+                alt: "The CPGRAMS chatbot on a phone showing a voice message thread with waveform players.",
+              },
+              {
+                src: "/projects/cpgrams/phone-text-3.webp",
+                label: "Review and submit",
+                alt: "The CPGRAMS chatbot review screen on a phone with the interpreted grievance and a submit button.",
+              },
+            ],
+            caption:
+              "The same architecture at 402px. Voice matters more here, not less: this is the device the low-literacy user actually owns.",
+          },
+        ],
+      },
+      {
+        name: "decisions",
+        heading: "The decisions",
+        blocks: [
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "Never ask for the ministry",
+                body: "The single highest-friction field on the original portal, and the one a citizen is least equipped to answer. It is inferred from what they said and confirmed at review.",
+              },
+              {
+                label: "Detect the language, do not offer it",
+                body: "A language picker is a reading test. Detection removes it, and the interface adapts to what it hears.",
+              },
+              {
+                label: "Speak every answer, not just accept speech",
+                body: "Voice input without voice output only solves half the literacy problem. Every response is playable.",
+              },
+              {
+                label: "Show the interpretation before submitting",
+                body: "Auto-filling a legal complaint for somebody demands consent. The review screen is where the system admits what it assumed.",
+              },
+              {
+                label: "Give the wrong answer somewhere to go",
+                body: "When the state-level routing is wrong, escalation to the Central Authority is one tap, not a new grievance.",
+              },
+              {
+                label: "Keep the government's own visual authority",
+                body: "The saffron, the emblem, the departmental masthead. A grievance tool that looks unofficial does not get trusted with a grievance.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "system",
+        heading: "The system underneath",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "A component set built for a conversation rather than a page: message bubbles by speaker, audio players, state tags, the review card, tutorial spotlights, and the mascot in each of her states.",
+            ],
+          },
+          {
+            kind: "specs",
+            items: [
+              { name: "Saffron", value: "#FE6700", swatch: "#FE6700", note: "Primary action, government identity" },
+              { name: "Deep", value: "#9F2D00", swatch: "#9F2D00", note: "Pressed and emphasis" },
+              { name: "Warm", value: "#FFC196", swatch: "#FFC196", note: "Surfaces, user bubbles" },
+              { name: "Cream", value: "#FFFBEF", swatch: "#FFFBEF", note: "Chat canvas" },
+              { name: "Ink", value: "#333333", swatch: "#333333", note: "Body copy" },
+              { name: "Slate", value: "#4A505B", swatch: "#4A505B", note: "Secondary text and labels" },
+              { name: "Interface", value: "Inter", note: "Chat, controls, labels" },
+              { name: "Supporting", value: "General Sans", note: "Headings, shared with the rest of the practice" },
+              { name: "System", value: "Roboto", note: "Devanagari and regional script coverage" },
+            ],
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/cpgrams/components-1.webp",
+                label: "Message and input components",
+                alt: "A Figma component set for the CPGRAMS chatbot showing message bubble and input variants.",
+              },
+              {
+                src: "/projects/cpgrams/components-2.webp",
+                label: "State variants",
+                alt: "A Figma component set showing state variants for the CPGRAMS chatbot controls.",
+              },
+            ],
+            caption:
+              "Roboto is in the stack for a specific reason: it carries Devanagari and most regional scripts, and a 22-language product cannot ship a typeface that only renders two of them.",
+          },
+        ],
+      },
+      {
+        name: "outcome",
+        heading: "What changed",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "It is live at cpgramsaichatbot.com, running against the real grievance system rather than as a concept.",
+              "For a citizen, the qualification to complain to their own government dropped from reading English or Hindi and knowing how ministries are organised, to being able to speak. For DARPG, grievances arrive pre-categorised and correctly routed, which is work that previously landed on an officer before the clock even started.",
+              "The projections the work was scoped against were 3x more grievances filed, a 40% reduction in incomplete submissions, and 85% satisfaction. Post-launch numbers sit with the department.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/cpgrams/research-solution.webp",
+              wide: true,
+              caption:
+                "The solution as it was argued at the outset: natural language in, correct routing out, and no prior knowledge required of the person filing.",
+              alt: "A research slide titled How a Chatbot Changes Everything, covering natural language input, 22 Indian languages, low-literacy accessibility, guided steps, zero app install and smart auto-routing.",
+            },
+          },
+        ],
+      },
+      {
+        name: "reflection",
+        heading: "What I learned",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Designing for government taught me that accessibility is not a layer you add to a finished product. Here it was the product. Take voice out and you have not made a slightly less inclusive chatbot, you have rebuilt the thing that was already failing.",
+              "It also changed how I think about automation. The instinct with a form this painful is to remove it entirely and let the machine handle everything. But the moment a system files a legal document on someone's behalf, hiding its reasoning stops being convenience and starts being a liability. The review screen is the least clever part of this project and probably the most important one.",
+              "Good design here was less about making the interface friendly and more about moving the burden of understanding off the citizen and onto the system that already has it.",
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "layover",
     /* a shipped product and a full deep dive, so it belongs in both lists */
     alsoCaseStudy: true,

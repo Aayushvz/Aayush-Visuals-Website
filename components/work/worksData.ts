@@ -52,6 +52,22 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     categories: ["UI/UX", "Brand Design"],
     tags: ["website", "festival", "framer", "event", "identity"],
   },
+  cpgrams: {
+    categories: ["Product Design", "UI/UX"],
+    tags: [
+      "chatbot",
+      "conversational",
+      "government",
+      "govtech",
+      "accessibility",
+      "voice",
+      "multilingual",
+      "india",
+      "darpg",
+      "grievance",
+      "mascot",
+    ],
+  },
   layover: {
     categories: ["Product Design", "UI/UX"],
     tags: ["app", "booking", "travel", "mobile", "prototyping"],
