@@ -153,12 +153,13 @@ const jsonLd = {
 /*
   Runs before first paint so the theme never flashes.
 
-  An explicit stored choice always wins. With nothing stored, case-study
-  routes default to LIGHT while the rest of the site follows the OS: the
-  work on those pages is screenshots of light interfaces, and a dark canvas
-  around them fights the thing it is meant to present.
+  The rest of the site follows a stored choice, then the OS. Case studies
+  always open light regardless of either: the work on those pages is
+  screenshots of light interfaces, and a dark canvas around them fights the
+  thing it exists to present. The dock's toggle still works once you are
+  there — this sets where the page starts, not where it has to stay.
 */
-const themeInit = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=location.pathname.indexOf("/work/")===0?"light":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}})();`;
+const themeInit = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}if(location.pathname.indexOf("/work/")===0){t="light";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}})();`;
 
 export default function RootLayout({
   children,

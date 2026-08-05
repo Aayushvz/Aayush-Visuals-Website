@@ -83,21 +83,17 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
   }, [layersOpen]);
 
   /*
-    The pre-paint script in the root layout handles a hard load, but a
-    client-side nav from the rest of the site never re-runs it. Same rule
-    here: an explicit stored choice is untouched, otherwise a case study
-    opens light. Restored on the way out so the preference does not leak
-    into the pages that did not ask for it.
+    A case study always opens light, whatever the rest of the site is set
+    to. The pre-paint script covers a hard load; this covers arriving by
+    client-side nav, which the script never sees. Neither writes to
+    localStorage, so the reader's own preference for the rest of the site
+    survives untouched and the dock toggle still works from here.
   */
   useEffect(() => {
-    let stored: string | null = null;
-    try {
-      stored = localStorage.getItem("theme");
-    } catch {}
-    if (stored === "light" || stored === "dark") return;
-
     const previous = document.documentElement.dataset.theme;
     document.documentElement.dataset.theme = "light";
+    /* restore on the way out, so opening a case study from a dark homepage
+       does not leave the homepage light when you go back */
     return () => {
       if (previous) document.documentElement.dataset.theme = previous;
     };
