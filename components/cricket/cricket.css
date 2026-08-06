@@ -309,6 +309,240 @@
   }
 }
 
+/* ================= reward layer =================
+   Two lines per ball: the cricket event, then the studio joke. Tiered so a
+   six visibly outranks a single — entrance and exit are framer-driven, this
+   only carries the look. */
+.cktReward {
+  position: absolute;
+  z-index: 6;
+  top: 15%;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 26px 12px;
+  border-radius: 18px;
+  text-align: center;
+  pointer-events: none;
+  background: var(--ckt-glass-strong);
+  border: 1px solid var(--ckt-glass-line);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: var(--ckt-glass-shadow);
+}
+
+.cktReward__head {
+  font-family: var(--ckt-shout), var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(1.9rem, 7vw, 3.1rem);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.cktReward--big .cktReward__head {
+  font-size: clamp(2.5rem, 10vw, 4.6rem);
+}
+
+.cktReward--six {
+  border-color: rgba(255, 217, 61, 0.6);
+  box-shadow: var(--ckt-glass-shadow), 0 0 34px rgba(255, 217, 61, 0.34);
+}
+.cktReward--six .cktReward__head {
+  color: var(--ckt-six);
+}
+.cktReward--four {
+  border-color: rgba(74, 222, 128, 0.55);
+  box-shadow: var(--ckt-glass-shadow), 0 0 26px rgba(74, 222, 128, 0.26);
+}
+.cktReward--four .cktReward__head {
+  color: var(--ckt-four);
+}
+.cktReward--wicket {
+  border-color: rgba(230, 57, 70, 0.6);
+  box-shadow: var(--ckt-glass-shadow), 0 0 26px rgba(230, 57, 70, 0.3);
+}
+.cktReward--wicket .cktReward__head {
+  color: var(--ckt-ball);
+}
+
+.cktReward__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: clamp(0.86rem, 3.2vw, 1.02rem);
+  font-weight: 600;
+  color: var(--ckt-ink);
+}
+
+.cktReward__icon {
+  font-size: 1.1em;
+}
+
+.cktReward__xp {
+  margin-top: 3px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ckt-dim);
+}
+
+/* boundary sparks — absolutely placed so they burst from the card's centre */
+.cktReward__sparks {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.cktReward__sparks i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  color: var(--ckt-six);
+}
+.cktReward--four .cktReward__sparks i {
+  color: var(--ckt-four);
+}
+
+/* ---- combo ---- */
+.cktCombo {
+  position: absolute;
+  z-index: 5;
+  left: 16px;
+  top: 47%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  pointer-events: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.cktCombo__icon {
+  font-size: 1.05rem;
+}
+.cktCombo__label {
+  letter-spacing: 0.02em;
+}
+.cktCombo__count {
+  color: var(--ckt-six);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- xp ---- */
+.cktXpWrap {
+  position: absolute;
+  z-index: 5;
+  left: 16px;
+  bottom: 16px;
+  width: min(230px, 44vw);
+  padding: 10px 13px 11px;
+  border-radius: 14px;
+}
+
+.cktXp {
+  position: relative;
+}
+.cktXp__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cktXp__level {
+  color: var(--ckt-six);
+}
+.cktXp__count {
+  color: var(--ckt-dim);
+  font-variant-numeric: tabular-nums;
+}
+.cktXp__track {
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.14);
+}
+.cktXp__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4ade80, var(--ckt-six));
+  box-shadow: 0 0 12px rgba(255, 217, 61, 0.5);
+}
+.cktXp__up {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--ckt-six);
+  color: #12324a;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ---- end-of-over summary ---- */
+.cktSummary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 18px 0 14px;
+}
+.cktSummary__cell {
+  padding: 9px 4px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--ckt-glass-line);
+  text-align: center;
+}
+.cktSummary__cell dt {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ckt-dim);
+}
+.cktSummary__cell dd {
+  margin: 3px 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.cktSummary__xp {
+  margin-bottom: 18px;
+}
+.cktSummary__xpEarned {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ckt-four);
+}
+
+@media (max-width: 480px) {
+  /* the pill and the XP card share the left gutter; stack rather than let
+     them overlap on a phone */
+  .cktCombo {
+    top: 40%;
+  }
+  .cktSummary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* ---- the shout ---- */
 .ckt-shout {
   position: absolute;

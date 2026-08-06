@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CricketGame from "@/components/cricket/CricketGame";
+import CricketExperience from "@/components/cricket/CricketExperience";
 import { OG_IMAGE } from "@/lib/site";
 
 /* bare title — the root layout's template appends " - Aayush Raj" */
@@ -21,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function CricketPage() {
-  return <CricketGame />;
+  return <CricketExperience />;
 }

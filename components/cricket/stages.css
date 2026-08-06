@@ -1,0 +1,714 @@
+/*
+  Chrome for the stages that sit over the pitch: the opening, team
+  selection, and the broadcast intro.
+
+  Kept out of cricket.css deliberately. That file styles the game itself —
+  the HUD, the reward cards, the wagon wheel — and it is already 750 lines.
+  These are the screens *around* the game, they mount and unmount as a set,
+  and they share a token block that nothing in the game needs.
+*/
+
+/*
+  The shell. Fills the viewport and establishes the stacking context every
+  stage layers into, so no child ever needs a z-index above about 5.
+
+  `overflow: hidden` is load-bearing: the camera zooms the stadium past the
+  frame during the fly-in, and the card motes drift beyond their card. Both
+  would otherwise extend the page and hand the document a scrollbar that
+  appears and disappears while the animation runs.
+*/
+.dpl {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #06080e;
+  isolation: isolate;
+}
+
+.stgBack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+.stg {
+  --stg-ink: #f6f4ef;
+  --stg-dim: rgba(246, 244, 239, 0.62);
+  --stg-faint: rgba(246, 244, 239, 0.4);
+  --stg-glass: rgba(14, 16, 24, 0.52);
+  --stg-edge: rgba(255, 255, 255, 0.14);
+  --stg-mono: var(--font-mono, ui-monospace, "SF Mono", monospace);
+
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 48px);
+  color: var(--stg-ink);
+  /* the stadium canvas runs underneath every one of these, so the layer
+     itself must never paint a background */
+  background: none;
+  z-index: 4;
+}
+
+/* clicks fall through to the canvas anywhere the screen is not actually
+   showing a control, so the game keeps receiving input during overlays */
+.stg--pass {
+  pointer-events: none;
+}
+.stg--pass > * {
+  pointer-events: auto;
+}
+
+/* ============================ opening ============================ */
+
+.stgOpen {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: clamp(14px, 2.4vh, 26px);
+  max-width: 44rem;
+}
+
+/*
+  The title lands one line at a time.
+
+  Both lines share a single keyframe and differ only by delay, which is what
+  keeps them feeling like one gesture instead of two animations that happen
+  to be near each other. The overshoot is small (1.04) and the scale starts
+  below 1: the title arrives *toward* you, the way a broadcast sting does.
+*/
+.stgOpen__kicker {
+  font-family: var(--stg-mono);
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--stg-faint);
+  animation: stgRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stgOpen__title {
+  margin: 0;
+  font-size: clamp(34px, 7.4vw, 88px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fff8e6 42%,
+    #e8c98a 78%,
+    #b98f3e 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* the gradient alone reads flat on a dark pitch; the drop shadow is what
+     separates the letterforms from the floodlights behind them */
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35))
+    drop-shadow(0 18px 44px rgba(0, 0, 0, 0.55));
+  animation: stgTitle 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.stgOpen__sub {
+  margin: 0;
+  font-family: var(--stg-mono);
+  font-size: clamp(12px, 1.5vw, 16px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--stg-dim);
+  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
+}
+
+/* ---- the start control ---- */
+
+.stgStart {
+  position: relative;
+  margin-top: clamp(10px, 2vh, 22px);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  isolation: isolate;
+  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stgStart__body {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.05)
+  );
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 12px 34px rgba(0, 0, 0, 0.45);
+  font-family: var(--stg-mono);
+  font-size: clamp(12px, 1.2vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--stg-ink);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease-out, border-color 0.32s ease-out;
+}
+
+/* the ring that breathes behind the button, so it reads as live before
+   anyone has touched it */
+.stgStart__ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: stgPulse 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .stgStart:hover .stgStart__body,
+  .stgStart:focus-visible .stgStart__body {
+    transform: translateY(-2px) scale(1.03);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 18px 46px rgba(0, 0, 0, 0.55);
+  }
+}
+
+.stgStart:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.stgStart__arrow {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) {
+  .stgStart:hover .stgStart__arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* hover particles live on their own canvas so they can never trigger
+   layout, and so the button stays a button */
+.stgStart__spark {
+  position: absolute;
+  inset: -60px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---- skip ---- */
+
+.stgSkip {
+  position: absolute;
+  right: clamp(14px, 3vw, 34px);
+  bottom: clamp(14px, 3vw, 30px);
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--stg-edge);
+  background: var(--stg-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--stg-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--stg-dim);
+  cursor: pointer;
+  transition: color 0.2s ease-out, border-color 0.2s ease-out;
+}
+@media (hover: hover) {
+  .stgSkip:hover,
+  .stgSkip:focus-visible {
+    color: var(--stg-ink);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* ========================= team selection ========================= */
+
+.stgPick {
+  display: grid;
+  justify-items: center;
+  gap: clamp(18px, 3vh, 34px);
+  width: 100%;
+  max-width: 62rem;
+}
+
+.stgPick__head {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  animation: stgRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stgPick__title {
+  margin: 0;
+  font-size: clamp(22px, 3.4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--stg-ink);
+}
+
+.stgPick__hint {
+  margin: 0;
+  font-family: var(--stg-mono);
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--stg-faint);
+}
+
+.stgPick__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 2.6vw, 34px);
+  width: 100%;
+  /* the cards tilt in 3D, and without a shared perspective on the parent
+     each one gets its own vanishing point and they read as two unrelated
+     objects rather than two cards on one table */
+  perspective: 1400px;
+}
+
+/* ============================== card ============================== */
+
+.tcard {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  -webkit-tap-highlight-color: transparent;
+  animation: stgCardIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--stagger) both;
+  transition: opacity 0.5s ease-out, filter 0.5s ease-out;
+}
+
+/*
+  The transform stack, in the order it must be read:
+  magnet moves the whole card toward the pointer, then the tilt rotates it
+  about its own centre, then the hover lift raises it off the table. Putting
+  the lift first would scale the magnet offset with it.
+*/
+.tcard__face {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  padding: clamp(16px, 2vw, 24px);
+  min-height: clamp(300px, 42vh, 420px);
+  grid-template-rows: auto 1fr auto auto auto;
+  border-radius: 20px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.03) 42%,
+      rgba(0, 0, 0, 0.2)
+    ),
+    radial-gradient(
+      120% 90% at 20% 0%,
+      color-mix(in srgb, var(--tm-primary) 42%, transparent),
+      transparent 62%
+    ),
+    rgba(10, 12, 20, 0.72);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 20px 50px rgba(0, 0, 0, 0.5);
+  transform: translate3d(var(--mag-x, 0), var(--mag-y, 0), 0)
+    rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease-out;
+}
+
+.tcard.is-hot .tcard__face {
+  /* no transition on the hot state: while the pointer is inside, the
+     transform is driven every frame and a transition would lag it */
+  transition: box-shadow 0.4s ease-out;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 30px 70px rgba(0, 0, 0, 0.58);
+}
+
+/* ---- rarity ring ---- */
+
+.tcard__rarity {
+  position: absolute;
+  inset: -1.5px;
+  z-index: 1;
+  border-radius: 21.5px;
+  background: conic-gradient(
+    from var(--spin, 0deg),
+    var(--tm-r1),
+    var(--tm-r2),
+    var(--tm-r3),
+    var(--tm-r1)
+  );
+  opacity: 0.55;
+  filter: blur(0.4px);
+  transition: opacity 0.4s ease-out;
+  animation: stgSpin 5.5s linear infinite;
+}
+.tcard.is-hot .tcard__rarity,
+.tcard.is-picked .tcard__rarity {
+  opacity: 1;
+}
+
+/* ---- holographic sheen ---- */
+
+.tcard__holo {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.32) 46%,
+    rgba(180, 220, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.32) 54%,
+    transparent 62%
+  );
+  background-size: 260% 100%;
+  background-position: var(--shine, 50%) 0;
+  mix-blend-mode: overlay;
+}
+.tcard.is-hot .tcard__holo {
+  opacity: 1;
+}
+
+/* ---- floating motes ---- */
+
+.tcard__motes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+.tcard.is-hot .tcard__motes {
+  opacity: 1;
+}
+.tcard__motes i {
+  position: absolute;
+  left: calc(8% + var(--i) * 16%);
+  bottom: -8px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--tm-light);
+  box-shadow: 0 0 8px var(--tm-light);
+  animation: stgMote 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.75s);
+}
+
+/* ---- card contents ---- */
+
+.tcard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--stg-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.tcard__style {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tm-primary) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tm-light) 50%, transparent);
+  color: #fff;
+}
+.tcard__abbr {
+  color: var(--stg-faint);
+  letter-spacing: 0.24em;
+}
+
+.tcard__mascot {
+  place-self: center;
+  font-size: clamp(56px, 8vw, 92px);
+  line-height: 1;
+  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.5));
+  animation: stgFloat 4s ease-in-out infinite;
+}
+
+.tcard__body {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+}
+.tcard__name {
+  font-size: clamp(19px, 2.2vw, 27px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.tcard__identity {
+  font-family: var(--stg-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tm-light);
+}
+.tcard__motto {
+  margin-top: 2px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--stg-dim);
+}
+
+.tcard__perk {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--stg-dim);
+}
+
+.tcard__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: var(--tm-primary);
+  color: var(--tm-ink);
+  font-family: var(--stg-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease-out, transform 0.3s ease-out;
+}
+.tcard__cta svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tcard.is-hot .tcard__cta svg {
+  transform: translateX(4px);
+}
+
+/* the pooled glow under the card — blurred well past its own box, which is
+   what makes the card read as hovering rather than as a sticker */
+.tcard__pool {
+  position: absolute;
+  z-index: 0;
+  left: 12%;
+  right: 12%;
+  bottom: -14px;
+  height: 40px;
+  border-radius: 50%;
+  filter: blur(26px);
+  opacity: 0;
+  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+.tcard.is-hot .tcard__pool {
+  opacity: 0.55;
+  transform: translateY(6px) scale(1.06);
+}
+
+/* ---- chosen / not chosen ---- */
+
+.tcard.is-picked .tcard__face {
+  animation: stgPicked 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+.tcard.is-dimmed {
+  opacity: 0.28;
+  filter: saturate(0.35) blur(1px);
+  pointer-events: none;
+}
+
+/* ============================ keyframes ============================ */
+
+@keyframes stgRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes stgTitle {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(18px);
+    letter-spacing: 0.06em;
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    letter-spacing: -0.035em;
+  }
+}
+
+@keyframes stgCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(34px) rotateX(12deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes stgPicked {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(1.07) translateY(-8px);
+  }
+  100% {
+    transform: scale(1.03) translateY(-4px);
+  }
+}
+
+@keyframes stgPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes stgSpin {
+  to {
+    --spin: 360deg;
+  }
+}
+
+/* the custom property has to be registered or it cannot be interpolated —
+   without this the conic sweep snaps at 0deg instead of rotating */
+@property --spin {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes stgFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes stgMote {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-260px) scale(1.1);
+  }
+}
+
+/* ============================ responsive ============================ */
+
+@media (max-width: 720px) {
+  .stgPick__cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .tcard__face {
+    min-height: 0;
+    grid-template-rows: auto auto auto auto auto;
+  }
+  .tcard__mascot {
+    font-size: 48px;
+  }
+}
+
+/* ========================= reduced motion ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+    Nothing here is decoration that can simply be deleted — the title and
+    the cards animate IN, so removing the animation removes the element.
+    Each one collapses to a cross-fade instead: the staging survives, the
+    travel does not.
+  */
+  .stgOpen__kicker,
+  .stgOpen__title,
+  .stgOpen__sub,
+  .stgStart,
+  .stgPick__head,
+  .tcard {
+    animation: stgFade 0.3s ease-out both;
+  }
+  .tcard__face,
+  .tcard.is-picked .tcard__face {
+    animation: none;
+    transform: none;
+  }
+  .tcard__mascot,
+  .tcard__motes i,
+  .stgStart__ring,
+  .tcard__rarity {
+    animation: none;
+  }
+  .tcard__motes {
+    display: none;
+  }
+}
+
+@keyframes stgFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

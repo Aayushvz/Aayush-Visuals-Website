@@ -14,9 +14,19 @@ import {
   paintForegroundGrass,
   paintSky,
   paintStadium,
+  paintStrikerWicket,
   paintStumps,
 } from "./scene";
 import type { Scene } from "./scene";
+import { breakWicket, STANDING, type WicketState } from "./wicket";
+import type { TeamKit } from "./spriteKit";
+import { preloadBatter, type BatterAction } from "./batterSprites";
+import { comboFor, extendsCombo, pickReward, XP_FOR, xpLabel, type Combo } from "./rewards";
+import { levelFor, readProgress, writeProgress } from "./progress";
+import RewardCard, { type RewardShout } from "./RewardCard";
+import ComboPill from "./ComboPill";
+import XpBar from "./XpBar";
+import Ticker from "./Ticker";
 import "./cricket.css";
 
 /*
@@ -43,7 +53,17 @@ type Plot = { direction: number; runs: number };
 
 const BALLS = OVER.length;
 
-export default function CricketGame() {
+/*
+  `opponent` is the side in the field, which is the OTHER team — you bat
+  for the side you picked, so the bowler and the ring wear the opposition
+  kit. It defaults to the Panthers so the component still stands up on its
+  own outside the match flow.
+*/
+export default function CricketGame({
+  opponent = "panthers",
+}: {
+  opponent?: TeamKit;
+} = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
 
@@ -60,6 +80,8 @@ export default function CricketGame() {
   const phaseRef = useRef<Phase>("idle");
   const deliveryRef = useRef<Delivery>(OVER[0]);
   const releaseAtRef = useRef(0);
+  const runUpStartRef = useRef(0);
+  const runUpMsRef = useRef(1200);
   const swungRef = useRef(false);
   /** -1 (leg side) to 1 (off side); pointer, touch or arrow keys all feed it */
   const aimRef = useRef(0);
@@ -73,10 +95,49 @@ export default function CricketGame() {
   const sceneRef = useRef<Scene | null>(null);
   /* 0 = stance, 1 = full follow through; eased toward on contact */
   const swingAnimRef = useRef(0);
+  /* which batting animation the current swing plays. resolveShot runs at the
+     moment of the swing, so the outcome is already known when the animation
+     starts — no need to guess and correct. */
+  const swingActionRef = useRef<BatterAction>("defend");
+  /* the striker's wicket: standing, or the instant it was broken. Held in
+     a ref because the fall is animated by the loop, and a state update per
+     frame of it would re-render the HUD for nine hundred milliseconds. */
+  const wicketRef = useRef<WicketState>(STANDING);
+
+  /* ---- reward layer ---- */
+  const [shout, setShout] = useState<RewardShout | null>(null);
+  const [combo, setCombo] = useState<Combo | null>(null);
+  const comboRef = useRef(0);
+  const [xp, setXp] = useState(0);
+  const [levelUp, setLevelUp] = useState<number | null>(null);
+  /* what this over alone earned, for the summary card */
+  const overXpRef = useRef(0);
+  const [overXp, setOverXp] = useState(0);
+  const [boundaries, setBoundaries] = useState({ fours: 0, sixes: 0 });
+  const shoutIdRef = useRef(0);
+  const shoutTimerRef = useRef<number | null>(null);
+
+  /* XP carries across overs, so it loads from storage rather than starting
+     at zero every visit */
+  useEffect(() => {
+    setXp(readProgress().xp);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (shoutTimerRef.current) window.clearTimeout(shoutTimerRef.current);
+    };
+  }, []);
 
   const setPhaseBoth = useCallback((p: Phase) => {
     phaseRef.current = p;
     setPhase(p);
+  }, []);
+
+  /* start fetching the batter's frames immediately — they need to be decoded
+     before the first ball, not on the first swing */
+  useEffect(() => {
+    preloadBatter();
   }, []);
 
   useEffect(() => {
@@ -100,11 +161,17 @@ export default function CricketGame() {
       shotRef.current = null;
       trailRef.current = [];
       swingAnimRef.current = 0;
+      wicketRef.current = STANDING;
       setLast(null);
       setBallIdx(index);
       setPhaseBoth("runup");
 
       const delay = reducedRef.current ? 700 : runUpDelay();
+      /* the run-up's own clock, so the nine-phase delivery cycle can be
+         driven by real progress toward the release rather than by a loop
+         that has no idea when the ball is due */
+      runUpStartRef.current = performance.now();
+      runUpMsRef.current = delay;
       window.setTimeout(() => {
         /* the player may have left, or restarted, during the run-up */
         if (phaseRef.current !== "runup") return;
@@ -121,7 +188,47 @@ export default function CricketGame() {
       setLast(result);
       setPhaseBoth("resolved");
 
+      /* ---- reward, combo and XP, before the wicket early-return so a
+         dismissal still gets its card and its XP ---- */
+      const { headline, reward } = pickReward(result.contact);
+      const gained = XP_FOR[result.contact];
+
+      shoutIdRef.current += 1;
+      setShout({
+        id: shoutIdRef.current,
+        contact: result.contact,
+        headline,
+        reward,
+        xp: gained,
+        xpLabel: xpLabel(result.contact),
+      });
+      if (shoutTimerRef.current) window.clearTimeout(shoutTimerRef.current);
+      shoutTimerRef.current = window.setTimeout(() => setShout(null), 1900);
+
+      comboRef.current = extendsCombo(result.contact) ? comboRef.current + 1 : 0;
+      setCombo(comboFor(comboRef.current));
+
+      setXp((prev) => {
+        const next = prev + gained;
+        if (levelFor(next) > levelFor(prev)) {
+          setLevelUp(levelFor(next));
+          window.setTimeout(() => setLevelUp(null), 2200);
+        }
+        writeProgress(next);
+        return next;
+      });
+      overXpRef.current += gained;
+      setOverXp(overXpRef.current);
+      if (result.contact === "four") setBoundaries((b) => ({ ...b, fours: b.fours + 1 }));
+      if (result.contact === "six") setBoundaries((b) => ({ ...b, sixes: b.sixes + 1 }));
+
       if (result.contact === "wicket") {
+        /* the ball's own line decides which way the timber goes, so the
+           bails follow the delivery rather than always flying the same way */
+        wicketRef.current = breakWicket(
+          performance.now(),
+          deliveryRef.current.swing * 6 + aimRef.current * 0.35
+        );
         playStumps();
         setOut(true);
         window.setTimeout(() => setPhaseBoth("over"), 1500);
@@ -162,6 +269,11 @@ export default function CricketGame() {
     const ideal = releaseAtRef.current + delivery.travelMs;
     const offset = performance.now() - ideal;
     const result = resolveShot(delivery, offset, aimRef.current);
+    /* a six gets the lofted follow-through, a four the horizontal drive;
+       everything else — including the ball that takes the stumps — plays the
+       compact defensive shot */
+    swingActionRef.current =
+      result.contact === "six" ? "six" : result.contact === "four" ? "drive" : "defend";
 
     if (result.contact !== "wicket") {
       shotRef.current = {
@@ -173,12 +285,36 @@ export default function CricketGame() {
     finishBall(result);
   }, [finishBall]);
 
+  /* native share sheet where the device has one, clipboard everywhere else */
+  const [shared, setShared] = useState(false);
+  const share = useCallback(async () => {
+    const text = `I scored ${score} off ${out ? ballIdx + 1 : BALLS} in Six Balls — aayushvisuals.com/cricket`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      setShared(true);
+      window.setTimeout(() => setShared(false), 1800);
+    } catch {
+      /* dismissed the sheet, or clipboard blocked — nothing to recover */
+    }
+  }, [score, out, ballIdx]);
+
   const start = useCallback(() => {
     unlockAudio();
     setScore(0);
     setPlots([]);
     setOut(false);
     setLast(null);
+    /* per-over counters reset; lifetime XP deliberately does not */
+    setShout(null);
+    setCombo(null);
+    comboRef.current = 0;
+    overXpRef.current = 0;
+    setOverXp(0);
+    setBoundaries({ fours: 0, sixes: 0 });
     bowl(0);
   }, [bowl]);
 
@@ -297,12 +433,29 @@ export default function CricketGame() {
       paintSky(ctx, scene, now);
       paintStadium(ctx, scene);
       paintField(ctx, scene);
-      paintFielders(ctx, scene);
+      paintFielders(ctx, scene, now, opponent);
       paintStumps(ctx, scene, phase === "resolved" && swungRef.current && trailRef.current.length === 0);
 
       /* the bowler only exists between the run-up and release */
-      if (phase === "runup") paintBowler(ctx, scene, 0.5 + Math.sin(now / 120) * 0.25);
-      else if (phase === "flight") paintBowler(ctx, scene, 1);
+      /*
+        The run-up covers 0 to 0.72 of the delivery cycle — 0.72 is where
+        the sprite reaches `release`, so the arm comes over exactly as the
+        ball is let go rather than at some point near it. The remaining
+        follow-through and recovery play out over the ball's flight.
+
+        This used to be `0.5 + sin(now / 120) * 0.25`, which oscillated
+        between 0.25 and 0.75 forever. That was fine when the bowler was
+        two rectangles and the number only drove a stride, but against a
+        nine-pose cycle it jitters between two frames in the middle and
+        never plays the bound, the follow-through or the recovery.
+      */
+      if (phase === "runup") {
+        const k = clamp((now - runUpStartRef.current) / runUpMsRef.current, 0, 1);
+        paintBowler(ctx, scene, k * 0.72, opponent);
+      } else if (phase === "flight") {
+        const since = now - releaseAtRef.current;
+        paintBowler(ctx, scene, 0.72 + clamp(since / 620, 0, 1) * 0.28, opponent);
+      }
 
       if (phase === "flight" || (phase === "resolved" && !shotRef.current)) {
         const p = clamp((now - releaseAtRef.current) / d.travelMs, 0, 1.12);
@@ -325,7 +478,11 @@ export default function CricketGame() {
 
       /* the batter eases into the follow through, then holds it */
       if (swingAnimRef.current > 0) swingAnimRef.current = Math.min(1, swingAnimRef.current + 0.11);
-      paintBatter(ctx, scene, swingAnimRef.current, now);
+      paintBatter(ctx, scene, swingAnimRef.current, now, swingActionRef.current);
+      /* after the batter on purpose — the camera is behind the striker's
+         stumps, so they are the nearest thing in frame and his pads pass
+         behind them */
+      paintStrikerWicket(ctx, scene, now, wicketRef.current);
       paintAim(ctx, w, batY, cx, aimRef.current, phase === "flight");
       paintForegroundGrass(ctx, scene);
       ctx.restore();
@@ -347,7 +504,10 @@ export default function CricketGame() {
   useEffect(() => setMutedState(isMuted()), []);
 
   const delivery = OVER[ballIdx];
+  const ballsFaced = out || phase === "over" ? (out ? ballIdx + 1 : BALLS) : ballIdx;
   const finalVerdict = verdict(score, out ? ballIdx + 1 : BALLS, out);
+  /* runs per hundred balls, the standard cricket figure */
+  const strikeRate = ballsFaced > 0 ? Math.round((score / ballsFaced) * 100) : 0;
 
   return (
     <div className="ckt">
@@ -361,7 +521,7 @@ export default function CricketGame() {
 
       <div className="ckt-glass ckt-board" role="status" aria-live="polite">
         <span className="ckt-score">
-          {score}
+          <Ticker value={score} reduced={reduced} />
           <span className="ckt-score-sub">{out ? "-1" : "-0"}</span>
         </span>
         <span className="ckt-divider" aria-hidden="true" />
@@ -373,9 +533,20 @@ export default function CricketGame() {
         </span>
         <span className="ckt-divider" aria-hidden="true" />
         <span className="ckt-meta">
+          <span className="ckt-meta-label">Strike rate</span>
+          <span className="ckt-meta-value">
+            <Ticker value={strikeRate} reduced={reduced} />
+          </span>
+        </span>
+        <span className="ckt-divider" aria-hidden="true" />
+        <span className="ckt-meta">
           <span className="ckt-meta-label">Bowling</span>
           <span className="ckt-meta-value">{phase === "idle" ? "TO COME" : delivery.label}</span>
         </span>
+      </div>
+
+      <div className="ckt-glass cktXpWrap">
+        <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
       </div>
 
       <div className="ckt-glass ckt-controls">
@@ -394,15 +565,8 @@ export default function CricketGame() {
         </PageLink>
       </div>
 
-      {last && phase !== "over" && (
-        <p className={`ckt-shout ckt-shout--${last.contact}`}>
-          {last.contact === "six" && "SIX"}
-          {last.contact === "four" && "FOUR"}
-          {last.contact === "single" && `${last.runs}`}
-          {last.contact === "dot" && "DOT"}
-          {last.contact === "wicket" && "OUT"}
-        </p>
-      )}
+      {phase !== "over" && <RewardCard shout={shout} reduced={reduced} />}
+      {phase !== "over" && <ComboPill combo={combo} reduced={reduced} />}
 
       <div className="ckt-glass ckt-say">
         <p className="ckt-commentary">
@@ -473,9 +637,32 @@ export default function CricketGame() {
             {score} <span>off {out ? ballIdx + 1 : BALLS}</span>
           </p>
           <p className="ckt-rule">{finalVerdict.note}</p>
+
+          <dl className="cktSummary">
+            {[
+              ["Strike rate", String(strikeRate)],
+              ["Fours", String(boundaries.fours)],
+              ["Sixes", String(boundaries.sixes)],
+              ["Wickets lost", out ? "1" : "0"],
+            ].map(([k, v]) => (
+              <div className="cktSummary__cell" key={k}>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="cktSummary__xp">
+            <span className="cktSummary__xpEarned">+{overXp} Creative XP</span>
+            <XpBar xp={xp} levelUp={null} reduced={reduced} />
+          </div>
+
           <div className="ckt-actions">
             <button type="button" className="ckt-cta" onClick={start}>
-              Bat again
+              Play again
+            </button>
+            <button type="button" className="ckt-link" onClick={share}>
+              {shared ? "Copied" : "Share score"}
             </button>
             <PageLink className="ckt-link" href="/work">
               See the actual work
