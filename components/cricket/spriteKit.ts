@@ -40,7 +40,7 @@ export function preloadKit(team: TeamKit, role: string, poses: readonly string[]
   for (const pose of poses) {
     const img = new Image();
     img.decoding = "async";
-    img.src = `/cricket/${team}/${role}/${pose}.png`;
+    img.src = `/cricket/${team}/${role}/${pose}.webp`;
     cache.set(key(team, role, pose), img);
   }
 }

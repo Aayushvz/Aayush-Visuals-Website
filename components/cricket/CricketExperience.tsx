@@ -51,6 +51,25 @@ export default function CricketExperience() {
     return () => mq.removeEventListener("change", read);
   }, []);
 
+  /*
+    The document is cream.
+
+    globals.css paints `body` with --cream for the whole portfolio, and the
+    game is a dark full-bleed scene sitting on top of it. Any gap between
+    the two — a canvas that has not sized yet, a viewport taller than the
+    shell for one frame during a resize — shows up as a white rectangle
+    rather than as nothing, because the page underneath is a light site.
+
+    Marking the document rather than styling `.dpl` harder is the fix that
+    holds: a child cannot repaint its own body, and every "make the shell
+    cover everything" approach is one layout edge case away from failing
+    again.
+  */
+  useEffect(() => {
+    document.documentElement.classList.add("dpl-page");
+    return () => document.documentElement.classList.remove("dpl-page");
+  }, []);
+
   const advance = useCallback((to: Stage) => setStage(to), []);
 
   const start = useCallback(() => {

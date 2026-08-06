@@ -53,7 +53,7 @@ export function preloadBatter() {
   for (const k of KEYS) {
     const img = new Image();
     img.decoding = "async";
-    img.src = `/cricket/batter/${k}.png`;
+    img.src = `/cricket/batter/${k}.webp`;
     images.set(k, img);
   }
 }

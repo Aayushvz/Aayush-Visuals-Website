@@ -79,6 +79,19 @@ export default function StadiumBackdrop({ settled, reduced }: Props) {
 
     const draw = (now: number) => {
       rafRef.current = requestAnimationFrame(draw);
+      /*
+        Re-check the size every frame rather than trusting the observer.
+
+        A ResizeObserver is the right tool and it is still doing the work,
+        but it is not a guarantee: it can miss a resize that happens while
+        the tab is backgrounded, and it fires after layout rather than
+        before the next paint. When that goes wrong the backing store keeps
+        its old dimensions while the element takes the new ones, and the
+        canvas stretches a stale buffer across the bigger box — a 1280x720
+        stadium smeared over 1920x880. Comparing two integers per frame is
+        far cheaper than the class of bug it removes.
+      */
+      fit();
       const s = sceneRef.current;
       if (!s) return;
       if (!startRef.current) startRef.current = now;

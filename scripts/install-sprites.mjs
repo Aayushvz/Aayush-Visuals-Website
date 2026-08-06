@@ -133,7 +133,7 @@ for (const sheet of SHEETS) {
     const m = manifest[i];
     const name = sheet.names[i];
     const buf = await readFile(path.join(sheet.src, `${m.name}.png`));
-    await writeFile(path.join(sheet.outDir, `${name}.png`), buf);
+    await writeFile(path.join(sheet.outDir, `${name}.webp`), buf);
     rows.push({ name, w: m.w, h: m.h, ax: m.ax, bytes: buf.length });
   }
 
