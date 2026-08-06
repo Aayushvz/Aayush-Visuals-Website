@@ -6,14 +6,15 @@ import { useEffect } from "react";
   Warms the cache for Selected Works' heaviest asset while the pinned Skills
   scene is still on screen.
 
-  The first tile is an animated WebP (288 frames, ~1.5MB) — 75% of the whole
+  One tile is an animated WebP (288 frames, ~1.5MB) — 75% of the whole
   section's payload. It's natively lazy-loaded, so its download only started
   as you arrived, and the tile popped in a beat later. Skills is ~4700px
   tall, so the moment you enter it there's a long runway to fetch this in
   the background, and the file itself is untouched.
 
-  Only the first row is worth this: every other cover is 49–102KB and
-  already arrives in time on its own.
+  Only that one tile is worth this: every other cover is 49–102KB and
+  already arrives in time on its own. Which row it happens to sit in makes
+  no difference — the caller picks by weight, not position.
 */
 export default function PrefetchWorkMedia({ src }: { src: string }) {
   useEffect(() => {

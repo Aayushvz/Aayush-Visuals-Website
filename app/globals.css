@@ -3299,6 +3299,230 @@ html.has-cursor .cursorRing {
   font-size: clamp(38px, 4.6vw, 70px);
 }
 
+/* -------- the section's two calls to action --------
+
+   Both go to /work. The header one is a quiet inline control sized to sit
+   under the note without competing with the display heading; the closing
+   one is a full ledger row (see below). Neither is filled — the section is
+   ruled hairlines and mono on cream, and a solid button would be the only
+   heavy object on it. */
+
+.selWorks__headCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px 9px 16px;
+  border: 1px solid var(--selw-line);
+  border-radius: 999px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11px, 0.92vw, 13px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  background: transparent;
+  transition: border-color 0.25s ease-out, color 0.25s ease-out;
+}
+
+/* the count sits in its own well, so the label reads as the action and the
+   number as the payload rather than the two running together */
+.selWorks__headCtaNum {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(31, 31, 31, 0.07);
+  font-size: 0.92em;
+  letter-spacing: 0.04em;
+  color: rgba(31, 31, 31, 0.62);
+  transition: background-color 0.25s ease-out, color 0.25s ease-out;
+}
+
+.selWorks__headCtaIcon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+}
+.selWorks__headCtaIcon svg {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hover fills rather than outlines. The count well inverts as it goes:
+   white on purple, so it stays a distinct object inside the fill instead of
+   dissolving into it. */
+@media (hover: hover) {
+  .selWorks__headCta:hover,
+  .selWorks__headCta:focus-visible {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+  }
+  .selWorks__headCta:hover .selWorks__headCtaNum,
+  .selWorks__headCta:focus-visible .selWorks__headCtaNum {
+    background: #fff;
+    color: var(--purple);
+  }
+  /* the arrow leaves in the direction it points */
+  .selWorks__headCta:hover .selWorks__headCtaIcon svg,
+  .selWorks__headCta:focus-visible .selWorks__headCtaIcon svg {
+    transform: translate(2px, -2px);
+  }
+}
+
+.selWorks__headCta:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+/* -------- closing CTA: the ledger's last line --------
+
+   Geometry is deliberately identical to .selWork__meta so this lands on the
+   same columns as the seven rows above it: year slot left, name and subline
+   in the middle, oversized numeral slot right. The numeral slot holds an
+   arrow instead, which is the whole idea — after counting 01 to 07 the
+   column resolves into a direction. */
+.selWorks__endCta {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(18px, 4vw, 64px);
+  padding: clamp(34px, 5vh, 64px) var(--selw-gap) clamp(34px, 5vh, 64px);
+  border-bottom: 1px solid var(--selw-line);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  /* the fill is the event, so it gets the longer, softer curve and the
+     colour changes ride along underneath it */
+  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease-out;
+}
+
+.selWorks__endCtaYear {
+  flex: 0 0 auto;
+  /* The name column is not a fixed column: it starts wherever this slot
+     ends, plus the flex gap. Every row above holds a four-digit year, so
+     they all line up by coincidence of width. "All" is three characters and
+     would pull the name 7px left of the seven rows above it. The type here
+     is monospace, so a year is exactly four character widths plus the
+     tracking that follows each of them. */
+  min-width: calc(4ch + 4 * 0.08em);
+  padding-top: 3px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11px, 0.95vw, 13px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.55);
+  transition: color 0.25s ease-out;
+}
+
+.selWorks__endCtaInfo {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+/* set a step above the rows' captions: this is the line that ends the
+   section, so it carries more weight than the seven it closes */
+.selWorks__endCtaName {
+  display: block;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(15px, 1.5vw, 21px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--ink);
+  transition: color 0.25s ease-out;
+}
+
+.selWorks__endCtaCat {
+  font-weight: 400;
+  color: rgba(31, 31, 31, 0.5);
+  transition: color 0.25s ease-out;
+}
+
+.selWorks__endCtaRole {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11.5px, 0.95vw, 13.5px);
+  letter-spacing: 0.01em;
+  color: rgba(31, 31, 31, 0.42);
+  transition: color 0.25s ease-out;
+}
+
+/* sized off .selWork__index so the arrow occupies exactly the footprint the
+   numerals did, and the right-hand column stays a straight edge */
+.selWorks__endCtaIcon {
+  flex: 0 0 auto;
+  margin-left: auto;
+  display: inline-flex;
+  width: clamp(48px, 6.2vw, 108px);
+  height: clamp(48px, 6.2vw, 108px);
+  color: var(--ink);
+}
+.selWorks__endCtaIcon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.25;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.25s ease-out;
+}
+
+/*
+  The whole cell fills. Every piece of text inside it is on its own muted
+  step of the ink — 100%, 50%, 42% — and each of those is a ratio against
+  cream, not against purple. So they all resolve to white rather than being
+  left to sit at whatever they happened to be: the subline in particular
+  would be near-invisible carried unchanged onto a saturated fill.
+*/
+@media (hover: hover) {
+  .selWorks__endCta:hover,
+  .selWorks__endCta:focus-visible {
+    background: var(--purple);
+    border-bottom-color: var(--purple);
+  }
+  .selWorks__endCta:hover .selWorks__endCtaName,
+  .selWorks__endCta:focus-visible .selWorks__endCtaName,
+  .selWorks__endCta:hover .selWorks__endCtaIcon,
+  .selWorks__endCta:focus-visible .selWorks__endCtaIcon {
+    color: #fff;
+  }
+  /* the year slot and the "/ archive" qualifier keep their step down in
+     emphasis, they just take it out of white instead of out of the ink */
+  .selWorks__endCta:hover .selWorks__endCtaYear,
+  .selWorks__endCta:focus-visible .selWorks__endCtaYear,
+  .selWorks__endCta:hover .selWorks__endCtaCat,
+  .selWorks__endCta:focus-visible .selWorks__endCtaCat,
+  .selWorks__endCta:hover .selWorks__endCtaRole,
+  .selWorks__endCta:focus-visible .selWorks__endCtaRole {
+    /* 85% and not lower: on this purple that is 4.54:1, which clears the
+       4.5 bar. 78% looked right but measured 4.08:1. */
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .selWorks__endCta:hover .selWorks__endCtaIcon svg,
+  .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
+    transform: translate(6px, -6px);
+  }
+}
+
+.selWorks__endCta:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* the hover still resolves, it just resolves as colour rather than travel */
+  .selWorks__headCtaIcon svg,
+  .selWorks__endCtaIcon svg {
+    transition: color 0.25s ease-out;
+  }
+  .selWorks__headCta:hover .selWorks__headCtaIcon svg,
+  .selWorks__headCta:focus-visible .selWorks__headCtaIcon svg,
+  .selWorks__endCta:hover .selWorks__endCtaIcon svg,
+  .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
+    transform: none;
+  }
+}
+
 @media (max-width: 760px) {
   .selWorks__head {
     flex-direction: column;
@@ -3346,6 +3570,27 @@ html.has-cursor .cursorRing {
     padding-bottom: clamp(10px, 2vh, 16px);
     margin-bottom: 0;
     border-bottom: none;
+  }
+  /* the year column is hidden on the rows above, so it goes here too or the
+     closing line would sit on columns the rest of the ledger no longer has */
+  .selWorks__endCtaYear {
+    display: none;
+  }
+  /* rows drop their rules at this width; this one follows, and keeps a
+     single hairline above instead so it still reads as a separate line */
+  .selWorks__endCta {
+    border-bottom: none;
+    border-top: 1px solid var(--selw-line);
+    margin-top: clamp(14px, 3vh, 24px);
+    padding-block: clamp(26px, 4vh, 38px);
+    align-items: center;
+  }
+  .selWorks__endCtaIcon {
+    width: clamp(34px, 11vw, 52px);
+    height: clamp(34px, 11vw, 52px);
+  }
+  .selWorks__headCta {
+    width: auto;
   }
 }
 

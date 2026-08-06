@@ -1,7 +1,7 @@
 "use client";
 
 import PageLink from "@/components/PageLink";
-import { PROJECTS } from "./projectData";
+import { SELECTED_PROJECTS } from "./projectData";
 import { projectCursorProps } from "./ProjectCursor";
 import { saveOrigin } from "@/lib/navOrigin";
 
@@ -13,7 +13,9 @@ import { saveOrigin } from "@/lib/navOrigin";
   study page at /work/[id], data-driven off the same PROJECTS array.
 */
 
-// row rhythm from the reference: 01 full · 02/03 pair · 04 full · 05/06 pair · 07 full
+/* row rhythm from the reference: 01 full · 02/03 pair · 04 full · 05/06 pair
+   · 07 full. The indices are positions in SELECTED_PROJECTS, whose running
+   order is set in projectData — this file owns the layout, not the lineup. */
 const ROWS: { type: "full" | "pair"; items: number[] }[] = [
   { type: "full", items: [0] },
   { type: "pair", items: [1, 2] },
@@ -28,7 +30,7 @@ export default function SelectedWorks() {
       {ROWS.map((row, ri) => (
         <div key={ri} className={`selWorks__row selWorks__row--${row.type}`}>
           {row.items.map((idx) => {
-            const p = PROJECTS[idx];
+            const p = SELECTED_PROJECTS[idx];
             const src = p.bgVideoUrl ?? p.cover;
             return (
               <PageLink
