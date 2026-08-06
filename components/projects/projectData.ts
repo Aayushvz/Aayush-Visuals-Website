@@ -1875,3 +1875,36 @@ export const PROJECTS: Project[] = [
     ],
   },
 ];
+
+/*
+  The homepage reel's running order, which is an editorial call and not the
+  order of the array above. The two long case studies lead because they are
+  the only work here that shows the whole arc of a problem; the recognisable
+  client names follow. PROJECTS keeps its own order, so /work is unaffected.
+
+  Named by id rather than by position: the reel used to index into PROJECTS
+  directly, which meant inserting a project anywhere near the top silently
+  reshuffled the homepage.
+*/
+const SELECTED_IDS = [
+  "cpgrams",
+  "layover",
+  "elevation-capital",
+  "mike-tyson-invitational",
+  "riviera",
+  "yantra",
+  "dropby",
+];
+
+export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {
+  const project = PROJECTS.find((p) => p.id === id);
+  /* Throwing here fails the build rather than shipping a reel with a hole in
+     it — every page that renders this is prerendered, so a renamed id is
+     caught at build time and never reaches anyone. */
+  if (!project) {
+    throw new Error(
+      `SELECTED_IDS names "${id}", which is not a project in PROJECTS.`
+    );
+  }
+  return project;
+});
