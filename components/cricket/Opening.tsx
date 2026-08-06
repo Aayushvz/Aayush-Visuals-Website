@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import TitleCrest from "./TitleCrest";
 
 /*
   The opening title card.
@@ -154,13 +155,33 @@ export default function Opening({ onStart, reduced }: Props) {
       <div className="stgOpen">
         <p className="stgOpen__kicker">Aayush Raj presents</p>
 
-        <h1 className="stgOpen__title">
-          Design
-          <br />
-          Premier League
-        </h1>
+        {/* the crown, as in the comps — three gold stars over the wordmark */}
+        <span className="gk-stars stgOpen__crown" aria-hidden>
+          <i />
+          <i />
+          <i />
+        </span>
 
-        <p className="stgOpen__sub">Play your portfolio</p>
+        {/*
+          The wordmark and the badge are one block but two elements: the
+          crest is decoration and the words are a real <h1>. Keeping the
+          type in HTML is what gives the screen the document heading it
+          needs, and lets the three lines take their own colours.
+        */}
+        <div className="stgOpen__lockup">
+          <TitleCrest />
+          <h1 className="stgOpen__title">
+            <span className="stgOpen__l1">Design</span>
+            <span className="stgOpen__l2">Premier</span>
+            <span className="stgOpen__l3">League</span>
+          </h1>
+        </div>
+
+        <p className="gk-ribbon gk-ribbon--navy stgOpen__sub">
+          <i className="stgOpen__subStar" aria-hidden />
+          Play your portfolio
+          <i className="stgOpen__subStar" aria-hidden />
+        </p>
 
         <button
           ref={btnRef}

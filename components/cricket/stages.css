@@ -82,7 +82,7 @@
   display: grid;
   justify-items: center;
   text-align: center;
-  gap: clamp(14px, 2.4vh, 26px);
+  gap: clamp(10px, 1.8vh, 20px);
   max-width: 44rem;
 }
 
@@ -103,29 +103,58 @@
   animation: stgRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* the badge and the words share one grid cell so the type sits on the
+   plate at every width, instead of being positioned against it in px */
+.stgOpen__lockup {
+  display: grid;
+  place-items: center;
+  width: min(560px, 92vw);
+  animation: stgTitle 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.stgOpen__lockup > * {
+  grid-area: 1 / 1;
+}
+
+.stgCrest {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 16px 34px rgba(0, 0, 0, 0.55));
+}
+
 .stgOpen__title {
-  margin: 0;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  /* nudged up off the shield's point, where the ball sits */
+  margin: 0 0 8% 0;
   font-size: clamp(34px, 7.4vw, 88px);
   font-weight: 800;
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  line-height: 0.86;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  text-wrap: balance;
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #fff8e6 42%,
-    #e8c98a 78%,
-    #b98f3e 100%
-  );
+}
+
+/*
+  Three lines, three colours: white, gold, white. The comp uses the middle
+  line's gold as the only accent in the wordmark, which is what keeps a
+  three-word title from reading as three equal words — and gold on this
+  navy plate measures 5.7:1, so it holds at any of these sizes.
+*/
+.stgOpen__l1,
+.stgOpen__l3 {
+  color: #fff;
+  font-size: clamp(30px, 6.2vw, 74px);
+  text-shadow: 0 3px 0 #0b1c4a, 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.stgOpen__l2 {
+  font-size: clamp(26px, 5.4vw, 64px);
+  background: linear-gradient(180deg, #ffe071 0%, #ffc32e 52%, #e08a12 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  /* the gradient alone reads flat on a dark pitch; the drop shadow is what
-     separates the letterforms from the floodlights behind them */
-  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35))
-    drop-shadow(0 18px 44px rgba(0, 0, 0, 0.55));
-  animation: stgTitle 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+  filter: drop-shadow(0 3px 0 #0b1c4a) drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
 }
 
 .stgOpen__sub {
@@ -152,59 +181,75 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/*
+  The one control on the title card, now the kit's green cap.
+
+  It was a frosted glass pill, which was the right button for the old
+  restrained treatment and the wrong one the moment anything else on screen
+  became a moulded object — a translucent control next to a solid card reads
+  as disabled. Green because it is the only "go" in the whole experience;
+  every other green in the game is this same button.
+*/
 .stgStart__body {
   position: relative;
   z-index: 2;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding: 15px 30px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  min-height: 52px;
+  padding: 15px 34px;
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.16),
-    rgba(255, 255, 255, 0.05)
+    var(--gk-green-lit) 0%,
+    var(--gk-green) 30%,
+    var(--gk-green-deep) 100%
   );
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 12px 34px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 7px 0 var(--gk-green-deep),
+    0 14px 22px rgba(4, 12, 38, 0.5);
   font-family: var(--stg-mono);
   font-size: clamp(12px, 1.2vw, 14px);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--stg-ink);
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.32s ease-out, border-color 0.32s ease-out;
+  color: #fff;
+  text-shadow: var(--gk-text-relief);
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+}
+
+.stgStart:active .stgStart__body {
+  transform: translateY(7px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 0 0 var(--gk-green-deep),
+    0 2px 6px rgba(4, 12, 38, 0.4);
 }
 
 /* the ring that breathes behind the button, so it reads as live before
    anyone has touched it */
 .stgStart__ring {
   position: absolute;
-  inset: -6px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  inset: -8px;
+  border-radius: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.24);
   animation: stgPulse 2.6s ease-in-out infinite;
   pointer-events: none;
 }
 
+/* hover brightens, it does not lift. The cap owns 7px of travel for the
+   press, and a hover that raises it first means a pointer crossing into
+   the button and clicking sends it 9px in one gesture — a wobble, not a
+   press. Same call as the in-game .ckt-cta. */
 @media (hover: hover) {
-  .stgStart:hover .stgStart__body,
-  .stgStart:focus-visible .stgStart__body {
-    transform: translateY(-2px) scale(1.03);
-    border-color: rgba(255, 255, 255, 0.45);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4),
-      0 18px 46px rgba(0, 0, 0, 0.55);
+  .stgStart:hover .stgStart__body {
+    filter: brightness(1.08);
   }
 }
 
 .stgStart:focus-visible {
-  outline: 2px solid #fff;
+  outline: 3px solid var(--gk-gold-lit);
   outline-offset: 6px;
-  border-radius: 999px;
+  border-radius: 22px;
 }
 
 .stgStart__arrow {
@@ -249,30 +294,41 @@
 
 /* ---- skip ---- */
 
+/* Skip stays quiet on purpose: it is the way *past* the thing the screen
+   exists to show, so it gets the touch-target floor and legible contrast
+   and nothing else. Giving it a moulded cap would put it in the same rank
+   as "Take the field". */
 .stgSkip {
   position: absolute;
   right: clamp(14px, 3vw, 34px);
   bottom: clamp(14px, 3vw, 30px);
-  padding: 9px 15px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 9px 18px;
   border-radius: 999px;
-  border: 1px solid var(--stg-edge);
-  background: var(--stg-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: rgba(10, 22, 54, 0.66);
   font-family: var(--stg-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--stg-dim);
+  color: #cfe0f8;
   cursor: pointer;
-  transition: color 0.2s ease-out, border-color 0.2s ease-out;
+  transition: color 0.2s ease-out, border-color 0.2s ease-out,
+    background 0.2s ease-out;
 }
 @media (hover: hover) {
-  .stgSkip:hover,
-  .stgSkip:focus-visible {
-    color: var(--stg-ink);
-    border-color: rgba(255, 255, 255, 0.4);
+  .stgSkip:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(16, 34, 78, 0.8);
   }
+}
+.stgSkip:focus-visible {
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: 3px;
+  color: #fff;
 }
 
 /* ========================= team selection ========================= */
@@ -294,20 +350,36 @@
 }
 
 .stgPick__title {
-  margin: 0;
-  font-size: clamp(22px, 3.4vw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--stg-ink);
+  margin: 0 26px;
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: clamp(22px, 3.6vw, 44px);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  /* the kit's relief, not a blur: same treatment as the scoreboard and the
+     team nameplates, so all the display type in the game is one material */
+  text-shadow: 0 3px 0 #0b1c4a, 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+/* the last word in gold, the way the opening's middle line is — one accent
+   per heading, and it lands on the word that names the choice. Gold on this
+   navy plate measures 7.8:1. */
+.stgPick__gold {
+  background: linear-gradient(180deg, #ffe071 0%, #ffc32e 52%, #e08a12 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 0 #0b1c4a);
 }
 
 .stgPick__hint {
-  margin: 0;
+  margin: 12px 0 0;
   font-family: var(--stg-mono);
-  font-size: clamp(10px, 1vw, 12px);
-  letter-spacing: 0.2em;
+  font-size: clamp(11px, 1.2vw, 13px);
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--stg-faint);
+  color: #cfe0f8;
 }
 
 .stgPick__cards {
@@ -321,15 +393,17 @@
   perspective: 1400px;
 }
 
-/* ============================== card ============================== */
+/* ============================== card ==============================
+
+   The team plate. Structure comes from gamekit.css — .gk-panel for the
+   moulding, .gk-ribbon for the nameplate, .gk-stats for the readout,
+   .gk-btn for the control. What lives here is only what is specific to a
+   card: the pointer tilt, the crest staging, and the picked/dimmed states.
+*/
 
 .tcard {
   position: relative;
   display: block;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
   transform-style: preserve-3d;
   -webkit-tap-highlight-color: transparent;
   animation: stgCardIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--stagger) both;
@@ -339,249 +413,295 @@
 /*
   The transform stack, in the order it must be read:
   magnet moves the whole card toward the pointer, then the tilt rotates it
-  about its own centre, then the hover lift raises it off the table. Putting
-  the lift first would scale the magnet offset with it.
+  about its own centre. Putting a lift first would scale the magnet offset
+  with it.
+
+  It sits on the panel rather than on .tcard because .tcard is the element
+  the pointer is measured against — transforming the thing you are
+  measuring feeds its own displacement back into the next reading.
 */
-.tcard__face {
+.tcard__panel {
   position: relative;
   z-index: 2;
-  display: grid;
-  gap: 10px;
-  padding: clamp(16px, 2vw, 24px);
-  min-height: clamp(300px, 42vh, 420px);
-  grid-template-rows: auto 1fr auto auto auto;
-  border-radius: 20px;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(
-      165deg,
-      rgba(255, 255, 255, 0.13),
-      rgba(255, 255, 255, 0.03) 42%,
-      rgba(0, 0, 0, 0.2)
-    ),
-    radial-gradient(
-      120% 90% at 20% 0%,
-      color-mix(in srgb, var(--tm-primary) 42%, transparent),
-      transparent 62%
-    ),
-    rgba(10, 12, 20, 0.72);
-  backdrop-filter: blur(16px) saturate(1.25);
-  -webkit-backdrop-filter: blur(16px) saturate(1.25);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 20px 50px rgba(0, 0, 0, 0.5);
   transform: translate3d(var(--mag-x, 0), var(--mag-y, 0), 0)
     rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.4s ease-out;
 }
 
-.tcard.is-hot .tcard__face {
+.tcard.is-hot .tcard__panel {
   /* no transition on the hot state: while the pointer is inside, the
      transform is driven every frame and a transition would lag it */
   transition: box-shadow 0.4s ease-out;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 30px 70px rgba(0, 0, 0, 0.58);
+  box-shadow: var(--gk-lit), var(--gk-unlit), 0 26px 60px rgba(4, 12, 38, 0.6);
 }
 
-/* ---- rarity ring ---- */
+.tcard__face {
+  display: grid;
+  grid-template-rows: auto 1fr auto auto auto auto;
+  gap: clamp(10px, 1.4vw, 16px);
+  padding: clamp(14px, 1.8vw, 22px);
+  min-height: clamp(330px, 46vh, 460px);
+  isolation: isolate;
+}
 
-.tcard__rarity {
-  position: absolute;
-  inset: -1.5px;
+/* every real child sits above the two decorative layers */
+.tcard__face > *:not(.tcard__rays):not(.tcard__holo) {
+  position: relative;
   z-index: 1;
-  border-radius: 21.5px;
-  background: conic-gradient(
-    from var(--spin, 0deg),
-    var(--tm-r1),
-    var(--tm-r2),
-    var(--tm-r3),
-    var(--tm-r1)
+}
+
+/* --- the two decorative layers --- */
+
+/*
+  The sunburst behind the crest. A repeating conic gradient rather than
+  drawn spokes: one paint, no DOM, and it stays crisp at any card size.
+  Masked to a soft disc so the rays fade out before they reach the panel's
+  edge — rays that run to the corners fight the ribbon for attention.
+*/
+.tcard__rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 0;
+  width: 128%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--tm-light) 26%, transparent) 0deg 6deg,
+    transparent 6deg 12deg
   );
-  opacity: 0.55;
-  filter: blur(0.4px);
-  transition: opacity 0.4s ease-out;
-  animation: stgSpin 5.5s linear infinite;
-}
-.tcard.is-hot .tcard__rarity,
-.tcard.is-picked .tcard__rarity {
-  opacity: 1;
+  -webkit-mask-image: radial-gradient(circle, #000 22%, transparent 62%);
+  mask-image: radial-gradient(circle, #000 22%, transparent 62%);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: stgSpin 62s linear infinite;
 }
 
-/* ---- holographic sheen ---- */
-
+/* holographic sheen — a hard-edged band, because a soft blur reads as a
+   gradient rather than as light on a surface */
 .tcard__holo {
   position: absolute;
   inset: 0;
-  z-index: 3;
-  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    100deg,
+    transparent calc(var(--shine, 50%) - 18%),
+    rgba(255, 255, 255, 0.16) var(--shine, 50%),
+    transparent calc(var(--shine, 50%) + 18%)
+  );
   opacity: 0;
   transition: opacity 0.35s ease-out;
-  background: linear-gradient(
-    105deg,
-    transparent 38%,
-    rgba(255, 255, 255, 0.32) 46%,
-    rgba(180, 220, 255, 0.42) 50%,
-    rgba(255, 255, 255, 0.32) 54%,
-    transparent 62%
-  );
-  background-size: 260% 100%;
-  background-position: var(--shine, 50%) 0;
-  mix-blend-mode: overlay;
+  pointer-events: none;
 }
+
 .tcard.is-hot .tcard__holo {
   opacity: 1;
 }
 
-/* ---- floating motes ---- */
+/* --- the side's own colour ---
 
-.tcard__motes {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity 0.5s ease-out;
-}
-.tcard.is-hot .tcard__motes {
-  opacity: 1;
-}
-.tcard__motes i {
-  position: absolute;
-  left: calc(8% + var(--i) * 16%);
-  bottom: -8px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--tm-light);
-  box-shadow: 0 0 8px var(--tm-light);
-  animation: stgMote 4.5s ease-in-out infinite;
-  animation-delay: calc(var(--i) * -0.75s);
+   The kit's panel tokens are read, not hardcoded, so overriding them here
+   repaints the rim, the face and every button inside the card from the
+   team's palette. `deep` is the face because it is the one colour on the
+   Team object with a stated contract — dark enough to carry white text at
+   4.5:1 — and the face is what all of this card's text sits on.
+*/
+.tcard__panel {
+  --gk-rim-lit: var(--tm-light);
+  --gk-rim: var(--tm-primary);
+  --gk-rim-deep: var(--tm-deep);
+  --gk-face-top: color-mix(in srgb, var(--tm-deep) 82%, #06102e);
+  --gk-face-bot: color-mix(in srgb, var(--tm-deep) 38%, #06102e);
 }
 
-/* ---- card contents ---- */
+/* --- top row: playstyle and abbreviation --- */
 
 .tcard__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  font-family: var(--stg-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-.tcard__style {
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--tm-primary) 40%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tm-light) 50%, transparent);
-  color: #fff;
-}
-.tcard__abbr {
-  color: var(--stg-faint);
-  letter-spacing: 0.24em;
 }
 
-.tcard__mascot {
-  place-self: center;
-  font-size: clamp(56px, 8vw, 92px);
-  line-height: 1;
-  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.5));
-  animation: stgFloat 4s ease-in-out infinite;
+.tcard__style {
+  padding: 6px 14px 7px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(180deg, var(--tm-light), var(--tm-primary) 40%, var(--tm-deep));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 3px 8px rgba(4, 12, 38, 0.45);
+  font-family: var(--stg-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: var(--gk-text-relief);
 }
+
+.tcard__abbr {
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: clamp(15px, 1.7vw, 20px);
+  letter-spacing: 0.08em;
+  color: #fff;
+  opacity: 0.82;
+  text-shadow: var(--gk-text-relief);
+}
+
+/* --- crest --- */
+
+.tcard__crest {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.tcard__crest .crest {
+  width: auto;
+  height: 100%;
+  max-height: clamp(120px, 18vh, 178px);
+  filter: drop-shadow(0 10px 18px rgba(4, 12, 38, 0.55));
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tcard.is-hot .tcard__crest .crest {
+  transform: translateY(-4px) scale(1.04);
+}
+
+/* --- identity block --- */
 
 .tcard__body {
   display: grid;
-  gap: 4px;
-  text-align: left;
+  gap: 3px;
+  text-align: center;
 }
+
 .tcard__name {
-  font-size: clamp(19px, 2.2vw, 27px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #fff;
-}
-.tcard__identity {
-  font-family: var(--stg-mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
+  margin: 0;
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: clamp(23px, 3vw, 36px);
+  line-height: 1;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: var(--tm-light);
+  color: #fff;
+  text-shadow: var(--gk-text-relief);
 }
+
+/*
+  The identity line is the one place the side's own light colour is used as
+  ink, and it is the smallest type on the card — so it is mixed toward
+  white rather than used raw. The Panthers' light violet measured 3.9:1 on
+  their own face; the mix takes both sides past 4.5 without either losing
+  the tint that makes the line theirs.
+*/
+.tcard__identity {
+  margin: 0;
+  font-family: var(--stg-mono);
+  font-size: clamp(11px, 1.2vw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tm-light) 58%, #ffffff);
+}
+
 .tcard__motto {
-  margin-top: 2px;
-  font-size: 13px;
+  margin: 3px 0 0;
+  font-size: clamp(12.5px, 1.3vw, 15px);
   font-style: italic;
-  color: var(--stg-dim);
+  color: #eaf1fd;
+}
+
+.tcard__sep {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--tm-light) 0 4px,
+    rgba(255, 255, 255, 0.16) 4px calc(100% - 4px),
+    var(--tm-light) calc(100% - 4px)
+  );
 }
 
 .tcard__perk {
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 12.5px;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(12px, 1.25vw, 14px);
   line-height: 1.5;
-  text-align: left;
-  color: var(--stg-dim);
+  color: #dbe8fb;
 }
 
-.tcard__cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 2px;
-  padding: 11px 16px;
-  border-radius: 12px;
-  background: var(--tm-primary);
-  color: var(--tm-ink);
-  font-family: var(--stg-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  transition: background-color 0.3s ease-out, transform 0.3s ease-out;
-}
 .tcard__cta svg {
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 .tcard.is-hot .tcard__cta svg {
   transform: translateX(4px);
 }
 
-/* the pooled glow under the card — blurred well past its own box, which is
-   what makes the card read as hovering rather than as a sticker */
+/* the control is the side's colour too, so the whole card is one object
+   rather than a coloured panel with a green button stuck on it */
+.tcard__cta {
+  --gk-btn-lit: var(--tm-light);
+  --gk-btn-face: var(--tm-primary);
+  --gk-btn-base: var(--tm-deep);
+  margin-top: 2px;
+}
+
+/* --- states --- */
+
+.tcard.is-picked .tcard__panel {
+  animation: stgPicked 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* the pick confirms in gold — the kit's earned colour — which is the only
+   moment this card leaves its own palette */
+.tcard.is-picked .tcard__cta {
+  --gk-btn-lit: var(--gk-gold-lit);
+  --gk-btn-face: var(--gk-gold);
+  --gk-btn-base: var(--gk-gold-deep);
+  color: #5a3400;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.tcard.is-dimmed {
+  opacity: 0.34;
+  filter: grayscale(0.6);
+}
+
+/* the glow pooled under the card, which is what actually sells the lift —
+   a shadow alone reads as flat paper */
 .tcard__pool {
   position: absolute;
-  z-index: 0;
   left: 12%;
   right: 12%;
   bottom: -14px;
   height: 40px;
+  z-index: 0;
   border-radius: 50%;
   filter: blur(26px);
-  opacity: 0;
-  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
-}
-.tcard.is-hot .tcard__pool {
-  opacity: 0.55;
-  transform: translateY(6px) scale(1.06);
-}
-
-/* ---- chosen / not chosen ---- */
-
-.tcard.is-picked .tcard__face {
-  animation: stgPicked 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
-}
-.tcard.is-dimmed {
-  opacity: 0.28;
-  filter: saturate(0.35) blur(1px);
+  opacity: 0.34;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
   pointer-events: none;
 }
 
-/* ============================ keyframes ============================ */
+.tcard.is-hot .tcard__pool {
+  opacity: 0.6;
+  transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tcard__rays {
+    animation: none;
+  }
+  .tcard__crest .crest,
+  .tcard__panel {
+    transition: none;
+  }
+}
+
 
 @keyframes stgRise {
   from {
@@ -696,10 +816,12 @@
   }
   .tcard__face {
     min-height: 0;
-    grid-template-rows: auto auto auto auto auto;
+    grid-template-rows: repeat(6, auto);
   }
-  .tcard__mascot {
-    font-size: 48px;
+  /* one card at a time now, so the crest can have the height it wants
+     instead of being squeezed to keep two side by side */
+  .tcard__crest .crest {
+    max-height: 132px;
   }
 }
 
@@ -720,19 +842,14 @@
   .tcard {
     animation: stgFade 0.3s ease-out both;
   }
-  .tcard__face,
-  .tcard.is-picked .tcard__face {
+  .tcard__panel,
+  .tcard.is-picked .tcard__panel {
     animation: none;
     transform: none;
   }
-  .tcard__mascot,
-  .tcard__motes i,
   .stgStart__ring,
-  .tcard__rarity {
+  .tcard__rays {
     animation: none;
-  }
-  .tcard__motes {
-    display: none;
   }
 }
 
@@ -743,4 +860,40 @@
   to {
     opacity: 1;
   }
+}
+
+/* ---- the comps' opening treatment ---- */
+
+.stgOpen__crown {
+  animation: stgRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/*
+  The subtitle as a ribbon rather than loose tracked-out type.
+
+  Its red is the same nameplate red as the game's own title banner, so the
+  two screens that carry a headline carry it on the same object. The tails
+  need room to hang, hence the inline margin — the parent is a centred grid
+  and would otherwise size the banner to the text and clip them.
+*/
+.stgOpen__subStar {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 0 10px;
+  vertical-align: -1px;
+  background: linear-gradient(180deg, var(--gk-gold-lit), var(--gk-gold) 55%, var(--gk-gold-deep));
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.stgOpen__sub {
+  margin: 0 26px;
+  justify-self: center;
+  font-family: var(--stg-mono);
+  font-size: clamp(12px, 1.5vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #fff;
+  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
 }

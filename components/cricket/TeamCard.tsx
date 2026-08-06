@@ -2,31 +2,30 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teamVars, type Team } from "./teams";
+import { Crest } from "./crests";
 
 /*
-  A collectible trading card.
+  A team card.
 
-  Six effects are stacked here and they are all driven by ONE pointer
-  reading per frame, written to CSS custom properties on the card element:
+  The screen comps put this back to what the card always said — playstyle,
+  abbreviation, crest, name, identity, motto, perk, one control — and paint
+  the whole panel in the side's own colour rather than the league blue. That
+  second part is the real idea: two identical blue cards make choosing a
+  side a reading exercise, and two differently-coloured ones make it a
+  glance. The team's palette drives the rim, the face and the button
+  through the kit's own tokens, so nothing here special-cases a team.
 
-    --px / --py   pointer position inside the card, 0..1
-    --tilt-x/y    the rotation that position implies, in degrees
-    --mag-x/y     the magnetic nudge toward the pointer, in px
-    --shine       where the holographic sweep sits, 0..100%
+  The card is not itself a button. It has a primary action inside it, and
+  nesting a button in a button is invalid markup that hands a screen reader
+  one target where there is one action and a lot of description.
 
-  Doing it this way matters. The naive version sets six inline styles from
-  six handlers and re-renders React on every mousemove, which is a state
-  update per pixel of pointer travel. Here the pointer writes to the DOM
-  directly inside a rAF, React never re-renders while you move, and CSS
-  does all six transforms in the compositor.
-
-  The tilt is intentionally small (8deg). Cards that flop 25 degrees look
-  impressive in isolation and cheap on a page — the effect should read as
-  the card having weight and a surface, not as a novelty.
+  The pointer effects survive from the original: one reading per frame
+  written to CSS custom properties, React never re-rendering on move. See
+  flush() for why that shape matters.
 */
 
-const MAX_TILT = 8;
-const MAX_MAGNET = 10;
+const MAX_TILT = 7;
+const MAX_MAGNET = 8;
 
 type Props = {
   team: Team;
@@ -46,7 +45,7 @@ export default function TeamCard({
   reduced,
   index,
 }: Props) {
-  const ref = useRef<HTMLButtonElement | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef(0);
   const pending = useRef<{ x: number; y: number } | null>(null);
   const [hot, setHot] = useState(false);
@@ -72,7 +71,7 @@ export default function TeamCard({
   }, []);
 
   const onMove = useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>) => {
+    (e: React.PointerEvent<HTMLDivElement>) => {
       if (reduced) return;
       const el = ref.current;
       if (!el) return;
@@ -103,18 +102,14 @@ export default function TeamCard({
   const c = team.colours;
 
   return (
-    <button
+    <div
       ref={ref}
-      type="button"
       onPointerMove={onMove}
       onPointerEnter={() => !reduced && setHot(true)}
       onPointerLeave={rest}
-      onBlur={rest}
-      onClick={() => onChoose(team)}
-      aria-pressed={selected}
-      aria-label={`Choose ${team.name}. ${team.identity}. ${team.perk}`}
       className={[
         "tcard",
+        `tcard--${team.playstyle}`,
         hot ? "is-hot" : "",
         selected ? "is-picked" : "",
         dimmed ? "is-dimmed" : "",
@@ -123,51 +118,53 @@ export default function TeamCard({
         .join(" ")}
       style={{ ...teamVars(team), "--stagger": `${index * 110}ms` } as React.CSSProperties}
     >
-      {/* the rarity border: a conic sweep behind the card face, masked to a
-          1.5px ring by the face sitting on top of it */}
-      <span className="tcard__rarity" aria-hidden />
+      <div className="gk-panel tcard__panel">
+        <div className="gk-panel__face tcard__face">
+          {/* the sunburst behind the crest — the kit's way of saying "this
+              is the hero of the panel" without adding another border */}
+          <span className="tcard__rays" aria-hidden />
 
-      <span className="tcard__face">
-        {/* holographic sheen — a hard-edged band, because a soft blur reads
-            as a gradient rather than as light on a surface */}
-        <span className="tcard__holo" aria-hidden />
+          {/* holographic sheen. A hard-edged band, because a soft blur
+              reads as a gradient rather than as light on a surface. */}
+          <span className="tcard__holo" aria-hidden />
 
-        {/* floating motes. Six is enough to read as atmosphere; more and
-            they start to look like dust on the screen. */}
-        <span className="tcard__motes" aria-hidden>
-          {Array.from({ length: 6 }, (_, i) => (
-            <i key={i} style={{ "--i": i } as React.CSSProperties} />
-          ))}
-        </span>
+          <div className="tcard__top">
+            <span className="tcard__style">{team.playstyle}</span>
+            <span className="tcard__abbr">{team.abbr}</span>
+          </div>
 
-        <span className="tcard__top">
-          <span className="tcard__style">{team.playstyle}</span>
-          <span className="tcard__abbr">{team.abbr}</span>
-        </span>
+          <Crest id={team.id} field={c.primary} emblem={c.light} className="tcard__crest" />
 
-        <span className="tcard__mascot" aria-hidden>
-          {team.mascot}
-        </span>
+          <div className="tcard__body">
+            <h3 className="tcard__name">{team.name}</h3>
+            <p className="tcard__identity">{team.identity}</p>
+            <p className="tcard__motto">&ldquo;{team.motto}&rdquo;</p>
+          </div>
 
-        <span className="tcard__body">
-          <span className="tcard__name">{team.name}</span>
-          <span className="tcard__identity">{team.identity}</span>
-          <span className="tcard__motto">“{team.motto}”</span>
-        </span>
+          {/* the ruled break, dotted at each end. It is the one piece of
+              chrome separating the side's identity from what picking it
+              actually does, which are two different kinds of claim. */}
+          <span className="tcard__sep" aria-hidden />
 
-        <span className="tcard__perk">{team.perk}</span>
+          <p className="tcard__perk">{team.perk}</p>
 
-        <span className="tcard__cta" aria-hidden>
-          <span>{selected ? "Selected" : "Choose side"}</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h13M12 5l7 7-7 7" />
-          </svg>
-        </span>
-      </span>
+          <button
+            type="button"
+            className="gk-btn gk-btn--block tcard__cta"
+            onClick={() => onChoose(team)}
+            aria-pressed={selected}
+          >
+            {selected ? "Locked in" : "Choose side"}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h13M12 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       {/* the glow pooled under the card, which is what actually sells the
           lift — a shadow alone reads as flat paper */}
       <span className="tcard__pool" aria-hidden style={{ background: c.primary }} />
-    </button>
+    </div>
   );
 }

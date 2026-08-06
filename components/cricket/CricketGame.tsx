@@ -26,6 +26,7 @@ import { levelFor, readProgress, writeProgress } from "./progress";
 import RewardCard, { type RewardShout } from "./RewardCard";
 import ComboPill from "./ComboPill";
 import XpBar from "./XpBar";
+import Avatar from "./Avatar";
 import Ticker from "./Ticker";
 import "./cricket.css";
 
@@ -61,11 +62,16 @@ const BALLS = OVER.length;
 */
 export default function CricketGame({
   opponent = "panthers",
+  onSwitchTeam,
 }: {
   opponent?: TeamKit;
+  /** hands control back to the shell's team-selection stage */
+  onSwitchTeam?: () => void;
 } = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [ballIdx, setBallIdx] = useState(0);
@@ -503,6 +509,31 @@ export default function CricketGame({
 
   useEffect(() => setMutedState(isMuted()), []);
 
+  /*
+    Dismiss the menu on an outside click or Escape.
+
+    Escape is bound at capture so it closes the menu before the game's own
+    key handling sees it — otherwise the same press that shuts the popover
+    would also fall through to the match.
+  */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      setMenuOpen(false);
+    };
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("keydown", onKey, true);
+    return () => {
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("keydown", onKey, true);
+    };
+  }, [menuOpen]);
+
   const delivery = OVER[ballIdx];
   const ballsFaced = out || phase === "over" ? (out ? ballIdx + 1 : BALLS) : ballIdx;
   const finalVerdict = verdict(score, out ? ballIdx + 1 : BALLS, out);
@@ -545,11 +576,8 @@ export default function CricketGame({
         </span>
       </div>
 
-      <div className="ckt-glass cktXpWrap">
-        <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
-      </div>
 
-      <div className="ckt-glass ckt-controls">
+      <div className="ckt-controls">
         <button
           type="button"
           className="ckt-icon"
@@ -560,6 +588,78 @@ export default function CricketGame({
         >
           {muted ? <MutedIcon /> : <SoundIcon />}
         </button>
+
+        {/*
+          Everything that changes the match rather than the moment lives
+          behind the gear: restarting and switching sides both throw away
+          an over in progress, and one mis-tap next to "leave" would do it
+          silently. Sound stays outside because it is the one control
+          people reach for mid-ball.
+        */}
+        <div className="ckt-menu" ref={menuRef}>
+          <button
+            type="button"
+            className="ckt-icon"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            aria-label="Match settings"
+            title="Settings"
+          >
+            <GearIcon />
+          </button>
+
+          {menuOpen && (
+            <div className="ckt-glass ckt-menu__panel" role="menu">
+              <p className="gk-head ckt-menu__head">Match</p>
+
+              <button
+                type="button"
+                className="ckt-menu__item"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  start();
+                }}
+              >
+                <ReplayIcon />
+                {phase === "idle" ? "Start the over" : "Restart the over"}
+              </button>
+
+              <button
+                type="button"
+                className="ckt-menu__item"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onSwitchTeam?.();
+                }}
+              >
+                <SwapIcon />
+                Switch side
+              </button>
+
+              <button
+                type="button"
+                className="ckt-menu__item"
+                role="menuitem"
+                aria-pressed={muted}
+                onClick={toggleMute}
+              >
+                {muted ? <MutedIcon /> : <SoundIcon />}
+                {muted ? "Sound off" : "Sound on"}
+              </button>
+
+              <span className="ckt-menu__rule" aria-hidden />
+
+              <PageLink className="ckt-menu__item" href="/work" role="menuitem">
+                <CloseIcon />
+                Leave the game
+              </PageLink>
+            </div>
+          )}
+        </div>
+
         <PageLink className="ckt-icon" href="/work" aria-label="Leave the game">
           <CloseIcon />
         </PageLink>
@@ -568,7 +668,20 @@ export default function CricketGame({
       {phase !== "over" && <RewardCard shout={shout} reduced={reduced} />}
       {phase !== "over" && <ComboPill combo={combo} reduced={reduced} />}
 
-      <div className="ckt-glass ckt-say">
+      {/*
+        Bottom-left is a stack, not two absolutely-positioned panels.
+
+        Both used to be pinned to the same corner with their own offsets,
+        which is fine exactly until one of them changes height — and the
+        commentary does, every ball, because the timing bar appears under
+        it after a shot. They overlapped. A flow column owns the corner and
+        the panels are ordinary blocks inside it, so their heights can
+        never collide.
+      */}
+      <div className="ckt-dock">
+        <div className="ckt-glass ckt-say">
+        <Avatar className="ckt-say__face" />
+        <div className="ckt-say__body">
         <p className="ckt-commentary">
           {last
             ? last.commentary
@@ -602,6 +715,17 @@ export default function CricketGame({
             </span>
           </p>
         )}
+
+          {/*
+            The level meter lives inside the commentary panel now rather
+            than in a second one below it. They were always read together —
+            what just happened, and what it earned you — and two panels for
+            one thought is what made the corner crowded enough to collide
+            in the first place.
+          */}
+          <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
+        </div>
+        </div>
       </div>
 
       <div className="ckt-glass ckt-wheel">
@@ -611,11 +735,14 @@ export default function CricketGame({
 
       {phase === "idle" && (
         <div className="ckt-glass ckt-card">
-          <p className="ckt-kicker">Face one over</p>
-          <h1 className="ckt-title">
-            Six balls.
-            <br />
-            One innings.
+          <span className="gk-stars ckt-card__crown" aria-hidden>
+            <i />
+            <i />
+            <i />
+          </span>
+          <h1 className="gk-ribbon ckt-card__banner">
+            <span>Six balls.</span>
+            <span className="ckt-card__bannerGold">One innings.</span>
           </h1>
           <p className="ckt-rule">
             Click, tap or press Space as the ball reaches you. Time it well for runs, and where
@@ -631,7 +758,12 @@ export default function CricketGame({
 
       {phase === "over" && (
         <div className="ckt-glass ckt-card">
-          <p className="ckt-kicker">{out ? "Over ended early" : "Over complete"}</p>
+          <span className="gk-stars ckt-card__crown" aria-hidden>
+            <i />
+            <i />
+            <i />
+          </span>
+          <p className="gk-head">{out ? "Over ended early" : "Over complete"}</p>
           <h2 className="ckt-title ckt-title--result">{finalVerdict.title}</h2>
           <p className="ckt-final">
             {score} <span>off {out ? ballIdx + 1 : BALLS}</span>
@@ -657,17 +789,26 @@ export default function CricketGame({
             <XpBar xp={xp} levelUp={null} reduced={reduced} />
           </div>
 
+          {/*
+            Two ranked controls, then a link. The comps put the replay in
+            gold and the share in blue rather than making both the green
+            "go" — green in this kit means starting play, and neither of
+            these does that. Gold outranks blue because replaying is what
+            almost everyone reaching this card wants next.
+          */}
           <div className="ckt-actions">
-            <button type="button" className="ckt-cta" onClick={start}>
+            <button type="button" className="ckt-cta ckt-cta--gold" onClick={start}>
               Play again
             </button>
-            <button type="button" className="ckt-link" onClick={share}>
+            <button type="button" className="ckt-cta ckt-cta--blue" onClick={share}>
+              <ShareIcon />
               {shared ? "Copied" : "Share score"}
             </button>
-            <PageLink className="ckt-link" href="/work">
-              See the actual work
-            </PageLink>
           </div>
+
+          <PageLink className="gk-head ckt-outLink" href="/work">
+            See the actual work
+          </PageLink>
         </div>
       )}
 
@@ -675,6 +816,45 @@ export default function CricketGame({
         {reduced ? "Reduced motion is on" : "Arrow keys aim · Space plays the shot"}
       </p>
     </div>
+  );
+}
+
+/* the settings gear, and the two actions only it exposes */
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.56V21a2 2 0 11-4 0v-.09A1.7 1.7 0 008.4 19.3a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.04 15a1.7 1.7 0 00-1.56-1.03H2.4a2 2 0 110-4h.09A1.7 1.7 0 004.04 9a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 008.4 4.7 1.7 1.7 0 009.43 3.14V3a2 2 0 114 0v.09a1.7 1.7 0 001.03 1.56 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 9v.09a1.7 1.7 0 001.56 1.03H21a2 2 0 110 4h-.09A1.7 1.7 0 0019.4 15z" />
+    </svg>
+  );
+}
+
+function ReplayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M3 11a9 9 0 1 1 2.6 6.4" />
+      <path d="M3 4.5V11h6.5" />
+    </svg>
+  );
+}
+
+function SwapIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4 8h13l-3.4-3.4M20 16H7l3.4 3.4" />
+    </svg>
+  );
+}
+
+/* share, for the secondary action on the result card */
+function ShareIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="M8.6 10.6l6.8-4.2M8.6 13.4l6.8 4.2" />
+    </svg>
   );
 }
 

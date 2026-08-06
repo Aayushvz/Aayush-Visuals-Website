@@ -22,12 +22,11 @@
   --ckt-four: #4ade80;
   --ckt-navy: #12324a;
 
-  /* the glass set */
-  --ckt-glass: rgba(14, 32, 48, 0.5);
-  --ckt-glass-strong: rgba(12, 28, 44, 0.74);
-  --ckt-glass-line: rgba(255, 255, 255, 0.18);
-  --ckt-glass-lit: rgba(255, 255, 255, 0.42);
-  --ckt-glass-shadow: 0 8px 32px rgba(4, 14, 26, 0.36), 0 1px 2px rgba(4, 14, 26, 0.2);
+  /* the panel set. The moulding itself comes from gamekit.css; these are
+     the two knobs the HUD turns for its own, smaller surfaces. */
+  --gk-frame-hud: 4px;
+  --ckt-glass-line: rgba(255, 255, 255, 0.2);
+  --ckt-groove: inset 1px 0 0 rgba(6, 22, 62, 0.55), inset 2px 0 0 rgba(255, 255, 255, 0.14);
 
   position: fixed;
   inset: 0;
@@ -52,33 +51,45 @@
   height: 100%;
 }
 
-/* ---- the glass panel ---- */
+/* ---- the floating dashboard ----
+
+   Was frosted glass. It is now the same moulded panel the team cards are
+   cut from, for one reason above the styling: a backdrop blur over a
+   canvas that repaints every frame is the most expensive thing on this
+   page, and there are six of these panels on screen during an over. An
+   opaque fill costs nothing per frame and reads *more* like a scoreboard,
+   not less.
+
+   The frame is one element, not the card's nested pair. `padding-box` and
+   `border-box` backgrounds put a different fill inside the border than on
+   it, and the border-box radius is automatically the outer radius minus
+   the border width — so the inner corner nests correctly without a second
+   element to wrap every HUD surface in.
+*/
 .ckt-glass {
   position: absolute;
   z-index: 3;
+  border: var(--gk-frame-hud) solid transparent;
   border-radius: 20px;
-  background: var(--ckt-glass);
-  border: 1px solid var(--ckt-glass-line);
-  /* saturate, or the colour behind the panel washes out to grey */
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: var(--ckt-glass-shadow);
+  background:
+    linear-gradient(180deg, var(--gk-face-top), var(--gk-face-bot)) padding-box,
+    linear-gradient(180deg, var(--gk-rim-lit), var(--gk-rim) 44%, var(--gk-rim-deep))
+      border-box;
+  box-shadow: var(--gk-unlit), var(--gk-cast);
 }
 
-/* the lit top edge. A single flat border reads as a box; real glass catches
-   light on the edge facing it. */
+/* the gloss across the top of the face. Stops hard at 46%, like every
+   other lit surface in the kit — see gamekit.css for why the cut is hard */
 .ckt-glass::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 1px;
+  height: 46%;
   border-radius: inherit;
   background: linear-gradient(
-    to right,
-    transparent,
-    var(--ckt-glass-lit) 22%,
-    var(--ckt-glass-lit) 78%,
-    transparent
+    180deg,
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0)
   );
   pointer-events: none;
 }
@@ -110,12 +121,19 @@
   white-space: nowrap;
 }
 
+/* the running score gets the kit's earned-gold fill, the same treatment as
+   the team nameplate and the level medallion — anything you scored is gold,
+   everything you are merely told is white */
 .ckt-score {
   font-family: var(--ckt-display), Impact, sans-serif;
   font-size: clamp(1.9rem, 4.4vw, 2.7rem);
   line-height: 0.9;
   letter-spacing: 0.01em;
-  color: var(--ckt-six);
+  background: linear-gradient(180deg, #fff6cf, var(--gk-gold) 55%, var(--gk-gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 var(--gk-ink-shadow));
   font-variant-numeric: tabular-nums;
 }
 
@@ -125,10 +143,15 @@
   margin-left: 0.12em;
 }
 
+/* a groove cut into the panel rather than a hairline drawn on it: one dark
+   pixel and one lit one, which is the same lit-from-above rule the panels
+   themselves follow, turned on its side */
 .ckt-divider {
-  width: 1px;
+  width: 2px;
   align-self: stretch;
-  background: var(--ckt-glass-line);
+  border-radius: 2px;
+  background: rgba(6, 22, 62, 0.55);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.16);
 }
 
 .ckt-meta {
@@ -151,47 +174,126 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- top right: controls ---- */
+/* ---- top right: controls ----
+
+   No longer a tray with two flat glyphs in it. The kit's icon control is
+   its own moulded square, and a panel wrapping two of them would give the
+   corner three nested frames. So the group loses its own surface entirely
+   and just spaces the buttons — 8px apart, the touch-spacing floor, so a
+   thumb reaching for mute cannot catch "leave the game" instead.
+*/
+/* the position has to be stated here, not inherited from .ckt-glass: this
+   group no longer carries that class, and top/right on a static element
+   silently does nothing */
 .ckt-controls {
+  position: absolute;
+  z-index: 7;
   top: clamp(0.8rem, 2vw, 1.4rem);
   right: clamp(0.8rem, 2vw, 1.4rem);
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 999px;
+  gap: 8px;
 }
 
 .ckt-icon {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--gk-rim-lit), var(--gk-rim) 52%, var(--gk-rim-deep));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 4px 0 var(--gk-rim-deep),
+    0 8px 14px rgba(4, 12, 38, 0.4);
   color: var(--ckt-ink);
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.18s ease;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ckt-icon:hover,
+@media (hover: hover) {
+  .ckt-icon:hover {
+    filter: brightness(1.1);
+  }
+}
+
+/* the press displacement, matching every other control in the kit: the cap
+   travels the exact height of its own side wall and lands on it */
+.ckt-icon:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 0 0 var(--gk-rim-deep),
+    0 2px 5px rgba(4, 12, 38, 0.4);
+}
+
 .ckt-icon:focus-visible {
-  background: rgba(255, 255, 255, 0.16);
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: 3px;
+}
+
+/* mute reads as "off", so the button reads as off too */
+.ckt-icon[aria-pressed="true"] {
+  --gk-rim-lit: #8fa3c4;
+  --gk-rim: #5b6d8c;
+  --gk-rim-deep: #33415c;
 }
 
 .ckt-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 19px;
+  height: 19px;
 }
 
-/* ---- bottom left: commentary + timing ---- */
-.ckt-say {
+/* ---- bottom left: the dock ----
+
+   One absolutely-positioned column holding the commentary and the level
+   meter, rather than two panels each pinned to the same corner. The
+   commentary grows a timing bar after every shot, so its height is not
+   knowable from a stylesheet; in flow that simply pushes the meter down,
+   where before the two overlapped.
+*/
+.ckt-dock {
+  position: absolute;
+  z-index: 5;
   left: clamp(0.8rem, 2vw, 1.4rem);
   bottom: clamp(0.8rem, 2vw, 1.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: min(360px, calc(100vw - 2rem));
-  padding: 0.85rem 1.05rem 0.95rem;
+  /* never taller than the space between the scoreboard and the bottom */
+  max-height: calc(100svh - 8.5rem);
+  pointer-events: none;
+}
+
+.ckt-dock > * {
+  pointer-events: auto;
+}
+
+/* the commentary panel is now a portrait beside a column: what was said,
+   then what it earned. The face is `align-items: start` so it stays level
+   with the first line of text however many lines follow it. */
+.ckt-say {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0.8rem 1rem 0.85rem;
+}
+
+.ckt-say__face {
+  flex: none;
+  width: 52px;
+  height: 52px;
+}
+
+.ckt-say__body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 10px;
 }
 
 .ckt-commentary {
@@ -327,11 +429,18 @@
   border-radius: 18px;
   text-align: center;
   pointer-events: none;
-  background: var(--ckt-glass-strong);
-  border: 1px solid var(--ckt-glass-line);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  backdrop-filter: blur(18px) saturate(150%);
-  box-shadow: var(--ckt-glass-shadow);
+  /* the shout is the one surface that is not blue: it belongs to the
+     result, so the outcome's own colour paints the frame (set per
+     modifier below) and the plate stays near-black to carry it */
+  --ckt-shout-lit: #7cc4ff;
+  --ckt-shout-rim: #1b56ad;
+  --ckt-shout-glow: rgba(28, 86, 173, 0.4);
+
+  border: 4px solid transparent;
+  background:
+    linear-gradient(180deg, #16265c, #0a1330) padding-box,
+    linear-gradient(180deg, var(--ckt-shout-lit), var(--ckt-shout-rim)) border-box;
+  box-shadow: var(--gk-unlit), var(--gk-cast), 0 0 34px var(--ckt-shout-glow);
 }
 
 .cktReward__head {
@@ -346,23 +455,28 @@
   font-size: clamp(2.5rem, 10vw, 4.6rem);
 }
 
+/* each outcome repaints the frame and its glow from one pair of tokens,
+   so a new result type is three values rather than three rules */
 .cktReward--six {
-  border-color: rgba(255, 217, 61, 0.6);
-  box-shadow: var(--ckt-glass-shadow), 0 0 34px rgba(255, 217, 61, 0.34);
+  --ckt-shout-lit: var(--gk-gold-lit);
+  --ckt-shout-rim: var(--gk-gold-deep);
+  --ckt-shout-glow: rgba(255, 217, 61, 0.4);
 }
 .cktReward--six .cktReward__head {
   color: var(--ckt-six);
 }
 .cktReward--four {
-  border-color: rgba(74, 222, 128, 0.55);
-  box-shadow: var(--ckt-glass-shadow), 0 0 26px rgba(74, 222, 128, 0.26);
+  --ckt-shout-lit: #86efac;
+  --ckt-shout-rim: #15803d;
+  --ckt-shout-glow: rgba(74, 222, 128, 0.32);
 }
 .cktReward--four .cktReward__head {
   color: var(--ckt-four);
 }
 .cktReward--wicket {
-  border-color: rgba(230, 57, 70, 0.6);
-  box-shadow: var(--ckt-glass-shadow), 0 0 26px rgba(230, 57, 70, 0.3);
+  --ckt-shout-lit: #ff8b83;
+  --ckt-shout-rim: var(--gk-red-deep);
+  --ckt-shout-glow: rgba(230, 57, 70, 0.38);
 }
 .cktReward--wicket .cktReward__head {
   color: var(--ckt-ball);
@@ -410,8 +524,24 @@
   color: var(--ckt-four);
 }
 
-/* ---- combo ---- */
+/* ---- combo ----
+
+   A streak is a scored thing, so the chip takes a gold rim rather than the
+   HUD's blue one — the same rule that makes the running score gold. It
+   overrides .ckt-glass's frame colours rather than opting out of the panel,
+   so the moulding, gloss and shadow all still come from one place.
+
+   The ladder's icons stay emoji. They are expressive content beside a
+   visible label ("Creative Flow ×3"), not glyphs standing in for a control,
+   and the six rungs are six different marks — the no-emoji rule is about
+   icons carrying meaning alone, which these never do.
+*/
 .cktCombo {
+  --gk-rim-lit: var(--gk-gold-lit);
+  --gk-rim: var(--gk-gold);
+  --gk-rim-deep: var(--gk-gold-deep);
+  --gk-frame-hud: 3px;
+
   position: absolute;
   z-index: 5;
   left: 16px;
@@ -419,108 +549,142 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 7px 15px 8px;
   border-radius: 999px;
   pointer-events: none;
   font-size: 0.82rem;
   font-weight: 700;
+  text-shadow: var(--gk-text-relief);
 }
 .cktCombo__icon {
   font-size: 1.05rem;
+  line-height: 1;
 }
 .cktCombo__label {
   letter-spacing: 0.02em;
 }
+/* white rather than gold: at 1.1rem this is below the large-text threshold,
+   and gold on the panel face is 3.7:1. The gold rim around the whole chip
+   already says "streak" — the number does not have to say it twice. */
 .cktCombo__count {
-  color: var(--ckt-six);
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #fff;
   font-variant-numeric: tabular-nums;
 }
 
 /* ---- xp ---- */
-.cktXpWrap {
-  position: absolute;
-  z-index: 5;
-  left: 16px;
-  bottom: 16px;
-  width: min(230px, 44vw);
-  padding: 10px 13px 11px;
-  border-radius: 14px;
-}
+
 
 .cktXp {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
 }
+
+/* the medallion overhangs the panel's left edge, which is what stops the
+   readout reading as one undifferentiated bar of chrome — the number you
+   earned sits proud of the thing measuring it */
+.cktXp__medal {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  margin: -6px 0 -6px -4px;
+  font-size: 21px;
+}
+
+.cktXp__meter {
+  flex: 1;
+  min-width: 0;
+}
+
 .cktXp__top {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 6px;
-  font-size: 0.68rem;
+  margin-bottom: 5px;
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.cktXp__level {
-  color: var(--ckt-six);
+.cktXp__label {
+  color: var(--gk-ink-dim);
 }
 .cktXp__count {
-  color: var(--ckt-dim);
+  color: #fff;
   font-variant-numeric: tabular-nums;
 }
 .cktXp__track {
-  height: 7px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.14);
-}
-.cktXp__fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #4ade80, var(--ckt-six));
-  box-shadow: 0 0 12px rgba(255, 217, 61, 0.5);
+  height: 12px;
 }
 .cktXp__up {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 6px);
-  padding: 3px 9px;
+  bottom: calc(100% + 10px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 11px 5px;
   border-radius: 999px;
-  background: var(--ckt-six);
-  color: #12324a;
-  font-size: 0.68rem;
+  background: linear-gradient(180deg, var(--gk-gold-lit), var(--gk-gold) 52%, var(--gk-gold-deep));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55), 0 4px 10px rgba(4, 12, 38, 0.5);
+  color: #5a3400;
+  font-size: 0.7rem;
   font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* ---- end-of-over summary ---- */
+.cktXp__upIcon {
+  width: 13px;
+  height: 13px;
+}
+
+/* ---- end-of-over summary ----
+
+   The same sunken well as the team card's stat strip, so the two places a
+   player reads numbers off a panel are one component wearing two widths.
+   Cut into the card rather than raised on it: these are readouts, and the
+   kit's rule is that anything you can press is lit from above and anything
+   you can only read is lit from below. */
 .cktSummary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 18px 0 14px;
+  margin: 12px 0 10px;
+  border-radius: 14px;
+  background: var(--gk-well);
+  box-shadow: inset 0 3px 8px rgba(4, 12, 38, 0.6),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
 .cktSummary__cell {
-  padding: 9px 4px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid var(--ckt-glass-line);
+  padding: 10px 4px 9px;
   text-align: center;
+}
+.cktSummary__cell + .cktSummary__cell {
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.14);
 }
 .cktSummary__cell dt {
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--ckt-dim);
+  color: var(--gk-ink-dim);
 }
 .cktSummary__cell dd {
   margin: 3px 0 0;
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: 1.25rem;
+  line-height: 1;
+  text-shadow: var(--gk-text-relief);
   font-variant-numeric: tabular-nums;
 }
 .cktSummary__xp {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 .cktSummary__xpEarned {
   display: block;
@@ -595,15 +759,36 @@
 }
 
 /* ---- centred card: start and result ---- */
+/*
+  The card is centred in the space *below* the scoreboard, not in the
+  viewport. Centring it on the screen put its top edge over the score, the
+  balls and the bowling readout — the four things a result is about — and
+  on a short window it covered them entirely. Anchoring the top and
+  capping the height keeps the HUD legible behind it and lets a long
+  result scroll inside itself instead of growing off-screen.
+*/
 .ckt-card {
   z-index: 6;
-  top: 50%;
+  top: 6.6rem;
+  bottom: clamp(0.8rem, 2vw, 1.4rem);
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(470px, calc(100vw - 2.5rem));
-  padding: clamp(1.6rem, 4vw, 2.3rem);
+  transform: translateX(-50%);
+  height: max-content;
+  max-height: calc(100svh - 8rem);
+  margin: auto 0;
+  /* `auto`, not `scroll`: the card is sized below to fit its own content
+     at every viewport this game supports, so the bar is a fallback for a
+     very short window rather than something anyone should normally see. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  width: min(560px, calc(100vw - 2.5rem));
+  padding: clamp(1.1rem, 2.4vw, 1.6rem) clamp(1.2rem, 2.6vw, 1.8rem);
   text-align: center;
-  background: var(--ckt-glass-strong);
+  /* the one panel that gets the card's full 7px moulding rather than the
+     HUD's 4px — it is the centre of the screen and nothing competes */
+  --gk-frame-hud: 7px;
+  border-radius: 28px;
   animation: ckt-card 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -650,56 +835,109 @@
 }
 
 .ckt-rule {
-  margin: 0.8rem auto 0;
+  margin: 0.55rem auto 0;
   max-width: 38ch;
   font-size: 0.9rem;
   line-height: 1.6;
   color: var(--ckt-dim);
 }
 
+/* the two result actions sit side by side at this width — 560px is wide
+   enough for both caps at full size, which is what removed the scroll */
 .ckt-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.7rem 1.3rem;
-  margin-top: 1.3rem;
+  gap: 0.6rem 0.8rem;
+  margin-top: 0.9rem;
 }
 
+/*
+  The primary action was already the closest thing this game had to the
+  kit — a flat cap on a hard 4px base. It now *is* the kit's button, in
+  green, which frees gold to mean "scored" everywhere without the loudest
+  control on screen also claiming it.
+
+  Hover no longer lifts the cap. Rising on hover and dropping on press
+  means the button travels 10px between two states a pointer passes
+  through in one motion, which reads as a wobble; brightness carries the
+  hover and the whole 6px of travel belongs to the press.
+*/
 .ckt-cta {
+  --gk-btn-lit: var(--gk-green-lit);
+  --gk-btn-face: var(--gk-green);
+  --gk-btn-base: var(--gk-green-deep);
+
+  min-height: 44px;
   padding: 0.8rem 2.2rem;
-  border: 0;
-  border-radius: 999px;
-  background: var(--ckt-six);
-  color: #12324a;
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  border-radius: var(--gk-r-btn);
+  background: linear-gradient(
+    180deg,
+    var(--gk-btn-lit) 0%,
+    var(--gk-btn-face) 30%,
+    var(--gk-btn-base) 100%
+  );
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 var(--gk-drop) 0 var(--gk-btn-base),
+    0 calc(var(--gk-drop) + 6px) 16px rgba(4, 12, 38, 0.45);
+  color: var(--gk-ink);
   font-family: var(--ckt-display), Impact, sans-serif;
   font-size: 1.15rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  text-shadow: var(--gk-text-relief);
   cursor: pointer;
-  box-shadow: 0 4px 0 #c9a418;
-  transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ckt-cta:hover,
+@media (hover: hover) {
+  .ckt-cta:hover {
+    filter: brightness(1.08);
+  }
+}
+
+.ckt-cta:active {
+  transform: translateY(var(--gk-drop));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 0 0 var(--gk-btn-base),
+    0 2px 6px rgba(4, 12, 38, 0.4);
+}
+
 .ckt-cta:focus-visible {
-  background: #ffe680;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #c9a418;
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: 4px;
 }
 
+/*
+  Secondary actions stay text, deliberately.
+
+  The result card has one thing you are meant to do and two you might —
+  giving all three a moulded cap would make the panel a wall of buttons and
+  cost the primary its rank. They get the touch-target floor and an
+  underline instead, which is the cheapest way to stay obviously clickable
+  without competing.
+*/
 .ckt-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
   font-size: 0.84rem;
-  color: var(--ckt-dim);
-  text-decoration: none;
-  border-bottom: 1px solid var(--ckt-glass-line);
-  padding-bottom: 2px;
-  transition: color 0.16s ease;
+  color: #cfe0f8;
+  text-decoration: underline;
+  text-decoration-color: rgba(207, 224, 248, 0.45);
+  text-underline-offset: 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.16s ease, text-decoration-color 0.16s ease;
 }
 
 .ckt-link:hover,
 .ckt-link:focus-visible {
   color: #fff;
+  text-decoration-color: #fff;
 }
 
 .ckt-hint {
@@ -718,29 +956,6 @@
 }
 
 /* ---- narrow ---- */
-@media (max-width: 760px) {
-  .ckt-board {
-    gap: 0.75rem;
-    padding: 0.45rem 0.85rem;
-  }
-
-  /* the wordmark goes first: the score matters more than the byline */
-  .ckt-brand,
-  .ckt-hint {
-    display: none;
-  }
-
-  .ckt-say {
-    width: calc(100vw - 1.6rem);
-    bottom: calc(clamp(0.8rem, 2vw, 1.4rem) + 128px);
-  }
-
-  .ckt-wheel {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .ckt-shout,
@@ -752,5 +967,316 @@
   .ckt-cta:hover,
   .ckt-cta:focus-visible {
     transform: none;
+  }
+}
+
+/* ============ THE SCREEN COMPS' CARD TREATMENT ============ */
+
+/* the crown of stars, overhanging the card's top edge. Negative margin
+   rather than absolute positioning so it still reserves the space it
+   needs — an absolutely positioned crown collides with the banner the
+   moment the card's own padding changes. */
+.ckt-card__crown {
+  margin: -2px auto 4px;
+}
+
+/* the title as a red banner rather than plain display type. Two lines,
+   white then gold, which is the comps' way of ranking a two-part title
+   without changing its size. */
+.ckt-card__banner {
+  display: grid;
+  gap: 1px;
+  margin: 0 26px 4px;
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* gold on this red is 3.0:1, so it only runs where the type is genuinely
+   large. clamp's floor is 24px, which is the large-text threshold — below
+   that this rule would not be safe and the line would have to go white. */
+.ckt-card__bannerGold {
+  color: var(--gk-gold);
+}
+
+/* --- the two ranked result actions --- */
+
+.ckt-cta--gold {
+  --gk-btn-lit: var(--gk-gold-lit);
+  --gk-btn-face: var(--gk-gold);
+  --gk-btn-base: var(--gk-gold-deep);
+  color: #5a3400;
+  /* dark ink on gold is 6.8:1; the white relief would only muddy it */
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.ckt-cta--blue {
+  --gk-btn-lit: #6fb6f5;
+  --gk-btn-face: #2a6fc0;
+  --gk-btn-base: #14418f;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ckt-cta--blue svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* the way out, ruled like a section header because that is what it is:
+   the end of the game and the start of the actual portfolio */
+.ckt-outLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 8px 0 0;
+  color: var(--gk-ink-dim);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+@media (hover: hover) {
+  .ckt-outLink:hover {
+    color: #fff;
+  }
+}
+
+.ckt-outLink:focus-visible {
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: 3px;
+  color: #fff;
+}
+
+/* the star plate replaces the round medallion: same gold, same job, and it
+   is the shape the comps use for a level everywhere it appears */
+.cktXp__medal {
+  width: 44px;
+  height: 44px;
+  margin: -4px 0 -4px -2px;
+  font-size: 17px;
+}
+
+/* ================= the settings menu ================= */
+
+.ckt-menu {
+  position: relative;
+}
+
+/*
+  The popover hangs from the gear's right edge so it can never push past
+  the viewport on the side it opens toward — anchoring left would send it
+  off-screen on a phone, where the gear is already near the edge.
+*/
+.ckt-menu__panel {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 10px);
+  right: 0;
+  width: max-content;
+  min-width: 208px;
+  padding: 10px;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  animation: ckt-menu 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ckt-menu {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+.ckt-menu__head {
+  margin: 2px 4px 6px;
+}
+
+.ckt-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+@media (hover: hover) {
+  .ckt-menu__item:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+.ckt-menu__item:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ckt-menu__item:focus-visible {
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: -3px;
+}
+
+.ckt-menu__item svg {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  color: var(--gk-gold);
+}
+
+.ckt-menu__rule {
+  height: 2px;
+  margin: 5px 4px;
+  border-radius: 2px;
+  background: rgba(6, 22, 62, 0.55);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* ================= phone =================
+
+   One media block, not two. There used to be a second one further up that
+   pinned .ckt-say to a hand-counted offset above the level meter and
+   centred the wagon wheel — both of which fight the dock and the corner
+   layout below. Two blocks at the same breakpoint editing the same
+   elements is how a phone layout drifts out of sync with the desktop one.
+
+   The layout is three bands: controls on the first row, the scoreboard on
+   the second (they cannot share one — together they are 400px of content
+   in a 375px window), the scene in the middle, the dock along the bottom.
+*/
+@media (max-width: 760px) {
+  .ckt-controls {
+    z-index: 7;
+  }
+
+  .ckt-board {
+    top: 4.3rem;
+    left: clamp(0.8rem, 2vw, 1.4rem);
+    right: clamp(0.8rem, 2vw, 1.4rem);
+    transform: none;
+    justify-content: space-between;
+    gap: 0.55rem;
+    padding: 0.4rem 0.7rem;
+  }
+
+  .ckt-score {
+    font-size: 1.45rem;
+  }
+
+  .ckt-meta-label {
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .ckt-meta-value {
+    font-size: 0.78rem;
+  }
+
+  /* the byline and the keyboard hint both go: one is a link home and the
+     other names keys a phone does not have */
+  .ckt-brand,
+  .ckt-hint {
+    display: none;
+  }
+
+  .ckt-dock {
+    left: 0.7rem;
+    right: 0.7rem;
+    width: auto;
+    max-height: 42svh;
+  }
+
+  /*
+    A phone does not have room for the dock and a full-height card at the
+    same time, and it does not need both: the card repeats the level meter
+    and the commentary it would cover is about a ball that has already been
+    bowled. So while a card is up, the dock stands down.
+
+    `:has()` rather than a React flag because this is a layout consequence
+    of one element existing, and the component that renders the card has no
+    business knowing what else is on screen at 375px.
+  */
+  .ckt:has(.ckt-card) .ckt-dock {
+    display: none;
+  }
+
+  .ckt-card {
+    top: 8.4rem;
+    width: calc(100vw - 1.4rem);
+    max-height: calc(100svh - 10rem);
+    padding: 1.1rem 1rem 1.3rem;
+  }
+
+  .ckt-card__banner {
+    margin-inline: 22px;
+    font-size: 1.35rem;
+  }
+
+  .cktSummary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* two full-width caps stacked: side by side at this width they wrap to
+     about 130px each, which is under the size a thumb wants for the one
+     action almost everyone takes */
+  .ckt-actions {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .ckt-actions .ckt-cta {
+    width: 100%;
+  }
+
+  /* the popover would hang off the right edge at this width, so it spans
+     the viewport instead and anchors to it rather than to the gear */
+  .ckt-menu__panel {
+    position: fixed;
+    top: calc(clamp(0.8rem, 2vw, 1.4rem) + 54px);
+    right: 0.7rem;
+    left: 0.7rem;
+    /* the base rule sets `width: max-content`, and left+right+width is
+       over-constrained — left would win and the panel would keep its
+       desktop width. `auto` is what lets both insets apply. */
+    width: auto;
+    min-width: 0;
+  }
+}
+
+/*
+  Under 560px the wagon wheel goes.
+
+  It is a summary of where the runs went, and the result card repeats every
+  number on it. Keeping it would mean a third floating panel competing for
+  a screen that already has the scoreboard, the card and the dock — and it
+  is the only one of the four nobody needs mid-ball.
+*/
+@media (max-width: 560px) {
+  .ckt-wheel {
+    display: none;
+  }
+}
+
+@media (min-width: 561px) and (max-width: 760px) {
+  .ckt-wheel {
+    top: 9.4rem;
+    bottom: auto;
+    left: auto;
+    right: clamp(0.8rem, 2vw, 1.4rem);
+    transform: none;
+    padding: 7px 9px 9px;
   }
 }

@@ -10,6 +10,9 @@ import { opponentOf, teamVars, type Team } from "./teams";
 import { preloadBowler } from "./bowlerSprites";
 import { preloadFielder } from "./fielderSprites";
 import { unlockAudio } from "./sound";
+/* gamekit first: it defines the tokens and primitives the other two
+   stylesheets override for their own surfaces */
+import "./gamekit.css";
 import "./cricket.css";
 import "./stages.css";
 
@@ -143,7 +146,15 @@ export default function CricketExperience() {
       {stage === "select" && <TeamSelect onPick={pick} reduced={reduced} />}
 
       {stage === "innings" && (
-        <CricketGame opponent={team ? opponentOf(team.id).id : "panthers"} />
+        <CricketGame
+          /* remount on a side change: the game owns a full ball-level
+             machine and a canvas scene keyed to the opposition kit, and
+             re-running that from a prop change would be a second code path
+             for something the key already does correctly */
+          key={team?.id ?? "default"}
+          opponent={team ? opponentOf(team.id).id : "panthers"}
+          onSwitchTeam={() => advance("select")}
+        />
       )}
 
       {stage === "opening" && (

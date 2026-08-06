@@ -1,0 +1,616 @@
+/*
+  ============ GAME KIT ============
+
+  The shared chrome for every surface in the Design Premier League: the
+  team cards, the in-play dashboards, the buttons, the meters.
+
+  Before this file the game wore the portfolio's clothes — frosted glass,
+  hairline borders, restraint. That is right for a case study and wrong
+  for a cricket game, where the interface is meant to feel like an object
+  you press rather than a layer you read through. The reference direction
+  is the casual-arcade kit: moulded blue panels with a lit bevel, red
+  ribbon nameplates, buttons with a base that the top physically drops
+  onto, gold reserved for anything you scored.
+
+  The style is Claymorphism as the design database defines it (chunky,
+  thick frames, paired inner + outer shadows, 16–24px radii, soft press) —
+  its own recommended palette is pastel pink, which is for children's
+  apps, so the tokens below stay on the game's existing navy/team colours
+  and take only the structure.
+
+  Two rules hold the whole thing together:
+
+  - Every raised surface is lit from directly above. One inset highlight
+    along the top edge, one inset shadow along the bottom, one cast shadow
+    below. Nothing here is lit from a corner, because two light sources
+    across a dozen components is what makes a kit look assembled from
+    different games.
+
+  - Depth is a real offset, not a blur. Buttons sit on a solid base of
+    their own darker shade and travel down onto it when pressed, so the
+    press is a displacement you can see rather than a colour change.
+
+  Tokens live on the two roots that mount game UI so the primitives can be
+  used from either the pre-match stages or the match itself.
+*/
+
+.dpl,
+.ckt {
+  /* --- the moulded blue the panels are cut from --- */
+  --gk-rim-lit: #7cc4ff;
+  --gk-rim: #3d8fe0;
+  --gk-rim-deep: #1b56ad;
+  /*
+    The face is deeper than the rim, and deeper than the reference's own
+    card interiors, because it is what every piece of secondary text sits
+    on. At the reference's mid-blue the game's dim ink measured 3.5:1 and
+    its gold 3.7:1 — both under. Dropping the face to #1c4394 puts white at
+    9.2, the dim ink at 5.0 and gold at 5.7, which means the kit can use
+    all three on a panel without checking each one again.
+
+    The panel does not read darker for it: the contrast that makes these
+    surfaces pop is between the face and the *rim*, and the rim stayed put.
+  */
+  --gk-face-top: #1c4394;
+  --gk-face-bot: #0f2a63;
+  --gk-well: #0b1f52;
+
+  /*
+    --- accents ---
+
+    These are darker than the reference art, and deliberately.
+
+    Every one of them carries white text, and the reference's own values do
+    not clear 4.5:1 against white — its green is 2.2:1, its red 4.15:1, its
+    blue 4.11:1. That is normal for stock game art and not something to
+    copy: the relief shadow under the lettering makes it *look* legible in a
+    mockup while doing nothing for anyone who actually needs the contrast.
+
+    So the face colours are pulled down to the first value that passes, and
+    the brightness the reference gets from the fill is recovered in the
+    gradient instead — each button keeps a vivid lit stop across its top
+    edge, ramped out fast enough that the band the text sits on is the
+    compliant one. Measured against white: green 4.54, red 4.86, blue 5.08.
+  */
+  --gk-red: #d92b20;
+  --gk-red-deep: #a81d1a;
+  --gk-red-lit: #f2564a;
+  --gk-green: #358710;
+  --gk-green-deep: #1f5a0c;
+  --gk-green-lit: #7fe04e;
+  --gk-gold-lit: #ffe071;
+  --gk-gold: #ffc32e;
+  --gk-gold-deep: #e08a12;
+
+  /* --- ink --- */
+  --gk-ink: #ffffff;
+  --gk-ink-dim: #b9d4f5;
+  --gk-ink-shadow: rgba(6, 22, 62, 0.85);
+
+  /* --- geometry --- */
+  --gk-r-panel: 28px;
+  --gk-r-face: 20px;
+  --gk-r-btn: 16px;
+  --gk-frame: 7px;
+  --gk-drop: 6px;
+
+  /*
+    The lit-from-above pair, as one token each so a component can never
+    accidentally light itself from a different angle.
+  */
+  --gk-lit: inset 0 3px 0 rgba(255, 255, 255, 0.45);
+  --gk-unlit: inset 0 -4px 0 rgba(6, 22, 62, 0.35);
+  --gk-cast: 0 10px 26px rgba(4, 12, 38, 0.5);
+
+  /* game lettering: a hard offset, no blur — a blurred shadow on display
+     type at this weight reads as a print smudge rather than as relief */
+  --gk-text-relief: 0 2px 0 var(--gk-ink-shadow);
+}
+
+/* =========================================================
+   PANEL — the moulded frame every dashboard is cut from
+   ========================================================= */
+
+/*
+  Two surfaces, not one: a bright outer frame and a darker inset face.
+  A single element with a thick border cannot do this, because the border
+  and the fill would share one radius and the inner corner would come out
+  square inside a round frame — the tell that gives away a CSS "3D" panel.
+  Nesting lets the face carry its own smaller radius, which is what real
+  moulded plastic does.
+*/
+.gk-panel {
+  position: relative;
+  padding: var(--gk-frame);
+  border-radius: var(--gk-r-panel);
+  background: linear-gradient(180deg, var(--gk-rim-lit), var(--gk-rim) 42%, var(--gk-rim-deep));
+  box-shadow: var(--gk-lit), var(--gk-unlit), var(--gk-cast);
+}
+
+.gk-panel__face {
+  position: relative;
+  border-radius: var(--gk-r-face);
+  background: linear-gradient(180deg, var(--gk-face-top), var(--gk-face-bot));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -3px 10px rgba(6, 18, 54, 0.5);
+  overflow: hidden;
+}
+
+/* the sheen across the top third. Sits above the face's own gradient and
+   below its content, and stops hard at 46% — a soft fade reads as fog on
+   the panel instead of as a curved surface catching light */
+.gk-panel__face::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 46%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+/* the floating variant used for in-play dashboards: same moulding, thinner
+   frame, tighter radii, because these sit at the edges of the screen and a
+   28px rim at that size eats the numbers */
+.gk-panel--hud {
+  --gk-frame: 4px;
+  --gk-r-panel: 20px;
+  --gk-r-face: 15px;
+}
+
+/* =========================================================
+   RIBBON — the nameplate
+   ========================================================= */
+
+/*
+  A banner with folded tails, built from one element plus two pseudos.
+  The tails are the whole effect: without them the shape is a red rectangle,
+  and with them it reads as cloth pinned across the panel.
+*/
+.gk-ribbon {
+  position: relative;
+  display: block;
+  padding: 10px 26px 12px;
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    var(--gk-red-lit) 0%,
+    var(--gk-red) 18%,
+    var(--gk-red-deep) 100%
+  );
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -3px 0 rgba(90, 12, 10, 0.5), 0 6px 14px rgba(6, 16, 44, 0.45);
+  color: var(--gk-ink);
+  text-align: center;
+  text-shadow: var(--gk-text-relief);
+}
+
+/* the tails, folded back behind the banner and notched with a clip-path.
+   Drawn darker than the face because they are the underside of the fold. */
+/* the navy variant. The opening's subtitle sits directly under a navy
+   badge, and a red banner there fought it for attention — the comp keeps
+   red for the game's own title card, where it is the only warm thing on
+   screen. */
+.gk-ribbon--navy {
+  background: linear-gradient(180deg, #2a5fc4 0%, #16307c 26%, #0d2260 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -3px 0 rgba(6, 18, 54, 0.6), 0 6px 14px rgba(6, 16, 44, 0.45);
+}
+
+.gk-ribbon--navy::before,
+.gk-ribbon--navy::after {
+  background: #0a1a4c;
+}
+
+.gk-ribbon::before,
+.gk-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 22%;
+  width: 30px;
+  height: 62%;
+  background: var(--gk-red-deep);
+  z-index: -1;
+}
+
+.gk-ribbon::before {
+  left: -22px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 34% 50%);
+  border-radius: 4px 0 0 4px;
+}
+
+.gk-ribbon::after {
+  right: -22px;
+  clip-path: polygon(0 0, 100% 0, 66% 50%, 100% 100%, 0 100%);
+  border-radius: 0 4px 4px 0;
+}
+
+/* =========================================================
+   BUTTONS — pressed, not clicked
+   ========================================================= */
+
+/*
+  The base is a hard `0 Npx 0` shadow rather than a blurred one, so the
+  button has a visible side wall. Pressing translates the cap down by
+  exactly the height of that wall and shrinks the shadow to match, which
+  means the cap lands on the base instead of hovering over a smaller one.
+
+  Padding is set so the cap clears 44px at every size — the touch-target
+  floor — including the small icon variant.
+*/
+.gk-btn {
+  --gk-btn-lit: var(--gk-green-lit);
+  --gk-btn-face: var(--gk-green);
+  --gk-btn-base: var(--gk-green-deep);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px 28px;
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  border-radius: var(--gk-r-btn);
+  /* the lit stop is a specular strip, not half the cap: it clears out by
+     30% so the text band sits entirely on the contrast-checked face and
+     base. See the accent tokens for the measurements. */
+  background: linear-gradient(
+    180deg,
+    var(--gk-btn-lit) 0%,
+    var(--gk-btn-face) 30%,
+    var(--gk-btn-base) 100%
+  );
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 var(--gk-drop) 0 var(--gk-btn-base),
+    0 calc(var(--gk-drop) + 6px) 16px rgba(4, 12, 38, 0.45);
+  color: var(--gk-ink);
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: clamp(15px, 1.5vw, 19px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: var(--gk-text-relief);
+  cursor: pointer;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .gk-btn:hover {
+    filter: brightness(1.08);
+  }
+}
+
+.gk-btn:active {
+  transform: translateY(var(--gk-drop));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 0 0 var(--gk-btn-base),
+    0 2px 6px rgba(4, 12, 38, 0.4);
+}
+
+.gk-btn:focus-visible {
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: 4px;
+}
+
+.gk-btn[disabled],
+.gk-btn[aria-disabled="true"] {
+  filter: grayscale(0.7) brightness(0.85);
+  cursor: not-allowed;
+}
+
+.gk-btn--red {
+  --gk-btn-lit: #ff6b5e;
+  --gk-btn-face: var(--gk-red);
+  --gk-btn-base: var(--gk-red-deep);
+}
+
+.gk-btn--blue {
+  --gk-btn-lit: #6fb6f5;
+  --gk-btn-face: #2a6fc0;
+  --gk-btn-base: #14418f;
+}
+
+.gk-btn--gold {
+  --gk-btn-lit: var(--gk-gold-lit);
+  --gk-btn-face: var(--gk-gold);
+  --gk-btn-base: var(--gk-gold-deep);
+  color: #5a3400;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.gk-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* --- icon button: the same object, square and small --- */
+.gk-ibtn {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--gk-rim-lit), var(--gk-rim) 52%, var(--gk-rim-deep));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 4px 0 var(--gk-rim-deep),
+    0 8px 14px rgba(4, 12, 38, 0.4);
+  color: var(--gk-ink);
+  cursor: pointer;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .gk-ibtn:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.gk-ibtn:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 0 0 var(--gk-rim-deep),
+    0 2px 5px rgba(4, 12, 38, 0.4);
+}
+
+.gk-ibtn:focus-visible {
+  outline: 3px solid var(--gk-gold-lit);
+  outline-offset: 3px;
+}
+
+.gk-ibtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* =========================================================
+   STAT STRIP — the row of scored numbers
+   ========================================================= */
+
+/*
+  A sunken well with cells divided by rules rather than by gaps. Sunken
+  because these are readouts, not controls: the same lighting run backwards
+  (dark at the top, lit along the bottom) is what tells you a surface is
+  cut into the panel rather than sitting on it, and it is the cheapest way
+  to keep a dashboard from looking like a row of buttons.
+*/
+.gk-stats {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border-radius: 14px;
+  background: var(--gk-well);
+  box-shadow: inset 0 3px 8px rgba(4, 12, 38, 0.6),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+/*
+  Reading order and paint order disagree here, on purpose.
+
+  A description list has to be written <dt> then <dd>, so the label is in
+  the markup before the number — which is what a screen reader should hear
+  ("Timing, minus twelve percent"). The design wants icon, number, label
+  top to bottom. `display: contents` on the term lifts the icon and the
+  label out to become flex items of the cell alongside the value, and
+  `order` then arranges all three, without a wrapper that would have to be
+  hidden from the tree to keep the list valid.
+*/
+.gk-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 8px 9px;
+  text-align: center;
+}
+
+.gk-stat__term {
+  display: contents;
+}
+
+.gk-stat__icon {
+  order: 1;
+}
+.gk-stat__value {
+  order: 2;
+  margin: 0;
+}
+.gk-stat__label {
+  order: 3;
+}
+
+.gk-stat + .gk-stat {
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.14);
+}
+
+.gk-stat__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--gk-gold);
+}
+
+.gk-stat__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gk-stat__value {
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: clamp(17px, 2vw, 23px);
+  line-height: 1;
+  color: var(--gk-ink);
+  text-shadow: var(--gk-text-relief);
+  font-variant-numeric: tabular-nums;
+}
+
+.gk-stat__label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gk-ink-dim);
+}
+
+/* =========================================================
+   METER — progress with milestone stars
+   ========================================================= */
+
+.gk-meter {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--gk-well);
+  box-shadow: inset 0 3px 7px rgba(4, 12, 38, 0.65),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.gk-meter__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--gk-gold-lit), var(--gk-gold) 50%, var(--gk-gold-deep));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+  transform-origin: left center;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =========================================================
+   MEDALLION — the round gold plate a level number sits on
+   ========================================================= */
+
+.gk-medal {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 28%, var(--gk-gold-lit), var(--gk-gold) 52%, var(--gk-gold-deep));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -4px 0 rgba(150, 82, 6, 0.55), 0 6px 14px rgba(4, 12, 38, 0.45);
+  color: #5a3400;
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: 26px;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* =========================================================
+   TYPE HELPERS
+   ========================================================= */
+
+/* the scored-number treatment: gold, filled top-down, with the same relief
+   as the buttons so numerals and lettering read as one material */
+.gk-num {
+  font-family: var(--ckt-display, var(--font-primary));
+  background: linear-gradient(180deg, #fff6cf, var(--gk-gold) 55%, var(--gk-gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-variant-numeric: tabular-nums;
+  filter: drop-shadow(0 2px 0 var(--gk-ink-shadow));
+}
+
+.gk-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gk-ink-dim);
+}
+
+/* =========================================================
+   REDUCED MOTION
+   =========================================================
+
+   The press displacement stays. It is not decoration — it is the only
+   feedback that a control was activated, and removing it would leave
+   someone with reduced motion on tapping a button that does nothing
+   visible. Only the travel that happens without input is cut.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .gk-meter__fill {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   PIECES THE SCREEN COMPS ADDED
+   =========================================================
+
+   Three shapes recur across the comps that the base kit did not have: a
+   row of stars crowning a panel, a section header ruled on both sides,
+   and a star-shaped plate for the level. All three are the same idea —
+   marking something as an achievement — so they share the gold ramp.
+*/
+
+/* --- the crown of stars over a card --- */
+.gk-stars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.gk-stars i {
+  display: block;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(180deg, var(--gk-gold-lit), var(--gk-gold) 55%, var(--gk-gold-deep));
+  /* a five-point star as a clip rather than an SVG: it is pure decoration
+     repeated three times, and three inline SVGs to say "nice one" is three
+     more nodes than the idea is worth */
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 2px 0 rgba(6, 22, 62, 0.6));
+}
+
+/* the middle star sits proud, which is what stops three identical marks
+   reading as a loading indicator */
+.gk-stars i:nth-child(2) {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 4px;
+}
+
+/* --- section header, ruled both sides --- */
+.gk-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gk-ink-dim);
+}
+
+.gk-head::before,
+.gk-head::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+/* --- the level plate --- */
+.gk-star {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  background: linear-gradient(180deg, var(--gk-gold-lit), var(--gk-gold) 52%, var(--gk-gold-deep));
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  color: #5a3400;
+  font-family: var(--ckt-display, var(--font-primary));
+  font-size: 19px;
+  line-height: 1;
+  /* the numeral rides in the star's body, which is below its centre */
+  padding-top: 6px;
+}
