@@ -18,40 +18,16 @@
   appears and disappears while the animation runs.
 */
 /*
-  While the game is mounted the document itself goes dark. See the effect in
-  CricketExperience for why this is on <html> and not on .dpl: the portfolio
-  paints `body` with --cream, and a light page under a dark full-bleed scene
-  turns every one-frame gap into a white rectangle.
+  `html.dpl-page` — the dark document and the preloader opt-out — lives in
+  globals.css, not here.
 
-  `overflow: hidden` on both belongs here too. The camera zooms the stadium
-  past the frame and the card motes drift beyond their card; without this
-  the document grows and a scrollbar appears and disappears mid-animation.
+  It used to be in this file, which is imported by CricketExperience and so
+  arrives as a route chunk. That is too late: on a cold load of /cricket the
+  rules that exist to stop a cream page and a stray overlay showing under
+  the scene were themselves not on screen yet, which is exactly the frame
+  they were written to prevent. globals.css ships with the root layout, so
+  there it is true before the first paint.
 */
-html.dpl-page,
-html.dpl-page body {
-  background: #06080e;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-/*
-  The portfolio's brand preloader does not belong over the game.
-
-  It is mounted by the root layout on every route, sits at z-index 9999
-  across the whole viewport, and opens by sliding two cream panels apart. On
-  a page that is itself a full-screen dark scene that is wrong twice: the
-  game already has its own cinematic opening, so the visitor waits through
-  two intros, and any panel that has not finished retracting reads as a
-  white rectangle over the pitch with the logo's broken-image box in its
-  corner.
-
-  Hidden rather than unmounted: it belongs to the layout, so this is the
-  only place a route can opt out of it without every other page paying for
-  a prop nobody else needs.
-*/
-html.dpl-page .preloader {
-  display: none !important;
-}
 
 .dpl {
   position: relative;
@@ -247,6 +223,26 @@ html.dpl-page .preloader {
 .stgStart__spark {
   position: absolute;
   inset: -60px;
+  /*
+    The explicit size is load-bearing, not belt-and-braces for the insets.
+
+    A canvas is a replaced element, and an absolutely positioned replaced
+    element with `width: auto` takes its width from its *intrinsic* size —
+    the width/height content attributes, i.e. the bitmap — and then drops
+    `right`/`bottom` as over-constrained. So with insets alone the box was
+    sized by the backing store rather than by this rule, and Opening's fit()
+    (measure the box, multiply by devicePixelRatio, write it back) became a
+    feedback loop: on any display above 1x the canvas grew by that factor
+    every ResizeObserver tick. Measured on the page, one cycle at 2x took it
+    375 -> 750 -> 1500px. Past the size a bitmap can be allocated at, it
+    paints as a broken image — the white rectangle running from 60px
+    up-left of the button to the corner of the screen.
+
+    Stating width and height keeps the box a function of this rule, so the
+    measurement fit() takes can no longer be one it caused.
+  */
+  width: calc(100% + 120px);
+  height: calc(100% + 120px);
   z-index: 1;
   pointer-events: none;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 /*
   Full-screen entrance preloader — mounted once in the root layout, so it
@@ -76,11 +77,33 @@ const SPLIT_MS = 700; // must match the transform transition-duration in CSS
 const REDUCED_HOLD_MS = 260;
 const REDUCED_FADE_MS = 260;
 
+/*
+  Routes that own their own opening and must never see this one.
+
+  /cricket is a full-bleed dark scene with a broadcast cold open of its
+  own, so this one is redundant there — the visitor sits through two
+  intros to reach the same screen.
+
+  It was already meant to be skipped: stages.css hid `.preloader` under
+  `html.dpl-page`. But that rule can only win once both the class (added
+  on mount) and the route chunk carrying it are in place, so on a cold
+  load a z-index 9999 overlay is over the pitch until hydration catches
+  up. Not rendering at all closes that window rather than racing it; the
+  CSS rule stays as the belt to this braces.
+*/
+const SILENT_ROUTES = ["/cricket"];
+
 export default function Preloader() {
+  const pathname = usePathname();
   const [stage, setStage] = useState<Stage>("bootClosed");
   const [percent, setPercent] = useState(0);
 
+  const silent = SILENT_ROUTES.some(
+    (r) => pathname === r || pathname?.startsWith(`${r}/`)
+  );
+
   useEffect(() => {
+    if (silent) return;
     const timers: number[] = [];
     const schedule = (fn: () => void, ms: number) => {
       timers.push(window.setTimeout(fn, ms));
@@ -141,9 +164,9 @@ export default function Preloader() {
       document.body.style.overflow = prevOverflow;
       document.body.style.paddingRight = prevPaddingRight;
     };
-  }, []);
+  }, [silent]);
 
-  if (stage === "done") return null;
+  if (silent || stage === "done") return null;
 
   const reducedMotion =
     typeof window !== "undefined" &&

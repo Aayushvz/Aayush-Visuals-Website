@@ -9853,6 +9853,40 @@ html.contact-page-active .themeSwitch {
   z-index: 9999;
 }
 
+/* ---------- the game route opts out ----------
+
+   /cricket is a full-bleed dark scene with a broadcast cold open of its
+   own, so `dpl-page` (set on <html> by the pre-paint script in layout.tsx,
+   and again by CricketExperience on mount) turns two things off.
+
+   The document goes dark. `body` is painted --cream for the rest of the
+   site, and a light page under a dark full-bleed scene turns every
+   one-frame gap — a canvas that has not sized yet, a viewport taller than
+   the shell for a frame during a resize — into a white rectangle. Marking
+   the document is the fix that holds; a child cannot repaint its own body.
+
+   And the brand preloader is hidden. It is mounted by the root layout on
+   every route and sits at z-index 9999 across the whole viewport, which on
+   a page with a cold open of its own is one intro too many. Preloader
+   itself also returns null here, which is the real opt-out — this rule is
+   what covers the frames before its JS has run.
+
+   Both rules belong in this file rather than in the game's own stylesheet
+   precisely because they have to be true before the game's stylesheet
+   exists. `overflow: hidden` rides along: the camera zooms the stadium
+   past the frame and the card motes drift beyond their card, and without
+   it the document grows a scrollbar mid-animation. */
+html.dpl-page,
+html.dpl-page body {
+  background: #06080e;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.dpl-page .preloader {
+  display: none !important;
+}
+
 .preloader__panel {
   position: absolute;
   left: 0;

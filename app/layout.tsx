@@ -165,8 +165,16 @@ const jsonLd = {
   which is a listing and stays dark with everything else. The dock's toggle
   still works once you are there; this sets where a page starts, not where
   it has to stay.
+
+  The same script marks /cricket before first paint. CricketExperience adds
+  `dpl-page` on mount for the client-side case, but on a cold load of that
+  route "on mount" is after hydration, and everything the class is there to
+  suppress — the cream body under a dark full-bleed scene, the root
+  preloader — is on screen for that whole window. Setting it here makes the
+  class true from the first byte; the component's copy is then a no-op, and
+  its cleanup still takes the class off if you navigate away.
 */
-const themeInit = `(function(){var d=document.documentElement,p=location.pathname.indexOf("/work/")===0;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark";}d.dataset.theme=p?"light":t;}catch(e){d.dataset.theme=p?"light":"dark";}})();`;
+const themeInit = `(function(){var d=document.documentElement,p=location.pathname.indexOf("/work/")===0;if(location.pathname.indexOf("/cricket")===0){d.classList.add("dpl-page");}try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark";}d.dataset.theme=p?"light":t;}catch(e){d.dataset.theme=p?"light":"dark";}})();`;
 
 export default function RootLayout({
   children,

@@ -94,8 +94,18 @@ export default function Opening({ onStart, reduced }: Props) {
       cv.height = Math.max(1, Math.round(b.height * dpr));
     };
     fit();
+    /*
+      Watch the button, not the canvas.
+
+      fit() writes the canvas's backing store, and stages.css now guarantees
+      that writing it cannot change the canvas's layout box — see the note on
+      .stgStart__spark for the replaced-element rule that made it able to.
+      Observing the element whose size this element is derived *from* means
+      the loop cannot close even if that guarantee is ever edited away: the
+      only thing that can trigger a refit is the button actually resizing.
+    */
     const ro = new ResizeObserver(fit);
-    ro.observe(cv);
+    ro.observe(cv.parentElement ?? cv);
 
     const step = (t: number) => {
       rafRef.current = requestAnimationFrame(step);
