@@ -4176,14 +4176,31 @@ html[data-theme="light"] .figp-lfile img {
   gap: var(--figp-grid-gap, 1.2rem);
 }
 
+/*
+  minmax(0, 1fr), never a bare 1fr.
+
+  `1fr` is shorthand for `minmax(auto, 1fr)`, and that `auto` minimum
+  resolves to the track's min-content — which for these posters is their
+  1200px intrinsic width. So the tracks refused to shrink, the grid grew
+  past its container, and the wall scrolled sideways with one poster
+  visible instead of wrapping down the page. The explicit 0 minimum is what
+  lets a column be narrower than the image inside it.
+*/
 .figp-section[data-figp-node="posters"] .figp-grid {
   --figp-grid-gap: 0px;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* and the images must be allowed to follow the track down */
+.figp-section[data-figp-node="posters"] .figp-grid-item,
+.figp-section[data-figp-node="posters"] .figp-grid-item img {
+  min-width: 0;
+  max-width: 100%;
 }
 
 @media (max-width: 720px) {
   .figp-section[data-figp-node="posters"] .figp-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -4240,6 +4257,38 @@ html[data-theme="light"] .figp-lfile img {
    existed to fix */
 @container figp-canvas (max-width: 820px) {
   .figp-section[data-figp-node="posters"] .figp-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/*
+  The poster wall opts out of the mobile swipe carousel.
+
+  On phones `.figp-grid` becomes a horizontal scroller — `display: flex`,
+  scroll-snap, items at `flex: 0 0 88%`. That is right for the two or three
+  wide desktop shots it was written for: swiping beats squinting.
+
+  It is wrong for 41 posters. It overrode the grid entirely, so the wall
+  became one row 12,682px wide showing a single poster at a time — the
+  column rules above were never in play, which is why changing them
+  changed nothing. A contact sheet has to be scrolled top to bottom.
+
+  This block sits after the carousel so it wins on order, and it puts back
+  every property that rule changed rather than only the ones that showed.
+*/
+@media (max-width: 720px) {
+  .figp-section[data-figp-node="posters"] .figp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow-x: visible;
+    scroll-snap-type: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .figp-section[data-figp-node="posters"] .figp-grid-item {
+    flex: initial;
+    scroll-snap-align: none;
+    min-width: 0;
   }
 }
