@@ -388,7 +388,7 @@ export const PROJECTS: Project[] = [
     cover: "/projects/mike-tyson-bg.webp",
     preview: {
       kind: "website",
-      href: "https://mike-tyson-invitational.webflow.io",
+      href: "https://mike-tyson-invitational-3821139c156afc7.webflow.io/",
       image: "/projects/mike-tyson-bg.webp",
     },
     cta: "Visit Live Website",
