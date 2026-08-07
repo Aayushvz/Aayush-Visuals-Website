@@ -13,12 +13,12 @@ import { useLowPowerMode } from "./useLowPowerMode";
 
   Background grid covers the entire canvas, reacting seamlessly to the spotlight.
 
-  Perf gating (see useLowPowerMode): the fine spotlight grid and its
+  Perf/motion gating (see useLowPowerMode): the fine spotlight grid and its
   pointer listeners are skipped entirely without a fine pointer (hover
-  can't happen via touch), the resting grid is coarser and its per-frame
-  flicker redraw is throttled to every 3rd frame on low-power devices, and
-  the whole rAF loop pauses via IntersectionObserver + document.hidden
-  once the portrait is off-screen.
+  can't happen via touch) or under prefers-reduced-motion, the resting
+  grid is coarser and its per-frame flicker redraw is throttled to every
+  3rd frame on low-power devices, and the whole rAF loop pauses via
+  IntersectionObserver + document.hidden once the portrait is off-screen.
 */
 
 const BASE_CELL = 7; // Grid resolution (resting size), in CSS px. A bit smaller makes the face much more high-res and detailed!
@@ -77,7 +77,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hoverCb = useRef(onHoverChange);
   hoverCb.current = onHoverChange;
-  const { lowPower, pointerFine } = useLowPowerMode();
+  const { lowPower, reducedMotion, pointerFine } = useLowPowerMode();
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -86,6 +86,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const spotlightEnabled = pointerFine && !reducedMotion;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     let W = 0;
@@ -102,8 +103,12 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let ix = 0, iy = 0, iw = 0, ih = 0;
     let sxc = 0, syc = 0, swc = 0, shc = 0;
 
-    /* two sampling grids: coarse (resting) and fine (spotlight, 2×,
-       skipped entirely without a fine pointer — it can never be reached) */
+    /* two sampling grids: coarse (resting) and fine (spotlight, 2×).
+       The fine grid is skipped without a fine, motion-ok pointer — a
+       deliberate tradeoff, not a dead path: touch devices could hit it
+       pre-perf-branch (pointerdown fires on tap), but we now drop
+       tap-to-spotlight (and its onHoverChange -> StatusBar "AVAILABLE"
+       side effect) there to avoid paying the 2x-density grid on phones. */
     const cell = lowPower ? 10 : BASE_CELL;
     let cols = 0, rows = 0;
     let lumC: Float32Array = new Float32Array(0);
@@ -176,7 +181,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
 
       ({ lum: lumC, alp: alpC } = sampleGrid(cols, rows));
 
-      if (pointerFine) {
+      if (spotlightEnabled) {
         colsF = cols * 2;
         rowsF = rows * 2;
         ({ lum: lumF, alp: alpF } = sampleGrid(colsF, rowsF));
@@ -267,7 +272,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       }
 
       /* 2. Fine Spotlight Hover overlay (Lavender tone base palette, 2x resolution increase!) */
-      if (br > 0.5 && pointerFine) {
+      if (br > 0.5 && spotlightEnabled) {
         const x0 = Math.max(0, Math.floor((bx - br) / cf));
         const x1 = Math.min(colsF - 1, Math.ceil((bx + br) / cf));
         const y0 = Math.max(0, Math.floor((by - br) / cf));
@@ -359,7 +364,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       hoverCb.current?.(false);
     };
 
-    if (pointerFine) {
+    if (spotlightEnabled) {
       window.addEventListener("pointermove", onPointerMove, { passive: true });
       window.addEventListener("pointerdown", onPointerMove, { passive: true });
       window.addEventListener("pointerleave", onPointerLeave, { passive: true });
@@ -434,14 +439,14 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       io.disconnect();
       document.removeEventListener("visibilitychange", syncRunning);
       ro.disconnect();
-      if (pointerFine) {
+      if (spotlightEnabled) {
         window.removeEventListener("pointermove", onPointerMove);
         window.removeEventListener("pointerdown", onPointerMove);
         window.removeEventListener("pointerleave", onPointerLeave);
         window.removeEventListener("pointercancel", onPointerLeave);
       }
     };
-  }, [src, lowPower, pointerFine]);
+  }, [src, lowPower, pointerFine, reducedMotion]);
 
   return (
     <div ref={wrapRef} style={{ width: "100%", height: "100%" }}>
