@@ -31,6 +31,9 @@ export type WorkItem = {
   /** extra free-text terms the search should match beyond title/category */
   tags: string[];
   thumbnail: string;
+  /* the still behind a moving thumbnail — a poster for the <video>, and
+     what shows if the loop is still in flight */
+  poster: string;
   /** real logo asset shown centred + sharp over the image (when one exists) */
   logo?: string;
   /** text wordmark fallback for projects without a logo asset (e.g. Yantra) */
@@ -85,6 +88,10 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     categories: ["UI/UX", "Brand Design"],
     tags: ["event", "website", "framer", "startup", "founders"],
   },
+  posterfolio: {
+    categories: ["Graphic Design"],
+    tags: ["poster", "print", "typography", "editorial", "series"],
+  },
   gravitas: {
     categories: ["Brand Design", "UI/UX"],
     tags: ["branding", "website", "fest", "identity", "print"],
@@ -108,6 +115,7 @@ const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   ],
   tags: TAXONOMY[p.id]?.tags ?? [],
   thumbnail: p.bgVideoUrl ?? p.cover,
+  poster: p.cover,
   logo: p.logoUrl,
   wordmark: p.logoText,
 });

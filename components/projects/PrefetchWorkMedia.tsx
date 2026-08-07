@@ -36,11 +36,21 @@ export default function PrefetchWorkMedia({ src }: { src: string }) {
         if (done || !entries.some((e) => e.isIntersecting)) return;
         done = true;
         io.disconnect();
-        /* a bare Image() is enough to populate the HTTP cache; the real
-           <img> in the tile then resolves from it instantly */
-        const warm = new Image();
-        warm.decoding = "async";
-        warm.src = src;
+        /*
+          An Image() cannot warm a video — it would just fail to decode and
+          the loop would still download cold when the tile arrives. Videos
+          are fetched instead, which populates the same HTTP cache the
+          <video> element then resolves from.
+        */
+        if (/\.(webm|mp4)$/i.test(src)) {
+          fetch(src, { mode: "no-cors" }).catch(() => {
+            /* a warm-up that fails costs nothing; the tile still loads */
+          });
+        } else {
+          const warm = new Image();
+          warm.decoding = "async";
+          warm.src = src;
+        }
       },
       { rootMargin: "200px 0px" }
     );

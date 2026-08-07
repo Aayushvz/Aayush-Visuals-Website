@@ -5,6 +5,7 @@ import PageLink from "@/components/PageLink";
 import { projectCursorProps } from "@/components/projects/ProjectCursor";
 import { saveOrigin } from "@/lib/navOrigin";
 import type { WorkItem } from "./worksData";
+import ProjectMedia from "@/components/projects/ProjectMedia";
 
 /*
   One project card = a white rounded header (title. /year + three macOS dots)
@@ -49,13 +50,14 @@ export default function ProjectCard({ item, index }: Props) {
         </div>
 
         <div className="workCard__media">
-          <img
+          {/* a project whose thumbnail is a loop renders <video> here; see
+              ProjectMedia. This was a plain <img>, so a .webm thumbnail
+              showed as a broken frame on the works grid. */}
+          <ProjectMedia
             className="workCard__img"
             src={item.thumbnail}
             alt={item.title}
-            loading="lazy"
-            decoding="async"
-            draggable={false}
+            poster={item.poster}
           />
           <span className="workCard__logoWrap">
             {item.logo ? (

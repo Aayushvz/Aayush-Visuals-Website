@@ -382,14 +382,16 @@ export const PROJECTS: Project[] = [
     title: "Mike Tyson Invitational",
     logoText: "MTI",
     logoUrl: "/projects/mike-tyson-logo.webp",
-    bgVideoUrl: "/projects/mike-tyson-bg.webp",
+    /* the card loops rather than sits still; `cover` stays a still and doubles
+       as the poster, so the frame is filled before the loop arrives */
+    bgVideoUrl: "/projects/mike-tyson-bg.webm",
     category: "Website Design",
     year: "2026",
-    cover: "/projects/mike-tyson-bg.webp",
+    cover: "/projects/mike-tyson-poster.webp",
     preview: {
       kind: "website",
       href: "https://mike-tyson-invitational-3821139c156afc7.webflow.io/",
-      image: "/projects/mike-tyson-bg.webp",
+      image: "/projects/mike-tyson-poster.webp",
     },
     cta: "Visit Live Website",
     role: "Design & Build",
@@ -1969,6 +1971,125 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "posterfolio",
+    /* deliberately NOT kind: "case-study" — a wall of posters is a body of
+       work, not an argument about one, and the works page splits the two on
+       this flag. The poster grid still renders: FigmaProjectPage keys that
+       off `sections`, not off the kind. */
+    title: "Posterfolio",
+    logoText: "POSTERFOLIO",
+    category: "Poster Design",
+    year: "2025",
+    cover: "/projects/posterfolio-cover.webp",
+    preview: {
+      kind: "website",
+      href: "https://www.behance.net/AAYUSHVISUALS",
+      image: "/projects/posterfolio-cover.webp",
+    },
+    cta: "View on Behance",
+    role: "Graphic Design",
+    tools: ["Photoshop", "Illustrator", "Figma"],
+    description:
+      "A running series of posters — startup teardowns, product launches, editorial covers, merch and title cards. One format, held across dozens of subjects, as a way of practising composition and type under a fixed constraint.",
+    highlights: [
+      "41 posters across startup, editorial, product and merch briefs",
+      "One 4:5 format throughout, so the variation is in composition rather than canvas",
+      "Type-led layouts built to read at thumbnail size before they read at full size",
+    ],
+    extraFacts: [
+      ["Posters", "41"],
+      ["Format", "4:5, poster"],
+    ],
+    sections: [
+      {
+        name: "overview",
+        heading: "The short version",
+        blocks: [
+          {
+            kind: "brief",
+            items: [
+              {
+                label: "What it is",
+                wide: true,
+                body: "An ongoing set of **41 posters** covering startup teardowns, product launches, editorial covers, streetwear merch and title cards. Not a campaign — **a practice**, run at one format over a long stretch.",
+              },
+              {
+                label: "The constraint",
+                body: "**One canvas, 4:5.** Every poster gets the same rectangle, so nothing can be solved by changing the shape of the page.",
+              },
+              {
+                label: "What it is for",
+                body: "Most of these are read at **thumbnail scale first** — a feed, a grid, a contact sheet. The layout has to survive being small before it earns being large.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        /*
+          One wall, not fourteen sets.
+
+          The posters were split into labelled groups of three, which gave
+          the page a heading and a rule every three images — the series read
+          as fourteen small announcements rather than as one body of work.
+          A contact sheet is the honest format for this: the whole set in a
+          single grid, nothing between the frames, so the variation across
+          them is the thing you see.
+        */
+        name: "posters",
+        heading: "",
+        blocks: [
+          {
+            kind: "grid",
+            items: [
+              { src: "/projects/posterfolio/poster-01.webp", alt: "Poster 1 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-02.webp", alt: "Poster 2 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-03.webp", alt: "Poster 3 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-04.webp", alt: "Poster 4 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-05.webp", alt: "Poster 5 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-06.webp", alt: "Poster 6 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-07.webp", alt: "Poster 7 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-08.webp", alt: "Poster 8 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-09.webp", alt: "Poster 9 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-10.webp", alt: "Poster 10 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-11.webp", alt: "Poster 11 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-12.webp", alt: "Poster 12 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-13.webp", alt: "Poster 13 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-14.webp", alt: "Poster 14 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-15.webp", alt: "Poster 15 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-16.webp", alt: "Poster 16 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-17.webp", alt: "Poster 17 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-18.webp", alt: "Poster 18 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-19.webp", alt: "Poster 19 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-20.webp", alt: "Poster 20 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-21.webp", alt: "Poster 21 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-22.webp", alt: "Poster 22 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-23.webp", alt: "Poster 23 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-24.webp", alt: "Poster 24 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-25.webp", alt: "Poster 25 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-26.webp", alt: "Poster 26 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-27.webp", alt: "Poster 27 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-28.webp", alt: "Poster 28 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-29.webp", alt: "Poster 29 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-30.webp", alt: "Poster 30 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-31.webp", alt: "Poster 31 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-32.webp", alt: "Poster 32 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-33.webp", alt: "Poster 33 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-34.webp", alt: "Poster 34 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-35.webp", alt: "Poster 35 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-36.webp", alt: "Poster 36 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-37.webp", alt: "Poster 37 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-38.webp", alt: "Poster 38 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-39.webp", alt: "Poster 39 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-40.webp", alt: "Poster 40 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-41.webp", alt: "Poster 41 from the Posterfolio series." },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "gravitas",
     title: "Gravitas",
     logoText: "GRAVITAS·25",
@@ -2023,31 +2144,34 @@ export const PROJECTS: Project[] = [
       Green, because the product is about food and the site's default purple
       says nothing about it.
 
-      Each value clears the bar its own role has, which is why they are four
-      different greens rather than one with opacity:
+      #385A41 is the brand green and it is the `light` value — it measures
+      7.8:1 on white, which is comfortably past the text bar. It cannot also
+      be `dark`: on the #1e1e1e shell the same colour is 2.2:1, effectively
+      invisible. So the dark-mode entries are lighter tints of the same hue
+      rather than a different green, which is what keeps the two themes
+      reading as one brand.
 
-      - `dark` / `light` carry TEXT, so they need 4.5:1 on their own canvas.
-        #34C759 measures 7.5 on the dark shell, #1F7F38 measures 5.1 on white.
-        One hue cannot do both — the mid greens that read on white vanish on
-        #1e1e1e and vice versa.
-      - `solid` is borders, rings and frame ticks, which are UI rather than
-        text and answer to 3:1. #279A45 is the only value here that clears it
-        on BOTH canvases (4.6 dark, 3.6 light), so the same ring works either
-        side of a theme switch.
-      - `bright` is the cursor, its name tag and the comment pins — meant to
-        be spotted, not read through, so it runs hotter than the body accent.
-        White on it is 1.7:1, hence the near-black `ink`.
-      - `fill` is what a card turns on hover, and white has to survive on it:
-        #1F7F38 gives 5.1:1.
+      Each value clears the bar its own role has:
+
+      - `dark` / `light` carry TEXT and need 4.5:1 on their own canvas.
+        #7CB98C is 7.3 on the shell, #385A41 is 7.8 on white.
+      - `solid` is borders, rings and frame ticks — UI, not text, so 3:1.
+        #5C8F69 is the tint that clears it on BOTH canvases (4.4 dark,
+        3.8 light), so one ring survives a theme switch.
+      - `bright` is the cursor, its tag and the comment pins: meant to be
+        spotted rather than read through. White on it is 2.4:1, hence the
+        near-black `ink` at 7.5:1.
+      - `fill` is a card at hover, and white has to survive on it: the brand
+        green gives 7.8:1, so filled surfaces stay on brand.
     */
     accent: {
-      dark: "#34C759",
-      light: "#1F7F38",
-      solid: "#279A45",
-      bright: "#4ADE80",
-      ink: "#08240F",
-      fill: "#1F7F38",
-      hover: "#279A45",
+      dark: "#7CB98C",
+      light: "#385A41",
+      solid: "#5C8F69",
+      bright: "#7CB98C",
+      ink: "#0E1F14",
+      fill: "#385A41",
+      hover: "#5C8F69",
     },
     shots: [
       {
@@ -2088,7 +2212,7 @@ const SELECTED_IDS = [
   "mike-tyson-invitational",
   "riviera",
   "yantra",
-  "dropby",
+  "posterfolio",
 ];
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {

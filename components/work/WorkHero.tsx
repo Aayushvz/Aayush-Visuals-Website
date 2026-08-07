@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { PROJECTS } from "@/components/projects/projectData";
+import ProjectMedia from "@/components/projects/ProjectMedia";
 
 /*
   WorkHero — the choreographed hero of the /work page. It is ONE section
@@ -237,13 +238,13 @@ export default function WorkHero() {
                     : { y: SPRING, scale: SPRING, opacity: { duration: 0.5, ease: EASE } }
                 }
               >
-                <img
+                <ProjectMedia
                   className="workHero__cardImg"
                   src={p.bgVideoUrl ?? p.cover}
                   alt={p.title}
-                  loading={i < 4 ? "eager" : "lazy"}
-                  fetchPriority={i < 2 ? "high" : "auto"}
-                  draggable={false}
+                  poster={p.cover}
+                  eager={i < 4}
+                  priority={i < 2}
                 />
               </motion.article>
             );

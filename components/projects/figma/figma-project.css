@@ -1330,6 +1330,15 @@ html[data-theme="light"] .figp-lfile img {
 /* ============ the canvas ============ */
 .figp-canvas {
   position: relative;
+  /*
+    A size container, so anything inside can measure the CANVAS rather than
+    the window. The shell puts a rail on the left and an inspector on the
+    right, either of which can be open — so `100vw` is a lie here: it spans
+    the whole browser, including the space the panels occupy. Full-bleed
+    content sized in `vw` runs underneath them and gets clipped.
+  */
+  container-type: inline-size;
+  container-name: figp-canvas;
   min-height: calc(100dvh - 44px);
   background-image: radial-gradient(circle, var(--figp-dotgrid) 1px, transparent 1.5px);
   background-size: 24px 24px;
@@ -4148,5 +4157,89 @@ html[data-theme="light"] .figp-lfile img {
   .figp-dock-wrap,
   .figp-dock-item {
     transition: none;
+  }
+}
+
+/* ---- contact-sheet grid ----
+
+   Posterfolio shows 41 posters as one wall. The default grid is spaced for
+   a handful of reference frames — 1.2rem between items and a 260px minimum,
+   which at this count reads as 41 separate exhibits rather than one body of
+   work.
+
+   `--figp-grid-gap` lets a section close that up. The posters are a fixed
+   3-up here rather than auto-fit: with no gutters the column count IS the
+   composition, and auto-fit would reflow it to 4 or 5 on a wide screen and
+   break the rhythm the set was laid out in.
+*/
+.figp-grid {
+  gap: var(--figp-grid-gap, 1.2rem);
+}
+
+.figp-section[data-figp-node="posters"] .figp-grid {
+  --figp-grid-gap: 0px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 720px) {
+  .figp-section[data-figp-node="posters"] .figp-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* flush frames need no rounding or border, or the seams reappear as a
+   grid of outlines */
+.figp-section[data-figp-node="posters"] .figp-grid-item {
+  border-radius: 0;
+  border: 0;
+}
+
+/*
+  The poster wall takes the whole column, rail included.
+
+  `display: none` on the rail alone was not enough: above 900px the section
+  is a two-column grid (an 11rem rail, then the body), and removing the
+  rail's contents left the empty 11rem track standing — which is why the
+  grid rendered as a narrow strip down the left with most of the canvas
+  blank. The track has to go too, so the section collapses to one column
+  and the wall gets the full width.
+*/
+.figp-section[data-figp-node="posters"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.figp-section[data-figp-node="posters"] .figp-section-rail {
+  display: none;
+}
+
+/*
+  The wall breaks out of the reading column.
+
+  Body copy is set to a 721px measure because that is what prose wants; a
+  contact sheet is not prose. Constrained to the same column the posters
+  came out at 240px each, which is thumbnail scale — the exact thing the
+  brief says they should survive but not the size anyone wants to look at
+  them.
+
+  The bleed is centred with viewport units rather than a negative margin on
+  a known container, so it does not have to know what the page's gutter is
+  and cannot drift if that gutter changes. Capped at 1600px: past that the
+  posters get larger than they were ever exported and start to soften.
+*/
+@container figp-canvas (min-width: 900px) {
+  .figp-section[data-figp-node="posters"] .figp-grid-fig {
+    /* cqw, not vw: a percentage of the canvas's own width, so the wall
+       shrinks when a side panel opens instead of sliding under it */
+    width: min(1600px, calc(100cqw - 4rem));
+    margin-left: calc(50% - min(800px, 50cqw - 2rem));
+  }
+}
+
+/* a panelled-down canvas gets two across rather than three — at that width
+   three posters are back to thumbnail scale, which is the thing the bleed
+   existed to fix */
+@container figp-canvas (max-width: 820px) {
+  .figp-section[data-figp-node="posters"] .figp-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

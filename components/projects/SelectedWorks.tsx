@@ -4,6 +4,7 @@ import PageLink from "@/components/PageLink";
 import { SELECTED_PROJECTS } from "./projectData";
 import { projectCursorProps } from "./ProjectCursor";
 import { saveOrigin } from "@/lib/navOrigin";
+import ProjectMedia from "./ProjectMedia";
 
 /*
   Selected-works list: numbered rows that alternate full-width and
@@ -45,13 +46,11 @@ export default function SelectedWorks() {
                 {...projectCursorProps}
               >
                 <div className="selWork__frame">
-                  <img
+                  <ProjectMedia
                     className="selWork__img"
                     src={src}
                     alt={p.title}
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
+                    poster={p.cover}
                   />
                 </div>
                 <div className="selWork__meta">
