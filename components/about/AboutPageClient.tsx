@@ -35,7 +35,7 @@ const TOOLKIT = [
   { name: "Antigravity", category: "Rapid Prototyping", icon: "/logos/toolkit/antigravity.svg" },
   { name: "NotebookLM", category: "Research", icon: "/logos/toolkit/notebooklm.svg" },
   { name: "VS Code • Neovim", category: "Coding", icon: "/logos/toolkit/vscode-neovim.svg" },
-  { name: "FigJam", category: "Workspace / Collaboration", icon: "/logos/toolkit/figjam.svg" },
+  { name: "Framer", category: "Web / Prototyping", icon: "/logos/toolkit/framer.svg" },
   { name: "Photoshop", category: "Image Editing", icon: "/logos/toolkit/photoshop.svg" },
   { name: "After Effects • Premiere", category: "Video / Motion Editing", icon: "/logos/toolkit/ae-premiere.svg" },
 ];
