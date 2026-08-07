@@ -37,9 +37,6 @@ export default function ComboPill({
           }
           exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, x: -8 }}
         >
-          <span className="cktCombo__icon" aria-hidden>
-            {combo.icon}
-          </span>
           <span className="cktCombo__label">{combo.label}</span>
           <span className="cktCombo__count">×{combo.count}</span>
         </motion.div>

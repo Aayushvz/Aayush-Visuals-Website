@@ -111,10 +111,22 @@ export function buildScene(w: number, h: number) {
   const fielders = (
     portrait
       ? [
-          { x: 0.68, y: 0.45 }, /* slip, behind square on the off side */
+          /*
+            Two, and both below the horizon.
+
+            The y here is not a screen fraction — it is fed through
+            `horizon + (h - horizon) * (y - 0.5) * 0.9`, so anything under
+            0.5 resolves ABOVE the horizon line and the figure is painted
+            standing in the crowd rather than on the grass. A slip at 0.45
+            and a deep fielder at 0.36 did exactly that.
+
+            They are cut rather than pushed down the field: portrait has
+            room for the bowler and a pair without crowding the corridor
+            the ball travels down, and that corridor is the whole reason
+            the field was thinned for this frame in the first place.
+          */
           { x: 0.2, y: 0.6 }, /* mid off */
           { x: 0.82, y: 0.62 }, /* mid on */
-          { x: 0.42, y: 0.36 }, /* the one deep, up near the rope */
         ]
       : [
           { x: 0.16, y: 0.62 }, { x: 0.31, y: 0.55 }, { x: 0.72, y: 0.56 },
@@ -124,7 +136,7 @@ export function buildScene(w: number, h: number) {
   ).map((f) => ({
     x: f.x * w,
     y: horizon + (h - horizon) * (f.y - 0.5) * 0.9,
-    s: portrait ? 1.45 : 1,
+    s: portrait ? 1.16 : 1,
   }));
 
   return { w, h, horizon, cx, crowd, clouds, fielders, standTop };
@@ -437,7 +449,7 @@ function paintBowlerSprite(
   team: TeamKit,
   variation?: BowlerPose
 ): boolean {
-  const { h, horizon, cx } = s;
+  const { w, h, horizon, cx } = s;
 
   let pose = cyclePose(t);
   /* the variation only replaces the instant of release, never the approach */
@@ -513,7 +525,15 @@ function paintBowlerSprite(
 
   const baseline = horizon + (h - horizon) * travel;
 
-  const targetH = personHeight(s, baseline);
+  /*
+    The bowler takes the same portrait trim as the batter and the ring.
+
+    He never had a portrait bump — perspective alone sized him — but on a
+    tall narrow canvas that still lands him larger in the frame than the
+    others, and the three have to move together or the field stops reading
+    as one depth. 0.8 is the pass applied across all three figures.
+  */
+  const targetH = personHeight(s, baseline) * (s.w / s.h < 0.72 ? 0.8 : 1);
   const scale = targetH / BOWLER_IDLE_H;
   const dw = meta.w * scale;
   const dh = meta.h * scale;
@@ -521,17 +541,45 @@ function paintBowlerSprite(
   /* contact shadow, squashed and faded — it sells the ground plane, and it
      shrinks as he leaves it at the bound */
   const air = pose === "bound" ? 0.45 : 1;
+  /*
+    Beside the stumps, not through them — and only just.
+
+    He was drawn at `cx`, the pitch's centre line, which is exactly where
+    the bowler's wicket stands, so the run-up walked him straight over it.
+
+    The offset is a fraction of his own DRAWN width, not of the viewport.
+    Viewport width was the first attempt and it was wrong twice over: it
+    ignores perspective, so the same number that clears the stumps up close
+    throws him halfway to the rope at distance, and it ignores how big he
+    actually is. Half his width plus a hair is what "next to the stumps"
+    means at any depth. BOWLER_OFFSET is the one number to turn.
+  */
+  const bowlerX = cx + dw * BOWLER_OFFSET + BOWLER_NUDGE;
+
   ctx.beginPath();
-  ctx.ellipse(cx, baseline, dw * 0.3 * air, dh * 0.035 * air, 0, 0, Math.PI * 2);
+  ctx.ellipse(bowlerX, baseline, dw * 0.3 * air, dh * 0.035 * air, 0, 0, Math.PI * 2);
   ctx.fillStyle = `rgba(20,44,26,${0.32 * air})`;
   ctx.fill();
 
   /* anchored on the feet, not the frame centre — see bowlerSprites.ts. The
      bound frame's anchor sits at 0.90, and centring it would throw him a
      third of his own width sideways for one frame. */
-  ctx.drawImage(img, cx - meta.ax * dw, baseline - dh, dw, dh);
+  ctx.drawImage(img, bowlerX - meta.ax * dw, baseline - dh, dw, dh);
   return true;
 }
+
+/*
+  How far right of the stumps the bowler stands.
+
+  Two terms on purpose. BOWLER_OFFSET is a multiple of his own drawn width,
+  which is what keeps "just beside the wicket" meaning the same thing at
+  any depth. BOWLER_NUDGE is a flat pixel trim on top for fine-tuning by
+  eye — the scene is built in CSS pixels (CricketGame's resize hands
+  buildScene the CSS box and puts the dpr in the transform), so a pixel
+  here really is a pixel on screen.
+*/
+const BOWLER_OFFSET = 0.34;
+const BOWLER_NUDGE = 6;
 
 export function paintBowler(
   ctx: CanvasRenderingContext2D,
@@ -542,8 +590,15 @@ export function paintBowler(
 ) {
   if (paintBowlerSprite(ctx, s, t, team, variation)) return;
 
-  const { h, horizon, cx } = s;
+  /* the same offset the sprite path takes — see paintBowlerSprite. If the
+     fallback figure stayed on the centre line he would jump sideways the
+     moment the artwork finished loading. `sc` is this figure's own unit,
+     so the shift is expressed against it for the same reason. */
+  const { h, horizon, cx: pitchCx } = s;
   const sc = h * 0.00055 * 90;
+  /* the vector figure runs about 0.68 * sc wide, so the same "half my own
+     width plus a hair" the sprite path uses lands here as this */
+  const cx = pitchCx + sc * 0.68 * BOWLER_OFFSET + BOWLER_NUDGE;
   const y = horizon + h * 0.055 - t * h * 0.012;
   const stride = Math.sin(t * Math.PI * 6) * sc * 0.5;
   const armAngle = t < 0.75 ? -0.6 : -0.6 + ((t - 0.75) / 0.25) * 3.4;
@@ -658,7 +713,7 @@ function paintBatterSprite(
     grows downward out of frame and crops at the thigh the way the shot
     was always composed to.
   */
-  const targetH = (h * 0.315 + u * 0.13) * (w / h < 0.72 ? 1.34 : 1);
+  const targetH = (h * 0.315 + u * 0.13) * (w / h < 0.72 ? 1.07 : 1);
   const scale = targetH / IDLE_H;
   const dw = meta.w * scale;
   const dh = meta.h * scale;

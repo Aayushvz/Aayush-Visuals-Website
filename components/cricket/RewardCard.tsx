@@ -56,9 +56,6 @@ export default function RewardCard({
         >
           <span className="cktReward__head">{shout.headline}</span>
           <span className="cktReward__line">
-            <span className="cktReward__icon" aria-hidden>
-              {shout.reward.icon}
-            </span>
             {shout.reward.line}
           </span>
           <span className="cktReward__xp">

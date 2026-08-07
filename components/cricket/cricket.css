@@ -100,13 +100,35 @@
   left: clamp(0.8rem, 2vw, 1.4rem);
   display: flex;
   align-items: center;
-  padding: 0.6rem 1.05rem;
+  gap: 9px;
+  padding: 0.5rem 0.95rem 0.5rem 0.5rem;
   border-radius: 999px;
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ckt-ink);
   text-decoration: none;
+}
+
+/* the mascot sits in a lit ring, the same one the crests and the level
+   plate use, so the chip reads as part of the kit rather than as a photo
+   dropped onto it */
+.ckt-brand__face {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(180deg, #2a5fc4, #12408f);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 3px 8px rgba(4, 12, 38, 0.45);
+}
+
+/* one line. The chip was capped at 4.2em, which broke "Aayush VZ" across
+   two rows and left the second one orphaned under the portrait — the name
+   is short enough to never need wrapping, so it is simply told not to. */
+.ckt-brand__name {
+  white-space: nowrap;
 }
 
 /* ---- top centre: the scoreboard ---- */
@@ -287,6 +309,10 @@
   flex: none;
   width: 52px;
   height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(180deg, #2a5fc4, #12408f);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85), 0 3px 8px rgba(4, 12, 38, 0.45);
 }
 
 .ckt-say__body {
@@ -684,7 +710,7 @@
   font-variant-numeric: tabular-nums;
 }
 .cktSummary__xp {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .cktSummary__xpEarned {
   display: block;
@@ -769,12 +795,15 @@
 */
 .ckt-card {
   z-index: 6;
-  top: 6.6rem;
+  /* closer to the scoreboard than it looks: the card is centred between
+     this offset and the bottom inset, so lowering the top only buys
+     headroom, it does not push the card up the screen */
+  top: 5.2rem;
   bottom: clamp(0.8rem, 2vw, 1.4rem);
   left: 50%;
   transform: translateX(-50%);
   height: max-content;
-  max-height: calc(100svh - 8rem);
+  max-height: calc(100svh - 6.6rem);
   margin: auto 0;
   /* `auto`, not `scroll`: the card is sized below to fit its own content
      at every viewport this game supports, so the bar is a fallback for a
@@ -782,8 +811,11 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  width: min(560px, calc(100vw - 2.5rem));
-  padding: clamp(1.1rem, 2.4vw, 1.6rem) clamp(1.2rem, 2.6vw, 1.8rem);
+  /* wider, so the verdict line stops wrapping to a third row on a short
+     window — the extra height that wrap costs is what tipped the card into
+     scrolling in the first place */
+  width: min(600px, calc(100vw - 2.5rem));
+  padding: clamp(1rem, 2.2vw, 1.4rem) clamp(1.2rem, 2.6vw, 1.8rem);
   text-align: center;
   /* the one panel that gets the card's full 7px moulding rather than the
      HUD's 4px — it is the centre of the screen and nothing competes */
@@ -835,8 +867,8 @@
 }
 
 .ckt-rule {
-  margin: 0.55rem auto 0;
-  max-width: 38ch;
+  margin: 0.45rem auto 0;
+  max-width: 46ch;
   font-size: 0.9rem;
   line-height: 1.6;
   color: var(--ckt-dim);
@@ -1884,5 +1916,212 @@
   .ckt-meta-value {
     font-size: 1.06rem;
     letter-spacing: 0.01em;
+  }
+}
+
+/* =====================================================================
+   PHONE RESULT CARD — fits, and stops scrolling
+   ===================================================================== */
+
+/*
+  The tap dock goes when the over is done.
+
+  It was still on screen under the result card, holding ~90px at the bottom
+  that the card then had to scroll to make up. There is nothing to tap at
+  that point — the card carries its own actions.
+*/
+.ckt[data-phase="over"] .cktTap {
+  display: none;
+}
+
+/* the share cap centres its icon and label like every other button in the
+   kit; it was inheriting a left-aligned inline-flex and reading lopsided */
+.ckt-cta--blue {
+  justify-content: center;
+}
+
+@media (max-width: 560px) {
+  .ckt-card {
+    top: calc(env(safe-area-inset-top, 0px) + 88px);
+    bottom: auto;
+    width: calc(100vw - 1.4rem);
+    /* the bar above is the only thing reserved now the dock stands down */
+    max-height: calc(100svh - env(safe-area-inset-top, 0px) - 104px);
+    padding: 0.9rem 0.9rem 1rem;
+  }
+
+  .ckt-card__crown {
+    margin: 0 auto 2px;
+  }
+
+  .ckt-card__crown i {
+    width: 17px;
+    height: 17px;
+  }
+  .ckt-card__crown i:nth-child(2) {
+    width: 23px;
+    height: 23px;
+  }
+
+  .gk-head {
+    margin-bottom: 2px;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+  }
+
+  .ckt-title--result {
+    font-size: 1.5rem;
+    line-height: 1.02;
+  }
+
+  .ckt-final {
+    margin: 2px 0 0;
+    font-size: 1.9rem;
+  }
+
+  .ckt-rule {
+    margin: 6px auto 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  /* two by two, with the rule between cells doing the dividing — the
+     four-across row wrapped into a ragged grid at this width */
+  .cktSummary {
+    grid-template-columns: repeat(2, 1fr);
+    margin: 9px 0 7px;
+  }
+
+  .cktSummary__cell {
+    padding: 7px 4px 6px;
+  }
+
+  .cktSummary__cell dt {
+    font-size: 0.54rem;
+  }
+  .cktSummary__cell dd {
+    margin-top: 1px;
+    font-size: 1.05rem;
+  }
+
+  /* every cell needs a rule on the side it meets a neighbour, not just the
+     "not first" ones — in a 2-up grid that is columns 2 and rows 2 */
+  .cktSummary__cell:nth-child(even) {
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.14);
+  }
+  .cktSummary__cell:nth-child(odd) {
+    box-shadow: none;
+  }
+  .cktSummary__cell:nth-child(n + 3) {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+  .cktSummary__cell:nth-child(4) {
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+
+  .cktSummary__xp {
+    margin-bottom: 8px;
+  }
+
+  .cktSummary__xpEarned {
+    margin-bottom: 5px;
+    font-size: 0.7rem;
+  }
+
+  /* side by side, as asked: two equal caps rather than a stacked pair */
+  .ckt-actions {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    margin-top: 0.7rem;
+  }
+
+  .ckt-actions .ckt-cta {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    padding: 0 0.5rem;
+    font-size: 0.86rem;
+    letter-spacing: 0.02em;
+  }
+
+  .ckt-cta--blue {
+    gap: 6px;
+  }
+  .ckt-cta--blue svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+
+  .ckt-outLink {
+    margin-top: 6px;
+    min-height: 40px;
+    font-size: 0.62rem;
+  }
+}
+
+/* ---- the third action: out to the real work ----
+
+   A full cap like the two above it, in the panel's own navy with a white
+   edge, so it reads as the same family of control while staying clearly
+   third. Gold is "do it again", blue is "tell someone", and this one is
+   the way out — three ranks, three fills, no guessing which is primary.
+*/
+/*
+  Purple, not another navy.
+
+  Navy-on-navy is why it read dull — a cap in the panel's own colour has no
+  edge to push against, so it sank into the card instead of ranking below
+  the two above it. Purple is the portfolio's own brand colour, which makes
+  this the one control on the card that is coloured for where it goes
+  rather than for what it does: gold replays, blue shares, purple leaves
+  the game for the actual work.
+*/
+.ckt-cta--ghost {
+  --gk-btn-lit: #9d6bff;
+  --gk-btn-face: #6a1eed;
+  --gk-btn-base: #4310a8;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  /* it was sitting 9px under the row above and reading as a third item in
+     the same group; the gap is now large enough to say it is a separate
+     decision */
+  margin-top: 1.15rem;
+  border-width: 3px;
+  border-color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  color: #fff;
+}
+
+.ckt-cta--ghost svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .ckt-cta--ghost:hover svg {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 560px) {
+  .ckt-cta--ghost {
+    margin-top: 0.9rem;
+    min-height: 44px;
+    font-size: 0.8rem;
+  }
+  .ckt-cta--ghost svg {
+    width: 14px;
+    height: 14px;
   }
 }

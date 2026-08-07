@@ -807,8 +807,20 @@ export default function CricketGame({
             </button>
           </div>
 
-          <PageLink className="gk-head ckt-outLink" href="/work">
+          {/*
+            The way out of the game is a control now, not a ruled caption.
+
+            It was styled as a section header, which made the one link that
+            leaves for the actual portfolio the quietest thing on the card —
+            below even the run-out summary. It gets a cap of its own, sized
+            like the two above it but in the panel's own navy so it still
+            ranks third rather than competing with replay and share.
+          */}
+          <PageLink className="ckt-cta ckt-cta--ghost ckt-outLink" href="/work">
             See the actual work
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h13M12 5l7 7-7 7" />
+            </svg>
           </PageLink>
         </div>
       )}
