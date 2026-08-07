@@ -547,7 +547,8 @@ export default function CricketGame({
       </div>
 
       <PageLink className="ckt-glass ckt-brand" href="/">
-        Aayush Visuals
+        <Avatar className="ckt-brand__face" />
+        <span className="ckt-brand__name">Aayush VZ</span>
       </PageLink>
 
       <div className="ckt-glass ckt-board" role="status" aria-live="polite">

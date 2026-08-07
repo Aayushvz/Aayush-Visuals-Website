@@ -362,15 +362,20 @@
   text-shadow: 0 3px 0 #0b1c4a, 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
-/* the last word in gold, the way the opening's middle line is — one accent
-   per heading, and it lands on the word that names the choice. Gold on this
-   navy plate measures 7.8:1. */
+/*
+  The last word in gold — one accent per heading, on the word that names
+  the choice.
+
+  A flat colour, not the clipped gradient the other gold type uses.
+  `background-clip: text` needs `color: transparent`, and at this weight
+  and size the gradient's dark bottom stop ate most of each letterform, so
+  the word read as a smudge — worst at phone sizes where the glyphs are
+  shortest. The mid-gold on its own is 7.8:1 on this plate and legible at
+  every size; the relief shadow does the depth the gradient was there for.
+*/
 .stgPick__gold {
-  background: linear-gradient(180deg, #ffe071 0%, #ffc32e 52%, #e08a12 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 3px 0 #0b1c4a);
+  color: var(--gk-gold);
+  text-shadow: 0 3px 0 #0b1c4a, 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
 .stgPick__hint {
@@ -896,4 +901,120 @@
   text-transform: uppercase;
   color: #fff;
   animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
+}
+
+/* =====================================================================
+   PHONE — team selection
+   =====================================================================
+
+   Both cards have to be reachable.
+
+   The stage is `place-items: center` inside a `.dpl` that is
+   `overflow: hidden`, so when the two cards stack on a phone the second one
+   was simply off the bottom of the screen with no way to get to it — the
+   pick screen offered one choice. Two things fix it together: the stage
+   scrolls, and the card loses enough height that both very nearly fit
+   anyway, so scrolling is a nudge rather than a hunt.
+*/
+@media (max-width: 720px) {
+  .stg {
+    /*
+      `safe center`, not `start`.
+
+      Plain `start` was there so a team-select column taller than the
+      viewport could not hide its own beginning — but it applies to every
+      stage, and it left the opening screen hanging off the top with all
+      the empty space below it. The safe keyword does both jobs: centre
+      while the content fits, fall back to start alignment the moment it
+      would overflow, so nothing is ever cut off at the top edge.
+    */
+    align-content: safe center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: calc(env(safe-area-inset-top, 0px) + 14px)
+      calc(env(safe-area-inset-bottom, 0px) + 20px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stgPick {
+    gap: 12px;
+  }
+
+  .stgPick__head {
+    gap: 4px;
+  }
+
+  .stgPick__title {
+    margin: 0 22px;
+    font-size: clamp(19px, 5.6vw, 26px);
+  }
+
+  .stgPick__hint {
+    margin-top: 6px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+  }
+
+  .stgPick__cards {
+    gap: 12px;
+  }
+
+  /* the card, compressed to what a choice actually needs */
+  .tcard__face {
+    gap: 8px;
+    padding: 12px 14px 14px;
+  }
+
+  .tcard__crest .crest {
+    max-height: 92px;
+  }
+
+  .tcard__name {
+    font-size: 25px;
+  }
+
+  .tcard__motto {
+    font-size: 12.5px;
+  }
+
+  .tcard__perk {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  /* the second card peeks above the fold, which is the cheapest possible
+     signal that there is one — a scroll affordance nobody has to be taught */
+  .tcard:last-child {
+    scroll-margin-bottom: 20px;
+  }
+}
+
+/*
+  The subtitle ribbon's tails, on a narrow screen.
+
+  The banner is centred with a fixed inline margin, so on a phone it runs
+  nearly edge to edge and the folded tails end up detached against the
+  screen sides — two red blocks with nothing between them and the banner.
+  Below 560px the banner narrows to its text and the tails come back in
+  where they belong.
+*/
+@media (max-width: 560px) {
+  .stgOpen__sub {
+    margin: 0 34px;
+    padding: 8px 16px 9px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+  }
+
+  .stgOpen__sub::before,
+  .stgOpen__sub::after {
+    width: 22px;
+  }
+
+  .stgOpen__sub::before {
+    left: -16px;
+  }
+  .stgOpen__sub::after {
+    right: -16px;
+  }
 }

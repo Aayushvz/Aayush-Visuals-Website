@@ -648,7 +648,17 @@ function paintBatterSprite(
   /* match the procedural figure's footprint exactly, so swapping between the
      two is invisible: that one runs from h*0.315 above the floor plus the
      head, which is sized off u */
-  const targetH = h * 0.315 + u * 0.13;
+  /*
+    Portrait puts the batter at roughly the lower third of the frame.
+
+    The desktop figure is sized as a fraction of canvas height, which on a
+    tall narrow canvas leaves him small and stranded in the middle — the
+    camera reads as being in the stands rather than over his shoulder. The
+    bump is applied to the height only; the baseline is unchanged, so he
+    grows downward out of frame and crops at the thigh the way the shot
+    was always composed to.
+  */
+  const targetH = (h * 0.315 + u * 0.13) * (w / h < 0.72 ? 1.34 : 1);
   const scale = targetH / IDLE_H;
   const dw = meta.w * scale;
   const dh = meta.h * scale;

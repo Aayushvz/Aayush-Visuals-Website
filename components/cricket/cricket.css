@@ -1526,3 +1526,363 @@
     display: none;
   }
 }
+
+/* =====================================================================
+   PHONE, ROUND TWO — the top bar and the tap control
+   ===================================================================== */
+
+@media (max-width: 560px) {
+  /*
+    One bar, laid out like the comp: identity on the left, the score block
+    in the middle, one control on the right.
+
+    Sound and "leave the game" come off the bar entirely. They were three
+    48px caps in a row eating half the width, and both already exist inside
+    the settings menu — the gear is the only one that needs to be a
+    permanent target, because it is the way to reach the other two.
+  */
+  /*
+    One row, the comp's arrangement: score hard left, the two readouts
+    beside it, the controls riding the bar's right end.
+
+    An earlier pass stacked the score over the readouts and pulled the
+    controls out to a chip of their own. The comp does neither — it is a
+    single status strip, and the three buttons read as part of it rather
+    than as furniture floating above it. The controls stay absolutely
+    positioned (they are a sibling, not a child) and the bar reserves the
+    width they occupy, which gets the same result without moving markup.
+  */
+  .ckt-board {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 9px;
+    /* tall enough to contain a 48px cap with a little air, so the controls
+       read as sitting *in* the bar rather than straddling its lower edge */
+    min-height: 66px;
+    padding: 0.4rem 0.6rem;
+    /* 3 x 48 caps + 2 x 8 gaps + the inset, and then some: the readouts
+       must stop before the caps start, not merely before the bar ends */
+    padding-right: 186px;
+  }
+
+  .ckt-score {
+    flex: none;
+    font-size: 1.5rem;
+  }
+
+  .ckt-board .ckt-meta {
+    flex: none;
+    align-items: center;
+    gap: 0;
+  }
+
+  /*
+    The comp's bar carries the score, one groove, then strike rate and the
+    delivery — no ball count, and no rules between the readouts.
+
+    Selected by :nth-child, not :nth-of-type. Every child of this bar is a
+    <span>, so "type" is the same for the score, the grooves and the
+    readouts alike, and :nth-of-type(1) was quietly matching the score
+    instead of the first readout. That is why "Balls" kept surviving a rule
+    that looked like it hid it.
+
+    Children in order: 1 score, 2 groove, 3 balls, 4 groove, 5 strike rate,
+    6 groove, 7 bowling.
+  */
+  .ckt-board > :nth-child(3),
+  .ckt-board > :nth-child(4),
+  .ckt-board > :nth-child(6) {
+    display: none;
+  }
+
+  .ckt-board > .ckt-divider:nth-child(2) {
+    display: block;
+    align-self: stretch;
+    margin: 4px 1px;
+  }
+
+  .ckt-meta-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.09em;
+    color: #fff;
+  }
+  .ckt-meta-value {
+    font-size: 0.9rem;
+    color: #fff;
+  }
+
+  /* the wicket count is gold too in the comp, not the dimmed white it uses
+     on desktop — the whole score reads as one figure */
+  .ckt-score-sub {
+    color: var(--gk-gold);
+  }
+
+  /* the byline chip is not in the comp's bar and there is no width for it */
+  .ckt-brand {
+    display: none;
+  }
+
+  /* all three ride the bar's right end, as in the comp — sound and the
+     way out are one tap each rather than two through the menu */
+  /* centred on the 66px bar: 8px offset + (66 - 48) / 2 */
+  .ckt-controls {
+    top: calc(env(safe-area-inset-top, 0px) + 17px);
+    right: calc(env(safe-area-inset-right, 0px) + 16px);
+    gap: 8px;
+  }
+}
+
+/*
+  The tap control, smaller.
+
+  At 300x68 with a 1.5rem face it was the loudest object on a screen whose
+  job is to let you watch a ball. It is still comfortably past the 48px
+  touch floor at 56px tall — the size is about visual weight, not
+  reachability.
+*/
+.cktTap__btn {
+  width: min(232px, 76%);
+  min-height: 56px;
+  padding: 0 20px;
+  border-width: 3px;
+  border-radius: 18px;
+  font-size: 1.15rem;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 6px 0 #a86205,
+    0 12px 20px rgba(4, 12, 38, 0.45);
+}
+
+.cktTap__rail {
+  width: min(232px, 76%);
+  font-size: 8px;
+}
+
+.cktTap__btn:active {
+  transform: translateY(6px) scale(0.98);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 0 0 #a86205,
+    0 3px 8px rgba(4, 12, 38, 0.45);
+}
+
+@keyframes cktTapPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 6px 0 #a86205,
+      0 12px 20px rgba(4, 12, 38, 0.45);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.55), 0 6px 0 #a86205,
+      0 16px 26px rgba(4, 12, 38, 0.5), 0 0 24px rgba(255, 195, 46, 0.4);
+  }
+}
+
+/* =====================================================================
+   PHONE STATUS BAR — matched to the comp crop
+   =====================================================================
+
+   Three things read wrong against the reference and all three are colour
+   rather than layout:
+
+   - The interior was washing out. The kit's panel carries a 46% white
+     gloss over its top half, which is right on a big card and far too much
+     on a 66px strip — it lifted the fill from navy to a mid blue and took
+     the bar's contrast with it. On this one surface the gloss is cut back
+     to a hint and the fill is flattened, so the bar stays dark and the
+     white type stays loud.
+
+   - The rim read cyan and thick. The kit's rim runs to #7cc4ff at the top,
+     which at 4px on a small bar is a pale halo rather than an edge. Here
+     it is 3px of a saturated blue that stays blue all the way down.
+
+   - The controls were pale for the same reason: they inherit the rim
+     ramp. They get their own brighter, more saturated blue and a solid
+     white border instead of the 85% one.
+*/
+@media (max-width: 560px) {
+  .ckt-board {
+    border-width: 3px;
+    background:
+      linear-gradient(180deg, #17357e 0%, #102a66 100%) padding-box,
+      linear-gradient(180deg, #56a8f0 0%, #2f7ad4 46%, #1a4fa0 100%) border-box;
+    box-shadow: inset 0 -3px 0 rgba(6, 18, 54, 0.5), 0 6px 18px rgba(4, 12, 38, 0.5);
+  }
+
+  /* a hint of light along the very top edge, not a wash over half the bar */
+  .ckt-board::before {
+    height: 16px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0)
+    );
+  }
+
+  .ckt-score {
+    font-size: 1.72rem;
+    letter-spacing: 0;
+  }
+
+  .ckt-score-sub {
+    font-size: 0.5em;
+  }
+
+  .ckt-meta-label {
+    font-size: 0.52rem;
+    font-weight: 700;
+  }
+
+  .ckt-meta-value {
+    font-size: 0.94rem;
+  }
+
+  .ckt-board > .ckt-divider:nth-child(2) {
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: none;
+    width: 2px;
+    margin: 10px 1px;
+  }
+
+  /* the caps: saturated blue, solid white edge, tighter radius */
+  .ckt-icon {
+    border-color: #ffffff;
+    border-radius: 13px;
+    background: linear-gradient(180deg, #4a9df0 0%, #2470cf 48%, #14479c 100%);
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.42), 0 3px 0 #0e3b84,
+      0 6px 12px rgba(4, 12, 38, 0.45);
+  }
+}
+
+/* =====================================================================
+   PHONE STATUS BAR — the readouts can never reach the controls
+   =====================================================================
+
+   Enlarging the score and the readouts last round pushed "Loosener" under
+   the sound button. Reserving padding was never enough on its own: the
+   readouts are `white-space: nowrap` flex items, and a nowrap item does
+   not shrink into its container — it overflows the padding and keeps
+   going, straight under the absolutely-positioned caps.
+
+   So this is two rules, not one. The type comes back down to a size that
+   fits the longest delivery name, and the readouts are made genuinely
+   shrinkable (`min-width: 0`) with the value clipping rather than
+   overflowing. The first keeps it from truncating in practice; the second
+   makes overlap impossible even if a longer label is added later.
+*/
+@media (max-width: 560px) {
+  .ckt-board {
+    gap: 7px;
+    /* the caps start at the bar's right edge minus their own width and
+       inset; the content box must stop there, not merely inside the bar */
+    padding-right: 176px;
+  }
+
+  .ckt-score {
+    font-size: 1.5rem;
+  }
+
+  .ckt-meta {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .ckt-meta-label {
+    font-size: 0.46rem;
+    letter-spacing: 0.06em;
+  }
+
+  .ckt-meta-value {
+    font-size: 0.8rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* the groove costs ~12px of a budget measured in single digits, and the
+     gap already separates the score from the readouts */
+  .ckt-board > .ckt-divider:nth-child(2) {
+    display: none;
+  }
+}
+
+/*
+  The timing rail goes on phone.
+
+  It was static — three fixed bands with no marker travelling across them —
+  so it described the timing rule rather than reporting anything about the
+  ball in the air. On a screen this size that is a decorative strip taking
+  space directly above the only control, and the actual feedback already
+  exists: the result panel names the shot as early, perfect or late the
+  moment it lands.
+
+  Kept on wider screens, where it costs nothing and the label reads as part
+  of the dock's furniture.
+*/
+@media (max-width: 560px) {
+  .cktTap__rail {
+    display: none;
+  }
+
+  /* the dock collapses to just the button, so the gap it was reserving
+     for the rail goes with it */
+  .cktTap {
+    gap: 0;
+  }
+}
+
+/* =====================================================================
+   PHONE STATUS BAR — the numbers lead, the controls follow
+   =====================================================================
+
+   Sound comes off the bar. It is the least-used of the three and it still
+   sits one tap inside the gear menu, so it was costing 56px of the only
+   scarce dimension this bar has for a control almost nobody reaches for
+   mid-over.
+
+   That width goes straight into the type. The readouts were sized to
+   survive next to three caps and ended up losing to them — 7px labels and
+   a 24px score against 48px buttons reads as a row of buttons with some
+   text next to it, which is backwards. The score is what the screen is
+   about, so it gets to be the largest thing on the bar.
+*/
+@media (max-width: 560px) {
+  /* mute is the one control carrying aria-pressed, which is how it is
+     picked out here without depending on sibling order */
+  .ckt-controls > button.ckt-icon[aria-pressed] {
+    display: none;
+  }
+
+  .ckt-board {
+    gap: 11px;
+    /* two caps now, not three: 2 x 48 + one 8px gap + the inset */
+    padding-right: 120px;
+  }
+
+  /* the hero number, and it should look like one */
+  .ckt-score {
+    font-size: 2.05rem;
+    line-height: 0.86;
+  }
+
+  .ckt-score-sub {
+    font-size: 0.46em;
+  }
+
+  .ckt-meta {
+    gap: 1px;
+  }
+
+  .ckt-meta-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.11em;
+    /* the label is the quiet half of the pair — dimming it is what lets
+       the value below read as the figure rather than as more caption */
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .ckt-meta-value {
+    font-size: 1.06rem;
+    letter-spacing: 0.01em;
+  }
+}
