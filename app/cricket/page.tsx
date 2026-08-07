@@ -7,13 +7,13 @@ const description =
   "Face one over. Six balls, a floodlit night and one shot to play. A small browser cricket game built with canvas and Web Audio, hidden on Aayush Raj's portfolio.";
 
 export const metadata: Metadata = {
-  title: "Six Balls",
+  title: "Playground",
   description,
   alternates: { canonical: "/cricket" },
   /* images must be repeated: a child openGraph replaces the parent's rather
      than merging into it, so omitting this ships the page with no share card */
   openGraph: {
-    title: "Six Balls - Aayush Raj",
+    title: "Playground - Aayush Raj",
     description,
     url: "/cricket",
     images: [OG_IMAGE],

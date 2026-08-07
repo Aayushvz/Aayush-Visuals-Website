@@ -8,8 +8,12 @@
   colour, closer to a vector poster than to a render. Everything that does
   not move between frames — the crowd, the clouds, the mown stripes, the
   fielders — is computed once per resize and replayed, because generating
-  four thousand crowd dots inside the draw loop would cost more than the
+  several thousand crowd dots inside the draw loop would cost more than the
   rest of the frame put together.
+
+  The stands go one step further and cache their PIXELS, not just their
+  geometry: see bakeStands. Positioning the dots once was never the
+  expensive half — filling them was.
 
   Randomness is seeded. An unseeded crowd re-rolls every frame and the
   entire stand boils, which is the single fastest way to make a static
@@ -139,7 +143,11 @@ export function buildScene(w: number, h: number) {
     s: portrait ? 1.16 : 1,
   }));
 
-  return { w, h, horizon, cx, crowd, clouds, fielders, standTop };
+  return {
+    w, h, horizon, cx, crowd, clouds, fielders, standTop,
+    /* filled in by the first paintStadium — see bakeStands */
+    stands: null as HTMLCanvasElement | null,
+  };
 }
 
 /* ============ perspective ============ */
@@ -219,7 +227,66 @@ function puff(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.fill();
 }
 
+/*
+  ---- the stands, painted once and then replayed as a bitmap ----
+
+  Everything above the horizon is fixed for the life of a scene: the bowl,
+  the roof, the towers, seven and a half thousand crowd dots and the
+  hoardings. Painting it live cost 15-21ms of a 16ms frame at 1280x720 —
+  around thirty times every other painter in this file added together, and
+  on its own the difference between the game running and the game crawling.
+  Blitting it back is 0.8ms.
+
+  The dots were always seeded so the stand would not boil between frames.
+  This is the other half of that: if the pixels cannot change, they should
+  not be recomputed.
+
+  Two things the bake has to get right:
+
+  - Resolution. It reads the scale off the caller's current transform,
+    because the two callers disagree about what a scene unit is. The match
+    paints under a devicePixelRatio transform and hands buildScene CSS
+    pixels; the fly-in hands it device pixels and paints under a camera zoom
+    that starts at 1.28. Baking at a flat 1x would have shipped a soft
+    stadium on every retina phone.
+  - Extent. The band stops at the horizon, which is where the last thing
+    drawn here — the bottom edge of the hoardings — ends. The floodlight
+    glow is the only mark that reaches for more room and it resolves to
+    0.35h, still clear of it. A full-frame cache would have cost more than
+    twice the memory and twice the fill rate to carry empty pixels.
+
+  Nothing invalidates it, because nothing needs to: the cache hangs off the
+  Scene, and a Scene is rebuilt from scratch on every resize.
+*/
+function bakeStands(ctx: CanvasRenderingContext2D, s: Scene): HTMLCanvasElement | null {
+  const t = ctx.getTransform();
+  /* hypot rather than `t.a`, so the fly-in's roll does not read as a
+     shrunken camera and bake a blurry stand */
+  const scale = Math.max(1, Math.min(3, Math.hypot(t.a, t.b)));
+
+  const cv = document.createElement("canvas");
+  cv.width = Math.max(1, Math.round(s.w * scale));
+  cv.height = Math.max(1, Math.round(s.horizon * scale));
+  const bctx = cv.getContext("2d");
+  if (!bctx) return null;
+  bctx.setTransform(scale, 0, 0, scale, 0, 0);
+  drawStands(bctx, s);
+  return cv;
+}
+
 export function paintStadium(ctx: CanvasRenderingContext2D, s: Scene) {
+  s.stands ??= bakeStands(ctx, s);
+  /* no 2D context for the offscreen canvas is not a case worth a fallback
+     path in theory — but it is one line, and the alternative is a stadium
+     with no crowd in it */
+  if (!s.stands) {
+    drawStands(ctx, s);
+    return;
+  }
+  ctx.drawImage(s.stands, 0, 0, s.w, s.horizon);
+}
+
+function drawStands(ctx: CanvasRenderingContext2D, s: Scene) {
   const { w, h, horizon, standTop, cx } = s;
 
   /* the bowl: a dark band the crowd sits on */
@@ -1331,17 +1398,25 @@ export function paintBigScreen(
     : Math.max(standTop - bh * 0.52, HUD_BAR_CLEARANCE);
 
   /* --- the gantry it stands on --- */
-  ctx.fillStyle = "#1b3f7a";
+  ctx.fillStyle = "#1a1a1a";
   ctx.fillRect(cx - bw * 0.06, by + bh, bw * 0.12, Math.max(0, standTop + h * 0.09 - (by + bh)));
 
-  /* --- the casing --- */
+  /*
+    --- the casing ---
+
+    Black, like the panel it holds. This is the surround that shows as a
+    band above and below the screen, so a navy casing around a black screen
+    does not read as trim — it reads as the screen still being blue at the
+    edges. The gold uprights are the only colour the unit keeps, and they
+    are what stops the whole assembly disappearing into the stand behind it.
+  */
   const r = bh * 0.09;
   ctx.beginPath();
   ctx.roundRect(bx - bw * 0.035, by - bh * 0.05, bw * 1.07, bh * 1.13, r);
-  ctx.fillStyle = "#12386f";
+  ctx.fillStyle = "#141414";
   ctx.fill();
   ctx.lineWidth = Math.max(1.5, bw * 0.012);
-  ctx.strokeStyle = "#0b2350";
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 
   ctx.fillStyle = "#f5b81f";
@@ -1351,7 +1426,7 @@ export function paintBigScreen(
   /* --- the panel --- */
   ctx.beginPath();
   ctx.roundRect(bx, by, bw, bh, r * 0.7);
-  ctx.fillStyle = "#0a1b3d";
+  ctx.fillStyle = "#000000";
   ctx.fill();
 
   ctx.save();
@@ -1366,14 +1441,21 @@ export function paintBigScreen(
     light the middle and throw rays out of it, so the type looks lit from
     behind rather than printed on a dark rectangle. Three cheap layers:
     a radial wash, a fan of rays, and confetti.
+
+    The ramp is neutral rather than pure black at every stop. A flat #000
+    panel kills the backlight, and the burst is the only thing separating
+    white type from the rectangle it sits on — the centre has to lift or
+    the words go back to being printed on a dark board. Black at the edges,
+    charcoal in the middle, and no hue anywhere: a grey ramp with any blue
+    left in it reads as a dimmed blue screen rather than a black one.
   */
   const mx = cx;
   const my = by + bh * 0.46;
 
   const wash = ctx.createRadialGradient(mx, my, 0, mx, my, bw * 0.62);
-  wash.addColorStop(0, "#1e4fa8");
-  wash.addColorStop(0.55, "#123166");
-  wash.addColorStop(1, "#0a1b3d");
+  wash.addColorStop(0, "#2e2e2e");
+  wash.addColorStop(0.55, "#141414");
+  wash.addColorStop(1, "#000000");
   ctx.fillStyle = wash;
   ctx.fillRect(bx, by, bw, bh);
 
@@ -1390,7 +1472,7 @@ export function paintBigScreen(
     ctx.lineTo(Math.cos(a) * bw, Math.sin(a) * bw);
     ctx.lineTo(Math.cos(a + 0.11) * bw, Math.sin(a + 0.11) * bw);
     ctx.closePath();
-    ctx.fillStyle = i % 2 ? "#5aa2ff" : "#8fc6ff";
+    ctx.fillStyle = i % 2 ? "#6e6e6e" : "#a3a3a3";
     ctx.fill();
   }
   ctx.restore();
@@ -1432,14 +1514,14 @@ export function paintBigScreen(
     reliefText(ctx, b.quote, cx, by + bh * 0.74, bw * 0.88, {
       top: "#ffffff",
       mid: "#ffffff",
-      low: "#cfe0f8",
+      low: "#d4d4d4",
     });
   } else {
     ctx.font = `${Math.round(bh * 0.14)}px ${DISPLAY_STACK}`;
     reliefText(ctx, b.quote, cx, by + bh * 0.5, bw * 0.88, {
       top: "#ffffff",
       mid: "#ffffff",
-      low: "#cfe0f8",
+      low: "#d4d4d4",
     });
   }
   ctx.restore();
@@ -1489,14 +1571,16 @@ function reliefText(
 
   const drop = Math.max(2, size * 0.07);
 
-  /* the shadow the letters cast onto the panel */
-  ctx.fillStyle = "rgba(4,12,38,0.55)";
+  /* the shadow the letters cast onto the panel. Neutral, like the panel:
+     the navy this used to be was invisible against a blue board and became
+     a blue halo the moment the board went black. */
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
   ctx.fillText(text, x, y + drop * 1.6, maxW);
 
   /* the outline */
   ctx.lineJoin = "round";
   ctx.lineWidth = Math.max(3, size * 0.17);
-  ctx.strokeStyle = "#0a1b3d";
+  ctx.strokeStyle = "#000000";
   ctx.strokeText(text, x, y, maxW);
 
   /* and the fill, top-lit like every other surface in the kit */
