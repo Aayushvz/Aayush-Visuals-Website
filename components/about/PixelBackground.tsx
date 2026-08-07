@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLowPowerMode } from "./useLowPowerMode";
 
 /*
   Pixel Starfield + Drifting Cloud Layers Background
   -----------------------------------------------------------------------
   Combines:
     1. Static scattered pixel starfield (seeded, deterministic layout)
-    2. 8 large drifting noise cloud layers that slowly morph and drift,
+    2. Large drifting noise cloud layers that slowly morph and drift,
        purely ambient — not cursor-reactive
     3. Magnetic ripple hover: each nearby starfield pixel is a tiny spring
        body. The cursor repels pixels within its radius (stronger the
@@ -18,6 +19,12 @@ import { useEffect, useRef } from "react";
        pixels also tint toward the brand purple in proportion to how far
        they've been pushed, so the ripple reads clearly against the grey
        resting state.
+
+  Perf gating (see useLowPowerMode): the ripple + pointer tracking is
+  skipped entirely without a fine pointer or under prefers-reduced-motion
+  (it can never trigger via touch anyway), the grid/cloud/dpr are scaled
+  down on low-power devices, and the whole rAF loop pauses via
+  IntersectionObserver + document.hidden once the hero is off-screen.
 */
 
 // ---- Perlin noise ----
@@ -71,11 +78,6 @@ function mulberry32(seed: number) {
   };
 }
 
-// ---- Constants ----
-const CELL = 10;
-const GAP = 2;
-const SQ = CELL - GAP;
-
 // 4×4 Bayer dither threshold matrix
 const BAYER = [
   [0.0625, 0.5625, 0.1875, 0.6875],
@@ -100,6 +102,7 @@ const MAX_DISPLACE = 15;
 
 export default function PixelBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { lowPower, reducedMotion, pointerFine } = useLowPowerMode();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -107,11 +110,18 @@ export default function PixelBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rippleEnabled = pointerFine && !reducedMotion;
+    const dpr = Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 2);
+    const CELL = lowPower ? 16 : 10;
+    const GAP = 2;
+    const SQ = CELL - GAP;
+
     let W = 0, H = 0;
     let destroyed = false;
     let raf = 0;
     let lastT = 0;
+    let running = false;
+    let intersecting = false;
 
     // Pointer tracking
     let px = -9999, py = -9999, lpx = -9999, lpy = -9999;
@@ -123,8 +133,10 @@ export default function PixelBackground() {
       tmy = (e.clientY / window.innerHeight) - 0.5;
     };
     const onPointerLeave = () => { px = -9999; py = -9999; };
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    if (rippleEnabled) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    }
 
     // Static starfield — each pixel is also a tiny spring body for the
     // magnetic ripple (dx/dy = current displacement, vx/vy = velocity)
@@ -168,8 +180,9 @@ export default function PixelBackground() {
       }
     };
 
-    // 10 cloud layers — large, slow, organic fog, purely ambient
-    const clouds: Cloud[] = [
+    // Ambient fog layers. Full set for capable devices; a smaller,
+    // still-spread-out subset on low-power ones (quadratic cost per layer).
+    const ALL_CLOUDS: Cloud[] = [
       { scale: 0.003,  speedX: 0.006,  speedY: 0.004,  zSeed: 10.3, cx: 0.15, cy: 0.20, radius: 520, parallax: 6,  maxIntensity: 0.45, opacity: 0.16 },
       { scale: 0.004,  speedX: 0.009,  speedY: 0.006,  zSeed: 28.7, cx: 0.85, cy: 0.15, radius: 480, parallax: 10, maxIntensity: 0.55, opacity: 0.13 },
       { scale: 0.002,  speedX: 0.004,  speedY: 0.003,  zSeed: 45.1, cx: 0.50, cy: 0.55, radius: 600, parallax: 8,  maxIntensity: 0.35, opacity: 0.18 },
@@ -181,6 +194,8 @@ export default function PixelBackground() {
       { scale: 0.0028, speedX: 0.007,  speedY: 0.005,  zSeed: 14.8, cx: 0.42, cy: 0.72, radius: 500, parallax: 9,  maxIntensity: 0.42, opacity: 0.15 },
       { scale: 0.0032, speedX: 0.010,  speedY: 0.006,  zSeed: 72.1, cx: 0.68, cy: 0.38, radius: 460, parallax: 11, maxIntensity: 0.50, opacity: 0.13 },
     ];
+    // Indices 0/2/4/7 keep spread across all four quadrants + center.
+    const clouds = lowPower ? [ALL_CLOUDS[0], ALL_CLOUDS[2], ALL_CLOUDS[4], ALL_CLOUDS[7]] : ALL_CLOUDS;
 
     const resize = () => {
       W = window.innerWidth;
@@ -199,6 +214,7 @@ export default function PixelBackground() {
     // Colour helpers
     const BASE_R = 200, BASE_G = 196, BASE_B = 208; // cool grey
     const HOVER_R = 167, HOVER_G = 139, HOVER_B = 250; // #A78BFA
+    const BASE_FILL = `rgb(${BASE_R},${BASE_G},${BASE_B})`;
 
     const draw = (t: number, dt: number) => {
       mx += (tmx - mx) * 0.04;
@@ -274,46 +290,56 @@ export default function PixelBackground() {
         }
       }
 
-      // 2. Starfield pixels — magnetic ripple spring physics + breathing
-      const pushOriginActive = lpx > -1000;
+      // 2. Starfield pixels — magnetic ripple spring physics (when enabled)
+      //    + breathing. Without a fine pointer / under reduced motion, the
+      //    spring physics never runs and dx/dy stay 0 — only the cheap
+      //    breathing-opacity term applies.
+      const pushOriginActive = rippleEnabled && lpx > -1000;
       for (let i = 0; i < pixels.length; i++) {
         const p = pixels[i];
 
-        // magnetic repulsion from the cursor, falling off with distance
-        if (pushOriginActive) {
-          const rdx = p.x - lpx;
-          const rdy = p.y - lpy;
-          const dist = Math.hypot(rdx, rdy);
-          if (dist < RIPPLE_R && dist > 0.01) {
-            const falloff = 1 - dist / RIPPLE_R;
-            const push = falloff * falloff * PUSH_POWER * dt;
-            p.vx += (rdx / dist) * push;
-            p.vy += (rdy / dist) * push;
+        if (rippleEnabled) {
+          if (pushOriginActive) {
+            const rdx = p.x - lpx;
+            const rdy = p.y - lpy;
+            const dist = Math.hypot(rdx, rdy);
+            if (dist < RIPPLE_R && dist > 0.01) {
+              const falloff = 1 - dist / RIPPLE_R;
+              const push = falloff * falloff * PUSH_POWER * dt;
+              p.vx += (rdx / dist) * push;
+              p.vy += (rdy / dist) * push;
+            }
           }
-        }
 
-        // spring back toward rest + damping
-        p.vx += -p.dx * SPRING_K * dt;
-        p.vy += -p.dy * SPRING_K * dt;
-        p.vx *= DAMPING;
-        p.vy *= DAMPING;
-        p.dx += p.vx * dt;
-        p.dy += p.vy * dt;
+          p.vx += -p.dx * SPRING_K * dt;
+          p.vy += -p.dy * SPRING_K * dt;
+          p.vx *= DAMPING;
+          p.vy *= DAMPING;
+          p.dx += p.vx * dt;
+          p.dy += p.vy * dt;
 
-        const dmag = Math.hypot(p.dx, p.dy);
-        if (dmag > MAX_DISPLACE) {
-          const k = MAX_DISPLACE / dmag;
-          p.dx *= k;
-          p.dy *= k;
+          const dmag0 = Math.hypot(p.dx, p.dy);
+          if (dmag0 > MAX_DISPLACE) {
+            const k = MAX_DISPLACE / dmag0;
+            p.dx *= k;
+            p.dy *= k;
+          }
         }
 
         const sine = (Math.sin(t * p.freq + p.phase) + 1) * 0.5;
         let op = p.baseOp * (0.3 + sine * 0.7);
 
-        // tint toward brand purple in proportion to how far it's been pushed
+        if (!rippleEnabled) {
+          if (op < 0.005) continue;
+          ctx.globalAlpha = op;
+          ctx.fillStyle = BASE_FILL;
+          ctx.fillRect(p.x, p.y, SQ, SQ);
+          continue;
+        }
+
+        const dmag = Math.hypot(p.dx, p.dy);
         const tint = Math.min(1, dmag / MAX_DISPLACE);
         op = Math.min(op + tint * 0.16, 0.4);
-
         if (op < 0.005) continue;
 
         const r = Math.round(BASE_R + (HOVER_R - BASE_R) * tint);
@@ -329,23 +355,52 @@ export default function PixelBackground() {
     };
 
     const loop = (now: number) => {
-      if (destroyed) return;
+      if (destroyed || !running) return;
       const tSec = now / 1000;
       const dt = lastT ? Math.min(0.05, tSec - lastT) : 1 / 60;
       lastT = tSec;
       draw(tSec, dt);
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+
+    const startLoop = () => {
+      if (running || destroyed) return;
+      running = true;
+      lastT = 0;
+      raf = requestAnimationFrame(loop);
+    };
+    const stopLoop = () => {
+      running = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const syncRunning = () => {
+      if (intersecting && !document.hidden) startLoop();
+      else stopLoop();
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        intersecting = entries[0]?.isIntersecting ?? false;
+        syncRunning();
+      },
+      { rootMargin: "300px 0px" }
+    );
+    io.observe(canvas);
+    document.addEventListener("visibilitychange", syncRunning);
 
     return () => {
       destroyed = true;
-      cancelAnimationFrame(raf);
+      stopLoop();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", syncRunning);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerleave", onPointerLeave);
+      if (rippleEnabled) {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerleave", onPointerLeave);
+      }
     };
-  }, []);
+  }, [lowPower, reducedMotion, pointerFine]);
 
   return (
     <canvas
