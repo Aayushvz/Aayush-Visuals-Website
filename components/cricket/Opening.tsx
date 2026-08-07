@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import TitleCrest from "./TitleCrest";
+import { useAssets } from "./useAssets";
 
 /*
   The opening title card.
@@ -53,6 +54,9 @@ function makePool(): Spark[] {
 }
 
 export default function Opening({ onStart, reduced }: Props) {
+  /* the match does not begin until it can be played properly — see
+     useAssets for why both sides are fetched before the pick screen */
+  const { progress, ready } = useAssets();
   const sparkRef = useRef<HTMLCanvasElement | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const poolRef = useRef<Spark[]>(makePool());
@@ -183,6 +187,34 @@ export default function Opening({ onStart, reduced }: Props) {
           <i className="stgOpen__subStar" aria-hidden />
         </p>
 
+        {/*
+          The bar replaces the button rather than sitting above it.
+
+          Two controls where one is dead is the worst version of this: a
+          disabled cap still reads as pressable and invites a tap that does
+          nothing. Swapping them means the screen only ever shows the thing
+          that is currently true — loading, or ready.
+        */}
+        {!ready ? (
+          <div
+            className="stgLoad"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress * 100)}
+            aria-label="Loading the match"
+          >
+            <span className="stgLoad__label">
+              Warming up<span className="stgLoad__pct">{Math.round(progress * 100)}%</span>
+            </span>
+            <span className="gk-meter stgLoad__track">
+              <span
+                className="gk-meter__fill"
+                style={{ width: `${Math.max(4, progress * 100)}%` }}
+              />
+            </span>
+          </div>
+        ) : (
         <button
           ref={btnRef}
           type="button"
@@ -213,6 +245,7 @@ export default function Opening({ onStart, reduced }: Props) {
             </svg>
           </span>
         </button>
+        )}
       </div>
     </div>
   );

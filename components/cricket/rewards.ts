@@ -23,46 +23,66 @@ export const EVENT_LABEL: Record<Contact, string> = {
   wicket: "OUT!",
 };
 
+/*
+  What the stadium says about the shot you just played.
+
+  All of it is design-studio material, because the whole conceit of this
+  game is that an over of cricket is an argument about craft. A six is the
+  fantasy nobody gets — signed off first time, straight to production. A
+  wicket is the thing that actually happens: the logo gets bigger.
+
+  The lines are written to be read at a glance from across a stadium, so
+  they are short, and they land as the punchline rather than building to
+  one — there is no second beat on a board that shows for 1.2 seconds.
+*/
 const REWARDS: Record<Contact, Reward[]> = {
+  /* a single: quiet competence, the bulk of the job */
   single: [
-    { icon: "✨", line: "Clean Layout!" },
-    { icon: "📐", line: "Grid Locked!" },
-    { icon: "🎯", line: "Perfect Alignment!" },
-    { icon: "💡", line: "Smart Decision!" },
-    { icon: "🎨", line: "Neat Execution!" },
+    { icon: "", line: "Nudged it 2px. Better." },
+    { icon: "", line: "Grid locked." },
+    { icon: "", line: "Named the layer." },
+    { icon: "", line: "Auto-layout behaved." },
+    { icon: "", line: "One round of revisions." },
+    { icon: "", line: "Used the design system." },
   ],
+  /* a four: the good day */
   four: [
-    { icon: "🎨", line: "Beautiful Composition!" },
-    { icon: "🖼️", line: "Gallery Worthy!" },
-    { icon: "✨", line: "Pixel Perfect!" },
-    { icon: "💎", line: "Premium Finish!" },
-    { icon: "📸", line: "Hero Shot!" },
+    { icon: "", line: "Kerning: chef's kiss." },
+    { icon: "", line: "Dev shipped it unchanged." },
+    { icon: "", line: "Stakeholder said nothing." },
+    { icon: "", line: "Pixel perfect handoff." },
+    { icon: "", line: "That's a Dribbble shot." },
+    { icon: "", line: "Whitespace defended." },
   ],
+  /* a six: the fantasy */
   six: [
-    { icon: "🚀", line: "Design Legend!" },
-    { icon: "🏆", line: "Award Winning!" },
-    { icon: "🌟", line: "Masterpiece!" },
-    { icon: "⭐", line: "Behance Featured!" },
-    { icon: "🎬", line: "Motion Magic!" },
+    { icon: "", line: "Approved on v1." },
+    { icon: "", line: "Client said 'trust you'." },
+    { icon: "", line: "No notes. None." },
+    { icon: "", line: "Straight to production." },
+    { icon: "", line: "Awwwards. Site of the day." },
+    { icon: "", line: "Budget approved. Timeline too." },
   ],
+  /* a dot: the meeting */
   dot: [
-    { icon: "🛠️", line: "Iterating..." },
-    { icon: "✏️", line: "Needs Another Revision." },
-    { icon: "📋", line: "Still Wireframing..." },
-    { icon: "💭", line: "Thinking Like a Designer." },
+    { icon: "", line: "Let's circle back." },
+    { icon: "", line: "Parked for now." },
+    { icon: "", line: "Still wireframing." },
+    { icon: "", line: "Awaiting brand feedback." },
+    { icon: "", line: "Exploring directions." },
+    { icon: "", line: "Sent. No reply." },
   ],
-  /* the brief separates BOWLED / CAUGHT / RUN OUT / HIT WICKET, but the
-     engine only models a single "wicket" contact today. Rather than invent a
-     dismissal type the game can't actually produce, all four sit in one pool
-     and the headline comes from the pool entry when it names a dismissal. */
+  /* a wicket: what actually happens */
   wicket: [
-    { icon: "💥", line: "Back to the Drawing Board!" },
-    { icon: "🧩", line: "Component Broke!" },
-    { icon: "📐", line: "Alignment Lost!" },
-    { icon: "🎯", line: "Missed the Grid!" },
-    { icon: "⚠️", line: "Prototype Failed!" },
+    { icon: "", line: "Make the logo bigger." },
+    { icon: "", line: "Can we see it in blue?" },
+    { icon: "", line: "final_v9_FINAL_real.fig" },
+    { icon: "", line: "They picked Comic Sans." },
+    { icon: "", line: "'Make it pop.'" },
+    { icon: "", line: "Client's nephew redesigned it." },
   ],
 };
+
 
 /* headline override for the dismissal pool, index-matched to REWARDS.wicket */
 const WICKET_HEADLINES = ["OUT!", "BOWLED!", "HIT WICKET!", "CAUGHT!", "RUN OUT!"];

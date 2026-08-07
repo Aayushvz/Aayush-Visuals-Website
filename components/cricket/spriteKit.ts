@@ -69,3 +69,22 @@ export function kitReady(team: TeamKit, role: string, poses: readonly string[]) 
     return !!i && i.complete && i.naturalWidth > 0;
   });
 }
+
+/*
+  How much of what has been asked for has arrived.
+
+  The preload functions are fire-and-forget by design — callers start a kit
+  and the renderer falls back to the procedural figure for anything still in
+  flight, so nothing ever blocks on a frame. That is right during a match
+  and useless for a loading screen, which needs to know when it is safe to
+  stop waiting.
+
+  Counted off the cache rather than tracked with listeners: an <img> already
+  knows whether it decoded, `complete` covers both success and failure, and
+  a failed frame must count as done or the bar hangs forever on a 404.
+*/
+export function kitProgress(): { loaded: number; total: number } {
+  let loaded = 0;
+  for (const img of cache.values()) if (img.complete) loaded++;
+  return { loaded, total: cache.size };
+}

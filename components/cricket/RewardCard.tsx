@@ -25,6 +25,20 @@ export type RewardShout = {
 
 const SPARKS = 10;
 
+/* what the shot was worth, as the figure a scorer would write */
+function runsFor(c: Contact): string {
+  return c === "six" ? "6" : c === "four" ? "4" : c === "single" ? "1" : c === "dot" ? "0" : "W";
+}
+
+/* and what it was, in one word */
+const VERDICT: Record<Contact, string> = {
+  six: "Maximum",
+  four: "Boundary",
+  single: "Worked away",
+  dot: "No run",
+  wicket: "Bowled",
+};
+
 export default function RewardCard({
   shout,
   reduced,
@@ -54,10 +68,17 @@ export default function RewardCard({
           exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: -10 }}
           aria-live="polite"
         >
-          <span className="cktReward__head">{shout.headline}</span>
-          <span className="cktReward__line">
-            {shout.reward.line}
-          </span>
+          {/*
+            The mechanics, not the story.
+
+            The shout and the studio line moved to the stadium's big screen,
+            which is where a crowd hears about a shot. What was left with
+            nowhere to go was the part a player needs at speed and precisely:
+            what it scored and what it earned. Two readouts, no prose — this
+            is now a receipt, and the board is the celebration.
+          */}
+          <span className="cktReward__runs">{runsFor(shout.contact)}</span>
+          <span className="cktReward__verdict">{VERDICT[shout.contact]}</span>
           <span className="cktReward__xp">
             +{shout.xp} {shout.xpLabel}
           </span>

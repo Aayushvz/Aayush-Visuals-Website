@@ -14,6 +14,8 @@ import {
   paintForegroundGrass,
   paintSky,
   paintStadium,
+  paintBigScreen,
+  paintFloodlights,
   paintStrikerWicket,
   paintStumps,
 } from "./scene";
@@ -71,6 +73,12 @@ export default function CricketGame({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  /* what the stadium's big screen is showing, kept in a ref so the paint
+     loop can read it without being restarted on every run scored */
+  const boardRef = useRef<{ shout: string | null; quote: string }>({
+    shout: null,
+    quote: "Six balls. One innings.",
+  });
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [phase, setPhase] = useState<Phase>("idle");
@@ -437,7 +445,19 @@ export default function CricketGame({
       }
 
       paintSky(ctx, scene, now);
+      /* towers before the stands, so they rise out of the roofline rather
+         than standing on top of the crowd */
+      paintFloodlights(ctx, scene);
       paintStadium(ctx, scene);
+      /*
+        The board reads the score through a ref, not through the closure.
+
+        This loop is started once and runs for the life of the innings; a
+        value captured from render would be frozen at whatever it was when
+        the effect ran, and the screen would sit on 0-0 all over. The ref is
+        written on every state change below.
+      */
+      paintBigScreen(ctx, scene, boardRef.current, now);
       paintField(ctx, scene);
       paintFielders(ctx, scene, now, opponent);
       paintStumps(ctx, scene, phase === "resolved" && swungRef.current && trailRef.current.length === 0);
@@ -533,6 +553,37 @@ export default function CricketGame({
       window.removeEventListener("keydown", onKey, true);
     };
   }, [menuOpen]);
+
+  /*
+    Mirror the score into the ref the paint loop reads.
+
+    During render, not in an effect: the canvas is repainted every frame
+    regardless, so the board picks this up on the next tick either way, and
+    an effect would just add a commit's worth of lag between the run being
+    scored and the stadium showing it.
+  */
+  /*
+    The board carries the commentary, not the score.
+
+    The HUD bar sits directly above it showing runs, balls and strike rate;
+    a board repeating those is a board saying nothing. What had nowhere to
+    live was the shot's own story, which used to be thrown over the middle
+    of the pitch on a card. While a shout is live the board shows it with
+    the studio line beneath; between deliveries it idles on whatever the
+    commentary is currently saying.
+  */
+  boardRef.current = {
+    shout: shout ? shout.headline : null,
+    quote: shout
+      ? shout.reward.line
+      : last
+        ? last.commentary
+        : phase === "flight"
+          ? "Watch it."
+          : phase === "runup"
+            ? "In his run-up."
+            : "Six balls. One innings.",
+  };
 
   const delivery = OVER[ballIdx];
   const ballsFaced = out || phase === "over" ? (out ? ballIdx + 1 : BALLS) : ballIdx;
@@ -667,7 +718,16 @@ export default function CricketGame({
       </div>
 
       {phase !== "over" && <RewardCard shout={shout} reduced={reduced} />}
-      {phase !== "over" && <ComboPill combo={combo} reduced={reduced} />}
+      {/*
+        One transient overlay at a time.
+
+        The receipt and the streak chip occupy the same slot now, and both
+        are triggered by the same event — a shot that scored. Showing them
+        together stacked two cards on one spot; the receipt wins while it is
+        up, and the streak returns underneath it a second later, which also
+        reads better as a sequence than as a pile.
+      */}
+      {phase !== "over" && !shout && <ComboPill combo={combo} reduced={reduced} />}
 
       {/*
         Bottom-left is a stack, not two absolutely-positioned panels.

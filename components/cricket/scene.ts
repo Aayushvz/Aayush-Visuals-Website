@@ -307,19 +307,32 @@ export function paintField(ctx: CanvasRenderingContext2D, s: Scene) {
   ctx.fillStyle = turf;
   ctx.fillRect(0, horizon, w, h - horizon);
 
-  /* mown stripes converge on the vanishing point */
+  /*
+    Mown stripes, converging on the vanishing point.
+
+    These were already here at 0.055 alpha, which is close enough to
+    invisible that the outfield read as one flat green — the single biggest
+    difference from the reference art, where the banding is the first thing
+    the eye lands on. They are strong bands now, and there are more of them
+    (14 wedges rather than 9) because a real square is mown in narrower
+    passes than the old spacing implied.
+
+    Light and dark alternate as washes over the turf gradient rather than as
+    flat colours, so the field still darkens toward the camera the way grass
+    does; two solid greens would have flattened the depth the gradient buys.
+  */
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, horizon, w, h - horizon);
   ctx.clip();
-  for (let i = -9; i <= 9; i++) {
+  for (let i = -14; i <= 14; i++) {
     ctx.beginPath();
-    ctx.moveTo(cx + i * w * 0.02, horizon);
-    ctx.lineTo(cx + i * w * 0.42, h + 40);
-    ctx.lineTo(cx + (i + 1) * w * 0.42, h + 40);
-    ctx.lineTo(cx + (i + 1) * w * 0.02, horizon);
+    ctx.moveTo(cx + i * w * 0.013, horizon);
+    ctx.lineTo(cx + i * w * 0.3, h + 40);
+    ctx.lineTo(cx + (i + 1) * w * 0.3, h + 40);
+    ctx.lineTo(cx + (i + 1) * w * 0.013, horizon);
     ctx.closePath();
-    ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.055)" : "rgba(0,0,0,0.05)";
+    ctx.fillStyle = i % 2 === 0 ? "rgba(190,255,190,0.15)" : "rgba(0,60,10,0.14)";
     ctx.fill();
   }
   ctx.restore();
@@ -1210,4 +1223,367 @@ export function paintForegroundGrass(ctx: CanvasRenderingContext2D, s: Scene) {
   ctx.lineTo(w, h);
   ctx.closePath();
   ctx.fill();
+}
+
+/* ============ the big screen ============
+
+   The stadium's replay board, standing above the far stand on the pitch's
+   centre line, carrying the branding and the live score.
+
+   It is painted as its own pass after the stands rather than inside
+   paintStadium, for two reasons. It is the only part of the stadium that
+   changes between frames for a reason other than the clock — it needs the
+   score, and paintStadium is deliberately state-free. And drawing it last
+   means it sits over the crowd it is mounted in front of without the stand
+   loop needing to know it exists.
+
+   Everything is derived from the scene's own stand geometry, so the board
+   stays bolted to the same place at any frame shape: the phone gets a
+   narrower board in the same spot rather than a desktop board cropped.
+*/
+
+/* the canvas cannot read `var(--ckt-display)`, so the display face is
+   named directly here. Anton is loaded by the route's layout; the fallbacks
+   matter because a canvas silently draws in the default serif if the family
+   is missing, which on a scoreboard is very obvious. */
+const DISPLAY_STACK = 'Anton, Impact, "Arial Narrow", sans-serif';
+/* the shout face — loud for one second, and reserved for exactly that.
+   Bungee is loaded by the route's layout alongside Anton. */
+const SHOUT_STACK = 'Bungee, Anton, Impact, sans-serif';
+
+/* the status bar's own height plus its inset, in CSS pixels. The board is
+   pushed clear of this rather than of a fraction of canvas height, because
+   the bar is a fixed-size object and a percentage only clears it at the
+   window size it was tuned on. */
+const HUD_BAR_CLEARANCE = 104;
+
+export type Board = {
+  /** the loud word — SIX!, FOUR!, OUT! — or null between deliveries */
+  shout: string | null;
+  /** the design-studio line under it, or the idle prompt */
+  quote: string;
+};
+
+export function paintBigScreen(
+  ctx: CanvasRenderingContext2D,
+  s: Scene,
+  b: Board,
+  now: number
+) {
+  const { w, h, cx, standTop } = s;
+
+  /*
+    Sized off the stand band, not the canvas. The board reads as an object
+    in the stadium only while its proportions hold against the thing it is
+    mounted on — tie it to canvas width and it becomes a billboard on a
+    phone and a postage stamp on a monitor.
+  */
+  /*
+    Portrait gets a much bigger board, and sits it lower.
+
+    `min(w * 0.34, h * 0.42)` is a landscape rule: on a narrow tall frame the
+    width term wins by a mile and the board comes out about 127px on a
+    375px screen — a postage stamp carrying a punchline nobody can read. In
+    portrait the board is the only thing on that band of screen, so it can
+    have most of the width.
+  */
+  /*
+    Portrait numbers are measured off the reference, not guessed.
+
+    On an 862x1856 frame the board runs x 128->720 and y 337->682: 69% of
+    the width, an aspect of 0.58, and a top edge at 18.2% of the height.
+    Three passes of nudging a width fraction never converged because two of
+    the three were wrong at once — it was too wide AND too squat AND too
+    high, and moving one at a time just traded faults.
+  */
+  const portrait = w / h < 0.72;
+  const bw = portrait ? w * 0.69 : Math.min(w * 0.34, h * 0.42);
+  const bh = bw * (portrait ? 0.58 : 0.42);
+  const bx = cx - bw / 2;
+  /*
+    Below the HUD, always.
+
+    It used to hang at `standTop - bh * 0.52`, which put its top edge under
+    the status bar — the bar is drawn in the DOM above this canvas, so the
+    board lost its own headline. The position is now whichever is lower:
+    where the stand wants it, or clear of the bar.
+  */
+  /* portrait pins the top edge to the measured fraction; landscape keeps
+     the stand-relative rule, clamped clear of the HUD bar */
+  /*
+    Anchored by its BOTTOM edge in portrait, not its top.
+
+    The complaint every time was that the board sat on the field covers —
+    which is a statement about where its lower edge lands, and the board is
+    not just the panel: the coloured hoarding strip hangs under it to
+    bh * 1.23. Pinning the top meant that total height pushed the bottom
+    wherever it liked, so each lift moved the panel and left the strip
+    still on the grass.
+
+    Now the assembly's bottom is placed at 0.375h — comfortably above the
+    ground-level sponsor boards, which sit just under the horizon at 0.44h —
+    and the top follows from however tall the board happens to be. Clamped
+    so it can never ride up under the status bar.
+  */
+  const assemblyH = bh * 1.23;
+  const by = portrait
+    ? Math.max(HUD_BAR_CLEARANCE, h * 0.375 - assemblyH)
+    : Math.max(standTop - bh * 0.52, HUD_BAR_CLEARANCE);
+
+  /* --- the gantry it stands on --- */
+  ctx.fillStyle = "#1b3f7a";
+  ctx.fillRect(cx - bw * 0.06, by + bh, bw * 0.12, Math.max(0, standTop + h * 0.09 - (by + bh)));
+
+  /* --- the casing --- */
+  const r = bh * 0.09;
+  ctx.beginPath();
+  ctx.roundRect(bx - bw * 0.035, by - bh * 0.05, bw * 1.07, bh * 1.13, r);
+  ctx.fillStyle = "#12386f";
+  ctx.fill();
+  ctx.lineWidth = Math.max(1.5, bw * 0.012);
+  ctx.strokeStyle = "#0b2350";
+  ctx.stroke();
+
+  ctx.fillStyle = "#f5b81f";
+  ctx.fillRect(bx - bw * 0.025, by, bw * 0.045, bh);
+  ctx.fillRect(bx + bw * 0.98, by, bw * 0.045, bh);
+
+  /* --- the panel --- */
+  ctx.beginPath();
+  ctx.roundRect(bx, by, bw, bh, r * 0.7);
+  ctx.fillStyle = "#0a1b3d";
+  ctx.fill();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(bx, by, bw, bh, r * 0.7);
+  ctx.clip();
+
+  /*
+    --- the stage the words stand on ---
+
+    A flat panel with scanlines read as a slide. What the reference does is
+    light the middle and throw rays out of it, so the type looks lit from
+    behind rather than printed on a dark rectangle. Three cheap layers:
+    a radial wash, a fan of rays, and confetti.
+  */
+  const mx = cx;
+  const my = by + bh * 0.46;
+
+  const wash = ctx.createRadialGradient(mx, my, 0, mx, my, bw * 0.62);
+  wash.addColorStop(0, "#1e4fa8");
+  wash.addColorStop(0.55, "#123166");
+  wash.addColorStop(1, "#0a1b3d");
+  ctx.fillStyle = wash;
+  ctx.fillRect(bx, by, bw, bh);
+
+  /* the rays. Rotating slowly so the board is never quite static, at a
+     speed low enough that it reads as shimmer rather than as spin. */
+  ctx.save();
+  ctx.translate(mx, my);
+  ctx.rotate((now / 24000) % (Math.PI * 2));
+  ctx.globalAlpha = 0.16;
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a) * bw, Math.sin(a) * bw);
+    ctx.lineTo(Math.cos(a + 0.11) * bw, Math.sin(a + 0.11) * bw);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 ? "#5aa2ff" : "#8fc6ff";
+    ctx.fill();
+  }
+  ctx.restore();
+
+  /* confetti — only while something is being celebrated */
+  if (b.shout) {
+    const bits = ["#ff4d5e", "#ffc32e", "#4ade80", "#5aa2ff", "#ffffff"];
+    for (let i = 0; i < 22; i++) {
+      /* deterministic scatter: a hash of the index, so the pieces sit in
+         the same places every shout instead of flickering frame to frame */
+      const n = Math.sin(i * 127.1) * 43758.5453;
+      const fx = bx + (n - Math.floor(n)) * bw;
+      const m = Math.sin(i * 311.7) * 24634.6345;
+      const fy = by + (m - Math.floor(m)) * bh;
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.rotate(i * 1.7 + now / 900);
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = bits[i % bits.length];
+      ctx.fillRect(-bh * 0.018, -bh * 0.03, bh * 0.036, bh * 0.06);
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* --- the words --- */
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  if (b.shout) {
+    ctx.font = `${Math.round(bh * 0.25)}px ${SHOUT_STACK}`;
+    reliefText(ctx, b.shout, cx, by + bh * 0.4, bw * 0.9, {
+      top: "#fff3c4",
+      mid: "#ffc32e",
+      low: "#e08a12",
+    });
+
+    ctx.font = `${Math.round(bh * 0.12)}px ${DISPLAY_STACK}`;
+    reliefText(ctx, b.quote, cx, by + bh * 0.74, bw * 0.88, {
+      top: "#ffffff",
+      mid: "#ffffff",
+      low: "#cfe0f8",
+    });
+  } else {
+    ctx.font = `${Math.round(bh * 0.14)}px ${DISPLAY_STACK}`;
+    reliefText(ctx, b.quote, cx, by + bh * 0.5, bw * 0.88, {
+      top: "#ffffff",
+      mid: "#ffffff",
+      low: "#cfe0f8",
+    });
+  }
+  ctx.restore();
+
+  /* --- the hoarding strip under the board --- */
+  const sy = by + bh * 1.1;
+  const sh = bh * 0.13;
+  const cols = ["#c9202e", "#f5b81f", "#1b7a4a", "#1b3f7a"];
+  const cw = (bw * 1.07) / 8;
+  for (let i = 0; i < 8; i++) {
+    ctx.fillStyle = cols[i % cols.length];
+    ctx.fillRect(bx - bw * 0.035 + i * cw, sy, cw, sh);
+  }
+}
+
+/*
+  Draw a word the way the reference does: a hard dark outline, a vertical
+  gradient fill, and a drop beneath it so the letters stand off the panel.
+
+  The outline is what makes it survive the busy background — gold type
+  straight onto a lit blue burst has nothing separating it from the rays,
+  and the whole point of the burst is that it is bright. Stroke first, fill
+  second: stroking over the fill eats half the letterform's weight.
+
+  It also guarantees the line fits the board.
+
+  Canvas will happily run a string straight off the edge of its panel, and
+  these lines are authored copy of varying length — "No notes. None." beside
+  "Client's nephew redesigned it." The font shrinks until it fits rather
+  than the string being clipped, because a punchline with its last two words
+  cut off is worse than a slightly smaller punchline.
+*/
+function reliefText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxW: number,
+  ramp: { top: string; mid: string; low: string }
+) {
+  const base = parseFloat(ctx.font);
+  let size = base;
+  while (size > base * 0.55 && ctx.measureText(text).width > maxW) {
+    size -= 1;
+    ctx.font = ctx.font.replace(/^[\d.]+px/, `${size}px`);
+  }
+
+  const drop = Math.max(2, size * 0.07);
+
+  /* the shadow the letters cast onto the panel */
+  ctx.fillStyle = "rgba(4,12,38,0.55)";
+  ctx.fillText(text, x, y + drop * 1.6, maxW);
+
+  /* the outline */
+  ctx.lineJoin = "round";
+  ctx.lineWidth = Math.max(3, size * 0.17);
+  ctx.strokeStyle = "#0a1b3d";
+  ctx.strokeText(text, x, y, maxW);
+
+  /* and the fill, top-lit like every other surface in the kit */
+  const g = ctx.createLinearGradient(0, y - size * 0.55, 0, y + size * 0.55);
+  g.addColorStop(0, ramp.top);
+  g.addColorStop(0.55, ramp.mid);
+  g.addColorStop(1, ramp.low);
+  ctx.fillStyle = g;
+  ctx.fillText(text, x, y, maxW);
+}
+
+
+/* ============ floodlights ============
+
+   Two towers, drawn after the sky and before the stands so they rise out
+   of the roofline the way they do in the reference art rather than sitting
+   on top of the crowd.
+
+   The bloom is a radial gradient, not a shadowBlur: shadowBlur on a lamp
+   this size is one of the most expensive things a 2D context can be asked
+   for, and this runs every frame of every ball.
+*/
+export function paintFloodlights(ctx: CanvasRenderingContext2D, s: Scene) {
+  const { w, h, standTop } = s;
+
+  /* pulled in from the edge so the towers frame the board rather than
+     clinging to the corners, and scaled off the stand band so they keep
+     their proportion against the stadium at any frame shape */
+  for (const side of [-1, 1] as const) {
+    const x = w / 2 + side * w * 0.36;
+    const headW = Math.min(w * 0.1, h * 0.13);
+    const headH = headW * 0.6;
+    /* the head sits well above the roofline and the mast runs all the way
+       down into the stand — it was starting at standTop - 14% and ending at
+       standTop + 5%, which is a stub, so the lamp read as floating */
+    const headY = standTop - h * 0.2;
+
+    /* the mast, tapering into the stand */
+    ctx.beginPath();
+    ctx.moveTo(x - headW * 0.07, headY + headH);
+    ctx.lineTo(x + headW * 0.07, headY + headH);
+    ctx.lineTo(x + headW * 0.12, standTop + h * 0.05);
+    ctx.lineTo(x - headW * 0.12, standTop + h * 0.05);
+    ctx.closePath();
+    ctx.fillStyle = "#4a5d7e";
+    ctx.fill();
+
+    /* the head, then the bloom OVER it — behind the head it was being
+       covered by the very thing it is supposed to be glowing from, which is
+       why the lamps read as flat grey grids */
+
+    /* the head, and its grid of lamps */
+    ctx.beginPath();
+    ctx.roundRect(x - headW / 2, headY, headW, headH, headW * 0.06);
+    ctx.fillStyle = "#5b6f92";
+    ctx.fill();
+
+    /* the glow, additive, on top of the lit head */
+    const g = ctx.createRadialGradient(x, headY + headH / 2, headW * 0.1, x, headY + headH / 2, headW * 1.6);
+    g.addColorStop(0, "rgba(228,244,255,0.55)");
+    g.addColorStop(0.4, "rgba(190,225,255,0.2)");
+    g.addColorStop(1, "rgba(190,225,255,0)");
+
+    const cols = 4;
+    const rows = 3;
+    const pad = headW * 0.07;
+    const cw = (headW - pad * 2) / cols;
+    const ch = (headH - pad * 2) / rows;
+    ctx.fillStyle = "#f2f9ff";
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        ctx.beginPath();
+        ctx.roundRect(
+          x - headW / 2 + pad + c * cw + cw * 0.12,
+          headY + pad + r * ch + ch * 0.12,
+          cw * 0.76,
+          ch * 0.76,
+          cw * 0.12
+        );
+        ctx.fill();
+      }
+    }
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g;
+    ctx.fillRect(x - headW * 1.6, headY + headH / 2 - headW * 1.6, headW * 3.2, headW * 3.2);
+    ctx.restore();
+  }
 }

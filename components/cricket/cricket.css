@@ -2125,3 +2125,135 @@
     height: 14px;
   }
 }
+
+/* ---- the shot receipt, moved off the pitch ----
+
+   It used to land dead centre at 15% height, over the one part of the
+   screen a player is watching. Now it sits on the right, clear of the
+   bowler's line and the ball's flight, opposite the commentary dock — the
+   two things that report on a delivery sit on opposite edges rather than
+   one of them covering the delivery itself.
+
+   Vertically centred rather than pinned high: at this size it reads as a
+   thing that appeared beside the action, not as a banner dropped on it.
+*/
+.cktReward {
+  top: 50%;
+  left: auto;
+  right: clamp(0.8rem, 2vw, 1.4rem);
+  translate: 0 -50%;
+  gap: 1px;
+  padding: 12px 18px 13px;
+  min-width: 122px;
+}
+
+/* the figure a scorer would write, in the shout face */
+.cktReward__runs {
+  font-family: var(--ckt-shout), var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  line-height: 0.94;
+  color: #fff;
+  text-shadow: var(--gk-text-relief);
+}
+
+.cktReward--six .cktReward__runs {
+  color: var(--ckt-six);
+}
+.cktReward--four .cktReward__runs {
+  color: var(--ckt-four);
+}
+.cktReward--wicket .cktReward__runs {
+  color: var(--ckt-ball);
+}
+
+.cktReward__verdict {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #cfe0f8;
+}
+
+/*
+  Centred again on a phone.
+
+  Moving it to the right edge is the right call on a wide frame, where the
+  middle of the screen is the ball's flight and the edges are dead space.
+  Portrait has no dead space: the frame is narrow enough that an edge-pinned
+  card sits on the fielders, and there is no room for it to be beside the
+  action rather than in front of it. So it goes back to the middle, high
+  enough to clear the batter, where it reads as a stamp on the moment.
+*/
+@media (max-width: 560px) {
+  .cktReward {
+    top: 30%;
+    left: 50%;
+    right: auto;
+    translate: -50% 0;
+    padding: 10px 18px 11px;
+    min-width: 108px;
+  }
+  .cktReward__runs {
+    font-size: 2.1rem;
+  }
+}
+
+/* ---- one slot for the two transient overlays ----
+
+   The receipt and the streak chip say related things about the same
+   moment, so they share a position instead of each claiming their own
+   corner. CricketGame renders only one at a time, so the slot is never
+   contested — and because they sit in the same place, the streak reads as
+   the receipt's follow-through rather than as a second, unrelated card.
+
+   Below the board and above the batter: the one band of a portrait screen
+   that is neither HUD nor pitch.
+*/
+@media (max-width: 560px) {
+  /*
+    On the side, not the centre line.
+
+    Centred, they sat directly over the pitch — the corridor the ball
+    travels down and the one thing a player is tracking. The wagon wheel is
+    hidden under 560px, so the right edge is free, and an overlay there is
+    read peripherally without covering the delivery.
+  */
+  .cktReward,
+  .cktCombo {
+    /*
+      Below the board, not beside it.
+
+      At 38% the receipt's top edge landed on the board's bottom corner —
+      the board runs to 15.5% + its own height + the hoarding strip, which
+      on a portrait frame reaches about 41%. 50% clears that with room and
+      still sits well above the batter.
+    */
+    top: 50%;
+    left: auto;
+    right: 0.7rem;
+    translate: 0 0;
+    max-width: 46vw;
+  }
+
+  /* smaller, now that it is inside the frame's busiest column rather than
+     off at an edge with room to be loud */
+  .cktReward {
+    gap: 0;
+    padding: 8px 15px 9px;
+    min-width: 92px;
+  }
+
+  .cktReward__runs {
+    font-size: 1.75rem;
+  }
+
+  .cktReward__verdict {
+    font-size: 0.54rem;
+    letter-spacing: 0.12em;
+  }
+
+  .cktReward__xp {
+    font-size: 0.62rem;
+  }
+}

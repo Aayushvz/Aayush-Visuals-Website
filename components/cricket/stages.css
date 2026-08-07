@@ -1018,3 +1018,43 @@
     right: -16px;
   }
 }
+
+/* ---- the loading gate ----
+
+   Sized and placed to match the button it stands in for, so the title card
+   does not reflow when the match finishes loading — the bar occupies the
+   same block, and the swap reads as one control changing state rather than
+   the screen rearranging itself under the pointer.
+*/
+.stgLoad {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  width: min(300px, 76vw);
+  min-height: 52px;
+  margin-top: clamp(10px, 2vh, 22px);
+  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
+}
+
+.stgLoad__label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--stg-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #cfe0f8;
+}
+
+/* tabular so the percentage does not jitter the label's width as it counts */
+.stgLoad__pct {
+  color: var(--gk-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.stgLoad__track {
+  width: 100%;
+  height: 16px;
+}

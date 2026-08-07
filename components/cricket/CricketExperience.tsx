@@ -10,6 +10,7 @@ import { opponentOf, teamVars, type Team } from "./teams";
 import { preloadBowler } from "./bowlerSprites";
 import { preloadFielder } from "./fielderSprites";
 import { unlockAudio } from "./sound";
+import { useAssets } from "./useAssets";
 /* gamekit first: it defines the tokens and primitives the other two
    stylesheets override for their own surfaces */
 import "./gamekit.css";
@@ -42,6 +43,15 @@ export default function CricketExperience() {
   const [stage, setStage] = useState<Stage>("opening");
   const [team, setTeam] = useState<Team | null>(null);
   const [reduced, setReduced] = useState(false);
+  /*
+    The gate is read here too, not just in Opening.
+
+    Escape, Enter and the Skip button all jump straight past the title card,
+    and a loading gate that only guards the button is not a gate — it is a
+    suggestion. The hook is safe to call twice: the sprite preloads are
+    idempotent, so the second caller only adds a progress poller.
+  */
+  const { ready: assetsReady } = useAssets();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   /* Motion preference, watched rather than read once: someone can change it
@@ -115,8 +125,8 @@ export default function CricketExperience() {
      to skip, so Escape stays free during the innings for the game's own
      handlers. */
   const skip = useCallback(() => {
-    if (stage === "opening") start();
-  }, [stage, start]);
+    if (stage === "opening" && assetsReady) start();
+  }, [stage, start, assetsReady]);
 
   useEffect(() => {
     if (!isSkippable(stage)) return;
@@ -157,7 +167,8 @@ export default function CricketExperience() {
         />
       )}
 
-      {stage === "opening" && (
+      {/* the skip only exists once there is something to skip to */}
+      {stage === "opening" && assetsReady && (
         <button type="button" className="stgSkip" onClick={skip}>
           Skip intro
         </button>
