@@ -2019,6 +2019,36 @@ export const PROJECTS: Project[] = [
       "Built on why people abandon meal planning, not on what an app could do",
       "Full design system: Poppins for display and headings, Open Sans for body",
     ],
+    /*
+      Green, because the product is about food and the site's default purple
+      says nothing about it.
+
+      Each value clears the bar its own role has, which is why they are four
+      different greens rather than one with opacity:
+
+      - `dark` / `light` carry TEXT, so they need 4.5:1 on their own canvas.
+        #34C759 measures 7.5 on the dark shell, #1F7F38 measures 5.1 on white.
+        One hue cannot do both — the mid greens that read on white vanish on
+        #1e1e1e and vice versa.
+      - `solid` is borders, rings and frame ticks, which are UI rather than
+        text and answer to 3:1. #279A45 is the only value here that clears it
+        on BOTH canvases (4.6 dark, 3.6 light), so the same ring works either
+        side of a theme switch.
+      - `bright` is the cursor, its name tag and the comment pins — meant to
+        be spotted, not read through, so it runs hotter than the body accent.
+        White on it is 1.7:1, hence the near-black `ink`.
+      - `fill` is what a card turns on hover, and white has to survive on it:
+        #1F7F38 gives 5.1:1.
+    */
+    accent: {
+      dark: "#34C759",
+      light: "#1F7F38",
+      solid: "#279A45",
+      bright: "#4ADE80",
+      ink: "#08240F",
+      fill: "#1F7F38",
+      hover: "#279A45",
+    },
     shots: [
       {
         /* The complete case study, exported at 1400x22306 and sliced into 18
