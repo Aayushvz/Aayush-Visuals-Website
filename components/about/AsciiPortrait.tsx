@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLowPowerMode } from "./useLowPowerMode";
 
 /*
   Living Pixel-Halftone Portrait — canvas renderer, no CSS/font fakery.
   Draws vector squares directly onto the canvas. The size and opacity of
   the squares are driven by the source image's processed luminance grid.
-  
+
   Hover spotlight dynamically REBUILDS the portrait locally at 2× grid
   resolution and switches the color to your soft purple accent shade.
-  
+
   Background grid covers the entire canvas, reacting seamlessly to the spotlight.
+
+  Perf gating (see useLowPowerMode): the fine spotlight grid and its
+  pointer listeners are skipped entirely without a fine pointer (hover
+  can't happen via touch), the resting grid is coarser and its per-frame
+  flicker redraw is throttled to every 3rd frame on low-power devices, and
+  the whole rAF loop pauses via IntersectionObserver + document.hidden
+  once the portrait is off-screen.
 */
 
 const BASE_CELL = 7; // Grid resolution (resting size), in CSS px. A bit smaller makes the face much more high-res and detailed!
@@ -69,6 +77,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hoverCb = useRef(onHoverChange);
   hoverCb.current = onHoverChange;
+  const { lowPower, pointerFine } = useLowPowerMode();
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -84,13 +93,18 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let img: HTMLImageElement | null = null;
     let raf = 0;
     let destroyed = false;
+    let running = false;
+    let intersecting = false;
+    let imageReady = false;
+    let frame = 0;
 
     /* figure draw rect + source alpha-bbox crop */
     let ix = 0, iy = 0, iw = 0, ih = 0;
     let sxc = 0, syc = 0, swc = 0, shc = 0;
 
-    /* two sampling grids: coarse (resting) and fine (spotlight, 2×) */
-    const cell = BASE_CELL;
+    /* two sampling grids: coarse (resting) and fine (spotlight, 2×,
+       skipped entirely without a fine pointer — it can never be reached) */
+    const cell = lowPower ? 10 : BASE_CELL;
     let cols = 0, rows = 0;
     let lumC: Float32Array = new Float32Array(0);
     let alpC: Float32Array = new Float32Array(0);
@@ -107,8 +121,6 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     let bx = 0, by = 0, btx = 0, bty = 0;
     let br = 0, brTarget = 0;
     let hovering = false;
-
-    let needsDraw = true;
 
     const sampleGrid = (c: number, r: number) => {
       sampler.width = c;
@@ -130,13 +142,13 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
         const green = data[i * 4 + 1];
         const blue = data[i * 4 + 2];
         let a = data[i * 4 + 3] / 255;
-        
+
         if (red > 235 && green > 235 && blue > 235) {
           a = 0;
         }
 
         alp[i] = a;
-        
+
         let l = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
         if (a > 0) {
           l = (l - 0.08) / 0.84;
@@ -153,7 +165,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       if (!img || !W || !H) return;
       cols = Math.max(8, Math.floor(W / cell));
       rows = Math.max(8, Math.floor(H / cell));
-      
+
       bgNoise = new Float32Array(cols * rows);
       for (let i = 0; i < cols * rows; i++) {
         const rand = Math.random();
@@ -163,10 +175,17 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       }
 
       ({ lum: lumC, alp: alpC } = sampleGrid(cols, rows));
-      colsF = cols * 2;
-      rowsF = rows * 2;
-      ({ lum: lumF, alp: alpF } = sampleGrid(colsF, rowsF));
-      needsDraw = true;
+
+      if (pointerFine) {
+        colsF = cols * 2;
+        rowsF = rows * 2;
+        ({ lum: lumF, alp: alpF } = sampleGrid(colsF, rowsF));
+      } else {
+        colsF = 0;
+        rowsF = 0;
+        lumF = new Float32Array(0);
+        alpF = new Float32Array(0);
+      }
     };
 
     const layout = () => {
@@ -213,7 +232,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     const draw = (timeMs: number) => {
       if (!img || !cols) return;
       ctx.clearRect(0, 0, W, H);
-      
+
       const c = cell;
       const cf = c / 2;
 
@@ -224,7 +243,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const cx = x * c + c / 2;
           const cy = y * c + c / 2;
           const f = falloff(cx, cy);
-          
+
           let size = c - 1.0;
           let opacity = 0;
           let colorVal = 0;
@@ -232,10 +251,10 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           if (alpC[i] >= 0.3) {
             // Face pixel
             colorVal = lumC[i];
-            
+
             // Subtle pixel-level refresh/flicker (CRT scanline drift + tiny noise)
             const flicker = (Math.sin(timeMs * 0.0012 + x * 0.28 + y * 0.42) * 0.015) + (Math.random() - 0.5) * 0.012;
-            
+
             opacity = (0.08 + colorVal * 0.72) * (1 - f);
             opacity = Math.max(0, Math.min(1, opacity + flicker));
 
@@ -248,7 +267,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       }
 
       /* 2. Fine Spotlight Hover overlay (Lavender tone base palette, 2x resolution increase!) */
-      if (br > 0.5) {
+      if (br > 0.5 && pointerFine) {
         const x0 = Math.max(0, Math.floor((bx - br) / cf));
         const x1 = Math.min(colsF - 1, Math.ceil((bx + br) / cf));
         const y0 = Math.max(0, Math.floor((by - br) / cf));
@@ -269,7 +288,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
             if (alpF[i] >= 0.3) {
               // Detailed face pixel
               colorVal = lumF[i];
-              
+
               // Subtle pixel-level refresh/flicker
               const flicker = (Math.sin(timeMs * 0.0012 + x * 0.15 + y * 0.22) * 0.012) + (Math.random() - 0.5) * 0.008;
 
@@ -289,17 +308,37 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
     };
 
     const loop = (now: number) => {
-      if (destroyed) return;
+      if (destroyed || !running) return;
 
       const ease = 0.15;
       bx += (btx - bx) * ease;
       by += (bty - by) * ease;
       br += (brTarget - br) * ease;
-      
-      // Always redraw because of the constant subtle pixel refresh/flicker animation
-      draw(now);
+
+      frame++;
+      // Full grid redraw is only needed to drive the subtle flicker — on
+      // low-power devices that's throttled to ~20fps (every 3rd rAF tick),
+      // which reads identically since the flicker itself is slow and subtle.
+      if (!lowPower || frame % 3 === 0) {
+        draw(now);
+      }
 
       raf = requestAnimationFrame(loop);
+    };
+
+    const startLoop = () => {
+      if (running || destroyed || !imageReady) return;
+      running = true;
+      raf = requestAnimationFrame(loop);
+    };
+    const stopLoop = () => {
+      running = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const syncRunning = () => {
+      if (intersecting && !document.hidden && imageReady) startLoop();
+      else stopLoop();
     };
 
     const onPointerMove = (e: PointerEvent) => {
@@ -320,10 +359,22 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       hoverCb.current?.(false);
     };
 
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerdown", onPointerMove, { passive: true });
-    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
-    window.addEventListener("pointercancel", onPointerLeave, { passive: true });
+    if (pointerFine) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerdown", onPointerMove, { passive: true });
+      window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+      window.addEventListener("pointercancel", onPointerLeave, { passive: true });
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        intersecting = entries[0]?.isIntersecting ?? false;
+        syncRunning();
+      },
+      { rootMargin: "300px 0px" }
+    );
+    io.observe(canvas);
+    document.addEventListener("visibilitychange", syncRunning);
 
     const ro = new ResizeObserver(layout);
     ro.observe(wrap);
@@ -349,7 +400,7 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
           const gVal = pd[idx + 1];
           const bVal = pd[idx + 2];
           let aVal = pd[idx + 3];
-          
+
           if (rVal > 235 && gVal > 235 && bVal > 235) {
             aVal = 0;
           }
@@ -373,19 +424,24 @@ export default function AsciiPortrait({ src, onHoverChange }: Props) {
       }
       img = image;
       layout();
-      raf = requestAnimationFrame(loop);
+      imageReady = true;
+      syncRunning();
     });
 
     return () => {
       destroyed = true;
+      stopLoop();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", syncRunning);
       ro.disconnect();
-      cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerdown", onPointerMove);
-      window.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("pointercancel", onPointerLeave);
+      if (pointerFine) {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerdown", onPointerMove);
+        window.removeEventListener("pointerleave", onPointerLeave);
+        window.removeEventListener("pointercancel", onPointerLeave);
+      }
     };
-  }, [src]);
+  }, [src, lowPower, pointerFine]);
 
   return (
     <div ref={wrapRef} style={{ width: "100%", height: "100%" }}>
