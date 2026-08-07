@@ -1781,6 +1781,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "futurepreneurs",
+    kind: "case-study",
     title: "Futurepreneurs",
     logoText: "FUTUREPRENEURS",
     logoUrl: "/projects/futurepreneurs-logo.webp",
@@ -1789,18 +1790,182 @@ export const PROJECTS: Project[] = [
     cover: "/projects/futurepreneurs-cover.webp",
     preview: {
       kind: "website",
-      href: "https://riviera.vit.ac.in/",
+      href: "https://future-preneurs-24.vercel.app/",
       image: "/projects/futurepreneurs-cover.webp",
     },
     cta: "Visit Live Website",
     role: "Web Design",
     tools: ["Framer", "Figma"],
     description:
-      "An event website for Futurepreneurs, a founders' initiative, presented with a confident, startup-grade identity.",
+      "The site for Futurepreneurs 10.0, E-Cell VIT Vellore's flagship business simulation event. A tenth edition needed to look like one, so the design leans on a countdown, a timeline and one hard deadline rather than on fest-poster maximalism.",
     highlights: [
-      "Founder-first narrative translated into a confident startup-grade site",
-      "Built for fast content updates across a multi-week event",
-      "Responsive system tuned for heavy mobile traffic on event day",
+      "Countdown-led landing page built around one hard registration deadline",
+      "Five-stage event timeline designed to read as a sequence, not a list",
+      "Framer build so a student team could update content without a developer",
+    ],
+    extraFacts: [
+      ["Edition", "10.0 - Xth edition"],
+      ["Organiser", "E-Cell, VIT Vellore"],
+    ],
+    sections: [
+      {
+        name: "overview",
+        heading: "The short version",
+        blocks: [
+          {
+            kind: "brief",
+            items: [
+              {
+                label: "What it is",
+                wide: true,
+                body: "The event site for **Futurepreneurs 10.0**, the flagship business simulation run by the **Entrepreneurship Cell at VIT Vellore**. Registration, timeline, the story of the format and a live countdown to the day itself - one page carrying all of it.",
+              },
+              {
+                label: "The problem",
+                body: "A campus event site is read once, fast, on a phone, usually while deciding whether to sign up. Everything on it competes with the **one thing that matters: the deadline.**",
+              },
+              {
+                label: "Key decisions",
+                body: "Lead with the **countdown**, not the copy. Give the timeline its own visual system so five dates read as a sequence. **One accent colour**, used sparingly.",
+              },
+              {
+                label: "Outcome",
+                body: "A tenth-edition site that reads startup-grade rather than student-fest, built in Framer so the team could update content through a multi-week campaign without a developer.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "hero",
+        heading: "The deadline is the headline",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The masthead sets **FUTURE PRENEURS** against a single outsized **X** - the tenth edition as a graphic device rather than a line of copy. Below it, the only number anyone acts on: time left to register, counted in days, hours and minutes.",
+              "Everything else on the first screen is subordinate to those two elements. The gradient field behind them is the one place the design allows itself colour.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/hero.webp",
+              wide: true,
+              caption:
+                "The landing view - masthead, register, and the countdown everything else defers to.",
+              alt: "Futurepreneurs Xth edition landing page on a laptop, with a live registration countdown reading 03:24:35.",
+            },
+          },
+        ],
+      },
+      {
+        name: "about",
+        heading: "What the event actually is",
+        blocks: [
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/about.webp",
+              wide: true,
+              caption:
+                "Futurepreneurs 10.0 - the flagship event of the Entrepreneurship Cell, VIT Vellore.",
+              alt: "Dark section describing Futurepreneurs 10.0 as an initiative immersing participants in the realities of the professional world.",
+            },
+          },
+        ],
+      },
+      {
+        name: "system",
+        heading: "The system it is built on",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Two families doing different jobs. **Whyte Inktrap** carries the display weight - its cut-in traps keep the masthead sharp at poster scale. **Gantari** and **Almarai** handle everything a person has to actually read.",
+              "The palette is two colours and two neutrals. **Slateblue** anchors the brand, **Sorrell Brown** is the single warm accent, and black and white do the structural work.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/typography.webp",
+              wide: true,
+              caption:
+                "Whyte Inktrap for display, Gantari and Almarai for everything that has to be read.",
+              alt: "Typography specimen board showing Whyte Inktrap, Almarai Regular and Gantari Medium.",
+            },
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/theme.webp",
+              wide: true,
+              caption: "Slateblue, Sorrell Brown, and the two neutrals holding the structure.",
+              alt: "Colour palette: 653BD8 Slateblue, F59869 Sorrell Brown, FFFFFF White, 000000 Outer Space.",
+            },
+          },
+        ],
+      },
+      {
+        name: "process",
+        heading: "How it got made",
+        blocks: [
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/process.webp",
+              wide: true,
+              caption:
+                "Research, ideate, wireframe, UI concept, design - staggered rather than sequential.",
+              alt: "Process diagram showing overlapping stages: Research, Ideate, Wireframe, UI Concept and Design.",
+            },
+          },
+        ],
+      },
+      {
+        name: "elements",
+        heading: "The pieces up close",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The timeline is the component the whole page turns on. Five dates - registration opening, closing, two qualifier stages and the D Day - built as numbered cards on a connecting line, so the sequence reads at a glance rather than being parsed as a list.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/elements.webp",
+              wide: true,
+              caption: "The timeline component, and the same page held to a phone.",
+              alt: "Close-up of the numbered event timeline cards on desktop, beside the mobile view of the landing page.",
+            },
+          },
+        ],
+      },
+      {
+        name: "the-site",
+        heading: "The finished site, top to bottom",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Desktop and mobile side by side, full scroll. The same five sections in both - masthead and countdown, the pitch for the simulation, the timeline, ten years of history, then FAQs and the E-Cell footer.",
+              "The mobile view is not the desktop one narrowed. The timeline reflows from a five-across row into stacked pairs, and the three-column explainer becomes a single column of cards - the two places where the desktop layout would have collapsed into something unreadable if it had simply been squeezed.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/futurepreneurs/fullview.webp",
+              wide: true,
+              caption: "The full page in both views - webview left, mobview right.",
+              alt: "Full-length screenshots of the Futurepreneurs site: the desktop page beside the mobile page, both showing masthead, timeline, ten-years section, FAQs and footer.",
+            },
+          },
+        ],
+      },
     ],
   },
   {
