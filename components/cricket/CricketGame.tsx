@@ -541,7 +541,7 @@ export default function CricketGame({
   const strikeRate = ballsFaced > 0 ? Math.round((score / ballsFaced) * 100) : 0;
 
   return (
-    <div className="ckt">
+    <div className="ckt" data-phase={phase}>
       <div className="ckt-stage" ref={stageRef}>
         <canvas ref={canvasRef} className="ckt-canvas" aria-hidden="true" />
       </div>
@@ -811,6 +811,36 @@ export default function CricketGame({
           </PageLink>
         </div>
       )}
+
+      {/*
+        The phone's whole input, in one thumb-sized object.
+
+        A phone has no space bar and no arrow keys, and the desktop
+        affordance — tap anywhere on the pitch — is invisible: nothing on
+        screen says the stadium is a button. So portrait gets an explicit
+        dock at the bottom, inside the thumb arc, with the timing rail
+        directly above the control it belongs to.
+
+        It is one button, not the five in the reference. The engine has one
+        input: a swing, timed. Five labelled shot types would be five
+        controls doing the same thing, which is worse than one honest one.
+      */}
+      <div className="cktTap" data-live={phase === "flight" || phase === "runup"}>
+        <div className="cktTap__rail" aria-hidden>
+          <span className="cktTap__zone cktTap__zone--early">Early</span>
+          <span className="cktTap__zone cktTap__zone--perfect">Perfect</span>
+          <span className="cktTap__zone cktTap__zone--late">Late</span>
+        </div>
+
+        <button
+          type="button"
+          className="cktTap__btn"
+          onClick={phase === "idle" || phase === "over" ? start : swing}
+          disabled={phase === "over"}
+        >
+          {phase === "idle" ? "Tap to play" : "Play shot"}
+        </button>
+      </div>
 
       <p className="ckt-hint">
         {reduced ? "Reduced motion is on" : "Arrow keys aim · Space plays the shot"}

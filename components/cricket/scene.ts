@@ -92,12 +92,40 @@ export function buildScene(w: number, h: number) {
     seed: i,
   }));
 
-  /* ---- fielders, kept off the pitch and out of the ball's line ---- */
-  const fielders = [
-    { x: 0.16, y: 0.62 }, { x: 0.31, y: 0.55 }, { x: 0.72, y: 0.56 },
-    { x: 0.87, y: 0.63 }, { x: 0.24, y: 0.78 }, { x: 0.8, y: 0.8 },
-    { x: 0.42, y: 0.53 }, { x: 0.6, y: 0.52 },
-  ].map((f) => ({ x: f.x * w, y: horizon + (h - horizon) * (f.y - 0.5) * 0.9, s: 1 }));
+  /*
+    ---- fielders, kept off the pitch and out of the ball's line ----
+
+    A portrait phone gets four, not eight, and they stand further apart.
+
+    The ring is drawn in a frame that is roughly half as wide and twice as
+    tall, so the desktop spread lands as a crowd stacked either side of the
+    pitch — figures overlapping each other and, worse, overlapping the line
+    the ball travels down, which is the one thing on this screen a player
+    has to track. Four positions that read as a real field (slip, mid off,
+    mid on, one deep) leave the corridor clear.
+
+    They are also drawn larger. At this width a desktop-scale figure is
+    about 14px of character, which is a smudge rather than a fielder.
+  */
+  const portrait = w / h < 0.72;
+  const fielders = (
+    portrait
+      ? [
+          { x: 0.68, y: 0.45 }, /* slip, behind square on the off side */
+          { x: 0.2, y: 0.6 }, /* mid off */
+          { x: 0.82, y: 0.62 }, /* mid on */
+          { x: 0.42, y: 0.36 }, /* the one deep, up near the rope */
+        ]
+      : [
+          { x: 0.16, y: 0.62 }, { x: 0.31, y: 0.55 }, { x: 0.72, y: 0.56 },
+          { x: 0.87, y: 0.63 }, { x: 0.24, y: 0.78 }, { x: 0.8, y: 0.8 },
+          { x: 0.42, y: 0.53 }, { x: 0.6, y: 0.52 },
+        ]
+  ).map((f) => ({
+    x: f.x * w,
+    y: horizon + (h - horizon) * (f.y - 0.5) * 0.9,
+    s: portrait ? 1.45 : 1,
+  }));
 
   return { w, h, horizon, cx, crowd, clouds, fielders, standTop };
 }
@@ -1032,7 +1060,10 @@ export function paintFielders(
     .sort((a, b) => a.f.y - b.f.y);
 
   for (const { f, i } of order) {
-    const targetH = personHeight(s, f.y);
+    /* f.s is the portrait bump — perspective sets the base height, this
+       scales it so four figures on a narrow screen read as characters
+       rather than as marks */
+    const targetH = personHeight(s, f.y) * f.s;
     if (paintFielderSprite(ctx, f.x, f.y, targetH, team, idlePoseFor(i, now)))
       continue;
     /* the procedural figure measures about 1.4 * sc from foot to crown */

@@ -1280,3 +1280,249 @@
     padding: 7px 9px 9px;
   }
 }
+
+/* =====================================================================
+   PORTRAIT PHONE
+   =====================================================================
+
+   Rebuilt for the frame rather than shrunk into it. The desktop layout
+   spreads six panels around a wide scene; portrait has one bar at the top,
+   the scene, and one control dock at the bottom, with nothing in the
+   middle third — because the middle third is where the ball is.
+
+   Safe areas are honoured at both ends: `env(safe-area-inset-*)` falls
+   back to 0 everywhere it does not apply, so the same rule covers a
+   Dynamic Island, a hole punch, an Android gesture bar and a plain
+   browser window without branching.
+*/
+/*
+  Width alone, not `orientation: portrait`.
+
+  A 360px window is a phone layout whether or not the browser reports an
+  orientation — desktop windows dragged narrow, emulators and in-app
+  webviews all report `landscape` at portrait proportions, and the layout
+  should follow the space it has rather than a device's opinion about it.
+*/
+@media (max-width: 560px) {
+  /* ---- the single top bar ---- */
+  .ckt-board {
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    left: calc(env(safe-area-inset-left, 0px) + 8px);
+    right: calc(env(safe-area-inset-right, 0px) + 8px);
+    transform: none;
+    justify-content: space-between;
+    gap: 0.4rem;
+    padding: 0.4rem 0.55rem;
+    /* room on the right for the three controls, which sit over this bar's
+       end rather than on a second row — one bar. 3 x 48 + 2 x 8 gaps + the
+       inset, so the readouts never run under them. */
+    padding-right: 178px;
+  }
+
+  .ckt-controls {
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    right: calc(env(safe-area-inset-right, 0px) + 14px);
+    gap: 8px;
+  }
+
+  /* 48px on touch, not the 44 a pointer needs: a thumb is a blunter
+     instrument than a mouse and these three sit in a row */
+  .ckt-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* only what a batter needs mid-over: score, balls, rate. "Bowling" is
+     the one readout that changes without the player doing anything, and
+     the delivery is already visible in the run-up. */
+  .ckt-board .ckt-meta:nth-of-type(3),
+  .ckt-board .ckt-divider:nth-of-type(3) {
+    display: none;
+  }
+
+  .ckt-score {
+    font-size: 1.5rem;
+  }
+
+  /* ---- everything the phone does not get ---- */
+  .ckt-dock,
+  .ckt-hint,
+  .ckt-brand {
+    display: none;
+  }
+
+  /* the wheel shrinks into the corner under the bar, and stands down while
+     the ball is live — it is a summary of shots already played, and it has
+     no business on screen during the one second that decides the next one */
+  .ckt-wheel {
+    top: calc(env(safe-area-inset-top, 0px) + 78px);
+    right: calc(env(safe-area-inset-right, 0px) + 8px);
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: 92px;
+    padding: 6px 7px 7px;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  }
+
+  .ckt[data-phase="runup"] .ckt-wheel,
+  .ckt[data-phase="flight"] .ckt-wheel {
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+  }
+
+  .ckt-wheel-label {
+    font-size: 0.5rem;
+  }
+
+  .ckt-card {
+    top: calc(env(safe-area-inset-top, 0px) + 92px);
+    bottom: auto;
+    max-height: calc(100svh - env(safe-area-inset-top, 0px) - 230px);
+  }
+}
+
+/*
+  The dock is laid out here and *hidden above the breakpoint*, rather than
+  hidden here and shown inside the phone block.
+
+  A media query adds no specificity — so `.cktTap { display: none }` sitting
+  later in the file beat the `display: grid` inside the query, and the dock
+  never appeared. Stating the phone case as the base and switching it off
+  for wide screens makes the rule order irrelevant.
+
+  It is off on desktop because the pitch is already the bat and the keyboard
+  works: a permanent button there would be a second way to do one thing,
+  occupying the best real estate on the screen.
+*/
+.cktTap {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  position: absolute;
+  z-index: 6;
+  left: calc(env(safe-area-inset-left, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 14px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* ---- the timing rail ---- */
+.cktTap__rail {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  width: min(320px, 100%);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 3px 7px rgba(4, 12, 38, 0.6),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.12);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.cktTap__zone {
+  padding: 6px 0 7px;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(6, 22, 62, 0.7);
+}
+
+/* the three bands are the engine's own windows, drawn: miss early, the
+   perfect window in the middle, miss late. Amber and green rather than
+   red and green alone, so the meaning survives a red-green deficiency. */
+.cktTap__zone--early {
+  background: linear-gradient(180deg, #f0a52e, #c26a09);
+}
+.cktTap__zone--perfect {
+  background: linear-gradient(180deg, #4faf24, var(--gk-green));
+}
+.cktTap__zone--late {
+  background: linear-gradient(180deg, #f0a52e, #c26a09);
+}
+
+/* ---- the one control ---- */
+.cktTap__btn {
+  width: min(300px, 100%);
+  min-height: 68px;
+  padding: 0 24px;
+  border: 4px solid rgba(255, 255, 255, 0.94);
+  border-radius: 22px;
+  background: linear-gradient(
+    180deg,
+    var(--gk-gold-lit) 0%,
+    var(--gk-gold) 34%,
+    var(--gk-gold-deep) 100%
+  );
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.5), 0 8px 0 #a86205,
+    0 16px 26px rgba(4, 12, 38, 0.5);
+  color: #4a2a00;
+  font-family: var(--ckt-display), Impact, sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+}
+
+/*
+  It breathes while it waits and stops the moment the ball is live.
+
+  A control that keeps pulsing during the half second you are trying to
+  time is competing with the thing it wants you to watch. The idle pulse is
+  an invitation; once the delivery is on its way the button holds still and
+  the ball is the only thing moving.
+*/
+.cktTap[data-live="false"] .cktTap__btn {
+  animation: cktTapPulse 1.9s ease-in-out infinite;
+}
+
+@keyframes cktTapPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.5), 0 8px 0 #a86205,
+      0 16px 26px rgba(4, 12, 38, 0.5);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.55), 0 8px 0 #a86205,
+      0 20px 34px rgba(4, 12, 38, 0.55), 0 0 30px rgba(255, 195, 46, 0.45);
+  }
+}
+
+/* the press: the cap travels the full height of its own base, as every
+   other control in the kit does */
+.cktTap__btn:active {
+  animation: none;
+  transform: translateY(8px) scale(0.98);
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.5), 0 0 0 #a86205,
+    0 3px 8px rgba(4, 12, 38, 0.45);
+}
+
+.cktTap__btn:focus-visible {
+  outline: 4px solid #fff;
+  outline-offset: 4px;
+}
+
+.cktTap__btn[disabled] {
+  animation: none;
+  filter: grayscale(0.6) brightness(0.85);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cktTap[data-live="false"] .cktTap__btn {
+    animation: none;
+  }
+}
+
+@media (min-width: 561px) {
+  .cktTap {
+    display: none;
+  }
+}
