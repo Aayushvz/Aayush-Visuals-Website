@@ -364,18 +364,46 @@ export default function About() {
     // above the panel's top edge is its max height × p, so the skyline
     // starts nearly flush and spreads apart as the panel rises — matching
     // the live-site recording frame for frame.
+    /* Parked unless the panel is near the viewport. Unconditional, this
+       loop forced a synchronous layout (getBoundingClientRect) 60x a second
+       for the entire life of the page, long after the bands finished
+       animating — dead weight under every later section's scrolling. */
     let raf = 0;
+    /* true for the first frames so the bands get a --transP before the
+       observer's first async callback; parked immediately after if the
+       panel is off-screen. */
+    let visible = true;
+    let lastP = "";
+
     const loop = () => {
+      raf = 0;
+      if (!visible) return;
       const r = section.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-      const p = Math.min(1, Math.max(0, 1 - r.top / vh));
-      steps.style.setProperty("--transP", p.toFixed(4));
+      const p = Math.min(1, Math.max(0, 1 - r.top / vh)).toFixed(4);
+      if (p !== lastP) {
+        lastP = p;
+        steps.style.setProperty("--transP", p);
+      }
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+
+    const wake = () => {
+      if (!raf && visible) raf = requestAnimationFrame(loop);
+    };
+
+    const bandIo = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        wake();
+      },
+      { rootMargin: "200px 0px" }
+    );
+    bandIo.observe(section);
 
     return () => {
       io.disconnect();
+      bandIo.disconnect();
       cancelAnimationFrame(raf);
     };
   }, []);

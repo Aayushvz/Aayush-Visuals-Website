@@ -70,21 +70,63 @@ const CLOSED = [
   { dx: 0.32, rz: 2, peek: 18, z: 2 },
 ];
 
-/* pin timeline (fractions of the scroll span):
-   - desktop: 520.83vh driver (420.83vh span), deal ends ~0.653 -> ~145.8vh
-     exit dwell after the 6th card lands (~2.5 scrolls)
-   - mobile: shorter 440vh driver (340vh span) AND deal finishes ~0.75, so
-     only ~1 viewport of exit dwell after the 6th card lands (was 3-4 swipes) */
-const DEAL_DESKTOP = { start: 0.4752, step: 0.0356 };
-const DEAL_MOBILE = { start: 0.46, step: 0.058 };
+/*
+  Pin timeline.
 
-function countRevealed(p: number, start: number, step: number) {
-  let n = 0;
-  for (let i = 0; i < CARDS.length; i++) {
-    if (p >= start + i * step) n = i + 1;
-  }
-  return n;
+  The section is pulled up 100vh under Process, so the FIRST 100vh of its
+  scroll span is spent with Process still sliding away on top — the reader
+  hasn't arrived yet. Everything below is measured from the end of that.
+
+  Three and a half beats after arrival:
+
+    1    dwell   closed wallet, the reader takes the scene in
+    2    deal A  cards 1-3 out together
+    3    deal B  cards 4-6 out together
+    0.5  dwell   all six held briefly, then the section releases
+
+  This replaced a six-step deal that cost ~320vh of scrolling after the
+  parallax (100vh of dead dwell, then one card per ~15vh, then a 146vh
+  tail). `beat` is the one number to touch if it still feels long, and
+  `tail` is how much of a beat is held after the last card lands —
+  everything else here is derived from those two.
+
+  `total` must match `min-height` on `.capabilities--pinned` in globals.css
+  (and the phone override in the max-width: 640px block). `pin` is the
+  sticky pane's own 100vh, which useScroll's "end end" offset subtracts.
+  total = pin + parallax + beat * (3 + tail).
+*/
+const TIMELINE_DESKTOP = { total: 375, pin: 100, parallax: 100, beat: 50, tail: 0.5 };
+const TIMELINE_MOBILE = { total: 340, pin: 100, parallax: 100, beat: 40, tail: 0.5 };
+
+type Timeline = typeof TIMELINE_DESKTOP;
+
+/* the two scroll fractions where a group of three lands */
+function dealPoints(t: Timeline) {
+  const span = t.total - t.pin;
+  return {
+    a: (t.parallax + t.beat) / span,
+    b: (t.parallax + t.beat * 2) / span,
+    /* where a wallet click parks the scroll so the next real scroll input
+       carries on from the right place: just past each trigger, so scrolling
+       back the other way re-crosses it and reverses naturally */
+    afterB: (t.parallax + t.beat * 2.25) / span,
+    beforeA: (t.parallax + t.beat * 0.5) / span,
+  };
 }
+
+function countRevealed(p: number, d: ReturnType<typeof dealPoints>) {
+  if (p >= d.b) return CARDS.length;
+  if (p >= d.a) return 3;
+  return 0;
+}
+
+/*
+  Each beat deals three cards in index order, and both scatters alternate
+  sides by row (0 left, 1 right, 2 left...), so a beat zigzags across the
+  wallet: left, right, left — then right, left, right. The cards arrive
+  50ms apart (see the spring delay below), so the zigzag reads as a hand
+  dealing across the scene rather than three cards appearing at once.
+*/
 
 /* deterministic starfield layers (no hydration mismatch) */
 const FAR_STARS = [
@@ -197,13 +239,13 @@ export default function Capabilities() {
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-  const deal = desktop ? DEAL_DESKTOP : DEAL_MOBILE;
+  const deal = dealPoints(desktop ? TIMELINE_DESKTOP : TIMELINE_MOBILE);
   // single, always-on, bidirectional mapping from scroll progress to reveal
   // count — no gating, no "already done" flag. Scrolling up naturally
   // decreases n again, which is exactly the reverse/collect animation.
   useMotionValueEvent(scrollYProgress, "change", (p) => {
     if (!pinned) return;
-    const n = countRevealed(p, deal.start, deal.step);
+    const n = countRevealed(p, deal);
     setScrollRevealed((prev) => (prev === n ? prev : n));
   });
 
@@ -236,9 +278,7 @@ export default function Capabilities() {
     const top = rect.top + window.scrollY;
     const range = sectionEl.offsetHeight - window.innerHeight;
     if (range <= 0) return;
-    const targetP = revealing
-      ? Math.min(1, deal.start + (CARDS.length - 1) * deal.step + 0.01)
-      : Math.max(0, deal.start - 0.05);
+    const targetP = revealing ? Math.min(1, deal.afterB) : Math.max(0, deal.beforeA);
     window.scrollTo({ top: top + targetP * range, behavior: "instant" });
   };
 
@@ -396,7 +436,14 @@ export default function Capabilities() {
                         stiffness: 230,
                         damping: 26,
                         mass: 0.9,
-                        delay: clickDirection === "all" ? i * 0.06 : 0,
+                        /* A click throws all six, so it staggers across all
+                           six. A scroll beat deals three, so it staggers
+                           within the group only (0 / 50 / 100ms) — enough
+                           that they zigzag left-right-left instead of
+                           teleporting in together, short enough that the
+                           three still read as one gesture. */
+                        delay:
+                          clickDirection === "all" ? i * 0.06 : (i % 3) * 0.05,
                       }
                 }
                 drag={open && !reduce}
@@ -416,6 +463,7 @@ export default function Capabilities() {
                   className="capCard__img"
                   src={`/skills/${card.slug}.webp`}
                   alt={card.title}
+                  loading="lazy"
                   decoding="async"
                   draggable={false}
                 />

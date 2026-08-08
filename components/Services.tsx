@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import ExtCta from "./ExtCta";
 
 // Exact sequence of 6 unique service card images
 const services = [
@@ -264,24 +265,7 @@ export default function Services() {
             Branding, UI/UX, graphic design &amp; video editing to help your brand stand out.
           </p>
 
-          <a href="#contact" className="services-cta">
-            <span className="services-cta__icon">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </span>
-            Book a Service
-          </a>
+          <ExtCta href="#contact">Book a Service</ExtCta>
         </div>
 
         <div className="services-wrapper">
@@ -327,24 +311,7 @@ export default function Services() {
             Branding, UI/UX, graphic design &amp; video editing to help your brand stand out.
           </p>
 
-          <a href="#contact" className="services-cta">
-            <span className="services-cta__icon">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </span>
-            Book a Service
-          </a>
+          <ExtCta href="#contact">Book a Service</ExtCta>
         </div>
 
         <div className="services-deck-stage">

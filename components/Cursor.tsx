@@ -31,17 +31,34 @@ export default function Cursor() {
     let ry = -100;
     let raf = 0;
 
+    /* The pointer fires many times per frame on a high-polling mouse. Both
+       the dot (1:1) and the ring (lerped) are written once per frame from
+       the loop instead, so a fast flick costs one style write each, not a
+       dozen. */
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
-      dot.style.transform = `translate(${tx}px, ${ty}px)`;
+      wake();
     };
 
     const loop = () => {
+      raf = 0;
+      dot.style.transform = `translate(${tx}px, ${ty}px)`;
       rx += (tx - rx) * 0.24;
       ry += (ty - ry) * 0.24;
       ring.style.transform = `translate(${rx}px, ${ry}px)`;
+      /* Park once the ring has caught up with the pointer. Idle, this loop
+         was re-rendering an unchanged transform 60x a second forever. */
+      if (Math.abs(tx - rx) < 0.1 && Math.abs(ty - ry) < 0.1) {
+        rx = tx;
+        ry = ty;
+        return;
+      }
       raf = requestAnimationFrame(loop);
+    };
+
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(loop);
     };
 
     const onOver = (e: PointerEvent) => {
@@ -52,7 +69,7 @@ export default function Cursor() {
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerover", onOver, { passive: true });
-    raf = requestAnimationFrame(loop);
+    wake();
 
     return () => {
       document.documentElement.classList.remove("has-cursor");

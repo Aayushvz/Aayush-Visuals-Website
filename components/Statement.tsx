@@ -136,9 +136,58 @@ export default function Statement() {
     // ---- per-tile smoothed cursor proximity ----
     const tState = TOOLS.map(() => ({ p: 0, dx: 0, dy: 0 }));
 
+    /* Tile box geometry, measured once instead of per frame. Reading
+       offsetLeft/offsetWidth inside the loop *after* writing a transform to
+       the previous tile forced a synchronous layout for every tile on every
+       frame (read-write-read-write thrash). The boxes only move when the
+       layout reflows, so measure on mount + resize and reuse. */
+    type Box = { left: number; top: number; w: number; h: number };
+    let boxes: Box[] = [];
+    const measure = () => {
+      boxes = toolRefs.current.map((el) =>
+        el
+          ? { left: el.offsetLeft, top: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }
+          : { left: 0, top: 0, w: 0, h: 0 }
+      );
+    };
+
     let raf = 0;
     let shown = false;
+
+    /* This loop reads layout and writes styles every frame. Left
+       unconditional it ran for the entire life of the page — including the
+       whole scroll past Projects, Services and the footer — which is pure
+       main-thread cost with nothing on screen to show for it. Park it
+       unless the panel is actually near the viewport.
+
+       Starts true so the very first frames run and seed --tp/--lineP even
+       before the observer's first (async) callback — the word reveal reads
+       those, and a panel that never got a value would render its text at
+       the 0.22 opacity floor. The observer parks it a frame later if the
+       panel is nowhere near the viewport. */
+    let visible = true;
+    const wake = () => {
+      if (!raf && visible) raf = requestAnimationFrame(loop);
+    };
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible) {
+          measure();
+          wake();
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+    io.observe(section);
+
+    let lastTp = "";
+    let lastLp = "";
+    const lastTileT: string[] = [];
+
     const loop = () => {
+      raf = 0;
+      if (!visible) return;
       const r = section.getBoundingClientRect();
       const vh = window.innerHeight || 1;
       const rise = Math.min(1, Math.max(0, 1 - r.top / vh));
@@ -155,10 +204,20 @@ export default function Statement() {
       const endTrigger = -1.0 * vh;
       const p = Math.min(1, Math.max(0, (startTrigger - r.top) / (startTrigger - endTrigger)));
 
-      section.style.setProperty("--tp", p.toFixed(4));
-      
-      const lp = Math.min(1, p * 1.3);
-      section.style.setProperty("--lineP", lp.toFixed(4));
+      /* --tp and --lineP are read by every word span's calc(), so each write
+         invalidates style for the whole block. Skip the write when the value
+         is unchanged (it is, for most frames of a slow scroll). */
+      const tp = p.toFixed(4);
+      if (tp !== lastTp) {
+        lastTp = tp;
+        section.style.setProperty("--tp", tp);
+      }
+
+      const lp = Math.min(1, p * 1.3).toFixed(4);
+      if (lp !== lastLp) {
+        lastLp = lp;
+        section.style.setProperty("--lineP", lp);
+      }
 
       // scroll drift of the typography plane is removed to keep it fully pinned
       const sp = Math.min(1, Math.max(0, -r.top / vh));
@@ -237,8 +296,10 @@ export default function Statement() {
       toolRefs.current.forEach((el, i) => {
         if (!el) return;
         const s = tState[i];
-        const cx0 = r.left + el.offsetLeft + el.offsetWidth / 2;
-        const cy0 = r.top + el.offsetTop + el.offsetHeight / 2;
+        const box = boxes[i];
+        if (!box) return;
+        const cx0 = r.left + box.left + box.w / 2;
+        const cy0 = r.top + box.top + box.h / 2;
         const dx = ptr.cx - cx0;
         const dy = ptr.cy - cy0;
         const dist = Math.hypot(dx, dy) || 1;
@@ -251,14 +312,28 @@ export default function Statement() {
         const ty = s.dy * 10 * pull - sp * 40;
         const ry = s.dx * 6 * pull; // tilt toward cursor horizontally
         const rx = -s.dy * 6 * pull; // and vertically
-        el.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+        const t = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+        if (t !== lastTileT[i]) {
+          lastTileT[i] = t;
+          el.style.transform = t;
+        }
       });
 
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+
+    const onResize = () => {
+      measure();
+      wake();
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+
+    measure();
+    wake();
 
     return () => {
+      io.disconnect();
+      window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
       if (fine) window.removeEventListener("pointermove", onMove);
     };

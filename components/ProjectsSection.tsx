@@ -1,9 +1,11 @@
 import SelectedWorks from "./projects/SelectedWorks";
 import PrefetchWorkMedia from "./projects/PrefetchWorkMedia";
 import PageLink from "./PageLink";
+import ExtCta from "./ExtCta";
 import { PROJECTS, SELECTED_PROJECTS } from "./projects/projectData";
 
-/* the arrow both calls to action share, so they can never drift apart */
+/* the closing ledger row's arrow — it resolves the 01-07 numeral column, so
+   it stays a plain glyph rather than the primary button's dot matrix */
 function ArrowUpRight() {
   return (
     <svg
@@ -70,13 +72,9 @@ export default function ProjectsSection() {
           </p>
           {/* the count above says how many are on show; this says how many
               there are, which is the reason to click it */}
-          <PageLink href="/work" className="selWorks__headCta" data-reveal>
-            <span className="selWorks__headCtaText">View all projects</span>
-            <span className="selWorks__headCtaNum">{total}</span>
-            <span className="selWorks__headCtaIcon">
-              <ArrowUpRight />
-            </span>
-          </PageLink>
+          <ExtCta href="/work" route count={total} data-reveal>
+            View all projects
+          </ExtCta>
         </div>
       </div>
       <div className="selWorks__divider" aria-hidden />

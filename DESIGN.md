@@ -103,8 +103,24 @@ Motion is part of the build, not an afterthought. Library: **framer-motion**
 (springs, scroll, drag) + CSS keyframes for ambient loops. Lenis is not used;
 scroll is native.
 
-- **Standard easing:** `cubic-bezier(0.22, 1, 0.36, 1)` (ease-out-quint feel) —
-  the default for transitions across the whole site.
+### Tokens (`:root` in `globals.css`)
+
+| Token | Value | Use |
+|---|---|---|
+| `--ease-quint` | `cubic-bezier(0.22, 1, 0.36, 1)` | **The site default.** Every transition unless there's a reason. |
+| `--ease-expo` | `cubic-bezier(0.16, 1, 0.3, 1)` | Snappier, decisive — larger panels |
+| `--ease-inout` | `cubic-bezier(0.76, 0, 0.24, 1)` | Symmetric moves (page wipe, preloader split) |
+| `--dur-press` | `130ms` | Press feedback |
+| `--dur-hover` | `200ms` | Hover / color |
+| `--dur-state` | `260ms` | State changes, press release |
+| `--dur-panel` | `420ms` | Real layout moves |
+
+Use the tokens. They exist so the whole site's feel is tunable from one
+place; a hand-typed cubic-bezier is a bug unless it's doing something the
+tokens can't.
+
+- **Standard easing:** `var(--ease-quint)` (ease-out-quint feel) — the default
+  for transitions across the whole site.
 - **Spring (deal / scatter / drag):** `type: "spring", stiffness ~230–260,
   damping ~26, mass ~0.9`.
 - **Pop / node reveal:** `cubic-bezier(0.34, 1.56, 0.64, 1)` — an intentional,
@@ -114,6 +130,28 @@ scroll is native.
   filter). Nebula, aurora curtains, starfield, wallet float.
 - **Reduced motion:** every animation has a `@media (prefers-reduced-motion:
   reduce)` path — pins disable, loops stop, reveals become instant. Non-optional.
+  A safety net at the bottom of `globals.css` lists every perpetual ambient
+  loop by selector; add new ones to it. Feedback survives reduced motion
+  (presses dim instead of scaling) — it means less movement, not no response.
+
+### Press feedback
+
+Controls scale to `0.97` on `:active` (`--dur-press` in, `--dur-state` out —
+pressure registers instantly, recovery is what gets to be smooth). Text links
+dim to `0.6` instead of moving. The selector list lives in the
+MICRO-INTERACTION LAYER block at the bottom of `globals.css`; add new controls
+there by name rather than blanket-styling `button, a` (most links here sit in
+prose or a nav row, where a scale reads as a glitch).
+
+### rAF loops
+
+Any per-frame loop **must** park itself. The pattern: an
+`IntersectionObserver` with `rootMargin: "200px 0px"` flips a `visible` flag,
+`wake()` restarts the loop, and the loop returns early when parked. Start
+`visible` as `true` so the first frames seed any CSS custom property the
+paint depends on. Measure element geometry (`offsetLeft` / `offsetWidth`) once
+on mount and resize, never inside the loop next to a style write — that
+interleaving forces a synchronous layout on every frame.
 
 ---
 
@@ -143,6 +181,23 @@ deck), `ProjectsSection`, `Services` (3D card carousel), `Testimonials`,
 About page: `about/AboutPageClient` + `AsciiPortrait`, `PixelBackground`,
 `StatusBar`, `Testimonials`. Shared: `Cursor`, `ThemeToggle`, `PageLink`
 (cinematic route transition), `LogoStrip`, `useSurfaceTone`.
+
+### `ExtCta` — the primary button
+
+`components/ExtCta.tsx` (`.extCta`) is the site's one primary action, shared
+between the homepage and the case-study pages, where it started life as
+`.figp-ext` ("Visit Live Website"). Charcoal bar, purple square tile; on
+hover the accent un-clips out of the square to fill the bar while the label
+gives way to a conveyor of dot arrows.
+
+Use it for the single most important action in a section. Props: `href`,
+`count` (an optional payload badge), `route` (renders through `PageLink` so
+a route change plays the page-transition wipe; omit for in-page hashes).
+
+Do not reach for it twice in one view. Selected Works deliberately pairs it
+with `.selWorks__endCta`, which is a ledger row belonging to the project reel
+rather than a button — two primary buttons there would flatten the section's
+hierarchy.
 
 ---
 

@@ -52,6 +52,20 @@
   --heroCard-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.42), 0 18px 36px rgba(0, 0, 0, 0.4),
     0 48px 100px rgba(0, 0, 0, 0.5);
 
+  /* ---- motion ----
+     One place to tune how the whole site feels. --ease-quint is the site's
+     standard curve; it was hand-typed in ~75 places before this. Durations
+     follow the 100/300/500 rule: feedback is near-instant, state changes
+     sit under 300ms, only real layout moves are allowed to take longer. */
+  --ease-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --dur-press: 130ms;
+  --dur-hover: 200ms;
+  --dur-state: 260ms;
+  --dur-panel: 420ms;
+
   /* apple-style glass */
   --glass-bg: rgba(16, 16, 20, 0.58);
   --glass-fg: #f4f1ea;
@@ -120,6 +134,22 @@ a {
   text-decoration: none;
 }
 
+/* Available to assistive tech and search crawlers, invisible on screen.
+   Used for the page's h1: the hero's identity lockup is a drawn brand mark
+   inside a drag canvas, not a heading, so the document gets a real one
+   here instead of forcing heading semantics onto the artwork. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ============================================================
    PAGE TRANSITIONS  (PageLink + app/template.tsx + PageTransition.tsx)
    ============================================================ */
@@ -129,7 +159,7 @@ a {
    covers the screen before any route swap happens underneath it. */
 .pageEnter > main,
 .aboutPage__content {
-  animation: pageEnter 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageEnter 0.52s var(--ease-quint) both;
 }
 
 @keyframes pageEnter {
@@ -157,7 +187,7 @@ a {
   background: #6a1eed;
   transform: scale(0);
   transform-origin: center;
-  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.5s var(--ease-inout);
   will-change: transform;
 }
 
@@ -264,7 +294,7 @@ html.has-cursor .cursorRing {
   white-space: nowrap;
   opacity: 0;
   scale: 0.6;
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1), scale 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.32s var(--ease-quint), scale 0.32s var(--ease-quint);
 }
 
 .cursorRing__ctaText {
@@ -532,7 +562,7 @@ html.has-cursor .cursorRing {
   position: absolute;
   background: var(--hero-brand);
   opacity: 0;
-  animation: trailCell 3.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: trailCell 3.4s var(--ease-quint) forwards;
 }
 
 @keyframes trailCell {
@@ -607,7 +637,7 @@ html.has-cursor .cursorRing {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.6s var(--ease-quint);
 }
 
 .heroRuler--hidden {
@@ -622,7 +652,7 @@ html.has-cursor .cursorRing {
   width: 1px;
   background: var(--hero-fg);
   opacity: 0.45;
-  animation: rulerRail 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rulerRail 0.7s var(--ease-quint) both;
   transition: background-color 0.55s ease;
 }
 
@@ -667,22 +697,22 @@ html.has-cursor .cursorRing {
 /* entrance: lines draw inward from the outer rails */
 .heroRuler__seg--outerLeft {
   transform-origin: left center;
-  animation: rulerSeg 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+  animation: rulerSeg 0.8s var(--ease-quint) 0.18s both;
 }
 
 .heroRuler__seg--outerRight {
   transform-origin: right center;
-  animation: rulerSeg 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+  animation: rulerSeg 0.8s var(--ease-quint) 0.18s both;
 }
 
 .heroRuler__seg--innerLeft {
   transform-origin: left center;
-  animation: rulerSeg 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both;
+  animation: rulerSeg 0.5s var(--ease-quint) 0.62s both;
 }
 
 .heroRuler__seg--innerRight {
   transform-origin: right center;
-  animation: rulerSeg 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.62s both;
+  animation: rulerSeg 0.5s var(--ease-quint) 0.62s both;
 }
 
 /* deliberate central title clearance zone */
@@ -698,7 +728,7 @@ html.has-cursor .cursorRing {
   white-space: nowrap;
   color: var(--hero-fg);
   opacity: 0.72;
-  animation: rulerLabel 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+  animation: rulerLabel 0.6s var(--ease-quint) 0.5s both;
   transition: color 0.55s ease;
 }
 
@@ -815,7 +845,7 @@ html.has-cursor .cursorRing {
   overflow: hidden;
   border: 1px solid var(--heroCard-border);
   box-shadow: var(--heroCard-shadow);
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: transform 0.32s var(--ease-quint),
     border-color 0.55s ease, box-shadow 0.32s ease;
   will-change: transform;
   background: #1a1a1c;
@@ -1157,7 +1187,7 @@ html.has-cursor .cursorRing {
   border-radius: 28px;
   overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.14), 0 6px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+  transition: transform 0.5s var(--ease-quint), box-shadow 0.4s ease;
   will-change: transform;
 }
 
@@ -1319,14 +1349,18 @@ html.has-cursor .cursorRing {
   position: absolute;
   left: 0;
   top: 0;
-  width: 0;
+  /* drawn with scaleX rather than an animated width: same 40px segment,
+     but it runs on the compositor instead of relaying out on every frame */
+  width: 40px;
   height: 100%;
   background: var(--purple);
-  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease-quint);
 }
 
 .aboutStat:hover .aboutStat__rule::after {
-  width: 40px;
+  transform: scaleX(1);
 }
 
 .aboutStat__desc {
@@ -1345,7 +1379,7 @@ html.has-cursor .cursorRing {
   }
 
   .aboutStat:hover .aboutStat__rule::after {
-    width: 0;
+    transform: scaleX(0);
   }
 
   .aboutCard:hover::before {
@@ -1621,8 +1655,8 @@ html.has-cursor .cursorRing {
   opacity: 0;
   translate: 0 26px;
   scale: 0.85;
-  transition: opacity 0.7s ease, translate 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    scale 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.7s ease, translate 0.7s var(--ease-quint),
+    scale 0.7s var(--ease-quint);
 }
 
 .toolTile--figma .toolTile__enter {
@@ -1664,7 +1698,7 @@ html.has-cursor .cursorRing {
     inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -12px 20px rgba(0, 0, 0, 0.28);
   transform-style: preserve-3d;
   animation: toolFloat3d var(--dur, 7s) cubic-bezier(0.37, 0, 0.63, 1) var(--del, 0s) infinite;
-  transition: scale 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease,
+  transition: scale 0.35s var(--ease-quint), border-color 0.35s ease,
     box-shadow 0.35s ease;
 }
 
@@ -1855,9 +1889,9 @@ html.has-cursor .cursorRing {
   border-radius: 12px;
   opacity: 0;
   transform: translateY(32px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              background 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: opacity 0.7s var(--ease-quint),
+              transform 0.7s var(--ease-quint),
+              background 0.4s var(--ease-quint),
               border-color 0.4s ease;
   transition-delay: calc(var(--step-i) * 0.12s);
 }
@@ -1907,7 +1941,7 @@ html.has-cursor .cursorRing {
   color: var(--ink);
   line-height: 1;
   letter-spacing: -0.02em;
-  transition: color 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.4s ease, transform 0.4s var(--ease-quint);
 }
 
 .process__step:hover .process__title {
@@ -2061,7 +2095,7 @@ html.has-cursor .cursorRing {
   background: linear-gradient(90deg, rgba(124, 58, 237, 0.45), #7c3aed);
   transform-origin: left;
   transform: scaleX(0);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.5s var(--ease-quint);
   z-index: 2;
   pointer-events: none;
 }
@@ -2077,7 +2111,7 @@ html.has-cursor .cursorRing {
   transform: translate(-50%, -50%);
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16), 0 0 14px rgba(124, 58, 237, 0.55);
   transition:
-    left 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.5s var(--ease-quint),
     opacity 0.4s ease;
   z-index: 3;
   pointer-events: none;
@@ -2127,8 +2161,8 @@ html.has-cursor .cursorRing {
   opacity: 0;
   transform: translateY(14px) scale(0.97);
   transition:
-    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.6s var(--ease-quint),
+    transform 0.6s var(--ease-quint),
     box-shadow 0.4s ease;
 }
 
@@ -2227,7 +2261,7 @@ html.has-cursor .cursorRing {
 .procTile__icon svg {
   width: 100%;
   height: 100%;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.45s var(--ease-quint);
 }
 
 @keyframes procIconFloat {
@@ -2301,8 +2335,8 @@ html.has-cursor .cursorRing {
   opacity: 0;
   transform: translateY(22px);
   transition:
-    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.65s var(--ease-quint),
+    transform 0.65s var(--ease-quint);
 }
 
 .procCard--visible .procCard__content {
@@ -2338,7 +2372,9 @@ html.has-cursor .cursorRing {
 .procCard__desc {
   font-size: 14px;
   line-height: 1.65;
-  color: #777777;
+  /* was #777 — 4.17:1 on the card's #f7f7f5, under the 4.5:1 floor for
+     body text. #6b6b6b clears it at 4.97:1 and still reads as muted. */
+  color: #6b6b6b;
   margin: 0 0 18px;
 }
 
@@ -2357,7 +2393,7 @@ html.has-cursor .cursorRing {
   border-radius: 4px;
   padding: 4px 10px;
   text-transform: uppercase;
-  transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s var(--ease-quint);
 }
 
 .procCard:hover .procCard__tag {
@@ -2460,14 +2496,18 @@ html.has-cursor .cursorRing {
   z-index: 1;
 }
 
-/* pulled up 100vh under the Process panel (which carries a higher z), so
+/* Pulled up 100vh under the Process panel (which carries a higher z), so
    Process slides away revealing the pinned wallet scene — the parallax.
-   Driver timeline (520.83vh = 100vh pin base + 420.83vh scroll span):
-   100vh parallax → 100vh closed-wallet dwell → ~75vh deal → ~145.8vh exit
-   dwell (~2.5 scrolls after the last card lands; one "scroll" ≈ 58.3vh,
-   derived from the original ~175vh/~3-scroll tail) */
+
+   Driver timeline (375vh = 100vh pin base + 275vh scroll span):
+   100vh parallax → 50vh dwell → 50vh deals cards 1-3 → 50vh deals cards
+   4-6 → 25vh held → release into Projects.
+
+   MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
+   card-reveal thresholds are computed from those numbers, so changing one
+   without the other slides the deal off its beats. */
 .capabilities--pinned {
-  min-height: 520.83vh;
+  min-height: 375vh;
   margin-top: -100vh;
 }
 
@@ -2770,11 +2810,11 @@ html.has-cursor .cursorRing {
 /* -------- phones: pinned canvas — 2x3 card grid above the bottom wallet
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
-  /* shorter pin driver on phones: paired with the later mobile deal timing
-     (DEAL_MOBILE), this leaves only ~1 viewport of exit dwell after the deal
-     instead of the desktop ~175vh tail */
+  /* shorter beats on phones (40vh rather than 50), where a swipe covers
+     less ground: 100vh parallax + 3 x 40vh + 20vh tail + 100vh pin base.
+     MUST match TIMELINE_MOBILE.total in components/Capabilities.tsx. */
   .capabilities--pinned {
-    min-height: 440vh;
+    min-height: 340vh;
   }
 
   .capabilities .capabilities__canvas {
@@ -2842,7 +2882,7 @@ html.has-cursor .cursorRing {
     0 0 44px rgba(139, 92, 246, 0.22);
   transform: perspective(950px) rotateX(12deg);
   transform-style: preserve-3d;
-  transition: box-shadow 0.4s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: box-shadow 0.4s ease, transform 0.5s var(--ease-quint);
 }
 
 .wallet:hover .wallet__body {
@@ -2891,7 +2931,7 @@ html.has-cursor .cursorRing {
   height: 46%;
   border-radius: 9px 9px 3px 3px;
   border: 1px solid rgba(233, 223, 255, 0.18);
-  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.35s ease, transform 0.45s var(--ease-quint);
 }
 
 .wallet__peek--a {
@@ -3216,7 +3256,7 @@ html.has-cursor .cursorRing {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.8s var(--ease-quint);
   will-change: transform;
 }
 
@@ -3301,78 +3341,11 @@ html.has-cursor .cursorRing {
 
 /* -------- the section's two calls to action --------
 
-   Both go to /work. The header one is a quiet inline control sized to sit
-   under the note without competing with the display heading; the closing
-   one is a full ledger row (see below). Neither is filled — the section is
-   ruled hairlines and mono on cream, and a solid button would be the only
-   heavy object on it. */
-
-.selWorks__headCta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 14px 9px 16px;
-  border: 1px solid var(--selw-line);
-  border-radius: 999px;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11px, 0.92vw, 13px);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
-  text-decoration: none;
-  background: transparent;
-  transition: border-color 0.25s ease-out, color 0.25s ease-out;
-}
-
-/* the count sits in its own well, so the label reads as the action and the
-   number as the payload rather than the two running together */
-.selWorks__headCtaNum {
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(31, 31, 31, 0.07);
-  font-size: 0.92em;
-  letter-spacing: 0.04em;
-  color: rgba(31, 31, 31, 0.62);
-  transition: background-color 0.25s ease-out, color 0.25s ease-out;
-}
-
-.selWorks__headCtaIcon {
-  display: inline-flex;
-  width: 14px;
-  height: 14px;
-}
-.selWorks__headCtaIcon svg {
-  width: 100%;
-  height: 100%;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Hover fills rather than outlines. The count well inverts as it goes:
-   white on purple, so it stays a distinct object inside the fill instead of
-   dissolving into it. */
-@media (hover: hover) {
-  .selWorks__headCta:hover,
-  .selWorks__headCta:focus-visible {
-    background: var(--purple);
-    border-color: var(--purple);
-    color: #fff;
-  }
-  .selWorks__headCta:hover .selWorks__headCtaNum,
-  .selWorks__headCta:focus-visible .selWorks__headCtaNum {
-    background: #fff;
-    color: var(--purple);
-  }
-  /* the arrow leaves in the direction it points */
-  .selWorks__headCta:hover .selWorks__headCtaIcon svg,
-  .selWorks__headCta:focus-visible .selWorks__headCtaIcon svg {
-    transform: translate(2px, -2px);
-  }
-}
-
-.selWorks__headCta:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 3px;
-}
+   Both go to /work, and they are deliberately different objects. The header
+   one is now the site's primary button (.extCta, shared with the case-study
+   pages) — the one solid, heavy thing in a section of ruled hairlines, which
+   is what makes it read as the action. The closing one is a full ledger row
+   (see below) that belongs to the reel rather than to the button system. */
 
 /* -------- closing CTA: the ledger's last line --------
 
@@ -3391,7 +3364,7 @@ html.has-cursor .cursorRing {
   -webkit-tap-highlight-color: transparent;
   /* the fill is the event, so it gets the longer, softer curve and the
      colour changes ride along underneath it */
-  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: background-color 0.4s var(--ease-quint),
     border-color 0.3s ease-out;
 }
 
@@ -3463,7 +3436,7 @@ html.has-cursor .cursorRing {
   width: 100%;
   height: 100%;
   stroke-width: 1.25;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: transform 0.45s var(--ease-quint),
     color 0.25s ease-out;
 }
 
@@ -3511,12 +3484,9 @@ html.has-cursor .cursorRing {
 
 @media (prefers-reduced-motion: reduce) {
   /* the hover still resolves, it just resolves as colour rather than travel */
-  .selWorks__headCtaIcon svg,
   .selWorks__endCtaIcon svg {
     transition: color 0.25s ease-out;
   }
-  .selWorks__headCta:hover .selWorks__headCtaIcon svg,
-  .selWorks__headCta:focus-visible .selWorks__headCtaIcon svg,
   .selWorks__endCta:hover .selWorks__endCtaIcon svg,
   .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
     transform: none;
@@ -3588,9 +3558,6 @@ html.has-cursor .cursorRing {
   .selWorks__endCtaIcon {
     width: clamp(34px, 11vw, 52px);
     height: clamp(34px, 11vw, 52px);
-  }
-  .selWorks__headCta {
-    width: auto;
   }
 }
 
@@ -3687,8 +3654,8 @@ html.has-cursor .cursorRing {
   opacity: 0;
   transform: scale(1);
   filter: blur(16px);
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.55s var(--ease-quint),
+    transform 0.55s var(--ease-quint), filter 0.55s var(--ease-quint);
 }
 
 .projTile:hover .projTile__cover,
@@ -3728,7 +3695,7 @@ html.has-cursor .cursorRing {
     linear-gradient(to bottom, #F2EDE6 0%, rgba(242, 237, 230, 0.58) 15%, transparent 35%),
     linear-gradient(to top, #F2EDE6 0%, rgba(242, 237, 230, 0.71) 25%, transparent 50%);
   opacity: 0;
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.55s var(--ease-quint);
   z-index: 3;
   pointer-events: none;
 }
@@ -3759,7 +3726,7 @@ html.has-cursor .cursorRing {
 .projTile:hover .projTile__sheen,
 .projTile:focus-visible .projTile__sheen {
   opacity: 1;
-  animation: sheenSweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sheenSweep 1.6s var(--ease-quint) both;
 }
 
 @keyframes sheenSweep {
@@ -3785,7 +3752,7 @@ html.has-cursor .cursorRing {
   object-fit: contain;
   opacity: 0.85;
   filter: grayscale(1) brightness(0); /* solid black at rest */
-  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
+  transition: transform 0.65s var(--ease-quint), opacity 0.55s ease;
 }
 
 .projTile[data-project-id="dropby"] .projTile__logoImg {
@@ -3823,7 +3790,7 @@ html.has-cursor .cursorRing {
   font-size: clamp(28px, 3vw, 50px);
   font-weight: 400; /* clean regular serif weight */
   color: var(--ink);
-  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.65s var(--ease-quint), color 0.5s var(--ease-quint);
 }
 
 .projTile__category {
@@ -3867,7 +3834,7 @@ html.has-cursor .cursorRing {
   inset: 0;
   background: rgba(242, 237, 230, 0.56);
   opacity: 0;
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.55s var(--ease-quint);
   z-index: 4;
   pointer-events: none;
 }
@@ -3922,7 +3889,7 @@ html.has-cursor .cursorRing {
   border: 1px solid transparent;
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease,
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.3s var(--ease-quint);
 }
 
 .ctaPill--solid {
@@ -3983,7 +3950,7 @@ html.has-cursor .cursorRing {
   color: var(--ink);
   cursor: pointer;
   transition: background 0.3s ease, border-color 0.3s ease,
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.3s var(--ease-quint);
 }
 
 .projModal__close:hover {
@@ -5772,7 +5739,7 @@ html.has-cursor .cursorRing {
   bottom: 0;
   width: 1px;
   background: rgba(244, 241, 234, 0.45);
-  animation: rulerRail 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rulerRail 0.7s var(--ease-quint) both;
 }
 
 .aboutRulers__rail--left {
@@ -6021,7 +5988,7 @@ html.has-cursor .cursorRing {
 [data-enter] {
   opacity: 0;
   translate: 0 22px;
-  animation: aboutEnter 0.85s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) forwards;
+  animation: aboutEnter 0.85s var(--ease-quint) var(--d, 0s) forwards;
 }
 
 @keyframes aboutEnter {
@@ -6089,7 +6056,7 @@ html.has-cursor .cursorRing {
 }
 
 .aboutPage__barVal--status {
-  animation: aboutStatusIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: aboutStatusIn 0.35s var(--ease-quint);
 }
 
 @keyframes aboutStatusIn {
@@ -6105,7 +6072,7 @@ html.has-cursor .cursorRing {
 
 .aboutPage__barSection {
   color: rgba(244, 241, 234, 0.5);
-  animation: aboutStatusIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: aboutStatusIn 0.35s var(--ease-quint);
 }
 
 /* -------- about page: content sections below hero -------- */
@@ -6549,14 +6516,16 @@ html.has-cursor .cursorRing {
   position: absolute;
   left: 0;
   bottom: -1px;
-  width: 0;
+  width: 64px;
   height: 2px;
   background: #7c3aed;
-  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s var(--ease-quint);
 }
 
 .aboutCompetencies__row:hover::after {
-  width: 64px;
+  transform: scaleX(1);
 }
 
 .aboutCompetencies__icon {
@@ -6565,8 +6534,8 @@ html.has-cursor .cursorRing {
   color: #1a1a1a;
   flex-shrink: 0;
   opacity: 0.7;
-  transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+  transition: color 0.35s var(--ease-quint),
+    transform 0.35s var(--ease-quint), opacity 0.35s ease;
 }
 
 .aboutCompetencies__row:hover .aboutCompetencies__icon {
@@ -6582,8 +6551,8 @@ html.has-cursor .cursorRing {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #1a1a1a;
-  transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    translate 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.35s var(--ease-quint),
+    translate 0.35s var(--ease-quint);
 }
 
 .aboutCompetencies__row:hover .aboutCompetencies__title {
@@ -6870,11 +6839,15 @@ html.has-cursor .cursorRing {
 /* Pagination dots */
 .testi__dots {
   display: flex;
-  gap: 6px;
+  /* 10px (was 6) so the enlarged hit areas below sit edge to edge instead
+     of overlapping — an overlapping target lets the later dot swallow
+     clicks meant for its neighbour */
+  gap: 10px;
   align-items: center;
 }
 
 .testi__dot {
+  position: relative;
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -6884,6 +6857,21 @@ html.has-cursor .cursorRing {
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
   flex-shrink: 0;
+}
+
+/* The dot stays 8px because that's the design; the *target* grows to 18px
+   so a thumb can actually land on it — it was 8x8, roughly a fifth of the
+   area a finger needs. Invisible and out of flow, so nothing moves.
+
+   18 rather than the 24 of WCAG 2.5.8: 24px targets at this pitch would
+   overlap each other, and reaching 24 without overlap needs a 16px gap,
+   which visibly loosens the pager. This is 5x the original target area
+   with no click-stealing; going the rest of the way is a design call. */
+.testi__dot::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
 }
 
 .testi__dot--on {
@@ -6958,7 +6946,8 @@ html.has-cursor .cursorRing {
 
 .testi__pRole {
   font-size: 12px;
-  color: #888888;
+  /* was #888 — 3.54:1 on white at 12px. #6e6e6e clears 4.5:1 (5.1:1). */
+  color: #6e6e6e;
   margin: 0;
   letter-spacing: 0.01em;
 }
@@ -7155,7 +7144,7 @@ html.has-cursor .cursorRing {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: color 0.2s ease, padding-left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.2s ease, padding-left 0.3s var(--ease-quint);
 }
 
 .aboutContact__social::after {
@@ -7212,15 +7201,17 @@ html.has-cursor .cursorRing {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 0;
+  width: 100%;
   height: 2px;
   background: #7c3aed;
   border-radius: 1px;
-  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease-quint);
 }
 
 .aboutContact__field:focus-within .aboutContact__inputWrap::after {
-  width: 100%;
+  transform: scaleX(1);
 }
 
 .aboutContact__input,
@@ -7277,7 +7268,7 @@ html.has-cursor .cursorRing {
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
-  transition: background 0.25s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  transition: background 0.25s ease, transform 0.3s var(--ease-quint), box-shadow 0.3s ease;
 }
 
 .aboutContact__submit:hover:not(:disabled) {
@@ -7298,7 +7289,7 @@ html.has-cursor .cursorRing {
 .aboutContact__submitArrow {
   font-size: 18px;
   line-height: 1;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.3s var(--ease-quint);
 }
 
 .aboutContact__submit:hover:not(:disabled) .aboutContact__submitArrow {
@@ -7309,7 +7300,7 @@ html.has-cursor .cursorRing {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  animation: contactCheckPop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: contactCheckPop 0.4s var(--ease-quint);
 }
 
 @keyframes contactCheckPop {
@@ -7477,7 +7468,7 @@ html.has-cursor .cursorRing {
   justify-content: center;
   gap: 10px;
   margin-top: 6px;
-  transition: background 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  transition: background 0.3s ease, transform 0.3s var(--ease-quint), box-shadow 0.3s ease;
 }
 
 .hc__submit:hover:not(:disabled) {
@@ -7499,7 +7490,7 @@ html.has-cursor .cursorRing {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.3s var(--ease-quint);
 }
 
 .hc__submit:hover:not(:disabled) .hc__submitArrow {
@@ -7923,8 +7914,8 @@ html.contact-page-active[data-theme="light"] body {
 
 .contactPage__title .contactPage__letter {
   display: inline-block;
-  transition: color 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.25s var(--ease-quint),
+              transform 0.25s var(--ease-quint);
   cursor: default;
 }
 
@@ -8018,14 +8009,16 @@ html.contact-page-active[data-theme="light"] body {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 0;
+  width: 100%;
   height: 1px;
   background: var(--purple-soft);
-  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s var(--ease-quint);
 }
 
 .contactPage__field:focus-within .contactPage__inputLine::after {
-  width: 100%;
+  transform: scaleX(1);
 }
 
 .contactPage__field:focus-within .contactPage__label {
@@ -8369,42 +8362,6 @@ html.contact-page-active .themeSwitch {
   margin: 0 0 16px 0;
 }
 
-.services-cta {
-  display: inline-flex;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(31, 31, 31, 0.08);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  padding: 6px 22px 6px 6px;
-  border-radius: 9999px;
-  color: var(--ink, #1a1a1a);
-  font-family: var(--font-primary), sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  gap: 12px;
-  text-decoration: none;
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.services-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.12);
-  border-color: rgba(124, 58, 237, 0.25);
-  background-color: #ffffff;
-}
-
-.services-cta__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: var(--purple, #7c3aed);
-  color: #ffffff;
-}
-
 /* 3D Carousel Viewport (Full-Width Corner-to-Corner Animation) */
 .services-viewport {
   position: relative;
@@ -8706,9 +8663,9 @@ html.contact-page-active .themeSwitch {
   white-space: nowrap;
   will-change: transform, opacity, filter;
   transition:
-    transform 1s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 1s var(--ease-quint),
+    opacity 0.85s var(--ease-expo),
+    filter 0.85s var(--ease-expo);
 }
 
 /* STATE 1 pre-entrance: centred pair, lifted + blurred + transparent */
@@ -9093,7 +9050,7 @@ html.contact-page-active .themeSwitch {
   height: 11px;
   border-radius: 50%;
   background: rgba(31, 31, 31, 0.16);
-  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background-color 0.4s var(--ease-quint);
 }
 
 .workCard:hover .workCard__dot:nth-child(1),
@@ -9130,8 +9087,8 @@ html.contact-page-active .themeSwitch {
   display: block;
   transform: scale(1);
   filter: blur(0);
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.45s var(--ease-quint),
+    filter 0.45s var(--ease-quint);
   will-change: transform, filter;
 }
 
@@ -9153,8 +9110,8 @@ html.contact-page-active .themeSwitch {
   padding: 0 24px;
   opacity: 0;
   transform: scale(0.92);
-  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.4s var(--ease-quint),
+    transform 0.4s var(--ease-quint);
   pointer-events: none;
 }
 
@@ -9501,7 +9458,7 @@ html.contact-page-active .themeSwitch {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s var(--ease-expo);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .seaFooter__centerSocials .seaFooter__socialBtn svg {
@@ -9840,7 +9797,7 @@ html.contact-page-active .themeSwitch {
    over the flat brand-color background. Phase 2: once it dissolves, two
    brand panels — already meeting at the exact vertical center — reveal
    the logo/wordmark, hold, then split apart (top up / bottom down) on
-   cubic-bezier(0.76,0,0.24,1) (same easing as the page-leave transition
+   var(--ease-inout) (same easing as the page-leave transition
    above), revealing the homepage that is already rendered underneath.
    ============================================================ */
 
@@ -9899,7 +9856,7 @@ html.dpl-page .preloader {
      of light/dark mode */
   background: #6a1eed;
   will-change: transform;
-  transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.7s var(--ease-inout);
 }
 
 .preloader__panel--top {
@@ -9932,8 +9889,8 @@ html.dpl-page .preloader {
 .preloader__word {
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.3s var(--ease-quint),
+    transform 0.3s var(--ease-quint);
 }
 
 .preloader__brand--visible {
@@ -10117,5 +10074,416 @@ html.dpl-page .preloader {
 
   .bootLoader__cursor {
     animation: none;
+  }
+}
+
+/* ============================================================
+   MICRO-INTERACTION LAYER
+   Site-wide press feedback and touch-hover correction. Everything
+   here is deliberately small: the point is that a control acknowledges
+   the finger before the navigation happens, not that it performs.
+   ============================================================ */
+
+/* ---------- press feedback ----------
+   Physical controls give way under pressure. 0.97 is the smallest scale
+   the eye reliably registers without the element looking like it jumped;
+   the release rides the site's standard curve back out, so a tap that
+   turns into a drag or a cancel doesn't snap.
+
+   Scoped to real controls by name rather than a blanket `button, a` —
+   most links here are text inside prose or a nav row, where a scale
+   would read as a glitch. */
+/* .extCta is not in these lists: the primary button carries its own press,
+   hover-lift and reduced-motion handling, and a blanket transform
+   transition here would clobber its box-shadow one. */
+.ctaPill,
+.footer__contactCta,
+.selWorks__endCta,
+.seaFooter__topBtn,
+.seaFooter__playBtn,
+.aboutContact__submit,
+.contactPage__submit,
+.hc__submit,
+.wallet__actionBtn,
+.mobileNav__menuBtn,
+.mobileNav__themeBtn,
+.themeSwitch button,
+.projTile__mobileCta,
+.navbar__contact {
+  transition: transform var(--dur-state) var(--ease-quint);
+}
+
+.ctaPill:active,
+.footer__contactCta:active,
+.selWorks__endCta:active,
+.seaFooter__topBtn:active,
+.seaFooter__playBtn:active,
+.wallet__actionBtn:active,
+.mobileNav__menuBtn:active,
+.mobileNav__themeBtn:active,
+.themeSwitch button:active,
+.projTile__mobileCta:active,
+.navbar__contact:active {
+  transform: scale(0.97);
+  /* the press itself is faster than the release — pressure registers
+     instantly, recovery is what gets to be smooth */
+  transition-duration: var(--dur-press);
+}
+
+.aboutContact__submit:active:not(:disabled),
+.contactPage__submit:active:not(:disabled),
+.hc__submit:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: var(--dur-press);
+}
+
+/* Nav links are text, not buttons: they dim on press instead of moving. */
+.navbar__links a,
+.mobileNavCard__link {
+  transition: opacity var(--dur-press) var(--ease-quint);
+}
+
+.navbar__links a:active,
+.mobileNavCard__link:active {
+  opacity: 0.6;
+}
+
+/* ---------- reduced motion ----------
+   Feedback survives; movement does not. A user who asked for less motion
+   still needs to know the button received the tap, so the press becomes a
+   dim instead of a scale. */
+@media (prefers-reduced-motion: reduce) {
+  .ctaPill:active,
+  .footer__contactCta:active,
+  .selWorks__endCta:active,
+  .seaFooter__topBtn:active,
+  .seaFooter__playBtn:active,
+  .wallet__actionBtn:active,
+  .mobileNav__menuBtn:active,
+  .mobileNav__themeBtn:active,
+  .themeSwitch button:active,
+  .projTile__mobileCta:active,
+  .navbar__contact:active,
+  .aboutContact__submit:active:not(:disabled),
+  .contactPage__submit:active:not(:disabled),
+  .hc__submit:active:not(:disabled) {
+    transform: none;
+    opacity: 0.7;
+  }
+
+  /* Ambient loop safety net.
+     The page runs ~28 infinite decorative animations. Ten of them had
+     their own reduced-motion path; the rest kept drifting, twinkling and
+     bobbing for a user who explicitly asked the OS for less motion. This
+     is the full verified list of the perpetual ones, so a newly added
+     ambient loop is the only thing that can slip through.
+
+     Two are deliberately NOT here: .projPreview__skeleton (a loading
+     pulse — it reports state, and it's opacity-only) and the cursor CTA
+     arrow (already handled at the top of this file). Reduced motion means
+     less movement, not no feedback. */
+  .aboutCard::before,
+  .aboutPage__portrait,
+  .capCurtain--a,
+  .capCurtain--b,
+  .capStar,
+  .contactPage__availDot,
+  .contactPage__globePulse,
+  .footer__dude,
+  .footer__glow,
+  .footer__hero:hover .footer__dude,
+  .hc__badge svg,
+  .logoStrip__scroll,
+  .procTile::before,
+  .procTile__icon,
+  .procTile__rings g,
+  .projTile:focus-visible .projTile__cover,
+  .seaFooter__emblem,
+  .seaFooter__flameGroup,
+  .seaFooter__shootingStar,
+  .seaFooter__star,
+  .seaFooter__waveLayer,
+  .seaFooter__waves i,
+  .toolTile__obj,
+  .wallet__shadow,
+  .workHero__scrollArrow {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   PRIMARY BUTTON  (.extCta — components/ExtCta.tsx)
+
+   Ported from the case-study pages' "Visit Live Website" control
+   (components/projects/figma/figma-project.css, .figp-ext) so the homepage
+   and the project pages share one primary action. Only the accent differs:
+   purple, the homepage's own colour, rather than the per-project green.
+
+   Geometry is driven off one height variable: change --ext-h and the tile,
+   its inset and both radii follow.
+   ============================================================ */
+
+.extCta {
+  --ext-h: 52px;
+  --ext-pad: 6px;
+  --ext-body: #22252b;
+  /* the edge stroke. One value for both states by design: on the charcoal
+     bar it is a darker rim that gives the button an edge, and on the purple
+     fill the same colour becomes a hard outline. */
+  --ext-stroke: #15171b;
+  /* the stroke is drawn twice — once as the ::after overlay on the bar, once
+     as the inset ring on the fill that rides out with the clip. They must
+     stay identical or the edge visibly thickens as the fill reaches it. */
+  --ext-stroke-w: 3px;
+  --ext-accent: var(--purple);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: var(--ext-pad) 22px var(--ext-pad) var(--ext-pad);
+  min-height: var(--ext-h);
+  border: 0;
+  border-radius: 12px;
+  background: var(--ext-body);
+  color: #fff;
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  /* 600 not 700: white on this charcoal measures 13.7:1, so the label has
+     contrast to spare and does not need weight to hold */
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-transform: none;
+  text-decoration: none;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.18);
+  transition: box-shadow var(--dur-hover) ease-out, transform var(--dur-hover) ease-out;
+}
+
+/*
+  The stroke as an overlay, not a border or an inset shadow.
+
+  An inset box-shadow on the anchor is invisible here: .extCta__fill is a
+  child painting over the parent's padding box, so it covers the parent's
+  inner ring completely. A border would work but it changes where `inset: 0`
+  resolves for the fill and the march, moving the whole interior in by 3px.
+  An ::after pinned above every other layer is neither: it cannot be covered,
+  and it costs the interior nothing.
+*/
+.extCta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: var(--ext-stroke-w) solid var(--ext-stroke);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+/*
+  The accent, as one layer that grows.
+
+  clip-path rather than width/height/left/top: it does not touch layout, it
+  interpolates the corner radius along with the box (8px square to 12px bar)
+  so the shape morphs instead of popping, it needs no second element to
+  cross-fade against, and it leaves the glyph and label — siblings, not
+  children — undistorted while the fill sweeps past them.
+
+  inset() reads top / right / bottom / left. At rest the right inset is
+  everything except the 40px square sitting 6px in.
+*/
+.extCta__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--ext-accent);
+  /* the square's own edge. Because the ring is inset on the element the
+     clip-path is cutting, it gets clipped too, so the stroke travels outward
+     with the fill rather than being faded in separately. */
+  box-shadow: inset 0 0 0 var(--ext-stroke-w) var(--ext-stroke);
+  clip-path: inset(
+    var(--ext-pad) calc(100% - var(--ext-h) + var(--ext-pad)) var(--ext-pad)
+      var(--ext-pad) round 8px
+  );
+  /* 340ms, past the micro-interaction band on purpose: this is a shape
+     travelling the width of the button, not a colour swap, and at 200ms it
+     reads as a pop. Decelerating quint — fast out of the square, settling
+     into the edges. */
+  transition: clip-path 0.34s var(--ease-quint);
+}
+
+/* the square is just a place to stand the glyph */
+.extCta__tile {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: calc(var(--ext-h) - var(--ext-pad) * 2);
+  height: calc(var(--ext-h) - var(--ext-pad) * 2);
+  color: var(--ext-body);
+  /* the glyph leaves early, before the fill has travelled far enough to put
+     a second arrow anywhere near it */
+  transition: opacity 0.14s ease-out;
+}
+
+.extCta__glyph {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+
+.extCta__label {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.16s ease-out;
+}
+
+/* the payload well: the label reads as the action and the number as the
+   thing being acted on, rather than the two running together */
+.extCta__num {
+  position: relative;
+  z-index: 1;
+  margin-left: -6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: opacity 0.16s ease-out;
+}
+
+/* the march, parked above the fill */
+.extCta__march {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--ext-body);
+  /* delayed: the arrows arrive once the fill has actually spread, so the
+     sequence reads as one move (accent spreads, arrows appear on it) rather
+     than two things dissolving into each other at once */
+  transition: opacity var(--dur-hover) ease-out 0.12s;
+  /* fade the arrows out toward the trailing edge rather than cutting them at
+     the corner radius */
+  -webkit-mask-image: linear-gradient(90deg, #000 0 62%, transparent 96%);
+  mask-image: linear-gradient(90deg, #000 0 62%, transparent 96%);
+}
+
+/*
+  The loop travels exactly one glyph pitch, not half the track.
+
+  -50% is the usual marquee trick and it is subtly wrong on a gapped row: a
+  flex row of N items is N*glyph + (N-1)*gap wide, so half of it lands half a
+  gap off the repeat and the march hitches once per cycle. Giving every glyph
+  the same margin makes the pitch uniform, and shifting by one pitch is
+  seamless by construction — no measuring, whatever the button's width is.
+*/
+.extCta__marchTrack {
+  --ext-pitch: 31px; /* 17px glyph + 14px gap */
+  display: flex;
+  align-items: center;
+  animation: extCtaMarch 0.75s linear infinite;
+}
+
+.extCta__marchTrack .extCta__glyph {
+  flex: none;
+  margin-right: calc(var(--ext-pitch) - 17px);
+}
+
+/*
+  linear, deliberately. The rule against linear is about transitions: a state
+  change that starts and stops and needs acceleration to look physical. This
+  is a conveyor — no start or stop on screen, and easing a loop puts a
+  visible pulse at the seam.
+
+  Left to right: the track starts one pitch back and moves forward to zero,
+  so every arrow travels the way it points.
+*/
+@keyframes extCtaMarch {
+  from { transform: translate3d(calc(var(--ext-pitch) * -1), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+/*
+  Hover is decoration, so it is gated behind a real pointer. Without
+  `hover: hover` a tap leaves the button stuck in its hover state until the
+  reader taps elsewhere: label gone, arrows frozen mid-march, on the one
+  control that tells them where they are going.
+*/
+@media (hover: hover) {
+  .extCta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), 0 14px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* the square opens out to the full bar, corner radius and all */
+  .extCta:hover .extCta__fill {
+    clip-path: inset(0 0 0 0 round 12px);
+  }
+
+  .extCta:hover .extCta__tile,
+  .extCta:hover .extCta__label,
+  .extCta:hover .extCta__num {
+    opacity: 0;
+  }
+
+  .extCta:hover .extCta__march {
+    opacity: 1;
+  }
+
+  .extCta:hover:active {
+    transform: translateY(-2px) scale(0.97);
+  }
+}
+
+/* press feedback, matching the site's micro-interaction layer */
+.extCta:active {
+  transform: scale(0.97);
+  transition-duration: var(--dur-press);
+}
+
+/*
+  Keyboard focus deliberately does NOT borrow the hover treatment. Hover
+  hides the label, which a pointer user can restore by moving the mouse. A
+  keyboard user cannot: they would land on the button and be shown a stream
+  of arrows where the name used to be. Focus gets a ring and keeps its words.
+*/
+.extCta:focus-visible {
+  outline: 2.5px solid var(--ext-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* the recolour stays — a colour change is not motion — but nothing
+     travels: the conveyor stops, the fill stops sweeping, the lift goes */
+  .extCta__marchTrack {
+    animation: none;
+  }
+
+  .extCta__fill {
+    transition: none;
+  }
+
+  .extCta,
+  .extCta__tile,
+  .extCta__label,
+  .extCta__num,
+  .extCta__march {
+    transition-property: opacity;
+    transition-duration: 0.15s;
+    transition-delay: 0s;
+  }
+
+  .extCta:hover,
+  .extCta:active,
+  .extCta:hover:active {
+    transform: none;
   }
 }

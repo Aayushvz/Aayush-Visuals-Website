@@ -24,6 +24,13 @@ export default function Home() {
       <Reveals />
       <div className="rails" aria-hidden />
       <main>
+        {/* The page had no h1 at all — headings started at h2, so the
+            document had no top-level heading for screen readers or
+            crawlers. The hero wordmark is artwork inside a drag canvas
+            rather than a heading, so the h1 lives here. */}
+        <h1 className="srOnly">
+          Aayush Raj - Product Designer and Design Engineer
+        </h1>
         <Hero />
         {/* About rises over the pinned hero (stage pulled up 100vh, higher
             z) with its stepped-band top edge, then pins inside this stage;
