@@ -83,14 +83,17 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
   }, [layersOpen]);
 
   /*
-    A case study always opens light, whatever the rest of the site is set
-    to. The pre-paint script covers a hard load; this covers arriving by
+    A case study opens on the side its design asks for — light unless the
+    project says `theme: "dark"` — whatever the rest of the site is set to.
+    The pre-paint script covers a hard load; this covers arriving by
     client-side nav, which the script never sees. Neither writes to
     localStorage, so the reader's own preference for the rest of the site
     survives untouched and the dock toggle still works from here.
   */
+  const opensOn = project.theme ?? "light";
+
   useEffect(() => {
-    document.documentElement.dataset.theme = "light";
+    document.documentElement.dataset.theme = opensOn;
     /*
       On the way out, hand back what the reader actually chose rather than
       whatever the DOM happened to say when this mounted. Those are not the
@@ -108,7 +111,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
       document.documentElement.dataset.theme =
         stored === "light" ? "light" : "dark";
     };
-  }, []);
+  }, [opensOn]);
 
   /* the collapse survives moving between projects, the way Figma remembers */
   useEffect(() => {
@@ -268,6 +271,9 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
     <div
       className="figp"
       data-chrome={chromeOn ? "on" : "off"}
+      /* the project's own id on the root, so a rule meant for one case study
+         can say so instead of every `.figp` page inheriting it */
+      data-figp-project={project.id}
       style={
         project.accent
           ? ({
@@ -365,8 +371,41 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
 
                 {liveHref && (
                   <a className="figp-ext" href={liveHref} target="_blank" rel="noreferrer">
-                    {project.cta}
-                    <ArrowUpRightIcon />
+                    {/*
+                      One accent layer for both states. It is clipped down to
+                      the tile at rest and un-clipped to the whole button on
+                      hover, so the green genuinely spreads out of the square
+                      instead of the square dissolving while a separate fill
+                      appears behind it.
+                    */}
+                    <span className="figp-ext-fill" aria-hidden="true" />
+
+                    {/* the square keeps its place in the flex row so the
+                        label still sits where it always did; it now carries
+                        only the glyph, not the fill */}
+                    <span className="figp-ext-tile" aria-hidden="true">
+                      <DotArrow />
+                    </span>
+
+                    {/*
+                      Hidden on hover with opacity, never `display: none` or
+                      `visibility: hidden`. Those two take the text out of the
+                      accessibility tree, and this label IS the link's
+                      accessible name — a screen reader would be left with an
+                      unnamed link whenever a pointer happened to be resting
+                      on it. Opacity keeps the name and only removes the ink.
+                    */}
+                    <span className="figp-ext-label">{project.cta}</span>
+
+                    {/* the march. Two identical halves so translating the
+                        track by exactly -50% lands on a seamless repeat */}
+                    <span className="figp-ext-march" aria-hidden="true">
+                      <span className="figp-ext-march-track">
+                        {Array.from({ length: 14 }, (_, i) => (
+                          <DotArrow key={i} />
+                        ))}
+                      </span>
+                    </span>
                   </a>
                 )}
               </div>
@@ -458,6 +497,7 @@ export default function FigmaProjectPage({ project }: { project: Project }) {
           {sections ? (
             <FigmaCaseSections
               sections={sections}
+              browserFrames={project.browserFrames ?? false}
               pin={
                 <CommentPin
                   number={2}
@@ -565,18 +605,36 @@ const factChild = {
   `withPlus` is the pointer variant: Figma draws a small diamond beside the
   arrow over anything clickable.
 */
-function cursorUrl(fill: string, withPlus: boolean) {
+/*
+  A CSS cursor is a static image and cannot animate: there is no frame loop
+  behind `cursor: url(...)`, and swapping the data URI on a timer repaints
+  the pointer on every tick, which reads as a flicker rather than as fire.
+
+  So the fire is in the RAMP instead of in motion. `hot` is the tip, `fill`
+  is the body, and the gradient runs along the arrow the way heat runs off
+  metal: brightest where it is thinnest. It stays one flat image, costs
+  nothing, and still says ember rather than "orange triangle".
+*/
+function cursorUrl(fill: string, withPlus: boolean, hot = "#FFC24A") {
   const ARROW = "M3.4 1.95 19.35 9.49 12.24 11.52 8.62 19.35Z";
   const PLUS = "M17.6 13.6 21.6 17.6 17.6 21.6 13.6 17.6Z";
+
+  const grad =
+    `<linearGradient id='f' x1='3' y1='2' x2='16' y2='19' gradientUnits='userSpaceOnUse'>` +
+    `<stop offset='0' stop-color='${hot}'/>` +
+    `<stop offset='.55' stop-color='${fill}'/>` +
+    `<stop offset='1' stop-color='#5E1109'/>` +
+    `</linearGradient>`;
 
   /* each shape is drawn twice: a dark halo underneath so the cursor stays
      visible over a light screenshot, then the coloured shape over it */
   const shape = (d: string) =>
     `<path d='${d}' fill='none' stroke='rgba(0,0,0,.45)' stroke-width='2.8' stroke-linejoin='round'/>` +
-    `<path d='${d}' fill='${fill}' stroke='#fff' stroke-width='1.2' stroke-linejoin='round'/>`;
+    `<path d='${d}' fill='url(%23f)' stroke='#fff' stroke-width='1.2' stroke-linejoin='round'/>`;
 
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>` +
+    `<defs>${grad}</defs>` +
     shape(ARROW) +
     (withPlus ? shape(PLUS) : "") +
     `</svg>`;
@@ -615,10 +673,32 @@ function ArrowLeftIcon() {
   );
 }
 
-function ArrowUpRightIcon() {
+/*
+  The halftone arrow, drawn as a dot matrix rather than a stroked path.
+
+  Four columns of shrinking dots make the triangle, and the radius tapers
+  4% per column toward the tip. That taper is the whole effect: equal dots
+  read as a dotted triangle, unequal ones read as a screen-printed arrow
+  fading into the surface, which is what the reference is doing.
+
+  One glyph serves both the idle tile and the hover march, so the mark the
+  reader meets at rest is the same mark that streams past on hover.
+*/
+const DOT_COLUMNS: { x: number; ys: number[]; r: number }[] = [
+  { x: 2.6, ys: [2.6, 6.2, 9.8, 13.4], r: 1.35 },
+  { x: 6.2, ys: [4.4, 8, 11.6], r: 1.25 },
+  { x: 9.8, ys: [6.2, 9.8], r: 1.15 },
+  { x: 13.4, ys: [8], r: 1.05 },
+];
+
+function DotArrow() {
   return (
-    <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true">
-      <path d="M4.5 11.5 11.5 4.5M5.5 4.5h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg className="figp-ext-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      {DOT_COLUMNS.map((col) =>
+        col.ys.map((y) => (
+          <circle key={`${col.x}-${y}`} cx={col.x} cy={y} r={col.r} fill="currentColor" />
+        ))
+      )}
     </svg>
   );
 }

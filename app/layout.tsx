@@ -5,6 +5,7 @@ import Preloader from "@/components/Preloader";
 import PageTransition from "@/components/PageTransition";
 import AnimationBudget from "@/components/AnimationBudget";
 import ScrollRestore from "@/components/ScrollRestore";
+import { DARK_CASE_STUDIES } from "@/components/projects/projectData";
 import {
   SITE_URL,
   PERSON_NAME,
@@ -158,13 +159,18 @@ const jsonLd = {
   the site as designed. A stored choice still wins here — the header toggle
   would mean nothing otherwise — but absent one, dark is the answer.
 
-  A project page is the exception and opens light every time, stored choice
-  or not: those pages are screenshots of light interfaces, and a dark canvas
-  around them fights the thing they exist to present. Note the trailing
-  slash — this catches /work/<project> and deliberately not the /work index,
-  which is a listing and stays dark with everything else. The dock's toggle
-  still works once you are there; this sets where a page starts, not where
-  it has to stay.
+  A project page is the exception and opens on its OWN side of the switch,
+  stored choice or not: most of those pages are screenshots of light
+  interfaces, and a dark canvas around them fights the thing they exist to
+  present. Projects designed dark say so with `theme: "dark"` and arrive in
+  DARK_CASE_STUDIES, which is inlined here as a literal — this script runs
+  before React and cannot import anything, and a theme resolved after
+  hydration is a white flash on a black page rather than a preference.
+
+  Note the trailing slash — this catches /work/<project> and deliberately
+  not the /work index, which is a listing and stays dark with everything
+  else. The dock's toggle still works once you are there; this sets where a
+  page starts, not where it has to stay.
 
   The same script marks /cricket before first paint. CricketExperience adds
   `dpl-page` on mount for the client-side case, but on a cold load of that
@@ -174,7 +180,9 @@ const jsonLd = {
   class true from the first byte; the component's copy is then a no-op, and
   its cleanup still takes the class off if you navigate away.
 */
-const themeInit = `(function(){var d=document.documentElement,p=location.pathname.indexOf("/work/")===0;if(location.pathname.indexOf("/cricket")===0){d.classList.add("dpl-page");}try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark";}d.dataset.theme=p?"light":t;}catch(e){d.dataset.theme=p?"light":"dark";}})();`;
+const themeInit = `(function(){var d=document.documentElement,path=location.pathname,p=path.indexOf("/work/")===0;if(path.indexOf("/cricket")===0){d.classList.add("dpl-page");}var dark=${JSON.stringify(
+  DARK_CASE_STUDIES
+)},proj=p?path.slice(6).replace(/\\/$/,""):"",pt=dark.indexOf(proj)>=0?"dark":"light";try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark";}d.dataset.theme=p?pt:t;}catch(e){d.dataset.theme=p?pt:"dark";}})();`;
 
 export default function RootLayout({
   children,

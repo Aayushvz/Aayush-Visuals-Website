@@ -1614,58 +1614,309 @@ html[data-theme="light"] .figp-lfile img {
 */
 /* `.figp a { color: inherit }` outranks a single class, so both of the new
    link-shaped buttons have to name the root to keep their own colour */
+/*
+  The live-site CTA: a charcoal bar with an accent tile, and a march of
+  halftone arrows across it on hover.
+
+  The accent is the project's own rather than one fixed brand green, so the
+  button reads in the colour of the work it sits under. Only the hue moves
+  between projects — geometry, tile, glyph and timing are identical
+  everywhere.
+
+  Geometry is driven off one height variable so the whole thing scales as a
+  unit: change --ext-h and the tile, its inset, and both radii follow.
+*/
 .figp a.figp-ext {
+  --ext-h: 52px;
+  --ext-pad: 6px;
+  /* the bar is charcoal in both themes, but #22252B on the #1e1e1e dark
+     canvas is a button you cannot find. Dark lifts it until the edge reads
+     as an object sitting on the page. */
+  --ext-body: #22252b;
+  /* the edge stroke. One value for both states by design: on the charcoal
+     bar it is a darker rim that gives the button an edge, and on the accent
+     fill the same colour becomes the hard outline the reference draws. */
+  --ext-stroke: #15171b;
+  /* width lives in a variable because the stroke is drawn twice — once as
+     the ::after overlay on the bar, once as the inset ring on the fill that
+     rides out with the clip. Those two have to stay identical or the edge
+     visibly thickens as the green reaches it. */
+  --ext-stroke-w: 3px;
+
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 14px;
   margin-top: 1.9rem;
-  padding: 0.72rem 1.25rem;
-  border-radius: 8px;
-  /* the brand's brightest, by request: this is the one control on the page
-     asking to be pressed, and the deep shade read as muddy against a white
-     canvas. White on it measures 2.94:1, so the label is set heavier and the
-     button is never the only route to the live site. */
-  background: var(--figp-accent-solid);
+  padding: var(--ext-pad) 22px var(--ext-pad) var(--ext-pad);
+  min-height: var(--ext-h);
+  border-radius: 12px;
+  background: var(--ext-body);
   color: #fff;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  /* 600, down from 700. White on this charcoal measures 13.7:1, so the label
+     has contrast to spare and does not need the extra weight to hold — at
+     700 it was reading heavier than the project titles above it. */
+  font-weight: 600;
   letter-spacing: 0.005em;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 8px 22px
-    color-mix(in srgb, var(--figp-accent-solid) 30%, transparent);
-  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out,
-    filter 0.18s ease-out;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.18);
+  /* 200ms sits inside the 150-300ms micro-interaction band; ease-out because
+     this is a state entering */
+  transition: background-color 0.2s ease-out, box-shadow 0.2s ease-out,
+    transform 0.2s ease-out;
 }
 
-.figp-ext svg {
-  transition: transform 0.18s ease-out;
+:root[data-theme="dark"] .figp a.figp-ext {
+  --ext-body: #2e323a;
 }
 
-.figp-ext:hover,
+/*
+  The stroke, as an overlay rather than a border or an inset shadow.
+
+  An `inset` box-shadow on the anchor was the obvious move and it is
+  invisible here: `.figp-ext-fill` is a child painting over the parent's
+  padding box, so it covers the parent's inner ring completely — which is
+  why the hover state had no outline at all. A `border` would work but it
+  changes where `inset: 0` resolves for the fill and the march, moving the
+  whole interior in by 2px.
+
+  An ::after pinned above every other layer is neither: it cannot be
+  covered, and it costs the interior nothing.
+*/
+.figp a.figp-ext::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: var(--ext-stroke-w) solid var(--ext-stroke);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+/* the tile. Square, inset equally on three sides, so the bar reads as a
+   frame around it rather than a pill with a blob in it */
+/*
+  The accent, as one layer that grows.
+
+  Animated with clip-path rather than width/height/left/top. Four reasons it
+  is the right tool here: it does not touch layout, it interpolates the
+  corner radius along with the box (8px square to 12px bar) so the shape
+  morphs instead of popping, it needs no second element to cross-fade
+  against, and it leaves the glyph and label — which are siblings, not
+  children — completely undistorted while the fill sweeps past them.
+
+  inset() reads top / right / bottom / left. At rest the right inset is
+  `100% - 46px`, i.e. everything except the 40px square sitting 6px in.
+*/
+.figp-ext-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* flat accent, no ramp. This was a 170deg gradient lifting the top edge
+     toward white, which is the one thing that read as decoration rather
+     than as the brand colour — and it also meant the square and the spread
+     bar were subtly different colours at their tops. */
+  background: var(--figp-accent-solid);
+  /* the square's own edge. Because the ring is inset on the element the
+     clip-path is cutting, it gets clipped too — so the stroke travels
+     outward with the fill instead of being a separate thing that has to be
+     faded in at the right moment. */
+  box-shadow: inset 0 0 0 var(--ext-stroke-w) var(--ext-stroke);
+  clip-path: inset(
+    var(--ext-pad) calc(100% - var(--ext-h) + var(--ext-pad)) var(--ext-pad)
+      var(--ext-pad) round 8px
+  );
+  /* 340ms, past the 150-300ms micro-interaction band on purpose: this is a
+     shape travelling the width of the button, not a colour swap, and at
+     200ms it reads as the pop the brief asked me not to do. The curve is a
+     decelerating quint — fast out of the square, settling into the edges. */
+  transition: clip-path 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* the square is now just a place to stand the glyph */
+.figp-ext-tile {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: calc(var(--ext-h) - var(--ext-pad) * 2);
+  height: calc(var(--ext-h) - var(--ext-pad) * 2);
+  color: var(--ext-body);
+  /* the glyph leaves early, before the fill has travelled far enough to put
+     a second arrow anywhere near it */
+  transition: opacity 0.14s ease-out;
+}
+
+.figp-ext-glyph {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+
+.figp-ext-label {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.16s ease-out;
+}
+
+/* the march, parked off-state above the fill and below nothing */
+.figp-ext-march {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--ext-body);
+  /* delayed: the arrows arrive once the fill has actually spread, so the
+     sequence reads as one move (green spreads, arrows appear on it) rather
+     than two things dissolving into each other at the same moment */
+  transition: opacity 0.2s ease-out 0.12s;
+  /* the reference fades its arrows out toward the trailing edge rather than
+     cutting them at the corner radius */
+  -webkit-mask-image: linear-gradient(90deg, #000 0 62%, transparent 96%);
+  mask-image: linear-gradient(90deg, #000 0 62%, transparent 96%);
+}
+
+/*
+  The loop travels exactly one glyph pitch, not half the track.
+
+  `-50%` is the usual marquee trick and it is subtly wrong on a gapped row:
+  a flex row of N items is N*glyph + (N-1)*gap wide, so half of it lands
+  half a gap off the repeat and the march visibly hitches once per cycle.
+  Giving every glyph the same margin makes the pitch uniform, and shifting
+  by one pitch is seamless by construction — no measuring, and it holds
+  whatever the button's width turns out to be.
+*/
+.figp-ext-march-track {
+  --ext-pitch: 31px; /* 17px glyph + 14px gap */
+  display: flex;
+  align-items: center;
+  /*
+    No left padding, because the track now starts one pitch to the LEFT and
+    travels back to zero. A 14px pad would leave that strip uncovered at the
+    end of every cycle — a bare notch blinking at the left edge once a
+    second. Starting flush means there is always a glyph arriving into it.
+  */
+  animation: figp-ext-march 0.75s linear infinite;
+}
+
+.figp-ext-march-track .figp-ext-glyph {
+  flex: none;
+  margin-right: calc(var(--ext-pitch) - 17px);
+}
+
+/*
+  linear, deliberately.
+
+  The rule against linear easing is about transitions — a state change that
+  starts and stops, and needs acceleration to look physical. This is a
+  conveyor: it has no start or stop on screen, and easing a loop puts a
+  visible pulse at the seam.
+*/
+/*
+  Left to right: the track starts one pitch back and moves forward to zero,
+  so every arrow travels the way it points. Running it the other way (0 to
+  -pitch) drifts the arrowheads backwards under themselves, which is what it
+  was doing before.
+*/
+@keyframes figp-ext-march {
+  from { transform: translate3d(calc(var(--ext-pitch) * -1), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+/*
+  Hover is decoration, so it is gated behind a real pointer.
+
+  Without `hover: hover` a touch tap leaves the button stuck in its hover
+  state until the reader taps elsewhere — the label gone, arrows frozen
+  mid-march, on the one control that tells them where they are going.
+*/
+@media (hover: hover) {
+  /*
+    `.figp a.figp-ext:hover`, not `.figp-ext:hover`.
+
+    The base rule is `.figp a.figp-ext` — (0,2,1), because `.figp a` is what
+    it takes to beat the page's `.figp a { color: inherit }`. A bare
+    `.figp-ext:hover` is (0,2,0) and quietly LOSES to it on every property
+    the base rule also sets: background and box-shadow. The opacity rules
+    below have no such competitor, so they won on their own — which is the
+    nastiest version of this bug. The label and tile faded out, the arrows
+    turned on, and the fill stayed charcoal, so hovering produced an empty
+    dark rectangle with charcoal arrows invisible against it.
+  */
+  /* the bar keeps its charcoal — the accent arrives by the fill spreading
+     over it, so there is no background swap to race the clip-path */
+  /* no inset ring here any more — the ::after stroke is already sitting on
+     that edge in both states, and an inset shadow on the anchor is painted
+     over by the fill anyway */
+  .figp a.figp-ext:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), 0 14px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* the square opens out to the full bar, corner radius and all */
+  .figp-ext:hover .figp-ext-fill {
+    clip-path: inset(0 0 0 0 round 12px);
+  }
+
+  .figp-ext:hover .figp-ext-tile {
+    opacity: 0;
+  }
+
+  .figp-ext:hover .figp-ext-label {
+    opacity: 0;
+  }
+
+  .figp-ext:hover .figp-ext-march {
+    opacity: 1;
+  }
+}
+
+/*
+  Keyboard focus deliberately does NOT borrow the hover treatment.
+
+  Hover hides the label, which a pointer user can restore by moving the
+  mouse. A keyboard user cannot — they would land on the button and be shown
+  a stream of arrows where the name used to be. Focus gets a ring and keeps
+  its words.
+*/
 .figp-ext:focus-visible {
-  transform: translateY(-2px);
-  filter: brightness(1.06);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16), 0 12px 28px
-    color-mix(in srgb, var(--figp-accent-solid) 36%, transparent);
-}
-
-/* the arrow leaves in the direction it points, which is the whole reason
-   it is an up-right arrow and not a chevron */
-.figp-ext:hover svg,
-.figp-ext:focus-visible svg {
-  transform: translate(2px, -2px);
+  outline: 2.5px solid var(--figp-accent-solid);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .figp-ext,
-  .figp-ext svg {
-    transition: filter 0.15s ease;
+  /* the recolour stays — a colour change is not motion — but nothing
+     travels: the conveyor stops, the fill stops sweeping, the lift goes */
+  .figp-ext-march-track {
+    animation: none;
   }
 
-  .figp-ext:hover,
-  .figp-ext:focus-visible,
-  .figp-ext:hover svg,
-  .figp-ext:focus-visible svg {
+  /* the accent still arrives, it just arrives already spread rather than
+     travelling the width of the button to get there */
+  .figp-ext-fill {
+    transition: none;
+  }
+
+  .figp a.figp-ext,
+  .figp-ext-tile,
+  .figp-ext-label,
+  .figp-ext-march {
+    transition-property: opacity;
+    transition-duration: 0.15s;
+    transition-delay: 0s;
+  }
+
+  /* same specificity trap as above: this has to match the hover rule's
+     (0,3,1) to be able to cancel the lift, and sits later in the file so
+     equal weight resolves in its favour */
+  .figp a.figp-ext:hover {
     transform: none;
   }
 }
@@ -1920,6 +2171,10 @@ html[data-theme="light"] .figp-lfile img {
 .figp-wires-fig + .figp-prose,
 .figp-screens + .figp-prose,
 .figp-screens + .figp-gallery-fig,
+.figp-palette-fig + .figp-palette-fig,
+.figp-palette-fig + .figp-specs,
+.figp-specs + .figp-statement,
+.figp-statement + .figp-prose,
 .figp-palette-fig + .figp-typeset-fig,
 .figp-typeset-fig + .figp-grid-fig,
 .figp-compare-fig + .figp-results-fig,
@@ -3708,33 +3963,25 @@ html[data-theme="light"] .figp-lfile img {
     grid-template-columns: 2.3rem 1fr;
   }
 
-  /* one column would stack four phones into a 2800px tower, and two columns
-     shrinks each screen to ~160px. A swipe strip keeps them at a size where
-     the UI is still legible. */
-  .figp-gallery {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    /* bleed to the page edge so the row reads as scrollable */
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
-    /* No scrollbar. On a touch screen it is a permanent grey line under the
-       screens that nobody can grab; the partially visible next card is the
-       affordance. */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+  /*
+    Two per row rather than a swipe strip.
 
-  .figp-gallery::-webkit-scrollbar {
-    display: none;
+    This used to be a horizontal scroller, on the reasoning that one column
+    stacks four phones into a tower and two columns shrinks each to ~160px.
+    Both halves of that are true and the conclusion was still wrong: a
+    sideways strip on a page you are already scrolling downward hides
+    whatever is off the right edge, and readers do not go looking for it.
+    Two columns of phone screens is the honest trade, and a phone screenshot
+    survives 160px far better than it survives not being seen.
+  */
+  .figp-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
   }
 
   .figp-gallery-item {
-    /* leaves a sliver of the next screen showing, which is what tells you
-       the row moves */
-    flex: 0 0 66%;
-    scroll-snap-align: center;
+    min-width: 0;
   }
 
   /* The swipe strip exists because a phone screenshot has to stay large
@@ -3753,46 +4000,27 @@ html[data-theme="light"] .figp-lfile img {
     flex: initial;
   }
 
-  /* a wide desktop screen at 335px is unreadable, so those scroll too */
+  /* wide desktop screens stack, one per row, at full column width. Narrow
+     and stacked beats wide and off-screen. */
   .figp-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .figp-grid::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.6rem;
   }
 
   .figp-grid-item {
-    flex: 0 0 88%;
-    scroll-snap-align: center;
+    min-width: 0;
   }
 
-  /* a step's two screens are the same wide desktop shots, so they swipe for
-     the same reason. The explanation underneath stays put — it is the one
-     part of a step that has to be read, not looked at. */
+  /* a step's two screens stack for the same reason the grid does */
   .figp-step-shots {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .figp-step-shots::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.6rem;
   }
 
   .figp-step-shot {
-    flex: 0 0 88%;
-    scroll-snap-align: center;
+    min-width: 0;
   }
 
   /* one step per row reads as a list; two keeps it feeling like a flow */
@@ -4291,4 +4519,883 @@ html[data-theme="light"] .figp-lfile img {
     scroll-snap-align: none;
     min-width: 0;
   }
+}
+
+/* ============ browser mockups ============
+   A drawn browser around a screen or a loop. Everything here is tokens and
+   borders — no exported chrome, no baked shadow — so the frame themes with
+   the page and costs nothing to download. */
+
+.figp-mockups {
+  display: grid;
+  gap: 6rem;
+}
+
+.figp-mockup {
+  display: grid;
+  gap: 2rem;
+}
+
+.figp-mockup-head {
+  max-width: 74ch;
+}
+
+.figp-mockup-step {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--figp-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.figp-mockup-title {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.014em;
+  color: var(--figp-ink);
+}
+
+.figp-mockup-body {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: var(--figp-body-text);
+}
+
+/*
+  The chrome is dark in both themes, on purpose.
+
+  Every screenshot inside it is a near-black page. A white browser bar around
+  a black screenshot puts the hardest edge on the page in the wrong place: at
+  the chrome, rather than at the design. Dark chrome makes the frame recede
+  and the screen read as the object.
+*/
+.figp-browser {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #202024;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28), 0 18px 44px rgba(0, 0, 0, 0.32);
+}
+
+.figp-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0 0.85rem;
+  height: 34px;
+  background: #17171a;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.figp-browser-dots {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.figp-browser-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.figp-browser-dots i:nth-child(1) { background: #ff5f57; }
+.figp-browser-dots i:nth-child(2) { background: #febc2e; }
+.figp-browser-dots i:nth-child(3) { background: #28c840; }
+
+
+/* the address bar. Tabular so the URL does not wobble between frames, and
+   truncated rather than wrapped — a two-line address bar is not a thing. */
+.figp-browser-url {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #0e0e10;
+  color: #9a9aa0;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.figp-browser img,
+.figp-browser video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+}
+
+/*
+  Only the video gets a declared ratio, and it is the ratio the clips were
+  actually encoded at (1280x580 and its neighbours, all within half a
+  percent of 2.2). Images carry real width and height attributes from
+  imageDims, so forcing a shared ratio on both would have cropped the
+  stills — which are 2.11 — to fit a number chosen for the video.
+
+  It has to be declared for the video because `preload="none"` means the
+  browser does not know how tall the thing is until it decides to fetch it,
+  and an undeclared 600px-tall element resolving mid-scroll shoves the page.
+*/
+.figp-browser video {
+  aspect-ratio: 1280 / 580;
+}
+
+@media (max-width: 720px) {
+  .figp-mockups {
+    gap: 3.6rem;
+  }
+
+  .figp-browser-bar {
+    height: 30px;
+  }
+
+  /* the URL is the first thing to go: at this width it is a truncated
+     string competing with the design for the same 40px of height */
+  .figp-browser-url {
+    display: none;
+  }
+}
+
+
+
+/* ============ laptop frame ============
+   For the scroll recordings. The lid holds a real browser window rather than
+   letting the capture bleed to the bezel, because every one of these clips
+   IS a browser and the tab is where the page name can live. */
+
+.figp-laptop {
+  display: grid;
+  justify-items: center;
+  filter: drop-shadow(0 26px 46px rgba(0, 0, 0, 0.45));
+}
+
+.figp-laptop-lid {
+  position: relative;
+  width: 100%;
+  padding: 16px 14px 18px;
+  border-radius: 16px 16px 5px 5px;
+  background: linear-gradient(168deg, #46464b 0%, #2c2c30 42%, #1d1d20 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.figp-laptop-cam {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #0c0c0e;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.figp-laptop-screen {
+  overflow: hidden;
+  border-radius: 4px;
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.75);
+}
+
+/* the wrist rest: wider than the lid and tapered, which is the whole reason
+   the silhouette reads as a laptop rather than a monitor on a stand */
+.figp-laptop-base {
+  position: relative;
+  width: 108%;
+  height: 15px;
+  border-radius: 0 0 13px 13px;
+  background: linear-gradient(180deg, #5a5a60 0%, #3a3a3f 38%, #232326 100%);
+  clip-path: polygon(0 0, 100% 0, 97.6% 100%, 2.4% 100%);
+}
+
+.figp-laptop-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 108px;
+  height: 6px;
+  border-radius: 0 0 7px 7px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="light"] .figp-laptop {
+  filter: drop-shadow(0 22px 40px rgba(0, 0, 0, 0.24));
+}
+
+html[data-theme="light"] .figp-laptop-lid {
+  background: linear-gradient(168deg, #e2e2e6 0%, #c8c8ce 45%, #adadb5 100%);
+}
+
+html[data-theme="light"] .figp-laptop-base {
+  background: linear-gradient(180deg, #e6e6ea 0%, #c4c4cb 40%, #a2a2ab 100%);
+}
+
+/* ---- the macOS window inside the lid ---- */
+
+.figp-mac {
+  background: #1f1f22;
+}
+
+.figp-mac-top {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7rem;
+  padding: 7px 10px 0;
+  height: 34px;
+  background: #17171a;
+}
+
+.figp-mac-lights {
+  display: flex;
+  gap: 6px;
+  padding-bottom: 7px;
+  flex: none;
+}
+
+.figp-mac-lights i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* the one place on this page allowed to use somebody else's colours,
+   because the traffic lights are the entire signal that says "macOS" */
+.figp-mac-lights i:nth-child(1) { background: #ff5f57; }
+.figp-mac-lights i:nth-child(2) { background: #febc2e; }
+.figp-mac-lights i:nth-child(3) { background: #28c840; }
+
+.figp-mac-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  max-width: 260px;
+  padding: 0.36rem 0.75rem;
+  border-radius: 7px 7px 0 0;
+  background: #1f1f22;
+}
+
+.figp-mac-fav {
+  width: 11px;
+  height: 11px;
+  flex: none;
+  border-radius: 2px;
+  /* the site's own ember, so the favicon is not a grey square pretending */
+  background: linear-gradient(160deg, #ff8d3c, #f72c25);
+}
+
+.figp-mac-tabname {
+  font-size: 0.68rem;
+  line-height: 1;
+  color: #c8c8cc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.figp-mac-bar {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px 8px;
+  background: #1f1f22;
+}
+
+.figp-mac-url {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #0e0e10;
+  font-size: 0.68rem;
+  color: #9a9aa0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.figp-mac video,
+.figp-mac img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+}
+
+.figp-mac video {
+  aspect-ratio: 1280 / 580;
+}
+
+@media (max-width: 720px) {
+  .figp-laptop-lid {
+    padding: 10px 8px 12px;
+    border-radius: 11px 11px 4px 4px;
+  }
+
+  .figp-laptop-cam { top: 4px; }
+
+  .figp-mac-top {
+    height: 26px;
+    padding: 5px 7px 0;
+    gap: 0.5rem;
+  }
+
+  .figp-mac-lights i { width: 7px; height: 7px; }
+
+  /* the tab name and the URL are both truncated strings at this width, and
+     two of them stacked is 30px of chrome eating the design */
+  .figp-mac-tabname,
+  .figp-mac-bar {
+    display: none;
+  }
+}
+
+/* ============ sitemap ============
+   A root, then every page under it. No inner scroll: the rank WRAPS instead,
+   so the whole diagram is on screen at any width and a phone gets one column
+   top to bottom rather than a strip that has to be dragged sideways.
+
+   The connectors survive wrapping because they are borders on the nodes
+   themselves. Each cell draws its own segment of the horizontal rule, and
+   because the columns sit flush the segments join into one line per row. A
+   drawn SVG overlay could not do that without recomputing coordinates every
+   time the grid reflowed. */
+
+.figp-map {
+  margin: 0;
+}
+
+.figp-map-inner {
+  width: 100%;
+}
+
+.figp-map-root {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding-bottom: 1.7rem;
+}
+
+/* the trunk dropping out of Home into the first row */
+.figp-map-root::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  height: 1.7rem;
+  background: var(--figp-accent);
+}
+
+.figp-map-roothome {
+  padding: 0.6rem 1.6rem;
+  border: 1px solid var(--figp-accent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--figp-accent) 12%, transparent);
+  font-family: var(--font-archivo), var(--font-primary);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  color: var(--figp-ink);
+}
+
+/*
+  Column gap is zero so the row rule is continuous; the breathing room comes
+  from padding inside each branch instead. Row gap is real, because rows do
+  not need to be joined to each other.
+*/
+.figp-map-rank {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 2rem 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.figp-map-branch {
+  position: relative;
+  padding: 1.5rem 0.45rem 0;
+  list-style: none;
+}
+
+/* each cell's share of the row rule */
+.figp-map-branch::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--figp-line);
+}
+
+/* the drop from the rule into the node */
+.figp-map-branch::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 1.5rem;
+  background: var(--figp-line);
+}
+
+.figp-map-node {
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  padding: 0.7rem 0.7rem 0.8rem;
+  border: 1px solid var(--figp-line);
+  border-top: 2px solid var(--figp-accent);
+  border-radius: 3px;
+  background: var(--figp-panel);
+}
+
+.figp-map-idx {
+  font-family: var(--font-chakra), var(--font-primary);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+  color: var(--figp-accent);
+}
+
+.figp-map-label {
+  font-size: 0.84rem;
+  line-height: 1.3;
+  color: var(--figp-ink);
+}
+
+.figp-map-note {
+  font-family: var(--font-chakra), var(--font-primary);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+.figp-map-kids {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  padding: 0 0 0 0.6rem;
+  list-style: none;
+  border-left: 1px solid var(--figp-line);
+}
+
+.figp-map-kid {
+  display: block;
+  position: relative;
+  padding: 0.32rem 0.45rem;
+  border-radius: 2px;
+  background: var(--figp-hover);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--figp-text-mid);
+}
+
+/* the elbow from the child rail into the child */
+.figp-map-kid::before {
+  content: "";
+  position: absolute;
+  top: 0.72em;
+  left: -0.6rem;
+  width: 0.45rem;
+  height: 1px;
+  background: var(--figp-line);
+}
+
+/* somebody else's software: a dashed edge is the standard way a diagram says
+   "this leaves the system" */
+.figp-map-kid--ext {
+  background: transparent;
+  border: 1px dashed var(--figp-chip-border);
+}
+
+.figp-map-flag {
+  display: block;
+  margin-top: 0.1rem;
+  font-family: var(--font-chakra), var(--font-primary);
+  font-size: 0.52rem;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--figp-accent);
+}
+
+.figp-map figcaption {
+  margin-top: 1.6rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--figp-text-dim);
+}
+
+@media (max-width: 620px) {
+  /* one per row: the rule above each node would otherwise be a 1px line the
+     width of a single card, which reads as a stray border rather than a tree */
+  .figp-map-rank {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.4rem 0;
+  }
+
+  .figp-map-branch {
+    padding-inline: 0;
+  }
+}
+
+/* ============ typeface trials ============
+   The exploration frames rebuilt: black card, sample on the left, face name
+   and numerals on the right. That composition is the design file's, and this
+   section is about how the decision got made, so it should look like the
+   place it was made. */
+
+.figp-trials {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+}
+
+.figp-trial {
+  position: relative;
+  padding: 1.9rem 1.7rem 1.5rem;
+  border-radius: 6px;
+  background: #040404;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* one of these survived, and the section should not need a sentence to say
+   which */
+.figp-trial--chosen {
+  box-shadow: inset 0 0 0 1px var(--figp-accent-dark, #ff8d3c);
+}
+
+.figp-trial-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.6rem;
+}
+
+.figp-trial-side {
+  display: grid;
+  justify-items: end;
+  gap: 0.9rem;
+}
+
+.figp-trial-face {
+  font-family: var(--font-chakra), var(--font-primary);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.figp-trial--chosen .figp-trial-face {
+  /* the card is black in both themes, so it pins its own accent rather than
+     inheriting one that swaps to #C41E18 and drops to 3.46:1 on this fill */
+  color: var(--figp-accent-dark, #ff8d3c);
+}
+
+/*
+  The outlines. Shape from the file, colour from here.
+
+  mask-image is the whole mechanism: the same file is grey when the face lost
+  and white when it won, and neither state needs a second export.
+*/
+.figp-outlines {
+  display: block;
+  width: 100%;
+  background: #d9d9d9;
+  -webkit-mask-image: var(--outline-src);
+  mask-image: var(--outline-src);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.figp-trial--chosen .figp-outlines {
+  background: #ffffff;
+}
+
+.figp-trial-num {
+  width: 100%;
+  max-width: 210px;
+  -webkit-mask-position: right center;
+  mask-position: right center;
+}
+
+/*
+  Boldonse is the only trial set as live type, and it wraps to three lines.
+  At line-height 0.92 those lines sat inside each other: a display face has
+  tall caps and real descenders, and sub-1 leading on wrapped text overlaps
+  by design. 1.02 is tight enough to still read as a display specimen and
+  loose enough that the rows clear.
+*/
+.figp-trial-live {
+  display: block;
+  font-size: clamp(1.5rem, 3.8vw, 2.6rem);
+  line-height: 1.02;
+  text-transform: uppercase;
+  color: #d9d9d9;
+  overflow-wrap: break-word;
+}
+
+.figp-trial-num-live {
+  font-size: clamp(2.6rem, 7vw, 5rem);
+  line-height: 0.8;
+  color: #d9d9d9;
+}
+
+/* ---- pairing trials ---- */
+
+.figp-trials--pairing {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.figp-trial-pair {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+}
+
+.figp-trial-pairhead {
+  max-width: 240px;
+}
+
+.figp-trial-body {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #bdbdbd;
+}
+
+.figp-trial-note {
+  display: block;
+  margin-top: 1.15rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #9a9a9a;
+}
+
+.figp-trials figcaption {
+  margin-top: 1.2rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--figp-text-dim);
+}
+
+@media (max-width: 620px) {
+  .figp-trial-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.1rem;
+  }
+
+  /* the numerals lead on a narrow card: the name and its digits stay
+     together at the top rather than stranding the label above a full-width
+     headline */
+  .figp-trial-side {
+    grid-row: 1;
+    justify-items: start;
+  }
+
+  .figp-trial-num {
+    -webkit-mask-position: left center;
+    mask-position: left center;
+  }
+}
+
+/* ============ the direction wall ============
+   Four 16:9 comps, two up, each with the note that says what it was testing.
+
+   No card around them, unlike the type trials. A trial card is mostly empty
+   black that needs an edge to read as an object; these boards are already
+   full-bleed art to their own corners, so a padded black panel around one is
+   a black border on a black image. The ring on the image is the edge. */
+
+.figp-dirs-fig {
+  margin: 0;
+}
+
+.figp-dirs {
+  display: grid;
+  /* minmax(0, …), never a bare 1fr — these are 1400px images and an `auto`
+     minimum resolves to that intrinsic width, which pushes the grid past the
+     column instead of wrapping. Same trap as the poster wall above. */
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 2.2rem 1.4rem;
+  align-items: start;
+}
+
+.figp-dir {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.figp-dir-frame {
+  display: block;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--figp-shot-ring);
+}
+
+.figp-dir-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* one of these became the site, and the wall should not need a sentence to
+   say which — same signal the type trials use */
+.figp-dir--chosen .figp-dir-frame {
+  box-shadow: 0 0 0 1.5px var(--figp-accent-solid);
+}
+
+.figp-dir-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.figp-dir-label {
+  font-family: var(--font-chakra), var(--font-primary);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--figp-text-dim);
+}
+
+.figp-dir--chosen .figp-dir-label {
+  color: var(--figp-ink);
+}
+
+/*
+  The accent carries the tag's border, not its text.
+
+  Smelting red on the light canvas is 3.93:1 — fine for a 1.5px ring around a
+  photograph, under AA for a 0.62rem uppercase word. So the ring on the image
+  stays accent and does the signalling, and the label itself is set in ink,
+  which clears 4.5:1 in both themes.
+*/
+.figp-dir-tag {
+  font-family: var(--font-chakra), var(--font-primary);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--figp-ink);
+  border: 1px solid color-mix(in srgb, var(--figp-accent-solid) 55%, transparent);
+  background: color-mix(in srgb, var(--figp-accent-solid) 8%, transparent);
+  border-radius: 2px;
+  padding: 0.12rem 0.4rem;
+}
+
+.figp-dir-note {
+  display: block;
+  max-width: 46ch;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--figp-text-faint);
+}
+
+.figp-dirs-fig figcaption {
+  margin-top: 1.6rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--figp-text-faint);
+  max-width: 62ch;
+}
+
+/* ============ spacing for the new blocks ============
+   The classes added for this project (mockups, the fight card, the type
+   trials) were not in any of the adjacency rules above, so they fell back to
+   the flat 2.4rem meant for paragraph-into-paragraph. That is why a laptop
+   frame and the screenshots under it sat almost touching.
+
+   A device frame is the heaviest object on the page and needs the most room
+   around it, which is what the first rule is for. */
+
+.figp-mockups + .figp-step,
+.figp-step + .figp-mockups,
+.figp-mockups + .figp-grid-fig,
+.figp-grid-fig + .figp-mockups,
+.figp-mockups + .figp-shot,
+.figp-shot + .figp-mockups,
+.figp-mockups + .figp-mockups {
+  margin-top: clamp(4.5rem, 8vw, 7rem);
+}
+
+.figp-prose + .figp-mockups,
+.figp-prose + .figp-card,
+.figp-prose + .figp-trials,
+.figp-mockups + .figp-prose,
+.figp-card + .figp-prose,
+.figp-trials + .figp-prose,
+.figp-trials + .figp-trials,
+.figp-trials + .figp-decisions,
+.figp-shot + .figp-trials,
+.figp-trials + .figp-shot,
+.figp-prose + .figp-dirs-fig,
+.figp-dirs-fig + .figp-prose,
+.figp-dirs-fig + .figp-trials,
+.figp-dirs-fig + .figp-decisions {
+  margin-top: 4rem;
+}
+
+/* the label under a framed screenshot needs to clear the chrome rather than
+   sit tight against the browser bar's bottom edge */
+.figp-step-shot .figp-browser + .figp-step-label,
+.figp-step-label {
+  margin-top: 0.85rem;
+}
+
+
+/* ============ captions that had none ============
+   .figp-palette-fig and .figp-typeset-fig never had a figcaption rule, so
+   their captions sat flush against the swatches above them and read as a
+   fourth line of the last column rather than as a caption for the set. Every
+   other figure block in this file already had one; these two were simply
+   missed. */
+
+.figp-palette-fig figcaption,
+.figp-typeset-fig figcaption {
+  display: block;
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--figp-line);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--figp-text-dim);
+  max-width: 70ch;
+}
+
+.figp-palette-fig figcaption strong,
+.figp-typeset-fig figcaption strong {
+  color: var(--figp-ink);
+  font-weight: 600;
+}
+
+/* the swatch column itself needs air under it before that rule lands */
+.figp-palette {
+  margin-bottom: 0.2rem;
+}
+
+/* specs rows were tight enough that the note under a value touched the row
+   below it */
+.figp-spec {
+  padding-block: 0.85rem;
 }

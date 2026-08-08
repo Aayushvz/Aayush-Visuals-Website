@@ -105,6 +105,28 @@ export type CaseBlock =
       items: { src: string; alt: string; label?: string; small?: boolean }[];
       caption?: string;
     }
+  /* Art-direction boards, shown as a wall of candidates rather than a
+     sequence. Deliberately not `grid`: these are whole 16:9 comps, so the
+     browser chrome `grid` puts round an unflagged item would be claiming a
+     type specimen is a live page, and the `small` escape hatch that avoids
+     the chrome caps the frame at 200px, which is unreadable for a board with
+     a headline on it.
+
+     Each one carries its own note because a wall of four comps with a single
+     caption underneath makes the reader guess which sentence belongs to
+     which picture. `chosen` marks the survivor the same way the type trials
+     in this file do — the section should not need a sentence to say which. */
+  | {
+      kind: "directions";
+      items: {
+        src: string;
+        alt: string;
+        label: string;
+        note: string;
+        chosen?: boolean;
+      }[];
+      caption?: string;
+    }
   /* design-system rows. `swatch` paints a colour chip beside the value. */
   | { kind: "specs"; items: { name: string; value: string; note?: string; swatch?: string }[] }
   /* A user flow, drawn here rather than screenshotted from the design file.
@@ -297,7 +319,125 @@ export type CaseBlock =
   | {
       kind: "lessons";
       items: { title: string; body: string }[];
+    }
+  /*
+    A screen in a browser, with the walkthrough attached.
+
+    `screens` is the right shape for a static frame with a paragraph. This
+    exists for the two things that one cannot do: it takes VIDEO, and it
+    puts whatever it is given inside a browser chrome.
+
+    The chrome is drawn in CSS rather than composited into the asset, for
+    the same reason the wireframes and the flow boards in this file are
+    drawn — an exported mockup bakes its own dimensions, its own shadow and
+    its own light/dark decision into a bitmap, and then disagrees with the
+    page it sits on the first time either changes. Drawn, it costs nothing,
+    it themes with everything else, and the address bar can carry the real
+    URL, which is the one piece of information a mockup can add that the
+    screenshot cannot.
+
+    `src` decides the element: `.webm` renders a muted looping video, every
+    other extension renders an image. Same field, because the call site
+    should be saying "here is the thing to show", not "here is which tag to
+    use for it".
+  */
+  | {
+      kind: "mockup";
+      /*
+        Which device the thing is shown inside. Screen recordings get the
+        laptop, because a full-page scroll is something you watch on a
+        machine and the lid gives it somewhere to sit; single screens get
+        the browser, which is a tighter frame that does not waste 200px of
+        bezel on a static image.
+      */
+      frame?: "laptop" | "browser";
+      items: {
+        /** .webm plays as a loop; anything else renders as an image */
+        src: string;
+        /** the still under a loop, shown until it is decoded and on screen */
+        poster?: string;
+        alt: string;
+        /** what the address bar reads. Omit for a surface with no URL. */
+        url?: string;
+        /** the small ordinal above the title — "01", "Home", "Flow" */
+        step?: string;
+        title: string;
+        body: string;
+      }[];
+    }
+  /*
+    The information architecture, as a tree rather than a screenshot.
+
+    A sitemap is the one artefact in a project that is pure structure, and a
+    picture of somebody's Figma board is the worst way to show structure:
+    it arrives at whatever zoom it was exported at, its type is not the
+    page's type, and it cannot reflow, so on a phone it becomes a 3589px
+    image scaled to illegibility.
+
+    Rebuilt as nested lists it reads at any width, the labels are real text
+    a screen reader can walk, and it inherits the accent — so the same tree
+    is drawn in the project's own colour rather than in Figma's greys.
+  */
+  | {
+      kind: "sitemap";
+      nodes: SitemapNode[];
+      caption?: string;
+    }
+  /*
+    A typeface trial, rebuilt from the design file rather than screenshotted.
+
+    Two shapes, because two different questions were being asked. `display`
+    is the headline bake-off: one face per card, set huge, nothing else on
+    it. `pairing` is the second round, where the headline was already
+    settled and the body face underneath it was the variable.
+
+    A face is drawn one of two ways. `stack` sets it as live type, which is
+    what you want whenever the web can load the face. `svg` points at vector
+    outlines exported from the design file, for the faces it cannot — Legend
+    and OneTwoHours are not webfonts, and a specimen set in a lookalike is
+    worse than no specimen at all, because it is a confident claim about
+    letterforms nobody actually chose.
+  */
+  | {
+      kind: "typetrial";
+      variant: "display" | "pairing";
+      items: {
+        face: string;
+        /*
+          Vector outlines of the headline sample, for non-web faces. Drawn as
+          a CSS mask rather than an <img>: an SVG loaded through <img> is its
+          own document and cannot see the page's `color`, so `currentColor`
+          inside it resolves to black and the specimen disappears into the
+          black card. A mask takes its shape from the file and its colour
+          from `background`, which is the only way to get one file that works
+          in both themes and in a chosen/unchosen state.
+
+          `ratio` is width / height of the file's viewBox. A mask has no
+          intrinsic size, so without it the box collapses.
+        */
+        svg?: string;
+        ratio?: number;
+        /** the numeral specimen that sits in the right column */
+        numerals?: string;
+        numeralsRatio?: number;
+        /** live CSS stack, for faces the web can load */
+        stack?: string;
+        /** the body sample's stack, for pairing trials */
+        bodyStack?: string;
+        note?: string;
+        /** the one that survived; drawn with the accent rather than grey */
+        chosen?: boolean;
+      }[];
+      caption?: string;
     };
+
+/* one page in the tree; `note` is the integration or the caveat hanging off
+   it, which is most of what a sitemap is actually communicating */
+export type SitemapNode = {
+  label: string;
+  note?: string;
+  children?: SitemapNode[];
+};
 
 export type ProjectSection = {
   /** the Layers-tree row and the frame label above the section on canvas */
@@ -337,11 +477,38 @@ export type Project = {
   /** project-specific facts appended after Role/Category/Year on the
       case-study page (e.g. Surfaces, Airports) */
   extraFacts?: [string, string][];
+  /*
+    Which side of the light/dark switch this project's case study opens on.
+
+    Case studies default to light because most of them are screenshots of
+    light interfaces and a dark canvas around those fights the thing the
+    page exists to present. A project designed dark has the opposite
+    problem: a near-black event site inside a parchment page reads as a
+    mistake, and every screenshot on it becomes a hole punched in the
+    layout. So the default is a default, not a rule.
+
+    This sets where the page STARTS. The dock's toggle still works from
+    either value, and neither this nor the pre-paint script writes to
+    localStorage, so the reader's preference for the rest of the site
+    survives a visit here untouched.
+  */
+  theme?: "dark" | "light";
   /** case-study gallery. Without it the page falls back to `cover` alone. */
   shots?: ProjectShot[];
   /** long-form body. When present it renders instead of the flat `shots`
       gallery — see CaseBlock above. */
   sections?: ProjectSection[];
+  /*
+    Draws the macOS browser window — traffic lights and an address bar —
+    around the screens in `grid`, `step` and `mockup` blocks.
+
+    Opt-in, and off by default, because the frame is a claim: it says the
+    thing inside it is a page in a browser. That is true of a website case
+    study and false of a poster wall or a set of app screens, where the
+    chrome was reading as a title bar bolted onto artwork that never lived
+    in a browser.
+  */
+  browserFrames?: boolean;
   /*
     Overrides the case-study accent for this project only, so a piece of
     work can be read in its own brand colour instead of the site purple.
@@ -380,6 +547,9 @@ export const PROJECTS: Project[] = [
   {
     id: "mike-tyson-invitational",
     title: "Mike Tyson Invitational",
+    /* the only case study whose screens really are a browser: every frame in
+       it is a page of a site you can go and load */
+    browserFrames: true,
     logoText: "MTI",
     logoUrl: "/projects/mike-tyson-logo.webp",
     /* the card loops rather than sits still; `cover` stays a still and doubles
@@ -388,6 +558,19 @@ export const PROJECTS: Project[] = [
     category: "Website Design",
     year: "2026",
     cover: "/projects/mike-tyson-poster.webp",
+    /* a shipped site AND a long-form deep dive, so it is listed as both
+       rather than moved out of the projects grid */
+    alsoCaseStudy: true,
+    /*
+      Opens light, like every other case study.
+
+      The site being near-black argued for a dark page, and that is what this
+      shipped as first. It was wrong: the screenshots carry their own
+      darkness now that the browser chrome around them is dark too, so they
+      read as objects sitting ON a light page rather than holes punched in
+      it. The `theme` field stays on the Project type for the next project
+      that genuinely needs it.
+    */
     preview: {
       kind: "website",
       href: "https://mike-tyson-invitational-3821139c156afc7.webflow.io/",
@@ -396,12 +579,549 @@ export const PROJECTS: Project[] = [
     cta: "Visit Live Website",
     role: "Design & Build",
     tools: ["Webflow", "Figma", "Motion"],
+    /*
+      The Smelting palette, straight off the design system.
+
+      `dark` is the orange rather than the red: #F72C25 is the brand's loud
+      value and it measures about 3.5:1 on this canvas, which is fine for a
+      button and not fine for the small caps labels the accent is mostly
+      used on here. #FF8D3C is the next stop up the same ramp and clears 6.8:1.
+      `bright` keeps the real red for the surfaces meant to be found rather
+      than read, and `fill` is the deepest ember, which is the only one in
+      the set white sits on cleanly.
+    */
+    /*
+      `bright` paints the collaborator cursor, its name tag and the comment
+      pins — objects that float over every screenshot on the page. At
+      #F72C25 that cursor was the loudest thing on screen and pulled the eye
+      off the work it was sitting on top of. It drops to the deep ember,
+      which still reads as this project's colour without competing with a
+      hero it happens to be hovering.
+    */
+    accent: {
+      dark: "#FF8D3C",
+      light: "#C41E18",
+      solid: "#F72C25",
+      bright: "#8E1F14",
+      ink: "#FFFFFF",
+      fill: "#450503",
+    },
     description:
       "A high-impact tournament site for the Mike Tyson Invitational, built for momentum, clarity and a heavyweight first impression.",
     highlights: [
       "Countdown-driven landing built around a hard launch deadline",
       "Custom Webflow interactions tuned for mobile performance",
       "Ticketing flow simplified into a single frictionless path",
+    ],
+    extraFacts: [
+      ["Surfaces", "10 pages"],
+      ["Typefaces", "Legend, Chakra Petch, IBM Plex Sans"],
+    ],
+    sections: [
+      {
+        name: "Overview",
+        heading: "Iron forge meets modern tech",
+        blocks: [
+          {
+            kind: "brief",
+            items: [
+              {
+                label: "Project",
+                wide: true,
+                body:
+                  "The first Mike Tyson Invitational, a three day amateur boxing event in Las Vegas. Ten pages covering tickets, fighter registration, sponsorship, donations and a live stream. Designed and built end to end.",
+              },
+              {
+                label: "Problem",
+                body:
+                  "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Both at full volume is a mess with a fire filter on it.",
+              },
+              {
+                label: "Decision",
+                body:
+                  "Ratio, not blending. 65% near black, 25% smelting orange, no more than 10% cold teal.",
+              },
+              {
+                label: "Honestly",
+                body:
+                  "First project at this size, with a name on the door that leaves no room for a shrug. I was nervous the whole way.",
+              },
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "Exploration",
+        heading: "Finding a face that could throw a punch",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Before any of that, four boards to find out how far the forge could go before it stopped looking like a sport and started looking like a filter.",
+            ],
+          },
+          {
+            kind: "directions",
+            items: [
+              {
+                src: "/projects/mike-tyson/direction-components.webp",
+                alt: "A direction board titled Headlines (Muscle - Force & Discipline), showing one content card in three densities over a dark arena plate, each with an ember gradient rail down its left edge and a red cut-corner outline on the headline.",
+                label: "01 · Forge, on a component",
+                note: "The heat tested on a real card rather than a headline: ember rail, cut corners, a stamped date. Three densities of the same component, because the one carrying body copy is the one that has to survive.",
+              },
+              {
+                src: "/projects/mike-tyson/direction-atmosphere.webp",
+                alt: "A direction board with a large Legend headline in off-white over an almost black architectural photograph, with teal halftone numerals reading 721 in the lower left.",
+                label: "02 · Cold, atmospheric",
+                note: "The opposite pole. Photography pushed nearly to black, teal numerals, no orange anywhere. Calm and expensive — and nothing in it throws a punch.",
+              },
+              {
+                src: "/projects/mike-tyson/direction-portrait.webp",
+                alt: "A hero board reading Forged in legacy. Built for the future, with a fighter lit by orange rim light on the right, supporting copy on the left and two buttons labelled Tickets and Explore.",
+                label: "03 · Lit portrait",
+                chosen: true,
+                note: "A fighter carrying the heat instead of a texture doing it. This layout is what shipped — headline and body left, the figure right, Tickets solid against Explore outlined. The cold blue accent is the one thing that did not survive the palette ratio.",
+              },
+              {
+                src: "/projects/mike-tyson/direction-graphic.webp",
+                alt: "A direction board with no photograph: a Legend headline over flat dark teal shards, with ember gradient diagonal lines and a red circled node at the right edge.",
+                label: "04 · Flat graphic",
+                note: "The tech pole with the photography removed entirely — shards, a trajectory line, a circled node. It reads like a product launch, not a fight card.",
+              },
+            ],
+            caption:
+              "Boards 02 and 04 are the two ends of the same argument, and both lose for the same reason: the event is a person, not a mood. **03 wins the layout, 01 wins the detailing**, and the palette ratio settles what happens when the two meet.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "Round one: three display faces, same sample, nothing else on the card.",
+            ],
+          },
+          {
+            kind: "typetrial",
+            variant: "display",
+            items: [
+              {
+                face: "Legend",
+                svg: "/projects/mike-tyson/face-legend.svg",
+                ratio: 1441 / 561,
+                numerals: "/projects/mike-tyson/face-legend-721.svg",
+                numeralsRatio: 651 / 360,
+                chosen: true,
+                note: "Flat sides, hard corners, and numerals that look stamped rather than drawn. The halftone in the digits is part of the face.",
+              },
+              {
+                face: "OneTwoHours",
+                svg: "/projects/mike-tyson/face-onetwohours.svg",
+                ratio: 1513 / 585,
+                note: "Cleaner and calmer. Reads as a tech conference, not a fight.",
+              },
+              {
+                face: "Boldonse",
+                stack: "var(--font-boldonse), sans-serif",
+                note: "Heavy enough, but the rounded joints soften every corner.",
+              },
+            ],
+          },
+          {
+            kind: "prose",
+            body: [
+              "Round two: Legend fixed on top, three body faces underneath it.",
+            ],
+          },
+          {
+            kind: "typetrial",
+            variant: "pairing",
+            items: [
+              {
+                face: "Oxanium",
+                bodyStack: "var(--font-oxanium), sans-serif",
+                note: "Two opinionated faces arguing. The headline stopped winning.",
+              },
+              {
+                face: "Chakra Petch",
+                bodyStack: "var(--font-chakra), sans-serif",
+                note: "Right voice, wrong job. Great on numbers, tiring across a paragraph.",
+              },
+              {
+                face: "IBM Plex Sans",
+                bodyStack: "var(--font-plex), sans-serif",
+                chosen: true,
+                note: "Disappears under Legend and stays comfortable at length.",
+              },
+            ],
+            caption:
+              "Legend and OneTwoHours are drawn as vector outlines from the design file, since neither has a webfont. The rest is live type.",
+          },
+          {
+            kind: "decisions",
+            items: [
+              {
+                tag: "Type",
+                label: "Three faces, one job each",
+                body:
+                  "Legend for headlines, IBM Plex Sans for reading, Chakra Petch for numbers and labels. Chakra Petch was too good at numerals to throw away.",
+              },
+              {
+                tag: "Texture",
+                label: "Texture lives in artwork, never in UI",
+                body:
+                  "Scratched metal and heat glow stay inside images and headline fills. Buttons, forms and body text stay flat.",
+              },
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "Design System",
+        heading: "Three palettes and a ratio",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The palette is a budget. The percentages do the work, not the hex values.",
+            ],
+          },
+          {
+            kind: "palette",
+            items: [
+              { name: "Onyx Black", hex: "#060708", use: "Backgrounds, canvas, nav, footer" },
+              { name: "Parchment", hex: "#F5F1EA", use: "Body text, outlines, dividers" },
+            ],
+            caption: "**Foundation, 65 to 70%.** Authority and depth. Most of the site is these two, quietly.",
+          },
+          {
+            kind: "palette",
+            items: [
+              { name: "Ember", hex: "#450503", use: "Filled surfaces" },
+              { name: "Smelting Red", hex: "#F72C25", use: "Primary CTAs, active states" },
+              { name: "Heated Steel", hex: "#FF8D3C", use: "Highlights, glow" },
+              { name: "Spark", hex: "#FFF893", use: "Rare accents, the hottest point" },
+            ],
+            caption: "**Accent, 20 to 25%.** The ramp runs in the order metal actually heats.",
+          },
+          {
+            kind: "palette",
+            items: [
+              { name: "Gunmetal", hex: "#0F1317", use: "Background elements" },
+              { name: "Slate", hex: "#162529", use: "Panels" },
+              { name: "Patina", hex: "#294341", use: "Data labels" },
+              { name: "Cold Steel", hex: "#3D6D67", use: "Numerals, timers, metallic tint" },
+            ],
+            caption: "**Cool tint, 5 to 10%.** The smallest budget, and the easiest one to overspend.",
+          },
+          {
+            kind: "specs",
+            items: [
+              { name: "Primary button", value: "Notched corners, solid fill", note: "Tickets, Register, Donate", swatch: "#F72C25" },
+              { name: "Secondary button", value: "Outline, parchment", swatch: "#F5F1EA" },
+              { name: "Input height", value: "48px", note: "Dark fill, explicit focus state" },
+              { name: "Field labels", value: "Above the input", note: "Never placeholder only" },
+              { name: "Tags and status", value: "Chakra Petch, letter spaced", swatch: "#3D6D67" },
+            ],
+          },
+          {
+            kind: "statement",
+            text:
+              "Capping the teal at 10% is the only reason this reads as a forge with technology in it, rather than a tech site in an orange coat.",
+          },
+        ],
+      },
+
+      {
+        name: "Sitemap",
+        heading: "Ten surfaces, four of them someone else's software",
+        blocks: [
+          {
+            kind: "sitemap",
+            nodes: [
+              { label: "Home" },
+              { label: "Tickets", children: [{ label: "Event Schedule" }, { label: "TicketTailor", note: "External" }] },
+              { label: "Event Info", children: [{ label: "Event Schedule" }] },
+              { label: "Get Involved", children: [{ label: "Sponsorship Tiers" }, { label: "Sponsor Inquiry", note: "Form" }] },
+              { label: "Fighter Registration", note: "Form" },
+              { label: "Donations", children: [{ label: "Donorbox", note: "External" }] },
+              { label: "Merch / Shop", children: [{ label: "Shopify", note: "Planned" }] },
+              { label: "Watch Live", children: [{ label: "Streaming Hub" }] },
+              { label: "Media / Gallery" },
+              { label: "Legal", children: [{ label: "Privacy" }, { label: "Terms" }, { label: "Refunds" }] },
+            ],
+            caption:
+              "Checkout runs through TicketTailor, Donorbox and Shopify, so most of the job is the run up to the handoff. Merch was scoped for after the products and sponsor tiers were locked, but sits in the architecture from day one so navigation never needs rebuilding around it.",
+          },
+        ],
+      },
+
+      {
+        name: "Homepage",
+        heading: "The first three seconds",
+        blocks: [
+          {
+            kind: "mockup",
+            frame: "laptop",
+            items: [
+              {
+                src: "/projects/mike-tyson/homepage.webm",
+                poster: "/projects/mike-tyson/homepage-poster.webp",
+                url: "miketysoninvitational.com",
+                step: "01",
+                title: "One scroll, six jobs",
+                body:
+                  "Sell a ticket, explain a format nobody has seen, register fighters, court sponsors, take donations, announce a date. It resolves as a descent: heat at the top, information in the middle, invitation at the bottom.",
+                alt: "Screen recording scrolling the homepage from hero to footer",
+              },
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              {
+                src: "/projects/mike-tyson/home-hero.webp",
+                alt: "Homepage hero with the headline in smelting red over a portrait lit with flame",
+                label: "Hero",
+              },
+              {
+                src: "/projects/mike-tyson/home-date-reveal.webp",
+                alt: "MARCH 12-14 LAS VEGAS in Legend, filled with brushed metal inside a bracketed frame",
+                label: "Date reveal",
+              },
+            ],
+            body: [
+              "The hero is the whole thesis: near black, headline in smelting red, one ember of heat carrying the right side. The cursor is a crosshair that glows, which is where the tech half stops being a colour and becomes a behaviour.",
+              "The date gets a full screen, filled with brushed metal and framed in corner brackets. Forge for the texture, HUD for the frame. It is the frame I am happiest with.",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              {
+                src: "/projects/mike-tyson/home-about.webp",
+                alt: "The Invitational section with a cyan wireframe figure and copy about AI powered broadcast",
+                label: "The format",
+              },
+              {
+                src: "/projects/mike-tyson/navbar.webp",
+                alt: "Full screen navigation portal with eight destinations set large in Legend",
+                label: "Navigation",
+              },
+            ],
+            body: [
+              "The one place cold teal runs: the section about AI broadcast and real time power measurement. The tech palette appears where the copy is about technology and nowhere else.",
+              "Eight destinations with no obvious ranking between Buy Tickets and Registration, so a horizontal bar would have had to invent one. The portal sets all eight at a size that says each matters.",
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "About",
+        heading: "The part that had to earn the name",
+        blocks: [
+          {
+            kind: "mockup",
+            frame: "laptop",
+            items: [
+              {
+                src: "/projects/mike-tyson/about.webm",
+                poster: "/projects/mike-tyson/about-poster.webp",
+                url: "miketysoninvitational.com/about",
+                step: "02",
+                title: "Legacy without the highlight reel",
+                body:
+                  "The easy version is a montage of famous knockouts. That is someone else's story and it does not explain why an amateur invitational exists. This runs on one line instead: legacy did not end in the ring, it continued through transformation.",
+                alt: "Screen recording scrolling the About page",
+              },
+            ],
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/mike-tyson/about-page.webp",
+                alt: "The Evolution hero on the About page, a portrait lit from behind in red and orange",
+                label: "The Evolution",
+              },
+              {
+                src: "/projects/mike-tyson/vision.webp",
+                alt: "The Vision Behind The Invitational section in orange and cream over deep red",
+                label: "The Vision",
+              },
+            ],
+            caption: "The only two frames that run the accent over budget, deliberately.",
+          },
+        ],
+      },
+
+      {
+        name: "Tickets",
+        heading: "Handing off to someone else's checkout",
+        blocks: [
+          {
+            kind: "mockup",
+            frame: "laptop",
+            items: [
+              {
+                src: "/projects/mike-tyson/tickets.webm",
+                poster: "/projects/mike-tyson/tickets-poster.webp",
+                url: "miketysoninvitational.com/events",
+                step: "03",
+                title: "Three nights, three states",
+                body:
+                  "Ticketing runs through TicketTailor, so the design job ends at the handoff. Sale status sits on the pages before the jump, so nobody reaches an external checkout to discover the thing they wanted is not purchasable yet.",
+                alt: "Screen recording of the tickets page showing the three nights and their sale states",
+              },
+            ],
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/mike-tyson/event-dates.webp",
+                alt: "Three date cards for March 12, 13 and 14 with sale status labels",
+                label: "Dates and status",
+              },
+              {
+                src: "/projects/mike-tyson/ticket-design.webp",
+                alt: "Physical ticket artwork with a portrait, chains, rivets and the Las Vegas sign",
+                label: "Physical ticket",
+                small: true,
+              },
+            ],
+            caption:
+              "Status is set in Chakra Petch, which is why that face survived the trials. The printed ticket lets the forge half go all the way, because print has no legibility budget to protect.",
+          },
+        ],
+      },
+
+      {
+        name: "Get Involved",
+        heading: "Selling to sponsors, not to fans",
+        blocks: [
+          {
+            kind: "mockup",
+            frame: "laptop",
+            items: [
+              {
+                src: "/projects/mike-tyson/sponsorship.webm",
+                poster: "/projects/mike-tyson/sponsorship-poster.webp",
+                url: "miketysoninvitational.com/sponsorships",
+                step: "04",
+                title: "A different reader entirely",
+                body:
+                  "Every other page talks to someone who wants to watch a fight. This one talks to someone with a marketing budget, who needs structure and numbers rather than atmosphere. It is the most restrained page on the site, and the restraint is the pitch.",
+                alt: "Screen recording of the sponsorship page scrolling through the tiers",
+              },
+            ],
+          },
+          {
+            kind: "mockup",
+            frame: "browser",
+            items: [
+              {
+                src: "/projects/mike-tyson/sponsorship-packages.webp",
+                alt: "Sponsorship packages section with heavyweight, middleweight and red/blue corner tiers",
+                url: "miketysoninvitational.com/sponsorships",
+                title: "Named in the sport's own language",
+                body:
+                  "Heavyweight, Middleweight, Red and Blue Corner. The hierarchy reads before any number does.",
+              },
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "Fighter Registration",
+        heading: "The longest form on the site",
+        blocks: [
+          {
+            kind: "mockup",
+            frame: "laptop",
+            items: [
+              {
+                src: "/projects/mike-tyson/fighter-registration.webm",
+                poster: "/projects/mike-tyson/fighter-registration-poster.webp",
+                url: "miketysoninvitational.com/registration",
+                step: "05",
+                title: "Ask a fighter for their record",
+                body:
+                  "Gym, date of birth, bout record, fight weight. Every one of those is a reason to abandon, so the page opens with an explicit promise about what happens next. A long form only gets finished when the reader knows why each field is there.",
+                alt: "Screen recording of the fighter registration page and form",
+              },
+            ],
+          },
+          {
+            kind: "grid",
+            items: [
+              {
+                src: "/projects/mike-tyson/registration-hero.webp",
+                alt: "Mike Wants You hero with apply now and event details buttons",
+                label: "The ask",
+              },
+              {
+                src: "/projects/mike-tyson/registration-form.webp",
+                alt: "Registration form with name, gym, date of birth, gender, record and weight fields",
+                label: "The form",
+              },
+            ],
+            caption:
+              "Labels sit above the fields. That rule matters most here, where someone entering a bout record cannot afford to lose the label the moment they start typing.",
+          },
+        ],
+      },
+
+      {
+        name: "Donations",
+        heading: "Asking without the guilt trip",
+        blocks: [
+          {
+            kind: "mockup",
+            frame: "laptop",
+            items: [
+              {
+                src: "/projects/mike-tyson/donation.webm",
+                poster: "/projects/mike-tyson/donation-poster.webp",
+                url: "miketysoninvitational.com/donation",
+                step: "06",
+                title: "Support the mission",
+                body:
+                  "Donations route out to Donorbox, so again the job is the run up. It is the reddest page on the site, and the only one asking for something with nothing tangible going back.",
+                alt: "Screen recording of the donation page",
+              },
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "Reflection",
+        heading: "What a first big one teaches you",
+        blocks: [
+          {
+            kind: "lessons",
+            items: [
+              {
+                title: "A ratio is a design decision",
+                body:
+                  "Writing **65 / 25 / 10** next to the palettes did more than any single colour choice. Two clashing directions stop clashing once one is rationed, and a written number let me tell whether a screen was wrong instead of just feeling it.",
+              },
+              {
+                title: "Scope integrations before designing around them",
+                body:
+                  "The pages that went smoothly were the ones where I knew the checkout belonged to someone else. The ones that hurt were where I had already drawn one.",
+              },
+              {
+                title: "Nervous is not unprepared",
+                body:
+                  "The anxiety was about the name on the door, not the work. Exploration, palette ratios and the sitemap were all settled before a page was designed, and that is what carried it.",
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -2214,6 +2934,19 @@ const SELECTED_IDS = [
   "yantra",
   "posterfolio",
 ];
+
+/*
+  The slugs whose case study opens dark, for the pre-paint theme script.
+
+  Derived rather than hand-listed, so `theme: "dark"` on a project is the
+  only place the fact lives. The script in app/layout.tsx runs before React
+  and cannot import a component tree, so it needs this as plain data — and
+  it has to be plain data at BUILD time, because a theme decided after
+  hydration is a white flash on a black page.
+*/
+export const DARK_CASE_STUDIES: string[] = PROJECTS.filter(
+  (p) => p.theme === "dark"
+).map((p) => p.id);
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {
   const project = PROJECTS.find((p) => p.id === id);

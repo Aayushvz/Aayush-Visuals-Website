@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import type { CaseBlock, ProjectSection, ProjectShot } from "@/components/projects/projectData";
+import type {
+  CaseBlock,
+  ProjectSection,
+  ProjectShot,
+  SitemapNode,
+} from "@/components/projects/projectData";
 import { isStripShot } from "@/components/projects/projectData";
 import { dimsFor } from "@/components/projects/imageDims";
+import { caseFontVars } from "./caseFonts";
 import { layerId } from "./FigmaProjectPage";
 
 /*
@@ -20,20 +26,35 @@ import { layerId } from "./FigmaProjectPage";
 */
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+/*
+  Whether this case study frames its screens as browser windows.
+
+  A context rather than a prop threaded through every block, because the
+  frame is decided once per project and the components that draw it —
+  `grid`, `step`, `mockup` — sit at three different depths. Default false:
+  the frame has to be asked for, since claiming a poster is a web page is a
+  worse failure than a screenshot rendering bare.
+*/
+const BrowserFramesCtx = createContext(false);
+
 export default function FigmaCaseSections({
   sections,
   pin,
+  browserFrames = false,
 }: {
   sections: ProjectSection[];
   /* the page's second comment pin. In the flat gallery it sits on the first
      frame; here the first frame is buried inside a section, so the page
      hands the pin down and we place it on whichever figure comes first. */
   pin?: React.ReactNode;
+  /** see Project.browserFrames — opt in to the macOS window chrome */
+  browserFrames?: boolean;
 }) {
   const firstFigure = findFirstFigure(sections);
 
   return (
-    <div className="figp-sections">
+    <BrowserFramesCtx.Provider value={browserFrames}>
+    <div className={`figp-sections ${caseFontVars}`}>
       {sections.map((section, si) => (
         <motion.section
           className="figp-section"
@@ -73,6 +94,7 @@ export default function FigmaCaseSections({
         </motion.section>
       ))}
     </div>
+    </BrowserFramesCtx.Provider>
   );
 }
 
@@ -220,18 +242,79 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
                 key={item.src}
                 variants={revealChild}
               >
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  {...dimsFor(item.src)}
-                  data-figp-node={shotNodeName(item.src)}
-                  data-figp-fill={`image:${item.src}`}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                />
+                {/*
+                  Browser chrome around a screen, and nothing around
+                  reference art. `small` already marks the items that are not
+                  captures of a website (a printed ticket, a component
+                  sheet), and putting an address bar over one of those would
+                  be claiming it is a page.
+                */}
+                <MaybeFramed framed={!item.small}>
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    {...dimsFor(item.src)}
+                    data-figp-node={shotNodeName(item.src)}
+                    data-figp-fill={`image:${item.src}`}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                </MaybeFramed>
                 {item.label && <span className="figp-grid-label">{item.label}</span>}
               </motion.span>
+            ))}
+          </motion.div>
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
+        </figure>
+      );
+
+    /*
+      The direction wall. Two up, because these are 16:9 comps and three
+      across a case column puts a headline at 280px, which is a thumbnail of
+      a decision rather than the decision.
+
+      No frame around them. A browser bar would say "this is a page", and
+      half of these are type and component boards that were never a page.
+    */
+    case "directions":
+      return (
+        <figure className="figp-dirs-fig">
+          <motion.div
+            className="figp-dirs"
+            variants={revealParent}
+            initial="hidden"
+            whileInView="shown"
+            viewport={inView}
+          >
+            {block.items.map((item) => (
+              <motion.div
+                className={`figp-dir${item.chosen ? " figp-dir--chosen" : ""}`}
+                key={item.src}
+                variants={revealChild}
+              >
+                <span
+                  className="figp-dir-frame"
+                  data-figp-node={shotNodeName(item.src)}
+                  data-figp-fill={`image:${item.src}`}
+                >
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    {...dimsFor(item.src)}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                </span>
+                <span className="figp-dir-head">
+                  <span className="figp-dir-label">{item.label}</span>
+                  {/* the ring already says it; this is the same fact for a
+                      reader who is not seeing the ring */}
+                  {item.chosen && <span className="figp-dir-tag">Chosen</span>}
+                </span>
+                <span className="figp-dir-note">{item.note}</span>
+              </motion.div>
             ))}
           </motion.div>
           {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
@@ -593,16 +676,21 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
           >
             {block.items.map((item) => (
               <motion.span className="figp-step-shot" key={item.src} variants={revealChild}>
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  {...dimsFor(item.src)}
-                  data-figp-node={shotNodeName(item.src)}
-                  data-figp-fill={`image:${item.src}`}
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                />
+                {/* a still screen sits in browser chrome; the laptop is
+                    reserved for the scroll recordings, where the lid is
+                    carrying a whole page rather than one frame */}
+                <BrowserChrome>
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    {...dimsFor(item.src)}
+                    data-figp-node={shotNodeName(item.src)}
+                    data-figp-fill={`image:${item.src}`}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                </BrowserChrome>
                 {item.label && <span className="figp-step-label">{item.label}</span>}
               </motion.span>
             ))}
@@ -751,7 +839,457 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
           ))}
         </motion.div>
       );
+
+    case "mockup":
+      return (
+        <div className="figp-mockups">
+          {block.items.map((item) => (
+            <section className="figp-mockup" key={item.src}>
+              <header className="figp-mockup-head">
+                {item.step && <span className="figp-mockup-step">{item.step}</span>}
+                <h3 className="figp-mockup-title">{marked(item.title)}</h3>
+                <p className="figp-mockup-body">{marked(item.body)}</p>
+              </header>
+              <DeviceFrame item={item} frame={block.frame ?? "laptop"} />
+            </section>
+          ))}
+        </div>
+      );
+
+    case "sitemap": {
+      /*
+        A real sitemap: a root, a spine, and a rank of pages hanging off it,
+        each with its own children below. Drawn with borders rather than SVG
+        so it reflows, themes and stays selectable — the connectors are just
+        pseudo-elements on the nodes they connect.
+
+        Home is pulled out as the root rather than listed first, because it
+        is the only node every other node is reachable from, and a list makes
+        it look like one of ten peers.
+      */
+      const [root, ...rest] = block.nodes;
+
+      return (
+        <figure className="figp-map">
+          <div>
+            <div className="figp-map-inner">
+              <div className="figp-map-root">
+                <span className="figp-map-roothome">{root.label}</span>
+              </div>
+
+              <ul className="figp-map-rank">
+                {rest.map((node, i) => (
+                  <li className="figp-map-branch" key={node.label}>
+                    <div className="figp-map-node">
+                      <span className="figp-map-idx" aria-hidden="true">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="figp-map-label">{node.label}</span>
+                      {node.note && <span className="figp-map-note">{node.note}</span>}
+                    </div>
+
+                    {node.children?.length ? (
+                      <ul className="figp-map-kids">
+                        {node.children.map((child) => (
+                          <li key={child.label}>
+                            <span
+                              className={`figp-map-kid${
+                                child.note === "External" || child.note === "Planned"
+                                  ? " figp-map-kid--ext"
+                                  : ""
+                              }`}
+                            >
+                              {child.label}
+                              {child.note && (
+                                <em className="figp-map-flag">{child.note}</em>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
+        </figure>
+      );
+    }
+
+    case "typetrial":
+      return (
+        <figure className={`figp-trials figp-trials--${block.variant}`}>
+          {block.items.map((t) => (
+            <div
+              className={`figp-trial${t.chosen ? " figp-trial--chosen" : ""}`}
+              key={t.face}
+            >
+              {block.variant === "display" ? (
+                <div className="figp-trial-grid">
+                  {/* the sample, left, exactly as the design file composes it */}
+                  <span className="figp-trial-head">
+                    {t.svg ? (
+                      <Outlines src={t.svg} ratio={t.ratio ?? 2.5} label={`Headlines set in ${t.face}`} />
+                    ) : (
+                      <span className="figp-trial-live" style={{ fontFamily: t.stack }}>
+                        Headlines (Muscle- Force &amp; Discipline)
+                      </span>
+                    )}
+                  </span>
+
+                  {/* the face's name and its numerals, right */}
+                  <span className="figp-trial-side">
+                    <span className="figp-trial-face">{t.face}</span>
+                    {t.numerals ? (
+                      <Outlines
+                        src={t.numerals}
+                        ratio={t.numeralsRatio ?? 1.8}
+                        label={`Numerals in ${t.face}`}
+                        className="figp-trial-num"
+                      />
+                    ) : (
+                      <span className="figp-trial-num-live" style={{ fontFamily: t.stack }}>
+                        721
+                      </span>
+                    )}
+                  </span>
+                </div>
+              ) : (
+                <div className="figp-trial-pair">
+                  <span className="figp-trial-face">{t.face}</span>
+                  <Outlines
+                    src="/projects/mike-tyson/face-legend.svg"
+                    ratio={2.5686}
+                    label=""
+                    className="figp-trial-pairhead"
+                  />
+                  <p className="figp-trial-body" style={{ fontFamily: t.bodyStack }}>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  </p>
+                </div>
+              )}
+              {t.note && <span className="figp-trial-note">{t.note}</span>}
+            </div>
+          ))}
+          {block.caption && <figcaption>{marked(block.caption)}</figcaption>}
+        </figure>
+      );
   }
+}
+
+/*
+  A browser, drawn.
+
+  Three dots and an address bar is enough — a mockup only has to say "this
+  is a page in a browser" before the reader's eye moves on to the thing
+  inside it, and every pixel spent on more convincing chrome is a pixel not
+  spent on the design being presented.
+
+  The URL is real. It is the one thing this frame knows that the screenshot
+  does not, and on a case study about a site somebody can actually visit,
+  naming the route each clip is showing does more work than any amount of
+  bezel.
+*/
+function DeviceFrame({
+  item,
+  frame,
+}: {
+  item: {
+    src: string;
+    poster?: string;
+    alt: string;
+    url?: string;
+    title?: string;
+  };
+  frame: "laptop" | "browser";
+}) {
+  const isVideo = item.src.endsWith(".webm");
+  const media = isVideo ? (
+    <ScrollVideo src={item.src} poster={item.poster} alt={item.alt} />
+  ) : (
+    <img
+      src={item.src}
+      alt={item.alt}
+      {...dimsFor(item.src)}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+    />
+  );
+
+  if (frame === "laptop") {
+    return (
+      <div className="figp-laptop" data-figp-node={shotNodeName(item.src)}>
+        <div className="figp-laptop-lid">
+          {/* camera pinhole, which is most of what sells a lid as a lid */}
+          <span className="figp-laptop-cam" aria-hidden="true" />
+          <div className="figp-laptop-screen">
+            {/*
+              A window inside the lid, rather than the recording bleeding to
+              the bezel. The clips are captures of a browser, so a browser is
+              what should be on the screen: the tab carries the page name and
+              the bar carries the URL, which is the one thing a mockup can
+              tell you that the recording cannot.
+            */}
+            <MacWindow url={item.url} title={item.title}>
+              {media}
+            </MacWindow>
+          </div>
+        </div>
+        <div className="figp-laptop-base" aria-hidden="true">
+          <span className="figp-laptop-notch" />
+        </div>
+      </div>
+    );
+  }
+
+  return <BrowserChrome url={item.url}>{media}</BrowserChrome>;
+}
+
+/*
+  Letterform outlines, painted rather than embedded.
+
+  The file supplies the shape through `mask-image` and CSS supplies the
+  colour through `background`. Going through <img> instead looks simpler and
+  silently fails: the SVG becomes its own document, `currentColor` inside it
+  falls back to black, and a black specimen on a black card is invisible.
+  That is exactly what shipped, and it is why this is a mask now.
+
+  `ratio` has to be passed because a mask has no intrinsic size. Without it
+  the element resolves to zero height and the specimen vanishes a second
+  time, for a different reason.
+*/
+function Outlines({
+  src,
+  ratio,
+  label,
+  className,
+}: {
+  src: string;
+  ratio: number;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`figp-outlines${className ? ` ${className}` : ""}`}
+      role={label ? "img" : undefined}
+      aria-label={label || undefined}
+      aria-hidden={label ? undefined : true}
+      style={
+        {
+          "--outline-src": `url("${src}")`,
+          aspectRatio: String(ratio),
+        } as React.CSSProperties
+      }
+    />
+  );
+}
+
+/* opt out without a branch at every call site */
+function MaybeFramed({
+  framed,
+  children,
+}: {
+  framed: boolean;
+  children: React.ReactNode;
+}) {
+  return framed ? <BrowserChrome>{children}</BrowserChrome> : <>{children}</>;
+}
+
+/*
+  A macOS browser window: traffic lights, one active tab, an address bar.
+
+  The tab is the detail that does the work. Chrome alone reads as generic
+  "app window"; a tab with a name on it reads as a specific page in a
+  specific browser, which is what every one of these recordings is.
+*/
+function MacWindow({
+  url,
+  title,
+  children,
+}: {
+  url?: string;
+  title?: string;
+  children: React.ReactNode;
+}) {
+  /* the tab shows the page, not the sentence above it: "One scroll, six
+     jobs" is a section heading, whereas the tab wants what the site itself
+     would put there */
+  const tab = url ? url.split("/").slice(1).join("/") || "Home" : title;
+
+  return (
+    <div className="figp-mac">
+      <div className="figp-mac-top" aria-hidden="true">
+        <span className="figp-mac-lights">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="figp-mac-tab">
+          <span className="figp-mac-fav" />
+          <span className="figp-mac-tabname">{tab}</span>
+        </span>
+      </div>
+      {url && (
+        <div className="figp-mac-bar" aria-hidden="true">
+          <span className="figp-mac-url">{url}</span>
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+/* the browser shell on its own, so a plain screenshot anywhere in the page
+   can be dropped into the same frame without going through `mockup` */
+function BrowserChrome({
+  url,
+  children,
+}: {
+  url?: string;
+  children: React.ReactNode;
+}) {
+  /*
+    One gate for all three callers — `grid`, `step` and the browser variant
+    of `mockup` — rather than a branch at each.
+
+    It returns the children unwrapped rather than hiding the bar in CSS, so
+    a project that does not want the frame does not ship an empty shell with
+    a background, a radius and a 44px shadow around every image. Every image
+    inside these blocks already carries its own width/radius/ring rule, so
+    there is nothing left for the wrapper to hold up.
+  */
+  const framed = useContext(BrowserFramesCtx);
+  if (!framed) return <>{children}</>;
+
+  return (
+    <div className="figp-browser">
+      <div className="figp-browser-bar" aria-hidden="true">
+        <span className="figp-browser-dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        {url && <span className="figp-browser-url">{url}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/*
+  A loop that only runs while it is on screen.
+
+  Six clips on one page is six VP9 decoders, and a browser will happily run
+  all of them at once into a laptop fan. An IntersectionObserver means the
+  cost is bounded by what the reader can actually see — normally one, never
+  more than two.
+
+  `preload="none"` is the other half: without it the browser fetches the
+  first frames of all six on load, which is the download this page was
+  compressed to avoid. The poster covers the gap, so the frame is never
+  empty while the video is still nothing.
+
+  No controls. These are screen recordings being presented as design work,
+  not media somebody came here to operate, and a scrub bar and a mute button
+  sitting across the bottom of every laptop is somebody else's UI covering
+  the UI the page is about.
+
+  That does remove the explicit pause affordance, so the two automatic ones
+  have to carry it: the clip stops the moment it leaves the viewport, and
+  `prefers-reduced-motion` means it never starts at all. The poster is a real
+  frame of the design, so a reader who has asked the OS to stop moving things
+  still sees the screen, just still.
+*/
+function ScrollVideo({
+  src,
+  poster,
+  alt,
+}: {
+  src: string;
+  poster?: string;
+  alt: string;
+}) {
+  const ref = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    /*
+      Start when the clip is actually being looked at, not when it clips the
+      edge of the viewport.
+
+      The first version used a 120px positive rootMargin and a 0.25
+      threshold, which meant a clip began playing while it was still below
+      the fold — by the time it was on screen it was ten seconds in and the
+      opening of the scroll had already been missed. The margin is negative
+      now, so the observer's box is INSET from the viewport rather than
+      grown past it, and 0.6 means most of the frame has to be inside that
+      inset box before anything moves.
+
+      It rewinds on exit for the same reason: a clip you scroll back to
+      should start from the top, not resume halfway through a scroll you
+      never saw.
+    */
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          /* play() rejects if the element is torn down mid-promise, and an
+             unhandled rejection in an observer is a console error on every
+             scroll past */
+          el.play().catch(() => {});
+        } else {
+          el.pause();
+          el.currentTime = 0;
+        }
+      },
+      { rootMargin: "-15% 0px -15% 0px", threshold: 0.6 }
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      poster={poster}
+      aria-label={alt}
+      muted
+      loop
+      playsInline
+      disableRemotePlayback
+      disablePictureInPicture
+      preload="none"
+    />
+  );
+}
+
+/* One page and everything under it. Recursive because the tree is: Get
+   Involved holds Sponsorship Tiers, which holds Sponsor Inquiry. */
+function SitemapBranch({ node, top }: { node: SitemapNode; top?: boolean }) {
+  return (
+    <li className={`figp-sitemap-node${top ? " figp-sitemap-node--top" : ""}`}>
+      <span className="figp-sitemap-page">
+        <span className="figp-sitemap-label">{node.label}</span>
+        {node.note && <span className="figp-sitemap-note">{node.note}</span>}
+      </span>
+      {node.children?.length ? (
+        <ul className="figp-sitemap-children">
+          {node.children.map((child) => (
+            <SitemapBranch node={child} key={child.label} />
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
 }
 
 /*
