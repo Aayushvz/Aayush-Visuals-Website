@@ -25,13 +25,16 @@ function ArrowUpRight() {
 
 export default function ProjectsSection() {
   /*
-    The reel's heaviest media, which is not the same thing as its first.
+    The reel's heaviest media, which is not necessarily its first.
+
     One project ships a looping WebM (~0.5MB) that outweighs every static
-    cover in this section by roughly ten times. That project used to open
-    the reel, so "first" and "heaviest" pointed at the same tile and the
-    difference never surfaced. Reordering the reel separated them: picking
-    by position would warm a 56KB cover and leave the heavy one to pop in
-    late, which is the exact problem the prefetch exists to solve.
+    cover in this section by roughly ten times. It happens to open the reel
+    again right now, so "first" and "heaviest" point at the same tile — but
+    that is a property of the current running order, not something to rely
+    on. An earlier order had them apart, and picking by position then warmed
+    a 56KB cover while the heavy one popped in late, which is the exact
+    problem this prefetch exists to solve. Finding it by bgVideoUrl survives
+    the next reshuffle.
   */
   const heaviest = SELECTED_PROJECTS.find((p) => p.bgVideoUrl);
   const firstMedia = heaviest?.bgVideoUrl ?? SELECTED_PROJECTS[0].cover;

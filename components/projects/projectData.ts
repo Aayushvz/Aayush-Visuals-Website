@@ -2917,19 +2917,23 @@ export const PROJECTS: Project[] = [
 
 /*
   The homepage reel's running order, which is an editorial call and not the
-  order of the array above. The two long case studies lead because they are
-  the only work here that shows the whole arc of a problem; the recognisable
-  client names follow. PROJECTS keeps its own order, so /work is unaffected.
+  order of the array above. PROJECTS keeps its own order, so /work is
+  unaffected.
+
+  Positions 1, 4 and 7 are the full-width rows (see the ROWS rhythm in
+  SelectedWorks.tsx), so those three slots carry the most weight — worth
+  knowing before reordering, since moving a project between a full row and
+  a paired one changes how large it renders, not just where it sits.
 
   Named by id rather than by position: the reel used to index into PROJECTS
   directly, which meant inserting a project anywhere near the top silently
   reshuffled the homepage.
 */
 const SELECTED_IDS = [
-  "cpgrams",
+  "mike-tyson-invitational",
   "layover",
   "elevation-capital",
-  "mike-tyson-invitational",
+  "cpgrams",
   "riviera",
   "yantra",
   "posterfolio",
