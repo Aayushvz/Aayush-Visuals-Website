@@ -2128,8 +2128,20 @@ html[data-theme="light"] .figp-lfile img {
    them individually (prose + stats, stats + prose, numbered + prose …) means
    every new CaseBlock kind needs N new rules and the one nobody writes is the
    one that ships flush against its neighbour. One adjacent-sibling rule can't
-   have that gap. */
-.figp-section-body > * + * {
+   have that gap.
+
+   `.figp-sections` is on the front for weight, and it is the whole point of
+   this rule rather than tidiness. At `.figp-section-body > * + *` this is
+   (0,1,0) — the same weight as every block's own reset, and those resets sit
+   LATER in this file. So `.figp-numbered { margin: 0 }`, `.figp-specs
+   { margin: 0 }`, `.figp-grid-fig { margin: 0 }` and friends — all written to
+   strip a browser default off a ul/ol/figure — were quietly winning and
+   zeroing the gap. That is why stats sat flush on numbered, bars on the
+   cover, and two galleries on each other: not a missing pair in the table
+   below, but this rule losing to a margin reset it was supposed to outrank.
+   At (0,2,0) it outranks the resets and still yields to the explicit pairs
+   below, which are also (0,2,0) and come later. */
+.figp-sections .figp-section-body > * + * {
   margin-top: 2.4rem;
 }
 
@@ -2547,10 +2559,24 @@ html[data-theme="light"] .figp-lfile img {
   margin-top: clamp(3.4rem, 6vw, 5rem);
 }
 
+/*
+  Row gap has to beat the label's own binding, not just look even.
+
+  Each shot is an image with a caption 0.85rem (14px) under it. At a uniform
+  1.2rem (19px) gap the caption sat 14px from the screen it describes and
+  19px from the next row's screen — near enough to a tie that a caption read
+  as a heading for the image below it as easily as a label for the one
+  above. Proximity is doing the grouping here, so the separation between
+  groups has to be clearly larger than the separation inside one.
+
+  Row and column are split deliberately: columns hold no caption between
+  them, so they keep the tighter 1.2rem and the grid stays dense sideways.
+*/
 .figp-step-shots {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.2rem;
+  column-gap: 1.2rem;
+  row-gap: 2.4rem; /* 38px against a 14px bind — 2.7x */
   align-items: start;
 }
 
@@ -4400,8 +4426,13 @@ html[data-theme="light"] .figp-lfile img {
    composition, and auto-fit would reflow it to 4 or 5 on a wide screen and
    break the rhythm the set was laid out in.
 */
+/* same split as .figp-step-shots: its label binds at 0.6rem (10px), so a
+   uniform 1.2rem row gap left the caption almost equidistant between its own
+   frame and the one below. --figp-grid-gap still tunes the columns for the
+   poster wall, which carries no captions at all. */
 .figp-grid {
-  gap: var(--figp-grid-gap, 1.2rem);
+  column-gap: var(--figp-grid-gap, 1.2rem);
+  row-gap: 2rem; /* 32px against a 10px bind — 3.2x */
 }
 
 /*
