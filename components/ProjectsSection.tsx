@@ -26,8 +26,8 @@ function ArrowUpRight() {
 export default function ProjectsSection() {
   /*
     The reel's heaviest media, which is not the same thing as its first.
-    One project ships an animated WebP (~1.5MB) that outweighs every static
-    cover in this section by more than ten times. That project used to open
+    One project ships a looping WebM (~0.5MB) that outweighs every static
+    cover in this section by roughly ten times. That project used to open
     the reel, so "first" and "heaviest" pointed at the same tile and the
     difference never surfaced. Reordering the reel separated them: picking
     by position would warm a 56KB cover and leave the heavy one to pop in
