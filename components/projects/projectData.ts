@@ -1203,7 +1203,7 @@ export const PROJECTS: Project[] = [
     category: "Product Design",
     year: "2026",
     cover: "/projects/cpgrams-cover.webp",
-    preview: { kind: "website", href: "https://cpgramsaichatbot.com/", image: "/projects/cpgrams-cover.webp" },
+    preview: { kind: "website", href: "https://pgportal.gov.in/Signin", image: "/projects/cpgrams-cover.webp" },
     cta: "Visit Live Chatbot",
     role: "Product Design · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
