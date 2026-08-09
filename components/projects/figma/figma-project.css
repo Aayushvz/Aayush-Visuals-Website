@@ -1745,7 +1745,9 @@ html[data-theme="light"] .figp-lfile img {
   flex: none;
   width: calc(var(--ext-h) - var(--ext-pad) * 2);
   height: calc(var(--ext-h) - var(--ext-pad) * 2);
-  color: var(--ext-body);
+  /* white on the accent square, matching the march it turns into on hover —
+     one arrow colour for both states rather than a dark glyph that flips */
+  color: #fff;
   /* the glyph leaves early, before the fill has travelled far enough to put
      a second arrow anywhere near it */
   transition: opacity 0.14s ease-out;
@@ -1772,7 +1774,11 @@ html[data-theme="light"] .figp-lfile img {
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  color: var(--ext-body);
+  /* White, not the bar's charcoal. At rest the glyph is dark because it sits
+     on the accent tile with the charcoal bar around it; on hover the accent
+     has spread under the whole march, and dark-on-accent goes muddy where
+     white reads as one crisp conveyor. */
+  color: #fff;
   /* delayed: the arrows arrive once the fill has actually spread, so the
      sequence reads as one move (green spreads, arrows appear on it) rather
      than two things dissolving into each other at the same moment */

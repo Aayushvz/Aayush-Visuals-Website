@@ -1,120 +1,235 @@
-"use client";
+﻿"use client";
 import { useEffect, useRef, useState } from "react";
+import ExtCta from "./ExtCta";
 
+/*
+  How a product gets made, as a dial.
+
+  What this replaced: one horizontal dimension line with three stations hung
+  off it — Discover / Design / Deliver as three columns of body copy. It was
+  honest but flat, and it was describing an engagement rather than the work:
+  three paragraphs of what a client can expect to receive. A reader had to
+  get through all three before anything came into focus.
+
+  What it is now: the seven things that actually happen between a blank file
+  and a shipped product, set clockwise around a ruled dial in the order they
+  happen. The claim sits in the middle with the one action attached to it. A
+  reader gets the shape of it at a glance and can stop there.
+
+  The dial keeps the section inside the site's own language rather than
+  importing a halo diagram wholesale. It is a measuring instrument — minor
+  ticks every 5 degrees, accent ticks where a stage begins — which is the
+  same drawn-annotation vocabulary as the fixed page rails and the About
+  page's rulers. It fades out to the left rather than being drawn as a
+  partial arc, so the geometry underneath stays a full circle and the
+  satellites are all placed against the same complete field.
+
+  Sequence is real content here, so it is in the geometry: the satellites run
+  clockwise from the top, the purple lead sweeps the ring once on entry to
+  teach that direction, and the tile colours run warm → violet → green so the
+  three stages of the work read as three stretches of the arc without a
+  legend underneath having to say so.
+
+  Motion is one orchestrated entrance (ticks sweep, satellites deal clockwise
+  behind them) plus a slow ambient drift. It runs off an IntersectionObserver
+  rather than scroll position, so the section still costs no scroll distance
+  and the parallax handoff to Capabilities below is untouched.
+*/
+
+/*
+  Satellites, in the order the work happens.
+
+  px / py are fractions of the polar field's two radii (see --hx / --hy), not
+  pixels: the field is an ellipse rather than a circle because the pane is a
+  100vh sticky and there is far more room sideways than there is down.
+
+  `side` is which edge of the pill is pinned to that point — pills on the
+  left of the dial grow leftwards, pills on the right grow rightwards, so
+  nothing reaches back across the headline.
+
+  `tone` is the tile gradient. Two warm, three violet, two green, in that
+  order round the clock — the grouping is carried by the sequence.
+
+  mx / my are the phone's own coordinates.
+
+  A phone keeps the dial, but the dial moves left of centre and every
+  satellite has to fan out into the space on its right — there is nowhere
+  near enough width to ring it. Same clockwise order, same anchor rule, read
+  as a C rather than a circle. They are separate numbers rather than a
+  transform of px / py because no single transform produces a usable fan: the
+  arrangement is genuinely different, not the same one squashed.
+
+  `short` is the label at that size. "Framing the real problem" beside a dial
+  on a 375px screen leaves about 80px for the words, which is three lines of
+  11px type per chip. The full labels are still what the dial carries
+  everywhere it has room for them.
+*/
 const STEPS = [
-  {
-    num: "01",
-    title: "Discover",
-    sub: "First, I listen.",
-    desc: "Deep research into goals, users, and constraints through stakeholder interviews, competitor audits, and brand analysis.",
-    tags: ["USER RESEARCH", "AUDIT", "STRATEGY"],
-  },
-  {
-    num: "02",
-    title: "Design",
-    sub: "Then, I craft.",
-    desc: "Iterative visual exploration with tight feedback loops until every detail is sharp, considered, and true to the vision.",
-    tags: ["VISUAL IDENTITY", "PROTOTYPE", "MOTION"],
-  },
-  {
-    num: "03",
-    title: "Deliver",
-    sub: "Finally, I ship.",
-    desc: "Production-ready assets with detailed specs, dev handoff documentation, QA checks, and post-launch support baked in.",
-    tags: ["DEV HANDOFF", "QA", "LAUNCH"],
-  },
+  { label: "Research and interviews", short: "Research", tone: "amber", px: 0.22, py: -0.93, side: "l", mx: -0.15, my: -1.15 },
+  { label: "Framing the real problem", short: "Framing", tone: "orange", px: 0.68, py: -0.29, side: "l", mx: 0.55, my: -0.92 },
+  { label: "Flows and wireframes", short: "Wireframes", tone: "violet", px: 0.64, py: 0.44, side: "l", mx: 1.0, my: -0.42 },
+  { label: "A design system", short: "Systems", tone: "indigo", px: 0.03, py: 0.99, side: "l", mx: 1.08, my: 0.1 },
+  { label: "Prototype and testing", short: "Prototype", tone: "plum", px: -0.56, py: 0.61, side: "r", mx: 0.95, my: 0.62 },
+  { label: "Build and handoff", short: "Handoff", tone: "emerald", px: -0.62, py: -0.06, side: "r", mx: 0.45, my: 1.02 },
+  { label: "Ship, measure, iterate", short: "Shipping", tone: "teal", px: -0.48, py: -0.75, side: "r", mx: -0.2, my: 1.32 },
+] as const;
+
+/* One glyph per satellite, in DOM order with STEPS. Drawn rather than
+   imported: at 17px on a 31px tile, a stroked outline in white stays legible
+   where a filled pictogram turns into a blob. */
+const GLYPHS = [
+  /* research and interviews — two voices */
+  <>
+    <path d="M3 6.6A2.6 2.6 0 0 1 5.6 4h7.8A2.6 2.6 0 0 1 16 6.6v3.8a2.6 2.6 0 0 1-2.6 2.6H8.3l-3.5 2.6V13H5.6A2.6 2.6 0 0 1 3 10.4z" />
+    <path d="M18.4 8.4h.2A2.4 2.4 0 0 1 21 10.8v4.4a2.4 2.4 0 0 1-2.4 2.4h-.4v2.5l-3.3-2.5h-3.3" />
+  </>,
+  /* framing the real problem — crop marks closing on one point */
+  <>
+    <path d="M4 8.6V6a2 2 0 0 1 2-2h2.6" />
+    <path d="M20 8.6V6a2 2 0 0 0-2-2h-2.6" />
+    <path d="M4 15.4V18a2 2 0 0 0 2 2h2.6" />
+    <path d="M20 15.4V18a2 2 0 0 1-2 2h-2.6" />
+    <circle cx="12" cy="12" r="2.2" />
+  </>,
+  /* flows and wireframes — one screen leading to the next */
+  <>
+    <rect x="2.6" y="4.4" width="8" height="6.4" rx="1.6" />
+    <rect x="13.4" y="13.2" width="8" height="6.4" rx="1.6" />
+    <path d="M10.6 7.6h4.2a2.6 2.6 0 0 1 2.6 2.6v3" />
+    <path d="m15.2 11.2 2.2 2.2 2.2-2.2" />
+  </>,
+  /* a design system — the kit the screens are built from */
+  <>
+    <rect x="3" y="4" width="7.6" height="16" rx="1.6" />
+    <rect x="13.4" y="4" width="7.6" height="6.6" rx="1.6" />
+    <rect x="13.4" y="13.4" width="7.6" height="6.6" rx="1.6" />
+  </>,
+  /* prototype and testing — run it and watch */
+  <>
+    <rect x="3" y="4.6" width="18" height="14.8" rx="3.2" />
+    <path d="m10.3 9.6 4.6 2.4-4.6 2.4z" />
+  </>,
+  /* build and handoff — the file a developer opens */
+  <>
+    <path d="m8.2 8.4-3.8 3.8 3.8 3.8" />
+    <path d="m15.8 8.4 3.8 3.8-3.8 3.8" />
+    <path d="m13.4 4.8-2.8 14.4" />
+  </>,
+  /* ship, measure, iterate — the line that tells you whether it worked */
+  <>
+    <path d="M3.8 19.6h16.4" />
+    <path d="m5.2 15.4 4.6-4.6 3.4 3.4 6-6.4" />
+    <path d="M14.8 7.8h4.4v4.4" />
+  </>,
 ];
 
-/* Gradient tiles: soft hue per step, faint concentric rings, frosted
-   glowing outline icon — compass / layers / paper plane */
-const ARTWORKS = [
-  {
-    cls: "discover",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" />
-        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88" />
-      </svg>
-    ),
-  },
-  {
-    cls: "design",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
-        <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
-        <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
-      </svg>
-    ),
-  },
-  {
-    cls: "deliver",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="m22 2-7 20-4-9-9-4Z" />
-        <path d="M22 2 11 13" />
-      </svg>
-    ),
-  },
-];
+/* The dial. 5-degree minor ticks all the way round, accent ticks where a
+   stage begins — 0 / 95 / 250, which is where the warm, violet and green
+   stretches start once the seven satellites are spaced around the circle. */
+const RING_R = 176;
+const STAGE_STARTS = [0, 95, 250];
+const round = (n: number) => Math.round(n * 100) / 100;
+
+const TICKS = Array.from({ length: 72 }, (_, i) => {
+  const deg = i * 5;
+  const major = STAGE_STARTS.includes(deg);
+  const len = major ? 16 : deg % 25 === 0 ? 9 : 5;
+  const rad = (deg * Math.PI) / 180;
+  const sin = Math.sin(rad);
+  const cos = Math.cos(rad);
+  return {
+    deg,
+    major,
+    x1: round(200 + RING_R * sin),
+    y1: round(200 - RING_R * cos),
+    x2: round(200 + (RING_R - len) * sin),
+    y2: round(200 - (RING_R - len) * cos),
+  };
+});
+
+/*
+  "animate" draws the section in. "instant" puts it in the same final state
+  with every transition switched off, which is the only version that is
+  actually safe when nothing is being painted: applying the reveal class is
+  not enough on its own, because a transition in a document that is not
+  rendering never advances past its start value.
+*/
+type Reveal = "hidden" | "animate" | "instant";
 
 export default function Process() {
-  const wrapperRef = useRef<HTMLElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const tipRef = useRef<HTMLDivElement>(null);
-  const [cardsVisible, setCardsVisible] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [reveal, setReveal] = useState<Reveal>("hidden");
 
   useEffect(() => {
-    let raf = 0;
+    const el = sectionRef.current;
+    if (!el) return;
 
-    const measure = () => {
-      raf = 0;
-      const el = wrapperRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const scrollable = el.offsetHeight - window.innerHeight;
-      const progress =
-        scrollable <= 0 ? 1 : Math.max(0, Math.min(1, -rect.top / scrollable));
+    /* Reduced motion gets the finished composition immediately. The entrance
+       is decoration; the content is the point. */
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReveal("instant");
+      return;
+    }
 
-      /* discrete — React bails when the value is unchanged, so this only
-         re-renders at the three card thresholds */
-      setCardsVisible(progress >= 0.65 ? 3 : progress >= 0.35 ? 2 : progress >= 0.02 ? 1 : 0);
-
-      const scale =
-        progress < 0.02 ? 0 :
-        progress < 0.35 ? 0.05 + (progress - 0.02) / 0.33 * 0.43 :
-        progress < 0.65 ? 0.48 + (progress - 0.35) / 0.30 * 0.46 :
-        1;
-
-      /* continuous — written straight to the DOM. Held in React state this
-         re-rendered the entire section (every card, tile and SVG filter)
-         on every scroll event, which was the section's main scroll cost. */
-      if (lineRef.current) lineRef.current.style.transform = `scaleX(${scale})`;
-      if (tipRef.current) {
-        tipRef.current.style.left = `${scale * 100}%`;
-        tipRef.current.style.opacity = scale > 0.01 && scale < 0.99 ? "1" : "0";
-      }
+    let settled = false;
+    const show = (mode: Reveal) => {
+      if (settled) return;
+      settled = true;
+      setReveal(mode);
     };
 
-    /* rAF-throttled: scroll fires far more often than the screen refreshes,
-       and this handler reads layout (getBoundingClientRect/offsetHeight) */
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(measure);
-    };
+    /* Fires once, well before the section pins, so the dial is already drawn
+       by the time the reader is looking straight at it. Disconnects on the
+       first hit: this is an entrance, not a scroll effect, and there is
+       nothing to recompute afterwards. */
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        show("animate");
+        io.disconnect();
+      },
+      { rootMargin: "0px 0px -20% 0px" }
+    );
+    io.observe(el);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    measure();
+    /*
+      Safety net, and not a theoretical one.
+
+      IntersectionObserver delivers from the rendering steps, so a document
+      that is not being painted never gets a callback: a background tab, a
+      headless renderer, a print. The section starts at opacity 0 waiting for
+      that callback, which means without this it can ship completely blank to
+      exactly the readers who cannot tell you it did.
+
+      It resolves to "instant" rather than "animate" deliberately. In those
+      same conditions a transition does not advance either, so handing them
+      the animated path would leave the section sitting on its opening frame,
+      which is the blank page all over again. Timers do keep running, so this
+      fires; a real visitor scrolling normally always trips the observer long
+      before it.
+    */
+    const fallback = window.setTimeout(() => show("instant"), 2500);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
+      io.disconnect();
+      window.clearTimeout(fallback);
     };
   }, []);
 
   return (
-    <section className={`process${cardsVisible > 0 ? " process--active" : ""}`} ref={wrapperRef}>
+    <section
+      className={
+        "process" +
+        (reveal !== "hidden" ? " process--shown" : "") +
+        (reveal === "instant" ? " process--instant" : "")
+      }
+      ref={sectionRef}
+      aria-labelledby="process-heading"
+    >
       <div className="process__sticky">
+        {/* Torn-paper edge carrying the dark Statement panel above into this
+            light one. Untouched: it is what makes the two sections read as
+            one continuous sheet. */}
         <div className="process__brushTop" aria-hidden>
           <svg className="process__brushSvg--desktop" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -156,66 +271,107 @@ export default function Process() {
         </div>
 
         <div className="process__inner">
-          <div className="process__marker">
-            <span className="process__markerNum">03</span>
-            <span className="process__markerLabel">Process</span>
-          </div>
-          <h2 className="process__heading">
-            Idea to impact, every step.
-          </h2>
+          <div className="procHalo">
+            {/*
+              Dial and claim are one unit. On the desktop dial that is
+              incidental — the hub is centred in the field, so anchoring the
+              ring here or to the field lands on the same point. On a phone,
+              where the satellites drop out of orbit and become a list below,
+              it is the whole reason this wrapper exists: the ring has to keep
+              its centre on the headline rather than drift down to the middle
+              of a column that is now mostly list.
+            */}
+            <div className="procHalo__hub">
+              {/* the dial itself */}
+              <div className="procHalo__ring" aria-hidden>
+                <svg className="procHalo__ringSvg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                  {TICKS.map((t, i) => (
+                    <line
+                      key={t.deg}
+                      className={"procHalo__tick" + (t.major ? " procHalo__tick--major" : "")}
+                      x1={t.x1}
+                      y1={t.y1}
+                      x2={t.x2}
+                      y2={t.y2}
+                      /* --t is the clockwise reveal order the full dial uses.
+                       --t2 is the same count anticlockwise, for the phone:
+                       there only the left half of the dial is drawn, and a
+                       clockwise sweep reaches that half last, so it would
+                       appear to fill from the bottom up. */
+                    style={{ "--t": i, "--t2": (72 - i) % 72 } as React.CSSProperties}
+                    />
+                  ))}
+                </svg>
+                {/* ambient: one faint arc of light going round the dial, slow
+                    enough to be atmosphere rather than a spinner */}
+                <span className="procHalo__sweep" />
+                {/* the lead, exactly once, teaching which way the sequence runs */}
+                <span className="procHalo__pen">
+                  <span className="procHalo__penDot" />
+                </span>
+              </div>
 
-          <div className={`procCards${cardsVisible > 0 ? " procCards--visible" : ""}`}>
-            <div
-              className="procLine"
-              ref={lineRef}
-              style={{ transform: "scaleX(0)" }}
-              aria-hidden
-            />
-            <div
-              className="procTip"
-              ref={tipRef}
-              style={{ left: "0%", opacity: 0 }}
-              aria-hidden
-            />
+              <div className="procHalo__core">
+                <span className="procHalo__eyebrow">
+                  <span className="procSheet" aria-hidden />
+                  <span className="procHalo__eyebrowLabel">Process</span>
+                </span>
 
-            {STEPS.map((step, i) => (
-              <div
-                key={step.num}
-                className={`procCard${cardsVisible > i ? " procCard--visible" : ""}`}
-              >
-                <div className="procCard__visual" aria-hidden>
-                  <div className={`procTile procTile--${ARTWORKS[i].cls}`}>
-                    <svg className="procTile__rings" viewBox="0 0 320 190" preserveAspectRatio="xMidYMid slice">
-                      <g>
-                        <circle cx="160" cy="95" r="46" />
-                        <circle cx="160" cy="95" r="82" />
-                        <circle cx="160" cy="95" r="118" />
-                        <circle cx="160" cy="95" r="154" />
-                        <circle cx="160" cy="95" r="190" />
-                      </g>
-                    </svg>
-                    <div className="procTile__icon">{ARTWORKS[i].icon}</div>
-                  </div>
-                </div>
+                <h2 className="process__heading" id="process-heading">
+                  How a product gets made.
+                </h2>
 
-                <div className="procCard__track">
-                  <div className="procCard__dot">
-                    <span>{i + 1}</span>
-                  </div>
-                </div>
-
-                <div className="procCard__content">
-                  <p className="procCard__sub">{step.sub}</p>
-                  <h3 className="procCard__title">{step.title}</h3>
-                  <p className="procCard__desc">{step.desc}</p>
-                  <div className="procCard__tags">
-                    {step.tags.map((tag) => (
-                      <span key={tag} className="procCard__tag">{tag}</span>
-                    ))}
-                  </div>
+                <div className="procHalo__cta">
+                  {/* Same swap as the satellites: inside a phone-sized dial
+                      the full label makes the bar wider than the chord it
+                      has to sit on. Only one is ever displayed, so the
+                      button is never announced twice. */}
+                  <ExtCta href="/work" route>
+                    <span className="procHalo__ctaFull">See it in the work</span>
+                    <span className="procHalo__ctaShort">See the work</span>
+                  </ExtCta>
                 </div>
               </div>
-            ))}
+            </div>
+
+            <ul className="procHalo__orbit">
+              {STEPS.map((s, i) => (
+                <li
+                  className={"procStep procStep--" + s.side}
+                  key={s.label}
+                  data-tone={s.tone}
+                  style={
+                    {
+                      "--px": s.px,
+                      "--py": s.py,
+                      "--mx": s.mx,
+                      "--my": s.my,
+                      "--i": i,
+                    } as React.CSSProperties
+                  }
+                >
+                  <span className="procStep__drift">
+                    <span className="procStep__pill">
+                      {/* the white surface, which dissolves out to the right
+                          from under the label */}
+                      <span className="procSheet" aria-hidden />
+                      <span className="procStep__tile" aria-hidden>
+                        <svg viewBox="0 0 24 24">{GLYPHS[i]}</svg>
+                      </span>
+                      {/* Both labels ship; CSS shows one. Whichever is
+                          displayed is the one assistive tech reads, and
+                          display:none keeps the other out of the tree
+                          entirely, so the chip is never announced twice. */}
+                      <span className="procStep__label">{s.label}</span>
+                      <span className="procStep__label procStep__label--short">
+                        {s.short}
+                      </span>
+                    </span>
+                  </span>
+                </li>
+              ))}
+
+            </ul>
           </div>
         </div>
       </div>

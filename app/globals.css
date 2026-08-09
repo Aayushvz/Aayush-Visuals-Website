@@ -1755,11 +1755,24 @@ html.has-cursor .cursorRing {
 
 /* ---------- process ---------- */
 
+/*
+  230vh, down from 310.
+
+  The floor here is 200: 100vh for the sticky pane itself, plus the 100vh
+  that Capabilities occupies as it is pulled up underneath and this panel
+  slides away over it. That parallax is fixed, so the only fat to cut was
+  the middle, and there was a lot of it: the old reveal was scrubbed against
+  scroll position, so it needed distance simply to exist, and it still
+  finished dealing its third card after the slide-away had already started.
+  The entrance now plays off an IntersectionObserver, which costs no scroll
+  at all and is complete before the panel pins. 30vh of dwell is what is
+  left in between.
+*/
 .process {
   position: relative;
   background: #F7F7F5;
   /* overflow: visible — sticky child needs this; clipping is on .process__sticky */
-  min-height: 310vh;
+  min-height: 230vh;
   z-index: 2;
 }
 
@@ -1839,159 +1852,532 @@ html.has-cursor .cursorRing {
 .process__rail--right { right: var(--page-rail-inset); }
 
 .process__inner {
-  width: min(1320px, calc(100vw - 240px));
-  margin-inline: auto;
-  padding-top: clamp(72px, 11vh, 100px);
-  padding-bottom: 48px;
-}
-
-.process__marker {
+  /* the pane is a 100vh sticky; the composition is radial, so it centres in
+     whatever height is left under the torn edge rather than sitting on a
+     fixed top padding */
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(31, 31, 31, 0.48);
-  margin-bottom: 18px;
+  justify-content: center;
+  width: min(1320px, calc(100vw - 240px));
+  margin-inline: auto;
+  /* the floor is the torn edge's own height plus clearance — a satellite must
+     never surface into the dark band carried down from Statement */
+  padding-top: clamp(84px, 10vh, 116px);
+  padding-bottom: clamp(14px, 3vh, 40px);
 }
 
-.process__markerNum {
-  color: var(--purple);
-  font-weight: 600;
+/* ---------- the dial ----------
+   One polar field. Every satellite is placed as a fraction of --hx / --hy
+   rather than in pixels, so the whole arrangement scales as one object and
+   the phases can be reordered by editing two numbers in Process.tsx. */
+.procHalo {
+  /*
+    Three sizes, and only one of them is free.
+
+    --ring is the input; both radii are derived from it, which is what stops a
+    satellite from wandering over the ticks at some in-between viewport. The
+    vertical radius is a fixed multiple, so the whole composition is
+    1.06 × --ring + 112px tall and can be checked against the pane in one
+    line. The horizontal one takes whichever is larger of that derivation and
+    a viewport-width clamp, so a wide window spreads out rather than leaving
+    the satellites huddled round a small dial.
+
+    --ring is capped on width as well as height for the same reason: a
+    satellite sits at 0.68 of --hx plus its own label, so an unconstrained
+    dial on a tall narrow window pushes the right-hand pills off the rail.
+  */
+  --ring: clamp(260px, min(56vh, 34vw), 520px);
+  --hx: max(calc(var(--ring) * 0.82 + 24px), clamp(240px, 27vw, 430px));
+  --hy: calc(var(--ring) * 0.53 + 34px);
+
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--hx) * 2 + 400px);
+  height: calc(var(--hy) * 2 + 72px);
+  display: grid;
+  place-items: center;
 }
 
-.process__markerLabel {
+/* Dial and claim, locked together. On the desktop field the hub is the one
+   in-flow child of a centred grid, so hub centre and field centre are the
+   same point and this changes nothing; on a phone it is what keeps the ring
+   on the headline once the satellites unroll into a list underneath. */
+.procHalo__hub {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+/*
+  The dial dissolves leftward.
+
+  It is masked rather than drawn as a partial arc: the ticks, the ambient arc
+  and the lead all live inside this box, so one gradient takes care of all
+  three and the geometry underneath stays a complete circle — the satellites
+  are still placed against a full 360, they simply stand on a part of it that
+  has faded out. The angle is a couple of degrees off horizontal so the top
+  and bottom of the arc do not end on the same vertical line.
+*/
+.procHalo__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ring);
+  height: var(--ring);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    96deg,
+    transparent 2%,
+    rgba(0, 0, 0, 0.09) 20%,
+    rgba(0, 0, 0, 0.5) 44%,
+    rgba(0, 0, 0, 0.9) 66%,
+    #000 80%
+  );
+  mask-image: linear-gradient(
+    96deg,
+    transparent 2%,
+    rgba(0, 0, 0, 0.09) 20%,
+    rgba(0, 0, 0, 0.5) 44%,
+    rgba(0, 0, 0, 0.9) 66%,
+    #000 80%
+  );
+}
+
+.procHalo__ringSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ticks arrive one after another clockwise from the top, which is the same
+   direction the sequence reads in. 15ms apart: 72 of them, so the sweep is
+   just over a second — long enough to be a sweep, short enough that the
+   satellites can start dealing behind it. */
+.procHalo__tick {
+  stroke: rgba(31, 31, 31, 0.34);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 0.4s ease calc(var(--t) * 15ms + 0.22s);
+}
+
+/* where a phase begins — accent, because these three are the only ticks on
+   the dial that mean anything */
+.procHalo__tick--major {
+  stroke: var(--purple);
+  stroke-width: 1.6;
+}
+
+.process--shown .procHalo__tick {
+  opacity: 1;
+}
+
+/*
+  The ambient arc: a conic gradient masked down to the width of the tick ring
+  so it reads as light travelling along the dial rather than a rotating disc.
+  26s per revolution — slow enough that you notice it only if you stop and
+  look, which is the point. AnimationBudget pauses it off-screen.
+*/
+.procHalo__sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(124, 58, 237, 0) 0deg,
+    rgba(124, 58, 237, 0) 244deg,
+    rgba(124, 58, 237, 0.3) 342deg,
+    rgba(124, 58, 237, 0) 360deg
+  );
+  -webkit-mask-image: radial-gradient(closest-side, transparent 0 84%, #000 88%, #000 92%, transparent 96%);
+  mask-image: radial-gradient(closest-side, transparent 0 84%, #000 88%, #000 92%, transparent 96%);
+  opacity: 0;
+  transition: opacity 0.8s ease 1.5s;
+}
+
+.process--shown .procHalo__sweep {
+  opacity: 1;
+  animation: procSweep 26s linear infinite;
+}
+
+@keyframes procSweep {
+  to { transform: rotate(360deg); }
+}
+
+/* The lead. One revolution on entry, then gone — it exists to say which way
+   round the sequence runs, and a permanent orbiting dot would say it forever. */
+.procHalo__pen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.process--shown .procHalo__pen {
+  animation: procPenOrbit 1.5s var(--ease-expo) 0.25s both;
+}
+
+.procHalo__penDot {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.13);
+}
+
+@keyframes procPenOrbit {
+  0% { transform: rotate(0deg); opacity: 0; }
+  9% { opacity: 1; }
+  84% { opacity: 1; }
+  100% { transform: rotate(360deg); opacity: 0; }
+}
+
+/* ---------- the fading sheet ----------
+   Every chip in this section is a label sitting on a white sheet that
+   dissolves out from under it to the right. The sheet is its own element
+   rather than a background on the chip, because the chip's text has to stay
+   at full strength while the surface under it goes.
+
+   The padding is not decoration either: a mask clips to the border box, so a
+   sheet at inset 0 would have its own drop shadow sliced off square on three
+   sides. The wrapper is inflated, the shadow is drawn on the inner rectangle,
+   and the gradient is measured across the inflated box — which is why the
+   stops read 53%/83% rather than the 55%/95% they represent on the chip
+   itself. Those two numbers hold to within half a percent across every label
+   length in the section. */
+.procSheet {
+  position: absolute;
+  inset: -26px -36px;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 0 53%, transparent 83%);
+  mask-image: linear-gradient(90deg, #000 0 53%, transparent 83%);
+}
+
+.procSheet::before {
+  content: "";
+  position: absolute;
+  inset: 26px 36px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 31, 31, 0.05), 0 10px 26px rgba(31, 31, 31, 0.09);
+  transition: box-shadow var(--dur-hover) ease;
+}
+
+/* ---------- the claim in the middle ---------- */
+.procHalo__core {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* Measured off the dial rather than the viewport, because the dial is what
+     it has to stay inside: at 0.83 the headline's widest line still clears
+     the tick ring at the height it sits, at every size the polar layout
+     runs. A viewport-based cap drifts out of step with --ring and starts
+     pushing words under the ticks somewhere in the middle of the range. */
+  max-width: calc(var(--ring) * 0.83);
+}
+
+.procHalo__eyebrow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  /* even now that the accent dot has gone — the left inset only existed to
+     sit the dot in from the cap */
+  padding: 5px 15px;
+  font-size: 12.5px;
   font-weight: 500;
+  letter-spacing: 0.005em;
+  /* 7.4:1 on the sheet */
+  color: #4f4f4f;
+  opacity: 0;
+  translate: 0 8px;
+  transition: opacity 0.5s var(--ease-quint), translate 0.6s var(--ease-expo);
+}
+
+.procHalo__eyebrow .procSheet {
+  inset: -20px -28px;
+}
+
+.procHalo__eyebrow .procSheet::before {
+  inset: 20px 28px;
+  box-shadow: 0 1px 2px rgba(31, 31, 31, 0.04), 0 6px 16px rgba(31, 31, 31, 0.07);
+}
+
+/* above the sheet, which is a sibling rather than a background */
+.procHalo__eyebrowLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.process--shown .procHalo__eyebrow {
+  opacity: 1;
+  translate: 0 0;
 }
 
 .process__heading {
-  font-size: clamp(32px, 2.6vw, 46px);
+  margin: clamp(14px, 2vh, 22px) 0 0;
+  font-size: clamp(30px, 3.4vw, 52px);
   font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
   color: var(--ink);
-  margin: 0 0 clamp(16px, 2vh, 28px);
-}
-
-.process__list {
-  display: flex;
-  flex-direction: column;
-}
-
-.process__step {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  padding: 44px 24px;
-  border-top: 1px solid rgba(31, 31, 31, 0.1);
-  border-radius: 12px;
+  text-wrap: balance;
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s var(--ease-quint),
-              transform 0.7s var(--ease-quint),
-              background 0.4s var(--ease-quint),
-              border-color 0.4s ease;
-  transition-delay: calc(var(--step-i) * 0.12s);
+  translate: 0 0.32em;
+  transition: opacity 0.6s var(--ease-quint) 0.06s, translate 0.7s var(--ease-expo) 0.06s;
 }
 
-.process--visible .process__step {
+.process--shown .process__heading {
   opacity: 1;
-  transform: translateY(0);
+  translate: 0 0;
 }
 
-.process__step:last-child {
-  border-bottom: 1px solid rgba(31, 31, 31, 0.1);
+/*
+  The primary button, at three quarters.
+
+  It is the same control as the one closing Selected Projects, but that one
+  ends a full-width ledger and this one sits inside a dial with seven chips
+  around it — at full size it was the heaviest object in a composition where
+  the headline is supposed to be. Every dimension comes off --ext-h except
+  the handful the source hard-codes (both radii, the glyph, the conveyor
+  pitch), which is why those four are restated here rather than left to
+  scale on their own.
+*/
+.procHalo__cta .extCta {
+  --ext-h: 39px;
+  --ext-pad: 5px;
+  --ext-stroke-w: 2.25px;
+  gap: 10px;
+  padding: var(--ext-pad) 17px var(--ext-pad) var(--ext-pad);
+  border-radius: 9px;
+  font-size: 0.74rem;
 }
 
-.process__step:hover {
-  background: var(--purple);
-  border-color: transparent;
-  border-radius: 12px;
+.procHalo__cta .extCta::after {
+  border-radius: 9px;
 }
 
-.process__step:hover + .process__step {
-  border-top-color: transparent;
+.procHalo__cta .extCta__fill {
+  clip-path: inset(
+    var(--ext-pad) calc(100% - var(--ext-h) + var(--ext-pad)) var(--ext-pad)
+      var(--ext-pad) round 6px
+  );
 }
 
-.process__stepLeft {
-  display: flex;
-  align-items: baseline;
-  gap: 20px;
+.procHalo__cta .extCta__glyph {
+  width: 13px;
+  height: 13px;
 }
 
-.process__num {
-  font-family: var(--font-mono, "SF Mono", "Fira Code", monospace);
-  font-size: 14px;
-  color: var(--purple);
-  opacity: 0.5;
-  transition: color 0.4s ease, opacity 0.4s ease;
-  flex-shrink: 0;
+.procHalo__cta .extCta__marchTrack {
+  --ext-pitch: 23px;
 }
 
-.process__step:hover .process__num {
-  color: rgba(255, 255, 255, 0.6);
+.procHalo__cta .extCta__marchTrack .extCta__glyph {
+  margin-right: calc(var(--ext-pitch) - 13px);
+}
+
+@media (hover: hover) {
+  .procHalo__cta .extCta:hover .extCta__fill {
+    clip-path: inset(0 0 0 0 round 9px);
+  }
+}
+
+/* the two labels the button carries; CSS shows exactly one, so whichever is
+   displayed is the one the button is named by */
+.procHalo__ctaShort {
+  display: none;
+}
+
+.procHalo__cta {
+  /* further off the headline than the reference sets it: the button is
+     smaller now, and a small object needs more air around it to keep
+     reading as the one thing to press */
+  margin-top: clamp(28px, 4.2vh, 46px);
+  opacity: 0;
+  translate: 0 10px;
+  transition: opacity 0.5s var(--ease-quint) 0.18s, translate 0.6s var(--ease-expo) 0.18s;
+}
+
+.process--shown .procHalo__cta {
   opacity: 1;
+  translate: 0 0;
 }
 
-.process__title {
-  font-size: clamp(36px, 5vw, 64px);
+/* ---------- the satellites ---------- */
+.procHalo__orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.procStep {
+  position: absolute;
+  left: calc(50% + var(--px) * var(--hx));
+  top: calc(50% + var(--py) * var(--hy));
+}
+
+/* which edge of the pill is pinned to the point — pills never grow back
+   across the headline */
+.procStep--l { transform: translateY(-50%); }
+.procStep--r { transform: translate(-100%, -50%); }
+
+/*
+  Tile gradients.
+
+  Seven distinct tiles, but only three families: the two Discover satellites
+  are warm, the three Design ones are violet, the two Deliver ones are green.
+  They run clockwise in that order, so the arc reads as three coloured
+  stretches without needing a legend underneath to say so — the grouping is
+  in the sequence, which is where it was always true.
+*/
+.procStep[data-tone="amber"]   { --g1: #ffb45f; --g2: #f0812c; --gs: 240, 129, 44; }
+.procStep[data-tone="orange"]  { --g1: #ff9a5c; --g2: #e8632a; --gs: 232, 99, 42; }
+.procStep[data-tone="violet"]  { --g1: #a78bfa; --g2: #7c3aed; --gs: 124, 58, 237; }
+.procStep[data-tone="indigo"]  { --g1: #8f97ff; --g2: #5b4fe0; --gs: 91, 79, 224; }
+.procStep[data-tone="plum"]    { --g1: #c689fb; --g2: #9333ea; --gs: 147, 51, 234; }
+.procStep[data-tone="emerald"] { --g1: #52e0a4; --g2: #10a06b; --gs: 16, 160, 107; }
+.procStep[data-tone="teal"]    { --g1: #54d6cb; --g2: #0e9384; --gs: 14, 147, 132; }
+
+/*
+  Drift lives on its own element.
+
+  The pill's entrance animates `translate` and `scale`, hover animates
+  `transform`, and the ambient float needs `transform` too — three things on
+  one box would fight. Splitting the float onto a wrapper means each layer
+  owns one property and none of them cancel.
+*/
+.procStep__drift {
+  display: block;
+}
+
+.process--shown .procStep__drift {
+  animation: procDrift calc(6.4s + var(--i) * 0.8s) var(--ease-inout)
+    calc(1.3s + var(--i) * 0.22s) infinite alternate;
+}
+
+@keyframes procDrift {
+  from { transform: translateY(0); }
+  to { transform: translateY(5px); }
+}
+
+.procStep__pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 18px 7px 7px;
+  white-space: nowrap;
+  font-size: clamp(13.5px, 1.05vw, 16px);
   font-weight: 500;
-  color: var(--ink);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  transition: color 0.4s ease, transform 0.4s var(--ease-quint);
+  letter-spacing: -0.008em;
+  line-height: 1.2;
+  /* 14.6:1 on the sheet */
+  color: #262626;
+  opacity: 0;
+  translate: 0 10px;
+  scale: 0.94;
+  transition:
+    opacity 0.5s var(--ease-quint) calc(0.3s + var(--i) * 0.085s),
+    translate 0.6s var(--ease-expo) calc(0.3s + var(--i) * 0.085s),
+    scale 0.6s var(--ease-expo) calc(0.3s + var(--i) * 0.085s),
+    transform var(--dur-hover) var(--ease-quint);
 }
 
-.process__step:hover .process__title {
-  color: #fff;
-  transform: translateX(8px);
-}
-
-.process__stepRight {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-}
-
-.process__desc {
-  font-size: 16px;
-  line-height: 1.65;
-  color: var(--ink);
-  opacity: 0.55;
-  max-width: 440px;
-  transition: color 0.4s ease, opacity 0.4s ease;
-}
-
-.process__step:hover .process__desc {
-  color: #fff;
-  opacity: 0.75;
-}
-
-.process__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.process__tag {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  padding: 7px 16px;
-  border-radius: 100px;
-  background: rgba(31, 31, 31, 0.06);
-  color: var(--ink);
-  opacity: 0.7;
-  transition: background 0.4s ease, color 0.4s ease, opacity 0.4s ease;
-}
-
-.process__step:hover .process__tag {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+.process--shown .procStep__pill {
   opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+
+.procStep__label {
+  position: relative;
+  z-index: 1;
+}
+
+/* the phone's abbreviation of the same label; the phone block swaps which of
+   the two is displayed, and only ever one is, so the chip is never read out
+   twice */
+.procStep__label--short {
+  display: none;
+}
+
+/*
+  The tile is the one saturated object in the section, so it is built like
+  one: a vertical gradient, a hairline of light along the top edge where a
+  real convex surface would catch it, and a shadow tinted with the tile's own
+  hue rather than grey. White glyph on top — an outline in the tile colour
+  would disappear into the gradient.
+*/
+.procStep__tile {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  /*
+    Round, because the chip around it is.
+
+    The chip is a pill: its cap radius is exactly half its height. At 9.5px on
+    a 31px square the tile was at 0.31 of its own height, so the two curves
+    disagreed at every corner and the tile read as a squircle dropped into a
+    pill. 50% is the same ratio the chip uses, which is the only value that
+    makes them one object — and it holds at every size the tile takes,
+    without a matching radius having to be restated beside each width.
+  */
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--g1) 0%, var(--g2) 100%);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(var(--gs), 0.34);
+  transition: transform var(--dur-hover) var(--ease-quint), box-shadow var(--dur-hover) ease;
+}
+
+.procStep__tile svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Hover lifts the chip and pushes the tile's own coloured shadow a little
+   further, so the thing that reacts is the object that carries the colour.
+   Nothing slides, nothing recolours. */
+@media (hover: hover) {
+  .procStep__pill:hover {
+    transform: translateY(-3px);
+  }
+
+  .procStep__pill:hover .procSheet::before {
+    box-shadow: 0 2px 4px rgba(31, 31, 31, 0.06), 0 16px 34px rgba(31, 31, 31, 0.12);
+  }
+
+  .procStep__pill:hover .procStep__tile {
+    transform: scale(1.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 0 0 0.5px rgba(0, 0, 0, 0.06),
+      0 4px 12px rgba(var(--gs), 0.46);
+  }
 }
 
 /* parallax: the Process panel rides above the Capabilities section (which
@@ -2002,7 +2388,111 @@ html.has-cursor .cursorRing {
   z-index: 2;
 }
 
-/* mobile */
+/* ---------- tablet and narrow laptop ----------
+   Below roughly 1180px the polar field stops working: --hx shrinks with the
+   viewport but the pills do not, so satellites on opposite sides start
+   meeting in the middle over the headline. Rather than shrink the type to
+   rescue the diagram, the dial is dropped and the same seven satellites
+   become a centred cluster under the claim. Same content, same tiles, no
+   diagram pretending to be one at a size where it cannot be. */
+@media (max-width: 1180px) {
+  .process__inner {
+    width: 100%;
+    padding-inline: clamp(20px, 5vw, 56px);
+  }
+
+  .procHalo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 680px;
+    height: auto;
+  }
+
+  .procHalo__ring {
+    display: none;
+  }
+
+  /* Stacked, the measure belongs to the headline alone rather than to the
+     whole centre column. */
+  .procHalo__core {
+    max-width: none;
+  }
+
+  .process__heading {
+    max-width: 22ch;
+  }
+
+  .procHalo__orbit {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: clamp(22px, 3.4vh, 38px);
+  }
+
+  /* left/top have to be cleared, not just neutralised by `position: static`.
+     The phone layout below puts the station back to `position: relative` so
+     its run-out tick has something to hang off, and a relative box still
+     honours the polar offsets — which shoved every row 200px right. */
+  .procStep,
+  .procStep--l,
+  .procStep--r {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+  }
+
+  /* the drift is a property of the orbit; in a stacked list it just makes
+     the rows shiver */
+  .process--shown .procStep__drift {
+    animation: none;
+  }
+
+  /*
+    Sheets stop fading once the chips are in a grid.
+
+    Out on the dial the fade is what stops seven white rectangles from
+    reading as a table of contents floating over the drawing. In a tidy
+    centred cluster there is nothing to dissolve into — a half-faded row of
+    chips just looks like a rendering fault, and the labels lose the surface
+    they need to stay legible against the sheet.
+  */
+  .procSheet,
+  .procHalo__eyebrow .procSheet {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* ---------- phone ----------
+   The dial stays; it moves off centre and the satellites fan.
+
+   Two failed attempts are worth recording, because the constraint that
+   killed them is the one this layout is built around. Floating the ring
+   behind a centred claim put it over the button and the first two steps and
+   gave it nothing to hold. Unrolling it into a rule down the left fixed the
+   collisions but left seven gradient tiles stacked in an even column, which
+   is the shape of a phone's Settings screen no matter what is drawn beside
+   it.
+
+   What actually does not fit is a ring: a satellite plus its label is around
+   130px, so a circle needs 260px of width either side of its centre and a
+   phone has 331. A C does fit. The dial sits at 29% of the width with the
+   claim inside it, and the seven satellites run clockwise from above it,
+   down its right flank, to below — same order, same anchoring, same drift.
+   The left of the dial is where the tick mask fades out anyway, so the side
+   that loses its satellites is the side that was already dissolving.
+
+   Labels shorten here. That is the other half of the same arithmetic: the
+   fan leaves roughly 125px per chip, and the full labels need 180.
+
+   The pane is a 100vh sticky with overflow: hidden, so anything taller than
+   the viewport is cut off rather than scrollable — the field's height is
+   derived from --hy so it can be checked against the pane in one line. */
 @media (max-width: 640px) {
   .process__brushTop {
     height: 68px;
@@ -2012,37 +2502,246 @@ html.has-cursor .cursorRing {
   .process__brushTop .process__brushSvg--mobile { display: block; }
 
   .process__inner {
+    padding: 74px 20px 14px;
+  }
+
+  /*
+    The phone's own polar field. --ring drives both radii here as it does on
+    the desktop dial, but at ratios tuned for a fan rather than a ring: the
+    horizontal one is deliberately short, because the satellites need the
+    width for their labels, not for their distance out.
+  */
+  /*
+    Half a gauge, and much bigger for it.
+
+    A whole ring on a phone has to stay small enough that a satellite can
+    clear its flank and still fit its label before the screen edge — which
+    capped it at about 210px and left the claim crammed inside a small
+    circle. Cropping the dial in half removes that constraint entirely: the
+    flank the satellites had to clear is no longer drawn, so they can sit
+    close in and the arc can grow to nearly the full width of the screen. It
+    reads as a gauge with its readings ranged off the open side, which is
+    what the seven of them are.
+
+    It is the right half that is kept, which also puts the phone and the
+    desktop dial in agreement: both are strongest on the right and dissolve
+    to the left.
+
+    The gauge is then pushed right out to the screen edge — its flat side
+    sits on the left border of the phone, so the whole of the drawn half is
+    on screen and none of the discarded half takes up room. That means the
+    arc no longer shares a centre with the fan: --cxp stays the pivot the
+    claim and the satellites are measured from, and the ring is placed
+    independently of it. Which is why the hub stops being a box here
+    (display: contents) — with it out of the way the ring and the claim each
+    position against the field directly instead of both being dragged around
+    by whichever one moves.
+  */
+  .procHalo {
+    --ring: clamp(250px, 82vw, 340px);
+    /*
+      The gauge is drawn larger than the module everything else is measured
+      from. --ring still sets the fan's two radii, the claim's measure and
+      its step off the pivot; --gauge only sets how big the arc itself is
+      drawn. Scaling --ring instead would have taken the satellites out to
+      the same 1.25 and pushed their labels off the right edge.
+    */
+    --gauge: calc(var(--ring) * 1.25);
+    /* Short across, long down. The satellites no longer have to reach past a
+       right flank, so the fan pulls in horizontally and spreads vertically:
+       that is what keeps their labels inside the screen while the arc takes
+       most of the width. */
+    --hx: calc(var(--ring) * 0.17);
+    --hy: calc(var(--ring) * 0.52);
+    /* the pivot the whole screen is measured from, as one pair of numbers so
+       a narrow phone can slide the arc further left in a single line */
+    --cxp: 48%;
+    --cyp: 48%;
+    /* the page padding, so the ring can be pushed back out through it to the
+       actual screen edge */
+    --proc-pad: 20px;
+
+    display: block;
+    position: relative;
     width: 100%;
-    padding: 80px 24px 32px;
+    max-width: none;
+    height: calc(var(--hy) * 2.5 + 46px);
   }
 
-  .process__step {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 28px 16px;
+  /* the hub stops being a box: the ring and the claim it wraps are placed
+     independently here, and a shared positioned parent only couples them */
+  .procHalo__hub {
+    display: contents;
   }
 
-  .process__stepLeft {
-    gap: 12px;
+  /* the claim, on the pivot and stepped left of it, clear of where the
+     satellites start */
+  .procHalo__core {
+    position: absolute;
+    left: var(--cxp);
+    top: var(--cyp);
+    transform: translate(-50%, -50%) translateX(calc(var(--ring) * -0.18));
   }
 
-  .process__title {
-    font-size: 32px;
+  .procHalo__ring {
+    display: block;
+    /* flat side on the screen's left border: the circle's centre sits at the
+       edge, so exactly the drawn half is on screen */
+    left: calc(-1 * var(--proc-pad));
+    top: var(--cyp);
+    width: var(--gauge);
+    height: var(--gauge);
+    /* the crop: everything left of the centreline goes, with just enough
+       softness on the cut that it reads as drawn rather than clipped */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0 47%, rgba(0, 0, 0, 0.5) 53%, #000 59%);
+    mask-image: linear-gradient(90deg, transparent 0 47%, rgba(0, 0, 0, 0.5) 53%, #000 59%);
   }
 
-  .process__desc {
-    font-size: 14px;
+  /*
+    With the gauge on the screen edge its widest point lands exactly on the
+    headline's middle — measured, the graduations ran straight through both
+    lines of it. So the ticks thin out across the band the claim occupies and
+    stay crisp above and below it: the arc reads as passing behind the type
+    rather than through it, which is the same dissolve the rest of the
+    section is drawn with.
+
+    On the SVG rather than on .procHalo__ring, so it composes with the crop
+    above instead of needing mask-composite — and so the lead and the ambient
+    arc, which are transient and soft, still travel the full sweep.
+  */
+  .procHalo__ringSvg {
+    -webkit-mask-image: linear-gradient(180deg, #000 0 29%, rgba(0, 0, 0, 0.1) 43%, rgba(0, 0, 0, 0.1) 59%, #000 73%);
+    mask-image: linear-gradient(180deg, #000 0 29%, rgba(0, 0, 0, 0.1) 43%, rgba(0, 0, 0, 0.1) 59%, #000 73%);
+  }
+
+  /* the row that only labels the section; the heading under it already does */
+  .procHalo__eyebrow {
+    display: none;
+  }
+
+  .procHalo__core {
+    max-width: calc(var(--ring) * 0.43);
   }
 
   .process__heading {
-    font-size: clamp(26px, 7.5vw, 38px);
-    letter-spacing: -0.03em;
-    margin-bottom: clamp(16px, 3vh, 24px);
+    margin-top: 0;
+    font-size: clamp(17px, 5.2vw, 24px);
+    letter-spacing: -0.04em;
   }
 
-  .process__tag {
-    font-size: 10px;
-    padding: 6px 12px;
+  .procHalo__cta {
+    margin-top: 22px;
+  }
+
+  .procHalo__ctaFull { display: none; }
+  .procHalo__ctaShort { display: inline; }
+
+  /* smaller again inside a dial this size — at the desktop three-quarter
+     size the bar is wider than the chord it has to sit on */
+  .procHalo__cta .extCta {
+    --ext-h: 32px;
+    --ext-pad: 4px;
+    --ext-stroke-w: 2px;
+    gap: 8px;
+    padding: var(--ext-pad) 13px var(--ext-pad) var(--ext-pad);
+    border-radius: 7px;
+    font-size: 0.66rem;
+  }
+
+  .procHalo__cta .extCta::after {
+    border-radius: 7px;
+  }
+
+  .procHalo__cta .extCta__fill {
+    clip-path: inset(
+      var(--ext-pad) calc(100% - var(--ext-h) + var(--ext-pad)) var(--ext-pad)
+        var(--ext-pad) round 5px
+    );
+  }
+
+  .procHalo__cta .extCta__glyph {
+    width: 11px;
+    height: 11px;
+  }
+
+  .procHalo__cta .extCta__marchTrack {
+    --ext-pitch: 19px;
+  }
+
+  .procHalo__cta .extCta__marchTrack .extCta__glyph {
+    margin-right: calc(var(--ext-pitch) - 11px);
+  }
+
+  /* ---- the fan ---- */
+  .procHalo__orbit {
+    position: absolute;
+    inset: 0;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* every satellite grows rightwards here, out into the open half of the
+     screen the gauge has vacated */
+  .procStep,
+  .procStep--l,
+  .procStep--r {
+    position: absolute;
+    left: calc(var(--cxp) + var(--mx) * var(--hx));
+    top: calc(var(--cyp) + var(--my) * var(--hy));
+    width: auto;
+    padding-block: 0;
+    transform: translateY(-50%);
+  }
+
+  /* the drift comes back with the orbit — it was only ever wrong in a list */
+  .process--shown .procStep__drift {
+    animation: procDrift calc(6.4s + var(--i) * 0.8s) var(--ease-inout)
+      calc(1.3s + var(--i) * 0.22s) infinite alternate;
+  }
+
+  /* and so do the fading sheets: there is a drawing behind these again */
+  .procSheet {
+    -webkit-mask-image: linear-gradient(90deg, #000 0 53%, transparent 83%);
+    mask-image: linear-gradient(90deg, #000 0 53%, transparent 83%);
+    inset: -22px -30px;
+  }
+
+  .procSheet::before {
+    inset: 22px 30px;
+    box-shadow: 0 1px 2px rgba(31, 31, 31, 0.05), 0 8px 20px rgba(31, 31, 31, 0.09);
+  }
+
+  .procStep .procSheet {
+    display: block;
+  }
+
+  .procStep__pill {
+    width: auto;
+    padding: 4px 12px 4px 4px;
+    gap: 8px;
+    white-space: nowrap;
+    text-align: left;
+    font-size: clamp(10px, 2.95vw, 11.5px);
+    letter-spacing: -0.002em;
+  }
+
+  .procStep__label {
+    display: none;
+  }
+
+  .procStep__label--short {
+    display: inline;
+  }
+
+  .procStep__tile {
+    width: 23px;
+    height: 23px;
+  }
+
+  .procStep__tile svg {
+    width: 13px;
+    height: 13px;
   }
 
   .process__rail--left,
@@ -2051,423 +2750,117 @@ html.has-cursor .cursorRing {
   }
 }
 
-/* ---- Process scroll-reveal cards (procCards) ---- */
-
-.procCards {
-  /* tile height shrinks on short viewports so tags never clip the panel edge;
-     the line/track/tip all derive their vertical position from this */
-  --proc-visual-h: clamp(140px, 19vh, 190px);
-  /* breathing room between tile bottom and the chip/line row */
-  --proc-track-gap: 12px;
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  margin-top: clamp(52px, 6.5vh, 80px);
+/* Narrow phones. The fan runs out of width first, so the pivot slides left
+   and the satellites start closer in. The gauge is pinned to the screen edge
+   and does not move with it. */
+@media (max-width: 360px) {
+  .procHalo {
+    --cxp: 45%;
+  }
 }
 
-/* faint full-width track — the path ahead */
-.procCards::before {
-  content: "";
-  position: absolute;
-  top: calc(var(--proc-visual-h) + var(--proc-track-gap, 12px) + 24px);
-  left: 0;
-  right: 0;
-  height: 2px;
-  border-radius: 2px;
-  background: rgba(26, 26, 26, 0.07);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.procCards--visible::before {
-  opacity: 1;
-}
+/*
+  Very short phones (a 568px-tall viewport and down).
 
-/* Real div controlled by inline style scaleX() — smooth continuous growth */
-.procLine {
-  position: absolute;
-  top: calc(var(--proc-visual-h) + var(--proc-track-gap, 12px) + 24px); /* visual zone + gap + half track zone */
-  left: 0;
-  right: 0;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, rgba(124, 58, 237, 0.45), #7c3aed);
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.5s var(--ease-quint);
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* glowing dot riding the leading edge of the fill */
-.procTip {
-  position: absolute;
-  top: calc(var(--proc-visual-h) + var(--proc-track-gap, 12px) + 24px + 1px);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #7c3aed;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16), 0 0 14px rgba(124, 58, 237, 0.55);
-  transition:
-    left 0.5s var(--ease-quint),
-    opacity 0.4s ease;
-  z-index: 3;
-  pointer-events: none;
-}
-
-/* card itself stays in place — the tile, node state, and content each
-   handle their own reveal, so unrevealed steps still show a faint node
-   on the track as "steps remaining" */
-.procCard {
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid transparent;
-  transition: background 0.35s ease, border-color 0.5s ease;
-  cursor: default;
-}
-
-.procCard--visible {
-  border-right-color: rgba(26, 26, 26, 0.08);
-}
-
-.procCard:last-child {
-  border-right: none;
-}
-
-.procCard:hover {
-  background: rgba(124, 58, 237, 0.025);
-}
-
-/* Visual zone — gradient tile with rings + frosted icon */
-.procCard__visual {
-  position: relative;
-  height: var(--proc-visual-h, 190px);
-  padding: 4px clamp(20px, 3.5vw, 40px) 0;
-  display: flex;
-  align-items: stretch;
-  background: transparent;
-}
-
-.procTile {
-  position: relative;
-  flex: 1;
-  border-radius: 16px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: translateY(14px) scale(0.97);
-  transition:
-    opacity 0.6s var(--ease-quint),
-    transform 0.6s var(--ease-quint),
-    box-shadow 0.4s ease;
-}
-
-.procCard--visible .procTile {
-  opacity: 1;
-  transform: none;
-  transition-delay: 0.15s;
-}
-
-.procCard--visible .procTile {
-  /* subtle inner highlight edge, like light catching the tile rim */
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
-}
-
-.procCard--visible:hover .procTile {
-  transform: translateY(-4px);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    0 20px 38px -20px rgba(26, 26, 26, 0.38);
-  transition-delay: 0s;
-}
-
-/* Soft hue per step, light bloom baked into the top layer */
-.procTile--discover {
-  background: linear-gradient(150deg, #cfbef5 0%, #a78ee9 55%, #8d72e0 100%);
-}
-.procTile--design {
-  background: linear-gradient(150deg, #efa470 0%, #de7b43 60%, #d06a34 100%);
-}
-.procTile--deliver {
-  background: linear-gradient(160deg, #8fb96d 0%, #a9c98f 45%, #becfd8 100%);
-}
-
-/* drifting light bloom — brightens softly on hover */
-.procTile::before {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: radial-gradient(closest-side at 50% 50%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.14) 45%, transparent 72%);
-  animation: procGlowDrift 9s ease-in-out infinite;
-  opacity: 0.85;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-}
-
-.procCard:hover .procTile::before {
-  opacity: 1;
-}
-
-@keyframes procGlowDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(4%, 5%) scale(1.06); }
-  66% { transform: translate(-4%, -3%) scale(0.97); }
-}
-
-/* faint concentric rings, breathing slowly */
-.procTile__rings {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.procTile__rings circle {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.26);
-  stroke-width: 1;
-  transition: stroke 0.5s ease;
-}
-
-.procCard:hover .procTile__rings circle {
-  stroke: rgba(255, 255, 255, 0.4);
-}
-
-.procTile__rings g {
-  transform-origin: center;
-  animation: procRingsBreathe 12s ease-in-out infinite;
-}
-
-@keyframes procRingsBreathe {
-  0%, 100% { transform: scale(1); opacity: 0.65; }
-  50% { transform: scale(1.07); opacity: 1; }
-}
-
-/* frosted glowing icon, floating gently */
-.procTile__icon {
-  position: relative;
-  z-index: 2;
-  width: 54px;
-  height: 54px;
-  color: #fff;
-  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.6)) drop-shadow(0 2px 10px rgba(255, 255, 255, 0.3));
-  animation: procIconFloat 5.5s ease-in-out infinite;
-}
-
-.procTile__icon svg {
-  width: 100%;
-  height: 100%;
-  transition: transform 0.45s var(--ease-quint);
-}
-
-@keyframes procIconFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-/* each icon gets its own small hover gesture */
-.procCard--visible:hover .procTile--discover .procTile__icon svg {
-  transform: scale(1.08) rotate(20deg); /* compass swings */
-}
-
-.procCard--visible:hover .procTile--design .procTile__icon svg {
-  transform: scale(1.08) translateY(-2px); /* layers lift */
-}
-
-.procCard--visible:hover .procTile--deliver .procTile__icon svg {
-  transform: scale(1.08) translate(3px, -3px); /* plane takes off */
-}
-
-/* Track zone — outlined circular nodes sitting on the line */
-.procCard__track {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  padding: 0 clamp(20px, 3.5vw, 40px);
-  margin-top: var(--proc-track-gap, 12px);
-  position: relative;
-  z-index: 3;
-}
-
-/* white chip, purple numeral — pops in when the card reveals */
-.procCard__dot {
-  width: 28px;
-  height: 28px;
-  background: #fff;
-  border: 1px solid rgba(124, 58, 237, 0.4);
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #7c3aed;
-  font-size: 11px;
-  font-weight: 700;
-  font-family: var(--font-mono, "SF Mono", monospace);
-  flex-shrink: 0;
-  transform: scale(0);
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.35s ease;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
-}
-
-.procCard--visible .procCard__dot {
-  transform: scale(1);
-  transition-delay: 0.1s;
-}
-
-.procCard--visible:hover .procCard__dot {
-  transform: scale(1.08);
-  transition-delay: 0s;
-  box-shadow: 0 0 0 7px rgba(124, 58, 237, 0.1), 0 0 0 12px rgba(124, 58, 237, 0.05);
-}
-
-/* Content zone — slides up on reveal */
-.procCard__content {
-  padding: 18px clamp(20px, 3.5vw, 40px) 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity 0.65s var(--ease-quint),
-    transform 0.65s var(--ease-quint);
-}
-
-.procCard--visible .procCard__content {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 0.2s;
-}
-
-.procCard--visible:hover .procCard__content {
-  transform: translateY(-3px);
-  transition-delay: 0s;
-  transition-duration: 0.35s;
-}
-
-.procCard__sub {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  color: #7c3aed;
-  margin: 0 0 10px;
-  text-transform: uppercase;
-}
-
-.procCard__title {
-  font-size: clamp(28px, 3vw, 40px);
-  font-weight: 600;
-  color: #1a1a1a;
-  line-height: 1.1;
-  letter-spacing: -0.025em;
-  margin: 0 0 16px;
-}
-
-.procCard__desc {
-  font-size: 14px;
-  line-height: 1.65;
-  /* was #777 — 4.17:1 on the card's #f7f7f5, under the 4.5:1 floor for
-     body text. #6b6b6b clears it at 4.97:1 and still reads as muted. */
-  color: #6b6b6b;
-  margin: 0 0 18px;
-}
-
-.procCard__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.procCard__tag {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  color: rgba(26, 26, 26, 0.38);
-  border: 1px solid rgba(26, 26, 26, 0.1);
-  border-radius: 4px;
-  padding: 4px 10px;
-  text-transform: uppercase;
-  transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s var(--ease-quint);
-}
-
-.procCard:hover .procCard__tag {
-  border-color: rgba(124, 58, 237, 0.25);
-  color: rgba(124, 58, 237, 0.75);
-  transform: translateY(-1px);
-}
-
-/* Mobile: vertical stack, no sticky, show all cards */
-@media (max-width: 700px) {
-  .process {
-    min-height: auto;
+  The whole field is derived from --ring, so this is one number plus the type
+  that sits inside it.
+*/
+@media (max-width: 640px) and (max-height: 620px) {
+  .process__inner {
+    padding: 68px 18px 10px;
   }
 
-  .process__sticky {
-    position: relative;
-    height: auto;
-    overflow: visible;
+  .procHalo {
+    --proc-pad: 18px;
   }
 
-  .procCards {
-    grid-template-columns: 1fr;
-    margin-top: 32px;
+  /* The arc is width-derived and the fan is 1.3 × --ring tall, which clears
+     even a 568px pane — so nothing here touches the geometry. Only the type
+     inside the arc comes down. */
+  .procHalo__cta {
+    margin-top: 18px;
   }
 
-  .procLine,
-  .procTip {
-    display: none;
+  .procStep__pill {
+    font-size: 10.5px;
+    padding: 3px 10px 3px 3px;
+    gap: 7px;
   }
 
-  .procCards::before {
-    display: none;
+  .procStep__tile {
+    width: 21px;
+    height: 21px;
   }
 
-  .procCard {
-    border-right: none;
-    border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+  .procStep__tile svg {
+    width: 12px;
+    height: 12px;
   }
+}
 
-  .procCard:last-child {
-    border-bottom: none;
-  }
-
-  .procCard__visual {
-    height: 150px;
-    padding: 4px 20px 0;
-  }
-
-  .procTile {
+@media (prefers-reduced-motion: reduce) {
+  .procHalo__eyebrow,
+  .process__heading,
+  .procHalo__cta,
+  .procHalo__tick,
+  .procStep__pill {
     opacity: 1;
-    transform: none;
+    translate: none;
+    scale: none;
+    transition: none;
   }
 
-  .procTile__icon {
-    width: 46px;
-    height: 46px;
-  }
-
-  .procCard__track {
+  /* both leads and the ambient arc exist only as motion; there is nothing of
+     them left to show standing still */
+  .procHalo__pen,
+  .procHalo__sweep {
     display: none;
   }
 
-  .procCard__content {
-    padding: 16px 20px 28px;
+  .process--shown .procStep__drift {
+    animation: none;
   }
+}
 
-  .procCard__title {
-    font-size: 24px;
-  }
+/*
+  The un-animated route to the finished state (see the Reveal type in
+  Process.tsx). Every property the entrance touches is transitioned, so
+  simply adding .process--shown is not enough where transitions do not run:
+  the element sits on its start value and the section reads as empty. This
+  drops the transitions so the end state applies on the spot.
+*/
+.process--instant .procHalo__eyebrow,
+.process--instant .process__heading,
+.process--instant .procHalo__cta,
+.process--instant .procHalo__tick,
+.process--instant .procStep__pill {
+  transition: none;
+}
 
-  /* All cards visible on mobile without scroll tracking */
-  .procCard__content {
+.process--instant .procHalo__pen {
+  display: none;
+}
+
+.process--instant .procHalo__sweep {
+  opacity: 1;
+}
+
+/* Print never runs the observer that reveals this, and the JS fallback may
+   not have fired either. Draw it flat. */
+@media print {
+  .procHalo__eyebrow,
+  .process__heading,
+  .procHalo__cta,
+  .procHalo__tick,
+  .procStep__pill {
     opacity: 1;
-    transform: translateY(0);
+    translate: none;
+    scale: none;
+  }
+
+  .procHalo__pen,
+  .procHalo__sweep {
+    display: none;
   }
 }
 
@@ -10194,9 +10587,6 @@ html.dpl-page .preloader {
   .footer__hero:hover .footer__dude,
   .hc__badge svg,
   .logoStrip__scroll,
-  .procTile::before,
-  .procTile__icon,
-  .procTile__rings g,
   .projTile:focus-visible .projTile__cover,
   .seaFooter__emblem,
   .seaFooter__flameGroup,
@@ -10322,7 +10712,9 @@ html.dpl-page .preloader {
   flex: none;
   width: calc(var(--ext-h) - var(--ext-pad) * 2);
   height: calc(var(--ext-h) - var(--ext-pad) * 2);
-  color: var(--ext-body);
+  /* white on the accent square, matching the march it turns into on hover —
+     one arrow colour for both states rather than a dark glyph that flips */
+  color: #fff;
   /* the glyph leaves early, before the fill has travelled far enough to put
      a second arrow anywhere near it */
   transition: opacity 0.14s ease-out;
@@ -10365,7 +10757,11 @@ html.dpl-page .preloader {
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  color: var(--ext-body);
+  /* White, not the bar's charcoal. At rest the glyph is dark because it sits
+     on the accent tile with the charcoal bar around it; on hover the accent
+     has spread under the whole march, and dark-on-accent goes muddy where
+     white reads as one crisp conveyor. */
+  color: #fff;
   /* delayed: the arrows arrive once the fill has actually spread, so the
      sequence reads as one move (accent spreads, arrows appear on it) rather
      than two things dissolving into each other at once */
