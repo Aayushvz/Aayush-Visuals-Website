@@ -45,7 +45,20 @@ const CARDS: Card[] = [
   { src: "https://framerusercontent.com/images/lixbhVQGtaJ1VnQKjv0GZQPzjwA.png", alt: "Food app interface", w: 188, h: 242, ox: 526, oy: -364, rot: -1.5 },
   { src: "https://framerusercontent.com/images/oo2KOi0T0T3Gc7mMJ6T4qgnqPqE.png", alt: "App interface", w: 188, h: 216, ox: 307, oy: 183, rot: 1 },
   { src: "https://framerusercontent.com/images/j7nFLyPw7Z0AjwVk2UBXI0pvmzM.png", alt: "Controller design", w: 188, h: 238, ox: -558, oy: 385, rot: -2 },
-  { src: "https://framerusercontent.com/images/MY0eWAd2bfxNVpoxLiTpcH5zs.png", alt: "E-Summit laptop", w: 188, h: 132, ox: -326, oy: 145, rot: 1.5, mobile: true },
+  /*
+    Mike Tyson takes the slot the E-Summit laptop held; that card is gone
+    rather than moved.
+
+    244 is 1.3x the 188 every other card is set to, and the only one off that
+    module. The shot is a mockup rather than a flat screenshot, so at the
+    common width the screen it exists to show reads as a smudge. 156 is the
+    frame's own 1212:777 — the height follows the image, not the slot, or
+    object-fit re-crops what the source was already cropped to.
+
+    `mobile` stays with the slot, not the image: it marks which cards belong
+    to the phone composition, which is a fact about position.
+  */
+  { src: "/projects/mike-tyson-hero-card.webp", alt: "Mike Tyson Invitational website", w: 244, h: 156, ox: -326, oy: 145, rot: 1.5, mobile: true },
   { src: "https://framerusercontent.com/images/Kc86yKh4qp4oDdDwiBYEWKdRZ4.png", alt: "Fuzion poster", w: 188, h: 232, ox: 530, oy: 266, rot: -1, mobile: true },
 ];
 

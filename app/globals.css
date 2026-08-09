@@ -10616,11 +10616,16 @@ html.dpl-page .preloader {
 .extCta {
   --ext-h: 52px;
   --ext-pad: 6px;
-  --ext-body: #22252b;
+  /* Off-black, not black. #22252B with a #15171B rim read as a solid black
+     slab on the cream sheet — the two were close enough together that the
+     stroke stopped being an edge and just darkened the whole thing. Lifting
+     both keeps the button a dark object rather than a hole in the page, and
+     leaves the rim visible as a rim. White on this is 12.6:1. */
+  --ext-body: #2b2e35;
   /* the edge stroke. One value for both states by design: on the charcoal
      bar it is a darker rim that gives the button an edge, and on the purple
      fill the same colour becomes a hard outline. */
-  --ext-stroke: #15171b;
+  --ext-stroke: #1f2228;
   /* the stroke is drawn twice — once as the ::after overlay on the bar, once
      as the inset ring on the fill that rides out with the clip. They must
      stay identical or the edge visibly thickens as the fill reaches it. */

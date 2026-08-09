@@ -53,6 +53,14 @@
      so each theme carries its own weight, the way Figma's own UI does. */
   --figp-shadow-dock: 0 10px 30px rgba(0, 0, 0, 0.35);
   --figp-shadow-dock-mobile: 0 -2px 20px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5);
+  /* The floating chrome — collapsed pills and the dock — sits over the
+     artboard rather than against an edge, so it carries a second, closer
+     shadow to seat it and a hairline of light along its top edge. One value
+     per theme: over #1e1e1e the sheen is a faint white, over light grey it is
+     the near-white that a real raised surface catches. */
+  --figp-shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 16px rgba(0, 0, 0, 0.28),
+    0 18px 44px rgba(0, 0, 0, 0.34);
+  --figp-sheen: rgba(255, 255, 255, 0.07);
   --figp-shadow-sheet: 0 -18px 44px rgba(0, 0, 0, 0.55);
   --figp-shadow-note: 0 2px 6px rgba(0, 0, 0, 0.22), 0 14px 34px rgba(0, 0, 0, 0.5);
   --figp-shadow-pin: 0 1px 2px rgba(0, 0, 0, 0.4), 0 5px 14px rgba(0, 0, 0, 0.5);
@@ -154,6 +162,9 @@ html[data-theme="light"] .figp-share-backdrop {
      grey canvas separates by a hairline plus a small shadow, not by depth. */
   --figp-shadow-dock: 0 1px 3px rgba(0, 0, 0, 0.06), 0 6px 18px rgba(0, 0, 0, 0.1);
   --figp-shadow-dock-mobile: 0 1px 3px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.14);
+  --figp-shadow-float: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.08),
+    0 14px 34px rgba(0, 0, 0, 0.1);
+  --figp-sheen: rgba(255, 255, 255, 0.9);
   --figp-shadow-sheet: 0 -8px 28px rgba(0, 0, 0, 0.14);
   --figp-shadow-note: 0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 22px rgba(0, 0, 0, 0.14);
   --figp-shadow-pin: 0 1px 2px rgba(0, 0, 0, 0.14), 0 4px 10px rgba(0, 0, 0, 0.16);
@@ -304,30 +315,33 @@ html[data-theme="light"] .figp-share-backdrop {
    the transition running both ways. */
 .figp-pill {
   position: fixed;
-  top: 12px;
+  top: 18px;
   z-index: 62;
   display: none;
   align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 6px 0 12px;
+  gap: 8px;
+  height: 44px;
+  padding: 0 7px 0 14px;
   border: 1px solid var(--figp-panel-line);
-  border-radius: 10px;
+  /* 14 against a 32px control at 8 leaves an even 6px of shell all round —
+     concentric, so the pill reads as one object rather than a bar with
+     buttons dropped into it */
+  border-radius: 14px;
   background: var(--figp-pill-bg);
-  box-shadow: var(--figp-shadow-dock);
-  font-size: 12.5px;
+  box-shadow: var(--figp-shadow-float), inset 0 1px 0 var(--figp-sheen);
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--figp-text-strong);
   user-select: none;
 }
 
 .figp-pill--file {
-  left: 12px;
+  left: 18px;
 }
 
 .figp-pill--actions {
-  right: 12px;
-  padding-left: 6px;
+  right: 18px;
+  padding-left: 7px;
 }
 
 @media (min-width: 769px) {
@@ -351,8 +365,8 @@ html[data-theme="light"] .figp-share-backdrop {
 }
 
 .figp-pill-mark {
-  width: 12px;
-  height: 18px;
+  width: 14px;
+  height: 21px;
   flex: none;
   color: var(--figp-text-strong);
 }
@@ -362,21 +376,29 @@ html[data-theme="light"] .figp-share-backdrop {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* the file name is the one piece of running text up here; the rest of the
+     pill is controls, and it wants a little air to read as a title */
+  letter-spacing: -0.005em;
 }
 
 .figp-pill-btn {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   flex: none;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: none;
   color: var(--figp-text-dim);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.figp-pill-btn svg {
+  width: 17px;
+  height: 17px;
 }
 
 .figp-pill-btn:hover,
@@ -386,21 +408,33 @@ html[data-theme="light"] .figp-share-backdrop {
 }
 
 /* inside the collapsed pill there is no row to push right, so the desktop
-   auto margin is dropped and the two controls just sit side by side */
-.figp-live-btn--pill {
+   auto margin is dropped and the two controls just sit side by side. The
+   height is restated because the pill's controls run taller than the tab
+   bar's — this one is floating over the artboard, not tucked into a 40px
+   strip. */
+.figp a.figp-live-btn.figp-live-btn--pill {
   margin: 0;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 8px;
+  font-size: 12.5px;
 }
 
 .figp-pill-share {
-  height: 26px;
-  padding: 0 12px;
+  height: 32px;
+  padding: 0 15px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--figp-blue-solid, #0b72d4);
   font: inherit;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
   color: #fff;
   cursor: pointer;
+  /* the one filled control up here, so it gets the seating the rest of the
+     pill has rather than sitting flat on it */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: filter 0.15s ease;
 }
 
 .figp-pill-share:hover,
@@ -1629,14 +1663,16 @@ html[data-theme="light"] .figp-lfile img {
 .figp a.figp-ext {
   --ext-h: 52px;
   --ext-pad: 6px;
-  /* the bar is charcoal in both themes, but #22252B on the #1e1e1e dark
-     canvas is a button you cannot find. Dark lifts it until the edge reads
-     as an object sitting on the page. */
-  --ext-body: #22252b;
+  /* Off-black, not black — the light canvas was reading this as a solid
+     black slab, because the body and its rim sat close enough together that
+     the stroke stopped being an edge. The bar is charcoal in both themes,
+     but even lifted it needs another step on the #1e1e1e dark canvas or it
+     is a button you cannot find. */
+  --ext-body: #2b2e35;
   /* the edge stroke. One value for both states by design: on the charcoal
      bar it is a darker rim that gives the button an edge, and on the accent
      fill the same colour becomes the hard outline the reference draws. */
-  --ext-stroke: #15171b;
+  --ext-stroke: #1f2228;
   /* width lives in a variable because the stroke is drawn twice — once as
      the ::after overlay on the bar, once as the inset ring on the fill that
      rides out with the clip. Those two have to stay identical or the edge
@@ -1670,7 +1706,9 @@ html[data-theme="light"] .figp-lfile img {
 }
 
 :root[data-theme="dark"] .figp a.figp-ext {
-  --ext-body: #2e323a;
+  /* the same step above the base the old pair had, so the button keeps its
+     separation from the dark canvas now that the base itself has lifted */
+  --ext-body: #373c45;
 }
 
 /*
@@ -4301,7 +4339,7 @@ html[data-theme="light"] .figp-lfile img {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: max(16px, env(safe-area-inset-bottom));
+  bottom: max(20px, env(safe-area-inset-bottom));
   z-index: 50;
   display: flex;
   justify-content: center;
@@ -4318,12 +4356,15 @@ html[data-theme="light"] .figp-lfile img {
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 6px;
+  gap: 4px;
+  padding: 7px;
   border-radius: 999px;
   background: var(--figp-panel);
   border: 1px solid var(--figp-panel-line);
-  box-shadow: var(--figp-shadow-dock);
+  /* same seating as the collapsed pills: this is the other half of the same
+     floating chrome, and the two read as one set only if they are lit and
+     shadowed the same way */
+  box-shadow: var(--figp-shadow-float), inset 0 1px 0 var(--figp-sheen);
 }
 
 /* solid, not glass, at this width — it sits directly over page content on a
@@ -4335,14 +4376,14 @@ html[data-theme="light"] .figp-lfile img {
     /* was --figp-text-dim: a #767676 rule around a white pill in light mode,
        much heavier than any other border on the page */
     border-color: var(--figp-dock-border-strong);
-    box-shadow: var(--figp-shadow-dock-mobile);
+    box-shadow: var(--figp-shadow-dock-mobile), inset 0 1px 0 var(--figp-sheen);
   }
 }
 
 .figp-dock-sep {
   width: 1px;
-  height: 20px;
-  margin: 0 2px;
+  height: 24px;
+  margin: 0 4px;
   background: var(--figp-panel-line);
   flex: none;
 }
@@ -4352,8 +4393,8 @@ html[data-theme="light"] .figp-lfile img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   flex: none;
   border: 0;
   border-radius: 50%;
@@ -4365,8 +4406,8 @@ html[data-theme="light"] .figp-lfile img {
 }
 
 .figp-dock-item svg {
-  width: 17px;
-  height: 17px;
+  width: 19px;
+  height: 19px;
 }
 
 .figp-dock-item:hover,
@@ -4382,7 +4423,7 @@ html[data-theme="light"] .figp-lfile img {
 
 .figp-dock-item-dot {
   position: absolute;
-  bottom: 3px;
+  bottom: 5px;
   left: 50%;
   width: 4px;
   height: 4px;
