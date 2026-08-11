@@ -6813,8 +6813,13 @@ html.has-cursor .cursorRing {
   gap: 1cqw;
 }
 
-.collage__mark > svg {
-  width: 2.9cqw;
+.collage__logo {
+  width: 3cqw;
+  /* the asset is trimmed to the mark, so the box is the artwork */
+  aspect-ratio: 320 / 247;
+  background: currentColor;
+  -webkit-mask: url("/about/collage-logo.webp") center / contain no-repeat;
+  mask: url("/about/collage-logo.webp") center / contain no-repeat;
 }
 
 .collage__wordmark {
@@ -6937,8 +6942,8 @@ html.has-cursor .cursorRing {
     font-size: 23px;
   }
 
-  .collage__mark > svg {
-    width: 28px;
+  .collage__logo {
+    width: 30px;
   }
 
   .collage__wordmark {

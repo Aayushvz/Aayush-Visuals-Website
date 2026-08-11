@@ -17,7 +17,7 @@
   reference; the artwork inside it is this site's own.
 */
 
-const BADGE_TEXT = "DESIGNER · DESIGN ENGINEER · ARTIST · ";
+const BADGE_TEXT = "DESIGNER · DESIGN ENGINEER · UI/UX · ";
 
 export default function CollagePanel() {
   return (
@@ -137,7 +137,7 @@ export default function CollagePanel() {
 
           <p className="collage__lede">
             My name is Aayush Raj, I&apos;m a product designer / design
-            engineer / artist based in India.
+            engineer / UI/UX based in India.
           </p>
 
           <p className="collage__para">
@@ -158,15 +158,10 @@ export default function CollagePanel() {
 
         {/* ---------- footer block ---------- */}
         <div className="collage__mark" aria-hidden>
-          <svg viewBox="0 0 34 30">
-            <path
-              d="M2 28 17 2l15 26-8 0-7-12-7 12Z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {/* the AV monogram. Painted as a mask rather than an <img> so it
+              takes --cl-ink and inverts with the theme toggle like every
+              other mark in this panel — the asset itself is white-only. */}
+          <span className="collage__logo" />
           <span className="collage__wordmark">
             AAYUSH
             <br />
