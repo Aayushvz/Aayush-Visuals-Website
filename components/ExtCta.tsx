@@ -1,7 +1,7 @@
 "use client";
 
 import PageLink from "./PageLink";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 /*
   The site's primary button, ported from the "Visit Live Website" control on
@@ -53,6 +53,8 @@ type Props = {
   route?: boolean;
   className?: string;
   "data-reveal"?: boolean | string;
+  /* the About page passes --rd through here to stagger its scroll reveals */
+  style?: CSSProperties;
 };
 
 export default function ExtCta({

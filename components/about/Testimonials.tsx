@@ -73,7 +73,9 @@ const STACK = [
 const SPRING      = { type: "spring" as const, stiffness: 130, damping: 22, mass: 0.85 };
 const EXIT_SPRING = { type: "spring" as const, stiffness: 80,  damping: 18, mass: 1.1  };
 
-export default function Testimonials({ hideHeader = false }: { hideHeader?: boolean }) {
+/* `hideHeader` used to gate the big "05" section index. The index is gone from
+   both pages now, so the prop had nothing left to switch. */
+export default function Testimonials() {
   const n = TESTIMONIALS.length;
 
   // order[0] = front card's index in TESTIMONIALS
@@ -141,7 +143,6 @@ export default function Testimonials({ hideHeader = false }: { hideHeader?: bool
     >
       {/* Header */}
       <div className="testi__header">
-        {!hideHeader && <span className="testi__sectionIdx" aria-hidden>05</span>}
         <h2 className="testi__title">
           Trusted by founders,
           <br />

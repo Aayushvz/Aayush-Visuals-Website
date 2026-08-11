@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { Archivo, Instrument_Serif, Cinzel_Decorative, Cinzel, Inter } from "next/font/google";
+import {
+  Archivo,
+  Instrument_Serif,
+  Cinzel_Decorative,
+  Cinzel,
+  Inter,
+  Caveat,
+  Permanent_Marker,
+  Grenze_Gotisch,
+} from "next/font/google";
 import localFont from "next/font/local";
 import Preloader from "@/components/Preloader";
 import PageTransition from "@/components/PageTransition";
@@ -44,6 +53,38 @@ const cinzel = Cinzel({
   subsets: ["latin"],
   weight: ["600", "700", "800", "900"],
   variable: "--font-cinzel",
+  display: "swap",
+});
+
+/*
+  The three faces below exist only for the About page's collage panel, which
+  is built on a typographic contrast the rest of the site doesn't use: a thin
+  flowing pen, a fat marker, and a modern gothic. They are deliberately
+  scoped to `.collage` in globals.css — none of them belong anywhere else.
+
+  Caveat is the thin pen (the "About Me" signature). Permanent Marker is the
+  fat marker used for the annotations written across the photo. Grenze
+  Gotisch is the gothic display that leads each paragraph. Pen vs marker is a
+  real contrast axis, not two lookalike handwriting fonts.
+*/
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-caveat",
+  display: "swap",
+});
+
+const permanentMarker = Permanent_Marker({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-marker",
+  display: "swap",
+});
+
+const grenzeGotisch = Grenze_Gotisch({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  variable: "--font-gothic",
   display: "swap",
 });
 
@@ -192,10 +233,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable} ${inter.variable}`}
+      className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable} ${inter.variable} ${caveat.variable} ${permanentMarker.variable} ${grenzeGotisch.variable}`}
       suppressHydrationWarning
     >
       <body>
+        {/*
+          [data-reveal] elements sit at opacity:0 until Reveals' observer adds
+          .revealed. With scripting off that class never lands and the content
+          is simply invisible — a scroll animation must never be the thing
+          deciding whether copy exists. The About page leans on it heavily.
+        */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <script
           type="application/ld+json"

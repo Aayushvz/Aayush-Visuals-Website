@@ -49,7 +49,7 @@ export default function Home() {
           <div className="hpParallax__stage">
             <ProjectsSection />
             <Services />
-            <Testimonials hideHeader />
+            <Testimonials />
             <HomeContact />
           </div>
           <Footer />
