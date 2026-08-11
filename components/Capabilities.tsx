@@ -446,18 +446,40 @@ export default function Capabilities() {
                           clickDirection === "all" ? i * 0.06 : (i % 3) * 0.05,
                       }
                 }
-                drag={open && !reduce}
+                /*
+                  Handling the card is a desktop-only affordance.
+
+                  A mouse has a spare gesture; a thumb does not. Six dealt
+                  cards cover most of the pinned canvas on a phone, and the
+                  section is driven entirely by scroll — so a drag there is
+                  competing with the one input the section runs on, and
+                  winning, because the deck sits between the thumb and the
+                  page. (`.capCard` also carries `touch-action: none`, undone
+                  for phones in the max-width: 640px block.)
+
+                  whileHover and the z-lift go with it rather than being left
+                  behind as orphans: hover on touch fires from a tap and has
+                  nothing to fire on release, so it strands a card at 1.06,
+                  and re-stacking the deck on tap is only meaningful when
+                  something is about to be pulled out of it.
+                */
+                drag={desktop && open && !reduce}
                 dragConstraints={canvasRef}
                 dragElastic={0.12}
                 dragMomentum
-                whileHover={open ? { scale: 1.06 } : undefined}
-                onPointerDown={(e) => {
-                  /* lift the grabbed card above its siblings, but never above
-                     the wallet (z 100) — cap below it so it tucks behind */
-                  (e.currentTarget as HTMLElement).style.zIndex = String(
-                    Math.min(90, ++topZ.current)
-                  );
-                }}
+                whileHover={desktop && open ? { scale: 1.06 } : undefined}
+                onPointerDown={
+                  desktop
+                    ? (e) => {
+                        /* lift the grabbed card above its siblings, but never
+                           above the wallet (z 100) — cap below it so it tucks
+                           behind */
+                        (e.currentTarget as HTMLElement).style.zIndex = String(
+                          Math.min(90, ++topZ.current)
+                        );
+                      }
+                    : undefined
+                }
               >
                 <img
                   className="capCard__img"

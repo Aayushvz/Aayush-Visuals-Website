@@ -1756,23 +1756,25 @@ html.has-cursor .cursorRing {
 /* ---------- process ---------- */
 
 /*
-  230vh, down from 310.
+  130vh, down from 230.
 
-  The floor here is 200: 100vh for the sticky pane itself, plus the 100vh
-  that Capabilities occupies as it is pulled up underneath and this panel
-  slides away over it. That parallax is fixed, so the only fat to cut was
-  the middle, and there was a lot of it: the old reveal was scrubbed against
-  scroll position, so it needed distance simply to exist, and it still
-  finished dealing its third card after the slide-away had already started.
-  The entrance now plays off an IntersectionObserver, which costs no scroll
-  at all and is complete before the panel pins. 30vh of dwell is what is
-  left in between.
+  The section's height IS its scroll cost, and 230 was counting the pane's
+  own 100vh twice. The sticky child sits at the top of the flow, so it pins
+  the moment the section reaches the top of the viewport and stays pinned
+  until the section's bottom reaches the bottom — height minus 100vh, which
+  at 230 was 130vh of motionless dial before the panel even began to move.
+  The entrance runs off an IntersectionObserver and is finished before the
+  pin starts, so all of that read as one dead screen of scrolling.
+
+  What the section actually needs: 100vh for Capabilities' pull-up, which is
+  the distance this panel slides away over the wallet scene and is fixed,
+  plus 30vh of dwell on the pinned dial. 130.
 */
 .process {
   position: relative;
   background: #F7F7F5;
   /* overflow: visible — sticky child needs this; clipping is on .process__sticky */
-  min-height: 230vh;
+  min-height: 130vh;
   z-index: 2;
 }
 
@@ -3238,8 +3240,15 @@ html.has-cursor .cursorRing {
     padding-bottom: 12px;
   }
 
+  /* No drag on phones (the `drag` prop is off below 641px too). The deck
+     covers most of the pinned canvas, so `touch-action: none` here meant a
+     vertical swipe that started on a card was swallowed instead of scrolling
+     the page — and the deal is scroll-driven, so it stripped the section of
+     its only input. `grab` goes with it: nothing here is grabbable now. */
   .capCard {
     width: min(44vw, 190px);
+    touch-action: auto;
+    cursor: default;
   }
 
   .wallet {
