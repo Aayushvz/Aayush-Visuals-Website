@@ -11941,28 +11941,63 @@ html.dpl-page .preloader {
     gap: 12px;
   }
 
-  /* toolkit: 11px labels were under the legibility floor */
+  /*
+    Toolkit, phones: the logos alone.
+
+    Two columns of name-plus-category cards ran the section to nearly two
+    screens for eight items, and the labels were the reason — at 287px of
+    content width they had to sit at 11-12px, under the legibility floor,
+    to fit at all. The logos are the recognisable part; a reader who knows
+    Figma knows the mark faster than the word, and one who doesn't is not
+    served by a 12px caption either.
+
+    So the labels go screen-reader-only rather than away: the section still
+    reads correctly announced, and the grid runs two tools per row — eight
+    tools, four even rows, no ragged tail.
+
+    Two per row rather than four: at four the tile was 66px and every mark
+    had to sit at 30px to clear its own border, which is smaller than the
+    app icons on the home screen the reader is holding. Half as many
+    columns is more than twice the tile, and the marks get to be marks.
+  */
   .aboutToolkit__grid {
-    gap: 9px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
+  /* 3:2 rather than square. Four rows of square tiles would run the grid
+     past the section's 100svh and put the last pair below the fold; the
+     landscape tile is also the better frame for a set whose widest members
+     are 2:1 lockups. */
   .aboutToolkit__card {
-    gap: 9px;
-    padding: 18px 8px 16px;
+    gap: 0;
+    padding: 14px;
+    aspect-ratio: 3 / 2;
+    border-radius: 14px;
   }
 
+  /* Both axes capped, not a fixed height: Figma's mark is portrait and the
+     two paired lockups are wider than 2:1, so a single fixed dimension
+     either overflows one end of the set or starves the other. At this tile
+     size there is room for every mark to reach the full 40px. */
   .aboutToolkit__icon {
-    height: 28px;
+    height: auto;
+    width: auto;
+    max-height: 40px;
+    max-width: 100%;
   }
 
-  .aboutToolkit__name {
-    font-size: 12px;
-    letter-spacing: 0.06em;
-  }
-
+  .aboutToolkit__name,
   .aboutToolkit__cat {
-    font-size: 11px;
-    letter-spacing: 0.04em;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* skills bento tiles carry their own phone sizing in the 700px block */
