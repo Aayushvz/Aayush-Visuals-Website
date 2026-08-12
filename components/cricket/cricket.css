@@ -395,35 +395,66 @@
   overflow: visible;
 }
 
-.ckt-wagon-edge {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 1;
+/* the outfield. Drawn before anything else, so the panel reads as a
+   miniature ground even on an over where nothing has been scored */
+.ckt-wagon-field {
+  fill: url(#wagonField);
 }
 
+/* the rope */
+.ckt-wagon-edge {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 1.4;
+}
+
+/* the mown ring and the 30-yard circle. Solid, not dashed: a dash pattern
+   at this radius turns into a row of dots and reads as noise rather than
+   as a marking on grass. */
+.ckt-wagon-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 0.8;
+}
+
+/* the sightlines can be quieter now the field carries the shape — they
+   only have to separate off side, straight and leg */
 .ckt-wagon-grid {
-  stroke: rgba(255, 255, 255, 0.18);
+  stroke: rgba(255, 255, 255, 0.14);
   stroke-width: 0.6;
   stroke-dasharray: 2 3;
 }
 
+.ckt-wagon-pitch {
+  fill: #cbb894;
+}
+
+/* the shot line and its landing mark share one colour per outcome, so the
+   group is styled once instead of the line and the dot separately */
 .ckt-wagon-shot {
   stroke: #fff;
-  stroke-width: 1.5;
+  fill: #fff;
+  stroke-width: 1.6;
   stroke-linecap: round;
   animation: ckt-draw 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .ckt-wagon-shot--6 {
   stroke: var(--ckt-six);
-  stroke-width: 2;
+  fill: var(--ckt-six);
+  stroke-width: 2.2;
 }
 .ckt-wagon-shot--4 {
   stroke: var(--ckt-four);
+  fill: var(--ckt-four);
 }
 
+/* the striker, ringed so the origin stays readable against the pitch strip
+   it now sits on */
 .ckt-wagon-pin {
   fill: #fff;
+  stroke: rgba(6, 22, 62, 0.55);
+  stroke-width: 1;
 }
 
 @keyframes ckt-draw {
@@ -810,7 +841,15 @@
      very short window rather than something anyone should normally see. */
   overflow-y: auto;
   overscroll-behavior: contain;
+  /*
+    Firefox honours these two; Chromium honours neither and falls back to
+    the OS scrollbar, which is what was actually on screen — a full-width
+    light bar with stepper arrows, jammed against a 28px rounded frame and
+    clipped by it at both ends. The ::-webkit- rules below are the other
+    half of this declaration, not an extra.
+  */
   scrollbar-width: thin;
+  scrollbar-color: var(--gk-rim) transparent;
   /* wider, so the verdict line stops wrapping to a third row on a short
      window — the extra height that wrap costs is what tipped the card into
      scrolling in the first place */
@@ -1098,83 +1137,204 @@
 }
 
 /*
-  The popover hangs from the gear's right edge so it can never push past
-  the viewport on the side it opens toward — anchoring left would send it
-  off-screen on a phone, where the gear is already near the edge.
+  ---- the pause screen ----
+
+  Not a popover any more. Pausing stops the over, and a 208px dropdown in
+  the corner said the opposite — that the game was still running and this
+  was a quick aside. It takes the whole viewport now, which is what every
+  console pause menu does and for the same reason: the decision on screen
+  is the only one available.
+
+  It is also deliberately the least panel-like surface in the game. Every
+  other thing here is a centred moulded rectangle, and stacking one more of
+  those on top would have made the pause read as another card rather than
+  as a change of state. So there is no panel at all: a dimmed pitch, a
+  ruled column of oversized type, and a gold bar that travels to whatever
+  the pointer is on. The material is the same navy and gold as the rest of
+  the kit — this is a different composition, not a different game.
 */
 .ckt-menu__panel {
-  position: absolute;
-  z-index: 8;
-  top: calc(100% + 10px);
-  right: 0;
-  width: max-content;
-  min-width: 208px;
-  padding: 10px;
-  display: grid;
-  gap: 2px;
-  text-align: left;
-  animation: ckt-menu 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(4.5rem, 12vh, 7rem) clamp(1.25rem, 7vw, 6rem);
+  /* the pitch stays visible underneath: a pause you can still see the game
+     through reads as suspended, where an opaque screen reads as exited */
+  background: linear-gradient(105deg, rgba(7, 20, 52, 0.97) 38%, rgba(7, 20, 52, 0.82) 100%);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: right;
+  animation: ckt-menu 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* the moulded gloss the panel inherited from .ckt-glass — a sheen across
+   the top third of a full-screen surface is just a bright band */
+.ckt-menu__panel::before {
+  display: none;
 }
 
 @keyframes ckt-menu {
   from {
     opacity: 0;
-    transform: translateY(-6px) scale(0.97);
   }
 }
 
-.ckt-menu__head {
-  margin: 2px 4px 6px;
+/*
+  The watermark. One enormous word bled off the left edge, at the opacity
+  of the pitch behind it — it gives the empty half of the screen something
+  to be rather than leaving it as dead navy, and it is the reason the type
+  column can sit hard right without the layout looking unbalanced.
+*/
+.ckt-menu__panel::after {
+  content: "PAUSED";
+  position: absolute;
+  left: -0.08em;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  font-family: var(--ckt-title), var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(4rem, 13vw, 11rem);
+  line-height: 0.8;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
+/* top LEFT: the mute/gear/close group keeps the right corner and stays
+   above this panel as the way back out, so a heading pinned there is drawn
+   underneath three buttons */
+.ckt-menu__head {
+  position: absolute;
+  top: clamp(1.4rem, 5vh, 2.8rem);
+  left: clamp(1.25rem, 7vw, 6rem);
+  right: auto;
+  margin: 0;
+  color: var(--gk-gold);
+}
+
+/*
+  The rows.
+
+  Sized off the viewport rather than to a comfortable control height: this
+  list IS the screen, and at button scale it would read as a menu sitting
+  inside a page. Row-reverse puts the glyph after the label so the ragged
+  edge stays on the left, away from where the eye tracks.
+*/
 .ckt-menu__item {
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 44px;
-  padding: 0 12px;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  width: auto;
+  min-height: 0;
+  padding: clamp(0.15rem, 0.8vh, 0.5rem) clamp(0.7rem, 2vw, 1.4rem);
   border: 0;
-  border-radius: 11px;
+  border-radius: 0;
   background: none;
   color: #fff;
-  font-family: inherit;
-  font-size: 0.86rem;
-  font-weight: 600;
-  text-align: left;
+  font-family: var(--ckt-title), var(--ckt-display), Impact, sans-serif;
+  font-size: clamp(1.6rem, 4.6vw, 2.9rem);
+  font-weight: 400;
+  line-height: 1.16;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  text-align: right;
   text-decoration: none;
+  text-shadow: 0 3px 0 rgba(4, 12, 38, 0.55);
   cursor: pointer;
-  transition: background 0.14s ease;
+  transition: color 0.14s ease, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+  The travelling bar.
+
+  A pseudo-element rather than a background, because it has to be wider
+  than its label and bleed off the right edge of the screen — a background
+  stops at the text box. It scales from the right so it arrives from the
+  edge the list is anchored to rather than growing out of the middle.
+*/
+.ckt-menu__item::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(-1 * clamp(1.25rem, 7vw, 6rem)) 0 -1rem;
+  background: linear-gradient(90deg, rgba(255, 195, 46, 0) 0%, var(--gk-gold) 22%, var(--gk-gold-deep) 100%);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (hover: hover) {
+  .ckt-menu__item:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* the label darkens onto the gold and steps toward the edge, so the row
+     reads as picked up rather than merely highlighted */
   .ckt-menu__item:hover {
-    background: rgba(255, 255, 255, 0.14);
+    color: #3d2600;
+    transform: translateX(-6px);
+    text-shadow: none;
   }
 }
 
-.ckt-menu__item:active {
-  background: rgba(255, 255, 255, 0.2);
+.ckt-menu__item:focus-visible::before {
+  transform: scaleX(1);
 }
 
 .ckt-menu__item:focus-visible {
-  outline: 3px solid var(--gk-gold-lit);
-  outline-offset: -3px;
+  outline: none;
+  color: #3d2600;
+  text-shadow: none;
+}
+
+.ckt-menu__item:active {
+  background: none;
+  transform: translateX(-2px);
 }
 
 .ckt-menu__item svg {
   flex: none;
-  width: 17px;
-  height: 17px;
-  color: var(--gk-gold);
+  width: 0.58em;
+  height: 0.58em;
+  color: currentColor;
+  opacity: 0.75;
 }
 
+/* the rule before the way out, in the kit's gold rather than a navy groove
+   — on a dimmed pitch a dark rule disappears entirely */
 .ckt-menu__rule {
-  height: 2px;
-  margin: 5px 4px;
-  border-radius: 2px;
-  background: rgba(6, 22, 62, 0.55);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.14);
+  width: min(42vw, 380px);
+  height: 3px;
+  margin: clamp(0.5rem, 2vh, 1rem) clamp(0.7rem, 2vw, 1.4rem);
+  border-radius: 0;
+  background: var(--gk-gold);
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+/*
+  The gear stays above its own menu.
+
+  The panel is fixed and full-screen, so without this the control that
+  opened the pause is painted underneath it — leaving no visible way back
+  and an outside-click handler with no outside left to click.
+*/
+.ckt-controls,
+.ckt-menu {
+  z-index: 31;
 }
 
 /* ================= phone =================
@@ -2256,4 +2416,212 @@
   .cktReward__xp {
     font-size: 0.62rem;
   }
+}
+
+/* ---- the innings-summary ground ----
+
+   Everything else in this game is a centred, rounded, moulded panel, and
+   the summary card is one more of them. Dropping it onto the live pitch
+   was the only thing distinguishing the end of an innings from any other
+   moment, and it was not enough — the screen read as "same card, different
+   words".
+
+   So the ground is built on the one axis nothing else here uses: the
+   diagonal. Floodlight shafts rake across it, a wide gold band runs under
+   the card at the same angle, and the crowd lights fall away into a
+   vignette. Drawn in CSS rather than shipped as an image so it covers any
+   viewport at any ratio, costs nothing to download, and stays on the kit's
+   own palette instead of being baked at export.
+
+   It sits at z-index 5: above the HUD bars at 3, below the card at 6.
+*/
+.ckt-outro {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  background:
+    /* the crowd, falling off toward the edges */
+    radial-gradient(circle at 22% 18%, rgba(124, 196, 255, 0.16) 0 2px, transparent 2px),
+    radial-gradient(circle at 78% 12%, rgba(255, 224, 113, 0.14) 0 2px, transparent 2px),
+    radial-gradient(circle at 62% 34%, rgba(124, 196, 255, 0.1) 0 2px, transparent 2px),
+    /* the floodlight shafts */
+    repeating-linear-gradient(
+      108deg,
+      transparent 0 90px,
+      rgba(124, 196, 255, 0.05) 90px 150px,
+      transparent 150px 250px
+    ),
+    /* the ground itself */
+    radial-gradient(120% 92% at 50% 34%, #14367e 0%, #0d2160 48%, #050e33 100%);
+  animation: ckt-outro 0.32s ease-out both;
+}
+
+@keyframes ckt-outro {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+  The band under the card.
+
+  One wide gold diagonal, bled off both edges so it reads as a stripe
+  passing behind the panel rather than as a shape parked under it. It is
+  what stops the ground being an evenly-dark rectangle, and it puts the
+  card's own gold lettering on something that belongs to it.
+*/
+.ckt-outro::before {
+  content: "";
+  position: absolute;
+  left: -12%;
+  right: -12%;
+  top: 50%;
+  height: clamp(150px, 26vh, 260px);
+  transform: translateY(-50%) rotate(-6deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 195, 46, 0) 0%,
+    rgba(255, 195, 46, 0.16) 22%,
+    rgba(233, 60, 52, 0.2) 55%,
+    rgba(255, 195, 46, 0) 100%
+  );
+}
+
+/*
+  A single hard rule along the top of that band. The band alone is a soft
+  gradient and reads as haze; one crisp line gives it an edge and tells the
+  eye it is an object, which is the same displacement logic the buttons use.
+*/
+.ckt-outro::after {
+  content: "";
+  position: absolute;
+  left: -12%;
+  right: -12%;
+  top: 50%;
+  height: 3px;
+  transform: translateY(calc(-50% - clamp(75px, 13vh, 130px))) rotate(-6deg);
+  background: linear-gradient(90deg, transparent, var(--gk-gold) 40%, var(--gk-gold) 60%, transparent);
+  opacity: 0.5;
+}
+
+/*
+  Resume is the primary row, so it is gold before it is hovered rather
+  than white like the rest. It is also the reason the outside-click close
+  no longer matters: the panel now fills the viewport and is a child of
+  .ckt-menu, so every click counts as "inside" and that handler can never
+  fire. Escape still works, and this is the visible equivalent.
+*/
+.ckt-menu__item--resume {
+  color: var(--gk-gold);
+  margin-bottom: 0.15em;
+}
+
+.ckt-menu__item--resume svg {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .ckt-menu__item--resume:hover {
+    color: #3d2600;
+  }
+}
+
+
+/* ---- fitting the new shapes to their slots ---- */
+
+/*
+  The commentary bubble.
+
+  .ckt-say is still the panel and .ckt-say__body still the column inside
+  it; the bubble is only the SPEECH — the line of commentary and the
+  timing readout for the ball it describes. The level meter is a sibling
+  below it, because the mascot is not saying your XP total and its medal
+  hangs on a negative margin that punched out through the bubble edge when
+  it was a child.
+
+  The bubble carries its own padding: the panel's padding was doing that
+  job before, and text sitting on a bubble's edge is not a bubble.
+*/
+.ckt-say__speech {
+  padding: 0.55rem 0.8rem 0.65rem;
+}
+
+/* the panel loses the padding the bubble now provides on that side, or the
+   two stack up and the commentary sits in from the edge twice */
+.ckt-say {
+  padding: 0.7rem 0.8rem 0.75rem;
+}
+
+/*
+  The rosette carrying the combo count.
+
+  Square, because a starburst needs equal radii — given a wider box the
+  points on the long axis stretch and it stops reading as a sticker. The
+  label beside it keeps the pill's own type.
+*/
+.cktCombo__count.gk-rosette {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: -4px 0 -4px -6px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+/*
+  The earned-XP stub on the summary card.
+
+  Inline-block from .gk-ticket, so the old `display: block` margin no
+  longer centres it — the card's own text-align does that instead.
+
+  Padding is pulled back below the primitive's default. The card is sized
+  to fit its content at every viewport this game supports, and the stub at
+  full size added just enough height to tip it into scrolling, which put a
+  scrollbar down the side of the one screen that should feel finished.
+*/
+.cktSummary__xpEarned.gk-ticket {
+  display: inline-block;
+  padding: 3px 14px 4px;
+  margin-bottom: 6px;
+  color: #10300a;
+  font-size: 0.72rem;
+}
+
+/* ---- the summary card's scrollbar ----
+
+   The card is sized to fit its content at every viewport this game
+   supports, so this is a fallback for a genuinely short window rather than
+   something anyone should normally meet. It still has to be designed: a
+   default Chromium scrollbar inside a moulded panel is the most obvious
+   place the browser shows through the game.
+
+   Slim, no stepper buttons, and the thumb inset from the track by a
+   transparent border with `background-clip: padding-box` — that is what
+   keeps it clear of the panel's rounded frame instead of being sliced by
+   it at each end.
+*/
+.ckt-card::-webkit-scrollbar {
+  width: 10px;
+}
+
+.ckt-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ckt-card::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--gk-rim);
+  background-clip: padding-box;
+}
+
+.ckt-card::-webkit-scrollbar-thumb:hover {
+  background: var(--gk-rim-lit);
+  background-clip: padding-box;
+}
+
+/* the stepper arrows, which no game UI wants */
+.ckt-card::-webkit-scrollbar-button {
+  display: none;
 }

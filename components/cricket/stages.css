@@ -1069,3 +1069,74 @@
   width: 100%;
   height: 16px;
 }
+
+/* ---- the pick screen's ground ----
+
+   The stadium canvas runs under every stage and .stg is deliberately
+   transparent so the fly-in can be seen. That is right for the title card,
+   where the camera move IS the screen — and wrong here, where two large
+   cards have to be compared against each other and the crowd behind them
+   is just noise competing for the same attention.
+
+   So this one stage gets a ground, built from the same parts as the
+   innings summary's (see .ckt-outro in cricket.css): floodlight shafts on
+   the diagonal, a wide band behind the content, crowd lights falling into
+   a vignette. Two screens sharing one recipe is the point — it is the
+   game's "full-screen moment" surface, and it should be recognisable as
+   the same place both times.
+
+   Scoped to .stgPick rather than .stg so the opening keeps its clear view
+   of the stadium.
+*/
+.stgPick {
+  position: relative;
+  /* own stacking context, so the ground can sit at -1: above the canvas
+     (which is outside this context) but below the cards (which are not) */
+  z-index: 0;
+}
+
+.stgPick::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(124, 196, 255, 0.15) 0 2px, transparent 2px),
+    radial-gradient(circle at 82% 16%, rgba(255, 224, 113, 0.13) 0 2px, transparent 2px),
+    radial-gradient(circle at 58% 38%, rgba(124, 196, 255, 0.1) 0 2px, transparent 2px),
+    repeating-linear-gradient(
+      108deg,
+      transparent 0 90px,
+      rgba(124, 196, 255, 0.05) 90px 150px,
+      transparent 150px 250px
+    ),
+    radial-gradient(120% 92% at 50% 32%, #14367e 0%, #0d2160 48%, #050e33 100%);
+  animation: stgGround 0.5s ease-out both;
+}
+
+@keyframes stgGround {
+  from {
+    opacity: 0;
+  }
+}
+
+/* the band the two cards stand on, bled off both edges so it reads as a
+   stripe passing behind them rather than a shape parked underneath */
+.stgPick::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  left: -12%;
+  right: -12%;
+  top: 54%;
+  height: clamp(160px, 30vh, 300px);
+  transform: translateY(-50%) rotate(-6deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 195, 46, 0) 0%,
+    rgba(255, 195, 46, 0.14) 24%,
+    rgba(233, 60, 52, 0.18) 56%,
+    rgba(255, 195, 46, 0) 100%
+  );
+  pointer-events: none;
+}

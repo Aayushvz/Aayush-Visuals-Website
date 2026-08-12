@@ -46,7 +46,7 @@ export default function XpBar({
           </span>
         </div>
 
-        <div className="gk-meter cktXp__track">
+        <div className="gk-meter gk-pips cktXp__track">
           <motion.div
             className="gk-meter__fill cktXp__fill"
             initial={false}

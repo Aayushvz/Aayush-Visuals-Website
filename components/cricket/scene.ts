@@ -1508,7 +1508,7 @@ export function paintBigScreen(
   const r = bh * 0.09;
   ctx.beginPath();
   ctx.roundRect(bx - bw * 0.035, by - bh * 0.05, bw * 1.07, bh * 1.13, r);
-  ctx.fillStyle = "#141414";
+  ctx.fillStyle = "#20242c";
   ctx.fill();
   ctx.lineWidth = Math.max(1.5, bw * 0.012);
   ctx.strokeStyle = "#000000";
@@ -1521,7 +1521,7 @@ export function paintBigScreen(
   /* --- the panel --- */
   ctx.beginPath();
   ctx.roundRect(bx, by, bw, bh, r * 0.7);
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = "#191d24";
   ctx.fill();
 
   ctx.save();
@@ -1552,7 +1552,16 @@ export function paintBigScreen(
     and clip still apply, and so this stays the single place the screen's
     background is decided.
   */
-  ctx.fillStyle = "#0d0d0d";
+  /*
+    Off-black, not black.
+
+    A true #000 panel reads as a hole cut in the canvas rather than as a
+    screen mounted in a stand — there is nothing darker on the field for it
+    to sit against, so it stops being an object. A slightly blue-lifted
+    charcoal keeps it clearly the darkest thing in the frame while still
+    catching the stadium's own colour temperature.
+  */
+  ctx.fillStyle = "#191d24";
   ctx.fillRect(bx, by, bw, bh);
 
   /* confetti — only while something is being celebrated */

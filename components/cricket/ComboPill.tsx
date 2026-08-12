@@ -37,8 +37,13 @@ export default function ComboPill({
           }
           exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, x: -8 }}
         >
+          {/*
+            Badge first, then the label — the sheets' own arrangement, and
+            the right one here: the number is what changes ball to ball, so
+            it leads and the word that qualifies it follows.
+          */}
+          <span className="gk-rosette cktCombo__count">{combo.count}</span>
           <span className="cktCombo__label">{combo.label}</span>
-          <span className="cktCombo__count">×{combo.count}</span>
         </motion.div>
       )}
     </AnimatePresence>

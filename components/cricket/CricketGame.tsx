@@ -683,6 +683,26 @@ export default function CricketGame({
             <div className="ckt-glass ckt-menu__panel" role="menu">
               <p className="gk-head ckt-menu__head">Match</p>
 
+              {/*
+                Resume, first and on its own.
+
+                The menu is full-screen now, so the gear that opened it is
+                no longer obviously the thing that closes it — at that
+                scale it reads as chrome, not as a toggle. Every pause
+                screen worth copying puts "continue" at the top of the
+                list, and it is the option most people reaching this screen
+                actually want.
+              */}
+              <button
+                type="button"
+                className="ckt-menu__item ckt-menu__item--resume"
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+              >
+                <ResumeIcon />
+                Resume
+              </button>
+
               <button
                 type="button"
                 className="ckt-menu__item"
@@ -761,6 +781,14 @@ export default function CricketGame({
         <div className="ckt-glass ckt-say">
         <Avatar className="ckt-say__face" />
         <div className="ckt-say__body">
+        {/*
+          The bubble wraps the SPEECH only — the commentary and the timing
+          readout for the ball it describes. The level meter below is a
+          sibling, not a child: the mascot is not saying your XP total, and
+          when the meter was inside the bubble its medal (which hangs on a
+          negative margin) punched straight out through the bubble's edge.
+        */}
+        <div className="gk-bubble ckt-say__speech">
         <p className="ckt-commentary">
           {last
             ? last.commentary
@@ -794,13 +822,15 @@ export default function CricketGame({
             </span>
           </p>
         )}
+        </div>
 
           {/*
-            The level meter lives inside the commentary panel now rather
-            than in a second one below it. They were always read together —
-            what just happened, and what it earned you — and two panels for
-            one thought is what made the corner crowded enough to collide
-            in the first place.
+            The level meter shares the commentary panel rather than taking
+            a second one below it. They are always read together — what
+            just happened, and what it earned you — and two panels for one
+            thought is what made this corner crowded enough to collide in
+            the first place. It sits outside the bubble, though: see the
+            note on the speech wrapper above.
           */}
           <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
         </div>
@@ -835,6 +865,19 @@ export default function CricketGame({
         </div>
       )}
 
+      {/*
+        The innings summary gets a ground of its own rather than floating
+        over the pitch.
+
+        A card over live play reads as an interruption you will come back
+        from. The over is finished — there is nothing behind it to return
+        to — so the pitch is covered and the summary sits on a surface
+        built for it. Its own element rather than a pseudo on the card,
+        because it has to paint BELOW the card and a pseudo-element cannot
+        escape its own parent's stacking context.
+      */}
+      {phase === "over" && <div className="ckt-outro" aria-hidden />}
+
       {phase === "over" && (
         <div className="ckt-glass ckt-card">
           <span className="gk-stars ckt-card__crown" aria-hidden>
@@ -864,7 +907,9 @@ export default function CricketGame({
           </dl>
 
           <div className="cktSummary__xp">
-            <span className="cktSummary__xpEarned">+{overXp} Creative XP</span>
+            {/* awarded, not measured, so it takes the stub rather than
+                sitting as another line of text — see .gk-ticket */}
+            <span className="gk-ticket cktSummary__xpEarned">+{overXp} Creative XP</span>
             <XpBar xp={xp} levelUp={null} reduced={reduced} />
           </div>
 
@@ -1005,32 +1050,93 @@ function CloseIcon() {
   );
 }
 
+/* the resume chevron. Solid, not stroked, because it reads as "play" at
+   the size the pause list sets its glyphs — a stroked triangle at 0.58em
+   loses its point. */
+function ResumeIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M6 4.2l10 5.8-10 5.8z" fill="currentColor" />
+    </svg>
+  );
+}
+
 
 /* ---------------- wagon wheel ---------------- */
 
+/*
+  The wagon wheel.
+
+  It used to be a hairline arc, three dotted spokes and a dot — which on an
+  over where nothing had been scored yet was an empty panel with a label on
+  it, the deadest thing on screen. The problem was that it drew the CHART
+  and not the GROUND: a wagon wheel is recognisable because it sits on a
+  field, and without one there is nothing to look at until a shot lands.
+
+  So the ground is drawn first — a green field wedge, the 30-yard ring, the
+  boundary rope and a pitch strip at the origin — and the shots are plotted
+  on top of it. It reads as a miniature of the pitch behind it even at
+  zero shots, and every line added afterwards lands somewhere meaningful
+  rather than in empty space.
+*/
 function Wagon({ plots }: { plots: Plot[] }) {
   return (
-    <svg className="ckt-wagon" viewBox="0 0 120 66" aria-label={`Wagon wheel, ${plots.length} scoring shots`}>
-      <path d="M4 62 A56 56 0 0 1 116 62" className="ckt-wagon-edge" />
-      <line x1="60" y1="62" x2="60" y2="10" className="ckt-wagon-grid" />
-      <line x1="60" y1="62" x2="14" y2="30" className="ckt-wagon-grid" />
-      <line x1="60" y1="62" x2="106" y2="30" className="ckt-wagon-grid" />
+    <svg
+      className="ckt-wagon"
+      viewBox="0 0 120 68"
+      aria-label={
+        plots.length
+          ? `Wagon wheel, ${plots.length} scoring shots`
+          : "Wagon wheel, no scoring shots yet"
+      }
+    >
+      <defs>
+        {/* the outfield, lit from the batter's end so the far boundary sits
+            back — the same top-down light every surface in this kit uses */}
+        <linearGradient id="wagonField" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="#2f7d3f" />
+          <stop offset="100%" stopColor="#1c5a2b" />
+        </linearGradient>
+      </defs>
+
+      {/* the field itself */}
+      <path d="M6 62 A54 54 0 0 1 114 62 Z" className="ckt-wagon-field" />
+
+      {/* the mown ring inside the rope, and the 30-yard circle */}
+      <path d="M20 62 A40 40 0 0 1 100 62" className="ckt-wagon-ring" />
+      <path d="M38 62 A22 22 0 0 1 82 62" className="ckt-wagon-ring" />
+
+      {/* the three sightlines, kept but quieter now the field carries the
+          shape — they exist to separate off side, straight and leg */}
+      <line x1="60" y1="62" x2="60" y2="12" className="ckt-wagon-grid" />
+      <line x1="60" y1="62" x2="21" y2="35" className="ckt-wagon-grid" />
+      <line x1="60" y1="62" x2="99" y2="35" className="ckt-wagon-grid" />
+
+      {/* the rope */}
+      <path d="M6 62 A54 54 0 0 1 114 62" className="ckt-wagon-edge" />
+
+      {/* the strip the striker is standing on */}
+      <rect x="57" y="53" width="6" height="9" rx="1" className="ckt-wagon-pitch" />
+
       {plots.map((p, i) => {
         /* -1..1 maps across a half circle, straight down the ground at 0 */
-        const angle = (-Math.PI / 2) + p.direction * (Math.PI / 2) * 0.92;
-        const len = p.runs >= 6 ? 54 : p.runs >= 4 ? 46 : 28;
+        const angle = -Math.PI / 2 + p.direction * (Math.PI / 2) * 0.92;
+        /* a six clears the rope, a four reaches it, a single dies inside
+           the ring — the length is the runs, not decoration */
+        const len = p.runs >= 6 ? 56 : p.runs >= 4 ? 48 : 26;
+        const x2 = 60 + Math.cos(angle) * len;
+        const y2 = 62 + Math.sin(angle) * len;
         return (
-          <line
-            key={i}
-            x1="60"
-            y1="62"
-            x2={60 + Math.cos(angle) * len}
-            y2={62 + Math.sin(angle) * len}
-            className={`ckt-wagon-shot ckt-wagon-shot--${p.runs}`}
-          />
+          <g key={i} className={`ckt-wagon-shot ckt-wagon-shot--${p.runs}`}>
+            <line x1="60" y1="62" x2={x2} y2={y2} />
+            {/* boundaries get a landing mark; singles do not, or the chart
+                fills up with dots that all look like fours */}
+            {p.runs >= 4 && <circle cx={x2} cy={y2} r="2.4" />}
+          </g>
         );
       })}
-      <circle cx="60" cy="62" r="2" className="ckt-wagon-pin" />
+
+      <circle cx="60" cy="62" r="2.4" className="ckt-wagon-pin" />
     </svg>
   );
 }
