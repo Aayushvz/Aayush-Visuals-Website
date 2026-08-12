@@ -41,8 +41,8 @@ export function useAssets() {
       preloadBowler(t.id);
       preloadFielder(t.id);
       preloadKeeper(t.id);
+      preloadBatter(t.id);
     }
-    preloadBatter();
 
     let extraDone = 0;
     for (const src of EXTRA) {

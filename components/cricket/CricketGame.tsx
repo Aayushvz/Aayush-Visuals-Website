@@ -61,11 +61,19 @@ const BALLS = OVER.length;
   for the side you picked, so the bowler and the ring wear the opposition
   kit. It defaults to the Panthers so the component still stands up on its
   own outside the match flow.
+
+  `team` is the side you picked, and the striker at the crease wears it. It
+  used to be missing entirely: the batter loaded from a single shared folder
+  of blue frames while every other figure on the field was already per-team,
+  so a Panthers player batted in the Falcons kit against Falcons bowlers.
+  The two defaults are opposites for the same standalone reason as above.
 */
 export default function CricketGame({
+  team = "falcons",
   opponent = "panthers",
   onSwitchTeam,
 }: {
+  team?: TeamKit;
   opponent?: TeamKit;
   /** hands control back to the shell's team-selection stage */
   onSwitchTeam?: () => void;
@@ -151,8 +159,8 @@ export default function CricketGame({
   /* start fetching the batter's frames immediately — they need to be decoded
      before the first ball, not on the first swing */
   useEffect(() => {
-    preloadBatter();
-  }, []);
+    preloadBatter(team);
+  }, [team]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -504,7 +512,17 @@ export default function CricketGame({
 
       /* the batter eases into the follow through, then holds it */
       if (swingAnimRef.current > 0) swingAnimRef.current = Math.min(1, swingAnimRef.current + 0.11);
-      paintBatter(ctx, scene, swingAnimRef.current, now, swingActionRef.current);
+      /* the delivery's own line, so the stroke is played at the ball rather
+         than at the same patch of turf six times an over */
+      paintBatter(
+        ctx,
+        scene,
+        swingAnimRef.current,
+        now,
+        swingActionRef.current,
+        team,
+        deliveryRef.current.swing
+      );
       /* after the batter on purpose — the camera is behind the striker's
          stumps, so they are the nearest thing in frame and his pads pass
          behind them */

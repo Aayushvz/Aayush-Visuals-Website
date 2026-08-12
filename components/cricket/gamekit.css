@@ -263,7 +263,7 @@
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 var(--gk-drop) 0 var(--gk-btn-base),
     0 calc(var(--gk-drop) + 6px) 16px rgba(4, 12, 38, 0.45);
   color: var(--gk-ink);
-  font-family: var(--ckt-display, var(--font-primary));
+  font-family: var(--ckt-title), var(--ckt-display, var(--font-primary));
   font-size: clamp(15px, 1.5vw, 19px);
   letter-spacing: 0.06em;
   text-transform: uppercase;

@@ -746,17 +746,57 @@ function batAngle(e: number) {
   The batter is the approved character art when it has loaded, and the
   procedural figure below until then — the crease is never empty, even on the
   very first ball of a cold load.
+
+  `line` is where the delivery is, as a fraction of canvas width either side
+  of the pitch's centre line — the same number ballAt uses to place the ball.
+  It is what lets the shot be played AT something. Without it the figure
+  plays the identical stroke to a yorker on middle and a ball drifting down
+  leg, which is the tell that the batter is an animation rather than a player.
 */
 export function paintBatter(
   ctx: CanvasRenderingContext2D,
   s: Scene,
   swing: number,
   now: number,
-  action: BatterAction = "defend"
+  action: BatterAction = "defend",
+  team: TeamKit = "panthers",
+  line = 0
 ) {
-  if (paintBatterSprite(ctx, s, swing, now, action)) return;
-  paintBatterVector(ctx, s, swing, now);
+  if (paintBatterSprite(ctx, s, swing, now, action, team, line)) return;
+  paintBatterVector(ctx, s, swing, now, line);
 }
+
+/*
+  Where the striker stands, and why it is to the RIGHT of the stumps.
+
+  The camera sits behind the striker's wicket looking down the pitch, so the
+  screen is mirrored against the familiar bowler's-arm broadcast angle: what
+  is the off side there is the leg side here.
+
+  The sheet is a left-hander's. Every frame's foot anchor sits at or right of
+  centre (see batterSprites.ts), which puts the bat off the player's left in
+  the backlift, through the line and into the follow through. A left-hander
+  stands with his legs on his own leg side, and from this camera that is
+  screen right of the middle stump.
+
+  Standing him screen LEFT — which is where this was — put the whole swing
+  arc on the far side of his body from the ball. Every delivery arrives on or
+  about the centre line, so the bat travelled away from it on all six balls
+  of the over, the defensive stroke covered nothing, and the commentary
+  called it playing down the wrong line because that is exactly what it was.
+*/
+const BATTER_OFFSET = 0.1;
+
+/*
+  How much of the delivery's line the batter covers.
+
+  Not 1: matching the ball exactly means the bat is never beaten and the
+  figure slides across the crease like it is on rails. A shade over half
+  reads as a player moving to the pitch of it and still being squared up by
+  the one that does most — which is the game the timing windows are already
+  playing.
+*/
+const REACH = 0.55;
 
 /** idle ping-pong: 0-1-2-1 reads as shifting weight; 0-1-2-0 snaps back */
 const IDLE_CYCLE = [0, 1, 2, 1];
@@ -767,16 +807,21 @@ function paintBatterSprite(
   s: Scene,
   swing: number,
   now: number,
-  action: BatterAction
+  action: BatterAction,
+  team: TeamKit,
+  line: number
 ) {
   const { w, h, cx } = s;
   const u = Math.min(h, w * 1.35);
-  const x = cx - w * 0.1;
+  /* the reach is eased in with the swing rather than applied flat, so he
+     moves to the ball as he plays it instead of teleporting onto the line
+     the instant the shot is triggered */
+  const x = cx + w * BATTER_OFFSET + line * w * REACH * ease(swing);
 
   const idle = swing <= 0;
   const frame = idle
-    ? batterFrame("idle", IDLE_CYCLE[Math.floor(now / IDLE_MS) % IDLE_CYCLE.length])
-    : batterFrame(action, swing < 0.34 ? 0 : swing < 0.68 ? 1 : 2);
+    ? batterFrame(team, "idle", IDLE_CYCLE[Math.floor(now / IDLE_MS) % IDLE_CYCLE.length])
+    : batterFrame(team, action, swing < 0.34 ? 0 : swing < 0.68 ? 1 : 2);
   if (!frame) return false;
 
   const { img, meta } = frame;
@@ -809,12 +854,20 @@ function paintBatterSprite(
   return true;
 }
 
-function paintBatterVector(ctx: CanvasRenderingContext2D, s: Scene, swing: number, now: number) {
+function paintBatterVector(
+  ctx: CanvasRenderingContext2D,
+  s: Scene,
+  swing: number,
+  now: number,
+  line: number
+) {
   const { w, h, cx } = s;
   /* scale off width as well as height: sizing purely by height renders a
      helmet a third of the screen tall on a narrow phone canvas */
   const u = Math.min(h, w * 1.35);
-  const x = cx - w * 0.1;
+  /* the same footprint the sprite takes, so the fallback swapping out for
+     the artwork mid-over does not jump across the crease */
+  const x = cx + w * BATTER_OFFSET + line * w * REACH * ease(swing);
   const headR = u * 0.053;
   const shoulderY = h * 0.685;
   /* neck length is what stops the helmet reading as a ball balanced on a box */
@@ -826,6 +879,23 @@ function paintBatterVector(ctx: CanvasRenderingContext2D, s: Scene, swing: numbe
   const tap = swing > 0 ? 0 : Math.sin(now / 260) * u * 0.006;
   const rot = -0.42 * e; /* shoulders turn through the shot */
   const padTop = shoulderY + u * 0.15;
+
+  /*
+    Mirrored about the player's own centre line, because everything below
+    this was authored as a right-hander — the grip pivots off the right
+    shoulder and batAngle measures from "pointing right".
+
+    Reflecting the finished figure is the honest version of the fix. The
+    alternative was negating a pivot, an elbow kick, a shoulder rotation and
+    an angle sweep by hand and hoping the four stayed in agreement, when the
+    one thing that has to be true is that this figure and the sprite play the
+    same way round. Only the jersey number is exempt, and it cancels the
+    reflection locally where it is drawn.
+  */
+  ctx.save();
+  ctx.translate(x, 0);
+  ctx.scale(-1, 1);
+  ctx.translate(-x, 0);
 
   /* ---- shadow ---- */
   ctx.beginPath();
@@ -895,11 +965,17 @@ function paintBatterVector(ctx: CanvasRenderingContext2D, s: Scene, swing: numbe
   ctx.fillRect(x - shoulderW * 1.2, neckY + headR * 0.42, shoulderW * 2.4, u * 0.008);
   ctx.restore();
 
+  /* the one thing that must not reflect — see the mirror above */
+  ctx.save();
+  ctx.translate(x, 0);
+  ctx.scale(-1, 1);
+  ctx.translate(-x, 0);
   ctx.fillStyle = KIT.white;
   ctx.font = Math.round(headR * 1.25) + "px var(--ckt-display), Impact, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("07", x, shoulderY + u * 0.085);
   ctx.textAlign = "left";
+  ctx.restore();
 
   /* ---- arm to the grip ---- */
   const pivotX = x + shoulderW * 0.66;
@@ -1004,6 +1080,9 @@ function paintBatterVector(ctx: CanvasRenderingContext2D, s: Scene, swing: numbe
     ctx.fill();
     outline(ctx, 2.5);
   }
+
+  /* closes the left-hander's mirror opened at the top */
+  ctx.restore();
 }
 
 /*
@@ -1089,8 +1168,7 @@ export function paintStrikerWicket(
   now: number,
   state: WicketState
 ) {
-  const { h, w, cx } = s;
-  const batterX = cx - w * 0.1;
+  const { h, cx } = s;
   const batterH = personHeight(s, h * 0.995);
 
   /*
@@ -1173,7 +1251,16 @@ export function paintStrikerWicket(
     ctx.restore();
   }
 
-  /* bails last, over the tops */
+  /*
+    Bails last, over the tops.
+
+    Length is the stump gap plus an overhang at each end, so each bail
+    visibly rests ON the two stumps it spans instead of floating between
+    them. Exactly `gap` long would meet the stump centres and leave the
+    joint looking like a butt weld; the overhang is what reads as a bail
+    sitting in a groove.
+  */
+  const bailLen = gap + rw * 2.2;
   for (const b of pose.bails) {
     ctx.save();
     ctx.translate(x + b.x, baseY + b.y);
@@ -1182,9 +1269,17 @@ export function paintStrikerWicket(
     ctx.strokeStyle = "rgba(60,40,10,0.5)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.roundRect(-unit * 0.15, -rw * 0.7, unit * 0.3, rw * 1.4, rw * 0.7);
+    ctx.roundRect(-bailLen / 2, -rw * 0.7, bailLen, rw * 1.4, rw * 0.7);
     ctx.fill();
     ctx.stroke();
+    /* the turned spigot at each end, the detail that stops a bail reading
+       as a plain lozenge at this size */
+    ctx.fillStyle = "#e2cf99";
+    for (const sx of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(sx * bailLen * 0.34, 0, rw * 0.34, rw * 0.72, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
   }
 }
@@ -1437,45 +1532,28 @@ export function paintBigScreen(
   /*
     --- the stage the words stand on ---
 
-    A flat panel with scanlines read as a slide. What the reference does is
-    light the middle and throw rays out of it, so the type looks lit from
-    behind rather than printed on a dark rectangle. Three cheap layers:
-    a radial wash, a fan of rays, and confetti.
+    Flat and dark, deliberately.
 
-    The ramp is neutral rather than pure black at every stop. A flat #000
-    panel kills the backlight, and the burst is the only thing separating
-    white type from the rectangle it sits on — the centre has to lift or
-    the words go back to being printed on a dark board. Black at the edges,
-    charcoal in the middle, and no hue anywhere: a grey ramp with any blue
-    left in it reads as a dimmed blue screen rather than a black one.
+    This carried a radial wash and a slowly rotating fan of sixteen rays,
+    on the theory that the type should look lit from behind rather than
+    printed on a rectangle. On the board at its real size that reads as
+    pattern, not backlight: the rays are wide enough at the rim to cross
+    the text at an angle and the whole panel competes with the one thing it
+    exists to display, which is a line of commentary that changes every
+    ball.
+
+    A real stadium LED is black when it is not lit. The words are white
+    display type at 14% of the board height with relief under them — they
+    have all the separation they need from black, and none of the rays'
+    cost. The confetti below stays, because that fires for about a second
+    when something is worth celebrating and is the whole point when it does.
+
+    Left as a fill rather than deleted outright so the panel's own rounding
+    and clip still apply, and so this stays the single place the screen's
+    background is decided.
   */
-  const mx = cx;
-  const my = by + bh * 0.46;
-
-  const wash = ctx.createRadialGradient(mx, my, 0, mx, my, bw * 0.62);
-  wash.addColorStop(0, "#2e2e2e");
-  wash.addColorStop(0.55, "#141414");
-  wash.addColorStop(1, "#000000");
-  ctx.fillStyle = wash;
+  ctx.fillStyle = "#0d0d0d";
   ctx.fillRect(bx, by, bw, bh);
-
-  /* the rays. Rotating slowly so the board is never quite static, at a
-     speed low enough that it reads as shimmer rather than as spin. */
-  ctx.save();
-  ctx.translate(mx, my);
-  ctx.rotate((now / 24000) % (Math.PI * 2));
-  ctx.globalAlpha = 0.16;
-  for (let i = 0; i < 16; i++) {
-    const a = (i / 16) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(Math.cos(a) * bw, Math.sin(a) * bw);
-    ctx.lineTo(Math.cos(a + 0.11) * bw, Math.sin(a + 0.11) * bw);
-    ctx.closePath();
-    ctx.fillStyle = i % 2 ? "#6e6e6e" : "#a3a3a3";
-    ctx.fill();
-  }
-  ctx.restore();
 
   /* confetti — only while something is being celebrated */
   if (b.shout) {

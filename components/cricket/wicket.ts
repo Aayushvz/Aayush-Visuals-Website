@@ -43,6 +43,23 @@ const FALL_MS = 900;
 type Bail = { x: number; y: number; rot: number; gone: boolean };
 
 /*
+  Where a bail rests, as a fraction of stump height either side of middle.
+
+  A bail BRIDGES two stumps — it lies in the grooves cut into the tops of
+  the pair it spans, so its centre is at half the stump spacing, not at a
+  stump. The painter puts the three stumps at -0.3, 0 and +0.3 of this same
+  unit, which is what makes 0.15 the midpoint of each pair.
+
+  This was 0.34, which is outside the outer stump. Both bails balanced on
+  the outer two and overhung into thin air, the middle stump was left bare,
+  and the outer pair read as taller than the one between them.
+*/
+const BAIL_X = 0.15;
+/* the height the pair rest at: a touch above the stump tops, so the bail
+   sits IN the groove rather than floating over it */
+const BAIL_Y = -1.02;
+
+/*
   Where each piece is at `t` seconds after the strike.
 
   Returned as plain numbers so the painter stays a painter: it receives
@@ -67,7 +84,7 @@ export function wicketPose(state: WicketState, now: number, unit: number) {
   */
   const bails: Bail[] = [-1, 1].map((side, i) => {
     if (standing) {
-      return { x: side * unit * 0.34, y: -unit * 1.02, rot: 0, gone: false };
+      return { x: side * unit * BAIL_X, y: unit * BAIL_Y, rot: 0, gone: false };
     }
     /* the far bail from the impact leaves marginally later and slower */
     const lag = side * dir > 0 ? 0 : 0.035;
@@ -76,8 +93,8 @@ export function wicketPose(state: WicketState, now: number, unit: number) {
     const vx = dir * speed + side * unit * 0.7;
     const vy = -unit * 3.1;
     return {
-      x: side * unit * 0.34 + vx * s,
-      y: -unit * 1.02 + vy * s + 0.5 * g * s * s,
+      x: side * unit * BAIL_X + vx * s,
+      y: unit * BAIL_Y + vy * s + 0.5 * g * s * s,
       /* spin scales with how hard it left, so the near bail tumbles faster */
       rot: s * (side * dir > 0 ? 15 : 11) * (dir >= 0 ? 1 : -1),
       gone: s > 0,

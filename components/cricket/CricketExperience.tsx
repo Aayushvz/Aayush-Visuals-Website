@@ -7,6 +7,7 @@ import StadiumBackdrop from "./StadiumBackdrop";
 import TeamSelect from "./TeamSelect";
 import { isSkippable, type Stage } from "./flow";
 import { opponentOf, teamVars, type Team } from "./teams";
+import { preloadBatter } from "./batterSprites";
 import { preloadBowler } from "./bowlerSprites";
 import { preloadFielder } from "./fielderSprites";
 import { unlockAudio } from "./sound";
@@ -104,10 +105,12 @@ export default function CricketExperience() {
         crease. Only the picked team's frames are fetched.
       */
       /* the FIELDING side is the opposition, so that is the kit the
-         bowler and the ring need — not the one just chosen */
+         bowler and the ring need — not the one just chosen. The striker is
+         the other way round: he is the side just picked. */
       const other = opponentOf(t.id).id;
       preloadBowler(other);
       preloadFielder(other);
+      preloadBatter(t.id);
       try {
         localStorage.setItem(STORE_KEY, t.id);
       } catch {
@@ -162,6 +165,7 @@ export default function CricketExperience() {
              re-running that from a prop change would be a second code path
              for something the key already does correctly */
           key={team?.id ?? "default"}
+          team={team ? team.id : "falcons"}
           opponent={team ? opponentOf(team.id).id : "panthers"}
           onSwitchTeam={() => advance("select")}
         />

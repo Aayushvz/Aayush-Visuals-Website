@@ -1,8 +1,16 @@
 /*
-  The batter's artwork: twelve frames cut from the approved character sheet.
+  The batter's artwork: twelve frames cut from the approved character sheet,
+  in each side's kit.
 
   Frames are the original pixels, not a redraw, so every pose is the same
-  character by construction — nothing here can drift from the reference.
+  character by construction — nothing here can drift from the reference. The
+  Panthers set is generated from the Falcons one by a measured hue rotation
+  (scripts/recolour-batter.mjs), the same arrangement the bowler, keeper and
+  fielder use, so the geometry is identical down to the pixel and only the
+  colours differ.
+
+  That is why the frame metadata below is NOT duplicated per team: `w`, `h`
+  and `ax` describe the drawing, and recolouring does not move anything.
 
   Two numbers per frame matter for placement:
 
@@ -17,7 +25,14 @@
     the feet keeps the player planted. Measured from the alpha channel of the
     bottom 7% of each frame; see the drive-1 value (0.67) for how far off
     centre this gets.
+
+  `ax` also says which way the player bats. Every value here is at or above
+  0.5 — the bat hangs off the LEFT of the feet in every shot — which makes
+  this a left-hander's sheet. paintBatter stands him accordingly; see the
+  note there.
 */
+
+import { kitFrame, kitReady, preloadKit, type TeamKit } from "./spriteKit";
 
 export type BatterAction = "idle" | "defend" | "six" | "drive";
 
@@ -41,35 +56,20 @@ export const BATTER_FRAMES: Record<string, FrameMeta> = {
   "drive-2": { w: 222, h: 309, ax: 0.536 },
 };
 
-const KEYS = Object.keys(BATTER_FRAMES);
+export const BATTER_POSES = Object.keys(BATTER_FRAMES);
 
-const images = new Map<string, HTMLImageElement>();
-let started = false;
-
-/** Kick off loading. Safe to call repeatedly; only the first call does work. */
-export function preloadBatter() {
-  if (started || typeof window === "undefined") return;
-  started = true;
-  for (const k of KEYS) {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = `/cricket/batter/${k}.webp`;
-    images.set(k, img);
-  }
+/** Kick off loading for one side. Safe to call repeatedly. */
+export function preloadBatter(team: TeamKit) {
+  preloadKit(team, "batter", BATTER_POSES);
 }
 
 /** A frame, or null while it's still loading — callers fall back to the
     procedural batter so the crease is never empty on the first ball. */
-export function batterFrame(action: BatterAction, index: number) {
-  const key = `${action}-${Math.max(0, Math.min(2, index))}`;
-  const img = images.get(key);
-  if (!img || !img.complete || img.naturalWidth === 0) return null;
-  return { img, meta: BATTER_FRAMES[key] };
+export function batterFrame(team: TeamKit, action: BatterAction, index: number) {
+  const pose = `${action}-${Math.max(0, Math.min(2, index))}`;
+  return kitFrame(team, "batter", pose, BATTER_FRAMES[pose]);
 }
 
-export function batterReady() {
-  return KEYS.every((k) => {
-    const i = images.get(k);
-    return !!i && i.complete && i.naturalWidth > 0;
-  });
+export function batterReady(team: TeamKit) {
+  return kitReady(team, "batter", BATTER_POSES);
 }
