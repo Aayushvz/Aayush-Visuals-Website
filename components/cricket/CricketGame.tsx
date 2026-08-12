@@ -590,17 +590,34 @@ export default function CricketGame({
     the studio line beneath; between deliveries it idles on whatever the
     commentary is currently saying.
   */
+  /*
+    The board goes dark behind a card.
+
+    `idle` and `over` are the two phases that put a full dialog over the
+    pitch, and the board's idle line is the same sentence the intro card
+    leads with — so the screen said "Six balls. One innings." twice, once
+    on the stadium screen and once on the panel covering it. A real board
+    is not showing copy while play is stopped either; it is off.
+
+    Blanked rather than skipped so the panel, its casing and the gantry
+    still paint. An unlit screen is part of the stadium; a missing one is
+    a hole in it.
+  */
+  const cardUp = phase === "idle" || phase === "over";
+
   boardRef.current = {
-    shout: shout ? shout.headline : null,
-    quote: shout
-      ? shout.reward.line
-      : last
-        ? last.commentary
-        : phase === "flight"
-          ? "Watch it."
-          : phase === "runup"
-            ? "In his run-up."
-            : "Six balls. One innings.",
+    shout: cardUp ? null : shout ? shout.headline : null,
+    quote: cardUp
+      ? ""
+      : shout
+        ? shout.reward.line
+        : last
+          ? last.commentary
+          : phase === "flight"
+            ? "Watch it."
+            : phase === "runup"
+              ? "In his run-up."
+              : "Six balls. One innings.",
   };
 
   const delivery = OVER[ballIdx];
