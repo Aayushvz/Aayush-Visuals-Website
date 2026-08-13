@@ -73,8 +73,12 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     ],
   },
   layover: {
+    categories: ["Product Design", "UI/UX", "Brand Design"],
+    tags: ["app", "booking", "travel", "mobile", "prototyping", "airport", "identity"],
+  },
+  "meal-maestro": {
     categories: ["Product Design", "UI/UX"],
-    tags: ["app", "booking", "travel", "mobile", "prototyping"],
+    tags: ["app", "food", "recipes", "meal planning", "mobile", "gdg", "hackathon"],
   },
   yantra: {
     categories: ["UI/UX"],
@@ -89,8 +93,10 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     tags: ["event", "website", "framer", "startup", "founders"],
   },
   posterfolio: {
-    categories: ["Graphic Design"],
-    tags: ["poster", "print", "typography", "editorial", "series"],
+    /* "Graphic Design" was not one of WORK_CATEGORIES, so this matched no
+       chip and the project was reachable only under All */
+    categories: ["Posters", "Social Media Creatives"],
+    tags: ["poster", "print", "typography", "editorial", "series", "graphic design", "social"],
   },
   gravitas: {
     categories: ["Brand Design", "UI/UX"],
@@ -120,29 +126,63 @@ const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   wordmark: p.logoText,
 });
 
+/*
+  Running order, set by hand.
+
+  The two sections are ordered independently because they answer different
+  questions: the grid leads with the work that should be seen first, the
+  reading list leads with the work that rewards being read. Anything not
+  named here still appears, appended in PROJECTS order, so a newly added
+  project is never silently dropped from a section.
+*/
+const PROJECT_ORDER = [
+  "mike-tyson-invitational",
+  "cpgrams",
+  "layover",
+  "gravitas",
+  "meal-maestro",
+  "elevation-capital",
+  "posterfolio",
+  "dropby",
+  "riviera",
+  "yantra",
+] as const;
+
+const CASE_STUDY_ORDER = [
+  "mike-tyson-invitational",
+  "cpgrams",
+  "layover",
+  "meal-maestro",
+  "dropby",
+  "gravitas",
+] as const;
+
+/* unlisted ids sort to the end; Array#sort is stable, so they keep their
+   PROJECTS order relative to each other */
+const byOrder = (ids: readonly string[]) => (a: WorkItem, b: WorkItem) => {
+  const rank = (id: string) => {
+    const i = ids.indexOf(id);
+    return i === -1 ? ids.length : i;
+  };
+  return rank(a.id) - rank(b.id);
+};
+
 /* The filterable grid, and it lists EVERY project without exception: this
    section is the complete body of work, so anything added to PROJECTS shows
    up here automatically and nothing has to be opted in.
 
-   Deep dives lead it. They are the work that rewards actually being read, so
-   burying them under whichever project happened to ship last is the wrong
-   default. Order within each group is preserved, and every deep dive carries
-   the "Case Study" chip so the filter can still isolate them.
-
    Case studies also appear in their own section below (see CASE_STUDIES).
    That repetition is deliberate: this grid answers "what has he made", the
-   section below answers "what can I read in depth". */
-export const WORKS: WorkItem[] = [
-  ...PROJECTS.filter(isDeepDive),
-  ...PROJECTS.filter((p) => !isDeepDive(p)),
-].map(toWorkItem);
+   section below answers "what can I read in depth". Every deep dive carries
+   the "Case Study" chip so the filter can isolate them here too. */
+export const WORKS: WorkItem[] = PROJECTS.map(toWorkItem).sort(byOrder(PROJECT_ORDER));
 
 /* Long-form process work, listed in its own section below Projects.
    `alsoCaseStudy` opts a project in here while leaving it in the grid above,
    for work that is both a shipped product and a deep dive. */
-export const CASE_STUDIES: WorkItem[] = PROJECTS.filter(
-  (p) => p.kind === "case-study" || p.alsoCaseStudy
-).map(toWorkItem);
+export const CASE_STUDIES: WorkItem[] = PROJECTS.filter(isDeepDive)
+  .map(toWorkItem)
+  .sort(byOrder(CASE_STUDY_ORDER));
 
 /** shared filter predicate so search + category always agree */
 export function filterWorks(items: WorkItem[], category: string, query: string) {

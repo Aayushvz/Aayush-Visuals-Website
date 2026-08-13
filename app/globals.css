@@ -10294,7 +10294,12 @@ html.contact-page-active .themeSwitch {
   transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease;
 }
 
-.worksChip:hover {
+/* Scoped away from the selected chip on purpose. This rule used to apply to
+   every chip, and because it out-specifies .worksChip--active it repainted
+   the selected chip's label in var(--ink) — the exact value of its own
+   background — so hovering the active filter made its text vanish into the
+   black. */
+.worksChip:not(.worksChip--active):hover {
   color: var(--ink);
   border-color: rgba(31, 31, 31, 0.16);
 }
@@ -10302,6 +10307,14 @@ html.contact-page-active .themeSwitch {
 .worksChip--active {
   background: var(--ink);
   border-color: var(--ink);
+  color: #fff;
+}
+
+/* the selected chip still needs a hover state, so it lifts off black
+   slightly and keeps its label white */
+.worksChip--active:hover {
+  background: #333333;
+  border-color: #333333;
   color: #fff;
 }
 
