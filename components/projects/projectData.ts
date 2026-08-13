@@ -1208,7 +1208,7 @@ export const PROJECTS: Project[] = [
     role: "Product Design · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
     description:
-      "CPGRAMS is how a citizen of India formally complains to their own government: 20 lakh grievances a year across 90+ ministries, filed through a 15-field form in English or Hindi. This is a conversational layer over it. You speak your problem in your own language and the chatbot files it, routed and categorised, without you ever seeing the form.",
+      "CPGRAMS is how a citizen of India formally complains to their own government: 20 lakh grievances a year across 90+ ministries, filed through a 15-field form that in practice only works in English or Hindi. This is a conversational layer over it, and it speaks all 22 scheduled Indian languages. You describe your problem out loud in whichever one you think in, and the chatbot files it, routed and categorised, without you ever seeing the form.",
     extraFacts: [
       ["Client", "DARPG, Government of India"],
       ["Delivered with", "KPMG India"],
