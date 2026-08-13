@@ -1208,7 +1208,7 @@ export const PROJECTS: Project[] = [
     role: "Product Design · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
     description:
-      "CPGRAMS is how a citizen of India formally complains to their own government. It handles over 20 lakh grievances a year across 90+ ministries, and until now it did it through a 15-field form in English or Hindi. This is a conversational layer over that system: you speak your problem in your own language, and a chatbot turns it into a correctly routed, correctly categorised grievance without you ever seeing the form.",
+      "CPGRAMS is how a citizen of India formally complains to their own government: 20 lakh grievances a year across 90+ ministries, filed through a 15-field form in English or Hindi. This is a conversational layer over it. You speak your problem in your own language and the chatbot files it, routed and categorised, without you ever seeing the form.",
     extraFacts: [
       ["Client", "DARPG, Government of India"],
       ["Delivered with", "KPMG India"],
@@ -1233,7 +1233,7 @@ export const PROJECTS: Project[] = [
               {
                 label: "What it is",
                 wide: true,
-                body: "A **conversational layer** over India's national grievance system. You describe your complaint out loud in any of **22 languages**, and a chatbot files it — categorised, routed and legally identical to a form submission — without you ever seeing the form.",
+                body: "A **conversational layer** over India's national grievance system. Describe your complaint out loud in any of **22 languages** and the chatbot files it: categorised, routed and legally identical to a form submission.",
               },
               {
                 label: "The problem",
@@ -1245,15 +1245,15 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "Key decisions",
-                body: "Never ask for the ministry — **infer it**. Detect the language instead of offering a list. **Show the interpretation before filing anything.**",
+                body: "**Infer the ministry**, never ask for it. Detect the language instead of offering a list. **Show the interpretation before filing.**",
               },
               {
                 label: "Outcome",
-                body: "Live at cpgramsaichatbot.com. The qualification for complaining to your government dropped from literacy plus filing knowledge to **being able to speak**.",
+                body: "Live at cpgramsaichatbot.com. Filing now asks for **speech**, not literacy plus filing knowledge.",
               },
               {
                 label: "What I learned",
-                body: "Accessibility was not a layer on this product, it **was** the product. And automation that hides its reasoning is **exposure, not convenience**.",
+                body: "Accessibility **was** the product, not a layer on it. Automation that hides its reasoning is **exposure, not convenience**.",
               },
             ],
           },
@@ -1266,9 +1266,35 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "CPGRAMS is a constitutional-grade commitment, not a startup idea. Any citizen can lodge a grievance against any central department and an officer must answer it. It runs across **90+ ministries**, handles **20 lakh grievances a year**, and disposes of **93%** of them. The machinery works.",
-              "The door does not. To reach it you fill a **15-field form**, and the second field asks which ministry and category your problem belongs to — a **filing decision**, demanded before you have described anything.",
+              "CPGRAMS is a statutory commitment. Any citizen can lodge a grievance against any central department and an officer must answer it. **90+ ministries**, **20 lakh grievances a year**, **93%** disposed. The machinery works.",
+              "The door does not. Reaching it means a **15-field form** whose second field asks which ministry and category your problem belongs to: a **filing decision**, demanded before you have described anything.",
             ],
+          },
+          {
+            kind: "flow",
+            steps: [
+              { label: "Open the portal", sub: ["Desktop-first", "English or Hindi"] },
+              { label: "Register", sub: ["Mobile number or email", "Before anything can be described"] },
+              {
+                label: "Pick the ministry",
+                decision: true,
+                sub: ["One of 90+", "Asked before the problem is stated"],
+              },
+              {
+                label: "Pick the department and category",
+                decision: true,
+                sub: ["The portal's taxonomy", "Not the citizen's words"],
+              },
+              { label: "Describe the grievance", sub: ["In writing", "In formal language"] },
+              { label: "Attach documents", sub: ["Which ones is never said up front"] },
+              { label: "Submit", sub: ["Clear a CAPTCHA", "Beat the session timeout"] },
+              {
+                label: "Receive a registration number",
+                sub: ["Track the status with it", "An officer must reply in 30 to 60 days"],
+              },
+            ],
+            caption:
+              "Eight steps, and the two a citizen is least equipped for sit at **three and four**. The classification is demanded **before the problem is described**, which is the wrong order for anyone who does not already know how government files things.",
           },
           {
             kind: "stats",
@@ -1287,7 +1313,7 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "Built for a machine most users do not own",
-                body: "Desktop-first, in a country that is **three quarters mobile**, with a **CAPTCHA** that defeats the age group filing most grievances.",
+                body: "Desktop-first in a country that is **three quarters mobile**, with a **CAPTCHA** that defeats the age group filing most grievances.",
               },
               {
                 label: "Two languages out of twenty-two",
@@ -1307,7 +1333,7 @@ export const PROJECTS: Project[] = [
               { label: "Of rural India uses the internet regularly", value: 31, display: "31%", tone: "bad" },
             ],
             caption:
-              "The first number is the whole indictment: **six in ten people who start a grievance never finish it**, so the state never hears from them at all.",
+              "**Six in ten people who start a grievance never finish it**, so the state never hears from them at all.",
           },
           {
             kind: "coverage",
@@ -1333,7 +1359,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "That moves the work from redesigning the portal to building a **translation layer** over it. Nothing about the government changes — same ministries, same categories, same **statutory clock**. What changes is **who has to understand any of it**.",
+              "That moves the work from redesigning the portal to building a **translation layer** over it. Same ministries, same categories, same **statutory clock**. The complexity does not disappear, it **moves out of the citizen and into the system**, which is the one place that already knows how government is organised.",
             ],
           },
           {
@@ -1362,7 +1388,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "The same grievance, the same destination, the same **legal weight**. The difference is **who carries the knowledge** of how government is organised, and the redesign moves that from the citizen to the software.",
+              "Same grievance, same destination, same **legal weight**. The redesign moves the knowledge of how government is organised **from the citizen to the software**.",
           },
         ],
       },
@@ -1373,7 +1399,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Two fixed constraints: the government's **taxonomy could not change**, and the audience **could not be assumed to read**. Together they rule out the obvious move — a cleaner form is still a **reading test with a filing test attached**.",
+              "Two fixed constraints: the government's **taxonomy could not change**, and the audience **could not be assumed to read**. Together they rule out the obvious move, since a cleaner form is still a **reading test with a filing test attached**.",
             ],
           },
           {
@@ -1405,7 +1431,7 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 label: "Move the cognitive load, do not reduce it",
-                body: "The **cognitive load** is real. It can only be carried by the **software instead of the citizen**.",
+                body: "The **cognitive load** is real. It can only move from the citizen to the **software**.",
               },
               {
                 label: "Progressive disclosure over a single page",
@@ -1434,7 +1460,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "You do not wireframe a chatbot the way you wireframe a page. There is no fixed layout, only a **sequence of states** and what each one is allowed to ask for. Four **greyboxes** settled it.",
+              "You do not wireframe a chatbot the way you wireframe a page. There is no fixed layout, only a **sequence of states** and what each one may ask for. Four **greyboxes** settled it.",
             ],
           },
           {
@@ -1462,7 +1488,44 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "Redrawn at **low fidelity**. Greyboxes keep the argument on **structure**, which is the only thing these were ever deciding.",
+              "Low fidelity on purpose. Greyboxes keep the argument on **structure**, the only thing these were deciding.",
+          },
+        ],
+      },
+      {
+        name: "layout",
+        heading: "Where everything sits, and why",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The shell is deliberately the one people already know from government portals: a rail on the left, an account control top right, an input along the bottom. **Recognition was worth more than novelty**, because the thing this has to overwrite is the visitor's last experience of a .gov.in site. Inside that familiar frame, only one element is allowed to be loud.",
+            ],
+          },
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "Centre: press to speak",
+                body: "The primary action takes the **optical centre and the largest target on the page**. A first-time user should not have to look for it, and someone who cannot read the label can still find a control that size in the middle of the screen.",
+              },
+              {
+                label: "Bottom: the text input",
+                body: "Where every messaging app puts it, and where the thumb already goes. Keeping it visible means **typing is never a hidden fallback**, but it sits below the microphone in the visual order because voice is the priority.",
+              },
+              {
+                label: "Left rail: new chat and history",
+                body: "First in the scanning order, carrying the two things a returning user needs. It also does the **recovery** work: on 2G a dropped session is routine, and a grievance in progress has to still be there when the page comes back.",
+              },
+              {
+                label: "Top right: profile and account",
+                body: "The conventional corner, deliberately **out of the task path**. Identity is something the system needs, not the person describing a problem, so it never interrupts the flow.",
+              },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "One screen, **one obvious action**. Everything else is chrome that has to earn its place.",
           },
         ],
       },
@@ -1473,7 +1536,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "A chat window is still an interface, and to somebody who has never used one it is still an exam. So the product has a face. **Didi means elder sister** — the person you already ask for help with a form. She is a government worker in a saree with a departmental lanyard, **lip-synced** to the spoken reply.",
+              "A chat window is still an interface, and to somebody who has never used one it is still an exam. So the product has a face. **Didi means elder sister**, the person you already ask for help with a form. She is a government worker in a saree with a departmental lanyard, **lip-synced** to the spoken reply.",
             ],
           },
           {
@@ -1486,7 +1549,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/mascot-v4.webp", label: "Direction 4", alt: "A fourth early mascot exploration for CPGRAMS." },
             ],
             caption:
-              "Four directions before the character settled. The test each one had to pass: would a first-time filer read her as **staff who works here**, or as a brand character?",
+              "Four directions before she settled. The test each had to pass: does a first-time filer read her as **staff who works here**, or as a brand character?",
           },
           {
             kind: "gallery",
@@ -1501,7 +1564,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/mascot-g.webp", label: "Closing", alt: "Samadhan Didi in a closing pose." },
             ],
             caption:
-              "The shipped set. Built as **states, not one illustration**: a guide holding a single expression through a complaint about a missing pension reads as indifferent.",
+              "The shipped set, built as **states rather than one illustration**. A guide holding a single expression through a complaint about a missing pension reads as indifferent.",
           },
         ],
       },
@@ -1512,7 +1575,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Seen once, the **first time a citizen ever opens the chatbot**. Everything after it assumes the person knows they can press a button and speak, and no government website has ever suggested that.",
+              "Seen once, the **first time a citizen opens the chatbot**. Everything after it assumes you know you can press a button and speak, and no government website has ever suggested that.",
             ],
           },
           {
@@ -1528,8 +1591,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The tutorial does not describe the interface, **it points at it** — **spotlight masking** dims everything but the control under discussion. The microphone gets the plainest sentence in the product: press it and speak in your language.",
-              "**Skip sits on the first frame**, not the last, because **onboarding should never tax the confident user to reassure the uncertain one**.",
+              "The tutorial **points at the interface** rather than describing it. **Spotlight masking** dims everything but the control being explained, and the microphone gets the plainest sentence in the product: press it and speak in your language.",
+              "**Skip sits on the first frame**, not the last. Onboarding should not tax the confident user to reassure the uncertain one.",
             ],
           },
           {
@@ -1545,7 +1608,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "On the phone she drops to a **corner presence**. At **402px** a full figure covers the control she is pointing at, which **turns the guide into the obstacle**.",
+              "On the phone she drops to a **corner presence**. At **402px** a full figure covers the control she is pointing at, turning the guide into the obstacle.",
             ],
           },
         ],
@@ -1557,7 +1620,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "For a quarter of the country, **reading and writing is the barrier**. Voice is not a convenience here, it is the **accessibility strategy** — the typed flow is the alternative.",
+              "For a quarter of the country, **reading and writing is the barrier**. Voice is the **accessibility strategy** here, not a convenience. Typing is the alternative.",
             ],
           },
           {
@@ -1567,7 +1630,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/voice-02.webp", label: "02 Press to speak", alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone." },
             ],
             body: [
-              "The microphone takes the **centre and the weight** — no language picker, no category dropdown, because each is a **decision demanded before you have said anything**. A single **press starts recording**: hold-to-record fails for **tremor and arthritis** in the 60-plus group that files the most grievances here.",
+              "**Entry.** The microphone holds the centre and the weight: no language picker, no category dropdown, since both demand a decision before you have said anything. The interface opens in English and waits, rather than asking who you are first. A single **press starts recording**, because hold-to-record fails for **tremor and arthritis** in the 60-plus group that files the most grievances here.",
             ],
           },
           {
@@ -1577,7 +1640,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/voice-04.webp", label: "04 Audio kept", alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player." },
             ],
             body: [
-              "A **live waveform** proves the system is listening — without **real-time feedback** an unsure speaker stops mid-sentence to check. The audio then **persists in the thread** instead of being discarded: it is the one artefact in this flow the software cannot have got wrong.",
+              "**Capture.** A **live waveform** proves the system is listening, and it is placed where the person is already looking, on the control they just pressed. Without that feedback an unsure speaker stops mid-sentence to check. The audio then **stays in the thread** rather than being discarded, since it is the one artefact here the software cannot have got wrong.",
             ],
           },
           {
@@ -1587,7 +1650,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/voice-06.webp", label: "06 Language detected", alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface." },
             ],
             body: [
-              "Transcription sits **beside the audio**, which makes this the **first point of error recovery** — catching a misheard place name here costs nothing next to catching it after routing. Language is **detected, not selected**: a picker is a **reading test** given to people who may not read.",
+              "**Transcription, then language.** Speech appears as text **in real time**, beside the audio it came from, which makes this the **first point of error recovery**: catching a misheard place name here costs nothing next to catching it after routing. Corrections go back through either input, voice or keyboard, so fixing a mistake never demands the skill the person came without. Language is **detected from what was said, not selected from a list**, and the whole interface switches to it. Speak Tamil and the product becomes Tamil. A picker would have been a reading test handed to people who may not read.",
             ],
           },
           {
@@ -1597,7 +1660,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/voice-08.webp", label: "08 One question", alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance." },
             ],
             body: [
-              "Every reply is **playable as well as readable** — voice in with text out abandons the user at the half carrying the answer. What cannot be inferred arrives as **one question at a time**: **progressive disclosure** collecting the same fifteen fields without ever showing a form.",
+              "**Understanding.** Every reply is **playable as well as readable**, since voice in with text out abandons the user at the half carrying the answer. Behind the reply the system is working out the nature of the problem, the department that owns it and the category it files under. What it still cannot infer arrives as **one question at a time**, in the conversation rather than in a second form, so working memory stays free for the answer instead of the interface.",
             ],
           },
           {
@@ -1607,7 +1670,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/voice-10.webp", label: "10 Review", alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control." },
             ],
             body: [
-              "**Ministry, category, jurisdiction and urgency** are inferred — the reframe paying out. Then the review screen, which the whole flow exists to reach: everything assumed is shown **before anything is committed**, because **auto-filing a legal document unseen** is a liability with the citizen's name on it. This is the **consent surface**.",
+              "**Summary.** **Ministry, category, jurisdiction and urgency** come out of what was said, and documents are asked for only when the grievance actually needs one, at the moment it is needed. Everything then returns as a **short summary** the citizen checks before anything is sent: the interpretation, in their own language, in one card. **Auto-filing a legal document unseen** is a liability with the citizen's name on it, so this is the **consent surface** and the flow's real destination.",
             ],
           },
           {
@@ -1617,7 +1680,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/voice-12.webp", label: "12 Filed", alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier." },
             ],
             body: [
-              "When routing is wrong, **escalation to the Central Authority is one tap**. The system is allowed to be wrong; it is not allowed to be wrong **with no exit**. It closes on the **same registration number** the portal issues, carrying the same statutory clock.",
+              "**Submission.** Confirming sends the structured grievance straight to the department that owns it, with no portal navigation in between. When routing is wrong, **escalation to the Central Authority is one tap**: the system is allowed to be wrong, not allowed to be wrong **with no exit**. It closes on the **same registration number** the portal issues, which is also how the citizen tracks it afterwards, carrying the same 30 to 60 day clock.",
             ],
           },
           {
@@ -1634,7 +1697,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Voice matters **more** on the phone. This is the device the low-literacy user actually owns, often on **2G**, so the microphone stays in **thumb reach** and the review card takes the full screen.",
+              "The phone runs the same sequence, re-laid rather than reduced. This is the device the low-literacy user actually owns, often on **2G**, so the **left rail collapses into a sheet** and gives its space back to the conversation, the microphone drops into the **thumb arc** instead of the optical centre, and the summary takes the **full screen** so nothing it is asking consent for sits below the fold.",
             ],
           },
         ],
@@ -1656,7 +1719,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-02.webp", label: "02 Describe", alt: "A typed grievance in the CPGRAMS chat written in plain conversational language." },
             ],
             body: [
-              "It opens with the **input focused and nothing else required**. The portal's first question was which of ninety ministries owns your problem; this one's is what happened. The grievance is typed in **plain language**, and everything the form demanded up front is **extracted from that one sentence**.",
+              "It opens with the **input focused and nothing else required**. The portal's first question was which of ninety ministries owns your problem. This one's is what happened, and everything the form demanded up front is **extracted from that answer**.",
             ],
           },
           {
@@ -1666,7 +1729,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-04.webp", label: "04 One question", alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow." },
             ],
             body: [
-              "The reply **restates the problem before acting on it** — the earliest and cheapest **error recovery** there is, and a signal of **comprehension** rather than keyword matching. Missing details then arrive as **sequential questions**: the fifteen fields still get filled, they just never appear as a form.",
+              "The reply **restates the problem before acting on it**, the cheapest **error recovery** there is and a signal of comprehension rather than keyword matching. Missing details arrive as **sequential questions**. The fifteen fields still get filled, they just never appear as a form.",
             ],
           },
           {
@@ -1676,7 +1739,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-06.webp", label: "06 Documents", alt: "The CPGRAMS chatbot requesting a supporting document within the conversation." },
             ],
             body: [
-              "A **closed set gets options**, not an open field — typing an answer the system already has the list of is a spelling test with a routing failure attached. Attachments are requested at the **point of relevance**: a documents checklist on screen one is a reason to leave.",
+              "A **closed set gets options**, not an open field. Typing an answer the system already holds the list of is a spelling test with a routing failure attached. Documents are requested **in the conversation, at the point they are needed**, and only when the grievance genuinely needs one. A checklist of paperwork on screen one is a reason to leave.",
             ],
           },
           {
@@ -1686,7 +1749,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-08.webp", label: "08 Classified", alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance." },
             ],
             body: [
-              "Conversations **persist in the left rail**, because on 2G a **session timeout** is routine and a half-written grievance lost is usually that grievance lost for good. **Classification happens quietly** in the background — the highest-friction field on the original form, resolved without ever being asked.",
+              "Conversations **persist in the left rail**, because on 2G a **session timeout** is routine and a half-written grievance lost is usually that grievance lost for good. **Classification happens quietly** in the background: the highest-friction field on the original form, resolved without being asked.",
             ],
           },
           {
@@ -1696,7 +1759,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-10.webp", label: "10 Assembled", alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details." },
             ],
             body: [
-              "**Jurisdiction** resolves the same way, from what was described rather than a dropdown of states — the part the machinery cares about and the citizen has no way to get right. Then everything scattered across the conversation returns as the **single document that will be filed**.",
+              "**Jurisdiction** resolves the same way, from what was described rather than a dropdown of states. Then everything scattered across the conversation returns as the **single document that will be filed**.",
             ],
           },
           {
@@ -1706,7 +1769,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-12.webp", label: "12 Submit", alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link." },
             ],
             body: [
-              "The typed flow ends at the **same consent surface**. One architecture, two inputs — the review screen is not a voice feature, it is where **software stops acting on somebody's behalf without showing them what it decided**. Submit, start again, or **escalate**: three exits, none of them the fifteen fields again.",
+              "The typed flow ends at the **same consent surface**. One architecture, two inputs: the review screen is not a voice feature, it is where **software stops acting on somebody's behalf without showing what it decided**. Submit, start again, or **escalate**. Three exits, none of them the fifteen fields again.",
             ],
           },
           {
@@ -1715,7 +1778,7 @@ export const PROJECTS: Project[] = [
               { src: "/projects/cpgrams/text-13.webp", label: "13 Filed", alt: "The CPGRAMS confirmation screen with a grievance registration identifier." },
             ],
             body: [
-              "The same **registration number**, the same **30 to 60 day** obligation, the same escalation path. The destination never changed — only the qualification required to reach it.",
+              "The same **registration number**, the same **30 to 60 day** obligation, the same escalation path. Only the qualification required to reach it changed.",
             ],
           },
           {
@@ -1732,7 +1795,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "On the phone the review card becomes a **full screen** — the one moment where something **below the fold** would be a real failure rather than an inconvenience.",
+              "Typed or spoken, the phone layout is the same: rail in a sheet, input at the thumb, summary **full screen**. That last one is the only moment in the product where something below the fold would be a real failure rather than an inconvenience.",
             ],
           },
         ],
@@ -1747,7 +1810,7 @@ export const PROJECTS: Project[] = [
               {
                 tag: "Classification",
                 label: "Never ask for the ministry",
-                body: "The **highest-friction field** on the original portal and the one a citizen is least equipped to answer. Inferred from what they said, confirmed at review, **never asked**.",
+                body: "The **highest-friction field** on the portal and the one a citizen is least equipped to answer. Inferred from what they said, confirmed at review, **never asked**.",
               },
               {
                 tag: "Language",
@@ -1757,7 +1820,7 @@ export const PROJECTS: Project[] = [
               {
                 tag: "Parity",
                 label: "Speak every answer, not just accept speech",
-                body: "**Voice in with text out** solves half the literacy problem and then abandons the user at the half containing the answer.",
+                body: "**Voice in with text out** solves half the literacy problem, then abandons the user at the half containing the answer.",
               },
               {
                 tag: "Motor access",
@@ -1767,7 +1830,7 @@ export const PROJECTS: Project[] = [
               {
                 tag: "Consent",
                 label: "Show the interpretation before submitting",
-                body: "**Auto-filing a legal document** for somebody requires their consent to what it says. The review screen is where the system **admits what it assumed**.",
+                body: "**Auto-filing a legal document** for somebody needs their consent to what it says. The review screen is where the system **admits what it assumed**.",
               },
               {
                 tag: "Recovery",
@@ -1790,7 +1853,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Built for a **conversation rather than a page**: bubbles by speaker, audio players, state and language tags, the review card, spotlights, and the mascot's states. **Saffron is the state's own colour** — a grievance tool that invented its own would look like it belonged to nobody.",
+              "Built for a **conversation rather than a page**: bubbles by speaker, audio players, state and language tags, the review card, spotlights, mascot states. **Saffron is the state's own colour**, and a grievance tool that invented its own would look like it belonged to nobody.",
             ],
           },
           {
@@ -1814,7 +1877,7 @@ export const PROJECTS: Project[] = [
                 family: "Inter",
                 sample: "Press and speak in your language",
                 stack: "var(--font-inter), Inter, sans-serif",
-                use: "Chat, controls and labels — the running voice of the product",
+                use: "Chat, controls and labels, the running voice of the product",
               },
               {
                 name: "Supporting",
@@ -1831,7 +1894,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "Roboto is in the stack for one specific reason: it carries **Devanagari and most regional scripts**. A product claiming **22 languages** cannot ship a typeface that renders two of them.",
+              "Roboto is in the stack for one reason: **Devanagari and most regional scripts**. A product claiming **22 languages** cannot ship a typeface that renders two.",
           },
           {
             kind: "grid",
@@ -1850,7 +1913,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "The component set behind all of it. Built as **variants rather than screens**, because a conversation has no fixed layout to hand a developer — only states and the rules for moving between them.",
+              "The component set behind all of it, built as **variants rather than screens**. A conversation has no fixed layout to hand a developer, only states and the rules for moving between them.",
           },
         ],
       },
@@ -1887,12 +1950,12 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "The service did not change. The **qualification required to reach it** did, and that is the entire outcome.",
+              "The service did not change. The **qualification required to reach it** did, and that is the outcome.",
           },
           {
             kind: "prose",
             body: [
-              "For **DARPG**, grievances now arrive **pre-categorised and correctly routed** — work that used to land on an officer before the statutory clock started.",
+              "For **DARPG**, grievances now arrive **pre-categorised and correctly routed**, work that used to land on an officer before the statutory clock started.",
             ],
           },
           {
@@ -1930,16 +1993,20 @@ export const PROJECTS: Project[] = [
             kind: "lessons",
             items: [
               {
-                title: "Accessibility was not a layer. It was the product.",
-                body: "Remove voice from this product and you have not built a slightly less inclusive chatbot — you have rebuilt the portal that was already failing, with a friendlier surface on it.",
+                title: "I started out treating voice as a feature. It was the whole product.",
+                body: "For a while I designed it as one of two input options. Then I tried removing it on paper, and what was left was the form again, just friendlier. If a quarter of your users cannot read or write, everything else you do is decoration. Once I accepted that, the rest of the decisions got easier: **detect the language instead of asking for it, speak every reply, never put a dropdown in the way**.",
               },
               {
-                title: "Automation without a consent surface is exposure, not convenience.",
-                body: "The instinct with a form this painful is to delete it and let the system work silently. But once software **files a legal document on your behalf**, hiding its reasoning becomes exposure. The **review screen** is the least clever thing here and the most important.",
+                title: "Letting the AI do everything quietly would have been the wrong kind of easy.",
+                body: "My first instinct was to hide the whole process, since the form was the problem. But this is a **legal complaint with somebody's name on it**. If the system picked the wrong department and nobody saw it, that is worse than the form ever was. So the summary screen exists, and it is the plainest thing in the design. It is also the part I would defend first.",
               },
               {
-                title: "At national scale, a usability issue is a different kind of number.",
-                body: "A dropdown that confuses **5% of users** is a usability issue in most products. On a system serving **1.4 billion people** it is tens of millions of citizens who never get heard.",
+                title: "Small design mistakes stop being small at this scale.",
+                body: "A confusing dropdown is a minor usability issue in most products. Here it is **millions of people who never get heard by their own government**. It made me slower and more careful about the kind of detail I would normally ship and fix later.",
+              },
+              {
+                title: "Familiar worked better than clever.",
+                body: "I wanted to design something cleaner than a government portal. What actually worked was **keeping the shape people already recognised**, the left rail, the account corner, the input at the bottom, and spending the effort on the one thing that had to change. Novelty here would have cost trust I had no way to earn back.",
               },
             ],
           },
