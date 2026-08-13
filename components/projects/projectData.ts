@@ -2546,10 +2546,12 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "dropby",
+    /* a brand system with a full deep dive behind it, so it belongs in both */
+    alsoCaseStudy: true,
     title: "DropBy",
     logoText: "dropby.",
     logoUrl: "/projects/dropby-logo.webp",
-    category: "Product Design",
+    category: "Brand Identity",
     year: "2024",
     cover: "/projects/dropby-cover.webp",
     preview: {
@@ -2558,14 +2560,276 @@ export const PROJECTS: Project[] = [
       href: "https://www.behance.net/gallery/230479963",
     },
     cta: "View Full Project on Behance",
-    role: "Product Design",
-    tools: ["Figma", "Prototyping"],
+    /*
+      Bandis Blue, the identity's own primary, sampled off the palette board.
+      It sits almost exactly on the line in both themes (3.91:1 on the dark
+      canvas, 4.45:1 on white), so TEXT uses a lighter blue in dark mode and a
+      deeper one in light, while `solid` keeps the true brand value for
+      borders and rings where the 3:1 UI bar applies.
+
+      `fill` is the brand blue itself and carries white at 4.45:1, so unlike
+      the lighter-accent projects here it needs no dark ink override.
+    */
+    accent: {
+      dark: "#4D9BFF",
+      light: "#0057CC",
+      solid: "#006FFF",
+      bright: "#66AAFF",
+      ink: "#04122B",
+      fill: "#006FFF",
+    },
+    role: "Brand Identity",
+    tools: ["Figma", "Illustrator", "Photoshop"],
     description:
-      "Product design and visual identity for DropBy, a location-first social app, from flows to a cohesive interface system.",
+      "DropBy is a real-world presence engine for people who want to meet, but on their own terms: it rewards you for showing up rather than for posting. The old brand did not say any of that. This is the rebrand, built around a radar that borrows the app's own drop mechanic and a voice loud enough to get somebody off the sofa.",
+    extraFacts: [
+      ["Scope", "Identity, logo, colour, design system, campaign"],
+      ["Team", "Crestic Era"],
+      ["Published", "Behance, July 2025"],
+    ],
     highlights: [
-      "Location-first interaction model designed from first principles",
-      "Full visual identity built alongside the product from day one",
-      "Prototype-tested flows refined through multiple usability passes",
+      "Radar-based system taken straight from the app's core drop mechanic",
+      "Palette rebuilt around one loud blue, with warm accents to break it",
+      "Out-of-home campaign written to sound like a person, not a platform",
+    ],
+    sections: [
+      {
+        name: "overview",
+        heading: "The short version",
+        blocks: [
+          {
+            kind: "brief",
+            items: [
+              {
+                label: "What it is",
+                wide: true,
+                body: "A rebrand for **DropBy**, an app for socially curious people who want to meet in person without the performance. It rewards **showing up**, not posting.",
+              },
+              {
+                label: "The problem",
+                body: "The old identity **felt shy**. No cohesion, no typographic clarity, no colour strategy, and nothing to say.",
+              },
+              {
+                label: "The idea",
+                body: "Take the product's own **drop mechanic**, the radar ping, and make it the brand's building block.",
+              },
+              {
+                label: "The system",
+                body: "One loud blue, warm accents to break it, a **bolder sans**, and a repeating radar element.",
+              },
+              {
+                label: "The voice",
+                body: "Campaign lines written as things a person would actually say. **Just Drop By.**",
+              },
+              {
+                label: "Team",
+                body: "Made with **Crestic Era**.",
+              },
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/statement.webp",
+              alt: "An opening slide on DropBy blue reading: we reimagined DropBy into a brand that gets people to show up.",
+              caption: "The brief, in one line.",
+              wide: true,
+            },
+          },
+        ],
+      },
+      {
+        name: "problem",
+        heading: "A brand that did not ask for anything",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "An app whose entire premise is **getting somebody to leave the house** was speaking in a voice that could be ignored. The identity was quiet and unsure of itself, and it read as a product that did not mind whether you turned up.",
+            ],
+          },
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "No visual cohesion",
+                body: "Nothing tied one screen, post or asset to the next, so nothing accumulated into a brand.",
+              },
+              {
+                label: "No clarity in the type",
+                body: "The typography carried **no hierarchy and no attitude**, which left every message weighted the same.",
+              },
+              {
+                label: "No colour strategy",
+                body: "Colour was decoration rather than a system, so it could not be used to **mean** anything.",
+              },
+              {
+                label: "Nothing to say",
+                body: "The messaging never made the case for the product's whole point: **turning up in person**.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "essence",
+        heading: "Brand essence",
+        blocks: [
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/essence-radar.webp",
+              alt: "A dark frame with a wide gradient arc sweeping from red through blue, and the word Encourage in a pill at its centre.",
+              caption: "Encourage, set inside the radar sweep the whole system is built from.",
+              wide: true,
+            },
+          },
+          {
+            kind: "prose",
+            body: [
+              "The essence landed on **encouragement** rather than connection, which is the word every social product already uses. Encouragement is what the product actually does: it gives a hesitant person a **reason and a nudge** to show up.",
+              "The radar sweep behind it comes straight from the app's **drop**, so the brand's central shape is a thing the product already does rather than an ornament chosen for it.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "logo",
+        heading: "Logo",
+        blocks: [
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/logo.webp",
+              alt: "The DropBy wordmark in white on the brand blue, set in a geometric sans with a small trademark symbol.",
+              caption: "The wordmark, set in a heavier geometric sans.",
+              wide: true,
+            },
+          },
+          {
+            kind: "prose",
+            body: [
+              "A **bolder geometric sans**, tightly set, with the trademark mark kept small so it reads as a brand rather than a startup logotype. The lowercase b and y keep it friendly at the size it actually lives at, which is a phone screen and a poster seen from across a street.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "colour",
+        heading: "Colour concept",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "One blue does the work, and the warm accents exist to stop it becoming another polite tech palette. **Rich Black** and **Alice Blue** carry the quiet moments so the loud colours stay loud.",
+            ],
+          },
+          {
+            kind: "palette",
+            items: [
+              { name: "Bandis Blue", hex: "#006FFF", use: "The primary, and the only colour allowed to shout" },
+              { name: "Rich Black", hex: "#0D0F1E", use: "Canvas for the night-side of the brand" },
+              { name: "Alice Blue", hex: "#F5F8FE", use: "The light canvas" },
+              { name: "Munsell", hex: "#EF013D", use: "Accent, and the hot end of the gradient" },
+              { name: "Tomato", hex: "#FF4A2C", use: "Warm accent for energy" },
+              { name: "Cleste", hex: "#97F2FF", use: "Cool accent, the cold end of the sweep" },
+              { name: "Vanilla", hex: "#FFECB3", use: "Softener, used sparingly" },
+            ],
+            caption:
+              "The accents are what keep it human. A blue-only system would have been **calm**, and calm is the wrong instruction for an app asking you to go and meet somebody.",
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/palette.webp",
+              alt: "The DropBy palette board showing Alice Blue, Rich Black, Bandis Blue, Munsell, Tomato, Cleste and Vanilla, with a full spectrum gradient strip underneath.",
+              caption: "The board as presented, with the gradient the accents resolve into.",
+            },
+          },
+        ],
+      },
+      {
+        name: "system",
+        heading: "Building a design system",
+        blocks: [
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/brand-element.webp",
+              alt: "A tiled pattern of overlapping gradient rings in blue, red and orange, labelled brand element in action.",
+              caption: "The ring, repeated into a pattern the brand can own.",
+              wide: true,
+            },
+          },
+          {
+            kind: "prose",
+            body: [
+              "The radar ring is the **one element everything else is made from**. Alone it is a ping. Repeated it becomes a pattern, a background, a crop on a poster, a frame around a face. That is what makes it a system rather than a logo with decoration around it: **the same shape survives every size** it has to work at.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "campaign",
+        heading: "Out in the world",
+        blocks: [
+          {
+            kind: "step",
+            items: [
+              {
+                src: "/projects/dropby/posters-street.webp",
+                label: "01 Didn't plan to meet",
+                alt: "Three street posters: two photographic panels reading didn't plan to meet and but glad I dropped by, with a blue DropBy panel between them, connected by a gradient arc.",
+              },
+              {
+                src: "/projects/dropby/posters-wall.webp",
+                label: "02 Real vibes",
+                alt: "Three posters on a concrete wall reading real vibes, random meets and stories don't start by chance, beside a photographic DropBy panel.",
+              },
+            ],
+            body: [
+              "The lines are written as **half-sentences that finish across panels**, so the arc carries your eye from one to the next and the campaign only completes if you read the set. It is the radar doing the work again, this time as a connector between two strangers on two different posters.",
+              "The copy stays in **spoken register**: didn't plan to meet, but glad I dropped by. Nothing there sounds like a platform describing its features.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/billboard.webp",
+              alt: "A wide billboard reading Just Drop By over a photograph of three people laughing, with body copy about valuing depth over display.",
+              caption: "The billboard, where the brand states its case in full.",
+              wide: true,
+            },
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/dropby/banners.webp",
+              alt: "Vertical banners hung between the columns of a stone building, alternating black Are You Alone panels with blue DropBy panels.",
+              caption: "Banners, alternating the question with the answer.",
+              wide: true,
+            },
+          },
+          {
+            kind: "prose",
+            body: [
+              "**Are you alone** is the most direct thing in the system, and it only works because the answer is hanging beside it. Asked on its own it would be bleak. Asked next to the wordmark it is **an invitation**.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "credits",
+        heading: "Credits",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Made with **Crestic Era**. Full project on **Behance**.",
+            ],
+          },
+        ],
+      },
     ],
   },
   {

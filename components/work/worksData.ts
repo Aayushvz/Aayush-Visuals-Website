@@ -81,8 +81,8 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     tags: ["3d", "website", "fest", "interactive", "webgl"],
   },
   dropby: {
-    categories: ["Product Design", "UI/UX"],
-    tags: ["app", "social", "location", "mobile", "identity"],
+    categories: ["Brand Design", "Product Design", "UI/UX"],
+    tags: ["app", "social", "location", "mobile", "identity", "rebrand", "campaign", "logo"],
   },
   futurepreneurs: {
     categories: ["UI/UX", "Brand Design"],
