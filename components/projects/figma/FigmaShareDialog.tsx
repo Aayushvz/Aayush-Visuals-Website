@@ -169,7 +169,7 @@ export default function FigmaShareDialog({ project, open, onClose }: Props) {
 
                 <div className="figp-share-row">
                   <span className="figp-share-avatar" aria-hidden="true">
-                    {OWNER.charAt(0)}
+                    <img src="/logos/av-logo.webp" alt="" draggable={false} />
                   </span>
                   <span className="figp-share-who">{OWNER}</span>
                   <span className="figp-share-perm">owner</span>

@@ -23,7 +23,7 @@ export default function CommentPin({ number, note, href, variant, external }: Pr
       <span className="figp-pin-note">
         <span className="figp-pin-author">
           <span className="figp-pin-avatar" aria-hidden="true">
-            A
+            <img src="/logos/av-logo.webp" alt="" draggable={false} />
           </span>
           Aayush
         </span>

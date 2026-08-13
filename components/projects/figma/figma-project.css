@@ -870,6 +870,11 @@ html[data-theme="light"] .figp-lfile img {
   color: var(--figp-text-mid);
 }
 
+/* The owner row carries the actual mark rather than an initial. The logo
+   artwork is white, so the disc is a fixed ink rather than the accent: in
+   dark mode --figp-accent is a light value on several projects and a white
+   logo on it disappears. The hairline keeps the disc readable where the
+   panel behind it is dark too. */
 .figp-share-avatar {
   display: grid;
   place-items: center;
@@ -877,10 +882,17 @@ html[data-theme="light"] .figp-lfile img {
   height: 26px;
   flex: none;
   border-radius: 50%;
-  background: var(--figp-accent);
+  background: #1a1a1a;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
   color: #fff;
   font-size: 11.5px;
   font-weight: 700;
+}
+
+.figp-share-avatar img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
 }
 
 .figp-share-who {
@@ -4211,16 +4223,25 @@ html[data-theme="light"] .figp-lfile img {
   color: #5b5960;
 }
 
+/* same logic as .figp-share-avatar: ink disc, white mark, because
+   --figp-accent-bright is a light value by definition and the logo is white */
 .figp-pin-avatar {
   display: grid;
   place-items: center;
   width: 17px;
   height: 17px;
+  flex: none;
   border-radius: 50%;
-  background: var(--figp-accent-bright);
-  color: var(--figp-accent-ink);
+  background: #1a1a1a;
+  color: #fff;
   font-size: 9.5px;
   font-weight: 700;
+}
+
+.figp-pin-avatar img {
+  width: 64%;
+  height: 64%;
+  object-fit: contain;
 }
 
 @media (max-width: 768px) {

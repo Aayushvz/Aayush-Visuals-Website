@@ -615,26 +615,21 @@ const factChild = {
   metal: brightest where it is thinnest. It stays one flat image, costs
   nothing, and still says ember rather than "orange triangle".
 */
-function cursorUrl(fill: string, withPlus: boolean, hot = "#FFC24A") {
+function cursorUrl(fill: string, withPlus: boolean) {
   const ARROW = "M3.4 1.95 19.35 9.49 12.24 11.52 8.62 19.35Z";
   const PLUS = "M17.6 13.6 21.6 17.6 17.6 21.6 13.6 17.6Z";
 
-  const grad =
-    `<linearGradient id='f' x1='3' y1='2' x2='16' y2='19' gradientUnits='userSpaceOnUse'>` +
-    `<stop offset='0' stop-color='${hot}'/>` +
-    `<stop offset='.55' stop-color='${fill}'/>` +
-    `<stop offset='1' stop-color='#5E1109'/>` +
-    `</linearGradient>`;
-
-  /* each shape is drawn twice: a dark halo underneath so the cursor stays
-     visible over a light screenshot, then the coloured shape over it */
+  /* One flat colour, the way Figma draws its own multiplayer cursors. This
+     used to be a three-stop gradient, which read as a shaded object rather
+     than somebody else's pointer and fought whatever screenshot was under
+     it. Each shape is still drawn twice: a dark halo underneath so the arrow
+     survives a light screenshot, then the accent shape over it. */
   const shape = (d: string) =>
     `<path d='${d}' fill='none' stroke='rgba(0,0,0,.45)' stroke-width='2.8' stroke-linejoin='round'/>` +
-    `<path d='${d}' fill='url(%23f)' stroke='#fff' stroke-width='1.2' stroke-linejoin='round'/>`;
+    `<path d='${d}' fill='${fill}' stroke='#fff' stroke-width='1.2' stroke-linejoin='round'/>`;
 
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>` +
-    `<defs>${grad}</defs>` +
     shape(ARROW) +
     (withPlus ? shape(PLUS) : "") +
     `</svg>`;
