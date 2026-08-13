@@ -2878,26 +2878,317 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "gravitas",
+    /* a shipped site and a full deep dive, so it belongs in both lists */
+    alsoCaseStudy: true,
     title: "Gravitas",
     logoText: "GRAVITAS·25",
     logoUrl: "/projects/gravitas-logo.webp",
     category: "Website + Branding",
     year: "2025",
-    cover: "/projects/gravitas-cover.webp",
+    cover: "/projects/gravitas/cover.webp",
     preview: {
       kind: "website",
-      image: "/projects/gravitas-cover.webp",
-      href: "https://www.behance.net/gallery/239867397",
+      image: "/projects/gravitas/cover.webp",
+      href: "https://gravitas25-frontend.vercel.app/",
     },
-    cta: "View Full Project on Behance",
-    role: "Brand + Web Design",
-    tools: ["Figma", "Illustrator", "Framer"],
+    cta: "Visit Live Website",
+    /*
+      The fest's own mint, sampled from the hero buttons in the shipped UI.
+      13:1 on the dark canvas but 1.5:1 on white, so light-mode TEXT drops to
+      a deep teal of the same hue while `solid` keeps a mid value that still
+      reads as a border or ring in both themes (7.11:1 dark, 2.45:1 light,
+      the same trade the other dark-brand projects here make).
+
+      `bright` runs the cursor, its tag and the pins, which are meant to be
+      spotted rather than read through. White on mint is 1.5:1, so `ink` puts
+      a near-black on it instead, at 10.92:1.
+    */
+    accent: {
+      dark: "#7FE3D4",
+      light: "#0E7466",
+      solid: "#2BB9A4",
+      bright: "#96F0E6",
+      ink: "#06231E",
+      fill: "#7FE3D4",
+      fillInk: "#06231E",
+    },
+    role: "Website Design",
+    tools: ["Figma", "Illustrator"],
     description:
-      "An end-to-end brand system and website for Gravitas, a flagship techno-management fest, scaled across every touchpoint.",
+      "Gravitas is VIT Vellore's flagship techno-management fest, and the website is where thousands of students find and register for hundreds of workshops and competitions. The old one had grown into a wall of text. This is a rebuild around a retro-tech system that makes a catalogue that size searchable, and turns browsing into booking.",
+    extraFacts: [
+      ["Event", "Gravitas'25, VIT Vellore"],
+      ["Live at", "gravitas25-frontend.vercel.app"],
+      ["Scope", "Website design, event catalogue, authentication, profile"],
+      ["Catalogue", "200+ events across three days"],
+      ["Team", "With the Gravitas'25 Design and Print team"],
+    ],
     highlights: [
-      "Unified identity system scaled across print, stage and digital",
-      "Signature visual language built around a bold techno-management theme",
-      "Website structured to carry the fest's scale without losing clarity",
+      "Retro-tech system built to carry hundreds of events without a wall of text",
+      "Role-based entry that filters the experience the moment you sign in",
+      "Filtering and a wishlist that turn browsing into registration",
+    ],
+    sections: [
+      {
+        name: "overview",
+        heading: "The short version",
+        blocks: [
+          {
+            kind: "brief",
+            items: [
+              {
+                label: "What it is",
+                wide: true,
+                body: "The central hub for **VIT's biggest technical fest**: a rebuild of the Gravitas site that turns a **200+ event** catalogue into something a student can actually search, shortlist and register through.",
+              },
+              {
+                label: "The problem",
+                body: "The old site had scaled into **content saturation**. Everyone saw the same wall of text, with no way to narrow it down.",
+              },
+              {
+                label: "The approach",
+                body: "A **retro-tech system** with real hierarchy, plus filters, modals and a wishlist so the catalogue can be worked through rather than read.",
+              },
+              {
+                label: "Key moves",
+                body: "**Ask who you are before what you want.** Filter by category, price and team size. Put the **wishlist** ahead of the receipt.",
+              },
+              {
+                label: "Outcome",
+                body: "**2M+ visits**, **77k+ new users** and **40,000+ event registrations** across the fest.",
+              },
+              {
+                label: "Team",
+                body: "Designed with the **Gravitas'25 Design and Print team**.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "challenge",
+        heading: "High traffic, low commitment",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "A fest catalogue grows every year, and the site had not grown with it. Hundreds of events were presented as one undifferentiated list, so the page carried everything and pointed at nothing. The traffic was never the problem. **People arrived, browsed and left without registering.**",
+            ],
+          },
+          {
+            kind: "numbered",
+            items: [
+              {
+                label: "One page for everybody",
+                body: "No personalised entry point. A first-year looking for a workshop and an external startup saw the **identical wall of text**.",
+              },
+              {
+                label: "Navigation that only reacted",
+                body: "Nothing helped you **narrow the catalogue down**. Finding the right event meant scrolling until you happened to see it.",
+              },
+              {
+                label: "Gaps that ended the visit",
+                body: "**404s and loading screens were dead ends**, with nothing to carry a user back into the fest.",
+              },
+              {
+                label: "Nowhere to put a maybe",
+                body: "An event you were interested in but not ready to pay for had **no place to go**, so coming back meant starting the search again.",
+              },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "Users were **browsing, not committing**. The catalogue was all there. It just could not be worked through.",
+          },
+        ],
+      },
+      {
+        name: "approach",
+        heading: "From information board to system",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The rebuild treats the site as a **system that responds to who is using it** rather than a board that displays everything to everyone. The retro-tech direction does real work here: a hard grid, pixel display type and high-contrast panels give a dense catalogue **visible structure**, so scale reads as organisation instead of noise.",
+            ],
+          },
+          {
+            kind: "compare",
+            lanes: [
+              {
+                label: "Before",
+                tone: "before",
+                note: "Everything present, nothing prioritised.",
+                steps: [
+                  "One generic list for every visitor",
+                  "Scroll until you find it",
+                  "No way to save an event for later",
+                  "Errors and empty states end the visit",
+                  "Register now or lose your place",
+                ],
+              },
+              {
+                label: "After",
+                tone: "after",
+                note: "The same catalogue, made workable.",
+                steps: [
+                  "The experience narrows to your role at sign-in",
+                  "Filter by category, price and team size",
+                  "Wishlist anything you are not ready to book",
+                  "Every state routes back into the fest",
+                ],
+              },
+            ],
+            caption:
+              "Nothing was removed from the catalogue. What changed is that a visitor can now **cut it down to the handful of events that apply to them**.",
+          },
+        ],
+      },
+      {
+        name: "homepage",
+        heading: "The homepage",
+        blocks: [
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/gravitas/home-hero.webp",
+              alt: "The Gravitas'25 homepage on a laptop, with the pixel wordmark, the fest dates and Events and Merch buttons over a dark tiled background.",
+              caption: "The homepage, holding itself to two destinations.",
+              wide: true,
+            },
+          },
+          {
+            kind: "prose",
+            body: [
+              "The hero carries the **wordmark, the dates and two buttons**, and stops there. A fest homepage is under pressure to announce everything at once, which is how the old one filled up. Holding it to **Events and Merch** means the page has a job rather than a job list, and the marquee underneath gives the fest its noise without taking space from the decision.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "authentication",
+        heading: "Segmented authentication",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The standard move is an email and password box. This asks a different first question: **who are you here as?**",
+            ],
+          },
+          {
+            kind: "step",
+            items: [
+              {
+                src: "/projects/gravitas/auth-affiliation.webp",
+                label: "01 Affiliation",
+                alt: "The Gravitas sign-in screen asking the user to select their affiliation, with VIT Vellore Student and External Participants options beside a retro-tech control panel illustration.",
+              },
+              {
+                src: "/projects/gravitas/auth-details.webp",
+                label: "02 Only the fields that apply",
+                alt: "The Gravitas details form asking for phone number, organisation name, designation and an optional LinkedIn profile.",
+              },
+            ],
+            body: [
+              "Picking **VIT student or external participant** first means the form that follows only asks what that person can answer. A student never sees organisation and designation fields, and an external participant is never asked for a registration number they do not have. **The branch costs one tap and removes every irrelevant field after it**, which is cheaper than one long form that makes everybody skip past half of it.",
+              "It also sets up everything downstream. Once the system knows the affiliation, the catalogue, the pricing and the eligible events can differ **without the user filtering for any of it**.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/gravitas/auth-affiliation-use.webp",
+              alt: "A person sitting outdoors using the Gravitas affiliation screen on a laptop.",
+              caption: "The affiliation choice is the first thing a new visitor meets.",
+            },
+          },
+        ],
+      },
+      {
+        name: "events",
+        heading: "Advanced event discovery",
+        blocks: [
+          {
+            kind: "step",
+            items: [
+              {
+                src: "/projects/gravitas/events-filters.webp",
+                label: "01 The filter rail",
+                alt: "The Gravitas events page with a left filter rail for event type, price range and date, beside a searchable list of events.",
+              },
+              {
+                src: "/projects/gravitas/events-desk.webp",
+                label: "02 The catalogue",
+                alt: "The Gravitas events page shown on a laptop, with filters applied and event cards listing time, date and team size.",
+              },
+            ],
+            body: [
+              "Filters sit in a **persistent left rail** rather than behind a button, because a catalogue this size is used by narrowing repeatedly, and a filter you have to reopen each time gets used once. **Category, price and team size** are the three questions a student actually arrives with, so they are the three that get controls.",
+              "Every card carries **time, date, team size and price on its face**. Those are the details that decide whether an event is even possible for you, and putting them behind a click turns a shortlist into a tab-opening exercise. **Only show available events** is on by default, since a full event you cannot join is just another row to read past.",
+            ],
+          },
+          {
+            kind: "figure",
+            shot: {
+              src: "/projects/gravitas/events-cushion.webp",
+              alt: "The Gravitas events page with its filter rail, shown on a laptop against a teal background.",
+              caption: "The filter rail stays put while the catalogue narrows.",
+              wide: true,
+            },
+          },
+        ],
+      },
+      {
+        name: "wishlist",
+        heading: "The wishlist",
+        blocks: [
+          {
+            kind: "step",
+            items: [
+              {
+                src: "/projects/gravitas/profile-wishlist.webp",
+                label: "01 Wishlist first",
+                alt: "The Gravitas profile page with the Wishlist tab active, showing saved events ahead of the purchased merch and purchased events tabs.",
+              },
+              {
+                src: "/projects/gravitas/profile-hands.webp",
+                label: "02 The profile in use",
+                alt: "The Gravitas profile and wishlist page shown on a laptop held in two hands.",
+              },
+            ],
+            body: [
+              "The profile used to be a receipt list. Here the **wishlist is the first tab**, ahead of purchased merch and purchased events, because a profile organised around what you already bought is a record, and one organised around **what you meant to do next** is a way back in.",
+              "It also matches how these decisions actually get made. Students shortlist events, check them against friends and a timetable, then book. Without somewhere to hold a maybe, **that gap between interest and registration is where the visit ended**.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "results",
+        heading: "What it did",
+        blocks: [
+          {
+            kind: "results",
+            items: [
+              { value: "2M+", label: "site traffic", note: "Across the fest cycle." },
+              { value: "2M+", label: "landing page views" },
+              { value: "77k+", label: "new users acquired" },
+              {
+                value: "40,000+",
+                label: "event registrations",
+                note: "The number the rebuild was actually aimed at.",
+              },
+              { value: "200+", label: "events managed through the platform" },
+            ],
+          },
+          {
+            kind: "prose",
+            body: [
+              "Designed in collaboration with the **Gravitas'25 Design and Print team**.",
+            ],
+          },
+        ],
+      },
     ],
   },
   {
