@@ -120,16 +120,21 @@ const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   wordmark: p.logoText,
 });
 
-/* The filterable grid. Deep dives lead it: they are the work that rewards
-   actually being read, so burying them under whichever project happened to
-   ship last is the wrong default. Order within each group is preserved.
+/* The filterable grid, and it lists EVERY project without exception: this
+   section is the complete body of work, so anything added to PROJECTS shows
+   up here automatically and nothing has to be opted in.
 
-   Projects flagged `kind: "case-study"` still live only in the section
-   below; `alsoCaseStudy` ones appear in both, and carry the "Case Study"
-   chip so the filter can find them here too. */
+   Deep dives lead it. They are the work that rewards actually being read, so
+   burying them under whichever project happened to ship last is the wrong
+   default. Order within each group is preserved, and every deep dive carries
+   the "Case Study" chip so the filter can still isolate them.
+
+   Case studies also appear in their own section below (see CASE_STUDIES).
+   That repetition is deliberate: this grid answers "what has he made", the
+   section below answers "what can I read in depth". */
 export const WORKS: WorkItem[] = [
-  ...PROJECTS.filter((p) => p.kind !== "case-study" && isDeepDive(p)),
-  ...PROJECTS.filter((p) => p.kind !== "case-study" && !isDeepDive(p)),
+  ...PROJECTS.filter(isDeepDive),
+  ...PROJECTS.filter((p) => !isDeepDive(p)),
 ].map(toWorkItem);
 
 /* Long-form process work, listed in its own section below Projects.
