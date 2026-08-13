@@ -10,6 +10,7 @@ export const IMAGE_DIMS: Record<string, [number, number]> = {
   "/projects/cpgrams-cover.webp": [1536, 1024],
   "/projects/cpgrams/components-1.webp": [453, 1751],
   "/projects/cpgrams/components-2.webp": [467, 1193],
+  "/projects/cpgrams/cover.webp": [1627, 967],
   "/projects/cpgrams/demo-01.webp": [1600, 806],
   "/projects/cpgrams/demo-02.webp": [1600, 806],
   "/projects/cpgrams/demo-03.webp": [1600, 806],
