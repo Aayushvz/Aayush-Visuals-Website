@@ -100,7 +100,7 @@ export const IMAGE_DIMS: Record<string, [number, number]> = {
   "/projects/gravitas/events-filters.webp": [2000, 1505],
   "/projects/gravitas/home-hero.webp": [2000, 1250],
   "/projects/gravitas/profile-hands.webp": [2000, 1125],
-  "/projects/gravitas/profile-wishlist.webp": [2000, 1505],
+  "/projects/gravitas/profile-wishlist.webp": [1446, 1088],
   "/projects/layover-cover.webp": [1024, 576],
   "/projects/layover-logo.webp": [298, 59],
   "/projects/layover/admin-addedit-item.webp": [1600, 1138],
