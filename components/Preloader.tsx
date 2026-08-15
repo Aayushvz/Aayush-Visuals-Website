@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { lockScroll } from "@/lib/scrollLock";
 
 /*
   Full-screen entrance preloader — mounted once in the root layout, so it
@@ -98,8 +99,24 @@ export default function Preloader() {
   const [stage, setStage] = useState<Stage>("bootClosed");
   const [percent, setPercent] = useState(0);
 
-  const silent = SILENT_ROUTES.some(
-    (r) => pathname === r || pathname?.startsWith(`${r}/`)
+  /*
+    Read once, on first mount, and never again.
+
+    This is the ENTRANCE preloader: it belongs to the document load, and
+    the component is mounted in the root layout precisely so that in-app
+    navigation cannot restart it. Deriving `silent` from the live pathname
+    quietly broke that for one route — arriving on /cricket left the flag
+    true and the effect skipped, so the first navigation away flipped it
+    to false and ran the whole opening sequence, four seconds of terminal
+    boot over a page the visitor had already asked for, with the scroll
+    locked underneath it the entire time.
+
+    Freezing the value at mount means /cricket simply never arms the
+    preloader for that document, which is what "this route owns its own
+    opening" was always supposed to mean.
+  */
+  const [silent] = useState(() =>
+    SILENT_ROUTES.some((r) => pathname === r || pathname?.startsWith(`${r}/`))
   );
 
   useEffect(() => {
@@ -110,19 +127,13 @@ export default function Preloader() {
     };
     const clearAll = () => timers.forEach(clearTimeout);
 
-    // Lock scroll without letting the vanished scrollbar shift layout.
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    const prevOverflow = document.body.style.overflow;
-    const prevPaddingRight = document.body.style.paddingRight;
-    document.body.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+    /* Shared, reference-counted lock (lib/scrollLock) — see the note in
+       that file for why this must not read and write body.style itself. */
+    const unlockScroll = lockScroll();
 
     const finish = () => {
       setStage("done");
-      document.body.style.overflow = prevOverflow;
-      document.body.style.paddingRight = prevPaddingRight;
+      unlockScroll();
       clearAll();
     };
 
@@ -161,8 +172,7 @@ export default function Preloader() {
 
     return () => {
       clearAll();
-      document.body.style.overflow = prevOverflow;
-      document.body.style.paddingRight = prevPaddingRight;
+      unlockScroll();
     };
   }, [silent]);
 

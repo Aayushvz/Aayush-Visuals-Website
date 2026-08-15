@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { lockScroll } from "@/lib/scrollLock";
 
 /*
   Full-screen page-to-page transition: a circle in the exact preloader
@@ -32,11 +33,20 @@ export default function PageTransition() {
   const [logoVisible, setLogoVisible] = useState(false);
   const [origin, setOrigin] = useState<Origin>({ x: 0, y: 0, r: 0 });
   const timers = useRef<number[]>([]);
+  /* the release for the lock this component currently holds, if any. It
+     lives outside clearAll's reach so that dropping the timers can never
+     drop the release with them — a cancelled unlock is a page that never
+     scrolls again. */
+  const release = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const clearAll = () => {
       timers.current.forEach(clearTimeout);
       timers.current = [];
+      /* whatever those timers were going to do, the unlock among them is
+         not optional — do it now rather than losing it */
+      release.current?.();
+      release.current = null;
     };
     const schedule = (fn: () => void, ms: number) => {
       timers.current.push(window.setTimeout(fn, ms));
@@ -61,18 +71,14 @@ export default function PageTransition() {
       setCovered(false);
       setActive(true);
 
-      // lock scroll for the (brief) duration of the wipe, without letting
-      // the vanished scrollbar shift layout
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      const prevOverflow = document.body.style.overflow;
-      const prevPaddingRight = document.body.style.paddingRight;
-      document.body.style.overflow = "hidden";
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-      }
+      // lock scroll for the (brief) duration of the wipe. Shared and
+      // reference counted (lib/scrollLock) because the route swaps
+      // underneath this overlay and whatever mounts on the other side may
+      // want its own lock while this one is still held.
+      release.current = lockScroll();
       const unlockScroll = () => {
-        document.body.style.overflow = prevOverflow;
-        document.body.style.paddingRight = prevPaddingRight;
+        release.current?.();
+        release.current = null;
       };
 
       // let the uncovered (scale 0) frame paint before animating to covered
