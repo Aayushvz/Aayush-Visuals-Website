@@ -17,6 +17,25 @@
   expensive at every size.
 */
 
+/*
+  Coordinates are rounded before they reach the markup, and that is a
+  correctness fix rather than tidiness.
+
+  ECMAScript does not require Math.sin/Math.cos to be correctly rounded —
+  it allows an implementation-approximated result, so the same expression
+  can land one unit in the last place apart between two engines, or
+  between two builds of the same engine. Node renders this SVG on the
+  server and the browser renders it again to hydrate, and at full float
+  precision a single ULP is a visible difference in the attribute string:
+  ...61461659 against ...61461658. React compares the two as text, calls
+  it a hydration mismatch, and warns that it will not patch it up.
+
+  Two decimals over a 520-unit viewBox is a hundredth of a user unit,
+  well under a device pixel at any size this badge is drawn, and it makes
+  both sides agree exactly.
+*/
+const r = (n: number) => n.toFixed(2);
+
 export default function TitleCrest() {
   return (
     <svg
@@ -55,9 +74,11 @@ export default function TitleCrest() {
           return (
             <path
               key={i}
-              d={`M260 150 L${260 + Math.cos(a) * 250} ${150 + Math.sin(a - 0.055) * 250} L${
-                260 + Math.cos(a + 0.075) * 250
-              } ${150 + Math.sin(a + 0.075) * 250} Z`}
+              d={`M260 150 L${r(260 + Math.cos(a) * 250)} ${r(
+                150 + Math.sin(a - 0.055) * 250
+              )} L${r(260 + Math.cos(a + 0.075) * 250)} ${r(
+                150 + Math.sin(a + 0.075) * 250
+              )} Z`}
               fill={i % 2 ? "#7cc4ff" : "#2f7fd4"}
               opacity={i % 2 ? 0.22 : 0.34}
             />
