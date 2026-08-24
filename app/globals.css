@@ -11261,7 +11261,7 @@ html.dpl-page .preloader {
   font-family: var(--font-primary);
   font-weight: 600;
   font-size: clamp(14px, 1.6vw, 20px);
-  letter-spacing: -0.08em;
+  letter-spacing: 0;
   color: var(--cream);
 }
 
