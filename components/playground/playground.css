@@ -1,0 +1,607 @@
+/*
+  /playground styles.
+
+  Route-scoped on purpose (imported by PlaygroundPageClient, same pattern as
+  cricket.css and figma-project.css) so none of this ships with the homepage
+  bundle. Every selector is prefixed pg-.
+
+  Two surfaces, and the contrast between them is the page's structure:
+  the hero is the dark room where the toy lives, the shelf below is the
+  site's cream, set as a quiet editorial index. Nothing in between.
+*/
+
+.pgHero {
+  --pg-fg: #f4f1ea;
+  --pg-fg-2: #8f8b84;
+
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  background: #1a1a1a;
+  color: var(--pg-fg);
+  /* clip, not hidden: an overflow:hidden full-viewport section becomes its
+     own scroll box the moment anything overshoots, which silently offsets
+     the whole interior (learned the hard way on the homepage hero) */
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* the toy's box. Above the type so a ball can rest ON the wordmark rather
+   than behind it, which is the entire idea of the section. */
+.pgHero__toys {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  cursor: grab;
+  /* vertical drags still scroll the page; only a grab is intercepted */
+  touch-action: pan-y;
+}
+
+.pgHero__toys--holding {
+  cursor: grabbing;
+}
+
+.pgHero__inner {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(28px, 6vh, 64px);
+  padding: clamp(96px, 14vh, 152px) var(--page-rail-inset) clamp(40px, 7vh, 72px);
+  width: 100%;
+}
+
+/* ---- top meta row ---- */
+
+.pgHero__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pgHero__metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pg-fg-2);
+}
+
+.pgHero__metaItem--end {
+  color: rgba(244, 241, 234, 0.34);
+}
+
+.pgHero__node {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple-soft);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.14);
+}
+
+/* ---- the wordmark, which is also the floor ---- */
+
+.pgHero__title {
+  margin: 0;
+  /* one line, filling the measure between the rails. The physics reads the
+     span's box, so the type size IS the level design. */
+  line-height: 0.82;
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  /* pre-hydration guess only, deliberately a shade under the column so it
+     can never clip; PlaygroundHero refits it to the exact measure */
+  font-size: clamp(52px, 18.2vw, 300px);
+  white-space: nowrap;
+}
+
+.pgHero__word {
+  display: inline-block;
+}
+
+/* ---- bottom row: one paragraph and one number ---- */
+
+.pgHero__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(24px, 6vw, 96px);
+}
+
+.pgHero__note {
+  margin: 0;
+  max-width: 46ch;
+  font-size: clamp(14px, 1.15vw, 16.5px);
+  line-height: 1.62;
+  color: rgba(244, 241, 234, 0.62);
+}
+
+.pgHero__count {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.pgHero__countNum {
+  font-size: clamp(34px, 4.2vw, 56px);
+  font-weight: 500;
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.pgHero__countLabel {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--pg-fg-2);
+  padding-bottom: 2px;
+}
+
+/* centred along the bottom edge, below the foot row rather than beside it:
+   at the right rail this sat straight on top of the live-experiment count */
+.pgHero__hint {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.26);
+  pointer-events: none;
+}
+
+/* ==========================================================
+   The shelf
+   ========================================================== */
+
+.pgShelf {
+  position: relative;
+  background: var(--cream);
+  color: var(--ink);
+  padding: clamp(88px, 13vw, 176px) 0 clamp(88px, 12vw, 160px);
+}
+
+.pgRails {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pgRails::before,
+.pgRails::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--ink-soft);
+}
+
+.pgRails::before {
+  left: var(--page-rail-inset);
+}
+
+.pgRails::after {
+  right: var(--page-rail-inset);
+}
+
+.pgShelf__inner {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--page-content-inset);
+}
+
+.pgShelf__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(20px, 5vw, 72px);
+  padding-bottom: clamp(34px, 4.5vw, 58px);
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.pgShelf__title {
+  margin: 0;
+  font-size: clamp(34px, 5.4vw, 76px);
+  font-weight: 600;
+  letter-spacing: -0.042em;
+  line-height: 0.94;
+}
+
+.pgShelf__lede {
+  margin: 0 0 4px;
+  max-width: 42ch;
+  font-size: clamp(13.5px, 1.05vw, 15.5px);
+  line-height: 1.62;
+  color: rgba(31, 31, 31, 0.58);
+}
+
+.pgShelf__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---- a live experiment ---- */
+
+.pgItem {
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.pgItem__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) clamp(180px, 22vw, 300px);
+  align-items: center;
+  gap: clamp(20px, 4vw, 64px);
+  padding: clamp(30px, 4vw, 54px) 0;
+  color: inherit;
+}
+
+.pgItem__index {
+  align-self: start;
+  padding-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: rgba(31, 31, 31, 0.38);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-state) var(--ease-quint);
+}
+
+.pgItem__titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.pgItem__title {
+  margin: 0;
+  font-size: clamp(26px, 3.4vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+.pgItem__year {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: rgba(31, 31, 31, 0.34);
+  font-variant-numeric: tabular-nums;
+}
+
+.pgItem__blurb {
+  margin: 12px 0 0;
+  max-width: 54ch;
+  font-size: clamp(13.5px, 1.02vw, 15.5px);
+  line-height: 1.62;
+  color: rgba(31, 31, 31, 0.6);
+}
+
+/* the spec rows are the "book weight" counterpoint to the big title: small,
+   even, mono-ish, and deliberately not competing for attention */
+.pgItem__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 28px;
+  margin: 20px 0 0;
+}
+
+.pgItem__spec {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pgItem__specK {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.34);
+}
+
+.pgItem__specV {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(31, 31, 31, 0.72);
+}
+
+.pgItem__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.pgItem__ctaText {
+  position: relative;
+}
+
+/* the underline draws in from the left rather than the whole line existing
+   at rest, so the row has somewhere to go on hover */
+.pgItem__ctaText::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--purple);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-state) var(--ease-quint);
+}
+
+.pgItem__ctaArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-soft);
+  color: var(--ink);
+  transition: background var(--dur-state) var(--ease-quint),
+    border-color var(--dur-state) var(--ease-quint),
+    color var(--dur-state) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.pgItem__ctaArrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---- the tile art ---- */
+
+.pgItem__art {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 4px;
+  background: #1a1a1a;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pgItem__artImg {
+  position: relative;
+  z-index: 2;
+  width: 58%;
+  height: auto;
+  object-fit: contain;
+  transition: transform var(--dur-panel) var(--ease-quint);
+}
+
+/* the drawn league badge isn't a next/image, so its own svg needs the
+   sizing .pgItem__artImg normally gets from being an <img>. Flat vector
+   art reads smaller than a photo at the same box width — sized up from
+   the 58% baseline to give the badge the same visual weight on the tile. */
+.pgItem__logo {
+  width: 76%;
+}
+
+.pgItem__logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
+}
+
+/* a single floodlight, off-centre, so the tile has a light source rather
+   than a flat fill */
+.pgItem__artGlow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    62% 62% at 50% 18%,
+    rgba(139, 92, 246, 0.34),
+    rgba(139, 92, 246, 0) 70%
+  );
+  opacity: 0.75;
+  transition: opacity var(--dur-panel) var(--ease-quint);
+}
+
+/* ---- hover: one coordinated move, not six separate ones ---- */
+
+@media (hover: hover) {
+  .pgItem__link:hover .pgItem__ctaText::after {
+    transform: scaleX(1);
+  }
+
+  .pgItem__link:hover .pgItem__ctaArrow {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    transform: translateX(3px);
+  }
+
+  .pgItem__link:hover .pgItem__index {
+    color: var(--purple);
+  }
+
+  .pgItem__link:hover .pgItem__artImg {
+    transform: scale(1.05) translateY(-4px);
+  }
+
+  .pgItem__link:hover .pgItem__artGlow {
+    opacity: 1;
+  }
+}
+
+.pgItem__link:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
+/* ---- vacant slots ---- */
+
+.pgSlot {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 4vw, 64px);
+  padding: clamp(22px, 2.6vw, 34px) 0;
+  border-bottom: 1px dashed rgba(31, 31, 31, 0.16);
+}
+
+.pgSlot__index {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: rgba(31, 31, 31, 0.24);
+  font-variant-numeric: tabular-nums;
+}
+
+.pgSlot__label {
+  flex: 1;
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: rgba(31, 31, 31, 0.3);
+}
+
+.pgSlot__mark {
+  font-size: 17px;
+  font-weight: 400;
+  color: rgba(31, 31, 31, 0.22);
+  line-height: 1;
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+@media (max-width: 900px) {
+  .pgShelf__head {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+  }
+
+  .pgItem__link {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  /* the art moves under the copy rather than shrinking into a stamp */
+  .pgItem__art {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
+    margin-top: 4px;
+  }
+
+  .pgItem__artImg {
+    width: 34%;
+  }
+
+  /* keep the badge's larger desktop ratio to .pgItem__artImg (58% -> 34%
+     is a 0.586x step; the same step off the logo's 76% baseline) */
+  .pgItem__logo {
+    width: 44.5%;
+  }
+}
+
+@media (max-width: 640px) {
+  .pgHero__inner {
+    padding: calc(var(--mnav-clear) + 22px) var(--page-rail-inset)
+      clamp(56px, 10vh, 84px);
+    gap: 26px;
+  }
+
+  .pgHero__title {
+    /* the wordmark stays one line at every width: it is a collision
+       surface, and a wrapped one would put a ball in mid-air */
+    font-size: clamp(34px, 16.8vw, 92px);
+  }
+
+  .pgHero__foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .pgHero__note {
+    font-size: 13.5px;
+  }
+
+  .pgHero__metaItem--end {
+    display: none;
+  }
+
+  .pgHero__hint {
+    left: var(--page-rail-inset);
+    transform: none;
+    bottom: 20px;
+  }
+
+  .pgShelf__inner {
+    padding: 0 var(--page-rail-inset);
+  }
+
+  .pgItem__link {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .pgItem__index {
+    padding-top: 0;
+  }
+
+  .pgItem__specs {
+    gap: 6px 20px;
+  }
+
+  .pgItem__art {
+    aspect-ratio: 3 / 2;
+  }
+
+  .pgItem__artImg {
+    width: 46%;
+  }
+
+  .pgItem__logo {
+    width: 60%;
+  }
+}
+
+/* ==========================================================
+   Reduced motion
+   ========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .pgHero__toys {
+    cursor: default;
+  }
+
+  .pgHero__hint {
+    display: none;
+  }
+
+  .pgItem__link *,
+  .pgItem__link {
+    transition: none !important;
+  }
+}

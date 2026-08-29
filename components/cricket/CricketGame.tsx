@@ -759,7 +759,7 @@ export default function CricketGame({
 
               <span className="ckt-menu__rule" aria-hidden />
 
-              <PageLink className="ckt-menu__item" href="/work" role="menuitem">
+              <PageLink className="ckt-menu__item" href="/playground" role="menuitem">
                 <CloseIcon />
                 Leave the game
               </PageLink>
@@ -767,7 +767,7 @@ export default function CricketGame({
           )}
         </div>
 
-        <PageLink className="ckt-icon" href="/work" aria-label="Leave the game">
+        <PageLink className="ckt-icon" href="/playground" aria-label="Leave the game">
           <CloseIcon />
         </PageLink>
       </div>
