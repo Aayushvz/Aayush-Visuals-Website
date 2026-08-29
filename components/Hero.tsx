@@ -25,6 +25,23 @@ const DRAG_THRESHOLD = 6;
 const TRAIL_MAX = 12;
 const TRAIL_LIFE_MS = 3400;
 
+/*
+  These cards render at 188-244px wide, but the raw framerusercontent.com
+  exports are the original uploads — up to 6000x4000px (5.7MB) for what's a
+  ~30KB thumbnail on screen. That's several MB of unnecessary download plus
+  main-thread decode/rasterize cost on every one of these actively-dragged,
+  entrance-animated cards, all happening at once on hero mount.
+
+  Framer's own asset CDN honours a `scale-down-to` query param (constrains
+  the longest edge, keeps aspect ratio, same format) — no re-upload, no
+  layout change needed since .heroCard__inner img is width/height:100% +
+  object-fit:cover already. 600px covers 2-3x retina at this display size
+  with room to spare for the object-fit crop.
+*/
+function framerAsset(src: string, maxEdge = 600) {
+  return src.includes("framerusercontent.com") ? `${src}?scale-down-to=${maxEdge}` : src;
+}
+
 type Card = {
   src: string;
   alt: string;
@@ -374,7 +391,7 @@ function ProjectCard({
       >
         <div className="heroCard__inner" ref={inner}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={card.src} alt={card.alt} draggable={false} loading="eager" />
+          <img src={framerAsset(card.src)} alt={card.alt} draggable={false} loading="eager" />
         </div>
       </div>
     </motion.div>
@@ -614,7 +631,10 @@ export default function Hero() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://framerusercontent.com/images/ekk0XlnOygglnIHWYDruVrstJNQ.png"
+                src={framerAsset(
+                  "https://framerusercontent.com/images/ekk0XlnOygglnIHWYDruVrstJNQ.png",
+                  350
+                )}
                 alt=""
                 draggable={false}
               />
