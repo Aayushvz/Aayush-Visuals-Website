@@ -6,27 +6,34 @@
   the counts off it, so a new object with status "live" shows up in both
   places at once.
 
-  `status` is the whole vocabulary. "live" gets a real tile and a real link,
-  "soon" gets a vacant outlined slot with no link on it, which is how the
-  page says "more is coming" without a paragraph claiming so.
+  `status` is the whole vocabulary. "live" gets a real card with real cover
+  art and a real link, "soon" gets a vacant slot in the same footprint with
+  no link on it, which is how the page says "more is coming" without a
+  paragraph claiming so.
+
+  The shape mirrors a store shelf on purpose - cover, kind, title, price -
+  because that is the format everybody already knows how to scan, and four
+  fields is the whole card. There is no description here by design: the
+  cover and the two lines under it either earn the click or they do not, and
+  a paragraph on every tile would only make the row harder to read.
 */
 
 import type { ComponentType } from "react";
-import TitleCrest from "@/components/cricket/TitleCrest";
+import { DplCover } from "./covers";
 
 export type Experiment = {
   id: string;
   index: string;
   title: string;
-  blurb: string;
+  /* the small muted line above the title - what kind of thing this is */
+  kind: string;
   href: string;
   cta: string;
-  year: string;
-  /* small key/value rows printed down the side of the tile */
-  specs: { k: string; v: string }[];
-  art?: { src: string; alt: string };
-  /* a drawn SVG mark instead of a photo — takes priority over `art` */
-  logo?: ComponentType;
+  /* the badge a storefront puts on a first release */
+  flag?: string;
+  /* where a price would sit */
+  meta: string;
+  cover: ComponentType;
   status: "live" | "soon";
 };
 
@@ -35,28 +42,24 @@ export const EXPERIMENTS: Experiment[] = [
     id: "dpl",
     index: "01",
     title: "Design Premier League",
-    blurb:
-      "Six balls, one over, a floodlit night. A browser cricket game with hand-drawn sprites, a broadcast cold open and a scoreboard that actually holds you to it.",
+    kind: "Browser game",
     href: "/cricket",
     cta: "Play the over",
-    year: "2026",
-    specs: [
-      { k: "Type", v: "Browser game" },
-      { k: "Built with", v: "Canvas, Web Audio" },
-      { k: "Time", v: "One over, about 90s" },
-    ],
-    /* the game's own league badge (TitleCrest, drawn for the opening
-       broadcast sting) — box art for the game, not a photo of its maker. */
-    logo: TitleCrest,
+    flag: "First Run",
+    meta: "Free",
+    cover: DplCover,
     status: "live",
   },
 ];
 
 /* Vacant slots. Deliberately not derived from a count: each one is a real
-   place on the shelf that a future experiment moves into. */
-export const SOON: { index: string; hint: string }[] = [
-  { index: "02", hint: "In the workshop" },
-  { index: "03", hint: "Not started yet" },
+   place on the shelf that a future experiment moves into, and there are
+   three so the top row of the grid is a complete row rather than a live
+   card with a gap after it. */
+export const SOON: { index: string; hint: string; kind: string }[] = [
+  { index: "02", hint: "In the workshop", kind: "Interface toy" },
+  { index: "03", hint: "Sketched, not built", kind: "Canvas sketch" },
+  { index: "04", hint: "Not started yet", kind: "Unclaimed" },
 ];
 
 export const LIVE_COUNT = EXPERIMENTS.filter((e) => e.status === "live").length;

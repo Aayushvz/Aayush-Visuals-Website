@@ -3,21 +3,102 @@
 
   Route-scoped on purpose (imported by PlaygroundPageClient, same pattern as
   cricket.css and figma-project.css) so none of this ships with the homepage
-  bundle. Every selector is prefixed pg-.
+  bundle. Every selector is prefixed pg-, apart from the two cover-art blocks
+  which are prefixed for the thing they draw.
 
-  Two surfaces, and the contrast between them is the page's structure:
-  the hero is the dark room where the toy lives, the shelf below is the
-  site's cream, set as a quiet editorial index. Nothing in between.
+  Two rooms. The hero is the site's theme-reactive hero ground - --hero-bg
+  under the ruled grid, dark by default, following the toggle in the nav.
+  The shelf below is the site's fixed light ground, the same plain cream
+  every other section under a hero stands on.
+
+  So every colour in here goes through one of four local tokens, and each
+  section says what those tokens mean once. Nothing below this point needs
+  to know which room it is in.
 */
 
 .pgHero {
-  --pg-fg: #f4f1ea;
-  --pg-fg-2: #8f8b84;
+  --pg-fg: var(--hero-fg);
+  --pg-mute: color-mix(in srgb, var(--hero-fg) 46%, transparent);
+  --pg-faint: color-mix(in srgb, var(--hero-fg) 28%, transparent);
+  --pg-hair: color-mix(in srgb, var(--hero-fg) 12%, transparent);
+  --pg-grid-line: var(--hero-grid-line);
+  --pg-accent: var(--purple-soft);
+}
 
+/* fixed light, not theme-reactive: this section is below the hero, and
+   everything below a hero on this site is cream by definition */
+.pgShelf {
+  --pg-fg: var(--ink);
+  --pg-mute: rgba(31, 31, 31, 0.56);
+  --pg-faint: rgba(31, 31, 31, 0.36);
+  --pg-hair: var(--ink-soft);
+  --pg-grid-line: rgba(31, 31, 31, 0.075);
+  --pg-accent: var(--purple);
+}
+
+/* ---- the ruled ground ---- */
+
+/* the homepage hero's dotted grid, hero only: nested horizontal x vertical
+   fade masks multiply so all four edges dissolve and the corners fade
+   hardest. The shelf below is left plain - its own rails and the covers are
+   structure enough, and a grid behind a row of cards is only texture. */
+.pgField {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 16%,
+    #000 84%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 16%,
+    #000 84%,
+    transparent 100%
+  );
+}
+
+.pgField__v {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 16%,
+    #000 84%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 16%,
+    #000 84%,
+    transparent 100%
+  );
+}
+
+.pgField__pattern {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+}
+
+/* ==========================================================
+   The hero
+   ========================================================== */
+
+.pgHero {
   position: relative;
   min-height: 100svh;
   display: flex;
-  background: #1a1a1a;
+  background: var(--hero-bg);
   color: var(--pg-fg);
   /* clip, not hidden: an overflow:hidden full-viewport section becomes its
      own scroll box the moment anything overshoots, which silently offsets
@@ -48,42 +129,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(28px, 6vh, 64px);
+  justify-content: center;
   padding: clamp(96px, 14vh, 152px) var(--page-rail-inset) clamp(40px, 7vh, 72px);
   width: 100%;
-}
-
-/* ---- top meta row ---- */
-
-.pgHero__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.pgHero__metaItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--pg-fg-2);
-}
-
-.pgHero__metaItem--end {
-  color: rgba(244, 241, 234, 0.34);
-}
-
-.pgHero__node {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--purple-soft);
-  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.14);
 }
 
 /* ---- the wordmark, which is also the floor ---- */
@@ -101,36 +149,79 @@
   white-space: nowrap;
 }
 
-.pgHero__word {
-  display: inline-block;
+/* the heading a screen reader gets, since the split wordmark is aria-hidden */
+.pgHero__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* ---- bottom row: one paragraph and one number ---- */
+.pgHero__word {
+  display: inline-block;
+  color: var(--pg-fg);
+}
+
+/*
+  One span per glyph, lit one at a time as the pointer crosses it - the same
+  move as the contact page's heading.
+
+  The class is toggled from PlaygroundHero rather than by :hover, because the
+  canvas covers the whole hero so the balls can rest on the letters, and it
+  swallows every pointer event the type would otherwise have received.
+
+  No transform on the lit state, deliberately: on the contact page the
+  letters are decoration and can rise 4px, but here they are the collision
+  surface, and a letter that steps out from under a resting ball leaves it
+  hanging in mid-air.
+*/
+.pgHero__letter {
+  display: inline-block;
+  transition: color 0.25s var(--ease-quint);
+}
+
+.pgHero__letter--lit {
+  color: var(--purple-soft);
+}
+
+/* ---- the bottom edge: one affordance, one number ---- */
 
 .pgHero__foot {
+  position: absolute;
+  z-index: 4;
+  left: var(--page-rail-inset);
+  right: var(--page-rail-inset);
+  bottom: clamp(20px, 3.4vh, 34px);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: clamp(24px, 6vw, 96px);
+  gap: 20px;
+  pointer-events: none;
 }
 
-.pgHero__note {
+.pgHero__hint {
   margin: 0;
-  max-width: 46ch;
-  font-size: clamp(14px, 1.15vw, 16.5px);
-  line-height: 1.62;
-  color: rgba(244, 241, 234, 0.62);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--pg-faint);
 }
 
 .pgHero__count {
   display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  flex-shrink: 0;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
 }
 
 .pgHero__countNum {
-  font-size: clamp(34px, 4.2vw, 56px);
+  font-size: clamp(26px, 3vw, 40px);
   font-weight: 500;
   line-height: 0.86;
   letter-spacing: -0.04em;
@@ -142,26 +233,7 @@
   font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  line-height: 1.5;
-  color: var(--pg-fg-2);
-  padding-bottom: 2px;
-}
-
-/* centred along the bottom edge, below the foot row rather than beside it:
-   at the right rail this sat straight on top of the live-experiment count */
-.pgHero__hint {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 18px;
-  margin: 0;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.26);
-  pointer-events: none;
+  color: var(--pg-mute);
 }
 
 /* ==========================================================
@@ -171,8 +243,9 @@
 .pgShelf {
   position: relative;
   background: var(--cream);
-  color: var(--ink);
-  padding: clamp(88px, 13vw, 176px) 0 clamp(88px, 12vw, 160px);
+  color: var(--pg-fg);
+  padding: clamp(80px, 11vw, 150px) 0 clamp(88px, 12vw, 160px);
+  overflow: clip;
 }
 
 .pgRails {
@@ -189,7 +262,7 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--ink-soft);
+  background: var(--pg-hair);
 }
 
 .pgRails::before {
@@ -207,328 +280,592 @@
 }
 
 .pgShelf__head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: end;
-  gap: clamp(20px, 5vw, 72px);
-  padding-bottom: clamp(34px, 4.5vw, 58px);
-  border-bottom: 1px solid var(--ink-soft);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: clamp(20px, 2.6vw, 32px);
+  border-bottom: 1px solid var(--pg-hair);
 }
 
 .pgShelf__title {
   margin: 0;
-  font-size: clamp(34px, 5.4vw, 76px);
+  font-size: clamp(30px, 4.4vw, 62px);
   font-weight: 600;
   letter-spacing: -0.042em;
   line-height: 0.94;
 }
 
-.pgShelf__lede {
-  margin: 0 0 4px;
-  max-width: 42ch;
-  font-size: clamp(13.5px, 1.05vw, 15.5px);
-  line-height: 1.62;
-  color: rgba(31, 31, 31, 0.58);
-}
+/* ---- the filter ---- */
 
-.pgShelf__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* ---- a live experiment ---- */
-
-.pgItem {
-  border-bottom: 1px solid var(--ink-soft);
-}
-
-.pgItem__link {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) clamp(180px, 22vw, 300px);
-  align-items: center;
-  gap: clamp(20px, 4vw, 64px);
-  padding: clamp(30px, 4vw, 54px) 0;
-  color: inherit;
-}
-
-.pgItem__index {
-  align-self: start;
-  padding-top: 8px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  color: rgba(31, 31, 31, 0.38);
-  font-variant-numeric: tabular-nums;
-  transition: color var(--dur-state) var(--ease-quint);
-}
-
-.pgItem__titleRow {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-}
-
-.pgItem__title {
-  margin: 0;
-  font-size: clamp(26px, 3.4vw, 46px);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.02;
-}
-
-.pgItem__year {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  color: rgba(31, 31, 31, 0.34);
-  font-variant-numeric: tabular-nums;
-}
-
-.pgItem__blurb {
-  margin: 12px 0 0;
-  max-width: 54ch;
-  font-size: clamp(13.5px, 1.02vw, 15.5px);
-  line-height: 1.62;
-  color: rgba(31, 31, 31, 0.6);
-}
-
-/* the spec rows are the "book weight" counterpoint to the big title: small,
-   even, mono-ish, and deliberately not competing for attention */
-.pgItem__specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 28px;
-  margin: 20px 0 0;
-}
-
-.pgItem__spec {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.pgItem__specK {
-  margin: 0;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(31, 31, 31, 0.34);
-}
-
-.pgItem__specV {
-  margin: 0;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: rgba(31, 31, 31, 0.72);
-}
-
-.pgItem__cta {
+.pgFilter {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 26px;
+  gap: 11px;
+  flex-shrink: 0;
+  padding-bottom: 3px;
+}
+
+.pgFilter__label {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pg-faint);
+}
+
+.pgFilter__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 11px 8px 13px;
+  border: 1px solid var(--pg-hair);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pg-fg);
+  font: inherit;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: border-color var(--dur-state) var(--ease-quint),
+    color var(--dur-state) var(--ease-quint);
 }
 
-.pgItem__ctaText {
-  position: relative;
+.pgFilter__button:hover {
+  border-color: color-mix(in srgb, var(--pg-accent) 46%, transparent);
+  color: var(--pg-accent);
 }
 
-/* the underline draws in from the left rather than the whole line existing
-   at rest, so the row has somewhere to go on hover */
-.pgItem__ctaText::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
-  height: 1px;
-  background: var(--purple);
-  transform: scaleX(0);
-  transform-origin: left;
+.pgFilter__button:focus-visible,
+.pgFilter__option:focus-visible {
+  outline: 2px solid var(--pg-accent);
+  outline-offset: 2px;
+}
+
+.pgFilter__chev {
+  display: inline-flex;
+  color: var(--pg-mute);
   transition: transform var(--dur-state) var(--ease-quint);
 }
 
-.pgItem__ctaArrow {
+.pgFilter__chev svg {
+  width: 13px;
+  height: 13px;
+}
+
+.pgFilter__chev[data-open] {
+  transform: rotate(180deg);
+}
+
+.pgFilter__list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 7px);
+  right: 0;
+  min-width: 196px;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--pg-hair);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(31, 31, 31, 0.06), 0 18px 40px rgba(31, 31, 31, 0.14);
+}
+
+.pgFilter__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--pg-fg);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pgFilter__option[data-active] {
+  background: color-mix(in srgb, var(--pg-accent) 10%, transparent);
+  color: var(--purple-mid);
+}
+
+.pgFilter__tick {
+  color: var(--pg-accent);
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ---- the grid ---- */
+
+.pgGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(24px, 3vw, 44px) clamp(14px, 1.7vw, 26px);
+  list-style: none;
+  margin: 0;
+  padding: clamp(26px, 3.2vw, 44px) 0 0;
+}
+
+.pgCard {
+  min-width: 0;
+}
+
+.pgCard__link {
+  display: block;
+  color: inherit;
+}
+
+.pgCard__art {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #12101c;
+  /* the cover art scales off the card, not the viewport, so a 4-up row and
+     a 2-up row get the same lockup proportions rather than the same pixels */
+  container-type: inline-size;
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.06),
+    0 2px 4px rgba(31, 31, 31, 0.06), 0 14px 30px rgba(31, 31, 31, 0.13);
+  transition: transform var(--dur-panel) var(--ease-quint),
+    box-shadow var(--dur-panel) var(--ease-quint);
+}
+
+/* the slot number, stamped on the art the way a catalogue number is */
+.pgCard__index {
+  position: absolute;
+  z-index: 6;
+  top: 11px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: rgba(244, 241, 234, 0.55);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* the play affordance, held back until a pointer arrives. It carries no
+   information of its own, so it is free to be hover-only. */
+.pgCard__play {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 40px 13px 13px;
+  background: linear-gradient(
+    to top,
+    rgba(8, 5, 18, 0.96) 0%,
+    rgba(8, 5, 18, 0.82) 46%,
+    rgba(8, 5, 18, 0) 100%
+  );
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #fff;
+  transform: translateY(16px);
+  opacity: 0;
+  transition: transform var(--dur-panel) var(--ease-quint),
+    opacity var(--dur-state) var(--ease-quint);
+}
+
+.pgCard__playArrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 1px solid var(--ink-soft);
-  color: var(--ink);
-  transition: background var(--dur-state) var(--ease-quint),
-    border-color var(--dur-state) var(--ease-quint),
-    color var(--dur-state) var(--ease-quint),
-    transform var(--dur-state) var(--ease-quint);
+  background: var(--purple);
+  flex-shrink: 0;
 }
 
-.pgItem__ctaArrow svg {
-  width: 14px;
-  height: 14px;
+.pgCard__playArrow svg {
+  width: 12px;
+  height: 12px;
 }
 
-/* ---- the tile art ---- */
-
-.pgItem__art {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  border-radius: 4px;
-  background: #1a1a1a;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.pgCard__meta {
+  padding-top: 13px;
 }
 
-.pgItem__artImg {
-  position: relative;
-  z-index: 2;
-  width: 58%;
-  height: auto;
-  object-fit: contain;
-  transition: transform var(--dur-panel) var(--ease-quint);
-}
-
-/* the drawn league badge isn't a next/image, so its own svg needs the
-   sizing .pgItem__artImg normally gets from being an <img>. Flat vector
-   art reads smaller than a photo at the same box width — sized up from
-   the 58% baseline to give the badge the same visual weight on the tile. */
-.pgItem__logo {
-  width: 76%;
-}
-
-.pgItem__logo svg {
+.pgCard__kind {
   display: block;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
-}
-
-/* a single floodlight, off-centre, so the tile has a light source rather
-   than a flat fill */
-.pgItem__artGlow {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: radial-gradient(
-    62% 62% at 50% 18%,
-    rgba(139, 92, 246, 0.34),
-    rgba(139, 92, 246, 0) 70%
-  );
-  opacity: 0.75;
-  transition: opacity var(--dur-panel) var(--ease-quint);
-}
-
-/* ---- hover: one coordinated move, not six separate ones ---- */
-
-@media (hover: hover) {
-  .pgItem__link:hover .pgItem__ctaText::after {
-    transform: scaleX(1);
-  }
-
-  .pgItem__link:hover .pgItem__ctaArrow {
-    background: var(--purple);
-    border-color: var(--purple);
-    color: #fff;
-    transform: translateX(3px);
-  }
-
-  .pgItem__link:hover .pgItem__index {
-    color: var(--purple);
-  }
-
-  .pgItem__link:hover .pgItem__artImg {
-    transform: scale(1.05) translateY(-4px);
-  }
-
-  .pgItem__link:hover .pgItem__artGlow {
-    opacity: 1;
-  }
-}
-
-.pgItem__link:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 6px;
-  border-radius: 2px;
-}
-
-/* ---- vacant slots ---- */
-
-.pgSlot {
-  display: flex;
-  align-items: center;
-  gap: clamp(20px, 4vw, 64px);
-  padding: clamp(22px, 2.6vw, 34px) 0;
-  border-bottom: 1px dashed rgba(31, 31, 31, 0.16);
-}
-
-.pgSlot__index {
   font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--pg-faint);
+}
+
+.pgCard__title {
+  margin: 4px 0 0;
+  font-size: clamp(14px, 1.1vw, 15.5px);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  line-height: 1.28;
+  transition: color var(--dur-state) var(--ease-quint);
+}
+
+.pgCard__status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  margin-top: 9px;
+}
+
+.pgCard__flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--pg-accent) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pg-accent) 9%, transparent);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--purple-mid);
+}
+
+.pgCard__flagIcon {
+  display: inline-flex;
+}
+
+.pgCard__flagIcon svg {
+  width: 10px;
+  height: 10px;
+}
+
+.pgCard__price {
+  font-size: 12px;
+  color: var(--pg-mute);
+}
+
+/* ---- hover: one coordinated move ---- */
+
+@media (hover: hover) {
+  .pgCard__link:hover .pgCard__art {
+    transform: translateY(-6px);
+    box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.08),
+      0 4px 8px rgba(31, 31, 31, 0.08), 0 26px 48px rgba(31, 31, 31, 0.22);
+  }
+
+  .pgCard__link:hover .pgCard__play {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .pgCard__link:hover .pgCard__title {
+    color: var(--purple-mid);
+  }
+}
+
+.pgCard__link:focus-visible {
+  outline: 2px solid var(--pg-accent);
+  outline-offset: 5px;
+  border-radius: 10px;
+}
+
+.pgCard__link:focus-visible .pgCard__play {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ---- a vacant slot ---- */
+
+.pgCard--soon .pgCard__art {
+  box-shadow: inset 0 0 0 1px var(--pg-hair);
+  background: color-mix(in srgb, var(--ink) 4%, var(--cream));
+}
+
+.pgCard--soon .pgCard__title {
+  font-weight: 400;
+  color: var(--pg-mute);
+}
+
+/* ==========================================================
+   Cover art
+   ========================================================== */
+
+/*
+  A floodlit night, drawn in layers: the sky, two light cones, a masked dot
+  field standing in for a crowd, the bloom the lights throw onto the square,
+  the pool of light on the ground, the shot leaving the bat, the batter, and
+  a scrim under the title so the lockup has something to sit on.
+
+  Drawn rather than photographed so it is sharp at any card size, ships no
+  extra image beyond the one sprite the game already loads, and stays fixed
+  while the page around it follows the theme - box art does not have a light
+  mode.
+*/
+.dplCover {
+  position: absolute;
+  inset: 0;
+}
+
+.dplCover__sky,
+.dplCover__crowd,
+.dplCover__bloom,
+.dplCover__pitch,
+.dplCover__arc,
+.dplCover__scrim {
+  position: absolute;
+  pointer-events: none;
+}
+
+.dplCover__sky {
+  inset: 0;
+  background:
+    radial-gradient(118% 62% at 50% 4%, #3d2176 0%, rgba(61, 33, 118, 0) 64%),
+    linear-gradient(180deg, #0a0614 0%, #150d2b 36%, #251549 68%, #0d0720 100%);
+}
+
+/* two cones, opening downward and offset, so the cover agrees with the balls
+   above it about where the light in this room is coming from */
+.dplCover__beam {
+  position: absolute;
+  top: -8%;
+  width: 62%;
+  height: 82%;
+  background: linear-gradient(
+    to bottom,
+    rgba(216, 206, 255, 0.26),
+    rgba(216, 206, 255, 0) 78%
+  );
+  clip-path: polygon(40% 0, 54% 0, 96% 100%, 4% 100%);
+  pointer-events: none;
+}
+
+.dplCover__beam--l {
+  left: -20%;
+  transform: rotate(-7deg);
+  opacity: 0.9;
+}
+
+.dplCover__beam--r {
+  right: -20%;
+  transform: rotate(7deg) scaleX(-1);
+  opacity: 0.62;
+}
+
+.dplCover__crowd {
+  left: -12%;
+  right: -12%;
+  top: 22%;
+  height: 24%;
+  background-image: radial-gradient(
+    circle,
+    rgba(196, 184, 246, 0.6) 0.9px,
+    transparent 1.5px
+  );
+  background-size: 8px 7px;
+  opacity: 0.42;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 32%,
+    #000 62%,
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, transparent, #000 32%, #000 62%, transparent);
+}
+
+.dplCover__bloom {
+  inset: 0;
+  background: radial-gradient(
+    44% 32% at 50% 56%,
+    rgba(167, 139, 250, 0.46),
+    rgba(167, 139, 250, 0) 74%
+  );
+}
+
+.dplCover__pitch {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  background:
+    radial-gradient(
+      56% 44% at 50% 98%,
+      rgba(206, 190, 255, 0.32),
+      rgba(206, 190, 255, 0) 76%
+    ),
+    linear-gradient(to top, rgba(9, 5, 20, 0.62), rgba(9, 5, 20, 0) 84%);
+}
+
+/* the boundary rope, one hairline, so the ground has a far edge */
+.dplCover__pitch::before {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 16%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(203, 189, 255, 0.32) 30%,
+    rgba(203, 189, 255, 0.32) 70%,
+    transparent
+  );
+}
+
+.dplCover__arc {
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+}
+
+.dplCover__figure {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 12%;
+  width: auto;
+  height: 62%;
+  transform: translateX(-54%);
+  object-fit: contain;
+  filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 26px rgba(139, 92, 246, 0.28));
+}
+
+.dplCover__scrim {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  height: 54%;
+  background: linear-gradient(
+    to top,
+    rgba(7, 4, 16, 0.95) 0%,
+    rgba(7, 4, 16, 0.74) 36%,
+    rgba(7, 4, 16, 0) 100%
+  );
+}
+
+.dplCover__lock {
+  position: absolute;
+  z-index: 5;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.dplCover__name {
+  display: block;
+  /* the vw clamp is the fallback for engines without container units; the
+     cqw rule below is the one that should win everywhere current */
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f7f3ff;
+  text-shadow: 0 2px 20px rgba(6, 3, 14, 0.7);
+}
+
+/* ---- the vacant cover ---- */
+
+.slotCover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ink) 4%, var(--cream));
+}
+
+.slotCover::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px dashed var(--pg-hair);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.slotCover__grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(72% 60% at 50% 50%, #000, transparent);
+  mask-image: radial-gradient(72% 60% at 50% 50%, #000, transparent);
+}
+
+.slotCover__index {
+  position: absolute;
+  top: 14px;
+  left: 15px;
+  font-size: 10px;
+  font-weight: 500;
   letter-spacing: 0.16em;
-  color: rgba(31, 31, 31, 0.24);
+  color: var(--pg-faint);
   font-variant-numeric: tabular-nums;
 }
 
-.pgSlot__label {
-  flex: 1;
-  font-size: clamp(15px, 1.5vw, 19px);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: rgba(31, 31, 31, 0.3);
+.slotCover__plus {
+  display: block;
+  width: 13cqw;
+  min-width: 20px;
+  color: var(--pg-faint);
 }
 
-.pgSlot__mark {
-  font-size: 17px;
-  font-weight: 400;
-  color: rgba(31, 31, 31, 0.22);
-  line-height: 1;
+.slotCover__plus svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ==========================================================
    Responsive
    ========================================================== */
 
-@media (max-width: 900px) {
-  .pgShelf__head {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    gap: 16px;
+@media (max-width: 1180px) {
+  .pgGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
-  .pgItem__link {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  /* the art moves under the copy rather than shrinking into a stamp */
-  .pgItem__art {
-    grid-column: 1 / -1;
-    aspect-ratio: 16 / 9;
-    margin-top: 4px;
-  }
-
-  .pgItem__artImg {
-    width: 34%;
-  }
-
-  /* keep the badge's larger desktop ratio to .pgItem__artImg (58% -> 34%
-     is a 0.586x step; the same step off the logo's 76% baseline) */
-  .pgItem__logo {
-    width: 44.5%;
+@media (max-width: 860px) {
+  .pgGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
+  /*
+    A phone is mostly height, and a wordmark centred in it leaves a very
+    tall empty room with a small word floating in the middle of it. So on
+    a phone the word drops to the lower third: the balls get a long fall
+    above it, the floor under it is a strip rather than half the screen,
+    and the composition has a bottom edge to sit on.
+  */
+  .pgHero {
+    min-height: 90svh;
+  }
+
+  /* the bottom padding is the depth of the floor strip under the wordmark,
+     and it has to clear the largest ball's diameter or the set ends up
+     wedged between the descenders and the labels */
   .pgHero__inner {
+    justify-content: flex-end;
     padding: calc(var(--mnav-clear) + 22px) var(--page-rail-inset)
-      clamp(56px, 10vh, 84px);
-    gap: 26px;
+      clamp(142px, 22vh, 196px);
   }
 
   .pgHero__title {
@@ -537,53 +874,40 @@
     font-size: clamp(34px, 16.8vw, 92px);
   }
 
-  .pgHero__foot {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 22px;
-  }
-
-  .pgHero__note {
-    font-size: 13.5px;
-  }
-
-  .pgHero__metaItem--end {
-    display: none;
-  }
-
-  .pgHero__hint {
-    left: var(--page-rail-inset);
-    transform: none;
-    bottom: 20px;
-  }
-
   .pgShelf__inner {
     padding: 0 var(--page-rail-inset);
   }
 
-  .pgItem__link {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+  /* the control drops under the heading rather than squeezing it */
+  .pgShelf__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
   }
 
-  .pgItem__index {
-    padding-top: 0;
+  .pgFilter__list {
+    left: 0;
+    right: auto;
   }
 
-  .pgItem__specs {
-    gap: 6px 20px;
+  /* nothing to hover with, and the strip says nothing the label below does
+     not already say, so it just goes */
+  .pgCard__play {
+    display: none;
+  }
+}
+
+/* on the narrowest phones the two bottom labels stop fitting on one line
+   together, so they stack rather than being squeezed or clipped */
+@media (max-width: 430px) {
+  .pgHero__foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
-  .pgItem__art {
-    aspect-ratio: 3 / 2;
-  }
-
-  .pgItem__artImg {
-    width: 46%;
-  }
-
-  .pgItem__logo {
-    width: 60%;
+  .pgHero__count {
+    align-items: baseline;
   }
 }
 
@@ -600,8 +924,18 @@
     display: none;
   }
 
-  .pgItem__link *,
-  .pgItem__link {
+  .pgHero__letter,
+  .pgCard__art,
+  .pgCard__title,
+  .pgCard__play,
+  .pgFilter__button,
+  .pgFilter__chev {
     transition: none !important;
+  }
+
+  @media (hover: hover) {
+    .pgCard__link:hover .pgCard__art {
+      transform: none;
+    }
   }
 }
