@@ -4,9 +4,9 @@
   Ported from the standalone build's inline <style>, with two changes forced
   by the move onto the site: nothing may touch html/body any more (the pond is
   a route, not a document), so the full-bleed and the hidden overflow are the
-  pond's own fixed layer; and the type is the site's rather than the browser's
-  monospace default, so the panel reads as part of this portfolio instead of a
-  widget borrowed from somewhere else.
+  pond's own fixed layer; and the type is the site's General Sans rather than
+  the browser's monospace default, so the panel reads as part of this
+  portfolio instead of a widget borrowed from somewhere else.
 
   Route-scoped - imported by LotusPond, same pattern as cricket.css and
   playground.css - so none of it ships with any other page.
@@ -21,6 +21,16 @@
   /* the pond is the whole viewport and nothing in it scrolls */
   overflow: hidden;
   overscroll-behavior: none;
+
+  /*
+    Stated rather than inherited. It would come down from body anyway, but the
+    pond's chrome is the only DOM on this route and it is one CSS reset away
+    from silently falling back to a system face; naming the token here means
+    the panel is on the design system by declaration, not by luck. The micro
+    labels below use the same 10.5px / 0.15em uppercase step the playground
+    and the rest of the site use for this size of text.
+  */
+  font-family: var(--font-primary);
 }
 
 /*
@@ -102,9 +112,9 @@
 
 .pond__sub {
   margin-top: 3px;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #8fb0b8;
 }
@@ -147,9 +157,9 @@
   background: rgba(255, 255, 255, 0.04);
   color: inherit;
   font: inherit;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   line-height: 1;
   cursor: pointer;

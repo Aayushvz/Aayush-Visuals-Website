@@ -70,7 +70,7 @@ export default function LotusPond() {
       */}
       <div className={`pond__panel${ready ? " pond__panel--ready" : ""}`}>
         <div className="pond__title">Lotus Pond</div>
-        <div className="pond__sub">Mrinali&rsquo;s pet frog</div>
+        <div className="pond__sub">Aayush&rsquo;s pet frog</div>
         <p className="pond__desc">
           Catch coding bugs and help the pond flourish. Click a bug and the
           frog hops the lily pads to reach it.
