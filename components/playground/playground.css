@@ -933,8 +933,21 @@
     font-size: clamp(34px, 16.8vw, 92px);
   }
 
+  /*
+    The rails go.
+
+    They are a desktop device: two hairlines marking the measure that the
+    content then sits inside of. On a phone there is no measure to mark -
+    the content is already the full width of the screen - so all they do is
+    draw a line down each edge and box the cards in. Losing them also frees
+    the gutter, which no longer has to be the rail inset it was hugging.
+  */
+  .pgRails {
+    display: none;
+  }
+
   .pgShelf__inner {
-    padding: 0 var(--page-rail-inset);
+    padding: 0 22px;
   }
 
   /* the control drops under the heading rather than squeezing it */
