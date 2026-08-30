@@ -19,7 +19,7 @@
 */
 
 import type { ComponentType } from "react";
-import { DplCover } from "./covers";
+import { DplCover, PondCover } from "./covers";
 
 export type Experiment = {
   id: string;
@@ -50,14 +50,26 @@ export const EXPERIMENTS: Experiment[] = [
     cover: DplCover,
     status: "live",
   },
+  {
+    id: "pond",
+    index: "02",
+    title: "Lotus Pond",
+    kind: "Pixel diorama",
+    href: "/frog",
+    cta: "Visit the pond",
+    /* no score, no timer, nothing to lose - so the status line says what it
+       costs rather than pretending there is a challenge to beat */
+    meta: "Free · stay as long as you like",
+    cover: PondCover,
+    status: "live",
+  },
 ];
 
 /* Vacant slots. Deliberately not derived from a count: each one is a real
    place on the shelf that a future experiment moves into, and there are
-   three so the top row of the grid is a complete row rather than a live
-   card with a gap after it. */
+   two so the live pair plus these fills the top row of the grid rather
+   than leaving a gap after the last real card. */
 export const SOON: { index: string; hint: string; kind: string }[] = [
-  { index: "02", hint: "In the workshop", kind: "Interface toy" },
   { index: "03", hint: "Sketched, not built", kind: "Canvas sketch" },
   { index: "04", hint: "Not started yet", kind: "Unclaimed" },
 ];

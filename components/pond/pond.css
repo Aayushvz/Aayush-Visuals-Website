@@ -1,0 +1,257 @@
+/*
+  Lotus Pond styles.
+
+  Ported from the standalone build's inline <style>, with two changes forced
+  by the move onto the site: nothing may touch html/body any more (the pond is
+  a route, not a document), so the full-bleed and the hidden overflow are the
+  pond's own fixed layer; and the type is the site's rather than the browser's
+  monospace default, so the panel reads as part of this portfolio instead of a
+  widget borrowed from somewhere else.
+
+  Route-scoped - imported by LotusPond, same pattern as cricket.css and
+  playground.css - so none of it ships with any other page.
+*/
+
+.pond {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #0b0f1e;
+  color-scheme: dark;
+  /* the pond is the whole viewport and nothing in it scrolls */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/*
+  The game canvas fills the viewport. Its backing store is tiny - the renderer
+  picks a virtual pixel size so the internal height lands near 232px - and the
+  browser upscales it with nearest-neighbour, which is the whole reason the
+  pixel art stays crisp instead of turning to soup.
+*/
+.pond__stage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  /* the system pointer is hidden: the game draws its own firefly cursor */
+  cursor: none;
+  touch-action: none;
+}
+
+/* ---- the boot label ---- */
+
+.pond__boot {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  background: #0b0f1e;
+  color: #6b7a9c;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  transition: opacity 900ms ease;
+}
+
+.pond__boot--gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---- the info card ---- */
+
+/*
+  Top-left, never over the frog, which sits centre-low. Dark translucent glass
+  so it reads as something floating above the night rather than a slab cut out
+  of it.
+*/
+.pond__panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 8;
+  width: 244px;
+  padding: 14px 16px 13px;
+  background: linear-gradient(160deg, rgba(20, 32, 46, 0.62), rgba(12, 20, 32, 0.5));
+  backdrop-filter: blur(9px) saturate(1.15);
+  -webkit-backdrop-filter: blur(9px) saturate(1.15);
+  border: 1px solid rgba(150, 205, 214, 0.2);
+  border-radius: 13px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: #d3e3e8;
+  user-select: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+.pond__panel--ready {
+  opacity: 1;
+  transform: none;
+}
+
+.pond__title {
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #eaf5f2;
+}
+
+.pond__sub {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8fb0b8;
+}
+
+.pond__desc {
+  margin: 10px 0 11px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #a9c4cb;
+}
+
+.pond__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(150, 205, 214, 0.14);
+}
+
+.pond__bugs {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: #c7dbe1;
+}
+
+.pond__bugs b {
+  margin-left: 4px;
+  font-weight: 600;
+  color: #ffe9a3;
+  font-variant-numeric: tabular-nums;
+}
+
+.pond__mute {
+  appearance: none;
+  min-width: 34px;
+  padding: 4px 8px;
+  border: 1px solid rgba(150, 205, 214, 0.18);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.pond__mute:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(150, 205, 214, 0.34);
+}
+
+.pond__mute--off {
+  color: #7b939b;
+}
+
+/* ---- the way out ---- */
+
+/*
+  Bottom-left, quiet, and the one control that did not exist in the standalone
+  build: there, closing the tab was the exit. Here the pond is a room in a
+  larger site and needs a door, matching the cricket game's own leave control.
+*/
+.pond__leave {
+  position: absolute;
+  z-index: 8;
+  left: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px 8px 9px;
+  border: 1px solid rgba(150, 205, 214, 0.18);
+  border-radius: 999px;
+  background: rgba(12, 20, 32, 0.5);
+  backdrop-filter: blur(9px) saturate(1.15);
+  -webkit-backdrop-filter: blur(9px) saturate(1.15);
+  color: #a9c4cb;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+.pond__leave:hover {
+  color: #eaf5f2;
+  border-color: rgba(150, 205, 214, 0.38);
+  background: rgba(18, 30, 44, 0.66);
+}
+
+.pond__leave:focus-visible,
+.pond__mute:focus-visible {
+  outline: 2px solid rgba(196, 181, 253, 0.8);
+  outline-offset: 3px;
+}
+
+.pond__leaveArrow {
+  display: inline-flex;
+}
+
+.pond__leaveArrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---- phone ---- */
+
+@media (max-width: 640px) {
+  /*
+    The card gives up its description on a phone. At 375 a 244px panel with a
+    three-line paragraph covers a third of the pond, and the pond is the point;
+    the title, the count and the sound toggle are the parts you actually come
+    back to.
+  */
+  .pond__panel {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    padding: 11px 13px 10px;
+  }
+
+  .pond__desc {
+    display: none;
+  }
+
+  .pond__row {
+    padding-top: 9px;
+  }
+
+  .pond__leave {
+    left: 12px;
+    bottom: 12px;
+  }
+}
+
+/* ---- reduced motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pond__panel,
+  .pond__boot,
+  .pond__leave,
+  .pond__mute {
+    transition: none;
+  }
+}

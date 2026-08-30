@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/contact", priority: 0.7 },
     { path: "/playground", priority: 0.6 },
     { path: "/cricket", priority: 0.4 },
+    { path: "/frog", priority: 0.4 },
   ].map(({ path, priority }) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
