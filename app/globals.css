@@ -7074,10 +7074,15 @@ html.has-cursor .cursorRing {
 /* Testimonials and HomeContact are shared with the homepage, so the
    one-screen rule is scoped to the About page's own wrapper rather than
    applied to .testi / .hc globally. */
-.aboutPostBanner .testi,
-.aboutPostBanner .hc {
+.aboutPostBanner .testi {
   background: var(--ab-bg);
   color: var(--ab-ink);
+}
+
+/* the contact section keeps its purple ground on About too - this wrapper
+   used to repaint it in the page background */
+.aboutPostBanner .testi,
+.aboutPostBanner .hc {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -8673,9 +8678,10 @@ html.has-cursor .cursorRing {
 /* ---- Home Contact (hc) ---- */
 
 .hc {
-  background: var(--cream);
+  background: var(--purple);
   padding: 112px var(--page-content-inset) 120px;
-  border-top: 1px solid #e8e4dc;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 
 .hc__inner {
@@ -8691,8 +8697,8 @@ html.has-cursor .cursorRing {
   gap: 7px;
   padding: 6px 14px 6px 10px;
   border-radius: 999px;
-  background: #7c3aed;
-  color: #fff;
+  background: #fff;
+  color: var(--purple);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -8712,13 +8718,13 @@ html.has-cursor .cursorRing {
   font-weight: 500;
   line-height: 1.0;
   letter-spacing: -0.04em;
-  color: #1a1a1a;
+  color: #fff;
   margin: 0 0 18px;
 }
 
 .hc__tagline {
   font-size: 15px;
-  color: rgba(31, 31, 31, 0.48);
+  color: rgba(255, 255, 255, 0.74);
   line-height: 1.65;
   margin: 0 0 36px;
   max-width: 300px;
@@ -8739,21 +8745,21 @@ html.has-cursor .cursorRing {
   gap: 14px;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(31, 31, 31, 0.62);
+  color: rgba(255, 255, 255, 0.86);
 }
 
 .hc__bulletMark {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.42);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   font-size: 15px;
   line-height: 1;
-  color: #7c3aed;
+  color: #fff;
 }
 
 .hc__form {
@@ -8765,12 +8771,12 @@ html.has-cursor .cursorRing {
 .hc__input,
 .hc__textarea {
   width: 100%;
-  background: #f3f2ee;
-  border: 1.5px solid transparent;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   font-family: var(--font-primary);
   font-size: 15px;
-  color: #1a1a1a;
+  color: #fff;
   padding: 15px 18px;
   outline: none;
   resize: none;
@@ -8779,19 +8785,19 @@ html.has-cursor .cursorRing {
 
 .hc__input::placeholder,
 .hc__textarea::placeholder {
-  color: rgba(31, 31, 31, 0.36);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .hc__input:hover,
 .hc__textarea:hover {
-  background: #edebe6;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .hc__input:focus,
 .hc__textarea:focus {
-  background: #fff;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
 }
 
 .hc__textarea {
@@ -8802,8 +8808,8 @@ html.has-cursor .cursorRing {
 .hc__submit {
   width: 100%;
   padding: 17px 28px;
-  background: #1a1a1a;
-  color: #f4f1ea;
+  background: #fff;
+  color: var(--purple);
   border: none;
   border-radius: 10px;
   font-family: var(--font-primary);
@@ -8820,9 +8826,9 @@ html.has-cursor .cursorRing {
 }
 
 .hc__submit:hover:not(:disabled) {
-  background: #7c3aed;
+  background: #f4f1ea;
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 28px rgba(23, 8, 56, 0.28);
 }
 
 .hc__submit:active:not(:disabled) {
