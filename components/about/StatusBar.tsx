@@ -19,7 +19,16 @@ export type AboutStatus =
   | "AVAILABLE"
   | "SCROLLING";
 
-export default function StatusBar({ status, section }: { status: AboutStatus; section: string }) {
+export default function StatusBar({
+  status,
+  section,
+  visible = true,
+}: {
+  status: AboutStatus;
+  section: string;
+  /** the bar belongs to the hero; the page hides it once the hero leaves */
+  visible?: boolean;
+}) {
   const scrlRef = useRef<HTMLSpanElement>(null);
   const crsrRef = useRef<HTMLSpanElement>(null);
   const [time, setTime] = useState("--:--:--");
@@ -80,7 +89,11 @@ export default function StatusBar({ status, section }: { status: AboutStatus; se
   /* one row of bordered cells, per the Figma: SCRL | CRSR | 02 — ABOUT
      (flexible centre) | STATUS | THEME | IST — keys grey, values purple */
   return (
-    <footer className="aboutPage__bar" aria-label="Page telemetry">
+    <footer
+      className={`aboutPage__bar${visible ? "" : " aboutPage__bar--hidden"}`}
+      aria-label="Page telemetry"
+      aria-hidden={!visible}
+    >
       <span className="aboutPage__barCell aboutPage__barCell--scrl">
         <span className="aboutPage__barKey">SCRL</span>
         <span className="aboutPage__barVal" ref={scrlRef}>

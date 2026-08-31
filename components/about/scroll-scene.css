@@ -1,0 +1,293 @@
+/*
+  The pinned scroll scene.
+
+  Route-scoped, imported by ScrollScene. Holds no magic numbers: every layout
+  and motion value arrives as a custom property from scene.config.ts by way of
+  IntroScene, so tuning the scene never means reading this file.
+
+  ScrollScene publishes one number, --p, and every block remaps its own window
+  off it. That is what lets the lead block and the info panels overlap: the
+  first is still on its way out while the second is already arriving, inside
+  one scene, with neither needing to know about the other.
+
+  Nothing transitions. The position IS the scroll offset, which is what makes
+  scrolling back up run the sequence in reverse with no state to unwind.
+*/
+
+/* ==========================================================
+   The pin
+   ========================================================== */
+
+/*
+  The section is taller than the screen and the sticky child is exactly one
+  screen. The difference between them is the timeline: while the section
+  scrolls past, the child holds still at the top and its contents are driven
+  by how far through the section you have travelled.
+*/
+.scn {
+  position: relative;
+  height: var(--scn-len, 220svh);
+  background: var(--ab-bg);
+}
+
+.scn__sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  /* the composition starts a long way below its resting place; without this
+     it would extend the page and produce a scrollbar on the way in */
+  overflow: clip;
+}
+
+/* ==========================================================
+   The composition
+   ========================================================== */
+
+.scnIntro {
+  position: relative;
+  height: 100%;
+  background: var(--ab-bg);
+  color: var(--ab-ink);
+}
+
+/* both compositions are layers filling the pinned box, so they can be on
+   screen together during the hand-off */
+.scnIntro__stage,
+.scnIntro .cards {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+  Everything moves as one block.
+
+  The eased term is (1 - enter) squared, which decelerates the arrival instead
+  of running it at a constant rate — calc is happy to multiply two unitless
+  numbers, so the easing needs no JS. Opacity is multiplied up so the text is
+  readable slightly before it has finished settling.
+*/
+.scnIntro__stage {
+  /* this block's own slice of the scene, remapped off --p */
+  --in: clamp(0, calc((var(--p, 0) - var(--w-lead-in-a)) / var(--w-lead-in-s)), 1);
+  --out: clamp(0, calc((var(--p, 0) - var(--w-lead-out-a)) / var(--w-lead-out-s)), 1);
+  --e: calc((1 - var(--in)) * (1 - var(--in)));
+
+  /* diagonal: it arrives from below-right and leaves up-left, so the path in
+     and the path out are not the same line */
+  transform: translate3d(
+    calc(
+      var(--scn-rise-x, 6vw) * var(--e) - var(--scn-lift-x, 12vw) * var(--out)
+    ),
+    calc(var(--scn-rise, 26svh) * var(--e) - var(--scn-lift, 30svh) * var(--out)),
+    0
+  );
+  opacity: calc(min(1, var(--in) * 2.2) * (1 - var(--out)));
+}
+
+/* ---- the hairline and the label, out in the left margin ---- */
+
+.scnIntro__rule {
+  position: absolute;
+  top: 13.1%;
+  left: var(--scn-rule-l);
+  right: var(--scn-rule-r);
+  height: 1px;
+  background: var(--ab-line);
+}
+
+.scnIntro__label {
+  position: absolute;
+  top: 16.5%;
+  left: var(--scn-label-l);
+  display: inline-flex;
+  align-items: center;
+  gap: 3.2em;
+  font-size: var(--scn-label);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--ab-ink);
+  white-space: nowrap;
+}
+
+.scnIntro__dot {
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background: var(--ab-ink);
+  flex: none;
+}
+
+/* ---- the content column, right of centre ---- */
+
+.scnIntro__content {
+  position: absolute;
+  top: 16.5%;
+  left: var(--scn-content-l);
+  width: var(--scn-content-w);
+}
+
+.scnIntro__lead {
+  margin: 0 0 clamp(28px, 7.2svh, 66px);
+  font-size: var(--scn-lead);
+  line-height: var(--scn-lead-lh);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--ab-ink);
+  text-wrap: pretty;
+}
+
+.scnIntro__row {
+  display: grid;
+  grid-template-columns: var(--scn-img) 1fr;
+  gap: var(--scn-gap);
+  align-items: start;
+}
+
+.scnIntro__figure {
+  margin: 0;
+  aspect-ratio: var(--scn-img-ratio);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--ab-chip);
+  /* the one element that does not travel rigidly with the rest: it lags on
+     the way in, so the picture arrives a beat after the words */
+  transform: translate3d(0, calc(var(--scn-imglag, 7svh) * var(--e)), 0);
+}
+
+.scnIntro__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scnIntro__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.45em;
+}
+
+.scnIntro__body p {
+  margin: 0;
+  font-size: var(--scn-body);
+  line-height: var(--scn-body-lh);
+  color: var(--ab-ink);
+  text-wrap: pretty;
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+/*
+  The margin-set label and the 40%-inset content column are a wide-screen idea.
+  Below roughly a laptop the empty thirds stop being composition and start
+  being wasted screen, so the block walks inward while keeping its internal
+  proportions and its asymmetry.
+*/
+@media (max-width: 1280px) {
+  .scnIntro__rule {
+    left: 8%;
+    right: 8%;
+  }
+
+  .scnIntro__label {
+    left: 8%;
+  }
+
+  .scnIntro__content {
+    left: 30%;
+    width: 62%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .scnIntro__content {
+    top: 22%;
+    left: 8%;
+    width: 84%;
+  }
+
+  .scnIntro__label {
+    top: 16.5%;
+  }
+}
+
+/*
+  Phones do not pin.
+
+  A pinned scene on a phone fights the address-bar collapse, costs a viewport
+  of scroll for one composition, and breaks the moment 100svh changes mid-
+  gesture. So below this width the section becomes ordinary flow: the block
+  stacks, sits still, and simply scrolls. The composition survives; the
+  choreography is a wide-screen affordance.
+*/
+@media (max-width: 760px) {
+  .scn {
+    height: auto;
+  }
+
+  .scn__sticky {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .scnIntro {
+    height: auto;
+    padding: clamp(72px, 12vh, 128px) var(--page-rail-inset);
+  }
+
+  .scnIntro__stage {
+    position: static;
+    transform: none;
+    opacity: 1;
+  }
+
+  .scnIntro__rule,
+  .scnIntro__label,
+  .scnIntro__content {
+    position: static;
+    width: auto;
+  }
+
+  .scnIntro__rule {
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .scnIntro__label {
+    display: inline-flex;
+    gap: 1.4em;
+    margin-bottom: 26px;
+  }
+
+  .scnIntro__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .scnIntro__figure {
+    transform: none;
+    max-width: 320px;
+    aspect-ratio: 4 / 5;
+  }
+}
+
+/* ==========================================================
+   Reduced motion
+   ========================================================== */
+
+/*
+  ScrollScene also pins --enter to 1 and --exit to 0 and never starts its loop;
+  this is the second half of that pair, so the composition can never be left
+  offset or transparent by a stylesheet that loaded without the script.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .scnIntro__stage,
+  .scnIntro__figure {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

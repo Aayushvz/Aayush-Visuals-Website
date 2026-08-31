@@ -9,11 +9,13 @@ import ProjectMedia from "@/components/projects/ProjectMedia";
 
 /*
   One project card = a white rounded header (title. /year + three macOS dots)
-  connected to a large rounded image with a centred, always-sharp wordmark.
-  All hover behaviour (image blur + scale, dots grey -> red/yellow/green,
-  wordmark rising to full) is pure CSS keyed off `.workCard:hover`, so nothing
-  runs on mousemove. Entrance is a subtle framer fade/rise for filter changes.
-  The whole card links to the project's full Figma-styled case study page.
+  connected to a large rounded thumbnail.
+
+  The thumbnail is static. It used to blur and scale on hover while a logo
+  lockup faded in over it; that preview is gone, so the image the grid shows
+  is the image, and the card's only hover state is the dots picking up colour.
+  Entrance is a subtle framer fade/rise. The whole card links to the
+  project's full case study page.
 */
 
 type Props = {
@@ -59,20 +61,6 @@ export default function ProjectCard({ item, index }: Props) {
             alt={item.title}
             poster={item.poster}
           />
-          <span className="workCard__logoWrap">
-            {item.logo ? (
-              <img
-                className="workCard__logo"
-                src={item.logo}
-                alt={`${item.title} logo`}
-                loading="lazy"
-                decoding="async"
-                draggable={false}
-              />
-            ) : (
-              <span className="workCard__wordmark">{item.wordmark}</span>
-            )}
-          </span>
         </div>
       </PageLink>
     </motion.div>

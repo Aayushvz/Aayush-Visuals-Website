@@ -1,0 +1,308 @@
+/*
+  The info panels.
+
+  Route-scoped, imported by InfoCards. Reads the same --enter / --exit that
+  ScrollScene publishes, so these arrive on scroll progress exactly like the
+  intro composition and reverse just as cleanly.
+
+  Two things carry the look:
+
+  - The tab. Each panel has a small plate hanging off its top edge, pushed to
+    the right, which is what makes the group read as cards laid on a surface
+    rather than as three columns of a table.
+  - The stagger. The panels rest at different heights and arrive at different
+    moments. Equal tops and one shared entrance would turn this into a pricing
+    grid, which is the one thing it must not look like.
+*/
+
+/*
+  The panel layer.
+
+  Positioned by scroll-scene.css as a layer filling the pinned box, so it can
+  already be rising while the lead block above it is still leaving. The group
+  spans 35.6% -> 98.5% of the viewport, measured off the reference: it starts
+  further left and runs further right than the text column it replaces, which
+  is what stops the hand-off feeling like the same column being redrawn.
+*/
+.cards {
+  display: flex;
+  align-items: center;
+  /*
+    The right edge has to clear the page's side rulers, which sit at
+    --page-rail-inset from each edge. At 1.5vw the third panel ran to x 1889
+    against a ruler at 1840 and crossed straight over it. Clearing the rail by
+    a further 70px puts the group's right edge at ~1770, and pulling the left
+    start in from 35.6% to 33% shifts the whole thing left while taking about
+    6% off its width.
+  */
+  padding: 0 calc(var(--page-rail-inset) + 70px) 0 33%;
+  color: var(--ab-ink);
+}
+
+/*
+  Three columns at the reference's ratio — the third panel is about a tenth
+  wider than the other two, which is what keeps the group from reading as a
+  regular grid.
+
+  Width is also a fit constraint, not just a style choice: the scene is pinned,
+  so the tallest card plus its stagger has to clear one viewport or the sticky
+  box clips it. An earlier pass ran the cards to 486px, which made the portrait
+  552px tall on its own and pushed the first card to 805px inside an 876px
+  screen.
+*/
+.cards__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.1fr;
+  gap: clamp(16px, 2.2vw, 44px);
+  align-items: start;
+  width: 100%;
+}
+
+/* ---- a panel ---- */
+
+.card {
+  /*
+    The panels' own slice of the scene, and each one opens a little later than
+    the last so the group deals itself in left to right. --k is the index.
+  */
+  --cin: clamp(
+    0,
+    calc(
+      (var(--p, 0) - var(--w-cards-in-a) - var(--k, 0) * 0.045) /
+        var(--w-cards-in-s)
+    ),
+    1
+  );
+  --cout: clamp(0, calc((var(--p, 0) - var(--w-cards-out-a)) / var(--w-cards-out-s)), 1);
+  --ce: calc((1 - var(--cin)) * (1 - var(--cin)));
+
+  position: relative;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ab-ink) 7%, var(--ab-bg));
+  /* the panels come in on the opposite diagonal to the block leaving above
+     them: up and to the LEFT, from off to the bottom-right */
+  transform: translate3d(
+    calc(
+      var(--scn-cards-rise-x, 15vw) * var(--ce) - var(--scn-lift-x, 12vw) *
+        var(--cout)
+    ),
+    calc(
+      var(--scn-cards-rise, 34svh) * var(--ce) - var(--scn-lift, 30svh) *
+        var(--cout)
+    ),
+    0
+  );
+  opacity: calc(min(1, var(--cin) * 2) * (1 - var(--cout)));
+}
+
+/* the resting stagger — no two tops align */
+.card--general {
+  margin-top: 4.5%;
+}
+.card--stats {
+  margin-top: 11%;
+}
+.card--current {
+  margin-top: 0;
+}
+
+/* ---- the tab ---- */
+
+.card__tab {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85em;
+  padding: 0.72em 1.15em 1.15em;
+  border-radius: 10px 10px 0 0;
+  background: color-mix(in srgb, var(--ab-ink) 7%, var(--ab-bg));
+  font-size: clamp(9.5px, 0.62vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ab-ink);
+  white-space: nowrap;
+  /* overlaps the panel's rounded top so the two read as one shape */
+  margin-bottom: -0.55em;
+}
+
+.card__dot {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--ab-ink);
+  flex: none;
+}
+
+/* ---- panel contents ---- */
+
+.card__body {
+  padding: clamp(14px, 1.15vw, 22px);
+}
+
+.card__portrait,
+.card__shot {
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--ab-chip);
+}
+
+.card__portrait {
+  aspect-ratio: 5 / 6;
+  margin-bottom: clamp(14px, 1.4vw, 26px);
+}
+
+.card__shot {
+  aspect-ratio: 16 / 10;
+  margin-top: 10px;
+}
+
+.card__portrait img,
+.card__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* a field is a hairline, a small label, then the value — the rhythm that
+   repeats down every panel and ties the three together */
+.card__field {
+  padding-top: clamp(10px, 1vw, 16px);
+  border-top: 1px solid color-mix(in srgb, var(--ab-ink) 30%, transparent);
+}
+
+.card__field + .card__field {
+  margin-top: clamp(14px, 1.5vw, 26px);
+}
+
+.card__k {
+  display: block;
+  margin-bottom: 0.5em;
+  font-size: clamp(9.5px, 0.62vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ab-ink) 62%, transparent);
+}
+
+/*
+  The values are the loudest thing in the group and the reason the panels have
+  any hierarchy at all: heavy, tight and set well above the labels, so a panel
+  scans as a number first and a caption second.
+*/
+.card__big {
+  display: block;
+  font-size: clamp(24px, 2.1vw, 40px);
+  font-weight: 600;
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: var(--ab-ink);
+}
+
+.card__big--num {
+  font-variant-numeric: tabular-nums;
+}
+
+.card__role,
+.card__status {
+  display: block;
+  font-size: clamp(14px, 0.95vw, 18px);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--ab-ink);
+}
+
+/* the paired marks, split by a leaning rule — the reference's team-and-sponsor
+   lockup, here doing the two halves of the job */
+.card__pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+  font-size: clamp(14px, 0.95vw, 18px);
+  font-weight: 500;
+  color: var(--ab-ink);
+}
+
+.card__slash {
+  width: 1px;
+  height: 1.5em;
+  background: color-mix(in srgb, var(--ab-ink) 40%, transparent);
+  transform: rotate(18deg);
+}
+
+.card__caption {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(11px, 0.72vw, 13px);
+  color: color-mix(in srgb, var(--ab-ink) 62%, transparent);
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+@media (max-width: 1280px) {
+  .cards {
+    padding: 0 6vw 0 22%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cards {
+    padding: 0 5vw;
+  }
+
+  .cards__row {
+    gap: 14px;
+  }
+
+  /* the stagger shrinks before it disappears — at this width the tall offsets
+     push the third panel past the fold */
+  .card--general {
+    margin-top: 2.5%;
+  }
+  .card--stats {
+    margin-top: 6%;
+  }
+}
+
+/*
+  Phones: the scene stops pinning (see scroll-scene.css) and the panels stack.
+  Three staggered cards side by side is a wide-screen composition; at 390px it
+  is three slivers, so the stagger is dropped and they simply follow one
+  another.
+*/
+@media (max-width: 760px) {
+  .scnIntro .cards {
+    position: static;
+    display: block;
+    padding: clamp(56px, 9vh, 92px) var(--page-rail-inset) 0;
+  }
+
+  .cards__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 52px;
+  }
+
+  .card {
+    margin-top: 0 !important;
+    transform: none;
+    opacity: 1;
+  }
+
+  .card__portrait {
+    max-width: 300px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

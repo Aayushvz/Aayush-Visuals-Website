@@ -3299,7 +3299,7 @@ html.has-cursor .cursorRing {
   display: block;
   width: var(--w-w);
   height: var(--w-h);
-  border-radius: 18px;
+  border-radius: 14px;
   padding: 1.5px;
   background: linear-gradient(135deg, rgba(233, 223, 255, 0.75), rgba(139, 92, 246, 0.35) 30%, rgba(56, 189, 248, 0.3) 62%, rgba(233, 223, 255, 0.6));
   box-shadow: 0 34px 70px rgba(8, 4, 24, 0.55), 0 10px 22px rgba(8, 4, 24, 0.4),
@@ -6100,7 +6100,9 @@ html.has-cursor .cursorRing {
 .aboutPage {
   position: relative;
   font-family: var(--font-primary);
-  padding-bottom: 58px;
+  /* no bottom reservation: the telemetry bar only shows while the hero is on
+     screen, so by the time the footer is reachable there is nothing pinned
+     over it to make room for */
   background: #1A1A1A;
 }
 
@@ -6431,7 +6433,22 @@ html.has-cursor .cursorRing {
 
 /* one row of bordered cells spanning the full width, per the Figma:
    vertical hairline dividers, grey keys, purple values */
+/*
+  Shown only while the hero is on screen.
+
+  It is the hero's instrument panel — scroll percentage, cursor coordinates,
+  a live clock — and once the story starts it is just a black strip sitting
+  over the editorial layout. AboutPageClient watches the hero with an
+  IntersectionObserver and drops the class below when it leaves.
+*/
+.aboutPage__bar--hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .aboutPage__bar {
+  transition: transform 420ms var(--ease-quint), opacity 260ms var(--ease-quint);
   position: fixed;
   bottom: 0;
   left: 0;
@@ -9124,7 +9141,7 @@ html.contact-page-active[data-theme="light"] body {
    above the bar so the footer lands exactly at its resting position
    instead of hiding behind the bar and shifting at the end of the scroll */
 .aboutParallax__footerWrap {
-  bottom: 58px;
+  bottom: 0;
 }
 
 @media (max-width: 640px) {
@@ -9961,6 +9978,31 @@ html.contact-page-active .themeSwitch {
   background-size: var(--grid-size) var(--grid-size);
 }
 
+/* the front card is a real link; the wrapper just fills its parent so the
+   whole cover is the hit area rather than the image alone */
+.workHero__cardLink {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.workHero__cardLink:focus-visible {
+  outline: 2px solid var(--hero-brand);
+  outline-offset: 4px;
+}
+
+/*
+  Inside the About story the deck keeps its dark ground — it is the one tonal
+  break in a long cream sequence, which is what stops the run of editorial
+  sections flattening out. Only the ruled grid comes off; the surface, the
+  near-white type and the card shadows all stay as they were.
+*/
+.abAct--work .workHero__grid {
+  display: none;
+}
+
 /* accessible heading; the animated words below are aria-hidden */
 .workHero__srHeading {
   position: absolute;
@@ -10326,9 +10368,17 @@ html.contact-page-active .themeSwitch {
 /* --- two-column grid --- */
 .worksGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   /* reference spacing: very tight rows and columns */
   gap: clamp(4px, 0.4vw, 8px);
+}
+
+/* three across needs the room; below a wide laptop it drops back to two
+   rather than squeezing three cards into cells too narrow to read */
+@media (max-width: 1200px) {
+  .worksGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .worksEmpty {
@@ -10348,14 +10398,16 @@ html.contact-page-active .themeSwitch {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.55);
 }
 
+/* tightened for the three-up grid: at two across these paddings sat inside a
+   cell half the page wide, at three they were eating the title's measure */
 .workCard__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: clamp(6px, 0.5vw, 10px);
-  padding: 16px clamp(18px, 1.6vw, 24px);
-  border-radius: 16px;
+  gap: 10px;
+  margin-bottom: clamp(5px, 0.4vw, 8px);
+  padding: 13px clamp(14px, 1.1vw, 19px);
+  border-radius: 13px;
   background: #fff;
 }
 
@@ -10367,7 +10419,7 @@ html.contact-page-active .themeSwitch {
 }
 
 .workCard__title {
-  font-size: clamp(17px, 1.5vw, 21px);
+  font-size: clamp(14px, 1.08vw, 17.5px);
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -10377,7 +10429,7 @@ html.contact-page-active .themeSwitch {
 }
 
 .workCard__year {
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 500;
   color: rgba(31, 31, 31, 0.4);
 }
@@ -10422,6 +10474,19 @@ html.contact-page-active .themeSwitch {
   transition: box-shadow 0.25s ease;
 }
 
+/*
+  A slow push-in on hover, and nothing else.
+
+  This replaced a 15px blur with a logo lockup fading over the top, which hid
+  the very thing the card exists to show. A few percent of scale reads as the
+  cover leaning toward you: enough to confirm the card is live under the
+  cursor, not enough to compete with the image.
+
+  The frame already clips, so the scale crops into the rounded corners rather
+  than spilling. No will-change — promoting eighteen thumbnails permanently
+  costs more memory than it saves on a transition this cheap, and the browser
+  composites a lone transform on its own anyway.
+*/
 .workCard__img {
   position: absolute;
   inset: 0;
@@ -10430,57 +10495,21 @@ html.contact-page-active .themeSwitch {
   object-fit: cover;
   display: block;
   transform: scale(1);
-  filter: blur(0);
-  transition: transform 0.45s var(--ease-quint),
-    filter 0.45s var(--ease-quint);
-  will-change: transform, filter;
+  transition: transform 0.7s var(--ease-quint);
 }
 
-/* blurred + slightly scaled on hover so no transparent edge is revealed */
 .workCard:hover .workCard__img,
 .workCard:focus-visible .workCard__img {
-  transform: scale(1.06);
-  filter: blur(15px);
+  transform: scale(1.05);
 }
 
-/* separate sharp layer above the image — never blurred. The wrap owns the
-   centring + subtle hover rise; the logo image or text wordmark sits inside. */
-.workCard__logoWrap {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 24px;
-  opacity: 0;
-  transform: scale(0.92);
-  transition: opacity 0.4s var(--ease-quint),
-    transform 0.4s var(--ease-quint);
-  pointer-events: none;
-}
-
-.workCard:hover .workCard__logoWrap,
-.workCard:focus-visible .workCard__logoWrap {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.workCard__logo {
-  width: auto;
-  height: auto;
-  max-width: min(62%, 360px);
-  max-height: 40%;
-  object-fit: contain;
-  filter: brightness(0) invert(1) drop-shadow(0 2px 20px rgba(0, 0, 0, 0.35));
-}
-
-.workCard__wordmark {
-  text-align: center;
-  color: #fff;
-  font-size: clamp(24px, 2.6vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.4);
+@media (prefers-reduced-motion: reduce) {
+  .workCard__img,
+  .workCard:hover .workCard__img,
+  .workCard:focus-visible .workCard__img {
+    transform: none;
+    transition: none;
+  }
 }
 
 /* --- tablet --- */
@@ -10528,16 +10557,6 @@ html.contact-page-active .themeSwitch {
   }
   .workCard__media {
     aspect-ratio: 3 / 2;
-  }
-  .workCard__logoWrap {
-    display: none !important;
-  }
-}
-
-/* touch devices / phone view — do not show logo over thumbnails */
-@media (hover: none) {
-  .workCard__logoWrap {
-    display: none !important;
   }
 }
 

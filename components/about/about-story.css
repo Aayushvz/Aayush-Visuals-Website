@@ -1,0 +1,956 @@
+/*
+  The About story's styles.
+
+  Route-scoped (imported by AboutStory, same pattern as playground.css and
+  cricket.css) so none of this ships with any other page, and so the sequence
+  can be restyled without touching the 10k-line globals.css.
+
+  It deliberately inherits the About page's existing palette — the --ab-*
+  tokens declared in globals.css — rather than introducing a second one. Those
+  tokens already flip for the dark theme, so every act below follows the theme
+  toggle for free and the story reads as part of this site rather than as a
+  section pasted in from somewhere else.
+
+  One structural decision worth naming: the acts are NOT 100svh. Every section
+  on the old About page was locked to exactly one screen, which is the right
+  call for a dashboard and the wrong one for a story — it forces every act to
+  the same length regardless of how much it has to say, and an editorial page
+  gets its pacing from acts that are deliberately different heights. These
+  size to their content and are spaced by generous, consistent vertical rhythm.
+*/
+
+/* ==========================================================
+   The reveal primitive
+   ========================================================== */
+
+/*
+  Composed entirely from the two numbers Reveal.tsx publishes:
+
+    --rv-in    0 -> 1   rising into place
+    --rv-out   0 -> 1   continuing up and off the top
+
+  Nothing here transitions. The motion IS the scroll position, which is the
+  whole point of a scrubbed system — a transition on top would lag behind the
+  finger and rubber-band on fast flicks.
+
+  Easing is done in CSS rather than JS: (1 - in) squared is an ease-out on the
+  remaining distance, and calc() is happy to multiply two unitless numbers. So
+  the element decelerates into place instead of arriving at a constant rate.
+
+  Opacity is deliberately ahead of position — it multiplies --rv-in by 1.6 and
+  clamps — so text is readable slightly before it has finished settling, which
+  is what stops the page feeling like it is withholding content.
+*/
+.rv {
+  --rv-e: calc((1 - var(--rv-in, 0)) * (1 - var(--rv-in, 0)));
+  opacity: calc(min(1, var(--rv-in, 0) * 1.6) * (1 - var(--rv-out, 0)));
+  transform: translate3d(
+    calc(var(--rv-x, 0px) * var(--rv-sx, 1) * var(--rv-e)),
+    calc(
+      var(--rv-y, 0px) * var(--rv-e) -
+      var(--rv-exit, 90px) * var(--rv-out, 0)
+    ),
+    0
+  );
+}
+
+/* ---- display type, split per character ---- */
+
+/*
+  Sentence case, and a good deal smaller.
+
+  All-caps at 104px was shouting over the sections it introduces. Lower case
+  also needs a little more room to breathe than caps do, so the leading opens
+  from 0.92 to 1.02 and the tracking loosens — caps tolerate tight negative
+  tracking that ascenders and descenders do not.
+*/
+.abSplit {
+  margin: 0 0 clamp(40px, 6vh, 78px);
+  font-size: clamp(28px, 4vw, 62px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--ab-ink);
+}
+
+.abSplit__line {
+  display: block;
+  /* the characters are lifted from below, so the line has to clip or they
+     show through from the row underneath before their window opens */
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+
+.abSplit__char {
+  display: inline-block;
+  white-space: pre;
+}
+
+/* ---- images ---- */
+
+/*
+  Two layers moving against each other: the frame settles up from just under
+  full size while the picture inside settles down from well over it. That
+  counter-scale is what gives the reveal depth — the photograph comes to rest
+  inside a window rather than sliding up as a flat rectangle.
+*/
+.rvImg {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--ab-chip);
+  transform: translate3d(
+      calc(var(--rv-x, 0px) * var(--rv-sx, 1) * var(--rv-e)),
+      calc(
+        var(--rv-y, 0px) * var(--rv-e) -
+        var(--rv-exit, 90px) * var(--rv-out, 0)
+      ),
+      0
+    )
+    scale(calc(0.92 + 0.08 * var(--rv-in, 0)));
+}
+
+.rvImg__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(calc(1.18 - 0.18 * var(--rv-in, 0)));
+}
+
+/* ==========================================================
+   Act shell
+   ========================================================== */
+
+.abAct {
+  position: relative;
+  background: var(--ab-bg);
+  color: var(--ab-ink);
+  padding: clamp(104px, 17vh, 220px) var(--page-content-inset);
+  /* the reveals travel horizontally, and a section that does not clip would
+     let a mid-flight element widen the document and produce a horizontal
+     scrollbar on the way in */
+  overflow: clip;
+}
+
+.abAct__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* the first act carries the seam between the dark hero and the story */
+.abAct--intro {
+  border-top: 1px solid var(--ab-line-2);
+}
+
+/* ---- the chapter label ---- */
+
+/*
+  The chapter label, set in the margin.
+
+  The reference's move, and the reason its pages read as editorial rather than
+  as a website: a hairline rule spans only part of the measure, and the label
+  hangs underneath it at the far left while the actual content starts further
+  in. The asymmetry between the rule's length and the content's indent is what
+  makes the whitespace look composed.
+*/
+.abLabel {
+  display: block;
+  margin-bottom: clamp(44px, 7vh, 88px);
+}
+
+.abLabel__rule {
+  display: block;
+  height: 1px;
+  /* deliberately short of the full measure */
+  width: min(100%, 620px);
+  background: var(--ab-line);
+  margin-bottom: 16px;
+}
+
+.abLabel__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ab-ink-3);
+}
+
+.abLabel__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ab-accent);
+}
+
+.abLabel__n {
+  color: var(--ab-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- shared type ---- */
+
+/*
+  The act's display heading.
+
+  The reference sets these in a heavy condensed face; the same weight and
+  compression comes out of the site's own General Sans by pushing the weight
+  to 600, the tracking well negative and the leading under 1. An imported
+  display font would be a third typeface on the page for one line of text.
+*/
+.abDisplay {
+  margin: 0 0 clamp(52px, 8vh, 104px);
+  font-size: clamp(38px, 6.4vw, 104px);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  color: var(--ab-ink);
+}
+
+.abStatement {
+  margin: 0;
+  font-size: clamp(30px, 4.4vw, 62px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.032em;
+  text-wrap: balance;
+  color: var(--ab-ink);
+  max-width: 18ch;
+}
+
+.abStatement--wide {
+  max-width: 24ch;
+  margin-bottom: clamp(48px, 7vh, 92px);
+}
+
+.abBody {
+  font-size: clamp(14.5px, 1.05vw, 16.5px);
+  line-height: 1.72;
+  color: var(--ab-ink-2);
+  text-wrap: pretty;
+  margin: 0;
+}
+
+/* ==========================================================
+   01 · Who I am
+   ========================================================== */
+
+/*
+  Asymmetric on purpose: the text column is narrower than the image column is
+  wide, and the portrait starts below the statement's cap line, so the two
+  never read as a matched pair of boxes.
+*/
+.abIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.85fr);
+  gap: clamp(36px, 6vw, 96px);
+  align-items: start;
+}
+
+.abIntro__body {
+  margin-top: clamp(24px, 3.4vh, 38px);
+  max-width: 46ch;
+}
+
+.abIntro__cta {
+  display: block;
+  margin-top: clamp(28px, 4vh, 44px);
+}
+
+.abIntro__portrait {
+  width: 100%;
+  /* drops the picture below the statement's first line so the composition
+     steps down rather than sitting on one shared top edge */
+  margin-top: clamp(12px, 5vh, 64px);
+}
+
+/* ==========================================================
+   02 · Beginnings
+   ========================================================== */
+
+.abBegin {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(36px, 5vw, 80px);
+  align-items: end;
+}
+
+.abBegin__wide {
+  width: 100%;
+}
+
+.abBegin__quote {
+  padding-bottom: clamp(0px, 2vh, 24px);
+}
+
+.abQuote {
+  margin: 0;
+  font-size: clamp(22px, 2.5vw, 34px);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.022em;
+  color: var(--ab-ink);
+  text-wrap: balance;
+}
+
+.abBegin__body {
+  margin-top: clamp(20px, 2.6vh, 30px);
+  max-width: 44ch;
+}
+
+/* the three formation rows: year, place, and what it actually gave me.
+   A three-column reading row rather than three cards. */
+.abFormation {
+  list-style: none;
+  margin: clamp(56px, 8vh, 104px) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--ab-line-2);
+}
+
+.abFormation__row {
+  display: grid;
+  grid-template-columns: 8ch minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: clamp(18px, 3vw, 52px);
+  align-items: baseline;
+  padding: clamp(20px, 2.8vh, 32px) 0;
+  border-bottom: 1px solid var(--ab-line-2);
+}
+
+.abFormation__year {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ab-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.abFormation__place {
+  font-size: clamp(15px, 1.25vw, 18px);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--ab-ink);
+}
+
+.abFormation__gave {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ab-ink-2);
+  text-wrap: pretty;
+}
+
+/* ==========================================================
+   03 · The journey
+   ========================================================== */
+
+/*
+  Same type system as the designer scene: the three sizes below are the
+  identical clamp() expressions scene.config.ts hands that section for its
+  lead, body and label. Restated rather than imported because this file loads
+  independently, but they are the same numbers, which is what stops the page
+  reading as two designers' work.
+*/
+.abJourney {
+  --j-lead: clamp(21px, 1.669vw, 34px);
+  --j-body: clamp(13.5px, 0.886vw, 18px);
+  --j-label: clamp(11px, 0.782vw, 15px);
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+  Each entry steps further across the measure than the last, then walks back.
+
+  A timeline drawn as a straight column with a rule down the middle is the
+  cliche this has to avoid; drifting the rows gives the run a diagonal that
+  echoes how the scene above it moves, and means no two consecutive entries
+  start on the same left edge.
+*/
+.abMile {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(28px, 4.5vw, 76px);
+  align-items: center;
+  padding: clamp(44px, 7vh, 92px) 0;
+  margin-left: calc(var(--step, 0) * clamp(0px, 1.6vw, 34px));
+}
+
+.abMile:nth-child(1) { --step: 0; }
+.abMile:nth-child(2) { --step: 1; }
+.abMile:nth-child(3) { --step: 2; }
+.abMile:nth-child(4) { --step: 3; }
+.abMile:nth-child(5) { --step: 2; }
+.abMile:nth-child(6) { --step: 1; }
+.abMile:nth-child(7) { --step: 0; }
+.abMile:nth-child(8) { --step: 1; }
+
+/* the flip. Grid placement rather than direction:rtl, so the DOM order — and
+   therefore the reading and tab order — stays text-then-image throughout. */
+.abMile--imgLeft .abMile__text {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.abMile--imgLeft .abMile__img {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/*
+  The year, at display scale, with a hairline running out of it to the edge of
+  the column — the same rule device the designer scene uses, so the sections
+  share a vocabulary as well as a type scale.
+
+  Sized down from the first pass: at up to 116px the number was the loudest
+  thing on a page that is about the work, not about the calendar.
+*/
+.abMile__year {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 28px);
+  font-size: clamp(40px, 4.8vw, 78px);
+  font-weight: 600;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  color: var(--ab-ink);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: clamp(16px, 2.4vh, 30px);
+}
+
+.abMile__year::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ab-line);
+}
+
+.abMile__org {
+  margin: 0 0 clamp(12px, 1.8vh, 18px);
+  font-size: var(--j-lead);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ab-ink);
+  max-width: 20ch;
+}
+
+.abMile__copy {
+  margin: 0;
+  font-size: var(--j-body);
+  line-height: 1.42;
+  color: var(--ab-ink);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/*
+  Each piece is pinned to a board.
+
+  The board is a dot grid — the FigJam surface, which is where most of this
+  work actually gets thought through, so it is the honest backdrop for a run
+  of sketches. The art then sits on it as a physical object: a white matte, a
+  soft drop shadow, a tack through the top, and a degree of tilt that
+  alternates down the page. Eight squared-up rectangles in a column goes flat
+  no matter what is inside them.
+
+  The art is CONTAINED, never cropped. These illustrations come at mixed
+  ratios — squares, a 4:5, a tall 3:4 — and cover would slice the top off some
+  and the sides off others, which is what cut the figures in half.
+*/
+.abMile__img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  padding: clamp(20px, 2.4vw, 40px);
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--ab-ink) 3.5%, var(--ab-bg));
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--ab-ink) 20%, transparent) 1.1px,
+    transparent 1.2px
+  );
+  background-size: 16px 16px;
+  rotate: calc(var(--tilt, 1) * 1.2deg);
+}
+
+.abMile--imgLeft .abMile__img {
+  --tilt: -1;
+}
+
+/* the tack. Small, slightly domed, and sitting over the top edge of the
+   matte rather than centred on the board, so it reads as holding the piece
+   up rather than as a dot printed on the background. */
+.abMile__img::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: clamp(14px, 1.7vw, 30px);
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 30%,
+    #fff 0 14%,
+    var(--ab-accent) 38%,
+    color-mix(in srgb, var(--ab-accent) 62%, #000) 100%
+  );
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.32);
+}
+
+/*
+  The picture hugs its own artwork rather than filling the frame.
+
+  With width/height at 100% the element box is the whole board, so a matte or
+  a shadow would draw around the board instead of around the piece. Sizing to
+  content and centring it in the flex frame puts the white edge exactly where
+  the artwork ends, whatever shape it is.
+*/
+.abMile__img .rvImg__img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  padding: 9px;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 10px 24px rgba(31, 31, 31, 0.16),
+    0 2px 5px rgba(31, 31, 31, 0.1);
+}
+
+/* ==========================================================
+   04 · What I do
+   ========================================================== */
+
+.abCraft {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--ab-line);
+}
+
+/*
+  A reading row, not a card: index, title, copy, separated by hairlines. The
+  title column is fixed so the copy edge lines up down the whole list, which
+  is what makes five rows read as one system.
+*/
+.abCraft__row {
+  display: grid;
+  grid-template-columns: 5ch minmax(0, 0.9fr) minmax(0, 1.25fr);
+  gap: clamp(16px, 3vw, 56px);
+  align-items: start;
+  padding: clamp(26px, 3.6vh, 44px) 0;
+  border-bottom: 1px solid var(--ab-line-2);
+}
+
+.abCraft__n {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--ab-ink-3);
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.5em;
+}
+
+.abCraft__title {
+  margin: 0;
+  font-size: clamp(20px, 2.1vw, 30px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.026em;
+  color: var(--ab-ink);
+}
+
+.abCraft__copy {
+  margin: 0;
+  font-size: clamp(14px, 1vw, 15.5px);
+  line-height: 1.72;
+  color: var(--ab-ink-2);
+  text-wrap: pretty;
+  padding-top: 0.35em;
+}
+
+/* ==========================================================
+   05 · How I work
+   ========================================================== */
+
+.abApproach {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(36px, 5.5vw, 90px);
+  align-items: center;
+}
+
+.abApproach__img {
+  width: 100%;
+}
+
+.abApproach__list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vh, 46px);
+}
+
+.abPrinciple {
+  display: block;
+}
+
+.abPrinciple__n {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--ab-accent);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 10px;
+}
+
+.abPrinciple__title {
+  margin: 0 0 10px;
+  font-size: clamp(19px, 1.9vw, 27px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.024em;
+  color: var(--ab-ink);
+}
+
+.abPrinciple__copy {
+  max-width: 48ch;
+}
+
+/* the toolkit, as one quiet line across the foot of the act rather than a
+   grid of logo tiles — which tool it is matters far less than the work */
+.abTools {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 48px);
+  margin-top: clamp(56px, 8vh, 104px);
+  padding-top: clamp(24px, 3.4vh, 38px);
+  border-top: 1px solid var(--ab-line-2);
+}
+
+.abTools__label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ab-ink-3);
+  margin-bottom: 9px;
+}
+
+.abTools__items {
+  display: block;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ab-ink);
+  text-wrap: pretty;
+}
+
+/* ==========================================================
+   06 · Selected moments
+   ========================================================== */
+
+/*
+  Four cells, three shapes, no repeats in a row. The wide one sets the top
+  edge, two small ones sit under it, and the tall one runs beside them —
+  which is what stops this reading as a 2x2 gallery.
+*/
+.abMoments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.4vw, 34px);
+}
+
+.abMoment {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.abMoment--wide {
+  grid-column: span 2;
+}
+
+.abMoment--tall {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+
+.abMoment--small {
+  grid-column: span 1;
+}
+
+.abMoment__frame {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+
+.abMoment--tall .abMoment__frame {
+  /* the tall cell spans two rows, so its picture fills the column instead of
+     keeping a fixed ratio and leaving a gap under it */
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 320px;
+}
+
+.abMoment--small .abMoment__frame {
+  aspect-ratio: 4 / 3;
+}
+
+.abMoment__cap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.abMoment__title {
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--ab-ink);
+}
+
+.abMoment__note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ab-ink-3);
+}
+
+/* ==========================================================
+   07 · Closing
+   ========================================================== */
+
+/*
+  The one act that centres, and the only one with no image, no rule above it
+  and no list. Everything the page has been doing stops.
+*/
+.abAct--closing {
+  padding-top: clamp(104px, 16vh, 200px);
+  padding-bottom: clamp(104px, 16vh, 200px);
+  border-top: 1px solid var(--ab-line-2);
+}
+
+.abAct--closing .abAct__inner {
+  max-width: 1000px;
+}
+
+.abClosing__statement {
+  margin: 0;
+  font-size: clamp(32px, 5.2vw, 76px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.036em;
+  text-wrap: balance;
+  color: var(--ab-ink);
+  max-width: 16ch;
+}
+
+.abClosing__rule {
+  display: block;
+  margin: clamp(34px, 5vh, 56px) 0 clamp(24px, 3.4vh, 36px);
+}
+
+.abClosing__rule span {
+  display: block;
+  width: clamp(64px, 12vw, 148px);
+  height: 1px;
+  background: var(--ab-accent);
+}
+
+.abClosing__body {
+  max-width: 44ch;
+}
+
+.abClosing__cta {
+  display: block;
+  margin-top: clamp(30px, 4.4vh, 46px);
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+/* laptop: the widest compositions lose their extreme ratios first */
+@media (max-width: 1100px) {
+  .abIntro,
+  .abBegin,
+  .abApproach {
+    gap: clamp(28px, 4vw, 56px);
+  }
+
+  .abCraft__row {
+    grid-template-columns: 4ch minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+
+  .abTools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+}
+
+/* tablet */
+@media (max-width: 900px) {
+  .abIntro,
+  .abBegin,
+  .abApproach {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(28px, 5vh, 44px);
+  }
+
+  .abIntro__portrait {
+    margin-top: 0;
+    /* full-bleed portraits on a narrow screen read as a stock photo; keeping
+       it to a column preserves the editorial framing */
+    max-width: 460px;
+  }
+
+  .abBegin__quote {
+    padding-bottom: 0;
+  }
+
+  .abApproach__img {
+    max-width: 460px;
+  }
+
+  /* the milestone flip is a two-column idea; stacked, every row is
+     image-then-text and the alternation lives in the reveal direction alone */
+  .abMile {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .abMile--imgLeft .abMile__text,
+  .abMile--imgLeft .abMile__img {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .abMoments {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .abMoment--wide {
+    grid-column: span 2;
+  }
+
+  .abMoment--tall {
+    grid-column: span 2;
+    grid-row: auto;
+  }
+
+  .abMoment--tall .abMoment__frame {
+    aspect-ratio: 16 / 10;
+    min-height: 0;
+  }
+}
+
+/* phone: a clean vertical flow, not a squeezed desktop layout */
+@media (max-width: 640px) {
+  .abAct {
+    padding: clamp(64px, 9vh, 96px) var(--page-rail-inset);
+  }
+
+  .abLabel {
+    margin-bottom: 28px;
+  }
+
+  .abStatement--wide {
+    margin-bottom: 36px;
+  }
+
+  /* three columns of prose at 375px is four words a line; these become
+     stacked blocks with the year as a small label above */
+  .abFormation__row,
+  .abCraft__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .abCraft__n,
+  .abCraft__copy {
+    padding-top: 0;
+  }
+
+  .abFormation__gave,
+  .abCraft__copy {
+    margin-top: 4px;
+  }
+
+  .abTools {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .abMoments {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  .abMoment--wide,
+  .abMoment--tall,
+  .abMoment--small {
+    grid-column: span 1;
+  }
+
+  .abMoment__frame,
+  .abMoment--small .abMoment__frame,
+  .abMoment--tall .abMoment__frame {
+    aspect-ratio: 3 / 2;
+    min-height: 0;
+  }
+
+  .abIntro__portrait,
+  .abApproach__img {
+    max-width: none;
+  }
+
+  /*
+    Horizontal travel is scaled down, not switched off.
+
+    40-56px of sideways entrance is a seventh of a 390px screen; at that
+    ratio it stops reading as content arriving and starts reading as a
+    slide-in effect, and every mid-flight element sits outside the viewport
+    until it lands. A third of the distance keeps the direction legible —
+    which is the point of the system — without throwing content off screen.
+    Vertical travel is left alone: there is no shortage of room downward.
+  */
+  .rv {
+    --rv-sx: 0.34;
+  }
+}
+
+/* ==========================================================
+   Reduced motion
+   ========================================================== */
+
+/*
+  Everything lands in its final state with no transition. Reveal.tsx also adds
+  the class outright in this case, so the content is never dependent on a
+  transition it is not going to run.
+*/
+@media (prefers-reduced-motion: reduce) {
+  /* Reveal.tsx also pins --rv-in to 1 and --rv-out to 0 and never starts the
+     loop; this is the belt to that pair of braces, so content can never be
+     left transparent by a stylesheet that loaded without the script. */
+  .rv,
+  .rvImg {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .rvImg__img {
+    transform: none !important;
+  }
+}

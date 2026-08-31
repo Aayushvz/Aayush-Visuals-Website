@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useMotionValueEvent } from "framer-motion";
 import { PROJECTS } from "@/components/projects/projectData";
 import ProjectMedia from "@/components/projects/ProjectMedia";
+import PageLink from "@/components/PageLink";
+import { saveOrigin } from "@/lib/navOrigin";
 
 /*
   WorkHero — the choreographed hero of the /work page. It is ONE section
@@ -203,14 +205,14 @@ export default function WorkHero() {
           </svg>
         </motion.div>
 
-        <h1 className="workHero__srHeading">Creative Projects</h1>
+        <h2 className="workHero__srHeading">Creative Projects</h2>
 
         <div className="workHero__heading" aria-hidden>
           <span className="workHero__word workHero__word--left">Creative</span>
           <span className="workHero__word workHero__word--right">Projects</span>
         </div>
 
-        <div className="workHero__stack" aria-hidden={!entered}>
+        <div className="workHero__stack">
           {PROJECTS.map((p, i) => {
             const d = signedOffset(i, front);
             const activeSlots = isMobile ? MOBILE_SLOTS : SLOTS;
@@ -225,31 +227,53 @@ export default function WorkHero() {
             const wrapped =
               prev !== undefined && Math.abs(d - prev) > Math.floor(N / 2) - 1;
             prevOffset.current[p.id] = d;
-            return (
-              <motion.article
-                key={p.id}
-                className="workHero__card"
-                style={{ zIndex: 100 - Math.abs(d) }}
-                initial={false}
-                animate={{ y: slot.y, scale: slot.s, opacity: slot.o }}
-                transition={
-                  wrapped
-                    ? { duration: 0 }
-                    : { y: SPRING, scale: SPRING, opacity: { duration: 0.5, ease: EASE } }
-                }
-              >
-                <ProjectMedia
-                  className="workHero__cardImg"
-                  src={p.bgVideoUrl ?? p.cover}
-                  alt={p.title}
-                  poster={p.cover}
-                  eager={i < 4}
-                  priority={i < 2}
-                />
-              </motion.article>
+                          /*
+                Only the front card is a live target. The ones peeking behind
+                it are partly occluded and the far ones are at zero opacity —
+                a click landing on an invisible card would be a trap, so
+                pointer events and tab stops both follow the front slot.
+              */
+              const isFront = entered && d === 0;
+              return (
+                <motion.article
+                  key={p.id}
+                  className="workHero__card"
+                  style={{
+                    zIndex: 100 - Math.abs(d),
+                    pointerEvents: isFront ? "auto" : "none",
+                  }}
+                  initial={false}
+                  animate={{ y: slot.y, scale: slot.s, opacity: slot.o }}
+                  transition={
+                    wrapped
+                      ? { duration: 0 }
+                      : { y: SPRING, scale: SPRING, opacity: { duration: 0.5, ease: EASE } }
+                  }
+                >
+                  <PageLink
+                    className="workHero__cardLink"
+                    href={`/work/${p.id}`}
+                    tabIndex={isFront ? 0 : -1}
+                    aria-hidden={!isFront}
+                    aria-label={`View the ${p.title} project`}
+                    /* remember where this came from so the project's back
+                       control returns here rather than to the works grid */
+                    onClick={() => saveOrigin("/about")}
+                  >
+                    <ProjectMedia
+                      className="workHero__cardImg"
+                      src={p.bgVideoUrl ?? p.cover}
+                      alt={p.title}
+                      poster={p.cover}
+                      eager={i < 4}
+                      priority={i < 2}
+                    />
+                  </PageLink>
+                </motion.article>
             );
           })}
         </div>
+
       </div>
     </section>
   );
