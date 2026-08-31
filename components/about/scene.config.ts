@@ -55,7 +55,7 @@ export const SCENE = {
   */
   motion: {
     /** scene height in viewport multiples; everything over 1 is timeline */
-    length: 3.2,
+    length: 2.9,
 
     /*
       Windows in scene progress, where 0 is the section's top reaching the
@@ -63,16 +63,37 @@ export const SCENE = {
       at 1 / length — about 0.31 here — so anything before that happens while
       the section is still rising into view.
 
-      The lead block therefore begins arriving at 0.10 and has settled by 0.30,
-      just as the pin takes hold: the content is already on screen by the time
-      you get there instead of the section arriving blank.
+      The lead block begins arriving at 0.22 and has settled by 0.44, a little
+      after the pin takes hold (1 / 2.9 = 0.345). It used to start at 0.10,
+      which had it materialising while the client marquee above was still most
+      of the screen — the section announced itself before you had asked for it.
+      Starting later costs roughly a third of a screen of extra scroll before
+      anything appears, and the block still finishes arriving well before the
+      pin runs out.
     */
-    leadIn: [0.1, 0.3],
-    leadOut: [0.5, 0.66],
+    leadIn: [0.22, 0.44],
+    leadOut: [0.6, 0.74],
 
     /** the panels — note leadOut and cardsIn overlap */
-    cardsIn: [0.58, 0.78],
-    cardsOut: [0.94, 1],
+    cardsIn: [0.68, 0.88],
+
+    /*
+      Deliberately parked past the end of the scene, which switches the panels'
+      exit OFF: `cout` is clamp(0, (p - 1) / 1, 1), and p never exceeds 1, so it
+      is 0 for the whole scene and the panels never lift or fade.
+
+      They used to leave over [0.94, 1]. The trouble is what p = 1 means: the
+      section's bottom edge has only just reached the bottom of the screen, so
+      there is still a full viewport of scrolling before the pinned box is
+      actually gone. Emptying the box at p = 1 therefore bought a screen of
+      blank cream between the panels and Beginnings.
+
+      Leaving them in place lets the pin simply release: the panels ride up and
+      out with the section under their own scroll while Beginnings comes in
+      directly behind them, so something is always on screen and the two
+      sections read as one continuous move.
+    */
+    cardsOut: [1, 2],
 
     /**
      * How far each block starts below its resting place, in vh.

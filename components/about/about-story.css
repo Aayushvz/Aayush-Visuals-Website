@@ -64,6 +64,47 @@
   from 0.92 to 1.02 and the tracking loosens — caps tolerate tight negative
   tracking that ascenders and descenders do not.
 */
+/*
+  The act's loud heading.
+
+  Same scale, weight and tracking as .worksSection__title and .pgShelf__title,
+  so the section headings across /work, /playground and this act are one
+  family rather than three near-misses. The display line underneath keeps its
+  own smaller size and now reads as a standfirst to this rather than as the
+  heading itself.
+*/
+.abActTitle {
+  margin: 0 0 clamp(12px, 1.6vh, 22px);
+  font-size: clamp(52px, 9vw, 128px);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  color: var(--ab-ink);
+}
+
+.abActTitle__dot {
+  color: var(--purple);
+}
+
+/* the chapter label sits close to the heading it introduces; the act default
+   opens a gap sized for a label standing alone above body copy */
+.abAct--journey .abLabel {
+  margin-bottom: clamp(22px, 3.2vh, 42px);
+}
+
+/* The display line is this heading's standfirst, so it sits close under it
+   rather than at the act default, which is spaced for a heading standing on
+   its own above a list. */
+.abAct--journey .abSplit {
+  margin-bottom: clamp(16px, 2.2vh, 28px);
+}
+
+/* The row padding is what separates one year from the next. On the first row
+   it is not separating anything - it just deepens the gap under the heading. */
+.abJourney .abMile:first-child {
+  padding-top: 0;
+}
+
 .abSplit {
   margin: 0 0 clamp(40px, 6vh, 78px);
   font-size: clamp(28px, 4vw, 62px);

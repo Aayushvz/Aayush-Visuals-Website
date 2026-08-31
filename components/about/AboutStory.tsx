@@ -132,7 +132,17 @@ export function AboutStoryLower({ sectionRef }: Props) {
         <div className="abAct__inner">
           <ActLabel n="03">The journey</ActLabel>
 
-          <SplitDisplay lines={["Six years, one long", "accident"]} />
+          {/* The act's loud heading, set at the same scale as the index-page
+              titles on /work and /playground so the three read as one family.
+              It takes the h2, and the display line below it drops to a <p>:
+              SplitDisplay renders an h2 by default, and two of them in one
+              section would be two competing section headings in the outline
+              rather than a heading and its standfirst. */}
+          <Reveal as="h2" direction="up" distance={34} className="abActTitle">
+            Journey<span className="abActTitle__dot">.</span>
+          </Reveal>
+
+          <SplitDisplay as="p" lines={["Six years, one long", "accident"]} />
 
           <ol className="abJourney">
             {MILESTONES.map((m, i) => {

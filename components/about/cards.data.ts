@@ -21,7 +21,7 @@ export const STATS = {
   label: "By the numbers",
   rows: [
     { k: "Years designing", v: "06" },
-    { k: "Designers led", v: "75+" },
+    { k: "Completed projects", v: "15+" },
     { k: "Languages shipped", v: "22" },
     { k: "Visits served", v: "500K" },
   ],

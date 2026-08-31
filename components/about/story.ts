@@ -22,7 +22,7 @@ export type Milestone = {
 export const MILESTONES: Milestone[] = [
   {
     year: "2020",
-    title: "The gaming investment",
+    title: "Visual Design",
     copy: "Lockdown was in full swing and, like every responsible teenager, I was spending most of my time playing games and watching YouTube. I started making gaming videos and reviews, which led to one very important problem: I wanted new skins and characters, and my parents did not believe in investing in my gaming career. So I learned Photoshop and made thumbnails, posters and banners for YouTubers to earn pocket money. The plan was to buy game skins. The unexpected side effect was that I started enjoying design.",
     image: { src: "/about/journey/luffy.webp", alt: "Illustration: a figure with arms raised" },
   },

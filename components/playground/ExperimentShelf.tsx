@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useMemo, useState } from "react";
 import PageLink from "@/components/PageLink";
 import { EXPERIMENTS, SOON } from "./experiments";
 import { SlotCover } from "./covers";
@@ -31,7 +32,7 @@ import { SlotCover } from "./covers";
 */
 
 const FILTERS = [
-  { id: "all", label: "Everything" },
+  { id: "all", label: "All" },
   { id: "live", label: "Playable now" },
   { id: "soon", label: "In the workshop" },
 ] as const;
@@ -54,22 +55,6 @@ function ArrowIcon() {
   );
 }
 
-function ChevronIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
-
 /* the badge mark on a first release - a struck spark rather than a star,
    because a star in a portfolio reads as a rating nobody gave */
 function SparkIcon() {
@@ -80,153 +65,118 @@ function SparkIcon() {
   );
 }
 
-/*
-  The filter control.
-
-  A native <select> would be two lines and would also be the one element on
-  the page that renders as an operating-system widget in the middle of a
-  drawn layout, so it is a button and a listbox instead. Everything a select
-  gives away for free is put back by hand: roving focus on the arrows, Home
-  and End, Escape to close back onto the button, and a click anywhere else
-  to dismiss.
-*/
-function FilterMenu({
-  value,
-  onChange,
-}: {
-  value: FilterId;
-  onChange: (v: FilterId) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const btnRef = useRef<HTMLButtonElement | null>(null);
-  const listId = useId();
-
-  const current = FILTERS.find((f) => f.id === value) ?? FILTERS[0];
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
-
-  const commit = (i: number) => {
-    onChange(FILTERS[i].id);
-    setOpen(false);
-    btnRef.current?.focus();
-  };
-
-  const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setOpen(false);
-      btnRef.current?.focus();
-      return;
-    }
-    if (!open && (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ")) {
-      e.preventDefault();
-      setActive(FILTERS.findIndex((f) => f.id === value));
-      setOpen(true);
-      return;
-    }
-    if (!open) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActive((i) => (i + 1) % FILTERS.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive((i) => (i - 1 + FILTERS.length) % FILTERS.length);
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      setActive(0);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      setActive(FILTERS.length - 1);
-    } else if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      commit(active);
-    }
-  };
-
-  return (
-    <div className="pgFilter" ref={rootRef} onKeyDown={onKey}>
-      <span className="pgFilter__label" id={`${listId}-label`}>
-        Show
-      </span>
-      <button
-        ref={btnRef}
-        type="button"
-        className="pgFilter__button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={open ? listId : undefined}
-        aria-labelledby={`${listId}-label ${listId}-value`}
-        onClick={() => {
-          setActive(FILTERS.findIndex((f) => f.id === value));
-          setOpen((o) => !o);
-        }}
-      >
-        <span id={`${listId}-value`}>{current.label}</span>
-        <span className="pgFilter__chev" data-open={open || undefined}>
-          <ChevronIcon />
-        </span>
-      </button>
-
-      {open ? (
-        <ul className="pgFilter__list" id={listId} role="listbox" tabIndex={-1}>
-          {FILTERS.map((f, i) => (
-            <li key={f.id}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={f.id === value}
-                className="pgFilter__option"
-                data-active={i === active || undefined}
-                onMouseEnter={() => setActive(i)}
-                onClick={() => commit(i)}
-              >
-                {f.label}
-                <span className="pgFilter__tick" aria-hidden>
-                  {f.id === value ? "•" : ""}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-}
-
 export default function ExperimentShelf() {
+  const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
 
-  const live = filter === "soon" ? [] : EXPERIMENTS;
-  const soon = filter === "live" ? [] : SOON;
+  /* One predicate over both lists. A vacant slot is searchable by the kind of
+     thing meant to land in it, because that hint is the only text it has. */
+  const { live, soon } = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const hit = (...fields: string[]) =>
+      !q || fields.some((f) => f.toLowerCase().includes(q));
+    return {
+      live: filter === "soon" ? [] : EXPERIMENTS.filter((e) => hit(e.title, e.kind)),
+      soon: filter === "live" ? [] : SOON.filter((s) => hit(s.hint, s.kind)),
+    };
+  }, [query, filter]);
+
+  const reduce = useReducedMotion();
+
+  /*
+    Entrance lives on the card rather than in the global [data-reveal] system,
+    and it has to. Reveals.tsx queries the document once on mount and observes
+    what it finds; anything React adds later is never observed, so it keeps
+    opacity:0 forever. Every keystroke in the search field remounts this list,
+    which would blank the shelf permanently the first time someone typed and
+    cleared. framer re-runs initial -> animate on each mount instead, so a card
+    is correct however it arrived. Same values as ProjectCard on /work.
+  */
+  const enter = (i: number) =>
+    reduce
+      ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
+      : {
+          initial: { opacity: 0, y: 8 },
+          animate: { opacity: 1, y: 0 },
+          transition: {
+            duration: 0.32,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: Math.min(i, 6) * 0.04,
+          },
+        };
 
   return (
     <section className="pgShelf" id="experiments">
-      {/* section-local rails: the global fixed .rails would run over the
-          dark hero above, so this section carries its own pair. They are the
-          only structure on this ground - the ruled grid stays in the hero,
-          where it is the room the toy sits in; under the covers it was just
-          texture competing with them. */}
-      <div className="pgRails" aria-hidden />
-
       <div className="pgShelf__inner">
-        {/* one heading, one control, one rule. Everything else this section
-            used to say is said better by the grid underneath it. */}
+        {/* Same header grammar as /work: the title on the left, a mono count
+            and a short paragraph answering it on the right, then one row of
+            controls under both. The two index pages should open the same way. */}
         <header className="pgShelf__head" data-reveal>
-          <h2 className="pgShelf__title">Experiments</h2>
-          <FilterMenu value={filter} onChange={setFilter} />
+          <h2 className="pgShelf__title">
+            Experiments<span className="pgShelf__dot">.</span>
+          </h2>
+          <div className="pgShelf__intro">
+            {/* a count, not a date range - the honest at-a-glance fact about a
+                shelf is how much of it you can actually play */}
+            <span className="pgShelf__meta">
+              ({String(EXPERIMENTS.length).padStart(2, "0")} playable)
+            </span>
+            {/* Sized to the same character count as the /work blurb on
+                purpose. The header is bottom-aligned, so this column's height
+                is what sets the heading's baseline - let it wrap to two lines
+                where /work wraps to three and the two titles stop landing on
+                the same line. */}
+            <p className="pgShelf__desc">
+              Games, toys and sketches I build to try an idea out. None of it
+              is client work, and none of it has to justify itself.
+            </p>
+          </div>
         </header>
 
+        <div className="pgControls" data-reveal>
+          <label className="pgSearch">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden>
+              <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6" />
+              <path
+                d="m14 14 3.5 3.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              type="text"
+              className="pgSearch__input"
+              placeholder="Search experiments..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search experiments"
+            />
+          </label>
+
+          <div
+            className="pgFilters"
+            role="tablist"
+            aria-label="Filter experiments by availability"
+          >
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                role="tab"
+                aria-selected={filter === f.id}
+                className={`pgChip${filter === f.id ? " pgChip--active" : ""}`}
+                onClick={() => setFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <ul className="pgGrid">
-          {live.map((e) => (
-            <li key={e.id} className="pgCard" data-reveal>
+          {live.map((e, i) => (
+            <motion.li key={e.id} className="pgCard" {...enter(i)}>
               <PageLink
                 href={e.href}
                 className="pgCard__link"
@@ -270,13 +220,17 @@ export default function ExperimentShelf() {
                   </div>
                 </div>
               </PageLink>
-            </li>
+            </motion.li>
           ))}
 
           {/* vacant slots: same footprint, no link, and labelled as empty
               rather than dressed up as content that is on its way */}
-          {soon.map((s) => (
-            <li key={s.index} className="pgCard pgCard--soon" data-reveal>
+          {soon.map((s, i) => (
+            <motion.li
+              key={s.index}
+              className="pgCard pgCard--soon"
+              {...enter(live.length + i)}
+            >
               <div className="pgCard__art">
                 <SlotCover index={s.index} />
               </div>
@@ -287,9 +241,13 @@ export default function ExperimentShelf() {
                   <span className="pgCard__price">Not yet</span>
                 </div>
               </div>
-            </li>
+            </motion.li>
           ))}
         </ul>
+
+        {live.length === 0 && soon.length === 0 ? (
+          <p className="pgEmpty">No experiments found.</p>
+        ) : null}
       </div>
     </section>
   );

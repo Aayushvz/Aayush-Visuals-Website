@@ -16,15 +16,6 @@
   to know which room it is in.
 */
 
-.pgHero {
-  --pg-fg: var(--hero-fg);
-  --pg-mute: color-mix(in srgb, var(--hero-fg) 46%, transparent);
-  --pg-faint: color-mix(in srgb, var(--hero-fg) 28%, transparent);
-  --pg-hair: color-mix(in srgb, var(--hero-fg) 12%, transparent);
-  --pg-grid-line: var(--hero-grid-line);
-  --pg-accent: var(--purple-soft);
-}
-
 /* fixed light, not theme-reactive: this section is below the hero, and
    everything below a hero on this site is cream by definition */
 .pgShelf {
@@ -42,130 +33,17 @@
    fade masks multiply so all four edges dissolve and the corners fade
    hardest. The shelf below is left plain - its own rails and the covers are
    structure enough, and a grid behind a row of cards is only texture. */
-.pgField {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    #000 16%,
-    #000 84%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    #000 16%,
-    #000 84%,
-    transparent 100%
-  );
-}
-
-.pgField__v {
-  position: absolute;
-  inset: 0;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 16%,
-    #000 84%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 16%,
-    #000 84%,
-    transparent 100%
-  );
-}
-
-.pgField__pattern {
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
 
 /* ==========================================================
    The hero
    ========================================================== */
 
-.pgHero {
-  position: relative;
-  min-height: 100svh;
-  display: flex;
-  background: var(--hero-bg);
-  color: var(--pg-fg);
-  /* clip, not hidden: an overflow:hidden full-viewport section becomes its
-     own scroll box the moment anything overshoots, which silently offsets
-     the whole interior (learned the hard way on the homepage hero) */
-  overflow: clip;
-  isolation: isolate;
-}
-
 /* the toy's box. Above the type so a ball can rest ON the wordmark rather
    than behind it, which is the entire idea of the section. */
-.pgHero__toys {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: block;
-  cursor: grab;
-  /* vertical drags still scroll the page; only a grab is intercepted */
-  touch-action: pan-y;
-}
-
-.pgHero__toys--holding {
-  cursor: grabbing;
-}
-
-.pgHero__inner {
-  position: relative;
-  z-index: 2;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(96px, 14vh, 152px) var(--page-rail-inset) clamp(40px, 7vh, 72px);
-  width: 100%;
-}
 
 /* ---- the wordmark, which is also the floor ---- */
 
-.pgHero__title {
-  margin: 0;
-  /* one line, filling the measure between the rails. The physics reads the
-     span's box, so the type size IS the level design. */
-  line-height: 0.82;
-  font-weight: 600;
-  letter-spacing: -0.055em;
-  /* pre-hydration guess only, deliberately a shade under the column so it
-     can never clip; PlaygroundHero refits it to the exact measure */
-  font-size: clamp(52px, 18.2vw, 300px);
-  white-space: nowrap;
-}
-
 /* the heading a screen reader gets, since the split wordmark is aria-hidden */
-.pgHero__sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.pgHero__word {
-  display: inline-block;
-  color: var(--pg-fg);
-}
 
 /*
   One span per glyph, lit one at a time as the pointer crosses it - the same
@@ -180,61 +58,26 @@
   surface, and a letter that steps out from under a resting ball leaves it
   hanging in mid-air.
 */
-.pgHero__letter {
-  display: inline-block;
-  transition: color 0.25s var(--ease-quint);
-}
 
-.pgHero__letter--lit {
-  color: var(--purple-soft);
+/*
+  The works page's header language, adapted to this surface.
+
+  Same structure and the same scale — bracketed year, a narrow description
+  column, and a purple full stop closing the title. The colours come from
+  this page's own tokens rather than the works page's literal rgba values,
+  because that header sits on cream and this one sits on the dark hero
+  ground; copying the values across would have produced near-black text on a
+  near-black field.
+*/
+
+/* the stop that closes the wordmark, matching .worksSection__dot */
+
+@media (max-width: 900px) {
+  /* beside a wordmark fitted to the full measure there is nowhere for this to
+     go on a narrow screen, so it moves under the nav and above the toy */
 }
 
 /* ---- the bottom edge: one affordance, one number ---- */
-
-.pgHero__foot {
-  position: absolute;
-  z-index: 4;
-  left: var(--page-rail-inset);
-  right: var(--page-rail-inset);
-  bottom: clamp(20px, 3.4vh, 34px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  pointer-events: none;
-}
-
-.pgHero__hint {
-  margin: 0;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--pg-faint);
-}
-
-.pgHero__count {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 0;
-}
-
-.pgHero__countNum {
-  font-size: clamp(26px, 3vw, 40px);
-  font-weight: 500;
-  line-height: 0.86;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-.pgHero__countLabel {
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--pg-mute);
-}
 
 /* ==========================================================
    The shelf
@@ -244,162 +87,175 @@
   position: relative;
   background: var(--cream);
   color: var(--pg-fg);
-  padding: clamp(80px, 11vw, 150px) 0 clamp(88px, 12vw, 160px);
+  /* identical to .worksSection on /work - same top gap, same shallow side
+     margins, same bottom. The two index pages are the same page shape, so
+     their headings have to land on the same line. */
+  padding: clamp(80px, 14vh, 190px) clamp(20px, 2.4vw, 46px) clamp(64px, 10vh, 130px);
   overflow: clip;
 }
 
-.pgRails {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.pgRails::before,
-.pgRails::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--pg-hair);
-}
-
-.pgRails::before {
-  left: var(--page-rail-inset);
-}
-
-.pgRails::after {
-  right: var(--page-rail-inset);
-}
-
+/* the section itself carries the side inset now, exactly as .worksSection
+   does; this is just the stacking context the cards sit in */
 .pgShelf__inner {
   position: relative;
   z-index: 2;
-  padding: 0 var(--page-content-inset);
 }
 
+/* mirrors .worksSection__head: title left, mono count + paragraph right,
+   baselines aligned. The hairline that used to close this off is gone - on
+   /work the controls row is what separates header from grid, and two
+   separators doing one job read as clutter. */
 .pgShelf__head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
-  padding-bottom: clamp(20px, 2.6vw, 32px);
-  border-bottom: 1px solid var(--pg-hair);
+  gap: clamp(24px, 5vw, 90px);
+  margin-bottom: clamp(48px, 8vh, 96px);
 }
 
+/* the same scale as .worksSection__title on /work, so the two index pages
+   open at the same volume */
 .pgShelf__title {
   margin: 0;
-  font-size: clamp(30px, 4.4vw, 62px);
+  font-size: clamp(52px, 9vw, 128px);
   font-weight: 600;
-  letter-spacing: -0.042em;
-  line-height: 0.94;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
 }
 
-/* ---- the filter ---- */
+.pgShelf__dot {
+  color: var(--pg-accent);
+}
 
-.pgFilter {
-  position: relative;
+.pgShelf__intro {
+  max-width: 380px;
+  padding-bottom: clamp(6px, 1.4vw, 18px);
+}
+
+.pgShelf__meta {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--pg-mute);
+}
+
+.pgShelf__desc {
+  margin: 0;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.5;
+  color: var(--pg-mute);
+}
+
+/* ---- search + availability filters ---- */
+
+/* Two rows: the field, then the tags under it. /work gets that shape for
+   free because nine chips cannot fit beside the search box and wrap - with
+   three they would sit on the same line, so the row break is declared here
+   rather than left to depend on how many filters happen to exist. */
+.pgControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: clamp(48px, 7vh, 84px);
+}
+
+.pgSearch {
   display: inline-flex;
   align-items: center;
-  gap: 11px;
-  flex-shrink: 0;
-  padding-bottom: 3px;
+  gap: 10px;
+  flex: 0 0 auto;
+  width: clamp(240px, 26vw, 320px);
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(31, 31, 31, 0.07);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.pgFilter__label {
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+.pgSearch:focus-within {
+  border-color: color-mix(in srgb, var(--pg-accent) 50%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pg-accent) 12%, transparent);
+}
+
+.pgSearch svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
   color: var(--pg-faint);
 }
 
-.pgFilter__button {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 11px 8px 13px;
-  border: 1px solid var(--pg-hair);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--pg-fg);
+.pgSearch__input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: none;
   font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.005em;
-  cursor: pointer;
-  transition: border-color var(--dur-state) var(--ease-quint),
-    color var(--dur-state) var(--ease-quint);
+  font-size: 15px;
+  color: var(--pg-fg);
 }
 
-.pgFilter__button:hover {
-  border-color: color-mix(in srgb, var(--pg-accent) 46%, transparent);
-  color: var(--pg-accent);
+.pgSearch__input::placeholder {
+  color: var(--pg-faint);
 }
 
-.pgFilter__button:focus-visible,
-.pgFilter__option:focus-visible {
-  outline: 2px solid var(--pg-accent);
-  outline-offset: 2px;
-}
-
-.pgFilter__chev {
-  display: inline-flex;
-  color: var(--pg-mute);
-  transition: transform var(--dur-state) var(--ease-quint);
-}
-
-.pgFilter__chev svg {
-  width: 13px;
-  height: 13px;
-}
-
-.pgFilter__chev[data-open] {
-  transform: rotate(180deg);
-}
-
-.pgFilter__list {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 7px);
-  right: 0;
-  min-width: 196px;
-  margin: 0;
-  padding: 5px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--pg-hair);
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(31, 31, 31, 0.06), 0 18px 40px rgba(31, 31, 31, 0.14);
-}
-
-.pgFilter__option {
+.pgFilters {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  padding: 8px 10px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--pg-fg);
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pgChip {
+  flex: 0 0 auto;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(31, 31, 31, 0.07);
+  color: var(--pg-mute);
   font: inherit;
-  font-size: 13px;
-  text-align: left;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
+  transition: background-color 0.22s ease, color 0.22s ease,
+    border-color 0.22s ease;
 }
 
-.pgFilter__option[data-active] {
-  background: color-mix(in srgb, var(--pg-accent) 10%, transparent);
-  color: var(--purple-mid);
+/* scoped off the active chip deliberately - unscoped, this out-specifies
+   .pgChip--active and repaints the selected label in the same colour as its
+   own background, so hovering the current filter blanks its text */
+.pgChip:not(.pgChip--active):hover {
+  color: var(--pg-fg);
+  border-color: rgba(31, 31, 31, 0.16);
 }
 
-.pgFilter__tick {
-  color: var(--pg-accent);
-  font-size: 15px;
-  line-height: 1;
+.pgChip--active {
+  background: var(--pg-fg);
+  border-color: var(--pg-fg);
+  color: #fff;
+}
+
+.pgChip--active:hover {
+  background: #333333;
+  border-color: #333333;
+  color: #fff;
+}
+
+.pgChip:focus-visible {
+  outline: 2px solid var(--pg-accent);
+  outline-offset: 3px;
+}
+
+.pgEmpty {
+  padding: clamp(40px, 8vh, 90px) 0;
+  font-size: 17px;
+  color: var(--pg-faint);
 }
 
 /* ---- the grid ---- */
@@ -914,24 +770,10 @@
     above it, the floor under it is a strip rather than half the screen,
     and the composition has a bottom edge to sit on.
   */
-  .pgHero {
-    min-height: 90svh;
-  }
 
   /* the bottom padding is the depth of the floor strip under the wordmark,
      and it has to clear the largest ball's diameter or the set ends up
      wedged between the descenders and the labels */
-  .pgHero__inner {
-    justify-content: flex-end;
-    padding: calc(var(--mnav-clear) + 22px) var(--page-rail-inset)
-      clamp(142px, 22vh, 196px);
-  }
-
-  .pgHero__title {
-    /* the wordmark stays one line at every width: it is a collision
-       surface, and a wrapped one would put a ball in mid-air */
-    font-size: clamp(34px, 16.8vw, 92px);
-  }
 
   /*
     The rails go.
@@ -942,24 +784,47 @@
     draw a line down each edge and box the cards in. Losing them also frees
     the gutter, which no longer has to be the rail inset it was hugging.
   */
-  .pgRails {
-    display: none;
-  }
-
-  .pgShelf__inner {
-    padding: 0 22px;
-  }
-
-  /* the control drops under the heading rather than squeezing it */
+  /* the intro drops under the heading rather than squeezing it */
   .pgShelf__head {
     flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
+    gap: 20px;
   }
 
-  .pgFilter__list {
-    left: 0;
-    right: auto;
+  .pgShelf__intro {
+    max-width: 520px;
+  }
+
+  .pgControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .pgSearch {
+    width: 100%;
+    height: 50px;
+  }
+
+  /* the chips scroll sideways instead of wrapping into a tall block that
+     pushes the first cover off the screen */
+  .pgFilters {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .pgFilters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pgChip {
+    height: 46px;
+    font-size: 14px;
   }
 
   /* nothing to hover with, and the strip says nothing the label below does
@@ -971,37 +836,17 @@
 
 /* on the narrowest phones the two bottom labels stop fitting on one line
    together, so they stack rather than being squeezed or clipped */
-@media (max-width: 430px) {
-  .pgHero__foot {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .pgHero__count {
-    align-items: baseline;
-  }
-}
 
 /* ==========================================================
    Reduced motion
    ========================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .pgHero__toys {
-    cursor: default;
-  }
-
-  .pgHero__hint {
-    display: none;
-  }
-
-  .pgHero__letter,
   .pgCard__art,
   .pgCard__title,
   .pgCard__play,
-  .pgFilter__button,
-  .pgFilter__chev {
+  .pgChip,
+  .pgSearch {
     transition: none !important;
   }
 

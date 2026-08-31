@@ -74,4 +74,3 @@ export const SOON: { index: string; hint: string; kind: string }[] = [
   { index: "04", hint: "Not started yet", kind: "Unclaimed" },
 ];
 
-export const LIVE_COUNT = EXPERIMENTS.filter((e) => e.status === "live").length;
