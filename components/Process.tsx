@@ -227,44 +227,6 @@ export default function Process() {
       aria-labelledby="process-heading"
     >
       <div className="process__sticky">
-        {/* Torn-paper edge carrying the dark Statement panel above into this
-            light one. Untouched: it is what makes the two sections read as
-            one continuous sheet. */}
-        <div className="process__brushTop" aria-hidden>
-          <svg className="process__brushSvg--desktop" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <filter id="processBrushFilter" x="-5%" y="-600%" width="110%" height="1300%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.055 0.07" numOctaves="5" seed="31" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-            </defs>
-            <path
-              d="M0,-500 L1440,-500 L1440,100 C1400,75 1360,64 1320,60 C1280,56 1240,61 1200,58 C1160,55 1120,59 1080,56 C1040,54 1000,58 960,55 C920,52 880,56 840,54 C800,51 760,55 720,52 C680,49 640,54 600,51 C560,48 520,52 480,49 C440,46 400,51 360,48 C320,45 280,49 240,46 C200,44 160,48 120,45 C80,64 40,80 0,100 Z"
-              fill="#1a1a1a"
-              filter="url(#processBrushFilter)"
-            />
-          </svg>
-          <svg className="process__brushSvg--mobile" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              {/* two-band fractal noise: low horizontal freq = broad tears,
-                  high vertical freq = fine dry-brush fibres; strong displace
-                  turns the base edge into a torn-paper / dry-brush stroke */}
-              <filter id="processBrushFilterMobile" x="-8%" y="-700%" width="116%" height="1500%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.019 0.13" numOctaves="4" seed="9" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-            </defs>
-            <path
-              d="M0,-500 L1440,-500 L1440,72 C1400,54 1360,47 1320,44 C1280,41 1240,46 1200,43 C1160,40 1120,46 1080,42 C1040,38 1000,45 960,41 C920,38 880,44 840,41 C800,37 760,43 720,39 C680,36 640,43 600,39 C560,36 520,42 480,38 C440,35 400,41 360,38 C320,34 280,40 240,37 C200,33 160,40 120,36 C80,49 40,62 0,72 Z"
-              fill="#1a1a1a"
-              filter="url(#processBrushFilterMobile)"
-            />
-          </svg>
-          <div className="process__brushDots" />
-          <span className="process__brushRail process__brushRail--left" />
-          <span className="process__brushRail process__brushRail--right" />
-        </div>
-
         <div className="process__rails" aria-hidden>
           <span className="process__rail process__rail--left" />
           <span className="process__rail process__rail--right" />

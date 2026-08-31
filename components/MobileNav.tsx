@@ -5,8 +5,10 @@ import { SunIcon, MoonIcon } from "./icons";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLink from "./PageLink";
 
+/* No "home" row: the wordmark in the bar above is already the link home, and
+   listing it again spends the panel's tallest, most prominent slot on the one
+   destination the user can always reach. */
 const links = [
-  { label: "home", href: "/" },
   { label: "about me", href: "/about" },
   { label: "works", href: "/work" },
   { label: "playground", href: "/playground" },

@@ -73,30 +73,30 @@ const CLOSED = [
 /*
   Pin timeline.
 
-  The section is pulled up 100vh under Process, so the FIRST 100vh of its
-  scroll span is spent with Process still sliding away on top — the reader
-  hasn't arrived yet. Everything below is measured from the end of that.
+  The section follows Statement in ordinary flow now - no pull-up, no panel
+  sliding away on top - so its scroll span begins the moment the pane pins.
 
-  Three and a half beats after arrival:
+  Measured in scrolls, where one scroll is one viewport:
 
-    1    dwell   closed wallet, the reader takes the scene in
-    2    deal A  cards 1-3 out together
-    3    deal B  cards 4-6 out together
-    0.5  dwell   all six held briefly, then the section releases
+    0.5  dwell    closed wallet, the reader takes the scene in
+     |   deal A   cards 1-3 out together
+    1.0  gap      the first three are read
+     |   deal B   cards 4-6 out together
+    0.5  tail     all six held, then the section releases
 
-  This replaced a six-step deal that cost ~320vh of scrolling after the
-  parallax (100vh of dead dwell, then one card per ~15vh, then a 146vh
-  tail). `beat` is the one number to touch if it still feels long, and
-  `tail` is how much of a beat is held after the last card lands —
-  everything else here is derived from those two.
+  The three segments are given in vh rather than derived from a single
+  `beat`, because they are no longer all the same length: the dwell and the
+  tail are half a scroll each and the gap between the two deals is a full
+  one. Change any of them and `total` must change with it.
 
   `total` must match `min-height` on `.capabilities--pinned` in globals.css
   (and the phone override in the max-width: 640px block). `pin` is the
   sticky pane's own 100vh, which useScroll's "end end" offset subtracts.
-  total = pin + parallax + beat * (3 + tail).
+  total = pin + dwell + gap + tail.
 */
-const TIMELINE_DESKTOP = { total: 375, pin: 100, parallax: 100, beat: 50, tail: 0.5 };
-const TIMELINE_MOBILE = { total: 340, pin: 100, parallax: 100, beat: 40, tail: 0.5 };
+const TIMELINE_DESKTOP = { total: 300, pin: 100, dwell: 50, gap: 100, tail: 50 };
+/* same rhythm, shorter strides - a swipe covers less ground than a wheel */
+const TIMELINE_MOBILE = { total: 260, pin: 100, dwell: 40, gap: 80, tail: 40 };
 
 type Timeline = typeof TIMELINE_DESKTOP;
 
@@ -104,13 +104,13 @@ type Timeline = typeof TIMELINE_DESKTOP;
 function dealPoints(t: Timeline) {
   const span = t.total - t.pin;
   return {
-    a: (t.parallax + t.beat) / span,
-    b: (t.parallax + t.beat * 2) / span,
+    a: t.dwell / span,
+    b: (t.dwell + t.gap) / span,
     /* where a wallet click parks the scroll so the next real scroll input
        carries on from the right place: just past each trigger, so scrolling
        back the other way re-crosses it and reverses naturally */
-    afterB: (t.parallax + t.beat * 2.25) / span,
-    beforeA: (t.parallax + t.beat * 0.5) / span,
+    afterB: (t.dwell + t.gap + t.tail * 0.5) / span,
+    beforeA: (t.dwell * 0.5) / span,
   };
 }
 
@@ -336,6 +336,43 @@ export default function Capabilities() {
       id="capabilities"
       ref={sectionRef}
     >
+      {/* Torn-paper edge, the same device Process uses: a shape filled in the
+          dark of the panel ABOVE (Statement, #1a1a1a) laid over this panel's
+          top, so the two read as one sheet torn across rather than two blocks
+          butted together. It hangs off the section rather than the sticky pin
+          so it scrolls away with the transition instead of parking at the top
+          of the screen for the whole pinned run. Filter ids are scoped to this
+          component - reusing Process's would collide in the DOM. */}
+      <div className="capabilities__brushTop" aria-hidden>
+        <svg className="capabilities__brushSvg--desktop" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="capBrushFilter" x="-5%" y="-600%" width="110%" height="1300%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.055 0.07" numOctaves="5" seed="31" result="noise"/>
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+          <path
+            d="M0,-500 L1440,-500 L1440,100 C1400,75 1360,64 1320,60 C1280,56 1240,61 1200,58 C1160,55 1120,59 1080,56 C1040,54 1000,58 960,55 C920,52 880,56 840,54 C800,51 760,55 720,52 C680,49 640,54 600,51 C560,48 520,52 480,49 C440,46 400,51 360,48 C320,45 280,49 240,46 C200,44 160,48 120,45 C80,64 40,80 0,100 Z"
+            fill="#1a1a1a"
+            filter="url(#capBrushFilter)"
+          />
+        </svg>
+        <svg className="capabilities__brushSvg--mobile" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="capBrushFilterMobile" x="-8%" y="-700%" width="116%" height="1500%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.019 0.13" numOctaves="4" seed="9" result="noise"/>
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+          </defs>
+          <path
+            d="M0,-500 L1440,-500 L1440,72 C1400,54 1360,47 1320,44 C1280,41 1240,46 1200,43 C1160,40 1120,46 1080,42 C1040,38 1000,45 960,41 C920,38 880,44 840,41 C800,37 760,43 720,39 C680,36 640,43 600,39 C560,36 520,42 480,38 C440,35 400,41 360,38 C320,34 280,40 240,37 C200,33 160,40 120,36 C80,49 40,62 0,72 Z"
+            fill="#1a1a1a"
+            filter="url(#capBrushFilterMobile)"
+          />
+        </svg>
+        <div className="capabilities__brushDots" />
+      </div>
+
       <div
         className="capabilities__pin"
         onMouseMove={(e) => {

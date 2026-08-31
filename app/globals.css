@@ -1772,7 +1772,9 @@ html.has-cursor .cursorRing {
 */
 .process {
   position: relative;
-  background: #F7F7F5;
+  /* the same light ground the rest of the page uses, rather than its own
+     near-white; it sat one step lighter than everything around it */
+  background: var(--cream);
   /* overflow: visible — sticky child needs this; clipping is on .process__sticky */
   min-height: 130vh;
   z-index: 2;
@@ -1784,50 +1786,12 @@ html.has-cursor .cursorRing {
   top: 0;
   height: 100vh;
   overflow: hidden;
-  background: #F7F7F5;
+  /* the pane covers the section, so THIS is the colour you actually see -
+     setting it on .process alone left the old near-white painting over it */
+  background: var(--cream);
   display: flex;
   flex-direction: column;
 }
-
-/* rough brush-stroke SVG pinned to Process top, dark fill matches Statement above */
-.process__brushTop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100px;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.process__brushTop svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.process__brushTop .process__brushSvg--mobile { display: none; }
-
-/* Dot grid div — comes after SVG in DOM so it paints on top of the dark fill */
-.process__brushDots {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(244, 241, 234, 0.13) 1px, transparent 1px);
-  background-size: 16px 16px;
-  pointer-events: none;
-}
-
-/* Light vertical rails over the dark brush area — match Statement rail style */
-.process__brushRail {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(244, 241, 234, 0.35);
-}
-
-.process__brushRail--left { left: var(--page-rail-inset); }
-.process__brushRail--right { right: var(--page-rail-inset); }
 
 .process__rails {
   position: absolute;
@@ -2496,12 +2460,13 @@ html.has-cursor .cursorRing {
    the viewport is cut off rather than scrollable — the field's height is
    derived from --hy so it can be checked against the pane in one line. */
 @media (max-width: 640px) {
-  .process__brushTop {
+  /* the Skills panel's tear follows the same phone treatment */
+  .capabilities__brushTop {
     height: 68px;
   }
 
-  .process__brushTop .process__brushSvg--desktop { display: none; }
-  .process__brushTop .process__brushSvg--mobile { display: block; }
+  .capabilities__brushTop .capabilities__brushSvg--desktop { display: none; }
+  .capabilities__brushTop .capabilities__brushSvg--mobile { display: block; }
 
   .process__inner {
     padding: 74px 20px 14px;
@@ -2913,19 +2878,58 @@ html.has-cursor .cursorRing {
   z-index: 1;
 }
 
-/* Pulled up 100vh under the Process panel (which carries a higher z), so
-   Process slides away revealing the pinned wallet scene — the parallax.
+/* -------- torn-paper top edge --------
+   Originally Process's device, which has since dropped it, so this is now the
+   only place it lives. The dark of the section above, cut as a torn edge over
+   this panel's top,
+   so Statement and Skills read as one sheet torn across. Anchored to the
+   section rather than to .capabilities__pin: the pin is sticky for the whole
+   275vh run, and an edge inside it would sit frozen at the top of the screen
+   the entire time instead of passing by once at the seam. */
+.capabilities__brushTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  pointer-events: none;
+  /* over the pin, which is unnumbered and would otherwise cover this */
+  z-index: 4;
+}
 
-   Driver timeline (375vh = 100vh pin base + 275vh scroll span):
-   100vh parallax → 50vh dwell → 50vh deals cards 1-3 → 50vh deals cards
-   4-6 → 25vh held → release into Projects.
+.capabilities__brushTop svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.capabilities__brushTop .capabilities__brushSvg--mobile {
+  display: none;
+}
+
+/* the dot grid sits after the svg so it paints on top of the dark fill,
+   carrying Statement's texture across the tear */
+.capabilities__brushDots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(244, 241, 234, 0.13) 1px, transparent 1px);
+  background-size: 16px 16px;
+  pointer-events: none;
+}
+
+/* The scroll driver's height. This is what gives the pinned pane something
+   to scroll THROUGH; without it the section collapses to one viewport and
+   the deal never fires.
+
+   Driver timeline (300vh = 100vh pin base + 200vh scroll span):
+   50vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 50vh
+   held -> release into Projects.
 
    MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
    card-reveal thresholds are computed from those numbers, so changing one
    without the other slides the deal off its beats. */
 .capabilities--pinned {
-  min-height: 375vh;
-  margin-top: -100vh;
+  min-height: 300vh;
 }
 
 .capabilities__pin {
@@ -3227,11 +3231,11 @@ html.has-cursor .cursorRing {
 /* -------- phones: pinned canvas — 2x3 card grid above the bottom wallet
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
-  /* shorter beats on phones (40vh rather than 50), where a swipe covers
-     less ground: 100vh parallax + 3 x 40vh + 20vh tail + 100vh pin base.
+  /* the same rhythm on shorter strides, where a swipe covers less ground
+     than a wheel: 40vh dwell + 80vh gap + 40vh tail + 100vh pin base.
      MUST match TIMELINE_MOBILE.total in components/Capabilities.tsx. */
   .capabilities--pinned {
-    min-height: 340vh;
+    min-height: 260vh;
   }
 
   .capabilities .capabilities__canvas {
@@ -5569,6 +5573,7 @@ html.has-cursor .cursorRing {
   }
 
 
+
   /* -------- statement: phone composition --------
      Full-screen dark canvas. Statement headline is the dominant element;
      four tool tiles shrink and retreat to the corners. Extra padding clears
@@ -6010,8 +6015,8 @@ html.has-cursor .cursorRing {
   left: 50%;
   translate: -50% 0;
   z-index: 250;
-  width: min(380px, calc(100vw - 32px));
-  border-radius: 20px; /* 20px rounded rectangle corners matching reference screenshot */
+  width: min(292px, calc(100vw - 56px));
+  border-radius: 18px; /* 20px rounded rectangle corners matching reference screenshot */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -6038,13 +6043,13 @@ html.has-cursor .cursorRing {
 .mobileNavCard--top {
   top: max(16px, env(safe-area-inset-top, 16px)) !important;
   bottom: auto !important;
-  padding: 0 0 18px 0 !important;
+  padding: 0 0 10px 0 !important;
 }
 
 .mobileNavCard--bottom {
   bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
   top: auto !important;
-  padding: 18px 0 0 0 !important;
+  padding: 10px 0 0 0 !important;
 }
 
 .mobileNavCard .mobileNav__bar {
@@ -6058,16 +6063,20 @@ html.has-cursor .cursorRing {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  /* the rows carry their own vertical padding for the tap target, so the gap
+     only has to separate them optically */
+  gap: 2px;
   width: 100%;
-  padding: 16px 0;
+  padding: 10px 0 4px;
 }
 
 .mobileNavCard__link {
   display: inline-block;
   text-decoration: none;
   color: #ffffff;
-  padding: 6px 16px;
+  /* keeps each row ~44px tall at the smaller type, so shrinking the text does
+     not shrink the thing you actually have to hit with a thumb */
+  padding: 11px 18px;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -6078,9 +6087,9 @@ html.has-cursor .cursorRing {
 
 .mobileNavCard__linkText {
   font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
-  font-size: 24px;
+  font-size: 17px;
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
   text-transform: lowercase; /* lowercase General Sans per user instructions */
   color: #ffffff;
   display: inline-block;
@@ -9872,16 +9881,13 @@ html.contact-page-active .themeSwitch {
    MOBILE SIDE RULERS OVERRIDE (PHONE VIEW ONLY <= 768px)
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Hide side rulers on phone view for Skills (Capabilities), Process (including top dark area brush rails), Hero, About, Statement, Services, Contact */
+  /* Hide side rulers on phone view for Skills (Capabilities), Process, Hero, About, Statement, Services, Contact */
   .rails,
   .heroRuler__rail,
   .heroRuler,
   .statement__rail,
   .process__rails,
   .process__rail,
-  .process__brushRail,
-  .process__brushRail--left,
-  .process__brushRail--right,
   .process__top::before,
   .process__top::after,
   .capRails,

@@ -41,13 +41,13 @@ export default function Home() {
           <About />
         </div>
         <Statement />
-        <div className="processStage">
-          <Process />
-        </div>
         <Capabilities />
         <div className="hpParallax">
           <div className="hpParallax__stage">
             <ProjectsSection />
+            <div className="processStage">
+              <Process />
+            </div>
             <Services />
             <Testimonials />
             <HomeContact />
