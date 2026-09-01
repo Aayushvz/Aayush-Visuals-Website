@@ -5,6 +5,7 @@ import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
 import Reveals from "@/components/Reveals";
 import Footer from "@/components/Footer";
+import HomeContact from "@/components/HomeContact";
 import ExperimentShelf from "./ExperimentShelf";
 import "./playground.css";
 
@@ -25,8 +26,15 @@ export default function PlaygroundPageClient() {
 
       <Reveals />
       <main>
-        <ExperimentShelf />
-        <Footer />
+        {/* the homepage's parallax: opaque stage over a sticky footer, with
+            contact closing the page just above it */}
+        <div className="hpParallax">
+          <div className="hpParallax__stage">
+            <ExperimentShelf />
+            <HomeContact />
+          </div>
+          <Footer />
+        </div>
       </main>
     </>
   );

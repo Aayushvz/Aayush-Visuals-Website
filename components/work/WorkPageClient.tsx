@@ -6,6 +6,7 @@ import Cursor from "@/components/Cursor";
 
 import Reveals from "@/components/Reveals";
 import Footer from "@/components/Footer";
+import HomeContact from "@/components/HomeContact";
 import WorksSection from "./WorksSection";
 import CaseStudiesSection from "./CaseStudiesSection";
 
@@ -27,9 +28,18 @@ export default function WorkPageClient() {
 
       <Reveals />
       <main>
-        <WorksSection />
-        <CaseStudiesSection />
-        <Footer />
+        {/* Same shape as the homepage: the content stage is opaque and slides
+            up over the footer, which is sticky underneath it, so the footer is
+            revealed rather than scrolled to. Contact closes the page just
+            above it, as it does there. */}
+        <div className="hpParallax">
+          <div className="hpParallax__stage">
+            <WorksSection />
+            <CaseStudiesSection />
+            <HomeContact />
+          </div>
+          <Footer />
+        </div>
       </main>
     </>
   );
