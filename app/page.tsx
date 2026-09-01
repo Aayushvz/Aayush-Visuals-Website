@@ -6,12 +6,15 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Statement from "@/components/Statement";
 import Process from "@/components/Process";
-import GallerySection from "@/components/GallerySection";
 import ProjectsSection from "@/components/ProjectsSection";
-import Services from "@/components/Services";
 import HomeContact from "@/components/HomeContact";
-import Footer from "@/components/Footer";
 import Reveals from "@/components/Reveals";
+/* heavy, below the fold, and held until approach - see HomeDeferred */
+import {
+  DeferredServices,
+  DeferredGallery,
+  DeferredFooter,
+} from "@/components/HomeDeferred";
 
 export default function Home() {
   return (
@@ -40,17 +43,17 @@ export default function Home() {
           <About />
         </div>
         <Statement />
-        <Services />
+        <DeferredServices />
         <div className="hpParallax">
           <div className="hpParallax__stage">
             <ProjectsSection />
             <div className="processStage">
               <Process />
             </div>
-            <GallerySection />
+            <DeferredGallery />
             <HomeContact />
           </div>
-          <Footer />
+          <DeferredFooter />
         </div>
       </main>
     </>

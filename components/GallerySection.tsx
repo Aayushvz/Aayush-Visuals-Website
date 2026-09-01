@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { GALLERY } from "./gallery.data";
 
 /*
@@ -35,6 +35,34 @@ export default function GallerySection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLUListElement | null>(null);
+
+  /*
+    The travel has to be known BEFORE the first paint, not after it.
+
+    This section is 100svh plus its track travel, and travel is only knowable
+    by measuring the row. Measured in an ordinary effect that measurement
+    lands after the browser has already painted, so the section shows for one
+    frame at a single viewport and then grows by roughly five more. The
+    homepage mounts this section on approach, which can put that frame on
+    screen, where it reads as the page lurching under the reader.
+
+    Measuring here runs it before paint, so the section is never painted at
+    the wrong height. The row does not need its images for this: every card
+    carries its own width and aspect from gallery.data.ts, so the track has
+    its full width from CSS alone. The effect below re-measures regardless,
+    and the ResizeObserver still catches anything that moves later.
+  */
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track) return;
+    const view = track.parentElement;
+    const visible = view ? view.clientWidth : window.innerWidth;
+    section.style.setProperty(
+      "--gal-travel",
+      `${Math.max(0, Math.round(track.scrollWidth - visible))}px`
+    );
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
