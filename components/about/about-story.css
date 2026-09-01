@@ -117,9 +117,60 @@
   padding-bottom: 0.06em;
 }
 
+/*
+  Per-character choreography, driven off the heading's ONE progress value.
+
+  Each character used to be its own <Reveal>, which meant 22 IntersectionObserver
+  registrations for a two-line heading purely to get a stagger - and they were
+  silently never entering the engine's active set, so the headings stayed at
+  --rv-in 0 and never appeared at all. The heading is now a single tracked
+  element and the stagger is derived here, which is the same split the rest of
+  this page already uses: JS says where you are, CSS says what that looks like.
+
+  --i is the character's normalised index (0 -> 1 across the whole heading), so
+  the last character's window still closes inside the parent's: its start is at
+  most --abSplit-spread, and spread + span stays under 1.
+*/
 .abSplit__char {
   display: inline-block;
   white-space: pre;
+
+  --abSplit-spread: 0.5;
+  --abSplit-span: 0.45;
+
+  /* this character's own 0 -> 1, opened later the further along it sits */
+  --ch: clamp(
+    0,
+    calc(
+      (var(--rv-in, 0) - var(--i, 0) * var(--abSplit-spread)) /
+        var(--abSplit-span)
+    ),
+    1
+  );
+  /* same eased term the rest of the engine uses */
+  --ch-e: calc((1 - var(--ch)) * (1 - var(--ch)));
+
+  opacity: calc(min(1, var(--ch) * 1.6) * (1 - var(--rv-out, 0)));
+  transform: translate3d(
+    0,
+    calc(72px * var(--ch-e) - 54px * var(--rv-out, 0)),
+    0
+  );
+}
+
+/* The heading publishes the numbers but does not move itself - the characters
+   are the motion. Without this the whole block would fade as one, which is the
+   thing the split exists to avoid. Specificity beats bare .rv deliberately. */
+.rv.abSplit {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abSplit__char {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---- images ---- */

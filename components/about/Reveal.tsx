@@ -335,7 +335,6 @@ export function SplitDisplay({
   lines,
   className = "",
   as = "h2",
-  stagger = 0.012,
   enterSpan = 0.42,
 }: {
   /** One string per rendered line. Kept as an array rather than a newline-
@@ -343,39 +342,40 @@ export function SplitDisplay({
   lines: string[];
   className?: string;
   as?: keyof HTMLElementTagNameMap;
-  stagger?: number;
   enterSpan?: number;
 }) {
+  /* the stagger is a fraction of the heading's own progress, so it is
+     normalised here: index 0 -> 0, last character -> 1, whatever the length */
+  const total = lines.join("").replace(/ /g, "").length;
+  const span = Math.max(1, total - 1);
   let n = 0;
 
-  return createElement(
-    as,
-    { className: `abSplit ${className}`.trim(), "aria-label": lines.join(" ") },
-    lines.map((line, li) =>
-      createElement(
-        "span",
-        { key: li, className: "abSplit__line", "aria-hidden": true },
-        [...line].map((chpar, ci) => {
-          const isSpace = chpar === " ";
-          const i = n++;
-          if (isSpace) return " ";
-          return (
-            <Reveal
-              key={ci}
-              as="span"
-              className="abSplit__char"
-              direction="up"
-              distance={72}
-              exitDistance={54}
-              enterSpan={enterSpan}
-              delay={i * stagger}
-            >
-              {chpar}
-            </Reveal>
-          );
-        })
-      )
-    )
+  return (
+    <Reveal
+      as={as}
+      className={`abSplit ${className}`.trim()}
+      direction="none"
+      enterSpan={enterSpan}
+      aria-label={lines.join(" ")}
+    >
+      {lines.map((line, li) => (
+        <span className="abSplit__line" key={li} aria-hidden>
+          {[...line].map((chpar, ci) =>
+            chpar === " " ? (
+              " "
+            ) : (
+              <span
+                className="abSplit__char"
+                key={ci}
+                style={{ "--i": n++ / span } as CSSProperties}
+              >
+                {chpar}
+              </span>
+            )
+          )}
+        </span>
+      ))}
+    </Reveal>
   );
 }
 

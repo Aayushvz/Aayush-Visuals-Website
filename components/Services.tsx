@@ -268,8 +268,7 @@ export default function Services() {
         <div className="services-header" data-reveal>
           <h2 className="services-heading">The full deck.</h2>
           <p className="services-desc">
-            Product, UI/UX, branding, web and video. The disciplines I actually
-            work in, not a menu.
+            Product, UI/UX, branding, web and video.
           </p>
 
           <ExtCta href="#contact">Work with me</ExtCta>
@@ -315,8 +314,7 @@ export default function Services() {
         <div className="services-header services-header--mobile">
           <h2 className="services-heading">The full deck.</h2>
           <p className="services-desc">
-            Product, UI/UX, branding, web and video. The disciplines I actually
-            work in, not a menu.
+            Product, UI/UX, branding, web and video.
           </p>
 
           <ExtCta href="#contact">Work with me</ExtCta>

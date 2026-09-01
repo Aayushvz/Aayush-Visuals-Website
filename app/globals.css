@@ -2878,6 +2878,24 @@ html.has-cursor .cursorRing {
   z-index: 1;
 }
 
+/* The scroll driver's height, and the reason the pinned pane has anything to
+   scroll THROUGH. Without it the section collapses to a single viewport, the
+   pane never holds, and the card deal never fires - it just flicks past.
+
+   Kept here, immediately under .capabilities, on purpose: it has twice been
+   swallowed by range edits made against the block that used to follow it.
+
+   Driver timeline (300vh = 100vh pin base + 200vh scroll span):
+   50vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 50vh held
+   -> release into the next section.
+
+   MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
+   card-reveal thresholds are computed from those numbers, so changing one
+   without the other slides the deal off its beats. */
+.capabilities--pinned {
+  min-height: 300vh;
+}
+
 /* -------- torn-paper top edge (see components/TornEdge.tsx) --------
    Shared by every seam that uses the device. The fill is set per instance in
    the component, because it is always the colour of the section ABOVE.
@@ -9704,10 +9722,13 @@ html.contact-page-active .themeSwitch {
 .services-desc {
   color: rgba(31, 31, 31, 0.48);
   font-family: var(--font-primary), sans-serif;
-  font-size: clamp(14px, 1.1vw, 16px);
+  font-size: clamp(12.5px, 0.92vw, 14px);
   line-height: 1.45;
   text-transform: none !important;
-  max-width: 560px;
+  /* wide enough that the line never wraps: it reads as one quiet line under
+     the heading, not a paragraph */
+  max-width: none;
+  white-space: nowrap;
   margin: 0 0 16px 0;
 }
 
