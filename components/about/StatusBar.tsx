@@ -43,9 +43,15 @@ export default function StatusBar({
     });
     const tick = () => setTime(fmt.format(new Date()));
     tick();
+    /* The bar is hidden once the hero leaves, and a clock nobody can see does
+       not need to keep re-rendering the component every second for the rest
+       of the page. It reads the real time again the moment it comes back, so
+       nothing is stale on return - the same "park when idle" rule the scroll
+       loops on this page already follow. */
+    if (!visible) return;
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [visible]);
 
   useEffect(() => {
     let raf = 0;

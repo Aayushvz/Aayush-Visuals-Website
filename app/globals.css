@@ -2924,17 +2924,15 @@ html.has-cursor .cursorRing {
    Kept here, immediately under .capabilities, on purpose: it has twice been
    swallowed by range edits made against the block that used to follow it.
 
-   Driver timeline (325vh = 100vh pin base + 225vh scroll span):
-   50vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 75vh held
-   -> release into the next section. The tail is the longest beat because the
-   deal springs settle after their trigger, so the pause has to be measured
-   from where the cards land, not where they start moving.
+   Driver timeline (350vh = 100vh pin base + 250vh scroll span):
+   100vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 50vh
+   held -> release into the next section.
 
    MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
    card-reveal thresholds are computed from those numbers, so changing one
    without the other slides the deal off its beats. */
 .capabilities--pinned {
-  min-height: 325vh;
+  min-height: 350vh;
 }
 
 /* -------- torn-paper top edge (see components/TornEdge.tsx) --------
@@ -3277,10 +3275,10 @@ html.has-cursor .cursorRing {
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
   /* the same rhythm on shorter strides, where a swipe covers less ground
-     than a wheel: 40vh dwell + 80vh gap + 60vh tail + 100vh pin base.
+     than a wheel: 80vh dwell + 80vh gap + 40vh tail + 100vh pin base.
      MUST match TIMELINE_MOBILE.total in components/Capabilities.tsx. */
   .capabilities--pinned {
-    min-height: 280vh;
+    min-height: 300vh;
   }
 
   .capabilities .capabilities__canvas {
