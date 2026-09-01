@@ -1,21 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SunIcon, MoonIcon } from "./icons";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLink from "./PageLink";
+import useSurfaceTone from "./useSurfaceTone";
 
 /* No "home" row: the wordmark in the bar above is already the link home, and
    listing it again spends the panel's tallest, most prominent slot on the one
    destination the user can always reach. */
 const links = [
   { label: "about me", href: "/about" },
-  { label: "works", href: "/work" },
-  { label: "playground", href: "/playground" },
+  { label: "projects", href: "/work" },
+  { label: "experiments", href: "/playground" },
   { label: "contact", href: "/contact" },
 ];
 
 export default function MobileNav({ position = "top" }: { position?: "top" | "bottom" }) {
+  const barRef = useRef<HTMLElement>(null);
+  /* the collapsed pill takes the tone of whatever it is over, exactly as the
+     desktop bar does; the expanded sheet stays dark on purpose */
+  const overLight = useSurfaceTone(barRef) === "light";
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
@@ -72,7 +77,10 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
     <>
       {!open && (
         <nav
-          className={`mobileNav ${position === "top" ? "mobileNav--top" : "mobileNav--bottom"}`}
+          ref={barRef}
+          className={`mobileNav ${position === "top" ? "mobileNav--top" : "mobileNav--bottom"} ${
+            overLight ? "mobileNav--overLight" : "mobileNav--overDark"
+          }`}
           aria-label="Mobile navigation"
         >
           {renderBar(false)}
@@ -83,10 +91,13 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
         {open && (
           <motion.div
             className={`mobileNavCard ${position === "top" ? "mobileNavCard--top" : "mobileNavCard--bottom"}`}
-            initial={{ opacity: 0, scale: 0.94, y: position === "top" ? -20 : 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: position === "top" ? -20 : 20 }}
-            transition={{ type: "spring", stiffness: 380, damping: 28 }}
+            /* No scale. Growing from 0.94 made the panel look like it was
+               being blown up from a smaller copy of itself; the sheet is the
+               same pill with more in it, so it only fades and settles. */
+            initial={{ opacity: 0, y: position === "top" ? -8 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: position === "top" ? -8 : 8 }}
+            transition={{ type: "spring", stiffness: 420, damping: 32 }}
           >
             {position === "top" && renderBar(true)}
 
@@ -97,7 +108,7 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
                   initial={{ opacity: 0, y: position === "top" ? -10 : 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.04 + 0.06, type: "spring", stiffness: 400, damping: 26 }}
-                  style={{ width: "100%", display: "flex", justifyContent: "center" }}
+                  style={{ width: "100%", display: "flex" }}
                 >
                   <PageLink
                     href={l.href}
@@ -110,6 +121,19 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
                   </PageLink>
                 </motion.div>
               ))}
+            </div>
+
+            {/* The reference closes its sheet with a pair of dark action
+                buttons. There is one real destination for that here, so it is
+                one full-width button rather than two invented ones. */}
+            <div className="mobileNavCard__foot">
+              <PageLink
+                href="/contact"
+                className="mobileNavCard__cta"
+                onClick={() => setOpen(false)}
+              >
+                Start a project
+              </PageLink>
             </div>
 
             {position !== "top" && renderBar(true)}

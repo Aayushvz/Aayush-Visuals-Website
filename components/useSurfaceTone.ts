@@ -8,6 +8,28 @@ import { useEffect, useState, type RefObject } from "react";
   section while scrolling. Samples the element stack under the pill's
   centre each scroll frame and picks the first opaque background color.
 */
+/*
+  Full-screen chrome painted temporarily OVER the page: the preloader, a route
+  transition. Not what the pill is sitting on, and reading one is how the bar
+  ends up dark on a cream page - the preloader's purple panel is the topmost
+  thing at mount, so the first sample takes its tone and keeps it until
+  something scrolls. The settle pass below does not outlast it.
+
+  Identified structurally rather than by name: an overlay is anchored to a
+  `fixed` ancestor covering the viewport. Real backdrops do not match - the
+  hero covers the viewport but is `sticky`, and the sections are in flow.
+*/
+function isOverlay(el: Element): boolean {
+  for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) {
+    if (getComputedStyle(n).position !== "fixed") continue;
+    const b = n.getBoundingClientRect();
+    if (b.width >= window.innerWidth * 0.98 && b.height >= window.innerHeight * 0.98) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export default function useSurfaceTone(
   ref: RefObject<HTMLElement | null>,
   rerunKey?: unknown
@@ -39,6 +61,7 @@ export default function useSurfaceTone(
 
       for (const under of document.elementsFromPoint(x, y)) {
         if (el.contains(under)) continue;
+        if (isOverlay(under)) continue;
         const style = getComputedStyle(under);
         /* SVG shapes (e.g. the brush-stroke section edges) paint via fill,
            not background-color */

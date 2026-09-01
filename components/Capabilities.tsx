@@ -83,7 +83,13 @@ const CLOSED = [
      |   deal A   cards 1-3 out together
     1.0  gap      the first three are read
      |   deal B   cards 4-6 out together
-    0.5  tail     all six held, then the section releases
+    0.75 tail     all six held, then the section releases
+
+  The tail is longer than the dwell on purpose. Both deals fire on a spring
+  with a stagger, so the cards are still settling for roughly half a second
+  after their trigger. A 0.5 tail measured from the trigger left almost no
+  stillness once they had actually landed: the pause belongs after the deal
+  is visibly finished, not after it starts.
 
   The three segments are given in vh rather than derived from a single
   `beat`, because they are no longer all the same length: the dwell and the
@@ -95,9 +101,9 @@ const CLOSED = [
   sticky pane's own 100vh, which useScroll's "end end" offset subtracts.
   total = pin + dwell + gap + tail.
 */
-const TIMELINE_DESKTOP = { total: 300, pin: 100, dwell: 50, gap: 100, tail: 50 };
+const TIMELINE_DESKTOP = { total: 325, pin: 100, dwell: 50, gap: 100, tail: 75 };
 /* same rhythm, shorter strides - a swipe covers less ground than a wheel */
-const TIMELINE_MOBILE = { total: 260, pin: 100, dwell: 40, gap: 80, tail: 40 };
+const TIMELINE_MOBILE = { total: 280, pin: 100, dwell: 40, gap: 80, tail: 60 };
 
 type Timeline = typeof TIMELINE_DESKTOP;
 

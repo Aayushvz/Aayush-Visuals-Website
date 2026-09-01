@@ -374,12 +374,18 @@ html.has-cursor .cursorRing {
   align-items: center;
   gap: clamp(16px, 3.2vw, 36px);
   padding: 8px 12px 8px 24px;
-  border-radius: 999px;
+  /* a soft rounded rectangle, not a capsule - the flatter corner is most of
+     what makes the bar read as part of the page surface */
+  border-radius: 16px;
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(24px) saturate(220%) brightness(1.12);
   backdrop-filter: blur(24px) saturate(220%) brightness(1.12);
   border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45), var(--glass-shadow);
+  /* No cast shadow anywhere on this bar. A drop shadow is the one thing that
+     always reads as "floating above"; with it gone the stroke is the only
+     thing separating the bar from the page, which is exactly how the
+     reference holds its edge. */
+  box-shadow: none;
   color: var(--glass-fg);
   white-space: nowrap;
   transition: background-color 0.55s ease, color 0.55s ease, border-color 0.55s ease,
@@ -435,7 +441,9 @@ html.has-cursor .cursorRing {
   display: flex;
   align-items: center;
   padding: 9px 20px;
-  border-radius: 999px;
+  /* scaled to the bar's own corner: a capsule inside a rounded rectangle
+     reads as a foreign shape dropped in */
+  border-radius: 11px;
   background: #7c3aed;
   color: #fff;
   font-size: 14px;
@@ -444,27 +452,29 @@ html.has-cursor .cursorRing {
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.4);
+  /* no cast glow: a glowing button lifts off a bar that is meant to sit flush */
+  box-shadow: none;
 }
 
 .navbar__contact:hover {
   background: #6d28d9;
   transform: translateY(-1px);
-  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.55);
+  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.32);
 }
 
 /* ---- section-aware chrome: heavy Apple glassmorphism effect ---- */
 
 .navbar--overDark {
-  background: rgba(22, 22, 30, 0.80);
-  -webkit-backdrop-filter: blur(32px) saturate(240%) brightness(0.96);
-  backdrop-filter: blur(32px) saturate(240%) brightness(0.96);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-top: 1px solid rgba(255, 255, 255, 0.42);
+  /* same idea on dark ground: the page's own dark, near-solid, so the hero's
+     photography cannot tint the bar or fight the white type */
+  background: rgba(23, 23, 28, 0.88);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  /* the same treatment at the weight that reads on dark ground */
+  border: 2px solid rgba(255, 255, 255, 0.16);
   color: #ffffff;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45),
-    0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.24),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.22);
 }
 
 .navbar--overDark .navbar__logo sup,
@@ -473,13 +483,32 @@ html.has-cursor .cursorRing {
 }
 
 .navbar--overLight {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.9);
+  /* Tinted with the PAGE colour, not white, which is what lets it be nearly
+     solid and still match the sections it sits on: 0.88 of (242,237,230)
+     over cream composites to cream, so it stays embedded, while over the
+     project imagery it is opaque enough to read against. A white fill could
+     not do both - at a low alpha the photographs bled through and coloured
+     the bar, at a high one it became a white card lying on the cream. */
+  background: rgba(242, 237, 230, 0.88);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  /* One even stroke, and a LIGHT one. A dark hairline draws the shape as an
+     outline sitting on the page; a light stroke reads as the lit edge of a
+     panel set into it, which is the line the reference uses and now the only
+     thing doing the separating. */
+  /* heavier stroke, and an inner shadow tucked just inside it: the stroke
+     alone drew an outline, the shadow behind it gives the edge depth so the
+     panel reads as sunk into the page rather than traced onto it. Still no
+     cast shadow - all of this happens inside the shape. */
+  border: 2px solid rgba(255, 255, 255, 0.95);
   color: #26221d;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.95),
-    0 24px 60px rgba(0, 0, 0, 0.12), 0 4px 14px rgba(0, 0, 0, 0.07),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.06);
+  /* the faint outer line along the bottom is the lip of the groove; it is
+     what sells "set into the page" rather than "sitting on it" */
+  /* one wide, very low-opacity shadow rather than a stack of dark ones: the
+     bar should look like it is resting ON the surface, close enough in tone
+     that the edge is what separates it, not a cast shadow */
+  box-shadow: inset 0 1px 3px rgba(31, 31, 31, 0.09),
+    inset 0 -1px 2px rgba(31, 31, 31, 0.035);
 }
 
 .navbar--overLight .navbar__logo sup,
@@ -889,8 +918,10 @@ html.has-cursor .cursorRing {
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--glass-fg);
+  /* both derived from the bar's own colour, so the control flips with the
+     surface instead of staying pinned to one theme's foreground */
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -912,7 +943,7 @@ html.has-cursor .cursorRing {
 }
 
 .themeSwitch button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, currentColor 16%, transparent);
 }
 
 .themeSwitch button:focus-visible {
@@ -2885,15 +2916,17 @@ html.has-cursor .cursorRing {
    Kept here, immediately under .capabilities, on purpose: it has twice been
    swallowed by range edits made against the block that used to follow it.
 
-   Driver timeline (300vh = 100vh pin base + 200vh scroll span):
-   50vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 50vh held
-   -> release into the next section.
+   Driver timeline (325vh = 100vh pin base + 225vh scroll span):
+   50vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 75vh held
+   -> release into the next section. The tail is the longest beat because the
+   deal springs settle after their trigger, so the pause has to be measured
+   from where the cards land, not where they start moving.
 
    MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
    card-reveal thresholds are computed from those numbers, so changing one
    without the other slides the deal off its beats. */
 .capabilities--pinned {
-  min-height: 300vh;
+  min-height: 325vh;
 }
 
 /* -------- torn-paper top edge (see components/TornEdge.tsx) --------
@@ -3236,10 +3269,10 @@ html.has-cursor .cursorRing {
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
   /* the same rhythm on shorter strides, where a swipe covers less ground
-     than a wheel: 40vh dwell + 80vh gap + 40vh tail + 100vh pin base.
+     than a wheel: 40vh dwell + 80vh gap + 60vh tail + 100vh pin base.
      MUST match TIMELINE_MOBILE.total in components/Capabilities.tsx. */
   .capabilities--pinned {
-    min-height: 260vh;
+    min-height: 280vh;
   }
 
   .capabilities .capabilities__canvas {
@@ -5062,18 +5095,46 @@ html.has-cursor .cursorRing {
   display: none;
   align-items: center;
   justify-content: center;
-  width: min(380px, calc(100vw - 32px));
+  /* a little further in from both edges than before (16px -> 24px a side) */
+  width: min(380px, calc(100vw - 48px));
   height: 58px;
   border-radius: 16px; /* 16px rounded rectangle corners per reference screenshot */
   padding: 0 8px;
-  background: rgba(22, 22, 30, 0.80); /* off-black obsidian Apple glassmorphism */
-  -webkit-backdrop-filter: blur(32px) saturate(240%) brightness(0.96);
-  backdrop-filter: blur(32px) saturate(240%) brightness(0.96);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.38); /* Apple glass specular rim highlight */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.6);
+  /* surface comes from the tone variants below; this rule is layout only */
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  transition: background-color 0.55s ease, color 0.55s ease,
+    border-color 0.55s ease, box-shadow 0.55s ease;
+}
+
+/*
+  The same panel treatment as the desktop navbar: fill tinted with the PAGE
+  colour rather than white so it can be near solid and still sit flush, one
+  even 2px stroke all the way round, and the depth entirely inside the shape.
+  No cast shadow - that is the thing that reads as "floating above".
+*/
+.mobileNav--overLight {
+  background: rgba(242, 237, 230, 0.88);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 1px 3px rgba(31, 31, 31, 0.09),
+    inset 0 -1px 2px rgba(31, 31, 31, 0.035);
+  color: #26221d;
+}
+
+.mobileNav--overDark {
+  background: rgba(23, 23, 28, 0.88);
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.22);
   color: #ffffff;
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* the badge is a solid white chip, which is right on the dark pill and far
+   too loud on the light one */
+.mobileNav--overLight .mobileNav__themeBadge {
+  background: rgba(31, 31, 31, 0.06);
+  color: inherit;
+  box-shadow: none;
 }
 
 [data-theme="light"] .mobileNav {
@@ -5112,7 +5173,7 @@ html.has-cursor .cursorRing {
   justify-content: center;
   background: none;
   border: none;
-  color: #ffffff;
+  color: inherit;
   cursor: pointer;
   padding: 0;
 }
@@ -5138,7 +5199,7 @@ html.has-cursor .cursorRing {
   display: block;
   width: 22px;
   height: 2px;
-  background: #ffffff;
+  background: currentColor;
   border-radius: 2px;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -5146,7 +5207,7 @@ html.has-cursor .cursorRing {
 .mobileNav__closeIcon {
   font-size: 20px;
   font-weight: 400;
-  color: #ffffff;
+  color: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5162,7 +5223,7 @@ html.has-cursor .cursorRing {
   font-size: 18px; /* increased by 1.3x from 14px (14 * 1.30 = 18.2px ~ 18px) */
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: inherit;
   text-decoration: none;
   white-space: nowrap;
   transition: opacity 0.2s ease;
@@ -6019,41 +6080,50 @@ html.has-cursor .cursorRing {
   left: 50%;
   translate: -50% 0;
   z-index: 250;
-  width: min(292px, calc(100vw - 56px));
-  border-radius: 18px; /* 20px rounded rectangle corners matching reference screenshot */
+  /* identical to .mobileNav's width and corner: the sheet is the pill grown
+     downward, so any difference in either reads as the panel resizing */
+  width: min(380px, calc(100vw - 48px));
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
-  background: rgba(6, 6, 10, 0.90); /* darker obsidian Apple glassmorphism */
-  -webkit-backdrop-filter: blur(32px) saturate(240%) brightness(0.95);
-  backdrop-filter: blur(32px) saturate(240%) brightness(0.95);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.38); /* Apple glass specular rim highlight */
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.6);
+  /* Dark sheet, whatever the page or theme underneath. It keeps the layout
+     the reference gave it - ruled full-width rows, a foot action - but the
+     surface stays dark, matching the collapsed pill it opens from, so the
+     menu reads as one object growing rather than two swapping. Near solid so
+     the page behind cannot tint it or compete with the type. */
+  background: rgba(23, 23, 28, 0.94);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.22);
   color: #ffffff;
   font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-[data-theme="light"] .mobileNavCard {
-  background: rgba(12, 12, 16, 0.92);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-top: 1px solid rgba(255, 255, 255, 0.42);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
-}
+/* the sheet is dark in both themes, so the light-theme override that forced
+   it to obsidian is redundant - the base rule already is */
 
 .mobileNavCard--top {
   top: max(16px, env(safe-area-inset-top, 16px)) !important;
   bottom: auto !important;
-  padding: 0 0 10px 0 !important;
+  padding: 0 !important;
 }
 
 .mobileNavCard--bottom {
   bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
   top: auto !important;
-  padding: 10px 0 0 0 !important;
+  padding: 0 !important;
+}
+
+/* a solid white badge is too loud on the sheet; a tinted one sits in it */
+.mobileNavCard .mobileNav__themeBadge {
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  box-shadow: none;
 }
 
 .mobileNavCard .mobileNav__bar {
@@ -6062,38 +6132,42 @@ html.has-cursor .cursorRing {
   flex-shrink: 0;
 }
 
+/* Ruled rows rather than a centred stack: each item is a full-width band with
+   a hairline above it, so the sheet reads as a list you run down. The rule
+   under the header row is the first item's own border. */
 .mobileNavCard__links {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   /* the rows carry their own vertical padding for the tap target, so the gap
      only has to separate them optically */
-  gap: 2px;
+  gap: 0;
   width: 100%;
-  padding: 10px 0 4px;
+  padding: 0;
 }
 
 .mobileNavCard__link {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  width: 100%;
   text-decoration: none;
-  color: #ffffff;
+  color: inherit;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   /* keeps each row ~44px tall at the smaller type, so shrinking the text does
      not shrink the thing you actually have to hit with a thumb */
-  padding: 11px 18px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  padding: 15px 20px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 .mobileNavCard__link:active {
-  transform: scale(0.95);
-  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .mobileNavCard__linkText {
   font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
   font-size: 17px;
-  font-weight: 400;
-  letter-spacing: -0.005em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   text-transform: lowercase; /* lowercase General Sans per user instructions */
   color: #ffffff;
   display: inline-block;
@@ -9829,7 +9903,11 @@ html.contact-page-active .themeSwitch {
     height: 100dvh;
     width: 100%;
     overflow: hidden;
-    padding-top: clamp(65px, 8vh, 95px);
+    /* 8vh landed at 65px on a normal phone while the pill's bottom edge sits
+       at 74px, so the heading was starting underneath it. --mnav-clear is the
+       pill's own top + height + gap, so this tracks the bar instead of
+       guessing at it. */
+    padding-top: calc(var(--mnav-clear) + 18px);
   }
 
   .services-header--mobile {
@@ -9853,11 +9931,21 @@ html.contact-page-active .themeSwitch {
     margin-bottom: 12px;
   }
 
+  /* Scoped to the phone deck's own header, so the pinned desktop carousel
+     keeps its CTA. On a phone the deck is the section - the button was
+     spending a third of the space above the cards on a link that the menu
+     and the contact section both already offer. */
+  .services-header--mobile .extCta {
+    display: none;
+  }
+
   .services-deck-stage {
     position: relative;
     width: 100%;
-    height: calc(100vh - 210px);
-    height: calc(100dvh - 210px);
+    /* the CTA above is hidden on phones, so the deck takes back its height
+       instead of leaving a gap where the button used to be */
+    height: calc(100vh - 196px);
+    height: calc(100dvh - 196px);
     margin-top: 10px;
   }
 
@@ -9865,8 +9953,10 @@ html.contact-page-active .themeSwitch {
     position: absolute;
     top: 48%;
     left: 50%;
-    width: min(290px, 82vw);
-    height: min(440px, 122vw);
+    /* smaller, at the same 0.66 aspect: the card was 290x440 on a 375px
+       screen, which left the section with almost nothing but card */
+    width: min(240px, 68vw);
+    height: min(364px, 103vw);
     border-radius: 22px;
     overflow: hidden;
     background-color: #1e1e1e;
@@ -11523,6 +11613,33 @@ html.dpl-page .preloader {
 .navbar__links a,
 .mobileNavCard__link {
   transition: opacity var(--dur-press) var(--ease-quint);
+}
+
+.mobileNavCard__foot {
+  padding: 14px 16px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileNavCard__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border-radius: 10px;
+  /* inverted against the dark sheet - the reference's dark button worked
+     because its sheet was light */
+  background: #f4f1ea;
+  color: #1a1a1a;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.mobileNavCard__cta:active {
+  background: #ded8cd;
 }
 
 .navbar__links a:active,
