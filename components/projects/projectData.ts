@@ -102,7 +102,17 @@ export type CaseBlock =
       kind: "grid";
       /* `small` caps the frame for reference art like a component sheet,
          which does not need to be read at full width to make its point */
-      items: { src: string; alt: string; label?: string; small?: boolean }[];
+      /* `newRow` forces an item to start a fresh grid row. Used where a run
+         changes proportion: without it the first item of the new shape lands
+         mid-row beside the old one and the row sizes to the taller of the
+         two, leaving a hole. */
+      items: {
+        src: string;
+        alt: string;
+        label?: string;
+        small?: boolean;
+        newRow?: boolean;
+      }[];
       caption?: string;
     }
   /* Art-direction boards, shown as a wall of candidates rather than a
@@ -3087,6 +3097,14 @@ export const PROJECTS: Project[] = [
           single grid, nothing between the frames, so the variation across
           them is the thing you see.
         */
+        /*
+          Ordered by proportion, not by filename. Thirty-five of these are
+          4:5 and six are square; interleaved, every square left a hole under
+          it in a row sized by its taller neighbours, and the contact sheet
+          read as ragged rather than as one set. The squares now sit together
+          at the end, and the first of them starts a new row so the two
+          formats never share one.
+        */
         name: "posters",
         heading: "",
         blocks: [
@@ -3096,11 +3114,9 @@ export const PROJECTS: Project[] = [
               { src: "/projects/posterfolio/poster-01.webp", alt: "Poster 1 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-02.webp", alt: "Poster 2 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-03.webp", alt: "Poster 3 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-04.webp", alt: "Poster 4 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-05.webp", alt: "Poster 5 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-06.webp", alt: "Poster 6 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-07.webp", alt: "Poster 7 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-08.webp", alt: "Poster 8 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-09.webp", alt: "Poster 9 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-10.webp", alt: "Poster 10 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-11.webp", alt: "Poster 11 from the Posterfolio series." },
@@ -3111,11 +3127,9 @@ export const PROJECTS: Project[] = [
               { src: "/projects/posterfolio/poster-16.webp", alt: "Poster 16 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-17.webp", alt: "Poster 17 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-18.webp", alt: "Poster 18 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-19.webp", alt: "Poster 19 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-20.webp", alt: "Poster 20 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-21.webp", alt: "Poster 21 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-22.webp", alt: "Poster 22 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-23.webp", alt: "Poster 23 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-24.webp", alt: "Poster 24 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-25.webp", alt: "Poster 25 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-26.webp", alt: "Poster 26 from the Posterfolio series." },
@@ -3123,8 +3137,6 @@ export const PROJECTS: Project[] = [
               { src: "/projects/posterfolio/poster-28.webp", alt: "Poster 28 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-29.webp", alt: "Poster 29 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-30.webp", alt: "Poster 30 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-31.webp", alt: "Poster 31 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-32.webp", alt: "Poster 32 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-33.webp", alt: "Poster 33 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-34.webp", alt: "Poster 34 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-35.webp", alt: "Poster 35 from the Posterfolio series." },
@@ -3134,6 +3146,12 @@ export const PROJECTS: Project[] = [
               { src: "/projects/posterfolio/poster-39.webp", alt: "Poster 39 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-40.webp", alt: "Poster 40 from the Posterfolio series." },
               { src: "/projects/posterfolio/poster-41.webp", alt: "Poster 41 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-04.webp", alt: "Poster 4 from the Posterfolio series.", newRow: true },
+              { src: "/projects/posterfolio/poster-08.webp", alt: "Poster 8 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-19.webp", alt: "Poster 19 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-23.webp", alt: "Poster 23 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-31.webp", alt: "Poster 31 from the Posterfolio series." },
+              { src: "/projects/posterfolio/poster-32.webp", alt: "Poster 32 from the Posterfolio series." },
             ],
           },
         ],

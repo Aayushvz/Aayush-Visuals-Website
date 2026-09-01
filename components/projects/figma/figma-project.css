@@ -3984,6 +3984,14 @@ html[data-theme="light"] .figp-lfile img {
   max-width: 200px;
 }
 
+/* Starts a fresh row, so a run of one proportion never shares a row with a
+   run of another. The grid is auto-fit, so the column count is unknown at
+   author time - this is the only way to guarantee the break without
+   hard-coding how many fit. */
+.figp-grid-item--newRow {
+  grid-column-start: 1;
+}
+
 .figp-grid-item img {
   display: block;
   width: 100%;

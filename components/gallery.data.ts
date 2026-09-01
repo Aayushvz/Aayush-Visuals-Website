@@ -48,8 +48,10 @@ export const GALLERY: GalleryItem[] = [
   {
     src: "/gallery/suit-campus.webp",
     alt: "On campus, festival week",
-    w: 300,
-    ratio: "3 / 4",
+    /* the supplied crop is 407px wide, so the card is held near that: at a
+       larger width a high-DPI screen would be upscaling it */
+    w: 280,
+    ratio: "407 / 450",
     drop: 0.04,
   },
   {

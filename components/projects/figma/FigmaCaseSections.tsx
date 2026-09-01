@@ -238,7 +238,9 @@ function Block({ block, pin }: { block: CaseBlock; pin?: React.ReactNode }) {
           >
             {block.items.map((item) => (
               <motion.span
-                className={`figp-grid-item${item.small ? " figp-grid-item--small" : ""}`}
+                className={`figp-grid-item${item.small ? " figp-grid-item--small" : ""}${
+                  item.newRow ? " figp-grid-item--newRow" : ""
+                }`}
                 key={item.src}
                 variants={revealChild}
               >
