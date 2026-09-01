@@ -58,7 +58,7 @@ export function DeferredGallery() {
 
 export function DeferredFooter() {
   return (
-    <DeferUntilNear minHeight="94vh">
+    <DeferUntilNear minHeight="94vh" className="hpParallax__footerWrap">
       <Footer />
     </DeferUntilNear>
   );

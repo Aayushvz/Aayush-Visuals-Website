@@ -8836,7 +8836,14 @@ html.contact-page-active[data-theme="light"] body {
   background: var(--cream);
 }
 .aboutParallax__footerWrap,
-.hpParallax .footer {
+/* The homepage footer is mounted on approach, so it sits inside the
+   DeferUntilNear wrapper rather than directly in .hpParallax. Sticky
+   travels within its PARENT box, so it has to be the wrapper that
+   sticks - on the footer itself it would have nowhere to move. The
+   direct-child selector stays so the pattern still works if the
+   section is ever mounted without the wrapper. */
+.hpParallax__footerWrap,
+.hpParallax > .footer {
   position: sticky;
   bottom: 0;
   z-index: 1;

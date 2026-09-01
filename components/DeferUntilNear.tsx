@@ -47,10 +47,23 @@ export default function DeferUntilNear({
   /** reserved before the real section arrives, so nothing jumps */
   minHeight,
   rootMargin = "150% 0px",
+  className,
 }: {
   children: ReactNode;
   minHeight: string;
   rootMargin?: string;
+  /*
+    This wrapper becomes the parent of whatever it holds, which for a
+    `position: sticky` section is not a neutral act: sticky travels within
+    the box of its PARENT, so a wrapper sized to the section leaves it
+    nowhere to go. The homepage footer is exactly that case - it sticks to
+    the bottom of the viewport while the stage above slides over it, and a
+    wrapper silently flattened that into a footer that just sits there.
+
+    Naming the wrapper lets the stylesheet put the sticky on it instead,
+    which is what .aboutParallax__footerWrap already does on the About page.
+  */
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
@@ -104,7 +117,7 @@ export default function DeferUntilNear({
   }, [shown, filled]);
 
   return (
-    <div ref={ref} style={filled ? undefined : { minHeight }}>
+    <div ref={ref} className={className} style={filled ? undefined : { minHeight }}>
       {shown ? children : null}
     </div>
   );
