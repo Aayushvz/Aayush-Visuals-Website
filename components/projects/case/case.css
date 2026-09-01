@@ -1,0 +1,596 @@
+/* ==========================================================================
+   CASE STUDY PAGES
+   --------------------------------------------------------------------------
+   One visual language for every project page, replacing the Figma-chrome
+   theme that used to wrap them.
+
+   The measurements here are taken from the reference comp rather than
+   guessed: it is a 1920px-wide artboard, so every value below is written as
+   the fraction of 1920 it occupied there, clamped so it stops growing on
+   very wide screens and stops shrinking before it becomes unreadable. The
+   reference values, for anyone checking this against the file:
+
+     page margin   60px        3.125vw
+     accent        #FF5100
+     body grey     #7F7F7F
+     inverted band #141414
+     title cap     72px tall, so roughly a 100px face
+     body          ~25px on a ~1.45 leading
+
+   The page is deliberately light and does not follow the site's dark mode.
+   Every project page is a white gallery wall with the work hung on it, and
+   the one inverted band is a device inside that, not a theme. A case study
+   that flipped to dark would put a dark page behind dark screenshots and
+   lose the frame that separates the two.
+   ========================================================================== */
+
+.cs {
+  --cs-pad: clamp(20px, 3.125vw, 60px);
+  --cs-ink: #000;
+  --cs-mute: #7f7f7f;
+  --cs-bg: #fff;
+  --cs-dark: #141414;
+  --cs-accent: #ff5100;
+  --cs-line: rgba(0, 0, 0, 0.13);
+  --cs-gap: clamp(8px, 0.83vw, 16px);
+
+  /* the three columns the reference keeps returning to: a label rail, a
+     text column, and the images taking the rest */
+  --cs-col1: 20.7%;
+
+  background: var(--cs-bg);
+  color: var(--cs-ink);
+  font-family: var(--font-general), "General Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  z-index: 1;
+  overflow-x: clip;
+}
+
+.cs__inner {
+  padding-inline: var(--cs-pad);
+}
+
+/* ---------- shared type ---------- */
+
+.cs__eyebrow {
+  font-size: clamp(10px, 1.14vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0;
+}
+
+.cs__body {
+  font-size: clamp(14px, 1.3vw, 25px);
+  line-height: 1.44;
+  color: var(--cs-mute);
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+.cs__body + .cs__body {
+  margin-top: 1.5em;
+}
+
+/* ---------- hero ---------- */
+
+.csHero {
+  padding-top: clamp(60px, 7vw, 134px);
+}
+
+.csHero__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.csHero__kicker {
+  color: var(--cs-ink);
+}
+
+.csHero__cat {
+  color: var(--cs-accent);
+  text-align: right;
+}
+
+/*
+  The title is the one place the page raises its voice, so it is set at the
+  weight and width the reference used rather than the site's usual display
+  face: Archivo carries a wdth axis, and the comp's letterforms are a heavy
+  grotesque pulled slightly narrow.
+*/
+.csHero__title {
+  font-family: var(--font-archivo), var(--font-general), system-ui, sans-serif;
+  font-size: clamp(38px, 5.2vw, 100px);
+  font-weight: 800;
+  font-stretch: 92%;
+  letter-spacing: -0.025em;
+  line-height: 0.94;
+  margin: clamp(14px, 1.7vw, 33px) 0 0;
+  color: var(--cs-ink);
+}
+
+.csHero__intro {
+  margin-top: clamp(16px, 1.7vw, 33px);
+  max-width: 58%;
+}
+
+.csHero__cover {
+  margin-top: clamp(28px, 3.8vw, 73px);
+}
+
+/* ---------- section head: hairline, ordinal, name ---------- */
+
+.csSec {
+  margin-top: clamp(46px, 6.5vw, 125px);
+}
+
+.csSec__head {
+  border-top: 1px solid var(--cs-line);
+  padding-top: clamp(10px, 1.15vw, 22px);
+  display: grid;
+  /* the name sits at the two-thirds line, right-aligned to it, which is
+     where every section label in the reference lands */
+  grid-template-columns: 1fr 66.6%;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.csSec--dark .csSec__head {
+  border-top-color: rgba(255, 255, 255, 0.16);
+}
+
+.csSec__no {
+  font-size: clamp(10px, 0.73vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--cs-ink);
+  margin: 0;
+}
+
+.csSec--dark .csSec__no,
+.csSec--dark .csSec__name {
+  color: #fff;
+}
+
+.csSec__no::before {
+  content: "\25C6";
+  font-size: 0.72em;
+  margin-right: 0.7em;
+  vertical-align: 0.1em;
+}
+
+.csSec__name {
+  font-size: clamp(10px, 0.73vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: right;
+  margin: 0;
+  color: var(--cs-ink);
+}
+
+.csSec__body {
+  margin-top: clamp(26px, 3.5vw, 67px);
+}
+
+/* ---------- the inverted statement band ---------- */
+
+.csSec--dark {
+  background: var(--cs-dark);
+  color: #fff;
+  padding: clamp(34px, 4.2vw, 80px) var(--cs-pad) clamp(60px, 8vw, 154px);
+  margin-inline: calc(var(--cs-pad) * -1);
+}
+
+/*
+  Two-tone: the claim in white, the rest of the sentence in grey. It is one
+  paragraph, not two, so it wraps as one - the colour break falls wherever
+  the line does, which is the point. The grey is lifted from the reference's
+  #7F7F7F, which reads as body text on white and as a second voice on black.
+*/
+.csStatement {
+  font-size: clamp(23px, 4.2vw, 81px);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.028em;
+  margin: 0;
+  color: #7c7c7c;
+  text-wrap: balance;
+}
+
+.csStatement__lead {
+  color: #fff;
+}
+
+/* ---------- (Details): label rail, prose column, stacked images ---------- */
+
+.csDetails {
+  display: grid;
+  grid-template-columns: var(--cs-col1) 31.2% 1fr;
+  column-gap: 0;
+  row-gap: clamp(30px, 4vw, 77px);
+  align-items: start;
+}
+
+.csDetails__label {
+  font-size: clamp(12px, 1.14vw, 22px);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--cs-ink);
+  grid-column: 1;
+}
+
+.csDetails__text {
+  grid-column: 2;
+  padding-right: 11%;
+}
+
+/* the images run down the third column as one stack, beside whatever
+   number of label/text pairs the project has */
+.csDetails__media {
+  grid-column: 3;
+  grid-row: 1 / span 99;
+  display: grid;
+  gap: var(--cs-gap);
+  align-content: start;
+}
+
+/* ---------- (Features): accent label, wide prose, image row ---------- */
+
+.csFeature + .csFeature {
+  margin-top: clamp(40px, 5.2vw, 100px);
+}
+
+.csFeature__head {
+  display: grid;
+  grid-template-columns: var(--cs-col1) 1fr;
+  align-items: start;
+  gap: 0;
+}
+
+.csFeature__name {
+  font-size: clamp(12px, 1.14vw, 22px);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--cs-accent);
+}
+
+.csFeature__media {
+  margin-top: clamp(18px, 2.2vw, 42px);
+}
+
+/* ---------- image primitives ---------- */
+
+.csShot {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f0f0f0;
+}
+
+.csRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cs-gap);
+}
+
+.csRow--single {
+  grid-template-columns: 1fr;
+}
+
+.csRow--three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.csFig {
+  margin: 0;
+}
+
+.csFig__cap {
+  font-size: clamp(10px, 0.73vw, 14px);
+  color: var(--cs-mute);
+  margin-top: 10px;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- (Results): label/value rows in two columns ---------- */
+
+.csResults {
+  display: grid;
+  grid-template-columns: var(--cs-col1) 1fr 1fr;
+  column-gap: clamp(20px, 3.6vw, 70px);
+  align-items: start;
+}
+
+.csResults__col {
+  display: block;
+}
+
+.csResults__col:first-of-type {
+  grid-column: 2;
+}
+
+.csResults__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: clamp(10px, 1.15vw, 22px) 0;
+  border-bottom: 1px solid var(--cs-line);
+}
+
+.csResults__label {
+  font-size: clamp(13px, 1.14vw, 22px);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--cs-ink);
+  max-width: 58%;
+}
+
+.csResults__value {
+  font-size: clamp(13px, 1.14vw, 22px);
+  font-weight: 400;
+  color: var(--cs-mute);
+  white-space: nowrap;
+}
+
+.csResults__note {
+  grid-column: 2 / -1;
+  margin-top: clamp(16px, 2vw, 38px);
+  font-size: clamp(10px, 0.73vw, 14px);
+  color: var(--cs-accent);
+  text-align: right;
+}
+
+/* ---------- (View Other Projects) ---------- */
+
+.csNext {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cs-gap);
+}
+
+.csNext__card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.csNext__shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #f0f0f0;
+}
+
+.csNext__meta {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: clamp(14px, 1.7vw, 33px);
+  align-items: start;
+  margin-top: clamp(10px, 1.15vw, 22px);
+}
+
+.csNext__no,
+.csNext__year {
+  font-size: clamp(11px, 0.94vw, 18px);
+  color: var(--cs-ink);
+  font-weight: 500;
+}
+
+.csNext__year {
+  color: var(--cs-mute);
+}
+
+.csNext__title {
+  font-size: clamp(11px, 0.94vw, 18px);
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.csNext__cat {
+  font-size: clamp(11px, 0.94vw, 18px);
+  color: var(--cs-mute);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.csNext__card:hover .csNext__title {
+  color: var(--cs-accent);
+}
+
+/* ---------- foot ---------- */
+
+.csFoot {
+  margin-top: clamp(60px, 8vw, 154px);
+  padding-bottom: clamp(40px, 5vw, 96px);
+}
+
+/* ==========================================================================
+   NARROW SCREENS
+   The reference is a desktop artboard, so the three-column rhythm has to be
+   decided rather than derived. Below 900px the label rail collapses: a 20%
+   column on a phone is four characters wide and breaks "(Challenge)" over
+   three lines. Labels stack above their text instead, which keeps the
+   pairing without pretending there is room for a rail.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .cs {
+    --cs-pad: clamp(16px, 4.5vw, 30px);
+  }
+
+  .csHero__intro {
+    max-width: none;
+  }
+
+  .csSec__head {
+    grid-template-columns: 1fr auto;
+  }
+
+  .csDetails,
+  .csFeature__head,
+  .csResults {
+    grid-template-columns: 1fr;
+    row-gap: clamp(18px, 3vw, 28px);
+  }
+
+  .csDetails__label,
+  .csDetails__text,
+  .csDetails__media,
+  .csResults__col,
+  .csResults__col:first-of-type,
+  .csResults__note {
+    grid-column: 1;
+  }
+
+  .csDetails__media {
+    grid-row: auto;
+    margin-top: clamp(8px, 2vw, 18px);
+  }
+
+  .csDetails__text {
+    padding-right: 0;
+    margin-bottom: clamp(10px, 3vw, 24px);
+  }
+
+  .csDetails__label {
+    margin-bottom: -0.4em;
+  }
+
+  .csResults__col + .csResults__col {
+    margin-top: 0;
+  }
+
+  .csResults__note {
+    text-align: left;
+  }
+
+  /* two 16:10 cards side by side on a phone are two postage stamps */
+  .csNext,
+  .csRow--three {
+    grid-template-columns: 1fr;
+  }
+
+  .csRow {
+    gap: clamp(6px, 2vw, 12px);
+  }
+}
+
+@media (max-width: 560px) {
+  /* a pair of phone screens can stay paired; anything else is too small */
+  .csRow:not(.csRow--pair) {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs * {
+    transition: none !important;
+  }
+}
+
+/* ---------- section heading, palette, light statement ---------- */
+
+.csSec__heading {
+  font-family: var(--font-archivo), var(--font-general), system-ui, sans-serif;
+  font-size: clamp(22px, 2.5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  margin: 0 0 clamp(24px, 3vw, 58px);
+  max-width: 72%;
+  color: var(--cs-ink);
+}
+
+/* a statement inside a light section, at the size the band uses but in ink */
+.csStatement--light {
+  color: var(--cs-ink);
+  font-size: clamp(20px, 2.9vw, 56px);
+  margin-block: clamp(20px, 2.6vw, 50px);
+  max-width: 88%;
+}
+
+.csPalette {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--cs-gap);
+}
+
+.csPalette__chip {
+  display: grid;
+  gap: 8px;
+}
+
+.csPalette__swatch {
+  display: block;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--cs-line);
+}
+
+.csPalette__name {
+  font-size: clamp(11px, 0.94vw, 18px);
+  font-weight: 600;
+}
+
+.csPalette__hex {
+  font-size: clamp(10px, 0.73vw, 14px);
+  color: var(--cs-mute);
+  text-transform: uppercase;
+}
+
+/* the related-project card stacks its title over its category */
+.csNext__title,
+.csNext__cat {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .csSec__heading,
+  .csStatement--light {
+    max-width: none;
+  }
+}
+
+/* ---------- the flat gallery, for projects with no written case ---------- */
+
+.csStack {
+  display: grid;
+  gap: clamp(24px, 3vw, 58px);
+}
+
+/*
+  The slices of one export, stacked with nothing between them. `display:
+  block` and a zero line-height matter here: images are inline by default, so
+  the strip would otherwise get a few pixels of text leading under every
+  slice and draw eighteen pale stripes across the artwork.
+*/
+.csStack__strip {
+  font-size: 0;
+  line-height: 0;
+}
+
+.csStack__slice {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/*
+  The floating nav is fixed over the page, so the hero has to start below it
+  rather than under it. --mnav-clear is the height the rest of the site uses
+  for exactly this, so the case pages defer to it instead of inventing a
+  second number that would drift the first time the bar changes height.
+*/
+@media (max-width: 900px) {
+  .csHero {
+    padding-top: calc(var(--mnav-clear) + clamp(14px, 4vw, 28px));
+  }
+}

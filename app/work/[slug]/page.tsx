@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PROJECTS } from "@/components/projects/projectData";
-import FigmaProjectPage from "@/components/projects/figma/FigmaProjectPage";
+import CaseStudyPage from "@/components/projects/case/CaseStudyPage";
 import { PERSON_NAME } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -49,5 +49,5 @@ export default async function ProjectPage({
   const project = PROJECTS.find((p) => p.id === slug);
   if (!project) notFound();
 
-  return <FigmaProjectPage project={project} />;
+  return <CaseStudyPage project={project} />;
 }
