@@ -191,7 +191,7 @@ function highlights(
       out.push({
         name: block.items[0]?.label ?? "",
         body: [trimTo(block.body[0], sentences)],
-        media: mediaOf(block).slice(0, 2),
+        media: mediaOf(block).slice(0, 4),
       });
       continue;
     }
@@ -319,7 +319,9 @@ function Img({
 
 function rowClass(n: number): string {
   if (n === 1) return "csRow csRow--single";
-  if (n === 2) return "csRow csRow--pair";
+  /* two and four both want two columns; four simply wraps to a second row,
+     which is the shape the comps use for a feature with more than one screen */
+  if (n === 2 || n === 4) return "csRow csRow--pair";
   return "csRow csRow--many";
 }
 
@@ -336,9 +338,18 @@ export function MediaRow({ media }: { media: Media[] }) {
 export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
   return (
     <div className="csDetails">
-      {pairs.map((pair, i) => (
-        <Pairing key={i} pair={pair} />
-      ))}
+      {/* one sticky block, so the whole argument holds while its evidence
+          scrolls past on the right */}
+      <div className="csDetails__pin">
+        {pairs.map((pair, i) => (
+          <div className="csDetails__pair" key={i}>
+            <p className="csDetails__label">{pair.label}</p>
+            <div className="csDetails__text">
+              <p className="cs__body">{marked(pair.body)}</p>
+            </div>
+          </div>
+        ))}
+      </div>
       {media.length ? (
         <div className="csDetails__media">
           {media.map((m, i) => (
@@ -347,17 +358,6 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
         </div>
       ) : null}
     </div>
-  );
-}
-
-function Pairing({ pair }: { pair: Pair }) {
-  return (
-    <>
-      <p className="csDetails__label">{pair.label}</p>
-      <div className="csDetails__text">
-        <p className="cs__body">{marked(pair.body)}</p>
-      </div>
-    </>
   );
 }
 

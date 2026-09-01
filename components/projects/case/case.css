@@ -61,7 +61,7 @@
 
   /* ---- type ---- */
   --cs-t-display: clamp(38px, 5.2vw, 76px);
-  --cs-t-statement: clamp(23px, 3.4vw, 54px);
+  --cs-t-statement: clamp(26px, 4vw, 76px);
   --cs-t-heading: clamp(21px, 2.2vw, 34px);
   --cs-t-lead: clamp(16px, 1.15vw, 19px);
   --cs-t-body: clamp(15px, 1vw, 17px);
@@ -232,7 +232,9 @@
   border-top: 1px solid var(--cs-line);
   padding-top: var(--cs-xs);
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* the name is right-aligned to the two-thirds line in every comp, not to
+     the page edge; measured at 66.4% across all four reference screens */
+  grid-template-columns: 1fr 66.5%;
   align-items: baseline;
   gap: var(--cs-sm);
 }
@@ -248,6 +250,10 @@
   letter-spacing: 0.08em;
   color: var(--cs-mute);
   margin: 0;
+}
+
+.csSec__name {
+  text-align: right;
 }
 
 .csSec--dark .csSec__no,
@@ -272,11 +278,26 @@
 
 /* ---------- the inverted statement band ---------- */
 
+/*
+  The inverted band is a full screen, not a strip.
+
+  It is the one moment the page stops presenting work and states what the
+  work was, so it gets the whole viewport and nothing else in it. The head
+  sits at the top and the sentence takes the space that is left.
+*/
 .csSec--dark {
   background: var(--cs-dark);
   color: #fff;
   padding: var(--cs-lg) var(--cs-pad) var(--cs-xl);
   margin-inline: calc(var(--cs-pad) * -1);
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.csSec--dark .csSec__body {
+  display: grid;
+  align-content: center;
 }
 
 /*
@@ -286,15 +307,15 @@
 */
 .csStatement {
   font-size: var(--cs-t-statement);
-  font-weight: 500;
-  line-height: 1.16;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   margin: 0;
-  /* wide enough to fill the band at display size; 20ch left two thirds
-     of the inverted section empty */
-  max-width: 26ch;
+  /* fills the band, as in the comp. The first line is indented there, which
+     stops four full-width lines reading as a paragraph of prose. */
+  max-width: none;
+  text-indent: 17%;
   color: #8a8a8a;
-  text-wrap: balance;
 }
 
 .csStatement b {
@@ -305,13 +326,42 @@
   color: #fff;
 }
 
-/* ---------- Details: label rail, prose, stacked media ---------- */
+/* ---------- Details: a pinned argument, scrolling evidence ---------- */
 
+/*
+  The left half holds still while the right half scrolls.
+
+  The challenge and the solution are one continuous argument, and the screens
+  on the right are the evidence for it. Letting the text scroll away from its
+  own evidence is what the sticky column prevents: the reader keeps the claim
+  in view for as long as the pictures that support it are going past.
+
+  It pins to the top of the section rather than the top of the page, and it
+  releases on its own once the media column runs out, because a sticky item
+  can never outlast its parent.
+*/
 .csDetails {
   display: grid;
-  grid-template-columns: var(--cs-rail) minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-columns: 47% minmax(0, 1fr);
   column-gap: var(--cs-lg);
+  align-items: start;
+}
+
+.csDetails__pin {
+  position: sticky;
+  /* clear of the floating navbar, which is fixed over the page */
+  top: clamp(88px, 12vh, 140px);
+  align-self: start;
+  display: grid;
   row-gap: var(--cs-lg);
+}
+
+.csDetails__pair {
+  display: grid;
+  /* 42% of the 47% column puts the label rail at 20% of the page, which is
+     where it sits in the comps */
+  grid-template-columns: 42% minmax(0, 1fr);
+  column-gap: var(--cs-sm);
   align-items: start;
 }
 
@@ -321,16 +371,9 @@
   line-height: 1.3;
   margin: 0;
   color: var(--cs-ink);
-  grid-column: 1;
-}
-
-.csDetails__text {
-  grid-column: 2;
 }
 
 .csDetails__media {
-  grid-column: 3;
-  grid-row: 1 / span 99;
   display: grid;
   gap: var(--cs-sm);
   align-content: start;
@@ -347,6 +390,18 @@
   grid-template-columns: var(--cs-rail) minmax(0, 1fr);
   column-gap: var(--cs-lg);
   align-items: start;
+}
+
+/*
+  The feature paragraph runs the full width of its column rather than the
+  68ch the rest of the page uses. That is what the comps do, and it works
+  here because it is three or four lines, not a section of prose: the reason
+  to cap a measure is to stop the eye losing its place returning down a long
+  block, and there is no long block. 88ch is the ceiling so it does not turn
+  into one on an ultrawide screen.
+*/
+.csFeature__head .cs__body {
+  max-width: 110ch;
 }
 
 /*
@@ -634,24 +689,26 @@
 
 @media (max-width: 900px) {
   .csDetails,
+  .csDetails__pair,
   .csFeature__head {
     grid-template-columns: 1fr;
     row-gap: var(--cs-sm);
   }
 
-  .csDetails__label,
-  .csDetails__text,
-  .csDetails__media {
-    grid-column: 1;
+  /*
+    Unpinned below this width, and not as a fallback.
+
+    A sticky column on a phone would hold a paragraph over the top of the
+    screens it is describing for the whole scroll, since there is no second
+    column for them to pass through. The argument and its evidence simply
+    stack instead.
+  */
+  .csDetails__pin {
+    position: static;
+    top: auto;
   }
 
   .csDetails__media {
-    grid-row: auto;
-    margin-top: var(--cs-sm);
-  }
-
-  .csDetails + .csDetails,
-  .csDetails__label:not(:first-child) {
     margin-top: var(--cs-md);
   }
 
@@ -666,9 +723,19 @@
     padding-top: calc(var(--mnav-clear) + var(--cs-md));
   }
 
-  .csStatement,
   .csSec__heading {
     max-width: none;
+  }
+
+  /* the indent costs a whole line at this width */
+  .csStatement {
+    text-indent: 0;
+  }
+
+  .csSec--dark {
+    /* a full screen of one sentence is right on a desktop and wasteful on a
+       phone, where the sentence already fills most of it */
+    min-height: 0;
   }
 }
 
