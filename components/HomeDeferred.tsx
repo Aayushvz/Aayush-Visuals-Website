@@ -58,7 +58,15 @@ export function DeferredGallery() {
 
 export function DeferredFooter() {
   return (
-    <DeferUntilNear minHeight="94vh" className="hpParallax__footerWrap">
+    /* sticky, so it is on screen from the first frame - watch a marker at
+       its place in flow instead, and give it a wider margin because the
+       stage only uncovers it in the last stretch of the page */
+    <DeferUntilNear
+      minHeight="94vh"
+      className="hpParallax__footerWrap"
+      flowAnchor
+      rootMargin="250% 0px"
+    >
       <Footer />
     </DeferUntilNear>
   );

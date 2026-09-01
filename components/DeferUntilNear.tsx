@@ -48,6 +48,7 @@ export default function DeferUntilNear({
   minHeight,
   rootMargin = "150% 0px",
   className,
+  flowAnchor = false,
 }: {
   children: ReactNode;
   minHeight: string;
@@ -64,8 +65,21 @@ export default function DeferUntilNear({
     which is what .aboutParallax__footerWrap already does on the About page.
   */
   className?: string;
+  /*
+    Watch a zero-height marker sitting where this section FALLS IN FLOW,
+    rather than the wrapper itself.
+
+    Needed when the wrapper is sticky, because a sticky element is held in
+    the viewport for as long as its container spans it - the homepage footer
+    is pinned to the bottom of the screen from the very first frame, hidden
+    behind the opaque stage. Observing it there fires instantly and defers
+    nothing at all. The marker is in normal flow at the end of the page, so
+    it arrives when the section is genuinely about to be uncovered.
+  */
+  flowAnchor?: boolean;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
   /* whether the child has actually rendered, which is later than `shown` */
   const [filled, setFilled] = useState(false);
@@ -75,7 +89,7 @@ export default function DeferUntilNear({
       setShown(true);
       return;
     }
-    const el = ref.current;
+    const el = anchorRef.current ?? ref.current;
     if (!el) return;
 
     const io = new IntersectionObserver(
@@ -117,8 +131,11 @@ export default function DeferUntilNear({
   }, [shown, filled]);
 
   return (
-    <div ref={ref} className={className} style={filled ? undefined : { minHeight }}>
-      {shown ? children : null}
-    </div>
+    <>
+      {flowAnchor ? <div ref={anchorRef} aria-hidden /> : null}
+      <div ref={ref} className={className} style={filled ? undefined : { minHeight }}>
+        {shown ? children : null}
+      </div>
+    </>
   );
 }

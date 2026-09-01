@@ -27,20 +27,18 @@ export default function WorkPageClient() {
       <Cursor />
 
       <Reveals />
-      <main>
-        {/* Same shape as the homepage: the content stage is opaque and slides
-            up over the footer, which is sticky underneath it, so the footer is
-            revealed rather than scrolled to. Contact closes the page just
-            above it, as it does there. */}
-        <div className="hpParallax">
-          <div className="hpParallax__stage">
-            <WorksSection />
-            <CaseStudiesSection />
-            <HomeContact />
-          </div>
-          <Footer />
-        </div>
-      </main>
+      {/* The footer sits OUTSIDE main so it still reads as a contentinfo
+          landmark, which a footer nested inside main does not. It has to
+          stay a sibling of the stage for the parallax - sticky travels
+          within its parent - so main becomes the stage itself. */}
+      <div className="hpParallax">
+        <main className="hpParallax__stage">
+          <WorksSection />
+          <CaseStudiesSection />
+          <HomeContact />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

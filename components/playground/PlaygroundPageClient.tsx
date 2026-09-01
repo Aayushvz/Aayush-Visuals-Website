@@ -25,17 +25,17 @@ export default function PlaygroundPageClient() {
       <Cursor />
 
       <Reveals />
-      <main>
-        {/* the homepage's parallax: opaque stage over a sticky footer, with
-            contact closing the page just above it */}
-        <div className="hpParallax">
-          <div className="hpParallax__stage">
-            <ExperimentShelf />
-            <HomeContact />
-          </div>
-          <Footer />
-        </div>
-      </main>
+      {/* The footer sits OUTSIDE main so it still reads as a contentinfo
+          landmark, which a footer nested inside main does not. It has to
+          stay a sibling of the stage for the parallax - sticky travels
+          within its parent - so main becomes the stage itself. */}
+      <div className="hpParallax">
+        <main className="hpParallax__stage">
+          <ExperimentShelf />
+          <HomeContact />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }
