@@ -638,6 +638,36 @@ html.has-cursor .cursorRing {
   display: none;
 }
 
+/* These stand in for the ruler labels once the ruler is gone, so they have
+   to appear at exactly the width it disappears at.
+
+   They were restored at 640px while the phone-view rule hides .heroRuler
+   from 768px, which left a band between the two where the ruler was hidden
+   and its replacement had not arrived: `Product Designer` and `Based in
+   India` were simply absent from the hero on any screen from 641px to
+   768px. Matching the breakpoint closes that band. */
+@media (max-width: 768px) {
+  .hero__mobileLabel {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hero-fg);
+    opacity: 0.72;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .hero__mobileLabel--top {
+    margin-bottom: 24px;
+  }
+
+  .hero__mobileLabel--bottom {
+    margin-top: 24px;
+  }
+}
+
 .hero__aayush {
   display: inline-block;
   font-family: var(--font-serif), serif;
@@ -710,7 +740,9 @@ html.has-cursor .cursorRing {
   translate: 0 -50%;
   display: flex;
   align-items: center;
-  gap: 22px;
+  /* six of these sit between the seven items, so at 22px they alone eat
+     132px of a row that has to fit two labels and the title clearance */
+  gap: clamp(12px, 1.8vw, 22px);
 }
 
 .heroRuler__seg {
@@ -724,6 +756,10 @@ html.has-cursor .cursorRing {
 .heroRuler__seg--outerLeft,
 .heroRuler__seg--outerRight {
   flex: 1 1 0;
+  /* these are the lines that tie the labels to the rails, so they keep a
+     stub when the row is tight rather than disappearing and leaving the
+     labels floating unattached */
+  min-width: 12px;
 }
 
 .heroRuler__seg--innerLeft,
@@ -752,13 +788,28 @@ html.has-cursor .cursorRing {
   animation: rulerSeg 0.5s var(--ease-quint) 0.62s both;
 }
 
-/* deliberate central title clearance zone */
+/* Deliberate central title clearance zone.
+
+   It used to be flex: 0 0, which meant it never yielded. Everything else
+   in the row is either a label (nowrap, will not shrink) or already at
+   zero, so below about 1000px the row simply overflowed and pushed the
+   right-hand label out past its rail and off the screen - at 820px the
+   label sat 72px beyond the rail with `Based in India` cut in half.
+
+   It now shrinks, down to a floor that still clears the title: the mark is
+   around 156px wide at that size and both are centred on the same axis, so
+   190px keeps air on either side of it. Above roughly 1200px there is
+   slack in the row and it never shrinks, so the desktop layout is
+   untouched. */
 .heroRuler__spacer {
-  flex: 0 0 clamp(320px, 42vw, 620px);
+  flex: 0 1 clamp(320px, 42vw, 620px);
+  min-width: 190px;
 }
 
 .heroRuler__label {
-  font-size: 13px;
+  /* holds 13px down to about 1080px, then eases to 11px rather than
+     forcing the clearance below what the title needs */
+  font-size: clamp(11px, 1.2vw, 13px);
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: none;
@@ -5507,26 +5558,6 @@ html.has-cursor .cursorRing {
      heroWorld typography block so they naturally drag and scroll with the title */
   .heroRuler {
     display: none;
-  }
-
-  .hero__mobileLabel {
-    display: block;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--hero-fg);
-    opacity: 0.72;
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .hero__mobileLabel--top {
-    margin-bottom: 24px;
-  }
-
-  .hero__mobileLabel--bottom {
-    margin-top: 24px;
   }
 
   /* ================= dedicated mobile About composition =================
