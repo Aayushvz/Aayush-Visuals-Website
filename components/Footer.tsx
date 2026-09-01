@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import PageLink from "./PageLink";
 
 /*
@@ -11,7 +11,7 @@ import PageLink from "./PageLink";
   - Intricate SVG pixel-art cliff campfire scene on left with characters & glowing fire
   - Right jungle foliage framing the night ocean
   - Center glowing Sea of Stars typography, crown-skull emblem, and copyright
-  - Interactive OST Audio Dock at bottom with Web Audio API ambient synth chime and social pill buttons
+  - Bottom dock with the back-to-top control and corner flourishes
 */
 
 interface Star {
@@ -79,11 +79,6 @@ const SOCIALS = [
 ];
 
 export default function Footer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
-  const oscRefs = useRef<OscillatorNode[]>([]);
-
   // Generate 70 deterministic twinkling stars for the night sky
   const stars = useMemo<Star[]>(() => {
     const list: Star[] = [];
@@ -107,73 +102,6 @@ export default function Footer() {
     }
     return list;
   }, []);
-
-  // Web Audio API ambient retro synth chime generator (Sea of Stars OST easter egg)
-  useEffect(() => {
-    if (isPlaying) {
-      try {
-        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (!AudioContextClass) return;
-        
-        const ctx = new AudioContextClass();
-        audioCtxRef.current = ctx;
-        
-        const gain = ctx.createGain();
-        gainNodeRef.current = gain;
-        gain.gain.setValueAtTime(0.001, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 1.2); // Gentle ambient volume
-        gain.connect(ctx.destination);
-
-        // Ethereal lo-fi ambient chord frequencies (C Major 9th: C4, E4, G4, B4, D5)
-        const freqs = [261.63, 329.63, 392.00, 493.88, 587.33];
-        const oscs: OscillatorNode[] = [];
-
-        freqs.forEach((freq, idx) => {
-          const osc = ctx.createOscillator();
-          osc.type = idx % 2 === 0 ? "sine" : "triangle";
-          osc.frequency.setValueAtTime(freq + (idx * 0.4), ctx.currentTime); // Slight analog detune
-
-          // Individual sub-gain for richness
-          const subGain = ctx.createGain();
-          subGain.gain.setValueAtTime(0.8 / freqs.length, ctx.currentTime);
-          osc.connect(subGain);
-          subGain.connect(gain);
-
-          osc.start();
-          oscs.push(osc);
-        });
-
-        oscRefs.current = oscs;
-      } catch (err) {
-        console.error("Web Audio API failed to start:", err);
-      }
-    } else {
-      // Fade out and close audio context gracefully
-      if (gainNodeRef.current && audioCtxRef.current) {
-        try {
-          const ctx = audioCtxRef.current;
-          gainNodeRef.current.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
-          setTimeout(() => {
-            oscRefs.current.forEach((osc) => {
-              try { osc.stop(); osc.disconnect(); } catch {}
-            });
-            oscRefs.current = [];
-            try { ctx.close(); } catch {}
-            audioCtxRef.current = null;
-          }, 800);
-        } catch {}
-      }
-    }
-
-    return () => {
-      if (audioCtxRef.current) {
-        try {
-          oscRefs.current.forEach((osc) => { try { osc.stop(); } catch {} });
-          audioCtxRef.current.close();
-        } catch {}
-      }
-    };
-  }, [isPlaying]);
 
   return (
     <footer className="footer siteFooter seaFooter">
@@ -342,46 +270,6 @@ export default function Footer() {
               <path d="M8 32V16C8 11.5 11.5 8 16 8H32" stroke="#8b5cf6" strokeWidth="1.5" strokeOpacity="0.4" />
               <circle cx="12" cy="12" r="2.5" fill="#a78bfa" />
             </svg>
-          </div>
-
-          {/* Left Side: OST Audio Player & Status Display */}
-          <div className="seaFooter__player">
-            <button
-              type="button"
-              className={`seaFooter__playBtn ${isPlaying ? "seaFooter__playBtn--active" : ""}`}
-              onClick={() => setIsPlaying(!isPlaying)}
-              aria-label={isPlaying ? "pause ambient ost" : "play ambient ost"}
-              title={isPlaying ? "click to pause ambient retro chime" : "click to play ambient retro chime"}
-            >
-              {isPlaying ? (
-                <svg viewBox="0 0 24 24" fill="currentColor" className="seaFooter__playIcon">
-                  <rect x="6" y="5" width="4" height="14" rx="1" />
-                  <rect x="14" y="5" width="4" height="14" rx="1" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="currentColor" className="seaFooter__playIcon">
-                  <path d="M6 4l15 8-15 8V4z" />
-                </svg>
-              )}
-            </button>
-
-            <div className="seaFooter__trackInfo">
-              <div className="seaFooter__trackTitleRow">
-                <span className="seaFooter__trackTitle">
-                  aayush visuals ost
-                  <span className="seaFooter__trackTitleExt"> — creative tech & design</span>
-                </span>
-                {isPlaying && (
-                  <span className="seaFooter__waves" aria-label="audio playing">
-                    <i /><i /><i /><i />
-                  </span>
-                )}
-              </div>
-              <div className="seaFooter__trackSub">
-                <span>dance of 1,000 pixels [2026 edition]</span>
-                <span className="seaFooter__time">{isPlaying ? "live ambient" : "lo-fi chime"}</span>
-              </div>
-            </div>
           </div>
 
           {/* Right Side: Back to Top */}

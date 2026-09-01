@@ -4,7 +4,7 @@ import { OG_IMAGE, PERSON_NAME, ROLE, SITE_URL } from "@/lib/site";
 
 /* bare title — the root layout's template appends " - Aayush Raj" */
 const description =
-  "Aayush Raj is a product designer and design engineer in India with 4+ years across UI/UX, design systems, brand identity and motion, from national government platforms to global sports brands.";
+  "Aayush Raj is a product designer and design engineer in India with 5+ years across UI/UX, design systems, brand identity and motion, from national government platforms to global sports brands.";
 
 export const metadata: Metadata = {
   title: "About",

@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from "react";
 */
 
 const WORDS: { t: string; strong?: boolean; br?: boolean; isDot?: boolean }[] = [
-  { t: "4+", strong: true },
+  { t: "5+", strong: true },
   { t: "years", strong: true },
   { t: "of" },
   { t: "turning", br: true },

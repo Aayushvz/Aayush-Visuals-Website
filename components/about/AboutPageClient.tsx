@@ -12,7 +12,6 @@ import AboutRulers from "./AboutRulers";
 import LogoStrip from "@/components/LogoStrip";
 import Footer from "@/components/Footer";
 import HomeContact from "@/components/HomeContact";
-import Testimonials from "./Testimonials";
 import AboutStory, { AboutStoryLower } from "./AboutStory";
 import IntroScene from "./IntroScene";
 import Capabilities from "@/components/Capabilities";
@@ -20,7 +19,7 @@ import Capabilities from "@/components/Capabilities";
 const META_LINE = ["UI/UX Design", "Design Systems", "Product Strategy"];
 
 const FACTS = [
-  "4+ years designing digital products",
+  "5+ years designing digital products",
   "Open for full-time opportunities",
 ];
 
@@ -31,8 +30,7 @@ const SECTION_MARKS = [
   { label: "03 - THE JOURNEY" },
   { label: "04 - WHAT I DO" },
   { label: "05 - SELECTED WORK" },
-  { label: "06 - KIND WORDS" },
-  { label: "07 - CONTACT" },
+  { label: "06 - CONTACT" },
   { label: "FOOTER" },
 ];
 
@@ -215,14 +213,10 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
       <div className="aboutPostBanner">
         <AboutStoryLower sectionRef={setSectionRef} />
 
-        {/* the testimonials and contact slide over the sticky footer */}
+        {/* contact slides over the sticky footer */}
         <div className="aboutParallax">
           <div className="aboutParallax__stage">
-            <div ref={setSectionRef(6)}>
-              <Testimonials />
-            </div>
-
-            <div id="get-in-touch" ref={setSectionRef(7)}>
+            <div id="get-in-touch" ref={setSectionRef(6)}>
               <HomeContact />
             </div>
           </div>
@@ -230,7 +224,7 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
           {/* the wrapper (not .footer) is the sticky element: sticky can only
               move within its direct parent, and this wrapper's parent spans
               stage + footer */}
-          <div className="aboutParallax__footerWrap" ref={setSectionRef(8)}>
+          <div className="aboutParallax__footerWrap" ref={setSectionRef(7)}>
             <Footer />
           </div>
         </div>

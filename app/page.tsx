@@ -8,7 +8,6 @@ import Statement from "@/components/Statement";
 import Process from "@/components/Process";
 import ProjectsSection from "@/components/ProjectsSection";
 import Services from "@/components/Services";
-import Testimonials from "@/components/about/Testimonials";
 import HomeContact from "@/components/HomeContact";
 import Footer from "@/components/Footer";
 import Reveals from "@/components/Reveals";
@@ -47,7 +46,6 @@ export default function Home() {
             <div className="processStage">
               <Process />
             </div>
-            <Testimonials />
             <HomeContact />
           </div>
           <Footer />
