@@ -676,7 +676,7 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/mike-tyson/direction-components.webp",
-                alt: "A direction board titled Headlines (Muscle - Force & Discipline), showing one content card in three densities over a dark arena plate, each with an ember gradient rail down its left edge and a red cut-corner outline on the headline.",
+                alt: "A direction board titled Headlines (Muscle: Force & Discipline), showing one content card in three densities over a dark arena plate, each with an ember gradient rail down its left edge and a red cut-corner outline on the headline.",
                 label: "01 · Forge, on a component",
                 note: "The heat tested on a real card rather than a headline: ember rail, cut corners, a stamped date. Three densities of the same component, because the one carrying body copy is the one that has to survive.",
               },
@@ -684,20 +684,20 @@ export const PROJECTS: Project[] = [
                 src: "/projects/mike-tyson/direction-atmosphere.webp",
                 alt: "A direction board with a large Legend headline in off-white over an almost black architectural photograph, with teal halftone numerals reading 721 in the lower left.",
                 label: "02 · Cold, atmospheric",
-                note: "The opposite pole. Photography pushed nearly to black, teal numerals, no orange anywhere. Calm and expensive — and nothing in it throws a punch.",
+                note: "The opposite pole. Photography pushed nearly to black, teal numerals, no orange anywhere. Calm and expensive: and nothing in it throws a punch.",
               },
               {
                 src: "/projects/mike-tyson/direction-portrait.webp",
                 alt: "A hero board reading Forged in legacy. Built for the future, with a fighter lit by orange rim light on the right, supporting copy on the left and two buttons labelled Tickets and Explore.",
                 label: "03 · Lit portrait",
                 chosen: true,
-                note: "A fighter carrying the heat instead of a texture doing it. This layout is what shipped — headline and body left, the figure right, Tickets solid against Explore outlined. The cold blue accent is the one thing that did not survive the palette ratio.",
+                note: "A fighter carrying the heat instead of a texture doing it. This layout is what shipped: headline and body left, the figure right, Tickets solid against Explore outlined. The cold blue accent is the one thing that did not survive the palette ratio.",
               },
               {
                 src: "/projects/mike-tyson/direction-graphic.webp",
                 alt: "A direction board with no photograph: a Legend headline over flat dark teal shards, with ember gradient diagonal lines and a red circled node at the right edge.",
                 label: "04 · Flat graphic",
-                note: "The tech pole with the photography removed entirely — shards, a trajectory line, a circled node. It reads like a product launch, not a fight card.",
+                note: "The tech pole with the photography removed entirely: shards, a trajectory line, a circled node. It reads like a product launch, not a fight card.",
               },
             ],
             caption:
@@ -2111,7 +2111,7 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "What I learned",
-                body: "I was asked for a food app. What the traveller needed was an answer to **will I make my flight** — identical on a wireframe, nothing alike in a terminal.",
+                body: "I was asked for a food app. What the traveller needed was an answer to **will I make my flight**: identical on a wireframe, nothing alike in a terminal.",
               },
             ],
           },
@@ -2160,7 +2160,7 @@ export const PROJECTS: Project[] = [
               { label: "Play Store rating of the incumbent that owns the partnerships", value: 40, display: "2 stars", tone: "bad" },
             ],
             caption:
-              "The last number is the opening. **The category is not short on supply** — the dominant player already holds the bank, airline and lounge deals. What it does not have is a product anyone wants to open twice.",
+              "The last number is the opening. **The category is not short on supply**: the dominant player already holds the bank, airline and lounge deals. What it does not have is a product anyone wants to open twice.",
           },
         ],
       },
@@ -2187,7 +2187,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "I mapped the whole journey before a single screen. The first structure came out **eleven clicks deep** — in a terminal, holding a bag, watching a departure board.",
+              "I mapped the whole journey before a single screen. The first structure came out **eleven clicks deep**: in a terminal, holding a bag, watching a departure board.",
             ],
           },
           {
@@ -2253,7 +2253,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Every card answers four questions before you tap it: **who, how far, how good, how long**. The pier replaces the street address, because in a terminal *where* is the only question that matters. Veg and non-veg sits in the filter bar rather than a drawer — in India that is a **first-class identity decision**, not a refinement.",
+              "Every card answers four questions before you tap it: **who, how far, how good, how long**. The pier replaces the street address, because in a terminal *where* is the only question that matters. Veg and non-veg sits in the filter bar rather than a drawer: in India that is a **first-class identity decision**, not a refinement.",
               "Tracking replaces status language with a countdown and keeps the outlet's location on screen throughout. If something goes wrong you are ten metres from the person who can fix it.",
             ],
           },
@@ -2295,7 +2295,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "**Sign-up took thirteen versions.** Everything after it is a consequence of one decision: ask where you are before you ask anything else. The Food and Café split follows the same logic — you already know which one you want before you open the app.",
+              "**Sign-up took thirteen versions.** Everything after it is a consequence of one decision: ask where you are before you ask anything else. The Food and Café split follows the same logic: you already know which one you want before you open the app.",
               "Prep time appears on the outlet card, on the item, and again in the cart, because the thing a traveller is actually deciding is **whether they have time**.",
             ],
           },
@@ -2350,7 +2350,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Orders are a wall of cards colour-coded by state, each with a live timer. **Accept and Reject are the two largest targets on the screen**, and there is no navigation to learn — the whole job lives on one surface.",
+              "Orders are a wall of cards colour-coded by state, each with a live timer. **Accept and Reject are the two largest targets on the screen**, and there is no navigation to learn: the whole job lives on one surface.",
               "Menus change daily and a stale menu in an airport means a refunded order, so sections and items are **edited in place** rather than through a separate builder. The empty state got the same attention as the dashboard: a new outlet's first login is their first impression of the platform, and it is a screen with nothing in it.",
             ],
           },
@@ -2867,7 +2867,7 @@ export const PROJECTS: Project[] = [
       "Framer build so a student team could update content without a developer",
     ],
     extraFacts: [
-      ["Edition", "10.0 - Xth edition"],
+      ["Edition", "10.0: Xth edition"],
       ["Organiser", "E-Cell, VIT Vellore"],
     ],
     sections: [
@@ -2881,7 +2881,7 @@ export const PROJECTS: Project[] = [
               {
                 label: "What it is",
                 wide: true,
-                body: "The event site for **Futurepreneurs 10.0**, the flagship business simulation run by the **Entrepreneurship Cell at VIT Vellore**. Registration, timeline, the story of the format and a live countdown to the day itself - one page carrying all of it.",
+                body: "The event site for **Futurepreneurs 10.0**, the flagship business simulation run by the **Entrepreneurship Cell at VIT Vellore**. Registration, timeline, the story of the format and a live countdown to the day itself: one page carrying all of it.",
               },
               {
                 label: "The problem",
@@ -2906,7 +2906,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The masthead sets **FUTURE PRENEURS** against a single outsized **X** - the tenth edition as a graphic device rather than a line of copy. Below it, the only number anyone acts on: time left to register, counted in days, hours and minutes.",
+              "The masthead sets **FUTURE PRENEURS** against a single outsized **X**: the tenth edition as a graphic device rather than a line of copy. Below it, the only number anyone acts on: time left to register, counted in days, hours and minutes.",
               "Everything else on the first screen is subordinate to those two elements. The gradient field behind them is the one place the design allows itself colour.",
             ],
           },
@@ -2916,7 +2916,7 @@ export const PROJECTS: Project[] = [
               src: "/projects/futurepreneurs/hero.webp",
               wide: true,
               caption:
-                "The landing view - masthead, register, and the countdown everything else defers to.",
+                "The landing view: masthead, register, and the countdown everything else defers to.",
               alt: "Futurepreneurs Xth edition landing page on a laptop, with a live registration countdown reading 03:24:35.",
             },
           },
@@ -2932,7 +2932,7 @@ export const PROJECTS: Project[] = [
               src: "/projects/futurepreneurs/about.webp",
               wide: true,
               caption:
-                "Futurepreneurs 10.0 - the flagship event of the Entrepreneurship Cell, VIT Vellore.",
+                "Futurepreneurs 10.0: the flagship event of the Entrepreneurship Cell, VIT Vellore.",
               alt: "Dark section describing Futurepreneurs 10.0 as an initiative immersing participants in the realities of the professional world.",
             },
           },
@@ -2945,7 +2945,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Two families doing different jobs. **Whyte Inktrap** carries the display weight - its cut-in traps keep the masthead sharp at poster scale. **Gantari** and **Almarai** handle everything a person has to actually read.",
+              "Two families doing different jobs. **Whyte Inktrap** carries the display weight: its cut-in traps keep the masthead sharp at poster scale. **Gantari** and **Almarai** handle everything a person has to actually read.",
               "The palette is two colours and two neutrals. **Slateblue** anchors the brand, **Sorrell Brown** is the single warm accent, and black and white do the structural work.",
             ],
           },
@@ -2980,7 +2980,7 @@ export const PROJECTS: Project[] = [
               src: "/projects/futurepreneurs/process.webp",
               wide: true,
               caption:
-                "Research, ideate, wireframe, UI concept, design - staggered rather than sequential.",
+                "Research, ideate, wireframe, UI concept, design: staggered rather than sequential.",
               alt: "Process diagram showing overlapping stages: Research, Ideate, Wireframe, UI Concept and Design.",
             },
           },
@@ -2993,7 +2993,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The timeline is the component the whole page turns on. Five dates - registration opening, closing, two qualifier stages and the D Day - built as numbered cards on a connecting line, so the sequence reads at a glance rather than being parsed as a list.",
+              "The timeline is the component the whole page turns on. Five dates: registration opening, closing, two qualifier stages and the D Day: built as numbered cards on a connecting line, so the sequence reads at a glance rather than being parsed as a list.",
             ],
           },
           {
@@ -3014,8 +3014,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Desktop and mobile side by side, full scroll. The same five sections in both - masthead and countdown, the pitch for the simulation, the timeline, ten years of history, then FAQs and the E-Cell footer.",
-              "The mobile view is not the desktop one narrowed. The timeline reflows from a five-across row into stacked pairs, and the three-column explainer becomes a single column of cards - the two places where the desktop layout would have collapsed into something unreadable if it had simply been squeezed.",
+              "Desktop and mobile side by side, full scroll. The same five sections in both: masthead and countdown, the pitch for the simulation, the timeline, ten years of history, then FAQs and the E-Cell footer.",
+              "The mobile view is not the desktop one narrowed. The timeline reflows from a five-across row into stacked pairs, and the three-column explainer becomes a single column of cards: the two places where the desktop layout would have collapsed into something unreadable if it had simply been squeezed.",
             ],
           },
           {
@@ -3023,7 +3023,7 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/futurepreneurs/fullview.webp",
               wide: true,
-              caption: "The full page in both views - webview left, mobview right.",
+              caption: "The full page in both views: webview left, mobview right.",
               alt: "Full-length screenshots of the Futurepreneurs site: the desktop page beside the mobile page, both showing masthead, timeline, ten-years section, FAQs and footer.",
             },
           },
@@ -3051,7 +3051,7 @@ export const PROJECTS: Project[] = [
     role: "Graphic Design",
     tools: ["Photoshop", "Illustrator", "Figma"],
     description:
-      "A running series of posters — startup teardowns, product launches, editorial covers, merch and title cards. One format, held across dozens of subjects, as a way of practising composition and type under a fixed constraint.",
+      "A running series of posters: startup teardowns, product launches, editorial covers, merch and title cards. One format, held across dozens of subjects, as a way of practising composition and type under a fixed constraint.",
     highlights: [
       "41 posters across startup, editorial, product and merch briefs",
       "One 4:5 format throughout, so the variation is in composition rather than canvas",
@@ -3072,7 +3072,7 @@ export const PROJECTS: Project[] = [
               {
                 label: "What it is",
                 wide: true,
-                body: "An ongoing set of **41 posters** covering startup teardowns, product launches, editorial covers, streetwear merch and title cards. Not a campaign — **a practice**, run at one format over a long stretch.",
+                body: "An ongoing set of **41 posters** covering startup teardowns, product launches, editorial covers, streetwear merch and title cards. Not a campaign: **a practice**, run at one format over a long stretch.",
               },
               {
                 label: "The constraint",
@@ -3080,7 +3080,7 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "What it is for",
-                body: "Most of these are read at **thumbnail scale first** — a feed, a grid, a contact sheet. The layout has to survive being small before it earns being large.",
+                body: "Most of these are read at **thumbnail scale first**: a feed, a grid, a contact sheet. The layout has to survive being small before it earns being large.",
               },
             ],
           },
@@ -3492,11 +3492,11 @@ export const PROJECTS: Project[] = [
     description:
       "A meal-planning app built around one idea: the hard part isn’t cooking, it’s deciding. Meal Maestro takes what you like, what you avoid and what’s already in the kitchen, and turns it into a week of recipes and the one grocery list that covers them. Placed third at the GDG Design-a-thon.",
     extraFacts: [
-      ["Recognition", "3rd — GDG Design-a-thon"],
+      ["Recognition", "3rd: GDG Design-a-thon"],
       ["Research", "12 interviews · 140 survey responses · 5 weeks"],
     ],
     highlights: [
-      "Grounded in primary research — 12 discovery interviews, 140 survey responses and 4 comparison teardowns",
+      "Grounded in primary research: 12 discovery interviews, 140 survey responses and 4 comparison teardowns",
       "Built on why people abandon meal planning, not on what an app could do",
       "Full design system: Poppins for display and headings, Open Sans for body",
     ],
@@ -3547,9 +3547,9 @@ export const PROJECTS: Project[] = [
         lastSliceH: 1226,
         wide: true,
         caption:
-          "The full case study — research with real users, the insights it earned, the design system, and the flows it produced.",
+          "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
         alt:
-          "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type — Poppins for display and headings, Open Sans for body — and finally the home, recipe detail, tracker and explore flows.",
+          "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",
       },
     ],
   },
