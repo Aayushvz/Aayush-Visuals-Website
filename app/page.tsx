@@ -6,7 +6,6 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Statement from "@/components/Statement";
 import Process from "@/components/Process";
-import Capabilities from "@/components/Capabilities";
 import ProjectsSection from "@/components/ProjectsSection";
 import Services from "@/components/Services";
 import Testimonials from "@/components/about/Testimonials";
@@ -48,7 +47,6 @@ export default function Home() {
             <div className="processStage">
               <Process />
             </div>
-            <Capabilities />
             <Testimonials />
             <HomeContact />
           </div>

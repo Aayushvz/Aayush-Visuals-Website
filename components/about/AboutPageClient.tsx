@@ -15,6 +15,7 @@ import HomeContact from "@/components/HomeContact";
 import Testimonials from "./Testimonials";
 import AboutStory, { AboutStoryLower } from "./AboutStory";
 import IntroScene from "./IntroScene";
+import Capabilities from "@/components/Capabilities";
 
 const META_LINE = ["UI/UX Design", "Design Systems", "Product Strategy"];
 
@@ -205,10 +206,11 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
       */}
       <AboutStory sectionRef={setSectionRef} />
 
-      <div className="aboutBanner">
-        <div className="aboutBanner__bg" aria-hidden />
-        <div className="aboutBanner__glow" aria-hidden />
-      </div>
+      {/* Skills sits where the banner interlude used to. The banner was a
+          sticky full-viewport image the rest of the story slid over; this is
+          a 3.5-viewport section that pins and deals internally, so it simply
+          occupies the slot in flow instead. */}
+      <Capabilities />
 
       <div className="aboutPostBanner">
         <AboutStoryLower sectionRef={setSectionRef} />

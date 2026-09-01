@@ -343,10 +343,13 @@ export default function Capabilities() {
       id="capabilities"
       ref={sectionRef}
     >
-      {/* Skills follows the cream Process panel now, so the tear carries
-          cream down into this dark one. No dot grid: that texture is
-          light-on-dark and there is no dark fill here to carry. */}
-      <TornEdge fill="var(--cream)" />
+      {/* The tear always carries the colour of whatever sits above. On About
+          that is the story's own ground, which is theme-reactive (#f5f2ec
+          light, #1a1a1a dark) where --cream is fixed - so it follows the
+          token rather than a literal, or the seam would show in dark mode.
+          No dot grid: that texture is light-on-dark and there is no dark fill
+          here to carry. */}
+      <TornEdge fill="var(--ab-bg)" />
 
       {/* Side rails, hoisted OUT of the sticky pane. Inside it they were
           trapped in its stacking context and the torn edge painted straight

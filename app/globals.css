@@ -164,7 +164,7 @@ a {
 
 @keyframes pageEnter {
   from { opacity: 0; }
-  to   { opacity: 1; }
+  to { opacity: 1; }
 }
 
 /* ---------- page-transition wipe (components/PageTransition.tsx) ----------
@@ -1648,7 +1648,6 @@ html.has-cursor .cursorRing {
 
 /* removed framer */
 
-
 .toolTile--framer {
   left: 24%;
   bottom: 16%;
@@ -1667,10 +1666,6 @@ html.has-cursor .cursorRing {
   --dur: 6.9s;
   --del: -2.2s;
 }
-
-
-
-
 
   .toolTile--framer {
     left: 10%;
@@ -2247,13 +2242,13 @@ html.has-cursor .cursorRing {
   stretches without needing a legend underneath to say so — the grouping is
   in the sequence, which is where it was always true.
 */
-.procStep[data-tone="amber"]   { --g1: #ffb45f; --g2: #f0812c; --gs: 240, 129, 44; }
-.procStep[data-tone="orange"]  { --g1: #ff9a5c; --g2: #e8632a; --gs: 232, 99, 42; }
-.procStep[data-tone="violet"]  { --g1: #a78bfa; --g2: #7c3aed; --gs: 124, 58, 237; }
-.procStep[data-tone="indigo"]  { --g1: #8f97ff; --g2: #5b4fe0; --gs: 91, 79, 224; }
-.procStep[data-tone="plum"]    { --g1: #c689fb; --g2: #9333ea; --gs: 147, 51, 234; }
+.procStep[data-tone="amber"] { --g1: #ffb45f; --g2: #f0812c; --gs: 240, 129, 44; }
+.procStep[data-tone="orange"] { --g1: #ff9a5c; --g2: #e8632a; --gs: 232, 99, 42; }
+.procStep[data-tone="violet"] { --g1: #a78bfa; --g2: #7c3aed; --gs: 124, 58, 237; }
+.procStep[data-tone="indigo"] { --g1: #8f97ff; --g2: #5b4fe0; --gs: 91, 79, 224; }
+.procStep[data-tone="plum"] { --g1: #c689fb; --g2: #9333ea; --gs: 147, 51, 234; }
 .procStep[data-tone="emerald"] { --g1: #52e0a4; --g2: #10a06b; --gs: 16, 160, 107; }
-.procStep[data-tone="teal"]    { --g1: #54d6cb; --g2: #0e9384; --gs: 14, 147, 132; }
+.procStep[data-tone="teal"] { --g1: #54d6cb; --g2: #0e9384; --gs: 14, 147, 132; }
 
 /*
   Drift lives on its own element.
@@ -5648,8 +5643,6 @@ html.has-cursor .cursorRing {
     height: calc(var(--transP) * 30px);
   }
 
-
-
   /* -------- statement: phone composition --------
      Full-screen dark canvas. Statement headline is the dominant element;
      four tool tiles shrink and retreat to the corners. Extra padding clears
@@ -5933,7 +5926,6 @@ html.has-cursor .cursorRing {
     letter-spacing: 0.02em;
   }
 }
-
 
 /* ======== CAPABILITIES REDESIGN (pixel-perfect) ======== */
 
@@ -6220,8 +6212,6 @@ html.has-cursor .cursorRing {
   z-index: 40;
   pointer-events: none;
 }
-
-
 
 /* Background masks to fade out pixels and grid lines at corners/edges like hero */
 .aboutPage__bgMask {
@@ -7342,7 +7332,6 @@ html.has-cursor .cursorRing {
   text-wrap: pretty;
 }
 
-
 .aboutSection__bullets {
   display: flex;
   flex-direction: column;
@@ -7358,7 +7347,6 @@ html.has-cursor .cursorRing {
   font-weight: 500;
   color: var(--ab-ink);
 }
-
 
 .aboutSection__bulletIcon {
   display: flex;
@@ -7477,64 +7465,7 @@ html.has-cursor .cursorRing {
     color var(--dur-hover) var(--ease-quint);
 }
 
-
 /* ---- Purple Banner ---- */
-
-.aboutBanner {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  background: #0d0315;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.aboutBanner__bg {
-  position: absolute;
-  inset: 0;
-  background: url("/about/banner-bg.webp") center / cover no-repeat;
-  opacity: 0.82;
-}
-
-.aboutBanner__glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, rgba(91, 33, 182, 0.45) 0%, rgba(91, 33, 182, 0.12) 40%, transparent 70%);
-  pointer-events: none;
-}
-
-.aboutBanner__content {
-  position: relative;
-  z-index: 2;
-}
-
-.aboutBanner__title {
-  font-size: clamp(56px, 8vw, 120px);
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 16px;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.aboutBanner__dot {
-  color: rgba(255, 255, 255, 0.5);
-  margin: 0 2px;
-}
-
-.aboutBanner__sub {
-  font-size: clamp(16px, 2vw, 24px);
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.65);
-  margin: 0;
-  letter-spacing: 0.03em;
-}
-
-.aboutBanner__sub em {
-  font-style: italic;
-  font-weight: 600;
-  color: #fff;
-}
 
 /* light-on-dark rail overlay, reused wherever an About page section (or the
    shared Footer) sits on a dark background: Purple Banner, Toolkit, Footer.
@@ -9133,9 +9064,7 @@ html.has-cursor .cursorRing {
     font-size: 24px;
   }
 
-  .aboutBanner {
-    padding: 72px 24px;
-  }
+  
 
   .aboutSection__card {
     padding: 16px 18px;
@@ -9698,7 +9627,6 @@ html.contact-page-active .themeSwitch {
     width: 100%;
     justify-content: center;
   }
-
 
   .contactPage__socials {
     flex-direction: row;
@@ -10685,8 +10613,6 @@ html.contact-page-active .themeSwitch {
     aspect-ratio: 3 / 2;
   }
 }
-
-
 
 /* ============================================================
    SEA OF STARS FOOTER  (components/Footer.tsx)
