@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import TornEdge from "./TornEdge";
 import {
   motion,
   useReducedMotion,
@@ -336,41 +337,19 @@ export default function Capabilities() {
       id="capabilities"
       ref={sectionRef}
     >
-      {/* Torn-paper edge, the same device Process uses: a shape filled in the
-          dark of the panel ABOVE (Statement, #1a1a1a) laid over this panel's
-          top, so the two read as one sheet torn across rather than two blocks
-          butted together. It hangs off the section rather than the sticky pin
-          so it scrolls away with the transition instead of parking at the top
-          of the screen for the whole pinned run. Filter ids are scoped to this
-          component - reusing Process's would collide in the DOM. */}
-      <div className="capabilities__brushTop" aria-hidden>
-        <svg className="capabilities__brushSvg--desktop" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="capBrushFilter" x="-5%" y="-600%" width="110%" height="1300%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.055 0.07" numOctaves="5" seed="31" result="noise"/>
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
-            </filter>
-          </defs>
-          <path
-            d="M0,-500 L1440,-500 L1440,100 C1400,75 1360,64 1320,60 C1280,56 1240,61 1200,58 C1160,55 1120,59 1080,56 C1040,54 1000,58 960,55 C920,52 880,56 840,54 C800,51 760,55 720,52 C680,49 640,54 600,51 C560,48 520,52 480,49 C440,46 400,51 360,48 C320,45 280,49 240,46 C200,44 160,48 120,45 C80,64 40,80 0,100 Z"
-            fill="#1a1a1a"
-            filter="url(#capBrushFilter)"
-          />
-        </svg>
-        <svg className="capabilities__brushSvg--mobile" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="capBrushFilterMobile" x="-8%" y="-700%" width="116%" height="1500%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.019 0.13" numOctaves="4" seed="9" result="noise"/>
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
-            </filter>
-          </defs>
-          <path
-            d="M0,-500 L1440,-500 L1440,72 C1400,54 1360,47 1320,44 C1280,41 1240,46 1200,43 C1160,40 1120,46 1080,42 C1040,38 1000,45 960,41 C920,38 880,44 840,41 C800,37 760,43 720,39 C680,36 640,43 600,39 C560,36 520,42 480,38 C440,35 400,41 360,38 C320,34 280,40 240,37 C200,33 160,40 120,36 C80,49 40,62 0,72 Z"
-            fill="#1a1a1a"
-            filter="url(#capBrushFilterMobile)"
-          />
-        </svg>
-        <div className="capabilities__brushDots" />
+      {/* Skills follows the cream Process panel now, so the tear carries
+          cream down into this dark one. No dot grid: that texture is
+          light-on-dark and there is no dark fill here to carry. */}
+      <TornEdge fill="var(--cream)" />
+
+      {/* Side rails, hoisted OUT of the sticky pane. Inside it they were
+          trapped in its stacking context and the torn edge painted straight
+          over them, breaking the line at the seam; out here they outrank the
+          tear and run unbroken through it. One set, not two aligned ones -
+          doubling a 1px line at 0.38 just makes that stretch brighter. */}
+      <div className="capRails" aria-hidden>
+        <span className="capRail capRail--left" />
+        <span className="capRail capRail--right" />
       </div>
 
       <div
@@ -431,11 +410,7 @@ export default function Capabilities() {
           </motion.div>
         </div>
 
-        {/* side rails */}
-        <div className="capRails" aria-hidden>
-          <span className="capRail capRail--left" />
-          <span className="capRail capRail--right" />
-        </div>
+
 
         <div className="capabilities__canvas" ref={canvasRef}>
           {wallet}

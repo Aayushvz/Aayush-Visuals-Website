@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import ExtCta from "./ExtCta";
+import TornEdge from "./TornEdge";
 
 // Exact sequence of 6 unique service card images
 const services = [
@@ -257,15 +258,21 @@ export default function Services() {
 
   return (
     <section className="services-section" id="services" ref={sectionRef}>
+      {/* Services follows the dark Statement panel now, so it inherits the
+          seam that used to belong to Skills: Statement's dark torn down into
+          this cream one, dot grid and all. */}
+      <TornEdge fill="#1a1a1a" dots />
+
       {/* Desktop Sticky 3D Carousel Stage (PROTECTED UNTOUCHED DESKTOP) */}
       <div className="services-pin">
         <div className="services-header" data-reveal>
-          <h2 className="services-heading">Every Services Clicked.</h2>
+          <h2 className="services-heading">The full deck.</h2>
           <p className="services-desc">
-            Branding, UI/UX, graphic design &amp; video editing to help your brand stand out.
+            Product, UI/UX, branding, web and video. The disciplines I actually
+            work in, not a menu.
           </p>
 
-          <ExtCta href="#contact">Book a Service</ExtCta>
+          <ExtCta href="#contact">Work with me</ExtCta>
         </div>
 
         <div className="services-wrapper">
@@ -306,12 +313,13 @@ export default function Services() {
       {/* ISOLATED Mobile Sticky On-Scroll Card Deck Stacking Stage */}
       <div className="services-mobile-deck">
         <div className="services-header services-header--mobile">
-          <h2 className="services-heading">Every Services Clicked.</h2>
+          <h2 className="services-heading">The full deck.</h2>
           <p className="services-desc">
-            Branding, UI/UX, graphic design &amp; video editing to help your brand stand out.
+            Product, UI/UX, branding, web and video. The disciplines I actually
+            work in, not a menu.
           </p>
 
-          <ExtCta href="#contact">Book a Service</ExtCta>
+          <ExtCta href="#contact">Work with me</ExtCta>
         </div>
 
         <div className="services-deck-stage">

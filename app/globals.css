@@ -2461,12 +2461,12 @@ html.has-cursor .cursorRing {
    derived from --hy so it can be checked against the pane in one line. */
 @media (max-width: 640px) {
   /* the Skills panel's tear follows the same phone treatment */
-  .capabilities__brushTop {
+  .tornEdge {
     height: 68px;
   }
 
-  .capabilities__brushTop .capabilities__brushSvg--desktop { display: none; }
-  .capabilities__brushTop .capabilities__brushSvg--mobile { display: block; }
+  .tornEdge .tornEdge__svg--desktop { display: none; }
+  .tornEdge .tornEdge__svg--mobile { display: block; }
 
   .process__inner {
     padding: 74px 20px 14px;
@@ -2878,58 +2878,44 @@ html.has-cursor .cursorRing {
   z-index: 1;
 }
 
-/* -------- torn-paper top edge --------
-   Originally Process's device, which has since dropped it, so this is now the
-   only place it lives. The dark of the section above, cut as a torn edge over
-   this panel's top,
-   so Statement and Skills read as one sheet torn across. Anchored to the
-   section rather than to .capabilities__pin: the pin is sticky for the whole
-   275vh run, and an edge inside it would sit frozen at the top of the screen
-   the entire time instead of passing by once at the seam. */
-.capabilities__brushTop {
+/* -------- torn-paper top edge (see components/TornEdge.tsx) --------
+   Shared by every seam that uses the device. The fill is set per instance in
+   the component, because it is always the colour of the section ABOVE.
+
+   Anchored to the section, never to a sticky pane: a pane holds still for the
+   whole pin, so an edge inside it would park on screen instead of passing by
+   once at the seam, and its stacking context would trap the edge underneath
+   anything the pane paints. */
+.tornEdge {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100px;
   pointer-events: none;
-  /* over the pin, which is unnumbered and would otherwise cover this */
+  /* over the pinned pane, which is unnumbered and would otherwise cover it */
   z-index: 4;
 }
 
-.capabilities__brushTop svg {
+.tornEdge svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.capabilities__brushTop .capabilities__brushSvg--mobile {
+/* Qualified deliberately: bare .tornEdge__svg--mobile (0,1,0) loses to
+   `.tornEdge svg { display: block }` (0,1,1) above, which left BOTH edges
+   drawn, one under the other. */
+.tornEdge .tornEdge__svg--mobile {
   display: none;
 }
 
-/* the dot grid sits after the svg so it paints on top of the dark fill,
-   carrying Statement's texture across the tear */
-.capabilities__brushDots {
+.tornEdge__dots {
   position: absolute;
   inset: 0;
   background-image: radial-gradient(rgba(244, 241, 234, 0.13) 1px, transparent 1px);
   background-size: 16px 16px;
   pointer-events: none;
-}
-
-/* The scroll driver's height. This is what gives the pinned pane something
-   to scroll THROUGH; without it the section collapses to one viewport and
-   the deal never fires.
-
-   Driver timeline (300vh = 100vh pin base + 200vh scroll span):
-   50vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 50vh
-   held -> release into Projects.
-
-   MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
-   card-reveal thresholds are computed from those numbers, so changing one
-   without the other slides the deal off its beats. */
-.capabilities--pinned {
-  min-height: 300vh;
 }
 
 .capabilities__pin {
