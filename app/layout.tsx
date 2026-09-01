@@ -236,6 +236,17 @@ export default function RootLayout({
       className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable} ${inter.variable} ${caveat.variable} ${permanentMarker.variable} ${grenzeGotisch.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/*
+          The hero's collage is served from Framer's CDN, and one of those
+          images is the page's Largest Contentful Paint. Without this the
+          browser cannot even start that request until it has done a DNS
+          lookup and a TLS handshake against a cold third-party origin, and
+          LCP waits for all of it. Warming the connection costs one line.
+        */}
+        <link rel="preconnect" href="https://framerusercontent.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://framerusercontent.com" />
+      </head>
       <body>
         {/*
           [data-reveal] elements sit at opacity:0 until Reveals' observer adds
