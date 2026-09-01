@@ -26,21 +26,16 @@ const TRAIL_MAX = 12;
 const TRAIL_LIFE_MS = 3400;
 
 /*
-  These cards render at 188-244px wide, but the raw framerusercontent.com
-  exports are the original uploads — up to 6000x4000px (5.7MB) for what's a
-  ~30KB thumbnail on screen. That's several MB of unnecessary download plus
-  main-thread decode/rasterize cost on every one of these actively-dragged,
-  entrance-animated cards, all happening at once on hero mount.
+  These cards are served from this origin, not from Framer's CDN.
 
-  Framer's own asset CDN honours a `scale-down-to` query param (constrains
-  the longest edge, keeps aspect ratio, same format) — no re-upload, no
-  layout change needed since .heroCard__inner img is width/height:100% +
-  object-fit:cover already. 600px covers 2-3x retina at this display size
-  with room to spare for the object-fit crop.
+  They used to be fetched cross-origin with a `scale-down-to` query, which
+  kept the bytes reasonable but left the page's Largest Contentful Paint
+  behind a cold third-party connection: DNS, then TLS, and only then the
+  image. They are now downloaded once, re-encoded as webp at the size they
+  actually render (188-244px wide, so 600px still covers 3x retina) and
+  served from /hero - 216KB for all eight, with no third party in the
+  critical path.
 */
-function framerAsset(src: string, maxEdge = 600) {
-  return src.includes("framerusercontent.com") ? `${src}?scale-down-to=${maxEdge}` : src;
-}
 
 type Card = {
   src: string;
@@ -56,12 +51,12 @@ type Card = {
 };
 
 const CARDS: Card[] = [
-  { src: "https://framerusercontent.com/images/N58AblVGhS8d8WNbem75fnZJY.png", alt: "Poster design", w: 188, h: 280, ox: -372, oy: -326, rot: -2.5, mobile: true },
-  { src: "https://framerusercontent.com/images/KHhJ7tm0Ianbz8NKexmRBTUtE.png", alt: "Futurepreneurs website", w: 188, h: 182, ox: -586, oy: -174, rot: 1.5 },
-  { src: "https://framerusercontent.com/images/c9Tsm6LX1MRlsqu10te7mVmJpww.png", alt: "Automotive photography", w: 188, h: 280, ox: 394, oy: -279, rot: 2, mobile: true },
-  { src: "https://framerusercontent.com/images/lixbhVQGtaJ1VnQKjv0GZQPzjwA.png", alt: "Food app interface", w: 188, h: 242, ox: 526, oy: -364, rot: -1.5 },
-  { src: "https://framerusercontent.com/images/oo2KOi0T0T3Gc7mMJ6T4qgnqPqE.png", alt: "App interface", w: 188, h: 216, ox: 307, oy: 183, rot: 1 },
-  { src: "https://framerusercontent.com/images/j7nFLyPw7Z0AjwVk2UBXI0pvmzM.png", alt: "Controller design", w: 188, h: 238, ox: -558, oy: 385, rot: -2 },
+  { src: "/hero/poster-design.webp", alt: "Poster design", w: 188, h: 280, ox: -372, oy: -326, rot: -2.5, mobile: true },
+  { src: "/hero/futurepreneurs.webp", alt: "Futurepreneurs website", w: 188, h: 182, ox: -586, oy: -174, rot: 1.5 },
+  { src: "/hero/automotive.webp", alt: "Automotive photography", w: 188, h: 280, ox: 394, oy: -279, rot: 2, mobile: true },
+  { src: "/hero/food-app.webp", alt: "Food app interface", w: 188, h: 242, ox: 526, oy: -364, rot: -1.5 },
+  { src: "/hero/app-interface.webp", alt: "App interface", w: 188, h: 216, ox: 307, oy: 183, rot: 1 },
+  { src: "/hero/controller.webp", alt: "Controller design", w: 188, h: 238, ox: -558, oy: 385, rot: -2 },
   /*
     Mike Tyson takes the slot the E-Summit laptop held; that card is gone
     rather than moved.
@@ -76,7 +71,7 @@ const CARDS: Card[] = [
     to the phone composition, which is a fact about position.
   */
   { src: "/projects/mike-tyson-hero-card.webp", alt: "Mike Tyson Invitational website", w: 244, h: 156, ox: -326, oy: 145, rot: 1.5, mobile: true },
-  { src: "https://framerusercontent.com/images/Kc86yKh4qp4oDdDwiBYEWKdRZ4.png", alt: "Fuzion poster", w: 188, h: 232, ox: 530, oy: 266, rot: -1, mobile: true },
+  { src: "/hero/fuzion.webp", alt: "Fuzion poster", w: 188, h: 232, ox: 530, oy: 266, rot: -1, mobile: true },
 ];
 
 function DragIcon() {
@@ -391,7 +386,7 @@ function ProjectCard({
       >
         <div className="heroCard__inner" ref={inner}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={framerAsset(card.src)} alt={card.alt} draggable={false} loading="eager" />
+          <img src={card.src} alt={card.alt} draggable={false} loading="eager" />
         </div>
       </div>
     </motion.div>
@@ -631,10 +626,9 @@ export default function Hero() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={framerAsset(
-                  "https://framerusercontent.com/images/ekk0XlnOygglnIHWYDruVrstJNQ.png",
-                  350
-                )}
+                src="/hero/mark.webp"
+                fetchPriority="high"
+                decoding="async"
                 alt=""
                 draggable={false}
               />
