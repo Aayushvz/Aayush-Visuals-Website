@@ -393,10 +393,18 @@ html.has-cursor .cursorRing {
 }
 
 .navbar__logo {
-  font-weight: 600;
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
   line-height: 1;
+}
+
+/* sized by height so the lockup keeps its own proportions; the source art is
+   302x119 with generous internal padding, so the box runs taller than the
+   letterforms actually read */
+.navbar__logoMark {
+  display: block;
+  height: 30px;
+  width: auto;
 }
 
 .navbar__logo sup {
@@ -5129,6 +5137,15 @@ html.has-cursor .cursorRing {
   color: #ffffff;
 }
 
+/* the bar is 58px tall, so this sits at roughly the presence the 18px
+   wordmark had; it takes the pill's colour through currentColor, which is
+   what lets one mark serve both the light and dark surfaces */
+.mobileNav__logoMark {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+
 /* the badge is a solid white chip, which is right on the dark pill and far
    too loud on the light one */
 .mobileNav--overLight .mobileNav__themeBadge {
@@ -5137,13 +5154,10 @@ html.has-cursor .cursorRing {
   box-shadow: none;
 }
 
-[data-theme="light"] .mobileNav {
-  background: rgba(12, 12, 16, 0.90);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-top: 1px solid rgba(255, 255, 255, 0.42);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.5);
-}
+/* The pill's tone follows the surface it is over, not the theme, so the
+   light-theme override that forced it back to obsidian has nothing left to
+   say - and at (0,2,0) it outranked the tone variants, which would have
+   pinned the pill dark on every light-theme page. */
 
 .mobileNav--top {
   top: max(16px, env(safe-area-inset-top, 16px)) !important;
@@ -5218,11 +5232,10 @@ html.has-cursor .cursorRing {
 
 .mobileNav__logo {
   flex: 1 1 auto;
-  text-align: center;
-  font-family: var(--font-primary), var(--font-general), "General Sans", system-ui, sans-serif;
-  font-size: 18px; /* increased by 1.3x from 14px (14 * 1.30 = 18.2px ~ 18px) */
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  /* was a centred text node; now centres the mark between the two controls */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: inherit;
   text-decoration: none;
   white-space: nowrap;
@@ -9793,16 +9806,22 @@ html.contact-page-active .themeSwitch {
   max-width: 850px;
 }
 
+/* matches the trailing dot on Projects. and Experiments. */
+.services-heading__dot {
+  color: var(--purple);
+}
+
 .services-desc {
   color: rgba(31, 31, 31, 0.48);
   font-family: var(--font-primary), sans-serif;
   font-size: clamp(12.5px, 0.92vw, 14px);
   line-height: 1.45;
   text-transform: none !important;
-  /* wide enough that the line never wraps: it reads as one quiet line under
-     the heading, not a paragraph */
+  /* no max-width, so it sits on one line under the heading wherever the
+     column is wide enough. `nowrap` is gone with the longer copy: at 375px
+     this string is wider than the screen, and forcing one line there would
+     push the page sideways rather than keep it tidy. */
   max-width: none;
-  white-space: nowrap;
   margin: 0 0 16px 0;
 }
 

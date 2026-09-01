@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import PageLink from "./PageLink";
 import useSurfaceTone from "./useSurfaceTone";
+import LogoMark from "./LogoMark";
 import ThemeToggle from "./ThemeToggle";
 
 /*
@@ -50,8 +51,9 @@ export default function Navbar() {
       ref={ref}
       className={`navbar ${overLight ? "navbar--overLight" : "navbar--overDark"}`}
     >
-      <PageLink href="/" className="navbar__logo">
-        aayush<sup>vz</sup>
+      {/* the mark carries no text, so the link needs its own accessible name */}
+      <PageLink href="/" className="navbar__logo" aria-label="aayush vz, home">
+        <LogoMark className="navbar__logoMark" />
       </PageLink>
       <nav className="navbar__links" aria-label="Primary">
         {navLinks.map((l) => (

@@ -5,6 +5,7 @@ import { SunIcon, MoonIcon } from "./icons";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLink from "./PageLink";
 import useSurfaceTone from "./useSurfaceTone";
+import LogoMark from "./LogoMark";
 
 /* No "home" row: the wordmark in the bar above is already the link home, and
    listing it again spends the panel's tallest, most prominent slot on the one
@@ -56,8 +57,14 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
         )}
       </button>
 
-      <PageLink href="/" className="mobileNav__logo" onClick={() => setOpen(false)}>
-        aayush
+      {/* the mark carries no text, so the link needs its own accessible name */}
+      <PageLink
+        href="/"
+        className="mobileNav__logo"
+        aria-label="aayush vz, home"
+        onClick={() => setOpen(false)}
+      >
+        <LogoMark className="mobileNav__logoMark" />
       </PageLink>
 
       <button

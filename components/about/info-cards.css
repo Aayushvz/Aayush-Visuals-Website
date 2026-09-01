@@ -272,12 +272,16 @@
 }
 
 /*
-  Phones: the scene stops pinning (see scroll-scene.css) and the panels stack.
-  Three staggered cards side by side is a wide-screen composition; at 390px it
-  is three slivers, so the stagger is dropped and they simply follow one
-  another.
+  Phones and reduced motion: the scene stops pinning (see scroll-scene.css)
+  and the panels stack. Three staggered cards side by side is a wide-screen
+  composition; at 390px it is three slivers, so the stagger is dropped and
+  they simply follow one another.
+
+  The reduced-motion case needs the `position: static` below in particular:
+  without it these panels stay an absolute layer sitting on top of the lead
+  block, and forcing both to opacity 1 renders them over each other.
 */
-@media (max-width: 760px) {
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
   .scnIntro .cards {
     position: static;
     display: block;

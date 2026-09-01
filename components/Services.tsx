@@ -266,9 +266,11 @@ export default function Services() {
       {/* Desktop Sticky 3D Carousel Stage (PROTECTED UNTOUCHED DESKTOP) */}
       <div className="services-pin">
         <div className="services-header" data-reveal>
-          <h2 className="services-heading">The full deck.</h2>
+          <h2 className="services-heading">
+            The Skills Deck<span className="services-heading__dot">.</span>
+          </h2>
           <p className="services-desc">
-            Product, UI/UX, branding, web and video.
+            Product, UI/UX, branding, web, motion and everything in between.
           </p>
 
           <ExtCta href="#contact">Work with me</ExtCta>
@@ -312,9 +314,11 @@ export default function Services() {
       {/* ISOLATED Mobile Sticky On-Scroll Card Deck Stacking Stage */}
       <div className="services-mobile-deck">
         <div className="services-header services-header--mobile">
-          <h2 className="services-heading">The full deck.</h2>
+          <h2 className="services-heading">
+            The Skills Deck<span className="services-heading__dot">.</span>
+          </h2>
           <p className="services-desc">
-            Product, UI/UX, branding, web and video.
+            Product, UI/UX, branding, web, motion and everything in between.
           </p>
 
           <ExtCta href="#contact">Work with me</ExtCta>

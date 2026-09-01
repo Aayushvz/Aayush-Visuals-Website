@@ -215,15 +215,23 @@
 }
 
 /*
-  Phones do not pin.
+  Phones do not pin - and neither does reduced motion.
 
   A pinned scene on a phone fights the address-bar collapse, costs a viewport
   of scroll for one composition, and breaks the moment 100svh changes mid-
   gesture. So below this width the section becomes ordinary flow: the block
   stacks, sits still, and simply scrolls. The composition survives; the
   choreography is a wide-screen affordance.
+
+  Reduced motion needs exactly the same thing, and used to get something
+  worse. The two compositions are absolutely positioned layers filling the
+  pinned box, one on top of the other, and the old reduced-motion rules only
+  forced each layer to opacity 1 - which made both fully visible AT ONCE,
+  printed over each other. Unpinning is the fix: in flow they are simply two
+  blocks, one after the other, which is what a reader who asked for no motion
+  should get.
 */
-@media (max-width: 760px) {
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
   .scn {
     height: auto;
   }
