@@ -312,7 +312,11 @@ export default function ContactPageClient() {
       <Cursor />
 
 
-      <div className="contactPage__stage">
+      {/* The stage is the page content proper - the heading, the form and
+          the details beside it - with the navbar, the cursor and the footer
+          all outside it. That is what a main landmark is, so it is one:
+          without it this page had no way to skip past the chrome. */}
+      <main className="contactPage__stage">
         <MagneticDotField />
 
         <div className="contactPage__rails" aria-hidden>
@@ -477,7 +481,7 @@ export default function ContactPageClient() {
           </aside>
         </div>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
