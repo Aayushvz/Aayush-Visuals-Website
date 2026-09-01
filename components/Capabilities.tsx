@@ -83,13 +83,19 @@ const CLOSED = [
      |   deal A   cards 1-3 out together
     1.0  gap      the first three are read
      |   deal B   cards 4-6 out together
-    0.5  tail     all six held, then the section releases
+    1.5  tail     all six held, then the section releases
 
-  One scroll to the first three, one more to the next three, half a scroll
-  held. Note the tail is measured from the deal's TRIGGER, and both deals
-  fire on a spring with a stagger, so the cards keep settling for roughly
-  half a second after it: the stillness you actually see at the end is a
-  little under half a scroll.
+  One scroll to the first three, one more to the next three. The tail is 1.5
+  but only the FIRST half of it is stillness: the journey below is pulled up
+  a viewport (see .aboutPostBanner) and starts sliding over this scene at 2.5
+  scrolls, so the last viewport of the tail is that parallax rather than a
+  hold. The section has to stay pinned through it, which is what the extra
+  height buys - shorten the tail and the scene scrolls away instead of being
+  slid over.
+
+  Note the tail is measured from the deal's TRIGGER, and both deals fire on a
+  spring with a stagger, so the cards keep settling for roughly half a second
+  after it.
 
   The three segments are given in vh rather than derived from a single
   `beat`, because they are no longer all the same length: the dwell and the
@@ -101,9 +107,9 @@ const CLOSED = [
   sticky pane's own 100vh, which useScroll's "end end" offset subtracts.
   total = pin + dwell + gap + tail.
 */
-const TIMELINE_DESKTOP = { total: 350, pin: 100, dwell: 100, gap: 100, tail: 50 };
+const TIMELINE_DESKTOP = { total: 450, pin: 100, dwell: 100, gap: 100, tail: 150 };
 /* same rhythm, shorter strides - a swipe covers less ground than a wheel */
-const TIMELINE_MOBILE = { total: 300, pin: 100, dwell: 80, gap: 80, tail: 40 };
+const TIMELINE_MOBILE = { total: 400, pin: 100, dwell: 80, gap: 80, tail: 140 };
 
 type Timeline = typeof TIMELINE_DESKTOP;
 

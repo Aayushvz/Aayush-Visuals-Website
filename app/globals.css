@@ -2919,15 +2919,18 @@ html.has-cursor .cursorRing {
    Kept here, immediately under .capabilities, on purpose: it has twice been
    swallowed by range edits made against the block that used to follow it.
 
-   Driver timeline (350vh = 100vh pin base + 250vh scroll span):
-   100vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 50vh
-   held -> release into the next section.
+   Driver timeline (450vh = 100vh pin base + 350vh scroll span):
+   100vh dwell -> deals cards 1-3 -> 100vh gap -> deals cards 4-6 -> 150vh
+   tail. Only the first 50vh of that tail is stillness; the journey below is
+   pulled up a viewport and spends the last 100vh sliding over this scene,
+   which stays pinned throughout. That last viewport is why the section is
+   taller than the deal needs.
 
    MUST match TIMELINE_DESKTOP.total in components/Capabilities.tsx; the
    card-reveal thresholds are computed from those numbers, so changing one
    without the other slides the deal off its beats. */
 .capabilities--pinned {
-  min-height: 350vh;
+  min-height: 450vh;
 }
 
 /* -------- torn-paper top edge (see components/TornEdge.tsx) --------
@@ -3270,10 +3273,10 @@ html.has-cursor .cursorRing {
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
   /* the same rhythm on shorter strides, where a swipe covers less ground
-     than a wheel: 80vh dwell + 80vh gap + 40vh tail + 100vh pin base.
+     than a wheel: 80vh dwell + 80vh gap + 140vh tail + 100vh pin base.
      MUST match TIMELINE_MOBILE.total in components/Capabilities.tsx. */
   .capabilities--pinned {
-    min-height: 300vh;
+    min-height: 400vh;
   }
 
   .capabilities .capabilities__canvas {
@@ -6611,9 +6614,24 @@ html.has-cursor .cursorRing {
 
 /* -------- about page: content sections below hero -------- */
 
+/*
+  The journey and everything after it slide UP over the Skills scene, which is
+  the parallax the sticky banner used to give.
+
+  The banner got it for free: it was sticky, so it held while this block (a
+  higher z-index) scrolled over it. Skills is a 3.5-viewport section with its
+  own internal pin, so the overlap has to be asked for. Pulling this block up
+  by one viewport starts it exactly where the Skills pin would otherwise begin
+  scrolling away - so instead of the scene sliding out, the journey slides over
+  it while it is still pinned.
+
+  It works because the first thing in here (.abAct--journey) paints an opaque
+  --ab-bg; a transparent block would just let the scene show through.
+*/
 .aboutPostBanner {
   position: relative;
   z-index: 2;
+  margin-top: -100svh;
 }
 
 /* ============================================================
