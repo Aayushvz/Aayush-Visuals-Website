@@ -6,6 +6,7 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Statement from "@/components/Statement";
 import Process from "@/components/Process";
+import GallerySection from "@/components/GallerySection";
 import ProjectsSection from "@/components/ProjectsSection";
 import Services from "@/components/Services";
 import HomeContact from "@/components/HomeContact";
@@ -46,6 +47,7 @@ export default function Home() {
             <div className="processStage">
               <Process />
             </div>
+            <GallerySection />
             <HomeContact />
           </div>
           <Footer />

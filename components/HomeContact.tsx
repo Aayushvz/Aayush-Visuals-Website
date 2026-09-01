@@ -11,24 +11,25 @@ export default function HomeContact() {
         {/* Left */}
         <div className="hc__left">
           <h2 className="hc__heading">
-            Let&rsquo;s work<br />together.
+            Got something in mind?
           </h2>
           <p className="hc__tagline">
-            Got a project? Drop me a message and I&rsquo;ll respond within 24 hours.
+            A job, a project, a wild idea. Whatever it is, drop me a message.
+            Let&rsquo;s see what we can make out of it.
           </p>
 
           <ul className="hc__bullets" aria-label="Highlights">
             <li className="hc__bullet">
               <span className="hc__bulletMark" aria-hidden>+</span>
-              Available for freelance
+              Looking for my next opportunity
             </li>
             <li className="hc__bullet">
               <span className="hc__bulletMark" aria-hidden>+</span>
-              Based in India
+              Open to freelance work
             </li>
             <li className="hc__bullet">
               <span className="hc__bulletMark" aria-hidden>+</span>
-              Responds within 24 hours
+              Always happy to talk design
             </li>
           </ul>
         </div>

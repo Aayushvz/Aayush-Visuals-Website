@@ -11650,3 +11650,214 @@ html.dpl-page .preloader {
 
   /* skills bento tiles carry their own phone sizing in the 700px block */
 }
+
+
+/* ============================================================
+   GALLERY  (.gallery - components/GallerySection.tsx)
+
+   Horizontal row driven by vertical scroll. The section is 100svh plus the
+   track's own travel, and the pinned child is exactly one screen; the
+   difference is the distance the row moves. That makes the mapping
+   one-to-one - a pixel down is a pixel across - so it never feels geared.
+
+   GallerySection measures --gal-travel and publishes --p; everything below
+   is composed from those two numbers.
+   ============================================================ */
+
+.gallery {
+  position: relative;
+  background: var(--cream);
+  color: var(--ink);
+  height: calc(100svh + var(--gal-travel, 0px));
+  /* the row is held inside the page's rulers AND stood off them, so the
+     pictures never sit right on the rule; one value so the heading, the
+     window and the lead-in cannot drift apart */
+  --gal-inset: calc(var(--page-rail-inset) + clamp(14px, 1.8vw, 34px));
+  /* How far the dissolve reaches in from each end. Deliberately short: this
+     is an edge treatment, not an effect - past about 40px it stops reading
+     as a soft edge and starts reading as a gradient laid on the picture. */
+  --gal-fade: clamp(18px, 2.2vw, 40px);
+  /*
+    The curve is weighted hard toward the outside: opacity is already near
+    half a fifth of the way in and all but resolved by two thirds, so the
+    transition sits against the edge and the card is clean well before its
+    middle. A curve centred in the fade would put the softest part over the
+    picture, which is the thing that looked like a smudge.
+  */
+  --gal-mask: linear-gradient(
+    to right,
+    transparent 0,
+    rgba(0, 0, 0, 0.16) calc(var(--gal-fade) * 0.2),
+    rgba(0, 0, 0, 0.54) calc(var(--gal-fade) * 0.4),
+    rgba(0, 0, 0, 0.84) calc(var(--gal-fade) * 0.62),
+    rgba(0, 0, 0, 0.96) calc(var(--gal-fade) * 0.82),
+    #000 var(--gal-fade),
+    #000 calc(100% - var(--gal-fade)),
+    rgba(0, 0, 0, 0.96) calc(100% - var(--gal-fade) * 0.82),
+    rgba(0, 0, 0, 0.84) calc(100% - var(--gal-fade) * 0.62),
+    rgba(0, 0, 0, 0.54) calc(100% - var(--gal-fade) * 0.4),
+    rgba(0, 0, 0, 0.16) calc(100% - var(--gal-fade) * 0.2),
+    transparent 100%
+  );
+}
+
+.gallery__pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* title and standfirst move as one block, so only the wrapper carries the
+   gap down to the row and the two can never drift apart */
+.gallery__head {
+  padding-left: var(--gal-inset);
+  margin-bottom: clamp(22px, 3.4vh, 40px);
+}
+
+.gallery__title {
+  margin: 0;
+  /* smaller than the index-page titles on purpose: this section is the row,
+     not the heading, and at 96px the type was competing with the pictures */
+  font-size: clamp(28px, 3.8vw, 56px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+/* the line the per-card labels used to carry: said once, quietly, instead of
+   repeated eight times over the pictures */
+.gallery__sub {
+  margin: 10px 0 0;
+  max-width: 46ch;
+  font-size: clamp(13.5px, 1.05vw, 16px);
+  line-height: 1.5;
+  color: rgba(31, 31, 31, 0.52);
+}
+
+.gallery__dot {
+  color: var(--purple);
+}
+
+/* The window onto the row, held inside the page's side rulers and stood off
+   them. The clip lives here rather than on the pin so the row is bounded by
+   the page's own frame instead of the screen edges.
+
+   The mask is what stops that boundary reading as a cut: pictures dissolve
+   over --gal-fade at each end rather than being sliced off mid-frame as they
+   travel. overflow: clip still does the real containment - the mask only
+   softens what the clip would otherwise end abruptly. */
+.gallery__viewport {
+  position: relative;
+  margin: 0 var(--gal-inset);
+  overflow: clip;
+  /*
+    An EASED falloff, not a straight ramp.
+
+    A linear alpha ramp spreads the transition evenly across its width, which
+    over a photograph reads as a grey band laid on the picture - the thing
+    that looks cheap. These stops approximate a smoothstep: the picture holds
+    near full opacity for most of the distance and gives way quickly in the
+    last stretch, so the eye reads an edge softening rather than a gradient
+    painted over the image.
+  */
+  -webkit-mask-image: var(--gal-mask);
+  mask-image: var(--gal-mask);
+}
+
+.gallery__track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(18px, 2.2vw, 40px);
+  width: max-content;
+  /* The first picture still opens at 40% of the SCREEN; the inset is
+     subtracted because the track starts at the window's edge, not the
+     screen's. The trailing air is the window's own margin. */
+  padding-left: calc(40vw - var(--gal-inset));
+  transform: translate3d(
+    calc(var(--p, 0) * -1 * var(--gal-travel, 0px)),
+    0,
+    0
+  );
+}
+
+/* Granted only while the section is in play - see the IntersectionObserver in
+   GallerySection.tsx. The track is a very wide strip of large photographs;
+   promoting it for the life of the page costs real memory for a section most
+   visitors are nowhere near. */
+.gallery[data-near="true"] .gallery__track {
+  will-change: transform;
+}
+
+.galleryItem {
+  flex: 0 0 auto;
+  width: min(var(--w), 72vw);
+  /* --drop is a fraction of the row rather than a fixed offset, so the
+     stagger scales instead of collapsing on a narrow screen */
+  margin-top: calc(var(--drop, 0) * clamp(40px, 7vw, 128px));
+}
+
+.galleryItem__frame {
+  margin: 0;
+  aspect-ratio: var(--ratio, 4 / 5);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(31, 31, 31, 0.06);
+}
+
+.galleryItem__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
+  Reduced motion, and the fallback if the script never runs: no pin, no
+  scroll-driven travel. The row becomes an ordinary side-scroller, which is
+  the honest version of this section for someone who asked for less movement.
+*/
+.gallery[data-static="true"] {
+  height: auto;
+  padding: clamp(72px, 11vh, 132px) 0 clamp(80px, 12vh, 148px);
+}
+
+.gallery[data-static="true"] .gallery__pin {
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+
+.gallery[data-static="true"] .gallery__viewport {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery[data-static="true"] .gallery__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery[data-static="true"] .gallery__track {
+  transform: none;
+  padding-left: var(--gal-inset);
+}
+
+@media (max-width: 640px) {
+  .gallery__track {
+    /* 40vw of a phone is barely a thumb's width of lead-in and costs a third
+       of the screen; the row starts closer to the rule here */
+    padding-left: max(0px, calc(22vw - var(--gal-inset)));
+  }
+
+  /* the stagger is a wide-screen idea: on a phone it only pushes cards off
+     the bottom of a row that is already moving sideways */
+  .galleryItem {
+    margin-top: 0;
+  }
+}
