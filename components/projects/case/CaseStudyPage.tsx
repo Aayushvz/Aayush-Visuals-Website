@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
 import Footer from "@/components/Footer";
+import HomeContact from "@/components/HomeContact";
 import { PROJECTS, type Project } from "@/components/projects/projectData";
 import {
   buildStory,
@@ -126,188 +127,198 @@ export default function CaseStudyPage({ project }: { project: Project }) {
       <MobileNav />
       <Cursor />
 
-      <main className="cs" style={accentVars(project)}>
-        <div className="cs__inner">
-          <header className="csHero">
-            <div className="csHero__meta">
-              <p className="cs__eyebrow">Projects</p>
-              <p className="cs__eyebrow csHero__cat">{project.category}</p>
-            </div>
-
-            <h1 className="csHero__title">{project.title}</h1>
-
-            <div className="csHero__intro">
-              {story.intro.map((p, i) => (
-                <p className="cs__body" key={i}>
-                  {marked(p)}
-                </p>
-              ))}
-            </div>
-
-            {/* the three facts a hiring manager checks first, in the order
-                they check them */}
-            <ul className="csHero__facts">
-              <li className="csHero__fact">
-                <span className="csHero__factKey">Role</span>
-                <span className="csHero__factVal">{project.role}</span>
-              </li>
-              <li className="csHero__fact">
-                <span className="csHero__factKey">Year</span>
-                <span className="csHero__factVal">{project.year}</span>
-              </li>
-              {project.tools?.length ? (
-                <li className="csHero__fact">
-                  <span className="csHero__factKey">Tools</span>
-                  <span className="csHero__factVal">
-                    {project.tools.slice(0, 3).join(", ")}
-                  </span>
-                </li>
-              ) : null}
-            </ul>
-
-            {live ? (
-              <div className="csHero__cta">
-                <ExtCta href={live}>{project.cta || "Visit live site"}</ExtCta>
+      {/* The same parallax the rest of the site closes on: an opaque stage
+          sliding up over a sticky footer, with contact the last thing on it.
+          The footer stays OUTSIDE main so it keeps its contentinfo landmark,
+          which is why main is the stage rather than wrapping it. */}
+      <div className="hpParallax">
+        <main className="cs hpParallax__stage" style={accentVars(project)}>
+          <div className="cs__inner">
+            <header className="csHero">
+              <div className="csHero__meta">
+                <p className="cs__eyebrow">Projects</p>
+                <p className="cs__eyebrow csHero__cat">{project.category}</p>
               </div>
-            ) : null}
 
-            {project.cover ? (
-              <div className="csHero__cover">
-                <img
-                  className="csShot"
-                  src={project.cover}
-                  alt={`${project.title}, cover`}
-                  /* the largest thing in the first screen, so it is the one
-                     image worth fetching before anything scrolls */
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              </div>
-            ) : null}
-          </header>
+              <h1 className="csHero__title">{project.title}</h1>
 
-          {story.statement ? (
-            <section className="csSec csSec--dark">
-              <SectionHead no={++no} name="About" />
-              <div className="csSec__body">
-                <p className="csStatement">
-                  <span className="csStatement__lead">
-                    {marked(story.statement.lead)}
-                  </span>
-                  {story.statement.rest
-                    ? marked(" " + story.statement.rest)
-                    : null}
-                </p>
-                {story.about.length ? (
-                  <div className="csAbout">
-                    {story.about.map((p, i) => (
-                      <p className="cs__body" key={i}>
-                        {marked(p)}
-                      </p>
-                    ))}
-                  </div>
-                ) : null}
-                <Marks />
-              </div>
-            </section>
-          ) : null}
-
-          {story.details ? (
-            <section className="csSec">
-              <SectionHead no={++no} name="Details" />
-              <div className="csSec__body">
-                <Details
-                  pairs={story.details.pairs}
-                  media={story.details.media}
-                />
-              </div>
-            </section>
-          ) : null}
-
-          {story.highlights.length ? (
-            <section className="csSec">
-              <SectionHead no={++no} name="Highlights" />
-              <div className="csSec__body">
-                {story.highlights.map((item, i) => (
-                  <FeatureBlock item={item} key={i} />
+              <div className="csHero__intro">
+                {story.intro.map((p, i) => (
+                  <p className="cs__body" key={i}>
+                    {marked(p)}
+                  </p>
                 ))}
               </div>
-            </section>
-          ) : null}
 
-          {story.results ? (
-            <section className="csSec">
-              <SectionHead no={++no} name="Results" />
-              <div className="csSec__body">
-                <ResultRows
-                  items={story.results.items}
-                  note={story.results.note}
-                />
-                <Marks />
-              </div>
-            </section>
-          ) : null}
+              {/* the three facts a hiring manager checks first, in the order
+                they check them */}
+              <ul className="csHero__facts">
+                <li className="csHero__fact">
+                  <span className="csHero__factKey">Role</span>
+                  <span className="csHero__factVal">{project.role}</span>
+                </li>
+                <li className="csHero__fact">
+                  <span className="csHero__factKey">Year</span>
+                  <span className="csHero__factVal">{project.year}</span>
+                </li>
+                {project.tools?.length ? (
+                  <li className="csHero__fact">
+                    <span className="csHero__factKey">Tools</span>
+                    <span className="csHero__factVal">
+                      {project.tools.slice(0, 3).join(", ")}
+                    </span>
+                  </li>
+                ) : null}
+              </ul>
 
-          {story.gallery.length ? (
-            <section className="csSec">
-              <SectionHead no={++no} name="Gallery" />
-              <div className="csSec__body">
-                <MediaRow media={story.gallery} />
-              </div>
-            </section>
-          ) : null}
+              {live ? (
+                <div className="csHero__cta">
+                  <ExtCta href={live}>
+                    {project.cta || "Visit live site"}
+                  </ExtCta>
+                </div>
+              ) : null}
 
-          {shots?.length ? (
-            <section className="csSec">
-              <SectionHead no={++no} name="The Work" />
-              <div className="csSec__body">
-                <ShotStack shots={shots} />
-              </div>
-            </section>
-          ) : null}
+              {project.cover ? (
+                <div className="csHero__cover">
+                  <img
+                    className="csShot"
+                    src={project.cover}
+                    alt={`${project.title}, cover`}
+                    /* the largest thing in the first screen, so it is the one
+                     image worth fetching before anything scrolls */
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </div>
+              ) : null}
+            </header>
 
-          {next.length ? (
-            <section className="csSec csFoot">
-              <SectionHead no={++no} name="More Work" />
-              <div className="csSec__body">
-                <div className="csNext">
-                  {next.map((p, i) => (
-                    <Link
-                      className="csNext__card"
-                      href={`/work/${p.id}`}
-                      key={p.id}
-                    >
-                      <div className="csNext__frame">
-                        <img
-                          className="csNext__shot"
-                          src={p.cover}
-                          alt={`${p.title}, cover`}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                      <div className="csNext__meta">
-                        <span className="csNext__no">
-                          {String(i + 1).padStart(3, "0")}
-                        </span>
-                        <span>
-                          <span className="csNext__title">{p.title}</span>
-                          <span className="csNext__cat">{p.category}</span>
-                        </span>
-                        <span className="csNext__year">{p.year}</span>
-                      </div>
-                    </Link>
+            {story.statement ? (
+              <section className="csSec csSec--dark">
+                <SectionHead no={++no} name="About" />
+                <div className="csSec__body">
+                  <p className="csStatement">
+                    <span className="csStatement__lead">
+                      {marked(story.statement.lead)}
+                    </span>
+                    {story.statement.rest
+                      ? marked(" " + story.statement.rest)
+                      : null}
+                  </p>
+                  {story.about.length ? (
+                    <div className="csAbout">
+                      {story.about.map((p, i) => (
+                        <p className="cs__body" key={i}>
+                          {marked(p)}
+                        </p>
+                      ))}
+                    </div>
+                  ) : null}
+                  <Marks />
+                </div>
+              </section>
+            ) : null}
+
+            {story.details ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="Details" />
+                <div className="csSec__body">
+                  <Details
+                    pairs={story.details.pairs}
+                    media={story.details.media}
+                  />
+                </div>
+              </section>
+            ) : null}
+
+            {story.highlights.length ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="Highlights" />
+                <div className="csSec__body">
+                  {story.highlights.map((item, i) => (
+                    <FeatureBlock item={item} key={i} />
                   ))}
                 </div>
-              </div>
-            </section>
-          ) : null}
-        </div>
+              </section>
+            ) : null}
 
-        <BackToTop />
-      </main>
+            {story.results ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="Results" />
+                <div className="csSec__body">
+                  <ResultRows
+                    items={story.results.items}
+                    note={story.results.note}
+                  />
+                  <Marks />
+                </div>
+              </section>
+            ) : null}
 
-      <Footer />
+            {story.gallery.length ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="Gallery" />
+                <div className="csSec__body">
+                  <MediaRow media={story.gallery} />
+                </div>
+              </section>
+            ) : null}
+
+            {shots?.length ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="The Work" />
+                <div className="csSec__body">
+                  <ShotStack shots={shots} />
+                </div>
+              </section>
+            ) : null}
+
+            {next.length ? (
+              <section className="csSec csFoot">
+                <SectionHead no={++no} name="More Work" />
+                <div className="csSec__body">
+                  <div className="csNext">
+                    {next.map((p, i) => (
+                      <Link
+                        className="csNext__card"
+                        href={`/work/${p.id}`}
+                        key={p.id}
+                      >
+                        <div className="csNext__frame">
+                          <img
+                            className="csNext__shot"
+                            src={p.cover}
+                            alt={`${p.title}, cover`}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                        <div className="csNext__meta">
+                          <span className="csNext__no">
+                            {String(i + 1).padStart(3, "0")}
+                          </span>
+                          <span>
+                            <span className="csNext__title">{p.title}</span>
+                            <span className="csNext__cat">{p.category}</span>
+                          </span>
+                          <span className="csNext__year">{p.year}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            ) : null}
+          </div>
+
+          <HomeContact />
+        </main>
+
+        <Footer />
+      </div>
+
+      <BackToTop />
     </>
   );
 }

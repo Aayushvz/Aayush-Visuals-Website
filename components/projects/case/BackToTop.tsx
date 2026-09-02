@@ -19,17 +19,42 @@ export default function BackToTop() {
   const [shown, setShown] = useState(false);
   const shownRef = useRef(false);
 
+  /*
+    Visible after a screenful, and stood down again at the very end.
+
+    The footer dock carries a back-to-top button of its own, so at the bottom
+    of the page both were on screen at once, side by side, doing the same
+    thing. A floating control exists to reach what is out of reach; when the
+    real one is right there it is just clutter.
+
+    The first attempt watched the footer with an IntersectionObserver and
+    never showed the button at all, because the footer is `position: sticky`
+    on these pages: it is in the viewport for the whole parallax, so "footer
+    visible" is true almost everywhere. Distance from the end of the document
+    is the honest measure of the same thing, and it costs no second listener
+    since the scroll handler is already here.
+  */
   useEffect(() => {
     const onScroll = () => {
-      const next = window.scrollY > window.innerHeight * 0.9;
+      const past = window.scrollY > window.innerHeight * 0.9;
+      const remaining =
+        document.documentElement.scrollHeight -
+        (window.scrollY + window.innerHeight);
+      const next = past && remaining > window.innerHeight * 0.5;
       if (next === shownRef.current) return;
       shownRef.current = next;
       setShown(next);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
+
+  const visible = shown;
 
   const toTop = () => {
     const reduced = window.matchMedia(
@@ -42,13 +67,13 @@ export default function BackToTop() {
     <button
       type="button"
       className="csTop"
-      data-shown={shown}
+      data-shown={visible}
       onClick={toTop}
       /* hidden from the tab order until it is actually on screen, so a
          keyboard reader at the top of the page does not land on a control
          they cannot see */
-      tabIndex={shown ? 0 : -1}
-      aria-hidden={!shown}
+      tabIndex={visible ? 0 : -1}
+      aria-hidden={!visible}
     >
       <svg
         width="12"

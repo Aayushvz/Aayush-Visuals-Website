@@ -78,6 +78,16 @@
   overflow-x: clip;
 }
 
+/*
+  When the page is also the parallax stage it inherits .hpParallax__stage,
+  which paints cream so the purple footer cannot bleed through it. A case
+  study is white, so the more specific selector wins it back. The stage still
+  does its job: the surface is opaque either way.
+*/
+.cs.hpParallax__stage {
+  background: var(--cs-bg);
+}
+
 .cs__inner {
   padding-inline: var(--cs-pad);
 }
