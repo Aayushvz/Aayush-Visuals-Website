@@ -104,13 +104,18 @@ export default function CaseStudyPage({ project }: { project: Project }) {
   const story = buildStory(project);
   const next = otherProjects(project);
   const live = liveHref(project);
-  const hasStory = Boolean(
-    story.details ||
-    story.highlights.length ||
-    story.results ||
-    story.gallery.length,
-  );
-  const shots = !hasStory ? project.shots : undefined;
+  /*
+    The flat gallery yields to real imagery, not to text.
+
+    This used to be suppressed whenever the project had "a story", and adding
+    written Challenge and Solution copy to meal-maestro therefore deleted its
+    entire case study: eighteen slices of a 22,306px export, which is the only
+    work that project has. Words are not a substitute for the pictures. What
+    replaces a strip is other imagery, so only a gallery or a set of named
+    highlights stands it down.
+  */
+  const shots =
+    story.gallery.length || story.highlights.length ? undefined : project.shots;
 
   /* generated from position, so dropping a beat can never leave a stale (03) */
   let no = 0;

@@ -49,9 +49,7 @@ export type ProjectShot =
       lastSliceH: number;
     });
 
-export function isStripShot(
-  shot: ProjectShot,
-): shot is ShotBase & {
+export function isStripShot(shot: ProjectShot): shot is ShotBase & {
   strip: string[];
   sliceW: number;
   sliceH: number;
@@ -4293,6 +4291,14 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "meal-maestro",
+    challenge: [
+      "Meal planning fails in the same place every time, and it is not the cooking. Working professionals aged 28 to 45 said it plainly: “I plan on Sunday and I’ve quit by Wednesday”, and “by the time I’m home, I’ve got no decisions left in me.”",
+      "Twelve interviews and 140 survey responses pointed at the same cause. People do not lack motivation, they lack **time and cognitive space**, and the apps they had already tried were widening the gap rather than closing it: “every app gives me recipes, none give me a plan.”",
+    ],
+    solution: [
+      "**Automation over education.** The app does the planning instead of teaching someone to plan. It takes what you like, what you avoid and what is already in your kitchen, and returns a week of recipes with the one grocery list that covers them.",
+      "Planning and groceries stay a single flow, because the research was blunt that disconnected tools create friction people refuse to tolerate. **Personalisation is the retention mechanism**, not a settings screen: generic recommendations were dismissed immediately. A tracker keeps progress visible, so a good week reads as one.",
+    ],
     kind: "case-study",
     title: "Meal Maestro",
     logoText: "Meal Maestro",
