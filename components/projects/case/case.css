@@ -72,6 +72,18 @@
   background: var(--cs-bg);
   color: var(--cs-ink);
   font-family: var(--font-general), "General Sans", system-ui, sans-serif;
+
+  /*
+    Nothing here may push the page sideways.
+
+    The copy is written by hand and none of it currently overflows at 320px,
+    but the things that WOULD are all one-offs waiting to happen: a project
+    named something long enough to beat the display size, a tool list with an
+    unbroken string in it, a URL pasted into a body paragraph. Breaking long
+    words is the difference between that being a wrapped line and being a
+    horizontal scrollbar.
+  */
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   position: relative;
   z-index: 1;
@@ -155,7 +167,9 @@
   text-align: right;
 }
 
+/* the one place a single long word is most likely to beat the column */
 .csHero__title {
+  hyphens: auto;
   font-size: var(--cs-t-display);
   font-weight: 600;
   letter-spacing: -0.035em;
@@ -412,6 +426,27 @@
   align-self: start;
   display: grid;
   row-gap: var(--cs-lg);
+}
+
+/*
+  min-width: 0 on the children, which grid does not do by default.
+
+  A grid item's automatic minimum size is its CONTENT, so a long word or a
+  nowrap value makes the track wider than its share rather than wrapping, and
+  the row quietly grows past its parent. It is the most common cause of a
+  layout that measures fine until one string changes.
+*/
+.csDetails__pair > *,
+.csResults__row > *,
+.csNext__meta > *,
+.csSec__body > *,
+.csAbout > *,
+.csFeature__head > *,
+.csDetails > *,
+.csSec__head > *,
+.csHero__facts > *,
+.csHero__fact > * {
+  min-width: 0;
 }
 
 .csDetails__pair {
