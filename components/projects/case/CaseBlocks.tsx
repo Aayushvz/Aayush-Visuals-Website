@@ -159,6 +159,17 @@ const SOLUTION_SECTION =
   /approach|solution|decision|insight|essence|structure/i;
 
 function detailPairs(project: Project): Pair[] {
+  /* written copy wins over anything assembled from the blocks: it exists
+     precisely because the assembly could not do the job for this project */
+  if (project.challenge?.length || project.solution?.length) {
+    const out: Pair[] = [];
+    if (project.challenge?.length)
+      out.push({ label: "Challenge", body: project.challenge });
+    if (project.solution?.length)
+      out.push({ label: "Solution", body: project.solution });
+    return out;
+  }
+
   const blocks = allBlocks(project);
   const labelled: { label: string; body: string }[] = [];
 

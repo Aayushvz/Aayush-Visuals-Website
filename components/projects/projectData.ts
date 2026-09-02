@@ -50,8 +50,13 @@ export type ProjectShot =
     });
 
 export function isStripShot(
-  shot: ProjectShot
-): shot is ShotBase & { strip: string[]; sliceW: number; sliceH: number; lastSliceH: number } {
+  shot: ProjectShot,
+): shot is ShotBase & {
+  strip: string[];
+  sliceW: number;
+  sliceH: number;
+  lastSliceH: number;
+} {
   return "strip" in shot;
 }
 
@@ -138,7 +143,10 @@ export type CaseBlock =
       caption?: string;
     }
   /* design-system rows. `swatch` paints a colour chip beside the value. */
-  | { kind: "specs"; items: { name: string; value: string; note?: string; swatch?: string }[] }
+  | {
+      kind: "specs";
+      items: { name: string; value: string; note?: string; swatch?: string }[];
+    }
   /* A user flow, drawn here rather than screenshotted from the design file.
      A working flow board is dense, half-abandoned and full of notes to
      yourself; it is evidence that thinking happened, not something a reader
@@ -179,7 +187,12 @@ export type CaseBlock =
   */
   | {
       kind: "bars";
-      items: { label: string; value: number; display: string; tone?: "bad" | "good" }[];
+      items: {
+        label: string;
+        value: number;
+        display: string;
+        tone?: "bad" | "good";
+      }[];
       caption?: string;
     }
   /*
@@ -202,7 +215,13 @@ export type CaseBlock =
   */
   | {
       kind: "screens";
-      items: { src: string; alt: string; step: string; title: string; body: string }[];
+      items: {
+        src: string;
+        alt: string;
+        step: string;
+        title: string;
+        body: string;
+      }[];
     }
   /*
     Low-fidelity layouts, drawn in CSS rather than exported.
@@ -218,7 +237,11 @@ export type CaseBlock =
   */
   | {
       kind: "wireframes";
-      items: { layout: "entry" | "listen" | "chat" | "review"; label: string; note: string }[];
+      items: {
+        layout: "entry" | "listen" | "chat" | "review";
+        label: string;
+        note: string;
+      }[];
       caption?: string;
     }
   /*
@@ -320,7 +343,12 @@ export type CaseBlock =
   */
   | {
       kind: "results";
-      items: { value: string; label: string; note?: string; projected?: boolean }[];
+      items: {
+        value: string;
+        label: string;
+        note?: string;
+        projected?: boolean;
+      }[];
       caption?: string;
     }
   /* What the work taught, one lesson per block. Reflection is normally
@@ -503,6 +531,24 @@ export type Project = {
     survives a visit here untouched.
   */
   theme?: "dark" | "light";
+  /*
+    The two points the Details beat is built from, written rather than
+    derived.
+
+    The renderer can usually assemble these from a `brief` item plus the prose
+    in a section named for the same thing, but that only works when the
+    project HAS such a section. Six of them do not, and the result was a
+    Challenge of twenty words sitting beside a column of screenshots. Padding
+    those from elsewhere in the file produced text that was longer and off
+    topic, so the answer is to write them.
+
+    Authored here rather than as another section because this is the copy most
+    likely to be revised: it is the part a reader actually judges the work on,
+    and it should be editable without going hunting through nested blocks.
+    When present it wins over anything the renderer would have assembled.
+  */
+  challenge?: string[];
+  solution?: string[];
   /** case-study gallery. Without it the page falls back to `cover` alone. */
   shots?: ProjectShot[];
   /** long-form body. When present it renders instead of the flat `shots`
@@ -556,6 +602,14 @@ export type Project = {
 export const PROJECTS: Project[] = [
   {
     id: "mike-tyson-invitational",
+    challenge: [
+      "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Both at full volume is a mess with a fire filter on it.",
+      "The site also has four audiences arriving at the same homepage: spectators buying tickets, amateur fighters applying to compete, partners looking to get involved, and donors. Each one wants a different page, and none of them should have to hunt for it.",
+    ],
+    solution: [
+      "**Ratio, not blending.** 65% near black, 25% smelting orange, no more than 10% cold teal, so the forge reads as heat on a technical surface instead of the two fighting each other.",
+      "The sitemap gives every audience its own route off the homepage. Tickets, fighter registration, get involved and donations each land somewhere built for that one job.",
+    ],
     title: "Mike Tyson Invitational",
     /* the only case study whose screens really are a browser: every frame in
        it is a page of a site you can go and load */
@@ -638,23 +692,19 @@ export const PROJECTS: Project[] = [
               {
                 label: "Project",
                 wide: true,
-                body:
-                  "The first Mike Tyson Invitational, a three day amateur boxing event in Las Vegas. Ten pages covering tickets, fighter registration, sponsorship, donations and a live stream. Designed and built end to end.",
+                body: "The first Mike Tyson Invitational, a three day amateur boxing event in Las Vegas. Ten pages covering tickets, fighter registration, sponsorship, donations and a live stream. Designed and built end to end.",
               },
               {
                 label: "Problem",
-                body:
-                  "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Both at full volume is a mess with a fire filter on it.",
+                body: "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Both at full volume is a mess with a fire filter on it.",
               },
               {
                 label: "Decision",
-                body:
-                  "Ratio, not blending. 65% near black, 25% smelting orange, no more than 10% cold teal.",
+                body: "Ratio, not blending. 65% near black, 25% smelting orange, no more than 10% cold teal.",
               },
               {
                 label: "Honestly",
-                body:
-                  "First project at this size, with a name on the door that leaves no room for a shrug. I was nervous the whole way.",
+                body: "First project at this size, with a name on the door that leaves no room for a shrug. I was nervous the whole way.",
               },
             ],
           },
@@ -771,14 +821,12 @@ export const PROJECTS: Project[] = [
               {
                 tag: "Type",
                 label: "Three faces, one job each",
-                body:
-                  "Legend for headlines, IBM Plex Sans for reading, Chakra Petch for numbers and labels. Chakra Petch was too good at numerals to throw away.",
+                body: "Legend for headlines, IBM Plex Sans for reading, Chakra Petch for numbers and labels. Chakra Petch was too good at numerals to throw away.",
               },
               {
                 tag: "Texture",
                 label: "Texture lives in artwork, never in UI",
-                body:
-                  "Scratched metal and heat glow stay inside images and headline fills. Buttons, forms and body text stay flat.",
+                body: "Scratched metal and heat glow stay inside images and headline fills. Buttons, forms and body text stay flat.",
               },
             ],
           },
@@ -798,20 +846,38 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              { name: "Onyx Black", hex: "#060708", use: "Backgrounds, canvas, nav, footer" },
-              { name: "Parchment", hex: "#F5F1EA", use: "Body text, outlines, dividers" },
+              {
+                name: "Onyx Black",
+                hex: "#060708",
+                use: "Backgrounds, canvas, nav, footer",
+              },
+              {
+                name: "Parchment",
+                hex: "#F5F1EA",
+                use: "Body text, outlines, dividers",
+              },
             ],
-            caption: "**Foundation, 65 to 70%.** Authority and depth. Most of the site is these two, quietly.",
+            caption:
+              "**Foundation, 65 to 70%.** Authority and depth. Most of the site is these two, quietly.",
           },
           {
             kind: "palette",
             items: [
               { name: "Ember", hex: "#450503", use: "Filled surfaces" },
-              { name: "Smelting Red", hex: "#F72C25", use: "Primary CTAs, active states" },
+              {
+                name: "Smelting Red",
+                hex: "#F72C25",
+                use: "Primary CTAs, active states",
+              },
               { name: "Heated Steel", hex: "#FF8D3C", use: "Highlights, glow" },
-              { name: "Spark", hex: "#FFF893", use: "Rare accents, the hottest point" },
+              {
+                name: "Spark",
+                hex: "#FFF893",
+                use: "Rare accents, the hottest point",
+              },
             ],
-            caption: "**Accent, 20 to 25%.** The ramp runs in the order metal actually heats.",
+            caption:
+              "**Accent, 20 to 25%.** The ramp runs in the order metal actually heats.",
           },
           {
             kind: "palette",
@@ -819,24 +885,49 @@ export const PROJECTS: Project[] = [
               { name: "Gunmetal", hex: "#0F1317", use: "Background elements" },
               { name: "Slate", hex: "#162529", use: "Panels" },
               { name: "Patina", hex: "#294341", use: "Data labels" },
-              { name: "Cold Steel", hex: "#3D6D67", use: "Numerals, timers, metallic tint" },
+              {
+                name: "Cold Steel",
+                hex: "#3D6D67",
+                use: "Numerals, timers, metallic tint",
+              },
             ],
-            caption: "**Cool tint, 5 to 10%.** The smallest budget, and the easiest one to overspend.",
+            caption:
+              "**Cool tint, 5 to 10%.** The smallest budget, and the easiest one to overspend.",
           },
           {
             kind: "specs",
             items: [
-              { name: "Primary button", value: "Notched corners, solid fill", note: "Tickets, Register, Donate", swatch: "#F72C25" },
-              { name: "Secondary button", value: "Outline, parchment", swatch: "#F5F1EA" },
-              { name: "Input height", value: "48px", note: "Dark fill, explicit focus state" },
-              { name: "Field labels", value: "Above the input", note: "Never placeholder only" },
-              { name: "Tags and status", value: "Chakra Petch, letter spaced", swatch: "#3D6D67" },
+              {
+                name: "Primary button",
+                value: "Notched corners, solid fill",
+                note: "Tickets, Register, Donate",
+                swatch: "#F72C25",
+              },
+              {
+                name: "Secondary button",
+                value: "Outline, parchment",
+                swatch: "#F5F1EA",
+              },
+              {
+                name: "Input height",
+                value: "48px",
+                note: "Dark fill, explicit focus state",
+              },
+              {
+                name: "Field labels",
+                value: "Above the input",
+                note: "Never placeholder only",
+              },
+              {
+                name: "Tags and status",
+                value: "Chakra Petch, letter spaced",
+                swatch: "#3D6D67",
+              },
             ],
           },
           {
             kind: "statement",
-            text:
-              "Capping the teal at 10% is the only reason this reads as a forge with technology in it, rather than a tech site in an orange coat.",
+            text: "Capping the teal at 10% is the only reason this reads as a forge with technology in it, rather than a tech site in an orange coat.",
           },
         ],
       },
@@ -849,15 +940,40 @@ export const PROJECTS: Project[] = [
             kind: "sitemap",
             nodes: [
               { label: "Home" },
-              { label: "Tickets", children: [{ label: "Event Schedule" }, { label: "TicketTailor", note: "External" }] },
+              {
+                label: "Tickets",
+                children: [
+                  { label: "Event Schedule" },
+                  { label: "TicketTailor", note: "External" },
+                ],
+              },
               { label: "Event Info", children: [{ label: "Event Schedule" }] },
-              { label: "Get Involved", children: [{ label: "Sponsorship Tiers" }, { label: "Sponsor Inquiry", note: "Form" }] },
+              {
+                label: "Get Involved",
+                children: [
+                  { label: "Sponsorship Tiers" },
+                  { label: "Sponsor Inquiry", note: "Form" },
+                ],
+              },
               { label: "Fighter Registration", note: "Form" },
-              { label: "Donations", children: [{ label: "Donorbox", note: "External" }] },
-              { label: "Merch / Shop", children: [{ label: "Shopify", note: "Planned" }] },
+              {
+                label: "Donations",
+                children: [{ label: "Donorbox", note: "External" }],
+              },
+              {
+                label: "Merch / Shop",
+                children: [{ label: "Shopify", note: "Planned" }],
+              },
               { label: "Watch Live", children: [{ label: "Streaming Hub" }] },
               { label: "Media / Gallery" },
-              { label: "Legal", children: [{ label: "Privacy" }, { label: "Terms" }, { label: "Refunds" }] },
+              {
+                label: "Legal",
+                children: [
+                  { label: "Privacy" },
+                  { label: "Terms" },
+                  { label: "Refunds" },
+                ],
+              },
             ],
             caption:
               "Checkout runs through TicketTailor, Donorbox and Shopify, so most of the job is the run up to the handoff. Merch was scoped for after the products and sponsor tiers were locked, but sits in the architecture from day one so navigation never needs rebuilding around it.",
@@ -879,8 +995,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com",
                 step: "01",
                 title: "One scroll, six jobs",
-                body:
-                  "Sell a ticket, explain a format nobody has seen, register fighters, court sponsors, take donations, announce a date. It resolves as a descent: heat at the top, information in the middle, invitation at the bottom.",
+                body: "Sell a ticket, explain a format nobody has seen, register fighters, court sponsors, take donations, announce a date. It resolves as a descent: heat at the top, information in the middle, invitation at the bottom.",
                 alt: "Screen recording scrolling the homepage from hero to footer",
               },
             ],
@@ -940,8 +1055,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com/about",
                 step: "02",
                 title: "Legacy without the highlight reel",
-                body:
-                  "The easy version is a montage of famous knockouts. That is someone else's story and it does not explain why an amateur invitational exists. This runs on one line instead: legacy did not end in the ring, it continued through transformation.",
+                body: "The easy version is a montage of famous knockouts. That is someone else's story and it does not explain why an amateur invitational exists. This runs on one line instead: legacy did not end in the ring, it continued through transformation.",
                 alt: "Screen recording scrolling the About page",
               },
             ],
@@ -960,7 +1074,8 @@ export const PROJECTS: Project[] = [
                 label: "The Vision",
               },
             ],
-            caption: "The only two frames that run the accent over budget, deliberately.",
+            caption:
+              "The only two frames that run the accent over budget, deliberately.",
           },
         ],
       },
@@ -979,8 +1094,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com/events",
                 step: "03",
                 title: "Three nights, three states",
-                body:
-                  "Ticketing runs through TicketTailor, so the design job ends at the handoff. Sale status sits on the pages before the jump, so nobody reaches an external checkout to discover the thing they wanted is not purchasable yet.",
+                body: "Ticketing runs through TicketTailor, so the design job ends at the handoff. Sale status sits on the pages before the jump, so nobody reaches an external checkout to discover the thing they wanted is not purchasable yet.",
                 alt: "Screen recording of the tickets page showing the three nights and their sale states",
               },
             ],
@@ -1020,8 +1134,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com/sponsorships",
                 step: "04",
                 title: "A different reader entirely",
-                body:
-                  "Every other page talks to someone who wants to watch a fight. This one talks to someone with a marketing budget, who needs structure and numbers rather than atmosphere. It is the most restrained page on the site, and the restraint is the pitch.",
+                body: "Every other page talks to someone who wants to watch a fight. This one talks to someone with a marketing budget, who needs structure and numbers rather than atmosphere. It is the most restrained page on the site, and the restraint is the pitch.",
                 alt: "Screen recording of the sponsorship page scrolling through the tiers",
               },
             ],
@@ -1035,8 +1148,7 @@ export const PROJECTS: Project[] = [
                 alt: "Sponsorship packages section with heavyweight, middleweight and red/blue corner tiers",
                 url: "miketysoninvitational.com/sponsorships",
                 title: "Named in the sport's own language",
-                body:
-                  "Heavyweight, Middleweight, Red and Blue Corner. The hierarchy reads before any number does.",
+                body: "Heavyweight, Middleweight, Red and Blue Corner. The hierarchy reads before any number does.",
               },
             ],
           },
@@ -1057,8 +1169,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com/registration",
                 step: "05",
                 title: "Ask a fighter for their record",
-                body:
-                  "Gym, date of birth, bout record, fight weight. Every one of those is a reason to abandon, so the page opens with an explicit promise about what happens next. A long form only gets finished when the reader knows why each field is there.",
+                body: "Gym, date of birth, bout record, fight weight. Every one of those is a reason to abandon, so the page opens with an explicit promise about what happens next. A long form only gets finished when the reader knows why each field is there.",
                 alt: "Screen recording of the fighter registration page and form",
               },
             ],
@@ -1097,8 +1208,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com/donation",
                 step: "06",
                 title: "Support the mission",
-                body:
-                  "Donations route out to Donorbox, so again the job is the run up. It is the reddest page on the site, and the only one asking for something with nothing tangible going back.",
+                body: "Donations route out to Donorbox, so again the job is the run up. It is the reddest page on the site, and the only one asking for something with nothing tangible going back.",
                 alt: "Screen recording of the donation page",
               },
             ],
@@ -1115,18 +1225,15 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 title: "A ratio is a design decision",
-                body:
-                  "Writing **65 / 25 / 10** next to the palettes did more than any single colour choice. Two clashing directions stop clashing once one is rationed, and a written number let me tell whether a screen was wrong instead of just feeling it.",
+                body: "Writing **65 / 25 / 10** next to the palettes did more than any single colour choice. Two clashing directions stop clashing once one is rationed, and a written number let me tell whether a screen was wrong instead of just feeling it.",
               },
               {
                 title: "Scope integrations before designing around them",
-                body:
-                  "The pages that went smoothly were the ones where I knew the checkout belonged to someone else. The ones that hurt were where I had already drawn one.",
+                body: "The pages that went smoothly were the ones where I knew the checkout belonged to someone else. The ones that hurt were where I had already drawn one.",
               },
               {
                 title: "Nervous is not unprepared",
-                body:
-                  "The anxiety was about the name on the door, not the work. Exploration, palette ratios and the sitemap were all settled before a page was designed, and that is what carried it.",
+                body: "The anxiety was about the name on the door, not the work. Exploration, palette ratios and the sitemap were all settled before a page was designed, and that is what carried it.",
               },
             ],
           },
@@ -1136,6 +1243,14 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "elevation-capital",
+    challenge: [
+      "**The State of AI Adoption in Indian Startups** is research worth reading, and research usually ships as a PDF that almost nobody finishes.",
+      "The findings are the whole point: **86% of founders** plan to increase AI spending, **85% of engineering teams** have moved AI into production, and productivity has become the primary proving ground. Buried in a document, none of that lands.",
+    ],
+    solution: [
+      "The report is rebuilt as an interactive site, so the numbers **are** the interface rather than illustrations sitting inside it.",
+      "Built natively in Framer with dynamic data visualisations and motion, which keeps the findings readable on a phone and lets the team publish updates without a rebuild.",
+    ],
     title: "Elevation Capital",
     logoText: "ELEVATION",
     logoUrl: "/logos/elevation-capital.webp",
@@ -1160,6 +1275,14 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "riviera",
+    challenge: [
+      "Riviera is **one of the country's largest student fests**, and the site has to do two things that pull against each other: convey the scale of the whole event, and let one student find the one thing they came for.",
+      "Dozens of events and sub-brands sit underneath it. Put them all on the homepage and it becomes a directory. Hide them and the fest looks smaller than it is.",
+    ],
+    solution: [
+      "A **motion-forward homepage** carries the energy and signals the scale, so the first impression is the event itself rather than a list of its parts.",
+      "Underneath that, a content architecture built to hold dozens of events and sub-brands, so the depth is there for anyone looking for it without the front page having to carry all of it at once.",
+    ],
     title: "Riviera",
     logoText: "RIVIERA",
     logoUrl: "/projects/riviera-logo.webp",
@@ -1213,7 +1336,11 @@ export const PROJECTS: Project[] = [
     category: "Product Design",
     year: "2026",
     cover: "/projects/cpgrams/cover.webp",
-    preview: { kind: "website", href: "https://pgportal.gov.in/Signin", image: "/projects/cpgrams/cover.webp" },
+    preview: {
+      kind: "website",
+      href: "https://pgportal.gov.in/Signin",
+      image: "/projects/cpgrams/cover.webp",
+    },
     cta: "Visit Live Chatbot",
     role: "Product Design · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
@@ -1223,7 +1350,10 @@ export const PROJECTS: Project[] = [
       ["Client", "DARPG, Government of India"],
       ["Delivered with", "KPMG India"],
       ["Languages", "22 scheduled Indian languages"],
-      ["Scope", "Conversational architecture, voice UX, UI, mascot, design system"],
+      [
+        "Scope",
+        "Conversational architecture, voice UX, UI, mascot, design system",
+      ],
       ["Surfaces", "Web chatbot, mobile web"],
       ["Live at", "cpgramsaichatbot.com"],
     ],
@@ -1283,8 +1413,17 @@ export const PROJECTS: Project[] = [
           {
             kind: "flow",
             steps: [
-              { label: "Open the portal", sub: ["Desktop-first", "English or Hindi"] },
-              { label: "Register", sub: ["Mobile number or email", "Before anything can be described"] },
+              {
+                label: "Open the portal",
+                sub: ["Desktop-first", "English or Hindi"],
+              },
+              {
+                label: "Register",
+                sub: [
+                  "Mobile number or email",
+                  "Before anything can be described",
+                ],
+              },
               {
                 label: "Pick the ministry",
                 decision: true,
@@ -1295,12 +1434,24 @@ export const PROJECTS: Project[] = [
                 decision: true,
                 sub: ["The portal's taxonomy", "Not the citizen's words"],
               },
-              { label: "Describe the grievance", sub: ["In writing", "In formal language"] },
-              { label: "Attach documents", sub: ["Which ones is never said up front"] },
-              { label: "Submit", sub: ["Clear a CAPTCHA", "Beat the session timeout"] },
+              {
+                label: "Describe the grievance",
+                sub: ["In writing", "In formal language"],
+              },
+              {
+                label: "Attach documents",
+                sub: ["Which ones is never said up front"],
+              },
+              {
+                label: "Submit",
+                sub: ["Clear a CAPTCHA", "Beat the session timeout"],
+              },
               {
                 label: "Receive a registration number",
-                sub: ["Track the status with it", "An officer must reply in 30 to 60 days"],
+                sub: [
+                  "Track the status with it",
+                  "An officer must reply in 30 to 60 days",
+                ],
               },
             ],
             caption:
@@ -1310,8 +1461,14 @@ export const PROJECTS: Project[] = [
             kind: "stats",
             items: [
               { value: "20L+", label: "grievances filed every year" },
-              { value: "90+", label: "central ministries and departments covered" },
-              { value: "30-60", label: "days an officer has to respond, by mandate" },
+              {
+                value: "90+",
+                label: "central ministries and departments covered",
+              },
+              {
+                value: "30-60",
+                label: "days an officer has to respond, by mandate",
+              },
             ],
           },
           {
@@ -1338,9 +1495,24 @@ export const PROJECTS: Project[] = [
           {
             kind: "bars",
             items: [
-              { label: "Abandon the grievance form partway through", value: 60, display: "60%", tone: "bad" },
-              { label: "Find government websites confusing to navigate", value: 52, display: "52%", tone: "bad" },
-              { label: "Of rural India uses the internet regularly", value: 31, display: "31%", tone: "bad" },
+              {
+                label: "Abandon the grievance form partway through",
+                value: 60,
+                display: "60%",
+                tone: "bad",
+              },
+              {
+                label: "Find government websites confusing to navigate",
+                value: 52,
+                display: "52%",
+                tone: "bad",
+              },
+              {
+                label: "Of rural India uses the internet regularly",
+                value: 31,
+                display: "31%",
+                tone: "bad",
+              },
             ],
             caption:
               "**Six in ten people who start a grievance never finish it**, so the state never hears from them at all.",
@@ -1553,10 +1725,26 @@ export const PROJECTS: Project[] = [
             kind: "gallery",
             compact: true,
             items: [
-              { src: "/projects/cpgrams/mascot-v1.webp", label: "Direction 1", alt: "An early mascot exploration for CPGRAMS." },
-              { src: "/projects/cpgrams/mascot-v2.webp", label: "Direction 2", alt: "A second early mascot exploration for CPGRAMS." },
-              { src: "/projects/cpgrams/mascot-v3.webp", label: "Direction 3", alt: "A third early mascot exploration for CPGRAMS." },
-              { src: "/projects/cpgrams/mascot-v4.webp", label: "Direction 4", alt: "A fourth early mascot exploration for CPGRAMS." },
+              {
+                src: "/projects/cpgrams/mascot-v1.webp",
+                label: "Direction 1",
+                alt: "An early mascot exploration for CPGRAMS.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-v2.webp",
+                label: "Direction 2",
+                alt: "A second early mascot exploration for CPGRAMS.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-v3.webp",
+                label: "Direction 3",
+                alt: "A third early mascot exploration for CPGRAMS.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-v4.webp",
+                label: "Direction 4",
+                alt: "A fourth early mascot exploration for CPGRAMS.",
+              },
             ],
             caption:
               "Four directions before she settled. The test each had to pass: does a first-time filer read her as **staff who works here**, or as a brand character?",
@@ -1565,13 +1753,41 @@ export const PROJECTS: Project[] = [
             kind: "gallery",
             compact: true,
             items: [
-              { src: "/projects/cpgrams/mascot-a.webp", label: "Greeting", alt: "Samadhan Didi in a greeting pose." },
-              { src: "/projects/cpgrams/mascot-b.webp", label: "Explaining", alt: "Samadhan Didi in an explaining pose." },
-              { src: "/projects/cpgrams/mascot-c.webp", label: "Pointing", alt: "Samadhan Didi pointing at an interface control." },
-              { src: "/projects/cpgrams/mascot-d.webp", label: "Listening", alt: "Samadhan Didi in a listening pose." },
-              { src: "/projects/cpgrams/mascot-e.webp", label: "Reassuring", alt: "Samadhan Didi in a reassuring pose." },
-              { src: "/projects/cpgrams/mascot-f.webp", label: "Confirming", alt: "Samadhan Didi in a confirming pose." },
-              { src: "/projects/cpgrams/mascot-g.webp", label: "Closing", alt: "Samadhan Didi in a closing pose." },
+              {
+                src: "/projects/cpgrams/mascot-a.webp",
+                label: "Greeting",
+                alt: "Samadhan Didi in a greeting pose.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-b.webp",
+                label: "Explaining",
+                alt: "Samadhan Didi in an explaining pose.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-c.webp",
+                label: "Pointing",
+                alt: "Samadhan Didi pointing at an interface control.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-d.webp",
+                label: "Listening",
+                alt: "Samadhan Didi in a listening pose.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-e.webp",
+                label: "Reassuring",
+                alt: "Samadhan Didi in a reassuring pose.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-f.webp",
+                label: "Confirming",
+                alt: "Samadhan Didi in a confirming pose.",
+              },
+              {
+                src: "/projects/cpgrams/mascot-g.webp",
+                label: "Closing",
+                alt: "Samadhan Didi in a closing pose.",
+              },
             ],
             caption:
               "The shipped set, built as **states rather than one illustration**. A guide holding a single expression through a complaint about a missing pension reads as indifferent.",
@@ -1591,11 +1807,31 @@ export const PROJECTS: Project[] = [
           {
             kind: "grid",
             items: [
-              { src: "/projects/cpgrams/demo-01.webp", label: "01 Arrive", alt: "The CPGRAMS chatbot opening screen with a welcome message and the option to speak or type." },
-              { src: "/projects/cpgrams/demo-02.webp", label: "02 Meet the guide", alt: "Samadhan Didi introduced at full height beside the CPGRAMS chatbot interface." },
-              { src: "/projects/cpgrams/demo-03.webp", label: "03 Spotlight", alt: "The CPGRAMS chatbot with the interface dimmed and a single control spotlit during the tutorial." },
-              { src: "/projects/cpgrams/demo-04.webp", label: "04 The microphone", alt: "The tutorial spotlighting the microphone with Samadhan Didi explaining to press it and speak in a preferred language." },
-              { src: "/projects/cpgrams/demo-05.webp", label: "05 Hand over", alt: "The final tutorial screen of the CPGRAMS chatbot with a skip tutorial control visible." },
+              {
+                src: "/projects/cpgrams/demo-01.webp",
+                label: "01 Arrive",
+                alt: "The CPGRAMS chatbot opening screen with a welcome message and the option to speak or type.",
+              },
+              {
+                src: "/projects/cpgrams/demo-02.webp",
+                label: "02 Meet the guide",
+                alt: "Samadhan Didi introduced at full height beside the CPGRAMS chatbot interface.",
+              },
+              {
+                src: "/projects/cpgrams/demo-03.webp",
+                label: "03 Spotlight",
+                alt: "The CPGRAMS chatbot with the interface dimmed and a single control spotlit during the tutorial.",
+              },
+              {
+                src: "/projects/cpgrams/demo-04.webp",
+                label: "04 The microphone",
+                alt: "The tutorial spotlighting the microphone with Samadhan Didi explaining to press it and speak in a preferred language.",
+              },
+              {
+                src: "/projects/cpgrams/demo-05.webp",
+                label: "05 Hand over",
+                alt: "The final tutorial screen of the CPGRAMS chatbot with a skip tutorial control visible.",
+              },
             ],
           },
           {
@@ -1608,11 +1844,31 @@ export const PROJECTS: Project[] = [
           {
             kind: "gallery",
             items: [
-              { src: "/projects/cpgrams/m-demo-1.webp", label: "Open", alt: "The CPGRAMS chatbot onboarding on a phone, opening state." },
-              { src: "/projects/cpgrams/m-demo-2.webp", label: "Meet", alt: "Samadhan Didi introduced on a phone screen." },
-              { src: "/projects/cpgrams/m-demo-3.webp", label: "Spotlight", alt: "The phone tutorial dimming the screen around one control." },
-              { src: "/projects/cpgrams/m-demo-4.webp", label: "Microphone", alt: "The phone tutorial spotlighting the microphone button." },
-              { src: "/projects/cpgrams/m-demo-5.webp", label: "Hand over", alt: "The final phone tutorial screen with a skip control." },
+              {
+                src: "/projects/cpgrams/m-demo-1.webp",
+                label: "Open",
+                alt: "The CPGRAMS chatbot onboarding on a phone, opening state.",
+              },
+              {
+                src: "/projects/cpgrams/m-demo-2.webp",
+                label: "Meet",
+                alt: "Samadhan Didi introduced on a phone screen.",
+              },
+              {
+                src: "/projects/cpgrams/m-demo-3.webp",
+                label: "Spotlight",
+                alt: "The phone tutorial dimming the screen around one control.",
+              },
+              {
+                src: "/projects/cpgrams/m-demo-4.webp",
+                label: "Microphone",
+                alt: "The phone tutorial spotlighting the microphone button.",
+              },
+              {
+                src: "/projects/cpgrams/m-demo-5.webp",
+                label: "Hand over",
+                alt: "The final phone tutorial screen with a skip control.",
+              },
             ],
           },
           {
@@ -1636,8 +1892,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/voice-01.webp", label: "01 Rest", alt: "The CPGRAMS voice flow resting state with a large central microphone control." },
-              { src: "/projects/cpgrams/voice-02.webp", label: "02 Press to speak", alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone." },
+              {
+                src: "/projects/cpgrams/voice-01.webp",
+                label: "01 Rest",
+                alt: "The CPGRAMS voice flow resting state with a large central microphone control.",
+              },
+              {
+                src: "/projects/cpgrams/voice-02.webp",
+                label: "02 Press to speak",
+                alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone.",
+              },
             ],
             body: [
               "**Entry.** The microphone holds the centre and the weight: no language picker, no category dropdown, since both demand a decision before you have said anything. The interface opens in English and waits, rather than asking who you are first. A single **press starts recording**, because hold-to-record fails for **tremor and arthritis** in the 60-plus group that files the most grievances here.",
@@ -1646,8 +1910,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/voice-03.webp", label: "03 Listening", alt: "The CPGRAMS voice flow recording with a live waveform responding to speech." },
-              { src: "/projects/cpgrams/voice-04.webp", label: "04 Audio kept", alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player." },
+              {
+                src: "/projects/cpgrams/voice-03.webp",
+                label: "03 Listening",
+                alt: "The CPGRAMS voice flow recording with a live waveform responding to speech.",
+              },
+              {
+                src: "/projects/cpgrams/voice-04.webp",
+                label: "04 Audio kept",
+                alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player.",
+              },
             ],
             body: [
               "**Capture.** A **live waveform** proves the system is listening, and it is placed where the person is already looking, on the control they just pressed. Without that feedback an unsure speaker stops mid-sentence to check. The audio then **stays in the thread** rather than being discarded, since it is the one artefact here the software cannot have got wrong.",
@@ -1656,8 +1928,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/voice-05.webp", label: "05 Transcribed", alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio." },
-              { src: "/projects/cpgrams/voice-06.webp", label: "06 Language detected", alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface." },
+              {
+                src: "/projects/cpgrams/voice-05.webp",
+                label: "05 Transcribed",
+                alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio.",
+              },
+              {
+                src: "/projects/cpgrams/voice-06.webp",
+                label: "06 Language detected",
+                alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface.",
+              },
             ],
             body: [
               "**Transcription, then language.** Speech appears as text **in real time**, beside the audio it came from, which makes this the **first point of error recovery**: catching a misheard place name here costs nothing next to catching it after routing. Corrections go back through either input, voice or keyboard, so fixing a mistake never demands the skill the person came without. Language is **detected from what was said, not selected from a list**, and the whole interface switches to it. Speak Tamil and the product becomes Tamil. A picker would have been a reading test handed to people who may not read.",
@@ -1666,8 +1946,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/voice-07.webp", label: "07 Answered aloud", alt: "Samadhan Didi responding with both written text and a voice response player." },
-              { src: "/projects/cpgrams/voice-08.webp", label: "08 One question", alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance." },
+              {
+                src: "/projects/cpgrams/voice-07.webp",
+                label: "07 Answered aloud",
+                alt: "Samadhan Didi responding with both written text and a voice response player.",
+              },
+              {
+                src: "/projects/cpgrams/voice-08.webp",
+                label: "08 One question",
+                alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance.",
+              },
             ],
             body: [
               "**Understanding.** Every reply is **playable as well as readable**, since voice in with text out abandons the user at the half carrying the answer. Behind the reply the system is working out the nature of the problem, the department that owns it and the category it files under. What it still cannot infer arrives as **one question at a time**, in the conversation rather than in a second form, so working memory stays free for the answer instead of the interface.",
@@ -1676,8 +1964,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/voice-09.webp", label: "09 Auto-filled", alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint." },
-              { src: "/projects/cpgrams/voice-10.webp", label: "10 Review", alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control." },
+              {
+                src: "/projects/cpgrams/voice-09.webp",
+                label: "09 Auto-filled",
+                alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint.",
+              },
+              {
+                src: "/projects/cpgrams/voice-10.webp",
+                label: "10 Review",
+                alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control.",
+              },
             ],
             body: [
               "**Summary.** **Ministry, category, jurisdiction and urgency** come out of what was said, and documents are asked for only when the grievance actually needs one, at the moment it is needed. Everything then returns as a **short summary** the citizen checks before anything is sent: the interpretation, in their own language, in one card. **Auto-filing a legal document unseen** is a liability with the citizen's name on it, so this is the **consent surface** and the flow's real destination.",
@@ -1686,8 +1982,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/voice-11.webp", label: "11 Escalate", alt: "The CPGRAMS review card with a link to register with the Central Authority." },
-              { src: "/projects/cpgrams/voice-12.webp", label: "12 Filed", alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier." },
+              {
+                src: "/projects/cpgrams/voice-11.webp",
+                label: "11 Escalate",
+                alt: "The CPGRAMS review card with a link to register with the Central Authority.",
+              },
+              {
+                src: "/projects/cpgrams/voice-12.webp",
+                label: "12 Filed",
+                alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier.",
+              },
             ],
             body: [
               "**Submission.** Confirming sends the structured grievance straight to the department that owns it, with no portal navigation in between. When routing is wrong, **escalation to the Central Authority is one tap**: the system is allowed to be wrong, not allowed to be wrong **with no exit**. It closes on the **same registration number** the portal issues, which is also how the citizen tracks it afterwards, carrying the same 30 to 60 day clock.",
@@ -1696,12 +2000,36 @@ export const PROJECTS: Project[] = [
           {
             kind: "gallery",
             items: [
-              { src: "/projects/cpgrams/m-voice-1.webp", label: "Rest", alt: "CPGRAMS voice flow resting state on a phone." },
-              { src: "/projects/cpgrams/m-voice-3.webp", label: "Listening", alt: "CPGRAMS voice recording on a phone with a live waveform." },
-              { src: "/projects/cpgrams/m-voice-5.webp", label: "Transcribed", alt: "CPGRAMS phone screen showing transcribed speech." },
-              { src: "/projects/cpgrams/m-voice-7.webp", label: "Answered", alt: "CPGRAMS phone screen with a spoken response player." },
-              { src: "/projects/cpgrams/m-voice-9.webp", label: "Review", alt: "CPGRAMS review screen on a phone before submission." },
-              { src: "/projects/cpgrams/m-voice-10.webp", label: "Filed", alt: "CPGRAMS phone confirmation screen with a registration identifier." },
+              {
+                src: "/projects/cpgrams/m-voice-1.webp",
+                label: "Rest",
+                alt: "CPGRAMS voice flow resting state on a phone.",
+              },
+              {
+                src: "/projects/cpgrams/m-voice-3.webp",
+                label: "Listening",
+                alt: "CPGRAMS voice recording on a phone with a live waveform.",
+              },
+              {
+                src: "/projects/cpgrams/m-voice-5.webp",
+                label: "Transcribed",
+                alt: "CPGRAMS phone screen showing transcribed speech.",
+              },
+              {
+                src: "/projects/cpgrams/m-voice-7.webp",
+                label: "Answered",
+                alt: "CPGRAMS phone screen with a spoken response player.",
+              },
+              {
+                src: "/projects/cpgrams/m-voice-9.webp",
+                label: "Review",
+                alt: "CPGRAMS review screen on a phone before submission.",
+              },
+              {
+                src: "/projects/cpgrams/m-voice-10.webp",
+                label: "Filed",
+                alt: "CPGRAMS phone confirmation screen with a registration identifier.",
+              },
             ],
           },
           {
@@ -1725,8 +2053,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-01.webp", label: "01 Open", alt: "The CPGRAMS text flow opening screen with the message input ready." },
-              { src: "/projects/cpgrams/text-02.webp", label: "02 Describe", alt: "A typed grievance in the CPGRAMS chat written in plain conversational language." },
+              {
+                src: "/projects/cpgrams/text-01.webp",
+                label: "01 Open",
+                alt: "The CPGRAMS text flow opening screen with the message input ready.",
+              },
+              {
+                src: "/projects/cpgrams/text-02.webp",
+                label: "02 Describe",
+                alt: "A typed grievance in the CPGRAMS chat written in plain conversational language.",
+              },
             ],
             body: [
               "It opens with the **input focused and nothing else required**. The portal's first question was which of ninety ministries owns your problem. This one's is what happened, and everything the form demanded up front is **extracted from that answer**.",
@@ -1735,8 +2071,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-03.webp", label: "03 Acknowledged", alt: "The CPGRAMS chatbot restating the citizen's grievance back to them." },
-              { src: "/projects/cpgrams/text-04.webp", label: "04 One question", alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow." },
+              {
+                src: "/projects/cpgrams/text-03.webp",
+                label: "03 Acknowledged",
+                alt: "The CPGRAMS chatbot restating the citizen's grievance back to them.",
+              },
+              {
+                src: "/projects/cpgrams/text-04.webp",
+                label: "04 One question",
+                alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow.",
+              },
             ],
             body: [
               "The reply **restates the problem before acting on it**, the cheapest **error recovery** there is and a signal of comprehension rather than keyword matching. Missing details arrive as **sequential questions**. The fifteen fields still get filled, they just never appear as a form.",
@@ -1745,8 +2089,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-05.webp", label: "05 Options", alt: "The CPGRAMS chatbot offering selectable options for a closed-set question." },
-              { src: "/projects/cpgrams/text-06.webp", label: "06 Documents", alt: "The CPGRAMS chatbot requesting a supporting document within the conversation." },
+              {
+                src: "/projects/cpgrams/text-05.webp",
+                label: "05 Options",
+                alt: "The CPGRAMS chatbot offering selectable options for a closed-set question.",
+              },
+              {
+                src: "/projects/cpgrams/text-06.webp",
+                label: "06 Documents",
+                alt: "The CPGRAMS chatbot requesting a supporting document within the conversation.",
+              },
             ],
             body: [
               "A **closed set gets options**, not an open field. Typing an answer the system already holds the list of is a spelling test with a routing failure attached. Documents are requested **in the conversation, at the point they are needed**, and only when the grievance genuinely needs one. A checklist of paperwork on screen one is a reason to leave.",
@@ -1755,8 +2107,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-07.webp", label: "07 History", alt: "The CPGRAMS chat with recent conversations listed in the left sidebar." },
-              { src: "/projects/cpgrams/text-08.webp", label: "08 Classified", alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance." },
+              {
+                src: "/projects/cpgrams/text-07.webp",
+                label: "07 History",
+                alt: "The CPGRAMS chat with recent conversations listed in the left sidebar.",
+              },
+              {
+                src: "/projects/cpgrams/text-08.webp",
+                label: "08 Classified",
+                alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance.",
+              },
             ],
             body: [
               "Conversations **persist in the left rail**, because on 2G a **session timeout** is routine and a half-written grievance lost is usually that grievance lost for good. **Classification happens quietly** in the background: the highest-friction field on the original form, resolved without being asked.",
@@ -1765,8 +2125,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-09.webp", label: "09 Jurisdiction", alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance." },
-              { src: "/projects/cpgrams/text-10.webp", label: "10 Assembled", alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details." },
+              {
+                src: "/projects/cpgrams/text-09.webp",
+                label: "09 Jurisdiction",
+                alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance.",
+              },
+              {
+                src: "/projects/cpgrams/text-10.webp",
+                label: "10 Assembled",
+                alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details.",
+              },
             ],
             body: [
               "**Jurisdiction** resolves the same way, from what was described rather than a dropdown of states. Then everything scattered across the conversation returns as the **single document that will be filed**.",
@@ -1775,8 +2143,16 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-11.webp", label: "11 Review", alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance." },
-              { src: "/projects/cpgrams/text-12.webp", label: "12 Submit", alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link." },
+              {
+                src: "/projects/cpgrams/text-11.webp",
+                label: "11 Review",
+                alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance.",
+              },
+              {
+                src: "/projects/cpgrams/text-12.webp",
+                label: "12 Submit",
+                alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link.",
+              },
             ],
             body: [
               "The typed flow ends at the **same consent surface**. One architecture, two inputs: the review screen is not a voice feature, it is where **software stops acting on somebody's behalf without showing what it decided**. Submit, start again, or **escalate**. Three exits, none of them the fifteen fields again.",
@@ -1785,7 +2161,11 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             items: [
-              { src: "/projects/cpgrams/text-13.webp", label: "13 Filed", alt: "The CPGRAMS confirmation screen with a grievance registration identifier." },
+              {
+                src: "/projects/cpgrams/text-13.webp",
+                label: "13 Filed",
+                alt: "The CPGRAMS confirmation screen with a grievance registration identifier.",
+              },
             ],
             body: [
               "The same **registration number**, the same **30 to 60 day** obligation, the same escalation path. Only the qualification required to reach it changed.",
@@ -1794,12 +2174,36 @@ export const PROJECTS: Project[] = [
           {
             kind: "gallery",
             items: [
-              { src: "/projects/cpgrams/m-text-1.webp", label: "Open", alt: "CPGRAMS typed flow opening on a phone." },
-              { src: "/projects/cpgrams/m-text-3.webp", label: "Describe", alt: "A typed grievance on a phone screen." },
-              { src: "/projects/cpgrams/m-text-5.webp", label: "Follow up", alt: "The CPGRAMS chatbot asking a follow-up question on a phone." },
-              { src: "/projects/cpgrams/m-text-6.webp", label: "Assemble", alt: "The assembled grievance on a phone screen." },
-              { src: "/projects/cpgrams/m-text-7.webp", label: "Review", alt: "The CPGRAMS review card on a phone." },
-              { src: "/projects/cpgrams/m-text-8.webp", label: "Filed", alt: "The CPGRAMS confirmation screen on a phone." },
+              {
+                src: "/projects/cpgrams/m-text-1.webp",
+                label: "Open",
+                alt: "CPGRAMS typed flow opening on a phone.",
+              },
+              {
+                src: "/projects/cpgrams/m-text-3.webp",
+                label: "Describe",
+                alt: "A typed grievance on a phone screen.",
+              },
+              {
+                src: "/projects/cpgrams/m-text-5.webp",
+                label: "Follow up",
+                alt: "The CPGRAMS chatbot asking a follow-up question on a phone.",
+              },
+              {
+                src: "/projects/cpgrams/m-text-6.webp",
+                label: "Assemble",
+                alt: "The assembled grievance on a phone screen.",
+              },
+              {
+                src: "/projects/cpgrams/m-text-7.webp",
+                label: "Review",
+                alt: "The CPGRAMS review card on a phone.",
+              },
+              {
+                src: "/projects/cpgrams/m-text-8.webp",
+                label: "Filed",
+                alt: "The CPGRAMS confirmation screen on a phone.",
+              },
             ],
           },
           {
@@ -1869,12 +2273,28 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              { name: "Saffron", hex: "#FE6700", use: "Primary action and government identity" },
-              { name: "Deep", hex: "#9F2D00", use: "Pressed states and emphasis" },
-              { name: "Warm", hex: "#FFC196", use: "Surfaces and the citizen's own bubbles" },
+              {
+                name: "Saffron",
+                hex: "#FE6700",
+                use: "Primary action and government identity",
+              },
+              {
+                name: "Deep",
+                hex: "#9F2D00",
+                use: "Pressed states and emphasis",
+              },
+              {
+                name: "Warm",
+                hex: "#FFC196",
+                use: "Surfaces and the citizen's own bubbles",
+              },
               { name: "Cream", hex: "#FFFBEF", use: "The chat canvas itself" },
               { name: "Ink", hex: "#333333", use: "Body copy" },
-              { name: "Slate", hex: "#4A505B", use: "Secondary text and labels" },
+              {
+                name: "Slate",
+                hex: "#4A505B",
+                use: "Secondary text and labels",
+              },
             ],
             caption:
               "Only one of the six is loud. **Saffron carries every primary action**, which is what lets a user who cannot read the label still find the button.",
@@ -1956,7 +2376,10 @@ export const PROJECTS: Project[] = [
                 label: "What it requires now",
                 tone: "after",
                 note: "Everything else moved into the software that already knew it.",
-                steps: ["Being able to speak", "Checking the system got it right"],
+                steps: [
+                  "Being able to speak",
+                  "Checking the system got it right",
+                ],
               },
             ],
             caption:
@@ -2003,11 +2426,13 @@ export const PROJECTS: Project[] = [
             kind: "lessons",
             items: [
               {
-                title: "I started out treating voice as a feature. It was the whole product.",
+                title:
+                  "I started out treating voice as a feature. It was the whole product.",
                 body: "For a while I designed it as one of two input options. Then I tried removing it on paper, and what was left was the form again, just friendlier. If a quarter of your users cannot read or write, everything else you do is decoration. Once I accepted that, the rest of the decisions got easier: **detect the language instead of asking for it, speak every reply, never put a dropdown in the way**.",
               },
               {
-                title: "Letting the AI do everything quietly would have been the wrong kind of easy.",
+                title:
+                  "Letting the AI do everything quietly would have been the wrong kind of easy.",
                 body: "My first instinct was to hide the whole process, since the form was the problem. But this is a **legal complaint with somebody's name on it**. If the system picked the wrong department and nobody saw it, that is worse than the form ever was. So the summary screen exists, and it is the plainest thing in the design. It is also the part I would defend first.",
               },
               {
@@ -2034,7 +2459,11 @@ export const PROJECTS: Project[] = [
     category: "Brand & Product Design",
     year: "2025",
     cover: "/projects/layover-cover.webp",
-    preview: { kind: "website", href: "https://mylayover.in/", image: "/projects/layover-cover.webp" },
+    preview: {
+      kind: "website",
+      href: "https://mylayover.in/",
+      image: "/projects/layover-cover.webp",
+    },
     cta: "Visit Website",
     /*
       The product's own gold. 7.32:1 on the dark canvas but only 2.28:1 on
@@ -2067,7 +2496,10 @@ export const PROJECTS: Project[] = [
     extraFacts: [
       ["Timeline", "2024 to 2026"],
       ["Scope", "Research, IA, user flows, UX, UI, brand, design system"],
-      ["Surfaces", "Marketing site, web app, mobile app, vendor portal, admin portal"],
+      [
+        "Surfaces",
+        "Marketing site, web app, mobile app, vendor portal, admin portal",
+      ],
       ["Airports", "Delhi IGI, Mumbai CSIA, Bengaluru KIA, Hyderabad RGIA"],
       ["Outcome", "Funded; pilot talks underway with Indian airports"],
     ],
@@ -2119,7 +2551,10 @@ export const PROJECTS: Project[] = [
             kind: "stats",
             items: [
               { value: "4", label: "product surfaces designed end to end" },
-              { value: "6", label: "full iteration passes on the marketing site" },
+              {
+                value: "6",
+                label: "full iteration passes on the marketing site",
+              },
               { value: "13", label: "versions of the sign-up screen alone" },
             ],
           },
@@ -2155,9 +2590,25 @@ export const PROJECTS: Project[] = [
           {
             kind: "bars",
             items: [
-              { label: "Global airport lounge market, growing 15% a year", value: 100, display: "$5.71B", tone: "good" },
-              { label: "Airports worldwide, almost none connected end to end", value: 62, display: "10,000+", tone: "bad" },
-              { label: "Play Store rating of the incumbent that owns the partnerships", value: 40, display: "2 stars", tone: "bad" },
+              {
+                label: "Global airport lounge market, growing 15% a year",
+                value: 100,
+                display: "$5.71B",
+                tone: "good",
+              },
+              {
+                label: "Airports worldwide, almost none connected end to end",
+                value: 62,
+                display: "10,000+",
+                tone: "bad",
+              },
+              {
+                label:
+                  "Play Store rating of the incumbent that owns the partnerships",
+                value: 40,
+                display: "2 stars",
+                tone: "bad",
+              },
             ],
             caption:
               "The last number is the opening. **The category is not short on supply**: the dominant player already holds the bank, airline and lounge deals. What it does not have is a product anyone wants to open twice.",
@@ -2193,14 +2644,27 @@ export const PROJECTS: Project[] = [
           {
             kind: "flow",
             steps: [
-              { label: "Land", sub: ["Airport or PNR", "No account asked for"] },
+              {
+                label: "Land",
+                sub: ["Airport or PNR", "No account asked for"],
+              },
               { label: "Terminal", sub: ["Sets everything after it"] },
-              { label: "Outlets", sub: ["Veg or non-veg", "Pier and prep time"] },
+              {
+                label: "Outlets",
+                sub: ["Veg or non-veg", "Pier and prep time"],
+              },
               { label: "Menu", sub: ["Live availability"] },
               { label: "Cart", sub: ["Edit before committing"] },
-              { label: "Account", decision: true, sub: ["Requested here, not earlier"] },
+              {
+                label: "Account",
+                decision: true,
+                sub: ["Requested here, not earlier"],
+              },
               { label: "Pay", sub: ["Single confirm"] },
-              { label: "Track", sub: ["Ready in 20 minutes", "Directions to the pier"] },
+              {
+                label: "Track",
+                sub: ["Ready in 20 minutes", "Directions to the pier"],
+              },
             ],
             caption:
               "**Login moved from the front door to the checkout.** Nobody in an airport wants an account, they want a sandwich. Everything before Cart is browsable by a stranger, and the one hard gate sits where money is involved.",
@@ -2242,12 +2706,36 @@ export const PROJECTS: Project[] = [
           {
             kind: "grid",
             items: [
-              { src: "/projects/layover/web-landing.webp", label: "01 Landing", alt: "The full LayOver landing page with an airport and PNR entry field in the hero." },
-              { src: "/projects/layover/web-eateries.webp", label: "02 Outlet directory", alt: "LayOver's web outlet directory showing terminal restaurants with Order now and Get Directions actions." },
-              { src: "/projects/layover/web-menu.webp", label: "03 Menu", alt: "A restaurant menu page on LayOver's website with dish cards and prices." },
-              { src: "/projects/layover/web-about.webp", label: "04 About", alt: "LayOver's About section describing the product." },
-              { src: "/projects/layover/web-contact.webp", label: "05 Get in touch", alt: "LayOver's contact and footer section with a message form." },
-              { src: "/projects/layover/order.webp", label: "06 Order tracking", alt: "LayOver's order-confirmed screen with a twenty-minute prep timer and a map." },
+              {
+                src: "/projects/layover/web-landing.webp",
+                label: "01 Landing",
+                alt: "The full LayOver landing page with an airport and PNR entry field in the hero.",
+              },
+              {
+                src: "/projects/layover/web-eateries.webp",
+                label: "02 Outlet directory",
+                alt: "LayOver's web outlet directory showing terminal restaurants with Order now and Get Directions actions.",
+              },
+              {
+                src: "/projects/layover/web-menu.webp",
+                label: "03 Menu",
+                alt: "A restaurant menu page on LayOver's website with dish cards and prices.",
+              },
+              {
+                src: "/projects/layover/web-about.webp",
+                label: "04 About",
+                alt: "LayOver's About section describing the product.",
+              },
+              {
+                src: "/projects/layover/web-contact.webp",
+                label: "05 Get in touch",
+                alt: "LayOver's contact and footer section with a message form.",
+              },
+              {
+                src: "/projects/layover/order.webp",
+                label: "06 Order tracking",
+                alt: "LayOver's order-confirmed screen with a twenty-minute prep timer and a map.",
+              },
             ],
           },
           {
@@ -2261,8 +2749,16 @@ export const PROJECTS: Project[] = [
             kind: "gallery",
             compact: true,
             items: [
-              { src: "/projects/layover/web-mobile-home.webp", label: "Home", alt: "LayOver's website on a phone showing the dark home layout with outlet cards." },
-              { src: "/projects/layover/web-mobile-order.webp", label: "Order", alt: "LayOver's website order flow on a phone with the itemised order and prep timer." },
+              {
+                src: "/projects/layover/web-mobile-home.webp",
+                label: "Home",
+                alt: "LayOver's website on a phone showing the dark home layout with outlet cards.",
+              },
+              {
+                src: "/projects/layover/web-mobile-order.webp",
+                label: "Order",
+                alt: "LayOver's website order flow on a phone with the itemised order and prep timer.",
+              },
             ],
           },
         ],
@@ -2280,16 +2776,56 @@ export const PROJECTS: Project[] = [
           {
             kind: "gallery",
             items: [
-              { src: "/projects/layover/app-signup.webp", label: "01 Sign up", alt: "The LayOver app sign-up screen with phone number entry." },
-              { src: "/projects/layover/app-onboarding.webp", label: "02 Onboarding", alt: "LayOver app onboarding screen with an illustration and the line all your airport needs in one app." },
-              { src: "/projects/layover/app-location.webp", label: "03 Airport", alt: "The LayOver app airport selection screen listing Indian airports." },
-              { src: "/projects/layover/app-location-type.webp", label: "04 Terminal", alt: "The LayOver app terminal and travel type selection screen." },
-              { src: "/projects/layover/app-home.webp", label: "05 Outlets", alt: "The LayOver app home screen showing Departures Terminal 3 with outlet cards and prep times." },
-              { src: "/projects/layover/app-menu.webp", label: "06 Menu", alt: "A restaurant menu screen in the LayOver app with dish images and prices." },
-              { src: "/projects/layover/app-menu-option.webp", label: "07 Options", alt: "The LayOver app item customisation screen with size and add-on options." },
-              { src: "/projects/layover/app-added.webp", label: "08 Added", alt: "The LayOver app menu screen with an item added and the cart count updated." },
-              { src: "/projects/layover/app-cart.webp", label: "09 Cart", alt: "The LayOver app cart screen listing ordered items with quantities and totals." },
-              { src: "/projects/layover/app-cart-pay.webp", label: "10 Payment", alt: "The LayOver app cart with the to-pay dropdown showing totals, taxes and fees." },
+              {
+                src: "/projects/layover/app-signup.webp",
+                label: "01 Sign up",
+                alt: "The LayOver app sign-up screen with phone number entry.",
+              },
+              {
+                src: "/projects/layover/app-onboarding.webp",
+                label: "02 Onboarding",
+                alt: "LayOver app onboarding screen with an illustration and the line all your airport needs in one app.",
+              },
+              {
+                src: "/projects/layover/app-location.webp",
+                label: "03 Airport",
+                alt: "The LayOver app airport selection screen listing Indian airports.",
+              },
+              {
+                src: "/projects/layover/app-location-type.webp",
+                label: "04 Terminal",
+                alt: "The LayOver app terminal and travel type selection screen.",
+              },
+              {
+                src: "/projects/layover/app-home.webp",
+                label: "05 Outlets",
+                alt: "The LayOver app home screen showing Departures Terminal 3 with outlet cards and prep times.",
+              },
+              {
+                src: "/projects/layover/app-menu.webp",
+                label: "06 Menu",
+                alt: "A restaurant menu screen in the LayOver app with dish images and prices.",
+              },
+              {
+                src: "/projects/layover/app-menu-option.webp",
+                label: "07 Options",
+                alt: "The LayOver app item customisation screen with size and add-on options.",
+              },
+              {
+                src: "/projects/layover/app-added.webp",
+                label: "08 Added",
+                alt: "The LayOver app menu screen with an item added and the cart count updated.",
+              },
+              {
+                src: "/projects/layover/app-cart.webp",
+                label: "09 Cart",
+                alt: "The LayOver app cart screen listing ordered items with quantities and totals.",
+              },
+              {
+                src: "/projects/layover/app-cart-pay.webp",
+                label: "10 Payment",
+                alt: "The LayOver app cart with the to-pay dropdown showing totals, taxes and fees.",
+              },
             ],
           },
           {
@@ -2333,18 +2869,66 @@ export const PROJECTS: Project[] = [
           {
             kind: "grid",
             items: [
-              { src: "/projects/layover/vendor-dashboard.webp", label: "01 Order wall", alt: "LayOver's vendor dashboard with an incoming order card and a grid of order cards marked Ready or Delivered." },
-              { src: "/projects/layover/vendor-onboarding.webp", label: "02 Onboarding", alt: "The six-step LayOver vendor onboarding flow laid out left to right." },
-              { src: "/projects/layover/vendor-menu.webp", label: "03 Menu", alt: "LayOver's vendor menu management screen with food item cards and edit controls." },
-              { src: "/projects/layover/vendor-addedit-section.webp", label: "04 Add section", alt: "The add or edit section dialog in LayOver's vendor menu manager." },
-              { src: "/projects/layover/vendor-addedit-item.webp", label: "05 Add item", alt: "The add or edit item screen in LayOver's vendor portal with a dish photo and price." },
-              { src: "/projects/layover/vendor-empty.webp", label: "06 Empty state", alt: "The empty menu state in LayOver's vendor portal with an Add Your First Section button." },
-              { src: "/projects/layover/vendor-orders.webp", label: "07 Orders", alt: "LayOver's vendor orders screen listing past and current orders." },
-              { src: "/projects/layover/vendor-coupons.webp", label: "08 Coupons", alt: "LayOver's vendor coupons screen showing discount codes and QR codes." },
-              { src: "/projects/layover/vendor-analytics.webp", label: "09 Revenue", alt: "LayOver's vendor analytics screen with revenue charts and top selling items." },
-              { src: "/projects/layover/vendor-reviews.webp", label: "10 Reviews", alt: "LayOver's vendor reviews screen with customer reviews and reply controls." },
-              { src: "/projects/layover/vendor-settings.webp", label: "11 Settings", alt: "The LayOver vendor profile and settings flow including bank details and OTP verification." },
-              { src: "/projects/layover/vendor-login.webp", label: "12 Login", alt: "LayOver's vendor login screen beside a reset password screen." },
+              {
+                src: "/projects/layover/vendor-dashboard.webp",
+                label: "01 Order wall",
+                alt: "LayOver's vendor dashboard with an incoming order card and a grid of order cards marked Ready or Delivered.",
+              },
+              {
+                src: "/projects/layover/vendor-onboarding.webp",
+                label: "02 Onboarding",
+                alt: "The six-step LayOver vendor onboarding flow laid out left to right.",
+              },
+              {
+                src: "/projects/layover/vendor-menu.webp",
+                label: "03 Menu",
+                alt: "LayOver's vendor menu management screen with food item cards and edit controls.",
+              },
+              {
+                src: "/projects/layover/vendor-addedit-section.webp",
+                label: "04 Add section",
+                alt: "The add or edit section dialog in LayOver's vendor menu manager.",
+              },
+              {
+                src: "/projects/layover/vendor-addedit-item.webp",
+                label: "05 Add item",
+                alt: "The add or edit item screen in LayOver's vendor portal with a dish photo and price.",
+              },
+              {
+                src: "/projects/layover/vendor-empty.webp",
+                label: "06 Empty state",
+                alt: "The empty menu state in LayOver's vendor portal with an Add Your First Section button.",
+              },
+              {
+                src: "/projects/layover/vendor-orders.webp",
+                label: "07 Orders",
+                alt: "LayOver's vendor orders screen listing past and current orders.",
+              },
+              {
+                src: "/projects/layover/vendor-coupons.webp",
+                label: "08 Coupons",
+                alt: "LayOver's vendor coupons screen showing discount codes and QR codes.",
+              },
+              {
+                src: "/projects/layover/vendor-analytics.webp",
+                label: "09 Revenue",
+                alt: "LayOver's vendor analytics screen with revenue charts and top selling items.",
+              },
+              {
+                src: "/projects/layover/vendor-reviews.webp",
+                label: "10 Reviews",
+                alt: "LayOver's vendor reviews screen with customer reviews and reply controls.",
+              },
+              {
+                src: "/projects/layover/vendor-settings.webp",
+                label: "11 Settings",
+                alt: "The LayOver vendor profile and settings flow including bank details and OTP verification.",
+              },
+              {
+                src: "/projects/layover/vendor-login.webp",
+                label: "12 Login",
+                alt: "LayOver's vendor login screen beside a reset password screen.",
+              },
             ],
           },
           {
@@ -2358,7 +2942,11 @@ export const PROJECTS: Project[] = [
             kind: "gallery",
             compact: true,
             items: [
-              { src: "/projects/layover/vendor-mobile.webp", label: "Mobile portal", alt: "The LayOver vendor dashboard on a phone with a compact order list." },
+              {
+                src: "/projects/layover/vendor-mobile.webp",
+                label: "Mobile portal",
+                alt: "The LayOver vendor dashboard on a phone with a compact order list.",
+              },
             ],
           },
           {
@@ -2382,14 +2970,46 @@ export const PROJECTS: Project[] = [
           {
             kind: "grid",
             items: [
-              { src: "/projects/layover/admin-vendors.webp", label: "01 Vendors", alt: "LayOver's admin vendor management screen listing outlets with orders, revenue, rating and prep time." },
-              { src: "/projects/layover/admin-onboarding.webp", label: "02 Approval", alt: "LayOver's admin vendor onboarding screen with application details and approval controls." },
-              { src: "/projects/layover/admin-vendor-menu.webp", label: "03 Menu oversight", alt: "LayOver's admin view of a vendor's menu with item cards and availability." },
-              { src: "/projects/layover/admin-menu.webp", label: "04 Menu tools", alt: "LayOver's admin menu management screen with sections and food item cards." },
-              { src: "/projects/layover/admin-addedit-section.webp", label: "05 Add section", alt: "The admin add or edit menu section screen in LayOver's admin portal." },
-              { src: "/projects/layover/admin-addedit-item.webp", label: "06 Add item", alt: "The admin add or edit item screen in LayOver's admin portal." },
-              { src: "/projects/layover/admin-orders.webp", label: "07 Orders", alt: "LayOver's admin orders screen listing orders across all vendors." },
-              { src: "/projects/layover/admin-users.webp", label: "08 Users", alt: "LayOver's admin user management screen with a table of users." },
+              {
+                src: "/projects/layover/admin-vendors.webp",
+                label: "01 Vendors",
+                alt: "LayOver's admin vendor management screen listing outlets with orders, revenue, rating and prep time.",
+              },
+              {
+                src: "/projects/layover/admin-onboarding.webp",
+                label: "02 Approval",
+                alt: "LayOver's admin vendor onboarding screen with application details and approval controls.",
+              },
+              {
+                src: "/projects/layover/admin-vendor-menu.webp",
+                label: "03 Menu oversight",
+                alt: "LayOver's admin view of a vendor's menu with item cards and availability.",
+              },
+              {
+                src: "/projects/layover/admin-menu.webp",
+                label: "04 Menu tools",
+                alt: "LayOver's admin menu management screen with sections and food item cards.",
+              },
+              {
+                src: "/projects/layover/admin-addedit-section.webp",
+                label: "05 Add section",
+                alt: "The admin add or edit menu section screen in LayOver's admin portal.",
+              },
+              {
+                src: "/projects/layover/admin-addedit-item.webp",
+                label: "06 Add item",
+                alt: "The admin add or edit item screen in LayOver's admin portal.",
+              },
+              {
+                src: "/projects/layover/admin-orders.webp",
+                label: "07 Orders",
+                alt: "LayOver's admin orders screen listing orders across all vendors.",
+              },
+              {
+                src: "/projects/layover/admin-users.webp",
+                label: "08 Users",
+                alt: "LayOver's admin user management screen with a table of users.",
+              },
             ],
           },
           {
@@ -2476,12 +3096,32 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              { name: "Gold", hex: "#C9A769", use: "Accents, active states, the brand's voice" },
-              { name: "Bronze", hex: "#7C6A46", use: "Primary brand, borders and fills" },
-              { name: "Gold Light", hex: "#FDCE77", use: "Emphasis on dark, badges" },
+              {
+                name: "Gold",
+                hex: "#C9A769",
+                use: "Accents, active states, the brand's voice",
+              },
+              {
+                name: "Bronze",
+                hex: "#7C6A46",
+                use: "Primary brand, borders and fills",
+              },
+              {
+                name: "Gold Light",
+                hex: "#FDCE77",
+                use: "Emphasis on dark, badges",
+              },
               { name: "Ink", hex: "#0D0D0D", use: "The consumer surface base" },
-              { name: "Surface", hex: "#1E1E1E", use: "Elevated cards on dark" },
-              { name: "Alert", hex: "#F65F5F", use: "Reject, non-veg, destructive" },
+              {
+                name: "Surface",
+                hex: "#1E1E1E",
+                use: "Elevated cards on dark",
+              },
+              {
+                name: "Alert",
+                hex: "#F65F5F",
+                use: "Reject, non-veg, destructive",
+              },
             ],
             caption:
               "**Gold is the only colour that speaks.** Everything else is a surface, which is what lets one accent carry every primary action across four products.",
@@ -2497,7 +3137,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/layover/system.webp",
               wide: true,
-              caption: "Site and app as one system: the dark front door, the warm room behind it.",
+              caption:
+                "Site and app as one system: the dark front door, the warm room behind it.",
               alt: "LayOver's marketing site and mobile app shown together.",
             },
           },
@@ -2533,6 +3174,14 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "yantra",
+    challenge: [
+      "Yantra is a week of technical events, workshops and hackathons, spread across formats and audiences. There was no single place for a student to see what was on and sign up for it.",
+      "A technical fest also has to feel worth a week of someone's time. A page that only lists things reads like a timetable, which is not a reason to turn up.",
+    ],
+    solution: [
+      "A **3D interactive environment** as the front door, so the fest is something you enter rather than something you scroll past.",
+      "Behind it, a unified portal covering technical events, workshops and hackathons in one place. The experience does the persuading and the portal does the work.",
+    ],
     title: "Yantra",
     logoText: "Yantra",
     category: "3d interactive website",
@@ -2690,7 +3339,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/dropby/essence-radar.webp",
               alt: "A dark frame with a wide gradient arc sweeping from red through blue, and the word Encourage in a pill at its centre.",
-              caption: "Encourage, set inside the radar sweep the whole system is built from.",
+              caption:
+                "Encourage, set inside the radar sweep the whole system is built from.",
               wide: true,
             },
           },
@@ -2737,13 +3387,33 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              { name: "Bandis Blue", hex: "#006FFF", use: "The primary, and the only colour allowed to shout" },
-              { name: "Rich Black", hex: "#0D0F1E", use: "Canvas for the night-side of the brand" },
+              {
+                name: "Bandis Blue",
+                hex: "#006FFF",
+                use: "The primary, and the only colour allowed to shout",
+              },
+              {
+                name: "Rich Black",
+                hex: "#0D0F1E",
+                use: "Canvas for the night-side of the brand",
+              },
               { name: "Alice Blue", hex: "#F5F8FE", use: "The light canvas" },
-              { name: "Munsell", hex: "#EF013D", use: "Accent, and the hot end of the gradient" },
+              {
+                name: "Munsell",
+                hex: "#EF013D",
+                use: "Accent, and the hot end of the gradient",
+              },
               { name: "Tomato", hex: "#FF4A2C", use: "Warm accent for energy" },
-              { name: "Cleste", hex: "#97F2FF", use: "Cool accent, the cold end of the sweep" },
-              { name: "Vanilla", hex: "#FFECB3", use: "Softener, used sparingly" },
+              {
+                name: "Cleste",
+                hex: "#97F2FF",
+                use: "Cool accent, the cold end of the sweep",
+              },
+              {
+                name: "Vanilla",
+                hex: "#FFECB3",
+                use: "Softener, used sparingly",
+              },
             ],
             caption:
               "The accents are what keep it human. A blue-only system would have been **calm**, and calm is the wrong instruction for an app asking you to go and meet somebody.",
@@ -2753,7 +3423,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/dropby/palette.webp",
               alt: "The DropBy palette board showing Alice Blue, Rich Black, Bandis Blue, Munsell, Tomato, Cleste and Vanilla, with a full spectrum gradient strip underneath.",
-              caption: "The board as presented, with the gradient the accents resolve into.",
+              caption:
+                "The board as presented, with the gradient the accents resolve into.",
             },
           },
         ],
@@ -2807,7 +3478,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/dropby/billboard.webp",
               alt: "A wide billboard reading Just Drop By over a photograph of three people laughing, with body copy about valuing depth over display.",
-              caption: "The billboard, where the brand states its case in full.",
+              caption:
+                "The billboard, where the brand states its case in full.",
               wide: true,
             },
           },
@@ -2834,9 +3506,7 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "prose",
-            body: [
-              "Made with **Crestic Era**. Full project on **Behance**.",
-            ],
+            body: ["Made with **Crestic Era**. Full project on **Behance**."],
           },
         ],
       },
@@ -2844,6 +3514,14 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "futurepreneurs",
+    challenge: [
+      "A campus event site is read once, fast, on a phone, usually while deciding whether to sign up. Everything on it competes with **the one thing that matters: the deadline.**",
+      "A tenth edition also has to look like one. The easy version is fest-poster maximalism, which is exactly what makes a student event look like a student event.",
+    ],
+    solution: [
+      "**Lead with the countdown, not the copy.** The clock is the first thing on the page, and the deadline is never more than a scroll away from wherever you are.",
+      "Five dates get their own visual system so the timeline reads as a sequence rather than a list, and **one accent colour** carries the whole page. Built in Framer so the team could run a multi-week campaign without a developer.",
+    ],
     kind: "case-study",
     title: "Futurepreneurs",
     logoText: "FUTUREPRENEURS",
@@ -2964,7 +3642,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/futurepreneurs/theme.webp",
               wide: true,
-              caption: "Slateblue, Sorrell Brown, and the two neutrals holding the structure.",
+              caption:
+                "Slateblue, Sorrell Brown, and the two neutrals holding the structure.",
               alt: "Colour palette: 653BD8 Slateblue, F59869 Sorrell Brown, FFFFFF White, 000000 Outer Space.",
             },
           },
@@ -3001,7 +3680,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/futurepreneurs/elements.webp",
               wide: true,
-              caption: "The timeline component, and the same page held to a phone.",
+              caption:
+                "The timeline component, and the same page held to a phone.",
               alt: "Close-up of the numbered event timeline cards on desktop, beside the mobile view of the landing page.",
             },
           },
@@ -3023,7 +3703,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/futurepreneurs/fullview.webp",
               wide: true,
-              caption: "The full page in both views: webview left, mobview right.",
+              caption:
+                "The full page in both views: webview left, mobview right.",
               alt: "Full-length screenshots of the Futurepreneurs site: the desktop page beside the mobile page, both showing masthead, timeline, ten-years section, FAQs and footer.",
             },
           },
@@ -3033,6 +3714,14 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "posterfolio",
+    challenge: [
+      "**One canvas, 4:5.** Every poster gets the same rectangle, so nothing can be solved by changing the shape of the page. Composition, type and contrast are the only variables left.",
+      "Most of these are read at **thumbnail scale first**, in a feed or on a contact sheet. A layout has to survive being small before it earns being large.",
+    ],
+    solution: [
+      "Every poster is judged at thumbnail size before it is judged at full size. If the idea does not survive that, the composition changes rather than the type getting bigger.",
+      "Running one format across **41 subjects**, from startup teardowns to title cards, is what makes it a practice rather than a campaign. The constraint stays fixed, so the thinking is the part that has to move.",
+    ],
     /* deliberately NOT kind: "case-study" — a wall of posters is a body of
        work, not an argument about one, and the works page splits the two on
        this flag. The poster grid still renders: FigmaProjectPage keys that
@@ -3111,47 +3800,171 @@ export const PROJECTS: Project[] = [
           {
             kind: "grid",
             items: [
-              { src: "/projects/posterfolio/poster-01.webp", alt: "Poster 1 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-02.webp", alt: "Poster 2 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-03.webp", alt: "Poster 3 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-05.webp", alt: "Poster 5 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-06.webp", alt: "Poster 6 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-07.webp", alt: "Poster 7 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-09.webp", alt: "Poster 9 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-10.webp", alt: "Poster 10 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-11.webp", alt: "Poster 11 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-12.webp", alt: "Poster 12 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-13.webp", alt: "Poster 13 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-14.webp", alt: "Poster 14 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-15.webp", alt: "Poster 15 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-16.webp", alt: "Poster 16 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-17.webp", alt: "Poster 17 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-18.webp", alt: "Poster 18 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-20.webp", alt: "Poster 20 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-21.webp", alt: "Poster 21 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-22.webp", alt: "Poster 22 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-24.webp", alt: "Poster 24 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-25.webp", alt: "Poster 25 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-26.webp", alt: "Poster 26 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-27.webp", alt: "Poster 27 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-28.webp", alt: "Poster 28 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-29.webp", alt: "Poster 29 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-30.webp", alt: "Poster 30 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-33.webp", alt: "Poster 33 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-34.webp", alt: "Poster 34 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-35.webp", alt: "Poster 35 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-36.webp", alt: "Poster 36 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-37.webp", alt: "Poster 37 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-38.webp", alt: "Poster 38 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-39.webp", alt: "Poster 39 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-40.webp", alt: "Poster 40 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-41.webp", alt: "Poster 41 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-04.webp", alt: "Poster 4 from the Posterfolio series.", newRow: true },
-              { src: "/projects/posterfolio/poster-08.webp", alt: "Poster 8 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-19.webp", alt: "Poster 19 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-23.webp", alt: "Poster 23 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-31.webp", alt: "Poster 31 from the Posterfolio series." },
-              { src: "/projects/posterfolio/poster-32.webp", alt: "Poster 32 from the Posterfolio series." },
+              {
+                src: "/projects/posterfolio/poster-01.webp",
+                alt: "Poster 1 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-02.webp",
+                alt: "Poster 2 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-03.webp",
+                alt: "Poster 3 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-05.webp",
+                alt: "Poster 5 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-06.webp",
+                alt: "Poster 6 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-07.webp",
+                alt: "Poster 7 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-09.webp",
+                alt: "Poster 9 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-10.webp",
+                alt: "Poster 10 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-11.webp",
+                alt: "Poster 11 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-12.webp",
+                alt: "Poster 12 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-13.webp",
+                alt: "Poster 13 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-14.webp",
+                alt: "Poster 14 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-15.webp",
+                alt: "Poster 15 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-16.webp",
+                alt: "Poster 16 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-17.webp",
+                alt: "Poster 17 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-18.webp",
+                alt: "Poster 18 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-20.webp",
+                alt: "Poster 20 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-21.webp",
+                alt: "Poster 21 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-22.webp",
+                alt: "Poster 22 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-24.webp",
+                alt: "Poster 24 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-25.webp",
+                alt: "Poster 25 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-26.webp",
+                alt: "Poster 26 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-27.webp",
+                alt: "Poster 27 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-28.webp",
+                alt: "Poster 28 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-29.webp",
+                alt: "Poster 29 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-30.webp",
+                alt: "Poster 30 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-33.webp",
+                alt: "Poster 33 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-34.webp",
+                alt: "Poster 34 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-35.webp",
+                alt: "Poster 35 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-36.webp",
+                alt: "Poster 36 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-37.webp",
+                alt: "Poster 37 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-38.webp",
+                alt: "Poster 38 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-39.webp",
+                alt: "Poster 39 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-40.webp",
+                alt: "Poster 40 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-41.webp",
+                alt: "Poster 41 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-04.webp",
+                alt: "Poster 4 from the Posterfolio series.",
+                newRow: true,
+              },
+              {
+                src: "/projects/posterfolio/poster-08.webp",
+                alt: "Poster 8 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-19.webp",
+                alt: "Poster 19 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-23.webp",
+                alt: "Poster 23 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-31.webp",
+                alt: "Poster 31 from the Posterfolio series.",
+              },
+              {
+                src: "/projects/posterfolio/poster-32.webp",
+                alt: "Poster 32 from the Posterfolio series.",
+              },
             ],
           },
         ],
@@ -3381,7 +4194,8 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/gravitas/auth-affiliation-use.webp",
               alt: "A person sitting outdoors using the Gravitas affiliation screen on a laptop.",
-              caption: "The affiliation choice is the first thing a new visitor meets.",
+              caption:
+                "The affiliation choice is the first thing a new visitor meets.",
             },
           },
         ],
@@ -3452,7 +4266,11 @@ export const PROJECTS: Project[] = [
           {
             kind: "results",
             items: [
-              { value: "2M+", label: "site traffic", note: "Across the fest cycle." },
+              {
+                value: "2M+",
+                label: "site traffic",
+                note: "Across the fest cycle.",
+              },
               { value: "2M+", label: "landing page views" },
               { value: "77k+", label: "new users acquired" },
               {
@@ -3540,7 +4358,8 @@ export const PROJECTS: Project[] = [
            cannot ship as a single file. */
         strip: Array.from(
           { length: 18 },
-          (_, i) => `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`
+          (_, i) =>
+            `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`,
         ),
         sliceW: 1400,
         sliceH: 1240,
@@ -3548,8 +4367,7 @@ export const PROJECTS: Project[] = [
         wide: true,
         caption:
           "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
-        alt:
-          "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",
+        alt: "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",
       },
     ],
   },
@@ -3589,7 +4407,7 @@ const SELECTED_IDS = [
   hydration is a white flash on a black page.
 */
 export const DARK_CASE_STUDIES: string[] = PROJECTS.filter(
-  (p) => p.theme === "dark"
+  (p) => p.theme === "dark",
 ).map((p) => p.id);
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {
@@ -3599,7 +4417,7 @@ export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {
      caught at build time and never reaches anyone. */
   if (!project) {
     throw new Error(
-      `SELECTED_IDS names "${id}", which is not a project in PROJECTS.`
+      `SELECTED_IDS names "${id}", which is not a project in PROJECTS.`,
     );
   }
   return project;
