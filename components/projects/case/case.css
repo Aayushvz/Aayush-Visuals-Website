@@ -326,6 +326,46 @@
   color: #fff;
 }
 
+/* ---------- registration marks ---------- */
+
+/*
+  The small crosses in the whitespace of the comps.
+
+  They are registration marks, the kind printers put outside a trim edge to
+  line plates up, and they do the same job here: they say the page sits on a
+  grid even where nothing is currently on it. Measured off the reference
+  screens, they step at 20.4% of the viewport, which is a five column rhythm,
+  and the middle one is drawn smaller than the two beside it.
+
+  Drawn in CSS rather than shipped as an asset so they take currentColor:
+  white where they fall in the inverted band, ink where they fall on paper,
+  with no second file and no second decision.
+*/
+.csMarks {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20.4vw;
+  margin-top: var(--cs-xl);
+  pointer-events: none;
+}
+
+.csMark {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  opacity: 0.5;
+  background:
+    linear-gradient(currentColor, currentColor) center / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1px 100% no-repeat;
+}
+
+.csMark--sm {
+  width: 9px;
+  height: 9px;
+  opacity: 0.42;
+}
+
 /* ---------- Details: a pinned argument, scrolling evidence ---------- */
 
 /*
@@ -730,6 +770,11 @@
   /* the indent costs a whole line at this width */
   .csStatement {
     text-indent: 0;
+  }
+
+  /* decorative, and there is no spare whitespace to mark at this width */
+  .csMarks {
+    display: none;
   }
 
   .csSec--dark {

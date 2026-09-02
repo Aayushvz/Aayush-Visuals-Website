@@ -56,6 +56,17 @@ function liveHref(project: Project): string | null {
   return null;
 }
 
+/* the small crosses the comps place in the whitespace; see .csMarks */
+function Marks() {
+  return (
+    <div className="csMarks" aria-hidden>
+      <span className="csMark" />
+      <span className="csMark csMark--sm" />
+      <span className="csMark" />
+    </div>
+  );
+}
+
 function SectionHead({ no, name }: { no: number; name: string }) {
   return (
     <div className="csSec__head">
@@ -166,6 +177,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                     ? marked(" " + story.statement.rest)
                     : null}
                 </p>
+                <Marks />
               </div>
             </section>
           ) : null}
@@ -201,6 +213,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                   items={story.results.items}
                   note={story.results.note}
                 />
+                <Marks />
               </div>
             </section>
           ) : null}
