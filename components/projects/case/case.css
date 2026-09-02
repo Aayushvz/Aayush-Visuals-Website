@@ -413,6 +413,16 @@
   align-content: start;
 }
 
+/*
+  This column DOES need a limit: it takes whatever the project has, and some
+  of those are phone screens at 644x1399, which at this width would render
+  over 1200px tall each. Cropped, not contained, per the note above.
+*/
+.csDetails__media .csShot {
+  max-height: 70vh;
+  object-fit: cover;
+}
+
 /* ---------- Feature: accent name, prose, its screens ---------- */
 
 .csFeature + .csFeature {
@@ -476,10 +486,21 @@
   display: block;
   width: 100%;
   height: auto;
-  max-height: 78vh;
-  object-fit: contain;
   background: #f4f4f4;
 }
+
+/*
+  A height cap and `contain` cannot be used together, which is the bug this
+  replaces. Clamping the box to 78vh while the width stayed at 100% left the
+  hero cover in a box wider than its own proportions, and `contain` then
+  letterboxed it: a 1.5 image sitting in a 1.83 box with grey down both
+  sides, on every project, since all eleven covers are landscape.
+
+  So nothing full-width is clamped at all. At a 1232px column the squarest
+  cover on the site is 962px tall, which is fine. Where a height limit IS
+  needed, the rule is to CROP rather than letterbox, because a cropped image
+  still fills its frame and a letterboxed one advertises the mismatch.
+*/
 
 .csRow {
   display: grid;

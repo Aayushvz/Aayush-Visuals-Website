@@ -319,15 +319,57 @@ function pickMedia(
   return out;
 }
 
+/*
+  One paragraph, one place on the page.
+
+  Everything here reads from the same few fields, so without a claim check the
+  same sentence surfaced twice: the hero intro and the inverted band both fell
+  back to `description`, which put the identical text under the title and
+  then again, four times the size, one scroll later. It was doing that on
+  eight of the eleven projects. A softer version of the same fault had an
+  About paragraph repeating one the Details beat was already using.
+
+  So text is CLAIMED. The first beat to want a paragraph gets it and later
+  beats have to find their own, and the order below is by importance rather
+  than by position on the page: the argument outranks the summary. Comparison
+  is on a normalised prefix, not equality, because the same source trimmed to
+  two sentences and to three is still the same paragraph to a reader.
+*/
 export function buildStory(project: Project): Story {
   /* long-form work keeps more of itself; a straight project stays short */
   const deep = project.kind === "case-study" || project.alsoCaseStudy === true;
 
-  const hl = highlights(project, deep ? 4 : 3);
-  const used = new Set<string>(hl.flatMap((h) => h.media.map((m) => m.src)));
+  const claimed = new Set<string>();
+  const key = (t: string) =>
+    t
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 60);
+  const claim = (t: string | undefined | null): string | null => {
+    if (!t) return null;
+    const k = key(t);
+    if (!k || claimed.has(k)) return null;
+    claimed.add(k);
+    return t;
+  };
 
+  /* the band speaks first: it is the largest type on the page */
+  const statement = pickStatement(project, claim);
+  const intro = introParagraphs(project, claim);
+
+  /* the argument outranks the summary, so Details claims before About does */
   const pairs = detailPairs(project);
-  const media = pickMedia(project, used, deep ? 4 : 3);
+  for (const pair of pairs) for (const para of pair.body) claim(para);
+
+  const hl = highlights(project, deep ? 4 : 3);
+  for (const h of hl) for (const para of h.body) claim(para);
+
+  const usedMedia = new Set<string>(
+    hl.flatMap((h) => h.media.map((m) => m.src)),
+  );
+  const media = pickMedia(project, usedMedia, deep ? 4 : 3);
   const results = resultsOf(project);
 
   /*
@@ -340,14 +382,12 @@ export function buildStory(project: Project): Story {
     decisions, no figures) is allowed twice the room.
   */
   const visualOnly = !hl.length && !results;
-  const gallery = pickMedia(project, used, visualOnly ? 24 : 12);
-
-  const intro = introParagraphs(project);
+  const gallery = pickMedia(project, usedMedia, visualOnly ? 24 : 12);
 
   return {
-    statement: pickStatement(project),
+    statement,
     intro,
-    about: aboutParagraphs(project, intro),
+    about: aboutParagraphs(project, claim),
     details: pairs.length || media.length ? { pairs, media } : null,
     highlights: hl,
     results,
@@ -564,9 +604,25 @@ export function ShotStack({ shots }: { shots: ProjectShot[] }) {
 */
 export function pickStatement(
   project: Project,
+  claim: (t?: string | null) => string | null,
 ): { lead: string; rest: string } | null {
   const explicit = allBlocks(project).find((b) => b.kind === "statement") as
     { kind: "statement"; text: string } | undefined;
+
+  const brief = allBlocks(project).find((b) => b.kind === "brief") as
+    | {
+        kind: "brief";
+        items: { label: string; body: string; wide?: boolean }[];
+      }
+    | undefined;
+
+  /* in order of how well each reads at display size, falling through to the
+     next when one has already been claimed */
+  const text =
+    claim(explicit?.text) ??
+    claim(brief?.items.find((i) => i.wide)?.body) ??
+    claim(project.description);
+  if (!text) return null;
 
   /*
     The emphasis markers come off before the split.
@@ -577,16 +633,12 @@ export function pickStatement(
     INSIDE a marked phrase. Each half then carried one unpaired **, which the
     parser cannot close, and the asterisks shipped as visible text.
   */
-  const text = trimTo(explicit?.text ?? project.description, 2)
-    .split("**")
-    .join("");
-  if (!text) return null;
-
-  const cut = text.indexOf(", ");
-  if (cut > 20 && cut < text.length - 20) {
-    return { lead: text.slice(0, cut + 1), rest: text.slice(cut + 2) };
+  const clean = trimTo(text, 2).split("**").join("");
+  const cut = clean.indexOf(", ");
+  if (cut > 20 && cut < clean.length - 20) {
+    return { lead: clean.slice(0, cut + 1), rest: clean.slice(cut + 2) };
   }
-  const words = text.split(" ");
+  const words = clean.split(" ");
   const at = Math.max(3, Math.round(words.length * 0.42));
   return {
     lead: words.slice(0, at).join(" "),
@@ -595,8 +647,21 @@ export function pickStatement(
 }
 
 /* One paragraph under the title. Two was already too many to read standing up. */
-export function introParagraphs(project: Project): string[] {
-  return [trimTo(project.description, 2)].filter(Boolean);
+export function introParagraphs(
+  project: Project,
+  claim: (t?: string | null) => string | null,
+): string[] {
+  const brief = allBlocks(project).find((b) => b.kind === "brief") as
+    | {
+        kind: "brief";
+        items: { label: string; body: string; wide?: boolean }[];
+      }
+    | undefined;
+
+  /* whichever summary the band did not take */
+  const text =
+    claim(project.description) ?? claim(brief?.items.find((i) => i.wide)?.body);
+  return text ? [trimTo(text, 2)] : [];
 }
 
 /*
@@ -611,25 +676,19 @@ export function introParagraphs(project: Project): string[] {
   all, so the overview line and the opening prose are taken in that order and
   anything matching the intro is dropped.
 */
-export function aboutParagraphs(project: Project, intro: string[]): string[] {
-  const blocks = allBlocks(project);
+export function aboutParagraphs(
+  project: Project,
+  claim: (t?: string | null) => string | null,
+): string[] {
   const out: string[] = [];
-
-  const brief = blocks.find((b) => b.kind === "brief");
-  if (brief && brief.kind === "brief") {
-    const wide = brief.items.find((i) => i.wide);
-    if (wide) out.push(trimTo(wide.body, 3));
-  }
-
-  for (const block of blocks) {
+  for (const block of allBlocks(project)) {
     if (out.length >= 2) break;
     if (block.kind !== "prose") continue;
     for (const para of block.body) {
       if (out.length >= 2) break;
-      out.push(trimTo(para, 3));
+      const taken = claim(para);
+      if (taken) out.push(trimTo(taken, 3));
     }
   }
-
-  const seen = new Set(intro.map((t) => t.slice(0, 40)));
-  return out.filter((t) => t && !seen.has(t.slice(0, 40))).slice(0, 2);
+  return out;
 }
