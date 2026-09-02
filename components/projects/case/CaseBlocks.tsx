@@ -387,6 +387,21 @@ function affordable(family: Budget, src: string, perFamily: number): boolean {
   return true;
 }
 
+/*
+  Sections whose pictures are artwork rather than interface.
+
+  The column beside the Challenge and Solution was filling with mascot
+  portraits, because it takes the first images it finds and the mascot
+  section comes early in the file. Beside a paragraph about a 15-field form,
+  the evidence a reader wants is the form.
+
+  Section names already carry this: a section called "samadhan didi" or
+  "logo" or "colour" is about identity, everything else is about the product.
+  Art is not excluded, only deferred, so it still reaches the gallery.
+*/
+const ART_SECTION =
+  /mascot|didi|logo|colour|color|brand|identity|typeface|typography|palette|essence|exploration/i;
+
 function pickMedia(
   project: Project,
   used: Set<string>,
@@ -394,16 +409,25 @@ function pickMedia(
   family: Budget,
   perFamily: number,
 ): Media[] {
+  const sections = project.sections ?? [];
+  /* interface first, artwork after, order preserved within each */
+  const ordered = [
+    ...sections.filter((sec) => !ART_SECTION.test(sec.name)),
+    ...sections.filter((sec) => ART_SECTION.test(sec.name)),
+  ];
+
   const out: Media[] = [];
-  for (const block of allBlocks(project)) {
-    if (!["figure", "grid", "gallery", "directions"].includes(block.kind))
-      continue;
-    for (const m of mediaOf(block)) {
-      if (used.has(m.src)) continue;
-      if (!affordable(family, m.src, perFamily)) continue;
-      used.add(m.src);
-      out.push(m);
-      if (out.length >= limit) return out;
+  for (const section of ordered) {
+    for (const block of section.blocks) {
+      if (!["figure", "grid", "gallery", "directions"].includes(block.kind))
+        continue;
+      for (const m of mediaOf(block)) {
+        if (used.has(m.src)) continue;
+        if (!affordable(family, m.src, perFamily)) continue;
+        used.add(m.src);
+        out.push(m);
+        if (out.length >= limit) return out;
+      }
     }
   }
   return out;
@@ -557,9 +581,19 @@ function Img({
   /** stop a small asset being blown up; only where there is no sized cell */
   capWidth?: boolean;
 }) {
+  /*
+    min() of the two, not the natural width alone.
+
+    An inline style outranks the stylesheet, so capping at the natural width
+    threw away the `max-width: 100%` that was keeping the image inside its
+    column. Only the height cap was left, which sized a 1.99 screenshot to
+    1251px inside a 615px column: it overflowed by more than its own column
+    again, and `overflow-x: clip` on the page meant it was silently cut off
+    rather than showing up as a scrollbar in any of my overflow checks.
+  */
   const dims = capWidth ? IMAGE_DIMS[src] : undefined;
   const cap = dims
-    ? ({ maxWidth: `${dims[0]}px` } as CSSProperties)
+    ? ({ maxWidth: `min(100%, ${dims[0]}px)` } as CSSProperties)
     : undefined;
   /* a .webm in an <img> renders nothing, so a moving asset gets a video that
      behaves like an image: no controls, no sound, and no reason to notice it

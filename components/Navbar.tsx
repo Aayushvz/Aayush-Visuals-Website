@@ -66,7 +66,10 @@ export default function Navbar() {
           </PageLink>
         ))}
       </nav>
-      <div className="navbar__actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div
+        className="navbar__actions"
+        style={{ display: "flex", alignItems: "center", gap: "8px" }}
+      >
         <ThemeToggle />
         <PageLink href="/contact" className="navbar__contact">
           Contact

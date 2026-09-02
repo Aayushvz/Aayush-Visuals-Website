@@ -17,7 +17,11 @@ const links = [
   { label: "contact", href: "/contact" },
 ];
 
-export default function MobileNav({ position = "top" }: { position?: "top" | "bottom" }) {
+export default function MobileNav({
+  position = "top",
+}: {
+  position?: "top" | "bottom";
+}) {
   const barRef = useRef<HTMLElement>(null);
   /* the collapsed pill takes the tone of whatever it is over, exactly as the
      desktop bar does; the expanded sheet stays dark on purpose */
@@ -26,7 +30,9 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    setTheme(
+      document.documentElement.dataset.theme === "light" ? "light" : "dark",
+    );
   }, []);
 
   const toggleTheme = () => {
@@ -47,7 +53,9 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
         onClick={() => setOpen(!isOpen)}
       >
         {isOpen ? (
-          <span className="mobileNav__closeIcon" aria-hidden>✕</span>
+          <span className="mobileNav__closeIcon" aria-hidden>
+            ✕
+          </span>
         ) : (
           <span className="mobileNav__hamburger" aria-hidden>
             <i />
@@ -70,7 +78,9 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
       <button
         type="button"
         className="mobileNav__themeBtn"
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label={
+          theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+        }
         onClick={toggleTheme}
       >
         <span key={theme} className="mobileNav__themeBadge">
@@ -108,13 +118,20 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
           >
             {position === "top" && renderBar(true)}
 
-            <div className={`mobileNavCard__links ${position === "top" ? "mobileNavCard__links--top" : "mobileNavCard__links--bottom"}`}>
+            <div
+              className={`mobileNavCard__links ${position === "top" ? "mobileNavCard__links--top" : "mobileNavCard__links--bottom"}`}
+            >
               {links.map((l, idx) => (
                 <motion.div
                   key={l.href}
                   initial={{ opacity: 0, y: position === "top" ? -10 : 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04 + 0.06, type: "spring", stiffness: 400, damping: 26 }}
+                  transition={{
+                    delay: idx * 0.04 + 0.06,
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 26,
+                  }}
                   style={{ width: "100%", display: "flex" }}
                 >
                   <PageLink
@@ -122,9 +139,7 @@ export default function MobileNav({ position = "top" }: { position?: "top" | "bo
                     className="mobileNavCard__link"
                     onClick={() => setOpen(false)}
                   >
-                    <span className="mobileNavCard__linkText">
-                      {l.label}
-                    </span>
+                    <span className="mobileNavCard__linkText">{l.label}</span>
                   </PageLink>
                 </motion.div>
               ))}

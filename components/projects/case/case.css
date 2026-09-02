@@ -728,39 +728,41 @@
 /* ---------- back to top ---------- */
 
 /*
-  A page this long needs a way out of it. It appears only once the reader is
-  past the first screen, because a control offering to return you to the top
-  while you are already at the top is noise.
+  A page this long needs a way out of it, and not much of one.
+
+  This was a pill: blurred backdrop, drop shadow, a border, and the word TOP
+  set in tracked uppercase beside an arrow. Five decisions for a control that
+  does one obvious thing. What is left is a hairline circle and the arrow,
+  which is all it ever needed to say, and it inverts on hover so the
+  affordance survives losing the label.
+
+  The label survives too, as the accessible name, so a screen reader still
+  hears "back to top" rather than a bare glyph.
 */
 .csTop {
   position: fixed;
   right: clamp(16px, 3vw, 40px);
   bottom: clamp(16px, 3vw, 40px);
   z-index: 60;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55em;
-  min-height: 44px;
-  padding: 0 1.1em;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 1px solid var(--cs-line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  background: var(--cs-bg);
   color: var(--cs-ink);
-  font-size: var(--cs-t-micro);
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.09);
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(8px);
   pointer-events: none;
   transition:
     opacity var(--dur-state, 260ms) var(--ease-quint),
     transform var(--dur-state, 260ms) var(--ease-quint),
     background-color var(--dur-hover, 200ms) var(--ease-quint),
-    color var(--dur-hover, 200ms) var(--ease-quint);
+    color var(--dur-hover, 200ms) var(--ease-quint),
+    border-color var(--dur-hover, 200ms) var(--ease-quint);
 }
 
 .csTop[data-shown="true"] {
@@ -772,12 +774,12 @@
 .csTop:hover,
 .csTop:focus-visible {
   background: var(--cs-ink);
-  color: var(--cs-bg);
   border-color: var(--cs-ink);
+  color: var(--cs-bg);
 }
 
 .csTop:active {
-  transform: scale(0.97);
+  transform: scale(0.94);
   transition-duration: var(--dur-press, 130ms);
 }
 

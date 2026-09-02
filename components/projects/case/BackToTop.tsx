@@ -74,21 +74,24 @@ export default function BackToTop() {
          they cannot see */
       tabIndex={visible ? 0 : -1}
       aria-hidden={!visible}
+      aria-label="Back to top"
+      title="Back to top"
     >
+      {/* the label lives in aria-label now, so the control still has a name
+          without printing one */}
       <svg
-        width="12"
-        height="12"
+        width="15"
+        height="15"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden
       >
         <path d="M12 19V5M5 12l7-7 7 7" />
       </svg>
-      Top
     </button>
   );
 }
