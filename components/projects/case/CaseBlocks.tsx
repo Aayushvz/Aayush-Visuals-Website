@@ -382,11 +382,9 @@ function Img({
 }
 
 function rowClass(n: number): string {
-  if (n === 1) return "csRow csRow--single";
-  /* two and four both want two columns; four simply wraps to a second row,
-     which is the shape the comps use for a feature with more than one screen */
-  if (n === 2 || n === 4) return "csRow csRow--pair";
-  return "csRow csRow--many";
+  /* one, or two across. Everything wider produced a ragged row of unequal
+     heights, and a website mockup three to a row is a thumbnail. */
+  return n === 1 ? "csRow csRow--single" : "csRow csRow--pair";
 }
 
 export function MediaRow({ media }: { media: Media[] }) {

@@ -490,13 +490,33 @@
   grid-template-columns: 1fr;
 }
 
+/*
+  Two across, and the same height.
+
+  An auto-fit grid put three and four screens on a row and, because each kept
+  its own proportions, left a ragged bottom edge with holes under the shorter
+  ones. Pairing them and giving the pair one ratio fixes both: two is also the
+  count at which a website mockup is still readable rather than a thumbnail.
+
+  The ratio is a variable so a project of portraits can say so, and the crop
+  is centred, which is where a mockup keeps its subject.
+*/
 .csRow--pair {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-/* breakpoint-free: as many columns as fit, never narrower than 260px */
-.csRow--many {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+.csRow--pair .csShot {
+  aspect-ratio: var(--cs-shot-ratio, 16 / 10);
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* an odd count would otherwise leave the last one alone beside a hole, so it
+   takes the full width instead and reads as a deliberate closing frame */
+.csRow--pair > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .csFig {
@@ -751,8 +771,9 @@
     margin-top: var(--cs-md);
   }
 
+  /* still two across on a tablet; one below 560px */
   .csRow--pair {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   /* the floating nav is fixed over the page, so the hero starts below it
@@ -789,8 +810,7 @@
 }
 
 @media (max-width: 560px) {
-  .csRow--pair,
-  .csRow--many {
+  .csRow--pair {
     grid-template-columns: 1fr;
   }
 
