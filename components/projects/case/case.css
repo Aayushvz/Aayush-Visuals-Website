@@ -438,13 +438,17 @@
 }
 
 /*
-  This column DOES need a limit: it takes whatever the project has, and some
-  of those are phone screens at 644x1399, which at this width would render
-  over 1200px tall each. Cropped, not contained, per the note above.
+  This column still needs a height limit, since it takes whatever the project
+  has and some of those are phone screens at 644x1399, over 1200px tall at
+  this width. It does NOT need a crop to get one: letting the width go auto
+  under a max-height scales the whole image down and centres it, so a tall
+  screen simply appears narrower instead of losing its top and bottom.
 */
 .csDetails__media .csShot {
   max-height: 70vh;
-  object-fit: cover;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 /* ---------- Feature: accent name, prose, its screens ---------- */
@@ -529,6 +533,8 @@
 .csRow {
   display: grid;
   gap: var(--cs-sm);
+  /* never wider than the assets in it; see rowShape() for why */
+  max-width: min(100%, var(--cs-row-max, 100%));
 }
 
 .csRow--single {
@@ -547,22 +553,37 @@
   is centred, which is where a mockup keeps its subject.
 */
 .csRow--pair {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* set per row from the images' own shape: two for desktop captures,
+     three for square-ish art, four for phone screens */
+  grid-template-columns: repeat(var(--cs-shot-cols, 2), minmax(0, 1fr));
 }
 
+/*
+  `contain`, not `cover`, now that a row only ever holds one shape.
+
+  With the images already agreeing on their proportions the two behave
+  identically, so nothing is letterboxed. The difference is what happens to
+  the small mismatch inside a group: contain shows a hair of background,
+  cover would quietly cut the edge off a screenshot. Given the choice, do not
+  cut the work.
+*/
 .csRow--pair .csShot {
   aspect-ratio: var(--cs-shot-ratio, 16 / 10);
   height: 100%;
   max-height: none;
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
 }
 
-/* an odd count would otherwise leave the last one alone beside a hole, so it
-   takes the full width instead and reads as a deliberate closing frame */
-.csRow--pair > :last-child:nth-child(odd) {
-  grid-column: 1 / -1;
+.csRows {
+  display: grid;
+  gap: var(--cs-sm);
 }
+
+/* Deliberately no full-width-last rule any more. It was there to stop an odd
+   image sitting alone beside a hole, which was reasonable at a fixed two
+   columns; with four it would blow one phone screen up to the width of the
+   page. Rows are grouped by shape now, so an orphan reads as the end of a
+   set rather than a gap. */
 
 .csFig {
   margin: 0;
@@ -816,9 +837,12 @@
     margin-top: var(--cs-md);
   }
 
-  /* still two across on a tablet; one below 560px */
+  /* halve the columns on a tablet, floor of two */
   .csRow--pair {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      max(2, calc(var(--cs-shot-cols, 2) - 1)),
+      minmax(0, 1fr)
+    );
   }
 
   /* the floating nav is fixed over the page, so the hero starts below it

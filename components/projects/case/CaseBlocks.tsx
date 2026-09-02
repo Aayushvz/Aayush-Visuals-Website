@@ -254,7 +254,12 @@ function words(text: string): number {
   can read WHY the thing works the way it does. What stays capped is how MANY
   of them a page gets, which is the part that made the old pages long.
 */
-function highlights(project: Project, limit: number): Highlight[] {
+function highlights(
+  project: Project,
+  limit: number,
+  family: Budget,
+  perFamily: number,
+): Highlight[] {
   const out: Highlight[] = [];
 
   for (const block of allBlocks(project)) {
@@ -264,7 +269,9 @@ function highlights(project: Project, limit: number): Highlight[] {
       out.push({
         name: block.items[0]?.label ?? "",
         body: block.body.slice(0, 2),
-        media: mediaOf(block).slice(0, 4),
+        media: mediaOf(block)
+          .filter((m) => affordable(family, m.src, perFamily))
+          .slice(0, 4),
       });
       continue;
     }
@@ -275,7 +282,9 @@ function highlights(project: Project, limit: number): Highlight[] {
         out.push({
           name: item.title,
           body: [item.body],
-          media: [{ src: item.src, alt: item.alt }],
+          media: affordable(family, item.src, perFamily)
+            ? [{ src: item.src, alt: item.alt }]
+            : [],
         });
       }
     }
@@ -300,10 +309,90 @@ function resultsOf(project: Project): Story["results"] {
   once beside the challenge and once beside the feature it illustrates, which
   reads as padding.
 */
+/*
+  One motif cannot eat the page.
+
+  On the grievance project eleven of the twenty-five images were the same
+  mascot: seven poses plus four variants, 44% of the page given to one
+  drawing, while not a single phone screen made it in. The budget had simply
+  been spent before the interface got a turn.
+
+  Files are grouped by their stem, so mascot-a through mascot-g and
+  mascot-v1 through mascot-v4 are all one family, and a family is allowed
+  two. The cap is what produces the variety: with mascots held to two, the
+  remaining slots fill with desktop screens, phone screens and components
+  instead of more of the same.
+*/
+function familyOf(src: string): string {
+  const file = (src.split("/").pop() ?? src).replace(/\.\w+$/, "");
+  return file
+    .replace(/[-_]v?\d+$/, "")
+    .replace(/-[a-z]$/, "")
+    .replace(/-v$/, "");
+}
+
+/*
+  The budget is page-wide, not per beat.
+
+  Capping only the gallery left the Highlights beat free to spend the same
+  motif again, which is how eight near-identical desktop captures and four
+  more mascot variants survived a cap that was supposed to stop exactly that.
+  One counter, shared by everything that picks an image.
+*/
+export type Budget = Map<string, number>;
+
+/*
+  How many of one family the page can afford, which depends on how many
+  families it has.
+
+  A flat cap of two was right for the grievance project, where eleven of
+  twenty-five images were the same mascot, and catastrophic for the poster
+  project, where all forty-one images ARE one family: it went from
+  twenty-eight images on the page to three. The cap exists to stop one motif
+  crowding out the others, so where there are no others it has nothing to do.
+
+  The budget is simply divided by the number of families present, with two as
+  the floor. Eight families on a page gets two each; one family gets all of
+  it.
+*/
+function perFamilyFor(project: Project, limit: number): number {
+  const families = new Set<string>();
+  for (const block of allBlocks(project)) {
+    if (
+      ![
+        "figure",
+        "grid",
+        "gallery",
+        "directions",
+        "step",
+        "screens",
+        "mockup",
+      ].includes(block.kind)
+    )
+      continue;
+    for (const m of mediaOf(block)) families.add(familyOf(m.src));
+  }
+  /* the cap exists to create variety, so where there is no variety to create
+     it does not apply: a project made of one or two families shows as much of
+     them as the beat's own limit allows */
+  if (families.size <= 2) return Number.MAX_SAFE_INTEGER;
+  return Math.max(2, Math.ceil(limit / families.size));
+}
+
+function affordable(family: Budget, src: string, perFamily: number): boolean {
+  const stem = familyOf(src);
+  const seen = family.get(stem) ?? 0;
+  if (seen >= perFamily) return false;
+  family.set(stem, seen + 1);
+  return true;
+}
+
 function pickMedia(
   project: Project,
   used: Set<string>,
   limit: number,
+  family: Budget,
+  perFamily: number,
 ): Media[] {
   const out: Media[] = [];
   for (const block of allBlocks(project)) {
@@ -311,12 +400,61 @@ function pickMedia(
       continue;
     for (const m of mediaOf(block)) {
       if (used.has(m.src)) continue;
+      if (!affordable(family, m.src, perFamily)) continue;
       used.add(m.src);
       out.push(m);
       if (out.length >= limit) return out;
     }
   }
   return out;
+}
+
+/*
+  Rows hold one shape at a time.
+
+  The assets on a single project run from 0.46 phone screens to 1.99 desktop
+  captures. Pairing those and cutting both to a median ratio is how a phone
+  screen loses its top and bottom, so the row is grouped by proportion first
+  and only then paired: phones with phones, desktops with desktops. Once a
+  row is one shape, matching the heights costs nothing, because the images
+  already agree.
+*/
+function groupByShape(media: Media[]): Media[][] {
+  const groups: Media[][] = [];
+  for (const m of media) {
+    const b = bucketOf(m);
+    const last = groups[groups.length - 1];
+    if (last && bucketOf(last[0]) === b) last.push(m);
+    else groups.push([m]);
+  }
+  return groups;
+}
+
+/*
+  Which shelf a picture belongs on.
+
+  This was a tight ratio tolerance, and it split things that belong together:
+  a component sheet at 0.26 and the phone screens at 0.46 are both TALL, but
+  12% apart is 12% apart, so the sheet was put in a row of its own and stood
+  there as a lone 453px column with half a screen of white beside it.
+
+  Buckets by orientation instead. The sheet now sits in the row with the
+  phone screens at the same cell size, which is where a reader expects a
+  component to be: next to the interface it came out of. Being narrower than
+  the phones, it keeps its own width inside that cell rather than stretching,
+  which is the whole point of `contain`.
+*/
+function bucketOf(m: Media): number {
+  const r = ratioOf(m) ?? 1.6;
+  if (r < 0.75) return 0; /* phone screens, component strips */
+  if (r < 1.15) return 1; /* mascots, square art */
+  if (r < 1.6) return 2; /* 4:3 captures */
+  return 3; /* wide desktop captures */
+}
+
+function ratioOf(m: Media): number | null {
+  const dims = IMAGE_DIMS[m.src];
+  return dims ? dims[0] / dims[1] : null;
 }
 
 /*
@@ -363,13 +501,17 @@ export function buildStory(project: Project): Story {
   const pairs = detailPairs(project);
   for (const pair of pairs) for (const para of pair.body) claim(para);
 
-  const hl = highlights(project, deep ? 4 : 3);
+  /* one image budget for the whole page, spent in beat order, sized so that
+     a project made of a single family is not capped down to nothing */
+  const family: Budget = new Map();
+  const perFamily = perFamilyFor(project, deep ? 20 : 16);
+  const hl = highlights(project, deep ? 4 : 3, family, perFamily);
   for (const h of hl) for (const para of h.body) claim(para);
 
   const usedMedia = new Set<string>(
     hl.flatMap((h) => h.media.map((m) => m.src)),
   );
-  const media = pickMedia(project, usedMedia, deep ? 4 : 3);
+  const media = pickMedia(project, usedMedia, deep ? 4 : 3, family, perFamily);
   const results = resultsOf(project);
 
   /*
@@ -382,7 +524,13 @@ export function buildStory(project: Project): Story {
     decisions, no figures) is allowed twice the room.
   */
   const visualOnly = !hl.length && !results;
-  const gallery = pickMedia(project, usedMedia, visualOnly ? 24 : 12);
+  const gallery = pickMedia(
+    project,
+    usedMedia,
+    visualOnly ? 24 : 14,
+    family,
+    perFamily,
+  );
 
   return {
     statement,
@@ -401,11 +549,18 @@ function Img({
   src,
   alt,
   className = "csShot",
+  capWidth = false,
 }: {
   src: string;
   alt: string;
   className?: string;
+  /** stop a small asset being blown up; only where there is no sized cell */
+  capWidth?: boolean;
 }) {
+  const dims = capWidth ? IMAGE_DIMS[src] : undefined;
+  const cap = dims
+    ? ({ maxWidth: `${dims[0]}px` } as CSSProperties)
+    : undefined;
   /* a .webm in an <img> renders nothing, so a moving asset gets a video that
      behaves like an image: no controls, no sound, and no reason to notice it
      is a video until it moves */
@@ -427,6 +582,7 @@ function Img({
       className={className}
       src={src}
       alt={alt}
+      style={cap}
       loading="lazy"
       decoding="async"
     />
@@ -459,26 +615,82 @@ function rowClass(n: number): string {
   those side by side would be 1400px tall on a desktop, which is a monolith
   rather than a pair.
 */
-function rowRatio(media: Media[]): string | undefined {
-  const ratios = media
-    .map((m) => IMAGE_DIMS[m.src])
-    .filter(Boolean)
-    .map(([w, h]) => w / h)
-    .sort((a, b) => a - b);
+/*
+  How many across, decided by shape rather than fixed at two.
 
-  if (!ratios.length) return undefined;
+  Two was right for a desktop capture and badly wrong for a phone screen. A
+  644x1399 export two-up on a desktop column is 1300px tall, so the ratio was
+  being clamped to stop that, and the clamp is what produced 52% letterboxing:
+  a 0.46 image sitting in a 0.7 box.
+
+  Narrow things simply want more columns. Four phone screens across are 290px
+  wide and 630px tall, which is how a case study actually shows a flow. With
+  the column count doing the work the ratio needs no clamp at all, so the cell
+  matches the image exactly and nothing is cropped OR letterboxed.
+*/
+function rowShape(
+  media: Media[],
+): { ratio: string; cols: number; max: string } | undefined {
+  const dims = media.map((m) => IMAGE_DIMS[m.src]).filter(Boolean);
+  if (!dims.length) return undefined;
+
+  const ratios = dims.map(([w, h]) => w / h).sort((a, b) => a - b);
+  const widths = dims.map(([w]) => w).sort((a, b) => a - b);
   const mid = ratios[Math.floor(ratios.length / 2)];
-  const clamped = Math.min(1.9, Math.max(0.7, mid));
-  return clamped.toFixed(3);
+  const cols = mid < 0.75 ? 4 : mid < 1.15 ? 3 : 2;
+
+  /*
+    And never wider than the asset actually is.
+
+    Some of these are components rather than screens: a mic button exported
+    at 400px was being stretched across a 1232px column, which is both soft
+    and a lie about the thing's size, since in the interface it is a control
+    you tap. Capping the ROW at its images' own width keeps every cell at or
+    under natural size while the cells themselves stay full, which is what
+    capping each image inside an aspect-ratio cell would not do: that just
+    leaves a hole around it.
+  */
+  const natural = widths[Math.floor(widths.length / 2)];
+  /*
+    The cap has to count the columns the row will ACTUALLY use, not the
+    columns its shape would like. A lone component sheet takes the
+    single-column class whatever its ratio says, so sizing the cap for four
+    columns left it unbound and the sheet rendered at 1281px from a 453px
+    source: a 183% upscale of a control that is a few hundred pixels wide in
+    the interface it belongs to.
+  */
+  const used = Math.min(cols, media.length);
+  return {
+    ratio: mid.toFixed(3),
+    cols,
+    max: `${used * natural + (used - 1) * 24}px`,
+  };
+}
+
+/* one row per shape, so nothing has to be cut to sit beside its neighbour */
+export function MediaRows({ media }: { media: Media[] }) {
+  return (
+    <div className="csRows">
+      {groupByShape(media).map((group, i) => (
+        <MediaRow media={group} key={i} />
+      ))}
+    </div>
+  );
 }
 
 export function MediaRow({ media }: { media: Media[] }) {
-  const ratio = rowRatio(media);
+  const shape = rowShape(media);
   return (
     <div
       className={rowClass(media.length)}
       style={
-        ratio ? ({ "--cs-shot-ratio": ratio } as CSSProperties) : undefined
+        shape
+          ? ({
+              "--cs-shot-ratio": shape.ratio,
+              "--cs-shot-cols": shape.cols,
+              "--cs-row-max": shape.max,
+            } as CSSProperties)
+          : undefined
       }
     >
       {media.map((m, i) => (
@@ -510,7 +722,7 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
       {media.length ? (
         <div className="csDetails__media">
           {media.map((m, i) => (
-            <Img key={m.src + i} src={m.src} alt={m.alt} />
+            <Img key={m.src + i} src={m.src} alt={m.alt} capWidth />
           ))}
         </div>
       ) : null}

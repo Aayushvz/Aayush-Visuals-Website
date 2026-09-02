@@ -13,7 +13,7 @@ import LogoMark from "./LogoMark";
 const links = [
   { label: "about me", href: "/about" },
   { label: "projects", href: "/work" },
-  { label: "experiments", href: "/playground" },
+  { label: "games", href: "/playground" },
   { label: "contact", href: "/contact" },
 ];
 

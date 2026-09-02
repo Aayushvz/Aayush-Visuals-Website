@@ -12,7 +12,7 @@ import {
   FeatureBlock,
   ResultRows,
   ShotStack,
-  MediaRow,
+  MediaRows,
 } from "./CaseBlocks";
 import BackToTop from "./BackToTop";
 import ExtCta from "@/components/ExtCta";
@@ -260,7 +260,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="Gallery" />
                 <div className="csSec__body">
-                  <MediaRow media={story.gallery} />
+                  <MediaRows media={story.gallery} />
                 </div>
               </section>
             ) : null}
