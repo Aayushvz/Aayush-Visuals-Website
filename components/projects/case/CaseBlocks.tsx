@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { IMAGE_DIMS } from "@/components/projects/imageDims";
 import {
   isStripShot,
   type CaseBlock,
@@ -387,9 +388,48 @@ function rowClass(n: number): string {
   return n === 1 ? "csRow csRow--single" : "csRow csRow--pair";
 }
 
+/*
+  What shape to cut a row of screens to.
+
+  A fixed 16/10 was right for the mockups and wrong for the poster project,
+  which is forty-one portraits and lost a third of each one to the crop. So
+  the row is measured rather than assumed: IMAGE_DIMS already carries every
+  asset's intrinsic size, so the row takes the median of its own images and
+  a wall of posters comes out portrait while a wall of laptops comes out
+  landscape, with no per-project flag to keep in sync.
+
+  The MEDIAN, not the mean, because one odd frame in a row of eight should
+  not drag the shape of the other seven. On an even count it takes the wider
+  of the middle two: in a mixed row somebody gets cropped either way, and
+  losing the top of a poster costs less than losing the side of a screenshot,
+  where the cropped part is interface.
+
+  Clamped, because the phone screens are 644x1399. Honoured literally, two of
+  those side by side would be 1400px tall on a desktop, which is a monolith
+  rather than a pair.
+*/
+function rowRatio(media: Media[]): string | undefined {
+  const ratios = media
+    .map((m) => IMAGE_DIMS[m.src])
+    .filter(Boolean)
+    .map(([w, h]) => w / h)
+    .sort((a, b) => a - b);
+
+  if (!ratios.length) return undefined;
+  const mid = ratios[Math.floor(ratios.length / 2)];
+  const clamped = Math.min(1.9, Math.max(0.7, mid));
+  return clamped.toFixed(3);
+}
+
 export function MediaRow({ media }: { media: Media[] }) {
+  const ratio = rowRatio(media);
   return (
-    <div className={rowClass(media.length)}>
+    <div
+      className={rowClass(media.length)}
+      style={
+        ratio ? ({ "--cs-shot-ratio": ratio } as CSSProperties) : undefined
+      }
+    >
       {media.map((m, i) => (
         <Img key={m.src + i} src={m.src} alt={m.alt} />
       ))}
