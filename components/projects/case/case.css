@@ -86,6 +86,20 @@
 */
 .cs.hpParallax__stage {
   background: var(--cs-bg);
+  /*
+    And the stage's z-index, restated, because losing it hid the entire page.
+
+    `.cs` and `.hpParallax__stage` are both single-class selectors, so which
+    one wins is decided by source order, and this file loads after
+    globals.css. That put `.cs { z-index: 1 }` over the stage's z-index: 2,
+    which tied the stage with the sticky footer underneath it, and a tie is
+    broken by DOM order: the footer comes later, so the footer painted on top
+    of the case study. Every project page opened onto the footer.
+
+    The two-class selector outranks both, so the stage is above the footer
+    again no matter which stylesheet arrives first.
+  */
+  z-index: 2;
 }
 
 .cs__inner {
