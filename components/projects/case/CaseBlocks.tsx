@@ -38,6 +38,7 @@ export type Highlight = { name: string; body: string[]; media: Media[] };
 export type Story = {
   statement: { lead: string; rest: string } | null;
   intro: string[];
+  about: string[];
   details: { pairs: Pair[]; media: Media[] } | null;
   highlights: Highlight[];
   results: { items: ResultItem[]; note?: string } | null;
@@ -133,55 +134,99 @@ function allBlocks(project: Project): CaseBlock[] {
 }
 
 /*
-  The pairs that answer "what was wrong" and "what did you do".
+  The Details beat is always the same two points: Challenge, then Solution.
 
-  `brief` is preferred because it was authored as the summary already: one
-  label, one or two lines. `numbered` is the fallback, since findings carry
-  their own labels too. Plain prose is last, and only its opening paragraph,
-  because unlabelled running text is the thing this page is trying to have
-  less of.
+  Every project has those two, whatever its author called them, and naming
+  them the same way on every page is what lets a reader who has opened three
+  of these know where to look on the fourth. The labels in the data are all
+  over the place ("The problem", "Problem", "The constraint", "Key decisions",
+  "The idea"), so they are matched on meaning rather than on string equality.
+
+  These two are deliberately NOT held to the short sentence budget the rest of
+  the page runs on. Everything else was cut because it was repeating the work
+  the pictures already do; these two are the argument itself, and a challenge
+  explained in one sentence is not explained. The reference gives each of them
+  a full paragraph, and so does this.
 */
-function detailPairs(
-  project: Project,
-  limit: number,
-  sentences: number,
-): Pair[] {
+const CHALLENGE = /problem|challenge|constraint|brief|issue/i;
+const SOLUTION =
+  /solution|approach|decision|idea|system|move|response|what i did/i;
+
+function detailPairs(project: Project): Pair[] {
   const blocks = allBlocks(project);
-  const out: Pair[] = [];
+  const labelled: { label: string; body: string }[] = [];
 
-  const brief = blocks.find((b) => b.kind === "brief");
-  if (brief && brief.kind === "brief") {
-    for (const item of brief.items) {
-      if (item.wide) continue; /* the overview already ran in the hero */
-      out.push({ label: item.label, body: trimTo(item.body, sentences) });
-    }
-  }
-
-  if (out.length < limit) {
-    const numbered = blocks.find((b) => b.kind === "numbered");
-    if (numbered && numbered.kind === "numbered") {
-      for (const item of numbered.items) {
-        out.push({ label: item.label, body: trimTo(item.body, sentences) });
+  for (const block of blocks) {
+    if (block.kind === "brief") {
+      for (const it of block.items) {
+        if (!it.wide) labelled.push({ label: it.label, body: it.body });
       }
     }
-  }
-
-  if (!out.length) {
-    const prose = blocks.find((b) => b.kind === "prose");
-    if (prose && prose.kind === "prose" && prose.body.length) {
-      out.push({ label: "Overview", body: trimTo(prose.body[0], sentences) });
+    if (block.kind === "numbered" || block.kind === "decisions") {
+      for (const it of block.items)
+        labelled.push({ label: it.label, body: it.body });
     }
   }
 
-  return out.slice(0, limit);
+  const pick = (re: RegExp) => labelled.find((x) => re.test(x.label));
+  const challenge = pick(CHALLENGE);
+  const solution = pick(SOLUTION);
+
+  /* running text is the fallback, and only when the labelled version of the
+     point is missing: the first paragraph sets up the problem and the second
+     answers it often enough to be worth reaching for */
+  const prose = blocks.find((b) => b.kind === "prose");
+  const paras = prose && prose.kind === "prose" ? prose.body : [];
+
+  /*
+    The labelled lines alone are too thin to be an explanation.
+
+    `brief` items were authored as a summary, "one or two lines, no more", so
+    taking one straight gives a Challenge of about twenty words where the
+    reference has sixty-five. The label is still the right framing, so it
+    stays and the running prose is used to finish the thought: paragraphs are
+    appended, in order and never reused between the two points, until the
+    paragraph is long enough to have actually said something.
+  */
+  const used = new Set<string>();
+  const build = (seed: string | undefined): string => {
+    const parts: string[] = [];
+    if (seed) {
+      parts.push(seed);
+      used.add(seed);
+    }
+    for (const para of paras) {
+      if (words(parts.join(" ")) >= 55) break;
+      if (used.has(para)) continue;
+      used.add(para);
+      parts.push(para);
+    }
+    return parts.join(" ").trim();
+  };
+
+  const out: Pair[] = [];
+  const challengeBody = build(challenge?.body);
+  const solutionBody = build(solution?.body);
+
+  if (challengeBody) out.push({ label: "Challenge", body: challengeBody });
+  if (solutionBody) out.push({ label: "Solution", body: solutionBody });
+  return out;
 }
 
-/* The decisions worth naming, each with the screens it produced. */
-function highlights(
-  project: Project,
-  limit: number,
-  sentences: number,
-): Highlight[] {
+function words(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/*
+  The decisions worth naming, each with the screens it produced.
+
+  Like Challenge and Solution, these keep their full explanation rather than
+  the two-sentence budget the rest of the page runs on. A named feature with
+  one sentence under it is a caption; the point of the beat is that somebody
+  can read WHY the thing works the way it does. What stays capped is how MANY
+  of them a page gets, which is the part that made the old pages long.
+*/
+function highlights(project: Project, limit: number): Highlight[] {
   const out: Highlight[] = [];
 
   for (const block of allBlocks(project)) {
@@ -190,7 +235,7 @@ function highlights(
     if (block.kind === "step" && block.body.length) {
       out.push({
         name: block.items[0]?.label ?? "",
-        body: [trimTo(block.body[0], sentences)],
+        body: block.body.slice(0, 2),
         media: mediaOf(block).slice(0, 4),
       });
       continue;
@@ -201,7 +246,7 @@ function highlights(
         if (out.length >= limit) break;
         out.push({
           name: item.title,
-          body: [trimTo(item.body, sentences)],
+          body: [item.body],
           media: [{ src: item.src, alt: item.alt }],
         });
       }
@@ -250,10 +295,10 @@ export function buildStory(project: Project): Story {
   /* long-form work keeps more of itself; a straight project stays short */
   const deep = project.kind === "case-study" || project.alsoCaseStudy === true;
 
-  const hl = highlights(project, deep ? 4 : 3, deep ? 3 : 2);
+  const hl = highlights(project, deep ? 4 : 3);
   const used = new Set<string>(hl.flatMap((h) => h.media.map((m) => m.src)));
 
-  const pairs = detailPairs(project, deep ? 4 : 2, deep ? 3 : 2);
+  const pairs = detailPairs(project);
   const media = pickMedia(project, used, deep ? 4 : 3);
   const results = resultsOf(project);
 
@@ -269,9 +314,12 @@ export function buildStory(project: Project): Story {
   const visualOnly = !hl.length && !results;
   const gallery = pickMedia(project, used, visualOnly ? 24 : 12);
 
+  const intro = introParagraphs(project);
+
   return {
     statement: pickStatement(project),
-    intro: introParagraphs(project),
+    intro,
+    about: aboutParagraphs(project, intro),
     details: pairs.length || media.length ? { pairs, media } : null,
     highlights: hl,
     results,
@@ -343,7 +391,7 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
       <div className="csDetails__pin">
         {pairs.map((pair, i) => (
           <div className="csDetails__pair" key={i}>
-            <p className="csDetails__label">{pair.label}</p>
+            <p className="csDetails__label">({pair.label})</p>
             <div className="csDetails__text">
               <p className="cs__body">{marked(pair.body)}</p>
             </div>
@@ -480,4 +528,39 @@ export function pickStatement(
 /* One paragraph under the title. Two was already too many to read standing up. */
 export function introParagraphs(project: Project): string[] {
   return [trimTo(project.description, 2)].filter(Boolean);
+}
+
+/*
+  The supporting paragraphs under the statement.
+
+  The inverted band is a whole screen holding one sentence, which left most of
+  it empty. These fill it without turning it back into prose: two short
+  paragraphs, side by side, that say what the sentence above assumes.
+
+  They deliberately avoid whatever the hero already used. Repeating the
+  description here would make the reader check whether they had scrolled at
+  all, so the overview line and the opening prose are taken in that order and
+  anything matching the intro is dropped.
+*/
+export function aboutParagraphs(project: Project, intro: string[]): string[] {
+  const blocks = allBlocks(project);
+  const out: string[] = [];
+
+  const brief = blocks.find((b) => b.kind === "brief");
+  if (brief && brief.kind === "brief") {
+    const wide = brief.items.find((i) => i.wide);
+    if (wide) out.push(trimTo(wide.body, 3));
+  }
+
+  for (const block of blocks) {
+    if (out.length >= 2) break;
+    if (block.kind !== "prose") continue;
+    for (const para of block.body) {
+      if (out.length >= 2) break;
+      out.push(trimTo(para, 3));
+    }
+  }
+
+  const seen = new Set(intro.map((t) => t.slice(0, 40)));
+  return out.filter((t) => t && !seen.has(t.slice(0, 40))).slice(0, 2);
 }

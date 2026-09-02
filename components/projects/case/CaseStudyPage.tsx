@@ -14,6 +14,8 @@ import {
   MediaRow,
 } from "./CaseBlocks";
 import BackToTop from "./BackToTop";
+import ExtCta from "@/components/ExtCta";
+import type { CSSProperties } from "react";
 import "./case.css";
 
 /*
@@ -47,6 +49,28 @@ function otherProjects(current: Project): Project[] {
   return [...kin, ...rest]
     .filter((p) => !seen.has(p.id) && seen.add(p.id))
     .slice(0, 2);
+}
+
+/*
+  The project's own colour, not a house orange.
+
+  The data already carries a per-project accent whose `light` entry was chosen
+  to stay legible on a light canvas, which is exactly the problem the two
+  hand-picked oranges were solving. So the page takes the project's hue:
+  `light` wherever the colour has to be read as text, the louder `solid` or
+  `dark` where it is a surface the eye is meant to find. Projects with no
+  accent of their own fall back to the site purple rather than to a colour
+  that appears nowhere else on the site.
+*/
+function accentVars(project: Project): CSSProperties {
+  const a = project.accent;
+  if (!a) return {};
+  return {
+    "--cs-accent": a.solid ?? a.dark,
+    "--cs-accent-ink": a.light,
+    /* the CTA carries its own token, so the button matches its page */
+    "--ext-accent": a.solid ?? a.dark,
+  } as CSSProperties;
 }
 
 function liveHref(project: Project): string | null {
@@ -97,7 +121,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
       <MobileNav />
       <Cursor />
 
-      <main className="cs">
+      <main className="cs" style={accentVars(project)}>
         <div className="cs__inner">
           <header className="csHero">
             <div className="csHero__meta">
@@ -137,17 +161,9 @@ export default function CaseStudyPage({ project }: { project: Project }) {
             </ul>
 
             {live ? (
-              <a
-                className="csLive"
-                href={live}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {project.cta || "Visit live site"}
-                <span className="csLive__arrow" aria-hidden>
-                  &#8599;
-                </span>
-              </a>
+              <div className="csHero__cta">
+                <ExtCta href={live}>{project.cta || "Visit live site"}</ExtCta>
+              </div>
             ) : null}
 
             {project.cover ? (
@@ -177,6 +193,15 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                     ? marked(" " + story.statement.rest)
                     : null}
                 </p>
+                {story.about.length ? (
+                  <div className="csAbout">
+                    {story.about.map((p, i) => (
+                      <p className="cs__body" key={i}>
+                        {marked(p)}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
                 <Marks />
               </div>
             </section>

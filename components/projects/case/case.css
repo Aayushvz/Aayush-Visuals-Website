@@ -30,17 +30,18 @@
   --cs-mute: #6b6b6b;
   --cs-dark: #141414;
   /*
-    Two oranges, and the reason is contrast rather than taste.
+    The accent is set per project from projectData's own `accent`, which
+    carries a `light` entry chosen to stay legible on a light canvas. These
+    two are only the fallback for a project that has not named one, and they
+    are the site purple rather than a colour that appears nowhere else.
 
-    The reference's #ff5100 measures 3.27:1 on white. That clears the 3:1 bar
-    for large or bold text, so the feature names (600 weight) keep it and the
-    page keeps the reference's colour where the colour is actually doing the
-    talking. It does NOT clear the 4.5:1 that small text needs, and the
-    category line and the results footnote are both 13px, so those take the
-    darkened variant at 4.72:1. The two are never adjacent.
+    Two values because one hue rarely does both jobs: --cs-accent is the loud
+    end, for surfaces the eye is meant to find, and --cs-accent-ink is what
+    stays readable AS text on paper. Every project's ink value was measured
+    on white and clears 4.5:1, the lowest being cpgrams at 4.9.
   */
-  --cs-accent: #ff5100;
-  --cs-accent-ink: #d23f00;
+  --cs-accent: #7c3aed;
+  --cs-accent-ink: #6d28d9;
   --cs-line: rgba(16, 16, 16, 0.12);
 
   /* ---- space: one scale, used everywhere, nothing hand-typed ---- */
@@ -177,49 +178,12 @@
   color: var(--cs-ink);
 }
 
+.csHero__cta {
+  margin-top: var(--cs-md);
+}
+
 .csHero__cover {
   margin-top: var(--cs-lg);
-}
-
-/* ---------- the live-site link ---------- */
-
-.csLive {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  margin-top: var(--cs-md);
-  padding: 0.85em 1.4em;
-  border: 1px solid var(--cs-ink);
-  color: var(--cs-ink);
-  background: transparent;
-  font-size: var(--cs-t-label);
-  font-weight: 500;
-  text-decoration: none;
-  /* the padding alone came to 43px at the smallest size, one pixel under the
-     touch-target minimum, so the floor is stated rather than inferred */
-  min-height: 44px;
-  transition:
-    background-color var(--dur-hover, 200ms) var(--ease-quint),
-    color var(--dur-hover, 200ms) var(--ease-quint);
-}
-
-.csLive:hover,
-.csLive:focus-visible {
-  background: var(--cs-ink);
-  color: var(--cs-bg);
-}
-
-.csLive__arrow {
-  transition: transform var(--dur-hover, 200ms) var(--ease-quint);
-}
-
-.csLive:hover .csLive__arrow {
-  transform: translate(2px, -2px);
-}
-
-.csLive:active {
-  transform: scale(0.97);
-  transition-duration: var(--dur-press, 130ms);
 }
 
 /* ---------- section head ---------- */
@@ -298,6 +262,33 @@
 .csSec--dark .csSec__body {
   display: grid;
   align-content: center;
+  gap: var(--cs-xl);
+}
+
+/*
+  The supporting paragraphs under the statement.
+
+  Two columns rather than one, and offset to the right half of the page, so
+  the block reads as a footnote to the sentence above it rather than as a
+  second sentence competing with it. They start where the statement's own
+  indent starts, which keeps the two on the same axis.
+*/
+.csAbout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--cs-lg);
+  margin-left: auto;
+  width: min(100%, 62%);
+}
+
+.csAbout .cs__body {
+  color: #8a8a8a;
+  max-width: 46ch;
+}
+
+.csAbout .cs__body b {
+  color: #fff;
+  font-weight: 500;
 }
 
 /*
@@ -307,7 +298,10 @@
 */
 .csStatement {
   font-size: var(--cs-t-statement);
-  font-weight: 600;
+  /* 500, not 600. At this size the extra weight stopped reading as emphasis
+     and started reading as shouting, and the white half of the sentence is
+     already doing the emphasising. */
+  font-weight: 500;
   line-height: 1.1;
   letter-spacing: -0.03em;
   margin: 0;
@@ -452,11 +446,14 @@
   presence it should have had anyway.
 */
 .csFeature__name {
+  /* the ink variant, not the bright one: this is text on paper. A project
+     whose brand colour is a light teal measures 2.45:1 bright, which fails
+     even the 3:1 large-text bar, while its own darker shade clears 5:1. */
   font-size: var(--cs-t-lead);
   font-weight: 600;
   line-height: 1.3;
   margin: 0;
-  color: var(--cs-accent);
+  color: var(--cs-accent-ink);
 }
 
 .csFeature__media {
@@ -706,9 +703,11 @@
 
 /* ---------- focus ---------- */
 
+/* the ink variant again: a focus ring is non-text UI and still owes 3:1
+   against what it sits on */
 .cs a:focus-visible,
 .cs button:focus-visible {
-  outline: 2px solid var(--cs-accent);
+  outline: 2px solid var(--cs-accent-ink);
   outline-offset: 3px;
 }
 
@@ -775,6 +774,11 @@
   /* decorative, and there is no spare whitespace to mark at this width */
   .csMarks {
     display: none;
+  }
+
+  .csAbout {
+    width: 100%;
+    margin-left: 0;
   }
 
   .csSec--dark {
