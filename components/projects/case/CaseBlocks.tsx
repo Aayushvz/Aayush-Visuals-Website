@@ -30,7 +30,7 @@ import {
   bottom of it.
 */
 
-type Pair = { label: string; body: string };
+type Pair = { label: string; body: string[] };
 type Media = { src: string; alt: string };
 
 export type Highlight = { name: string; body: string[]; media: Media[] };
@@ -152,6 +152,11 @@ const CHALLENGE = /problem|challenge|constraint|brief|issue/i;
 const SOLUTION =
   /solution|approach|decision|idea|system|move|response|what i did/i;
 
+/* the section names that belong to each point; see proseFrom() below */
+const CHALLENGE_SECTION = /problem|challenge|constraint/i;
+const SOLUTION_SECTION =
+  /approach|solution|decision|insight|essence|structure/i;
+
 function detailPairs(project: Project): Pair[] {
   const blocks = allBlocks(project);
   const labelled: { label: string; body: string }[] = [];
@@ -172,44 +177,55 @@ function detailPairs(project: Project): Pair[] {
   const challenge = pick(CHALLENGE);
   const solution = pick(SOLUTION);
 
-  /* running text is the fallback, and only when the labelled version of the
-     point is missing: the first paragraph sets up the problem and the second
-     answers it often enough to be worth reaching for */
-  const prose = blocks.find((b) => b.kind === "prose");
-  const paras = prose && prose.kind === "prose" ? prose.body : [];
-
   /*
-    The labelled lines alone are too thin to be an explanation.
+    Where the rest of each point comes from.
 
-    `brief` items were authored as a summary, "one or two lines, no more", so
-    taking one straight gives a Challenge of about twenty words where the
-    reference has sixty-five. The label is still the right framing, so it
-    stays and the running prose is used to finish the thought: paragraphs are
-    appended, in order and never reused between the two points, until the
-    paragraph is long enough to have actually said something.
+    Not "the next paragraph in the file". Padding by proximity produced a
+    Challenge whose third paragraph was "Round one: three display faces, same
+    sample, nothing else on the card", which is about type trials: longer, and
+    nonsense. Length is worthless if the paragraph under (Challenge) is not
+    about the challenge.
+
+    Sections already carry the topic in their name, so affinity is read from
+    there. A section called "problem" or "constraints" belongs to the
+    Challenge; one called "approach", "decisions" or "insight" belongs to the
+    Solution. A project whose sections say neither contributes nothing, and
+    the point stays as short as its data actually is, which is honest.
   */
+  const proseFrom = (re: RegExp): string[] => {
+    const out: string[] = [];
+    for (const section of project.sections ?? []) {
+      if (!re.test(section.name)) continue;
+      for (const block of section.blocks) {
+        if (block.kind === "prose") out.push(...block.body);
+      }
+    }
+    return out;
+  };
+
   const used = new Set<string>();
-  const build = (seed: string | undefined): string => {
+  const build = (seed: string | undefined, pool: string[]): string[] => {
     const parts: string[] = [];
     if (seed) {
       parts.push(seed);
       used.add(seed);
     }
-    for (const para of paras) {
-      if (words(parts.join(" ")) >= 55) break;
+    for (const para of pool) {
+      if (words(parts.join(" ")) >= 85 || parts.length >= 3) break;
       if (used.has(para)) continue;
       used.add(para);
       parts.push(para);
     }
-    return parts.join(" ").trim();
+    return parts;
   };
 
   const out: Pair[] = [];
-  const challengeBody = build(challenge?.body);
-  const solutionBody = build(solution?.body);
+  const challengeBody = build(challenge?.body, proseFrom(CHALLENGE_SECTION));
+  const solutionBody = build(solution?.body, proseFrom(SOLUTION_SECTION));
 
-  if (challengeBody) out.push({ label: "Challenge", body: challengeBody });
-  if (solutionBody) out.push({ label: "Solution", body: solutionBody });
+  if (challengeBody.length)
+    out.push({ label: "Challenge", body: challengeBody });
+  if (solutionBody.length) out.push({ label: "Solution", body: solutionBody });
   return out;
 }
 
@@ -393,7 +409,11 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
           <div className="csDetails__pair" key={i}>
             <p className="csDetails__label">({pair.label})</p>
             <div className="csDetails__text">
-              <p className="cs__body">{marked(pair.body)}</p>
+              {pair.body.map((para, k) => (
+                <p className="cs__body" key={k}>
+                  {marked(para)}
+                </p>
+              ))}
             </div>
           </div>
         ))}
