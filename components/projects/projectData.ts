@@ -2804,13 +2804,6 @@ export const PROJECTS: Project[] = [
                 alt: "The Layover vendor revenue screen with today's sales and orders, a monthly revenue bar chart, an activity-by-time line chart, top selling items, average order value and repeat rate.",
                 body: "Today against yesterday at the top, then the month, then **Activity by time**, which is the chart that actually earns its place here. An airport kitchen staffs against flight banks rather than against lunch and dinner, and this is the only screen in the product that shows them where those banks are.",
               },
-              {
-                src: "/projects/layover/vendor-mobile.webp",
-                step: "Vendor 07",
-                title: "The order wall had to survive in a pocket",
-                alt: "The Layover vendor portal on a phone with the navigation open as a drawer over the dashboard's order cards.",
-                body: "On a busy day nobody is at the desk. The sidebar becomes a drawer, the order cards stack, and Accept and Reject keep their size. **Nothing was removed for the small screen**, deliberately: an outlet running the evening rush from a phone should not be running a lesser version of the product.",
-              },
             ],
           },
         ],
