@@ -279,6 +279,13 @@ export type CaseBlock =
   */
   | {
       kind: "step";
+      /*
+        The beat's name. Falls back to the first item's label, which is what
+        every existing call site relies on and which stops being sensible the
+        moment a beat holds four screens: "01 Rest" is the name of one frame,
+        not of the group it opens.
+      */
+      title?: string;
       items: { src: string; alt: string; label?: string }[];
       body: string[];
     }
@@ -547,6 +554,51 @@ export type Project = {
   */
   challenge?: string[];
   solution?: string[];
+  /*
+    The pictures beside the Challenge and Solution, chosen rather than picked.
+
+    The renderer takes the first interface images it finds in section order,
+    which is right for most projects and wrong for one with a tutorial in it:
+    on the grievance project the column filled with onboarding frames, so the
+    argument about a 15-field form was illustrated by a coach mark. Naming
+    them here says "these are the screens the product IS", which no heuristic
+    reading section names can work out.
+
+    Anything listed here is also withheld from the gallery, so a screen never
+    appears twice on the page.
+  */
+  detailMedia?: { src: string; alt: string }[];
+  /*
+    How much room this project's case study is allowed.
+
+    The defaults are sized for a project with one flow in it. A product with
+    two complete flows, twenty-odd distinct screens and a real explanation
+    for each one is not longer because it is padded, it is longer because
+    there is more of it, and capping it to four named screens throws away the
+    part a designer reading the page actually wants.
+
+    `images` is the page-wide budget BEFORE it is divided between motifs, so
+    raising it is what lets one flow show more than three of its own frames.
+  */
+  /*
+    Give every surface its own numbered section instead of one Highlights run.
+
+    Off by default, because a project with one interface reads better as a
+    single list of decisions. Turn it on for a product that is several
+    separate interfaces used by different people: each section carrying a
+    walkthrough then becomes its own beat, titled by that section's heading,
+    so the reader can see where the traveller's app stops and the kitchen's
+    portal starts without having to work it out from the screenshots.
+  */
+  caseChapters?: boolean;
+  caseLimits?: {
+    /** named screens the page shows, shared across chapters when they are on */
+    highlights?: number;
+    /** page-wide image budget, split across the families it finds */
+    images?: number;
+    /** pictures in the Gallery beat */
+    gallery?: number;
+  };
   /** case-study gallery. Without it the page falls back to `cover` alone. */
   shots?: ProjectShot[];
   /** long-form body. When present it renders instead of the flat `shots`
@@ -1289,7 +1341,7 @@ export const PROJECTS: Project[] = [
     cover: "/projects/riviera-cover.webp",
     preview: {
       kind: "website",
-      href: "https://riviera.vit.ac.in/",
+      href: "https://riviera-lol.vercel.app/",
       image: "/projects/riviera-cover.webp",
     },
     cta: "Visit Live Website",
@@ -1343,7 +1395,7 @@ export const PROJECTS: Project[] = [
     role: "Product Design · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
     description:
-      "CPGRAMS is how a citizen of India formally complains to their own government: 20 lakh grievances a year across 90+ ministries, filed through a 15-field form that in practice only works in English or Hindi. This is a conversational layer over it, and it speaks all 22 scheduled Indian languages. You describe your problem out loud in whichever one you think in, and the chatbot files it, routed and categorised, without you ever seeing the form.",
+      "CPGRAMS is how you complain to the Government of India. Twenty lakh grievances a year, more than ninety ministries, and a fifteen-field form that in practice only works if you read English or Hindi. I designed a chatbot that sits on top of it. You say what went wrong, in whichever of the 22 official languages you actually think in, and it files the grievance for you.",
     extraFacts: [
       ["Client", "DARPG, Government of India"],
       ["Delivered with", "KPMG India"],
@@ -1360,6 +1412,51 @@ export const PROJECTS: Project[] = [
       "Grievances auto-filled and routed to the correct ministry from plain speech",
       "Samadhan Didi, a lip-synced mascot who teaches the interface as you use it",
     ],
+    /*
+      Written rather than assembled. This is the copy the page is judged on,
+      and it is the part most likely to be revised, so it lives here instead
+      of being pieced together from a brief item and whatever prose happened
+      to sit in a section with the right name.
+    */
+    challenge: [
+      "The system works. The door does not. Anyone can lodge a complaint against any central department, an officer is legally obliged to answer it, and 93% of the twenty lakh filed each year get closed. That machinery is real.",
+      "Getting to it is the problem. There is a 15-field form, and its second question asks which of 90+ ministries owns what happened to you. That is a filing decision, demanded before you have described anything. Add English or Hindi only, a desktop-shaped layout, a CAPTCHA and a session that quietly expires, and **six in ten people who start the form never finish it**.",
+      "Which means the people the system exists for are the ones least able to reach it. A quarter of the country cannot read or write. More than 550 million citizens think in a language the portal does not speak.",
+    ],
+    solution: [
+      "**Work out the ministry instead of asking for it. Listen for the language instead of offering a list. And show the person what you understood before anything is filed.**",
+      "That turned the job from redesigning the portal into building a translation layer over it. Same ministries, same categories, same 30 to 60 day clock. The complexity does not disappear, it moves off the citizen and into the software, which already knows how government is organised.",
+      "Voice carries it. Press one button, talk, and the interface switches to whatever language it heard. Everything the form used to demand gets pulled out of that one answer and handed back as a summary you check before it goes.",
+    ],
+    /*
+      The four screens the argument above is actually about. Left to the
+      picker this column filled with onboarding coach marks, because the
+      tutorial section comes earlier in the file than the product does.
+    */
+    detailMedia: [
+      {
+        src: "/projects/cpgrams/voice-02.webp",
+        alt: "The CPGRAMS chatbot home screen: a large microphone in the centre labelled Press to Speak, a chat history rail on the left and a text input along the bottom.",
+      },
+      {
+        src: "/projects/cpgrams/voice-09.webp",
+        alt: "The CPGRAMS chat thread showing the citizen's own voice message with a waveform player above Samadhan Didi's written reply and its spoken version.",
+      },
+      {
+        src: "/projects/cpgrams/text-08.webp",
+        alt: "The CPGRAMS Grievance Information card with a plain-language summary and the ministry resolved to NHAI.",
+      },
+      {
+        src: "/projects/cpgrams/voice-12.webp",
+        alt: "The CPGRAMS Verify Details dialog with an editable grievance summary, the ministry and category, and Close and Submit controls.",
+      },
+    ],
+    /*
+      Two complete flows, and a real explanation for each screen in them. The
+      default of four named screens is right for work whose argument is three
+      decisions; here the argument IS the sequence.
+    */
+    caseLimits: { highlights: 14, images: 200, gallery: 30 },
     sections: [
       {
         name: "overview",
@@ -1371,28 +1468,40 @@ export const PROJECTS: Project[] = [
               {
                 label: "What it is",
                 wide: true,
-                body: "A **conversational layer** over India's national grievance system. Describe your complaint out loud in any of **22 languages** and the chatbot files it: categorised, routed and legally identical to a form submission.",
+                body: "A conversation laid over India's national grievance system. Say what went wrong in any of **22 languages** and it files the complaint for you: categorised, routed, and worth exactly as much as a form submission.",
               },
               {
                 label: "The problem",
-                body: "Filing required naming which of **90+ ministries** owned your problem, in English or Hindi, on a desktop form. **Six in ten people abandoned it.**",
+                body: "You had to name which of **90+ ministries** owned your problem, in English or Hindi, on a desktop form. **Six in ten people gave up partway.**",
               },
               {
                 label: "Key challenges",
-                body: "The government's **taxonomy could not change**, a quarter of the audience **cannot read or write**, and it had to work on a 2G phone.",
+                body: "The government's **taxonomy was fixed**, a quarter of the audience **cannot read or write**, and it had to work on a 2G phone.",
               },
               {
                 label: "Key decisions",
-                body: "**Infer the ministry**, never ask for it. Detect the language instead of offering a list. **Show the interpretation before filing.**",
+                body: "**Work out the ministry** instead of asking. Listen for the language instead of offering a list. **Show what you understood before filing.**",
               },
               {
                 label: "Outcome",
-                body: "Live at cpgramsaichatbot.com. Filing now asks for **speech**, not literacy plus filing knowledge.",
+                body: "Live at cpgramsaichatbot.com. Filing now asks you to **speak**, not to read, write and know how government files things.",
               },
               {
                 label: "What I learned",
-                body: "Accessibility **was** the product, not a layer on it. Automation that hides its reasoning is **exposure, not convenience**.",
+                body: "Accessibility **was** the product, not a layer on it. And automation that hides its reasoning is **exposure, not convenience**.",
               },
+            ],
+          },
+          {
+            /*
+              Written for the About beat specifically. It sits under the
+              inverted statement, which is a whole screen holding one line,
+              and these two paragraphs are what that line assumes.
+            */
+            kind: "prose",
+            body: [
+              "Complaining to your own government should be the easiest thing you ever do online. It is a right, it is written down, and somebody at the other end is obliged to answer. In practice it has been closer to a qualification test.",
+              "So this was never really a chatbot project. It was a project about who gets to be heard, and the interface was just where that got decided.",
             ],
           },
         ],
@@ -1404,8 +1513,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "CPGRAMS is a statutory commitment. Any citizen can lodge a grievance against any central department and an officer must answer it. **90+ ministries**, **20 lakh grievances a year**, **93%** disposed. The machinery works.",
-              "The door does not. Reaching it means a **15-field form** whose second field asks which ministry and category your problem belongs to: a **filing decision**, demanded before you have described anything.",
+              "CPGRAMS is a promise the state makes to everyone. Lodge a grievance against any central department and an officer has to answer it inside 30 to 60 days. **90+ ministries**, **20 lakh grievances a year**, **93%** of them closed.",
+              "The promise holds. The door does not. To reach it you fill a **15-field form**, and its second field asks which ministry and category your problem belongs to. You are being asked to file the complaint before you are allowed to describe it.",
             ],
           },
           {
@@ -1417,20 +1526,17 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "Register",
-                sub: [
-                  "Mobile number or email",
-                  "Before anything can be described",
-                ],
+                sub: ["Mobile number or email", "Before you can say anything"],
               },
               {
                 label: "Pick the ministry",
                 decision: true,
-                sub: ["One of 90+", "Asked before the problem is stated"],
+                sub: ["One of 90+", "Asked before you describe the problem"],
               },
               {
                 label: "Pick the department and category",
                 decision: true,
-                sub: ["The portal's taxonomy", "Not the citizen's words"],
+                sub: ["The portal's words", "Not yours"],
               },
               {
                 label: "Describe the grievance",
@@ -1438,22 +1544,19 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "Attach documents",
-                sub: ["Which ones is never said up front"],
+                sub: ["Nobody says which ones up front"],
               },
               {
                 label: "Submit",
                 sub: ["Clear a CAPTCHA", "Beat the session timeout"],
               },
               {
-                label: "Receive a registration number",
-                sub: [
-                  "Track the status with it",
-                  "An officer must reply in 30 to 60 days",
-                ],
+                label: "Get a registration number",
+                sub: ["Track it with that", "An officer replies in 30 to 60 days"],
               },
             ],
             caption:
-              "Eight steps, and the two a citizen is least equipped for sit at **three and four**. The classification is demanded **before the problem is described**, which is the wrong order for anyone who does not already know how government files things.",
+              "Eight steps, and the two hardest sit at **three and four**. You classify the problem before you have said what it is, which is backwards for anyone who does not already know how government is organised.",
           },
           {
             kind: "stats",
@@ -1473,20 +1576,20 @@ export const PROJECTS: Project[] = [
             kind: "numbered",
             items: [
               {
-                label: "You must already know the answer to use it",
-                body: "The people least able to **classify their own problem** are the ones the system exists for.",
+                label: "You have to already know the answer",
+                body: "The people least able to sort their own problem into a ministry are exactly the people this exists for.",
               },
               {
-                label: "Built for a machine most users do not own",
-                body: "Desktop-first in a country that is **three quarters mobile**, with a **CAPTCHA** that defeats the age group filing most grievances.",
+                label: "Built for a machine most people do not own",
+                body: "Desktop-first in a country that is **three quarters mobile**, with a **CAPTCHA** that stops the age group filing the most grievances.",
               },
               {
                 label: "Two languages out of twenty-two",
                 body: "More than **550 million citizens** think in a regional language the portal cannot read.",
               },
               {
-                label: "One mistake and the work is gone",
-                body: "**Session timeouts** wipe everything. No autosave, no drafts, no recovery path.",
+                label: "One slip and the work is gone",
+                body: "**Session timeouts** take everything with them. No autosave, no draft, no way back.",
               },
             ],
           },
@@ -1513,7 +1616,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "**Six in ten people who start a grievance never finish it**, so the state never hears from them at all.",
+              "**Six in ten people who start a grievance never finish it.** The state simply never hears from them.",
           },
           {
             kind: "coverage",
@@ -1539,36 +1642,36 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "That moves the work from redesigning the portal to building a **translation layer** over it. Same ministries, same categories, same **statutory clock**. The complexity does not disappear, it **moves out of the citizen and into the system**, which is the one place that already knows how government is organised.",
+              "Once I wrote that down the brief changed. I was not designing a better portal, I was designing a **translation layer** over the one that already works. Same ministries, same categories, same statutory clock. The hard part does not vanish, it moves from the person complaining to the system that already understands how it is filed.",
             ],
           },
           {
             kind: "compare",
             lanes: [
               {
-                label: "The portal asks the citizen to",
+                label: "The portal asks you to",
                 tone: "before",
                 note: "Every step is a chance to give up, and six in ten people take it.",
                 steps: [
                   "Register an account",
                   "Read the interface in English or Hindi",
-                  "Identify the correct ministry",
-                  "Identify the correct category",
+                  "Work out the right ministry",
+                  "Work out the right category inside it",
                   "Write the grievance in formal language",
                   "Attach the right documents",
                   "Clear a CAPTCHA",
-                  "Complete it all before the session expires",
+                  "Finish before the session expires",
                 ],
               },
               {
-                label: "The chatbot asks the citizen to",
+                label: "The chatbot asks you to",
                 tone: "after",
-                note: "Everything else is inferred, filled and routed by the system that already knows how it is organised.",
+                note: "Everything else is inferred, filled and routed by the system that already knew it.",
                 steps: ["Say what happened", "Check that it got it right"],
               },
             ],
             caption:
-              "Same grievance, same destination, same **legal weight**. The redesign moves the knowledge of how government is organised **from the citizen to the software**.",
+              "Same grievance, same destination, same **legal weight**. What moved is who has to know how government is organised.",
           },
         ],
       },
@@ -1579,7 +1682,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Two fixed constraints: the government's **taxonomy could not change**, and the audience **could not be assumed to read**. Together they rule out the obvious move, since a cleaner form is still a **reading test with a filing test attached**.",
+              "Two things were fixed before I started. The government's **taxonomy could not change**, and I could not assume the person filing **could read**. Between them they kill the obvious answer, because a tidier form is still a reading test with a filing test stapled to it.",
             ],
           },
           {
@@ -1588,7 +1691,7 @@ export const PROJECTS: Project[] = [
               {
                 label: "Rejected",
                 tone: "before",
-                note: "Each fixes the surface and leaves the barrier standing.",
+                note: "Each one fixes the surface and leaves the barrier standing.",
                 steps: [
                   "Redesign the form: cleaner, still a reading and filing test",
                   "Add a language toggle: a picker is itself a reading test",
@@ -1600,7 +1703,7 @@ export const PROJECTS: Project[] = [
                 tone: "after",
                 note: "Removes the two things that actually stop people.",
                 steps: [
-                  "Conversation over the existing system",
+                  "A conversation over the system that already exists",
                   "Voice as the primary input, not a feature",
                 ],
               },
@@ -1610,26 +1713,26 @@ export const PROJECTS: Project[] = [
             kind: "numbered",
             items: [
               {
-                label: "Move the cognitive load, do not reduce it",
-                body: "The **cognitive load** is real. It can only move from the citizen to the **software**.",
+                label: "Move the work, do not pretend it is not there",
+                body: "Somebody has to know which ministry owns a broken highway. It should be the **software**.",
               },
               {
-                label: "Progressive disclosure over a single page",
-                body: "**One question at a time** keeps **working memory** free for the answer.",
+                label: "One question at a time",
+                body: "A page of fields makes you hold all of them at once. A conversation asks for one thing and waits, which keeps **working memory** free for the answer.",
               },
               {
-                label: "Input parity, output parity",
-                body: "Accepting voice but replying only in text solves the wrong half.",
+                label: "If it listens, it should also speak",
+                body: "Taking voice in and replying only in text solves the half of the problem the user could already handle.",
               },
               {
-                label: "Automation needs a consent surface",
-                body: "The system files on your behalf, so it must **show its interpretation before committing**.",
+                label: "Automation needs somewhere to ask permission",
+                body: "The system files a legal document on your behalf, so it has to **show you what it wrote** first.",
               },
             ],
           },
           {
             kind: "statement",
-            text: "Every screen had to solve its problem in the **minimum number of clicks**.",
+            text: "Every screen had to solve its problem in the **fewest possible clicks**.",
           },
         ],
       },
@@ -1640,7 +1743,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "You do not wireframe a chatbot the way you wireframe a page. There is no fixed layout, only a **sequence of states** and what each one may ask for. Four **greyboxes** settled it.",
+              "You cannot wireframe a chatbot the way you wireframe a page. There is no fixed layout, only a **sequence of states** and what each one is allowed to ask for. Four greyboxes settled it.",
             ],
           },
           {
@@ -1649,17 +1752,17 @@ export const PROJECTS: Project[] = [
               {
                 layout: "entry",
                 label: "01 Entry",
-                note: "**One primary action**, centred. History rail kept from the portal so **returning users recognise it**.",
+                note: "**One primary action**, centred. The history rail stays because **returning users recognise it** from the portal.",
               },
               {
                 layout: "listen",
                 label: "02 Capture",
-                note: "**Live feedback** while recording. A static indicator does not reassure a first-time user.",
+                note: "**Live feedback** while recording. A static indicator does not reassure someone doing this for the first time.",
               },
               {
                 layout: "chat",
                 label: "03 Thread",
-                note: "Alternating turns, input pinned. **Every message persists** so a dropped session is not a lost grievance.",
+                note: "Alternating turns, input pinned. **Every message persists**, so a dropped session is not a lost grievance.",
               },
               {
                 layout: "review",
@@ -1668,7 +1771,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "Low fidelity on purpose. Greyboxes keep the argument on **structure**, the only thing these were deciding.",
+              "Low fidelity on purpose. Greyboxes keep the argument about **structure**, which was the only thing these had to decide.",
           },
         ],
       },
@@ -1679,7 +1782,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The shell is deliberately the one people already know from government portals: a rail on the left, an account control top right, an input along the bottom. **Recognition was worth more than novelty**, because the thing this has to overwrite is the visitor's last experience of a .gov.in site. Inside that familiar frame, only one element is allowed to be loud.",
+              "The shell is deliberately the one people already know from government portals: a rail on the left, the account control top right, an input along the bottom. **Recognition was worth more than novelty** here, because what this has to overwrite is whatever happened the last time they opened a .gov.in site. Inside that familiar frame, exactly one thing is allowed to be loud.",
             ],
           },
           {
@@ -1687,25 +1790,25 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 label: "Centre: press to speak",
-                body: "The primary action takes the **optical centre and the largest target on the page**. A first-time user should not have to look for it, and someone who cannot read the label can still find a control that size in the middle of the screen.",
+                body: "The primary action takes the **optical centre and the largest target on the page**. Nobody should have to hunt for it, and someone who cannot read the label can still find a control that size in the middle of the screen.",
               },
               {
                 label: "Bottom: the text input",
-                body: "Where every messaging app puts it, and where the thumb already goes. Keeping it visible means **typing is never a hidden fallback**, but it sits below the microphone in the visual order because voice is the priority.",
+                body: "Where every messaging app puts it, and where the thumb already is. Keeping it visible means **typing is never a hidden fallback**, but it sits below the microphone because voice comes first.",
               },
               {
                 label: "Left rail: new chat and history",
-                body: "First in the scanning order, carrying the two things a returning user needs. It also does the **recovery** work: on 2G a dropped session is routine, and a grievance in progress has to still be there when the page comes back.",
+                body: "First in the scanning order, holding the two things a returning user needs. It also does the **recovery** work: on 2G a dropped session is routine, and a half-finished grievance has to still be there when the page comes back.",
               },
               {
                 label: "Top right: profile and account",
-                body: "The conventional corner, deliberately **out of the task path**. Identity is something the system needs, not the person describing a problem, so it never interrupts the flow.",
+                body: "The conventional corner, deliberately **out of the task path**. Identity is something the system needs, not something the person describing a problem should be interrupted by.",
               },
             ],
           },
           {
             kind: "statement",
-            text: "One screen, **one obvious action**. Everything else is chrome that has to earn its place.",
+            text: "One screen, **one obvious action**. Everything else has to earn its place.",
           },
         ],
       },
@@ -1716,7 +1819,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "A chat window is still an interface, and to somebody who has never used one it is still an exam. So the product has a face. **Didi means elder sister**, the person you already ask for help with a form. She is a government worker in a saree with a departmental lanyard, **lip-synced** to the spoken reply.",
+              "A chat window is still an interface, and to someone who has never used one it is still an exam. So the product has a face. **Didi means elder sister**, the person you already ask for help with a form. She is a government worker in a saree with a departmental lanyard, and she is **lip-synced** to whatever the system says out loud.",
             ],
           },
           {
@@ -1745,50 +1848,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "Four directions before she settled. The test each had to pass: does a first-time filer read her as **staff who works here**, or as a brand character?",
-          },
-          {
-            kind: "gallery",
-            compact: true,
-            items: [
-              {
-                src: "/projects/cpgrams/mascot-a.webp",
-                label: "Greeting",
-                alt: "Samadhan Didi in a greeting pose.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-b.webp",
-                label: "Explaining",
-                alt: "Samadhan Didi in an explaining pose.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-c.webp",
-                label: "Pointing",
-                alt: "Samadhan Didi pointing at an interface control.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-d.webp",
-                label: "Listening",
-                alt: "Samadhan Didi in a listening pose.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-e.webp",
-                label: "Reassuring",
-                alt: "Samadhan Didi in a reassuring pose.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-f.webp",
-                label: "Confirming",
-                alt: "Samadhan Didi in a confirming pose.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-g.webp",
-                label: "Closing",
-                alt: "Samadhan Didi in a closing pose.",
-              },
-            ],
-            caption:
-              "The shipped set, built as **states rather than one illustration**. A guide holding a single expression through a complaint about a missing pension reads as indifferent.",
+              "Four directions before she settled. The test each one had to pass: does a first-time filer read her as **staff who works here**, or as a brand character?",
           },
         ],
       },
@@ -1799,7 +1859,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Seen once, the **first time a citizen opens the chatbot**. Everything after it assumes you know you can press a button and speak, and no government website has ever suggested that.",
+              "Seen once, the first time someone opens the chatbot. Everything after it assumes you know you can press a button and just talk, and **no government website has ever suggested that**.",
             ],
           },
           {
@@ -1835,7 +1895,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The tutorial **points at the interface** rather than describing it. **Spotlight masking** dims everything but the control being explained, and the microphone gets the plainest sentence in the product: press it and speak in your language.",
+              "The tutorial **points at the interface** rather than describing it. Spotlight masking dims everything except the control being explained, and the microphone gets the plainest sentence in the product: press it and speak in your language.",
               "**Skip sits on the first frame**, not the last. Onboarding should not tax the confident user to reassure the uncertain one.",
             ],
           },
@@ -1846,11 +1906,6 @@ export const PROJECTS: Project[] = [
                 src: "/projects/cpgrams/m-demo-1.webp",
                 label: "Open",
                 alt: "The CPGRAMS chatbot onboarding on a phone, opening state.",
-              },
-              {
-                src: "/projects/cpgrams/m-demo-2.webp",
-                label: "Meet",
-                alt: "Samadhan Didi introduced on a phone screen.",
               },
               {
                 src: "/projects/cpgrams/m-demo-3.webp",
@@ -1872,7 +1927,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "On the phone she drops to a **corner presence**. At **402px** a full figure covers the control she is pointing at, turning the guide into the obstacle.",
+              "On the phone she drops to a **corner presence**. At 402px a full figure covers the control she is pointing at, which turns the guide into the obstacle.",
             ],
           },
         ],
@@ -1884,115 +1939,74 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "For a quarter of the country, **reading and writing is the barrier**. Voice is the **accessibility strategy** here, not a convenience. Typing is the alternative.",
+              "For a quarter of the country, reading and writing **is** the barrier. So voice is not a convenience feature here, it is the accessibility strategy. Typing is the alternative to it, not the other way round.",
             ],
           },
           {
-            kind: "step",
+            kind: "screens",
             items: [
               {
                 src: "/projects/cpgrams/voice-01.webp",
-                label: "01 Rest",
-                alt: "The CPGRAMS voice flow resting state with a large central microphone control.",
+                step: "Voice 01",
+                title: "It opens with a person, not a form",
+                alt: "The CPGRAMS Chatbot title screen on saffron with the departmental masthead and Samadhan Didi greeting with folded hands.",
+                body: "The first thing on screen is Samadhan Didi and the name of the department, on the state's own saffron. That is deliberate. What this product has to overwrite is whatever happened the last time this person opened a government website, and being greeted by someone who looks like staff does more for that than any amount of layout.",
               },
-              {
-                src: "/projects/cpgrams/voice-02.webp",
-                label: "02 Press to speak",
-                alt: "The CPGRAMS voice flow with a press to speak prompt on the microphone.",
-              },
-            ],
-            body: [
-              "**Entry.** The microphone holds the centre and the weight: no language picker, no category dropdown, since both demand a decision before you have said anything. The interface opens in English and waits, rather than asking who you are first. A single **press starts recording**, because hold-to-record fails for **tremor and arthritis** in the 60-plus group that files the most grievances here.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
               {
                 src: "/projects/cpgrams/voice-03.webp",
-                label: "03 Listening",
-                alt: "The CPGRAMS voice flow recording with a live waveform responding to speech.",
+                step: "Voice 02",
+                title: "It listens before it asks you anything",
+                alt: "The CPGRAMS voice flow recording, with a reactive orb replacing the microphone and the line Detecting Language, Please continue to speak.",
+                body: "No language picker and no category dropdown, because both ask you to decide something before you have said a word. The orb reacts while you talk, on the exact control you just pressed, so there is never a doubt that it is on. One press starts and stops it: press-and-hold fails for tremor and arthritis, and the over-60s file more grievances here than anybody else.",
               },
               {
                 src: "/projects/cpgrams/voice-04.webp",
-                label: "04 Audio kept",
-                alt: "A user voice message in the CPGRAMS chat thread with a waveform audio player.",
+                step: "Voice 03",
+                title: "It says what it is waiting for",
+                alt: "The CPGRAMS recording panel open with a placeholder transcript line and an instruction to click the microphone to stop recording.",
+                body: "A silent pause during a wait reads as failure, especially on a connection where failure is normal. So the panel opens the moment recording starts, asks you to keep speaking while it works the language out, and says in plain words how to stop. Nothing hides behind a spinner.",
               },
-            ],
-            body: [
-              "**Capture.** A **live waveform** proves the system is listening, and it is placed where the person is already looking, on the control they just pressed. Without that feedback an unsure speaker stops mid-sentence to check. The audio then **stays in the thread** rather than being discarded, since it is the one artefact here the software cannot have got wrong.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
               {
                 src: "/projects/cpgrams/voice-05.webp",
-                label: "05 Transcribed",
-                alt: "The CPGRAMS voice flow showing the transcribed text alongside the recorded audio.",
+                step: "Voice 04",
+                title: "Your words come back while you are still talking",
+                alt: "The CPGRAMS voice flow showing a live transcript building underneath the detected language and an elapsed recording time.",
+                body: "The transcript builds live, with the detected language above it and the elapsed time beside it. This is the cheapest place in the whole product to catch a mistake. A misheard road name costs nothing here, and costs a wrongly routed grievance if it gets through.",
               },
               {
                 src: "/projects/cpgrams/voice-06.webp",
-                label: "06 Language detected",
-                alt: "The CPGRAMS voice flow with a detected regional language reflected in the interface.",
+                step: "Voice 05",
+                title: "You get to fix it before it goes anywhere",
+                alt: "The CPGRAMS editable transcript with Samadhan Didi pointing at it and a note saying mistakes can be edited here, beside a submit control.",
+                body: "Didi points at the text and says, in as few words as possible, that you can edit it. Corrections go back in by voice or by keyboard, so fixing an error never demands the skill the person arrived without. Nothing moves until Submit.",
               },
-            ],
-            body: [
-              "**Transcription, then language.** Speech appears as text **in real time**, beside the audio it came from, which makes this the **first point of error recovery**: catching a misheard place name here costs nothing next to catching it after routing. Corrections go back through either input, voice or keyboard, so fixing a mistake never demands the skill the person came without. Language is **detected from what was said, not selected from a list**, and the whole interface switches to it. Speak Tamil and the product becomes Tamil. A picker would have been a reading test handed to people who may not read.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
               {
                 src: "/projects/cpgrams/voice-07.webp",
-                label: "07 Answered aloud",
-                alt: "Samadhan Didi responding with both written text and a voice response player.",
-              },
-              {
-                src: "/projects/cpgrams/voice-08.webp",
-                label: "08 One question",
-                alt: "The CPGRAMS chatbot asking a single follow-up question to complete a grievance.",
-              },
-            ],
-            body: [
-              "**Understanding.** Every reply is **playable as well as readable**, since voice in with text out abandons the user at the half carrying the answer. Behind the reply the system is working out the nature of the problem, the department that owns it and the category it files under. What it still cannot infer arrives as **one question at a time**, in the conversation rather than in a second form, so working memory stays free for the answer instead of the interface.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
-              {
-                src: "/projects/cpgrams/voice-09.webp",
-                label: "09 Auto-filled",
-                alt: "The CPGRAMS chatbot with an auto-filled grievance derived from the spoken complaint.",
+                step: "Voice 06",
+                title: "The recording stays in the conversation",
+                alt: "The CPGRAMS chat thread with the citizen's voice message and waveform player kept above a card reading Identifying Relevant Ministry.",
+                body: "The audio is not thrown away once it has been transcribed. It is the one thing on this page the software cannot have got wrong, so it stays in the thread as a playable message. Underneath, the system names the step it is on rather than showing a bar: identifying the relevant ministry.",
               },
               {
                 src: "/projects/cpgrams/voice-10.webp",
-                label: "10 Review",
-                alt: "The CPGRAMS pre-submission review card showing the interpreted grievance and a submit control.",
+                step: "Voice 07",
+                title: "It asks for what is missing, one thing at a time",
+                alt: "The CPGRAMS thread with a short answer chip reading Road name NH 45 above a Grievance Information card holding a summary and classification.",
+                body: "The road name is the sort of detail the portal buried in a field called Location. Here it is one question with one answer under it. Everything gathered so far then folds into a Grievance Information card: a plain-language summary, the ministry, the category, all of it worked out from what was said instead of chosen from a dropdown.",
               },
-            ],
-            body: [
-              "**Summary.** **Ministry, category, jurisdiction and urgency** come out of what was said, and documents are asked for only when the grievance actually needs one, at the moment it is needed. Everything then returns as a **short summary** the citizen checks before anything is sent: the interpretation, in their own language, in one card. **Auto-filing a legal document unseen** is a liability with the citizen's name on it, so this is the **consent surface** and the flow's real destination.",
+              {
+                src: "/projects/cpgrams/voice-11.webp",
+                step: "Voice 08",
+                title: "Documents are asked for at the moment they matter",
+                alt: "The CPGRAMS grievance card with an optional document upload, an expected resolution field that also takes voice, and a Verify Details button.",
+                body: "Not as a checklist on screen one, which is a reason to close the tab. The upload appears only when the grievance actually needs paperwork, and the field beside it asks what you want to happen, which the original form never bothered to ask at all. Verify Details is the only way forward from here.",
+              },
             ],
           },
           {
-            kind: "step",
-            items: [
-              {
-                src: "/projects/cpgrams/voice-11.webp",
-                label: "11 Escalate",
-                alt: "The CPGRAMS review card with a link to register with the Central Authority.",
-              },
-              {
-                src: "/projects/cpgrams/voice-12.webp",
-                label: "12 Filed",
-                alt: "The CPGRAMS chatbot confirming a submitted grievance with a registration identifier.",
-              },
-            ],
+            kind: "prose",
             body: [
-              "**Submission.** Confirming sends the structured grievance straight to the department that owns it, with no portal navigation in between. When routing is wrong, **escalation to the Central Authority is one tap**: the system is allowed to be wrong, not allowed to be wrong **with no exit**. It closes on the **same registration number** the portal issues, which is also how the citizen tracks it afterwards, carrying the same 30 to 60 day clock.",
+              "Language is **detected from what was said, never selected from a list**. Speak Tamil and the product becomes Tamil. A picker would have been a reading test handed to people who may not read.",
             ],
           },
           {
@@ -2009,11 +2023,6 @@ export const PROJECTS: Project[] = [
                 alt: "CPGRAMS voice recording on a phone with a live waveform.",
               },
               {
-                src: "/projects/cpgrams/m-voice-5.webp",
-                label: "Transcribed",
-                alt: "CPGRAMS phone screen showing transcribed speech.",
-              },
-              {
                 src: "/projects/cpgrams/m-voice-7.webp",
                 label: "Answered",
                 alt: "CPGRAMS phone screen with a spoken response player.",
@@ -2023,17 +2032,12 @@ export const PROJECTS: Project[] = [
                 label: "Review",
                 alt: "CPGRAMS review screen on a phone before submission.",
               },
-              {
-                src: "/projects/cpgrams/m-voice-10.webp",
-                label: "Filed",
-                alt: "CPGRAMS phone confirmation screen with a registration identifier.",
-              },
             ],
           },
           {
             kind: "prose",
             body: [
-              "The phone runs the same sequence, re-laid rather than reduced. This is the device the low-literacy user actually owns, often on **2G**, so the **left rail collapses into a sheet** and gives its space back to the conversation, the microphone drops into the **thumb arc** instead of the optical centre, and the summary takes the **full screen** so nothing it is asking consent for sits below the fold.",
+              "The phone runs the same sequence, re-laid rather than reduced. This is the device the low-literacy user actually owns, often on **2G**, so the left rail collapses into a sheet and gives its space back to the conversation, the microphone drops into the **thumb arc** instead of the optical centre, and the summary takes the **full screen** so nothing it is asking consent for sits below the fold.",
             ],
           },
         ],
@@ -2045,128 +2049,53 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Voice is the **priority, not the requirement**. Plenty of citizens would rather type, and speaking a complaint aloud is not always possible in a shared house or a queue.",
+              "Voice is the **priority, not the requirement**. Plenty of people would rather type, and saying a complaint out loud is not always possible in a shared house or a queue.",
             ],
           },
           {
-            kind: "step",
-            items: [
-              {
-                src: "/projects/cpgrams/text-01.webp",
-                label: "01 Open",
-                alt: "The CPGRAMS text flow opening screen with the message input ready.",
-              },
-              {
-                src: "/projects/cpgrams/text-02.webp",
-                label: "02 Describe",
-                alt: "A typed grievance in the CPGRAMS chat written in plain conversational language.",
-              },
-            ],
-            body: [
-              "It opens with the **input focused and nothing else required**. The portal's first question was which of ninety ministries owns your problem. This one's is what happened, and everything the form demanded up front is **extracted from that answer**.",
-            ],
-          },
-          {
-            kind: "step",
+            kind: "screens",
             items: [
               {
                 src: "/projects/cpgrams/text-03.webp",
-                label: "03 Acknowledged",
-                alt: "The CPGRAMS chatbot restating the citizen's grievance back to them.",
+                step: "Text 01",
+                title: "Typing gets the same first question",
+                alt: "A typed grievance sitting in the CPGRAMS chat thread, written in ordinary conversational language.",
+                body: "The input is focused and nothing else is required. The portal's first question was which of ninety ministries owns your problem. This one's is what happened, and all fifteen fields get filled out of that single paragraph.",
               },
-              {
-                src: "/projects/cpgrams/text-04.webp",
-                label: "04 One question",
-                alt: "The CPGRAMS chatbot asking a single follow-up question in the typed flow.",
-              },
-            ],
-            body: [
-              "The reply **restates the problem before acting on it**, the cheapest **error recovery** there is and a signal of comprehension rather than keyword matching. Missing details arrive as **sequential questions**. The fifteen fields still get filled, they just never appear as a form.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
               {
                 src: "/projects/cpgrams/text-05.webp",
-                label: "05 Options",
-                alt: "The CPGRAMS chatbot offering selectable options for a closed-set question.",
+                step: "Text 02",
+                title: "It tells you what it is doing while it does it",
+                alt: "The CPGRAMS chatbot showing the detected language above a progress card reading Identifying Relevant Ministry.",
+                body: "Language detected, then a progress line naming the actual step. This is the field that stopped six in ten people on the old form, and here it resolves in the background with the citizen watching rather than deciding.",
               },
               {
                 src: "/projects/cpgrams/text-06.webp",
-                label: "06 Documents",
-                alt: "The CPGRAMS chatbot requesting a supporting document within the conversation.",
+                step: "Text 03",
+                title: "Every reply is spoken as well as written",
+                alt: "Samadhan Didi's reply in the CPGRAMS chat, restating the complaint in text with a voice response player underneath it.",
+                body: "Output parity is not a voice-flow feature. Someone who can type may still find a paragraph of official language easier to hear than to read, so the audio is always there. The reply also restates the problem before acting on it, which is comprehension you can check rather than a keyword match you have to trust.",
               },
-            ],
-            body: [
-              "A **closed set gets options**, not an open field. Typing an answer the system already holds the list of is a spelling test with a routing failure attached. Documents are requested **in the conversation, at the point they are needed**, and only when the grievance genuinely needs one. A checklist of paperwork on screen one is a reason to leave.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
               {
                 src: "/projects/cpgrams/text-07.webp",
-                label: "07 History",
-                alt: "The CPGRAMS chat with recent conversations listed in the left sidebar.",
-              },
-              {
-                src: "/projects/cpgrams/text-08.webp",
-                label: "08 Classified",
-                alt: "The CPGRAMS chatbot resolving the ministry and category for a typed grievance.",
-              },
-            ],
-            body: [
-              "Conversations **persist in the left rail**, because on 2G a **session timeout** is routine and a half-written grievance lost is usually that grievance lost for good. **Classification happens quietly** in the background: the highest-friction field on the original form, resolved without being asked.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
-              {
-                src: "/projects/cpgrams/text-09.webp",
-                label: "09 Jurisdiction",
-                alt: "The CPGRAMS chatbot showing the detected state and jurisdiction for a grievance.",
-              },
-              {
-                src: "/projects/cpgrams/text-10.webp",
-                label: "10 Assembled",
-                alt: "The CPGRAMS chatbot presenting the assembled grievance with all collected details.",
-              },
-            ],
-            body: [
-              "**Jurisdiction** resolves the same way, from what was described rather than a dropdown of states. Then everything scattered across the conversation returns as the **single document that will be filed**.",
-            ],
-          },
-          {
-            kind: "step",
-            items: [
-              {
-                src: "/projects/cpgrams/text-11.webp",
-                label: "11 Review",
-                alt: "The CPGRAMS review card in the typed flow showing the interpreted grievance.",
+                step: "Text 04",
+                title: "Follow-ups happen in the thread, not in a second form",
+                alt: "The CPGRAMS chat with a single follow-up answered by a short message reading Road name NH 45.",
+                body: "One question, one answer, then on. Working memory stays free for the answer instead of the interface, which is the whole reason a conversation beats a page of fields for somebody doing this once, under stress, on a phone.",
               },
               {
                 src: "/projects/cpgrams/text-12.webp",
-                label: "12 Submit",
-                alt: "The CPGRAMS review card with submit, new chat and a central authority escalation link.",
+                step: "Text 05",
+                title: "Three ways out, and none of them is the form again",
+                alt: "The CPGRAMS closing card with Submit Grievance and New Chat buttons and a link to register with the Central Authority if the state categorisation is wrong.",
+                body: "Submit the grievance, start again, or escalate to the Central Authority when the state-level routing looks wrong. The system is allowed to be wrong. It is not allowed to be wrong with nowhere to go, which is exactly what the old portal did every time it dropped a session.",
               },
-            ],
-            body: [
-              "The typed flow ends at the **same consent surface**. One architecture, two inputs: the review screen is not a voice feature, it is where **software stops acting on somebody's behalf without showing what it decided**. Submit, start again, or **escalate**. Three exits, none of them the fifteen fields again.",
             ],
           },
           {
-            kind: "step",
-            items: [
-              {
-                src: "/projects/cpgrams/text-13.webp",
-                label: "13 Filed",
-                alt: "The CPGRAMS confirmation screen with a grievance registration identifier.",
-              },
-            ],
+            kind: "prose",
             body: [
-              "The same **registration number**, the same **30 to 60 day** obligation, the same escalation path. Only the qualification required to reach it changed.",
+              "**Classification happens quietly** the whole way through: the highest-friction field on the original form, resolved without anybody being asked. Conversations also persist in the left rail, because on 2G a session timeout is routine and a half-written grievance lost is usually that grievance lost for good.",
             ],
           },
           {
@@ -2183,11 +2112,6 @@ export const PROJECTS: Project[] = [
                 alt: "A typed grievance on a phone screen.",
               },
               {
-                src: "/projects/cpgrams/m-text-5.webp",
-                label: "Follow up",
-                alt: "The CPGRAMS chatbot asking a follow-up question on a phone.",
-              },
-              {
                 src: "/projects/cpgrams/m-text-6.webp",
                 label: "Assemble",
                 alt: "The assembled grievance on a phone screen.",
@@ -2197,17 +2121,12 @@ export const PROJECTS: Project[] = [
                 label: "Review",
                 alt: "The CPGRAMS review card on a phone.",
               },
-              {
-                src: "/projects/cpgrams/m-text-8.webp",
-                label: "Filed",
-                alt: "The CPGRAMS confirmation screen on a phone.",
-              },
             ],
           },
           {
             kind: "prose",
             body: [
-              "Typed or spoken, the phone layout is the same: rail in a sheet, input at the thumb, summary **full screen**. That last one is the only moment in the product where something below the fold would be a real failure rather than an inconvenience.",
+              "Typed or spoken, the phone layout is the same: rail in a sheet, input at the thumb, summary full screen. That last one is the only moment in the product where something below the fold would be a real failure rather than an inconvenience.",
             ],
           },
         ],
@@ -2222,32 +2141,32 @@ export const PROJECTS: Project[] = [
               {
                 tag: "Classification",
                 label: "Never ask for the ministry",
-                body: "The **highest-friction field** on the portal and the one a citizen is least equipped to answer. Inferred from what they said, confirmed at review, **never asked**.",
+                body: "The **highest-friction field** on the portal, and the one a citizen is least equipped to answer. Worked out from what they said, confirmed at review, never asked.",
               },
               {
                 tag: "Language",
-                label: "Detect the language, do not offer a list",
-                body: "A language picker is a **reading test** given to people who may not read. Detection removes the test and the interface adapts to what it heard.",
+                label: "Listen for the language, do not offer a list",
+                body: "A language picker is a **reading test** given to people who may not read. Detection removes the test, and the interface follows whatever it heard.",
               },
               {
                 tag: "Parity",
                 label: "Speak every answer, not just accept speech",
-                body: "**Voice in with text out** solves half the literacy problem, then abandons the user at the half containing the answer.",
+                body: "**Voice in, text out** solves half the literacy problem and then abandons the user at the half holding the answer.",
               },
               {
                 tag: "Motor access",
                 label: "Press, do not press and hold",
-                body: "Hold-to-record fails for **tremor and arthritis**, and the **60-plus group** files more grievances than anyone else on the platform.",
+                body: "Hold-to-record fails for **tremor and arthritis**, and the **over-60s** file more grievances than anyone else on this platform.",
               },
               {
                 tag: "Consent",
-                label: "Show the interpretation before submitting",
-                body: "**Auto-filing a legal document** for somebody needs their consent to what it says. The review screen is where the system **admits what it assumed**.",
+                label: "Show what you understood before submitting",
+                body: "**Filing a legal document** for somebody needs their agreement to what it says. The review screen is where the system admits what it assumed.",
               },
               {
                 tag: "Recovery",
                 label: "Give a wrong answer somewhere to go",
-                body: "When state-level routing is wrong, **escalation to the Central Authority is one tap** rather than starting again.",
+                body: "When state-level routing is wrong, **escalation to the Central Authority is one tap** rather than starting over.",
               },
               {
                 tag: "Trust",
@@ -2295,7 +2214,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "Only one of the six is loud. **Saffron carries every primary action**, which is what lets a user who cannot read the label still find the button.",
+              "Only one of the six is loud. **Saffron carries every primary action**, which is what lets somebody who cannot read the label still find the button.",
           },
           {
             kind: "typeset",
@@ -2352,7 +2271,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "It is **live at cpgramsaichatbot.com**, running against the real grievance system rather than standing as a concept.",
+              "It is **live at cpgramsaichatbot.com**, running against the real grievance system rather than sitting in a deck as a concept.",
             ],
           },
           {
@@ -2386,7 +2305,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "For **DARPG**, grievances now arrive **pre-categorised and correctly routed**, work that used to land on an officer before the statutory clock started.",
+              "For **DARPG** the win is on the other side of the desk: grievances now arrive **pre-categorised and correctly routed**, work that used to land on an officer before the statutory clock even started.",
             ],
           },
           {
@@ -2412,7 +2331,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "These are the **targets the work was scoped against, not results it achieved**. Post-launch numbers sit with the department.",
+              "These are the targets the work was scoped against, not results it achieved. Post-launch numbers sit with the department.",
           },
         ],
       },
@@ -2490,13 +2409,13 @@ export const PROJECTS: Project[] = [
     role: "Lead Product Designer",
     tools: ["Figma", "Prototyping"],
     description:
-      "A layover is dead time you’ve already paid for. Layover turns it into something usable: enter your airport or PNR and it shows what’s actually open in your terminal right now, so you can order a meal to your gate or book into a lounge. Built around Indian airports (Delhi, Mumbai, Bengaluru, Hyderabad) and the details that matter there: terminal-aware delivery, veg and non-veg filters as a first-class control, and a live prep timer so you know whether you have time before boarding.",
+      "A layover is dead time you have already paid for. Layover turns it into something usable: put in your airport or your PNR and it shows what is actually open in your terminal right now, so you can order a meal to your gate or book a lounge seat. I joined at zero and took it to four surfaces: the site people land on, the app they order from, the portal a restaurant runs its kitchen on, and the console the whole platform is operated from.",
     extraFacts: [
       ["Timeline", "2024 to 2026"],
       ["Scope", "Research, IA, user flows, UX, UI, brand, design system"],
       [
         "Surfaces",
-        "Marketing site, web app, mobile app, vendor portal, admin portal",
+        "Marketing site, web app, mobile app, vendor portal, admin console",
       ],
       ["Airports", "Delhi IGI, Mumbai CSIA, Bengaluru KIA, Hyderabad RGIA"],
       ["Outcome", "Funded; pilot talks underway with Indian airports"],
@@ -2506,10 +2425,37 @@ export const PROJECTS: Project[] = [
       "Veg and non-veg filters promoted to a first-class control",
       "Live prep timer, so you know whether you have time before boarding",
     ],
-    /* two years of work, so this one runs long-form rather than as a gallery.
-       The five frames below are the ones that exist as exports today; the
-       sections are written so more can slot in beside them without the
-       argument changing shape. */
+    /*
+      Written rather than assembled. The renderer can usually build these
+      out of a brief item plus the prose in a section named for the same
+      thing, and on a project with four audiences it produces a Challenge
+      that is only about one of them.
+    */
+    challenge: [
+      "You are standing in a building full of food and lounges with no way to know what is open, how far away it is, or whether you have time to get there and back before boarding. That is the traveller's half of it.",
+      "The outlet's half is the mirror image: a counter, a paper queue, and no idea how many people are about to walk up. Terminal restaurants had **no listing, no live menu and no way to take an order ahead**. Lounge access was a guess you confirmed at the desk, in front of a line.",
+      "The category is not short on supply either. The dominant player already holds the bank, airline and lounge partnerships. What it does not have is a product anyone wants to open twice, and it sits at **two stars**. Nobody had built the layer between the two sides.",
+    ],
+    solution: [
+      "**Treat it as a time problem, not a food problem.** The moment that landed, every screen resolved: the prep-time badge stopped being a detail and became the loudest thing on a card, Get Directions earned equal weight with Order Now, and the QR code stopped being a payment feature and became a queue-removal feature.",
+      "Then build all four sides of it, because none of them works alone. A traveller who orders is only fed if the kitchen sees the ticket. The kitchen is only on the platform if somebody approved it. And none of that matters if the person googling from the departure gate cannot find the site.",
+      "Same system across all four, **opposite temperature**. Dark and warm for travellers, light and dense for operators, because one is read on a phone in a dim terminal and the other under a fluorescent tube at arm's length.",
+    ],
+    /* the two presentation frames, which are about the product as a whole
+       rather than about any one of its four surfaces */
+    detailMedia: [
+      {
+        src: "/projects/layover/hero.webp",
+        alt: "The Layover landing page hero on a laptop, showing the headline Order Meals, Access Lounges, All In One App above an airport picker listing four Indian airports.",
+      },
+      {
+        src: "/projects/layover/system.webp",
+        alt: "Layover's dark marketing site shown beside two phone screens of the ordering app.",
+      },
+    ],
+    /* four interfaces, so four beats rather than one long Highlights run */
+    caseChapters: true,
+    caseLimits: { highlights: 20 },
     sections: [
       {
         name: "overview",
@@ -2521,7 +2467,7 @@ export const PROJECTS: Project[] = [
               {
                 label: "What it is",
                 wide: true,
-                body: "The layer that turns a layover into usable time. **FoodSync** puts every outlet in your terminal into one live menu; **LoungeSync** checks whether your card gets you in, books the seat, and opens the gate with a QR code. I joined at zero and took it to **four shipping-ready surfaces**.",
+                body: "The layer that turns a layover into usable time. **FoodSync** puts every outlet in your terminal into one live menu; **LoungeSync** checks whether your card gets you in, books the seat and opens the gate with a QR code. I joined at zero and took it to **four shipping-ready surfaces**.",
               },
               {
                 label: "The problem",
@@ -2546,26 +2492,24 @@ export const PROJECTS: Project[] = [
             ],
           },
           {
-            kind: "stats",
-            items: [
-              { value: "4", label: "product surfaces designed end to end" },
-              {
-                value: "6",
-                label: "full iteration passes on the marketing site",
-              },
-              { value: "13", label: "versions of the sign-up screen alone" },
+            /* written for the About beat, which is a whole screen holding one
+               sentence and needs two paragraphs that say what it assumes */
+            kind: "prose",
+            body: [
+              "Every airport sells you the same thing twice: a ticket out, and the two hours you have to spend before you can use it. The second one is a service nobody had bothered to design.",
+              "So this was never really a food-ordering project. It was an attempt to make an airport legible for the ninety minutes you are stuck inside it, which turned out to need four products rather than one.",
             ],
           },
         ],
       },
       {
         name: "problem",
-        heading: "The problem",
+        heading: "Two people, the same problem, opposite ends",
         blocks: [
           {
             kind: "prose",
             body: [
-              "Two people want the same thing from opposite directions and never meet. The traveller wants to know **how long**. The outlet wants to know **how many**. Nobody had built the layer between them.",
+              "The traveller wants to know **how long**. The outlet wants to know **how many**. They are twenty metres apart and there is nothing between them.",
             ],
           },
           {
@@ -2573,15 +2517,15 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 label: "Lounge access was a guess",
-                body: "Membership rules nobody could parse and **no real-time seat availability**. You found out at the counter, in front of a queue.",
+                body: "Membership rules nobody could parse and **no live seat availability**. You found out at the counter, in front of a queue.",
               },
               {
                 label: "Terminal food was invisible",
-                body: "Outlets had **no digital presence**. No listing, no live menu, no way to compare, no way to order ahead.",
+                body: "Outlets had **no digital presence at all**. No listing, no live menu, no way to compare, no way to order ahead.",
               },
               {
-                label: "Demand was already there",
-                body: "The willingness to pay for comfort exists. **Manual, counter-and-paper systems** on both sides were the only thing in the way.",
+                label: "The demand was already there",
+                body: "People in airports will pay for comfort. **Counter-and-paper systems** on both sides were the only thing in the way.",
               },
             ],
           },
@@ -2623,7 +2567,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The moment this stopped being a food-ordering app and became a **time-certainty app**, every screen resolved. A prep-time badge stopped being a detail and became the most important element on a card. **Get Directions earned equal weight with Order Now**, because food you cannot find in time is worth nothing. The QR code stopped being a payment feature and became a queue-removal feature.",
+              "Once that was written down, the screens stopped arguing with each other. A prep-time badge went from a detail to the most important element on a card. **Get Directions earned the same weight as Order Now**, because food you cannot find in time is worth nothing. The QR code stopped being a payment feature and became a way to not stand in a line.",
               "Same components. Different product.",
             ],
           },
@@ -2636,7 +2580,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "I mapped the whole journey before a single screen. The first structure came out **eleven clicks deep**: in a terminal, holding a bag, watching a departure board.",
+              "I mapped the whole journey before drawing a single screen. The first structure came out **eleven clicks deep**, for somebody in a terminal, holding a bag, watching a departure board.",
             ],
           },
           {
@@ -2698,64 +2642,25 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Six passes to get here. The final direction stops explaining LayOver and starts being it: **the airport selector lives inside the hero**, so the first thing the site does is the first thing the product does.",
+              "The front door, and for most people the whole product until they install anything. It took **six labelled passes** to get here. The version that shipped stops explaining Layover and starts being it: the airport picker lives inside the hero, so the first thing the site does is the first thing the product does.",
             ],
           },
           {
-            kind: "grid",
+            kind: "screens",
             items: [
               {
                 src: "/projects/layover/web-landing.webp",
-                label: "01 Landing",
-                alt: "The full LayOver landing page with an airport and PNR entry field in the hero.",
-              },
-              {
-                src: "/projects/layover/web-eateries.webp",
-                label: "02 Outlet directory",
-                alt: "LayOver's web outlet directory showing terminal restaurants with Order now and Get Directions actions.",
-              },
-              {
-                src: "/projects/layover/web-menu.webp",
-                label: "03 Menu",
-                alt: "A restaurant menu page on LayOver's website with dish cards and prices.",
-              },
-              {
-                src: "/projects/layover/web-about.webp",
-                label: "04 About",
-                alt: "LayOver's About section describing the product.",
-              },
-              {
-                src: "/projects/layover/web-contact.webp",
-                label: "05 Get in touch",
-                alt: "LayOver's contact and footer section with a message form.",
+                step: "Web 01",
+                title: "The hero does the product's job, not the product's pitch",
+                alt: "The full Layover landing page: a dark airport hero with an airport picker, a three-step explainer, a lounge teaser marked coming soon, and an app download section.",
+                body: "Three lines of copy, then a live airport picker. Earlier passes opened with a carousel and a paragraph explaining what a layover is, which every traveller already knows. Pick an airport and the next thing it asks is which terminal, in a dialog it will not let you skip: that looks like friction and is the opposite, because nothing on the page after it is true until it knows. Everything further down is ordered by distance from the payoff: the three-step explainer, the lounge tease, the app download, the footer.",
               },
               {
                 src: "/projects/layover/order.webp",
-                label: "06 Order tracking",
-                alt: "LayOver's order-confirmed screen with a twenty-minute prep timer and a map.",
-              },
-            ],
-          },
-          {
-            kind: "prose",
-            body: [
-              "Every card answers four questions before you tap it: **who, how far, how good, how long**. The pier replaces the street address, because in a terminal *where* is the only question that matters. Veg and non-veg sits in the filter bar rather than a drawer: in India that is a **first-class identity decision**, not a refinement.",
-              "Tracking replaces status language with a countdown and keeps the outlet's location on screen throughout. If something goes wrong you are ten metres from the person who can fix it.",
-            ],
-          },
-          {
-            kind: "gallery",
-            compact: true,
-            items: [
-              {
-                src: "/projects/layover/web-mobile-home.webp",
-                label: "Home",
-                alt: "LayOver's website on a phone showing the dark home layout with outlet cards.",
-              },
-              {
-                src: "/projects/layover/web-mobile-order.webp",
-                label: "Order",
-                alt: "LayOver's website order flow on a phone with the itemised order and prep timer.",
+                step: "Web 04",
+                title: "Four questions on the card, then a countdown",
+                alt: "Layover's outlet directory, with Get Directions and Order now on every card, beside an Order Confirmed screen showing a twenty-minute ready timer, the itemised order and a map.",
+                body: "The directory on the left answers four questions before you click anything: who, how far, how good, how long. **The pier replaces the street address**, because in a terminal where is the only question that matters, and Veg and Non-Veg sit in the header beside All rather than behind a Filters drawer. Then, once the order is in, the only thing that matters is the number of minutes. The itemised order, the outlet's phone number and the map stay under it, so when something goes wrong you are ten metres from the person who can fix it.",
               },
             ],
           },
@@ -2768,252 +2673,182 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The app opens on the only question that matters: **which airport, which terminal**. Until it knows that, no listing on screen means anything, so location is the first screen rather than a setting in a profile.",
+              "The app is for the people who fly often enough to install something. It opens on the only question that matters, **which airport and which terminal**, because until it knows that nothing it could show you is true.",
             ],
           },
           {
-            kind: "gallery",
+            /*
+              Four at a time, not one at a time.
+
+              These are full-page phone captures at 660x2577. One per beat
+              rendered each of them as tall as three screenfuls with half the
+              column empty beside it, which is a wall rather than a flow. Four
+              across is how a case study actually shows a sequence, and the
+              two beats are split by proportion as well as by subject: the
+              short screens sit together and the long scrolls sit together,
+              so no cell has to letterbox its neighbour.
+            */
+            kind: "step",
+            title: "Arriving, and getting located",
             items: [
               {
                 src: "/projects/layover/app-signup.webp",
-                label: "01 Sign up",
-                alt: "The LayOver app sign-up screen with phone number entry.",
+                label: "01 Splash",
+                alt: "The Layover app splash screen: the wordmark on near-black with a faint grid.",
               },
               {
                 src: "/projects/layover/app-onboarding.webp",
                 label: "02 Onboarding",
-                alt: "LayOver app onboarding screen with an illustration and the line all your airport needs in one app.",
+                alt: "A Layover app onboarding card with a 3D burger illustration, the line Hungry before your flight, and a Skip control in the top right.",
               },
               {
                 src: "/projects/layover/app-location.webp",
                 label: "03 Airport",
-                alt: "The LayOver app airport selection screen listing Indian airports.",
+                alt: "The Layover app airport picker opening as a sheet over the home screen, with a grid of airport tiles.",
               },
               {
                 src: "/projects/layover/app-location-type.webp",
                 label: "04 Terminal",
-                alt: "The LayOver app terminal and travel type selection screen.",
+                alt: "The Layover app location sheet with Delhi selected and radio groups for flight type, travel type and terminal above a Continue button.",
               },
+            ],
+            body: [
+              "The onboarding says what the app does and gets out of the way. **Skip sits on the first frame, not the last**, because making a confident user sit through three screens to reassure an uncertain one is a tax paid by the wrong person.",
+              "Then the only question that matters. Domestic or international decides which piers you can reach and the terminal decides the entire menu, so all of it is asked once, up front, as radio buttons rather than a search, and stays editable from the header on every screen after this. **Sign-up took thirteen versions** before it ended up behind the browsing instead of in front of it.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Choosing, and paying",
+            items: [
               {
                 src: "/projects/layover/app-home.webp",
                 label: "05 Outlets",
-                alt: "The LayOver app home screen showing Departures Terminal 3 with outlet cards and prep times.",
+                alt: "The Layover app home screen headed Departures, Terminal 3, with a veg toggle, a Food and Cafe split, and outlet cards each showing a rating and a ten to fifteen minute prep time.",
               },
               {
                 src: "/projects/layover/app-menu.webp",
                 label: "06 Menu",
-                alt: "A restaurant menu screen in the LayOver app with dish images and prices.",
+                alt: "A McDonald's menu inside the Layover app, with a ten to fifteen minute prep time under the outlet name, a veg toggle, a Bestsellers section and a Coffee grid.",
               },
               {
                 src: "/projects/layover/app-menu-option.webp",
-                label: "07 Options",
-                alt: "The LayOver app item customisation screen with size and add-on options.",
-              },
-              {
-                src: "/projects/layover/app-added.webp",
-                label: "08 Added",
-                alt: "The LayOver app menu screen with an item added and the cart count updated.",
-              },
-              {
-                src: "/projects/layover/app-cart.webp",
-                label: "09 Cart",
-                alt: "The LayOver app cart screen listing ordered items with quantities and totals.",
+                label: "07 Jump to section",
+                alt: "The Layover app menu with a floating section list open over it, listing each menu section and its item count.",
               },
               {
                 src: "/projects/layover/app-cart-pay.webp",
-                label: "10 Payment",
-                alt: "The LayOver app cart with the to-pay dropdown showing totals, taxes and fees.",
+                label: "08 Pay",
+                alt: "The Layover app cart with four items, an add-ons row, an applied coupon, and an expanded To Pay panel listing item total, GST, platform fee and platform fee GST above a sticky Pay button.",
               },
             ],
-          },
-          {
-            kind: "prose",
             body: [
-              "**Sign-up took thirteen versions.** Everything after it is a consequence of one decision: ask where you are before you ask anything else. The Food and Café split follows the same logic: you already know which one you want before you open the app.",
-              "Prep time appears on the outlet card, on the item, and again in the cart, because the thing a traveller is actually deciding is **whether they have time**.",
+              "**Prep time is the loudest thing on every card**, and it follows you down from the outlet into the menu header. On a restaurant app the price decides; in a terminal the clock does. The veg toggle sits top right where a thumb reaches it, the veg mark repeats on every item rather than living only in a filter, and the floating jump control exists because an airport menu is long and you are reading it standing up with a bag on your shoulder.",
+              "The bill is itemised before the button: item total, GST, platform fee, and the platform fee's own GST, all visible without expanding anything. Airport pricing is what travellers are most suspicious of, so hiding a line here would cost more trust than the line is worth. **This is also where the account is finally asked for**, and not one screen earlier.",
             ],
-          },
-          {
-            kind: "figure",
-            shot: {
-              src: "/projects/layover/app.webp",
-              narrow: true,
-              caption: "The same flow in the launch presentation.",
-              alt: "Two phone screens showing LayOver's food ordering interface in cream and gold.",
-            },
           },
         ],
       },
       {
         name: "vendor portal",
-        heading: "The vendor portal",
+        heading: "The restaurant portal",
         blocks: [
           {
             kind: "prose",
             body: [
-              "Here the visual system flips. An order queue is read **standing up, under fluorescent light, at arm's length**, by someone whose hands are full. So it is light, flat and high contrast, with nothing decorative competing with a number.",
+              "Here the visual system flips. An order queue is read **standing up, under fluorescent light, at arm's length**, by somebody whose hands are full. So it goes light, flat and high contrast, with nothing decorative competing with a number.",
             ],
           },
           {
-            kind: "figure",
-            shot: {
-              src: "/projects/layover/flow-vendor.webp",
-              wide: true,
-              caption:
-                "The whole vendor surface on one canvas: login, six-step onboarding, dashboard, orders, menu and its edit states, coupons, revenue, reviews, and the bank-verification settings flow.",
-              alt: "A Figma board showing every screen of the LayOver vendor portal arranged in rows.",
-            },
-          },
-          {
-            kind: "grid",
+            kind: "screens",
             items: [
               {
-                src: "/projects/layover/vendor-dashboard.webp",
-                label: "01 Order wall",
-                alt: "LayOver's vendor dashboard with an incoming order card and a grid of order cards marked Ready or Delivered.",
+                src: "/projects/layover/vendor-onboarding.webp",
+                step: "Vendor 01",
+                title: "Six steps, and a straight answer at the end of them",
+                alt: "The six-step Layover vendor onboarding flow laid out left to right: registration, contact verification, document upload, and an application submitted confirmation.",
+                body: "Registration, contact verification, documents, review. The last frame does the thing most onboarding flows skip: it says what happens next and how long it takes, **34 to 48 hours**, with the checks listed. An airport outlet signing up to a platform they have never heard of needs that more than they need a prettier form.",
               },
               {
-                src: "/projects/layover/vendor-onboarding.webp",
-                label: "02 Onboarding",
-                alt: "The six-step LayOver vendor onboarding flow laid out left to right.",
+                src: "/projects/layover/vendor-dashboard.webp",
+                step: "Vendor 02",
+                title: "One incoming order, and a wall of everything else",
+                alt: "The Layover vendor dashboard: a single incoming order card with large Accept and Reject buttons above a grid of order cards marked Ready or Delivered with live timers.",
+                body: "The new order takes the top of the screen on its own, with **Accept and Reject as the two largest targets on the page**. Everything already accepted drops into the grid below, colour-coded Ready or Delivered with a timer running on each. There is no navigation to learn, because the whole job lives on one surface.",
               },
               {
                 src: "/projects/layover/vendor-menu.webp",
-                label: "03 Menu",
-                alt: "LayOver's vendor menu management screen with food item cards and edit controls.",
-              },
-              {
-                src: "/projects/layover/vendor-addedit-section.webp",
-                label: "04 Add section",
-                alt: "The add or edit section dialog in LayOver's vendor menu manager.",
-              },
-              {
-                src: "/projects/layover/vendor-addedit-item.webp",
-                label: "05 Add item",
-                alt: "The add or edit item screen in LayOver's vendor portal with a dish photo and price.",
+                step: "Vendor 03",
+                title: "Menus edited where they are read",
+                alt: "The Layover vendor menu manager showing Recommended, Drinks and Burgers sections of item cards, each with an availability toggle and an inline edit control.",
+                body: "Sections and items sit the way the traveller will see them, and each is edited in place rather than through a separate builder. Availability is a toggle on the card itself: a stale menu in an airport means a refunded order and a passenger who has already boarded, so turning one item off has to cost one tap.",
               },
               {
                 src: "/projects/layover/vendor-empty.webp",
-                label: "06 Empty state",
-                alt: "The empty menu state in LayOver's vendor portal with an Add Your First Section button.",
-              },
-              {
-                src: "/projects/layover/vendor-orders.webp",
-                label: "07 Orders",
-                alt: "LayOver's vendor orders screen listing past and current orders.",
+                step: "Vendor 04",
+                title: "The screen a new outlet actually sees first",
+                alt: "The empty menu state in the Layover vendor portal: an illustration, the line Add Your First Section, and a single Add Section button.",
+                body: "A vendor's first login shows a menu with nothing in it. **That is their first impression of the entire platform**, so it got the same attention as the dashboard: one illustration, one sentence, one button, and the same Add Section control that lives in the header, so the thing you learn here still works tomorrow.",
               },
               {
                 src: "/projects/layover/vendor-coupons.webp",
-                label: "08 Coupons",
-                alt: "LayOver's vendor coupons screen showing discount codes and QR codes.",
+                step: "Vendor 05",
+                title: "Build it on the left, watch it appear on the right",
+                alt: "The Layover coupons screen with an Add New Coupon form on the left, a list of active and expired coupons below it, and a live coupon preview with a QR code on the right.",
+                body: "The form and the coupon it produces sit side by side, so the outlet sees what the traveller will see while they are still typing. Coupons ship with a **QR code** because half of airport promotion happens on a printed standee next to the till, not inside an app.",
               },
               {
                 src: "/projects/layover/vendor-analytics.webp",
-                label: "09 Revenue",
-                alt: "LayOver's vendor analytics screen with revenue charts and top selling items.",
+                step: "Vendor 06",
+                title: "Revenue, and the shape of an airport day",
+                alt: "The Layover vendor revenue screen with today's sales and orders, a monthly revenue bar chart, an activity-by-time line chart, top selling items, average order value and repeat rate.",
+                body: "Today against yesterday at the top, then the month, then **Activity by time**, which is the chart that actually earns its place here. An airport kitchen staffs against flight banks rather than against lunch and dinner, and this is the only screen in the product that shows them where those banks are.",
               },
-              {
-                src: "/projects/layover/vendor-reviews.webp",
-                label: "10 Reviews",
-                alt: "LayOver's vendor reviews screen with customer reviews and reply controls.",
-              },
-              {
-                src: "/projects/layover/vendor-settings.webp",
-                label: "11 Settings",
-                alt: "The LayOver vendor profile and settings flow including bank details and OTP verification.",
-              },
-              {
-                src: "/projects/layover/vendor-login.webp",
-                label: "12 Login",
-                alt: "LayOver's vendor login screen beside a reset password screen.",
-              },
-            ],
-          },
-          {
-            kind: "prose",
-            body: [
-              "Orders are a wall of cards colour-coded by state, each with a live timer. **Accept and Reject are the two largest targets on the screen**, and there is no navigation to learn: the whole job lives on one surface.",
-              "Menus change daily and a stale menu in an airport means a refunded order, so sections and items are **edited in place** rather than through a separate builder. The empty state got the same attention as the dashboard: a new outlet's first login is their first impression of the platform, and it is a screen with nothing in it.",
-            ],
-          },
-          {
-            kind: "gallery",
-            compact: true,
-            items: [
               {
                 src: "/projects/layover/vendor-mobile.webp",
-                label: "Mobile portal",
-                alt: "The LayOver vendor dashboard on a phone with a compact order list.",
+                step: "Vendor 07",
+                title: "The order wall had to survive in a pocket",
+                alt: "The Layover vendor portal on a phone with the navigation open as a drawer over the dashboard's order cards.",
+                body: "On a busy day nobody is at the desk. The sidebar becomes a drawer, the order cards stack, and Accept and Reject keep their size. **Nothing was removed for the small screen**, deliberately: an outlet running the evening rush from a phone should not be running a lesser version of the product.",
               },
-            ],
-          },
-          {
-            kind: "prose",
-            body: [
-              "On a busy day nobody is at the desk, so **the order wall had to survive in a pocket**.",
             ],
           },
         ],
       },
       {
-        name: "admin portal",
-        heading: "The admin portal",
+        name: "admin console",
+        heading: "The admin console",
         blocks: [
           {
             kind: "prose",
             body: [
-              "The layer nobody sees and everything depends on. Built for **scanning, not exploring**: every vendor row surfaces the same four metrics in the same four positions, so a hundred outlets read at the speed of one.",
+              "The layer nobody sees and everything depends on. Built for **scanning rather than exploring**: four navigation items, and every vendor row surfacing the same four metrics in the same four positions, so a hundred outlets read at the speed of one.",
             ],
           },
           {
-            kind: "grid",
+            kind: "screens",
             items: [
               {
-                src: "/projects/layover/admin-vendors.webp",
-                label: "01 Vendors",
-                alt: "LayOver's admin vendor management screen listing outlets with orders, revenue, rating and prep time.",
+                src: "/projects/layover/admin-onboarding.webp",
+                step: "Admin 01",
+                title: "Approve or reject, with the whole case on one row",
+                alt: "Layover's admin vendor onboarding screen listing pending applications, each showing contact person, category, submission date, email and phone with View, Approve and Reject controls.",
+                body: "Contact, category, submitted date, the documents behind a View, then the two decisions. Everything needed to make the call sits on the card, so approving a vendor never turns into a tab-switching exercise. **Add New Vendor** is in the corner for the outlets that get onboarded in a meeting rather than through the form.",
               },
               {
-                src: "/projects/layover/admin-onboarding.webp",
-                label: "02 Approval",
-                alt: "LayOver's admin vendor onboarding screen with application details and approval controls.",
+                src: "/projects/layover/admin-vendors.webp",
+                step: "Admin 02",
+                title: "Orders, revenue, rating, prep time. Always in that order.",
+                alt: "Layover's vendor management screen, each outlet a row with orders, revenue, rating and prep time in fixed positions, an active toggle, and Order History and Manage controls.",
+                body: "Four metrics, four fixed positions on every row, and one switch that takes an outlet offline. Prep time is on this list for the same reason it is on the traveller's card: **it is the number that predicts a complaint.** Manage opens that vendor's own portal, so support never has to describe a screen down a phone.",
               },
               {
                 src: "/projects/layover/admin-vendor-menu.webp",
-                label: "03 Menu oversight",
-                alt: "LayOver's admin view of a vendor's menu with item cards and availability.",
+                step: "Admin 03",
+                title: "Admin can fix a menu without asking anyone",
+                alt: "The admin's view of a vendor's menu inside Layover's admin console, showing item cards with prices, prep times and veg marks, each with edit and delete controls and an Add Item button.",
+                body: "At launch an outlet's first menu upload is rarely right: wrong prices, missing veg marks, an item that does not exist any more. So admin can correct it directly, and **the edit screens here are identical to the vendor's own**, because two interfaces for the same job is how the two drift apart.",
               },
-              {
-                src: "/projects/layover/admin-menu.webp",
-                label: "04 Menu tools",
-                alt: "LayOver's admin menu management screen with sections and food item cards.",
-              },
-              {
-                src: "/projects/layover/admin-addedit-section.webp",
-                label: "05 Add section",
-                alt: "The admin add or edit menu section screen in LayOver's admin portal.",
-              },
-              {
-                src: "/projects/layover/admin-addedit-item.webp",
-                label: "06 Add item",
-                alt: "The admin add or edit item screen in LayOver's admin portal.",
-              },
-              {
-                src: "/projects/layover/admin-orders.webp",
-                label: "07 Orders",
-                alt: "LayOver's admin orders screen listing orders across all vendors.",
-              },
-              {
-                src: "/projects/layover/admin-users.webp",
-                label: "08 Users",
-                alt: "LayOver's admin user management screen with a table of users.",
-              },
-            ],
-          },
-          {
-            kind: "prose",
-            body: [
-              "Admin can see and correct a vendor's menu directly, because at launch **an outlet's first menu upload is rarely right**. The add and edit screens are deliberately identical to the vendor equivalents: two interfaces for the same job is how the two drift apart.",
             ],
           },
         ],
@@ -3035,7 +2870,7 @@ export const PROJECTS: Project[] = [
               },
               {
                 label: "Login moved to the checkout",
-                body: "Browsing is free. The account is requested **only at the moment it becomes necessary**.",
+                body: "Browsing is free. The account is asked for **only at the moment it becomes necessary**.",
               },
               {
                 label: "Veg and non-veg is a header control",
@@ -3060,7 +2895,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Nothing arrived fully formed. The site went through **six labelled passes**: first structure, restructure, a wide exploration board, a near-final, a final, and the final that shipped.",
+              "None of it arrived fully formed. The site went through **six labelled passes**: a first structure, a restructure, a wide exploration board, a near-final, a final, and the final that actually shipped.",
             ],
           },
           {
@@ -3069,14 +2904,14 @@ export const PROJECTS: Project[] = [
               src: "/projects/layover/iterations.webp",
               wide: true,
               caption:
-                "One pass, as it sits on the canvas. **Ten full page layouts explored in parallel** before anything was chosen, and this is the first of six such boards.",
-              alt: "A Figma canvas board holding ten full-page dark website layouts for LayOver arranged in a grid.",
+                "One pass, as it sits on the canvas. **Ten full page layouts explored side by side** before anything was chosen, and this is the first of six such boards.",
+              alt: "A Figma canvas board holding ten full-page dark website layouts for Layover arranged in a grid.",
             },
           },
           {
             kind: "prose",
             body: [
-              "Between the first and the last, the hero went from an empty carousel shell to an airport selector, and the listing went from **four unlabelled tiles to cards carrying four data points each**.",
+              "Between the first board and the last, the hero went from an empty carousel shell to a working airport picker, and the listing went from **four unlabelled tiles to cards carrying four data points each**.",
             ],
           },
         ],
@@ -3130,16 +2965,6 @@ export const PROJECTS: Project[] = [
               "**Montserrat** across marketing and consumer, **Sofia Pro** as the supporting voice, and **Inter** inside the operator portals, where density and legibility beat personality.",
             ],
           },
-          {
-            kind: "figure",
-            shot: {
-              src: "/projects/layover/system.webp",
-              wide: true,
-              caption:
-                "Site and app as one system: the dark front door, the warm room behind it.",
-              alt: "LayOver's marketing site and mobile app shown together.",
-            },
-          },
         ],
       },
       {
@@ -3149,9 +2974,25 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "**The company raised on this work**, and pilot conversations with Indian airports are underway. The designs did double duty as the product spec and the fundraising material.",
-              "For travellers, the path went from an eleven-click structure to a flow where **location, terminal and wait time are answered before they are asked**. For outlets, demand became visible before it arrived, and the order queue became one glanceable wall instead of a counter and a shout.",
+              "**The company raised on this work**, and pilot conversations with Indian airports are underway. The designs did double duty as the product spec and as the fundraising material.",
+              "For travellers, an eleven-click structure became a flow where **location, terminal and wait time are answered before anybody asks**. For outlets, demand became visible before it arrived, and the order queue became one glanceable wall instead of a counter and a shout.",
             ],
+          },
+          {
+            kind: "results",
+            items: [
+              {
+                value: "4",
+                label: "surfaces designed end to end, starting from nothing",
+              },
+              {
+                value: "6",
+                label: "full iteration passes on the marketing site",
+              },
+              { value: "13", label: "versions of the sign-up screen alone" },
+            ],
+            caption:
+              "These count what got designed, not how it performed. The product has not launched to the public yet, so there are no usage numbers to report and I am not going to invent any.",
           },
         ],
       },
@@ -3162,8 +3003,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The hardest part of a 0-to-1 project is **resisting the urge to design the thing you were asked for**. I was asked for a food-ordering app. What the traveller needed was an answer to *will I make my flight*. Those look identical on a wireframe and behave nothing alike in a terminal.",
-              "Designing for four users at once is not four times the work, it is a different kind of work. The value was never in the individual screens. It was in making sure **a decision made on the traveller's screen still made sense to the person in the kitchen** twenty metres away.",
+              "The hardest part of a 0-to-1 project is **resisting the urge to design the thing you were asked for**. I was asked for a food-ordering app. What the traveller needed was an answer to whether they would make their flight. Those two look identical on a wireframe and behave nothing alike in a terminal.",
+              "Designing for four users at once is not four times the work, it is a different kind of work. The value was never in any individual screen. It was in making sure **a decision made on the traveller's screen still made sense to the person in the kitchen** twenty metres away, and to whoever had to approve that kitchen in the first place.",
             ],
           },
         ],

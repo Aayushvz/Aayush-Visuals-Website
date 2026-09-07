@@ -157,7 +157,7 @@
 
 .csHero__meta {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--cs-sm);
 }
@@ -165,6 +165,70 @@
 .csHero__cat {
   color: var(--cs-accent-ink);
   text-align: right;
+}
+
+/*
+  The way back to /work.
+
+  A hairline pill rather than a filled button. It sits above the title, which
+  is the largest thing on the page, and a solid orange control there would be
+  the first thing the eye lands on when the last thing it should compete with
+  is the project's own name. So it reads as an eyebrow that happens to be
+  clickable: same micro type, same tracking, with an outline and an arrow to
+  say it goes somewhere.
+
+  The pill's padding is set so its optical height matches the category label
+  opposite it, which is why .csHero__meta centres rather than sitting on a
+  shared baseline the border would ignore.
+*/
+.csBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  /* the top value is smaller because uppercase type sits high in its box */
+  padding: 0.62em 1.05em 0.66em;
+  border: 1px solid var(--cs-line);
+  border-radius: 999px;
+  color: var(--cs-mute);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color var(--dur-hover) var(--ease-quint),
+    border-color var(--dur-hover) var(--ease-quint);
+}
+
+.csBack:hover {
+  color: var(--cs-accent-ink);
+  border-color: var(--cs-accent);
+}
+
+.csBack:focus-visible {
+  outline: 2px solid var(--cs-accent);
+  outline-offset: 3px;
+}
+
+/* the arrow leads, so it is the part that moves */
+.csBack__arrow {
+  display: block;
+  /* the glyph is drawn small next to uppercase caps at this size */
+  font-size: 1.15em;
+  line-height: 1;
+  transition: transform var(--dur-hover) var(--ease-quint);
+}
+
+.csBack:hover .csBack__arrow {
+  transform: translateX(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .csBack,
+  .csBack__arrow {
+    transition: none;
+  }
+
+  .csBack:hover .csBack__arrow {
+    transform: none;
+  }
 }
 
 /* the one place a single long word is most likely to beat the column */
@@ -488,6 +552,18 @@
 
 /* ---------- Feature: accent name, prose, its screens ---------- */
 
+/*
+  A chapter's opening paragraph, set on the same rail its screens sit on.
+
+  It is deliberately NOT indented into the feature grid's second column. The
+  intro is about the surface as a whole and the feature names below it are
+  about single screens, so the intro starting further left is what says which
+  of the two is the parent.
+*/
+.csChapter__lead {
+  margin-bottom: var(--cs-lg);
+}
+
 .csFeature + .csFeature {
   margin-top: var(--cs-xl);
 }
@@ -570,6 +646,17 @@
   gap: var(--cs-sm);
   /* never wider than the assets in it; see rowShape() for why */
   max-width: min(100%, var(--cs-row-max, 100%));
+  /*
+    And centred once that cap bites.
+
+    A row narrower than its column has to put the leftover width somewhere.
+    Left-aligned it reads as a missing image on the right, which is the same
+    complaint the balanced rows were fixing; split evenly it reads as an
+    image sized to itself. Rows that are not capped are already the full
+    column, so this changes nothing for them. It is also what
+    .csDetails__media already does with its own shots.
+  */
+  margin-inline: auto;
 }
 
 .csRow--single {

@@ -42,6 +42,8 @@ export type Story = {
   about: string[];
   details: { pairs: Pair[]; media: Media[] } | null;
   highlights: Highlight[];
+  /* when non-empty these replace the Highlights beat, one section each */
+  chapters: Chapter[];
   results: { items: ResultItem[]; note?: string } | null;
   gallery: Media[];
 };
@@ -260,14 +262,23 @@ function highlights(
   family: Budget,
   perFamily: number,
 ): Highlight[] {
+  return highlightsIn(allBlocks(project), limit, family, perFamily);
+}
+
+function highlightsIn(
+  blocks: CaseBlock[],
+  limit: number,
+  family: Budget,
+  perFamily: number,
+): Highlight[] {
   const out: Highlight[] = [];
 
-  for (const block of allBlocks(project)) {
+  for (const block of blocks) {
     if (out.length >= limit) break;
 
     if (block.kind === "step" && block.body.length) {
       out.push({
-        name: block.items[0]?.label ?? "",
+        name: block.title ?? block.items[0]?.label ?? "",
         body: block.body.slice(0, 2),
         media: mediaOf(block)
           .filter((m) => affordable(family, m.src, perFamily))
@@ -293,10 +304,82 @@ function highlights(
   return out.filter((h) => h.name).slice(0, limit);
 }
 
+/*
+  One beat per surface, instead of one beat for the whole product.
+
+  The five-beat page assumes a project is one thing, and puts every named
+  screen in a single Highlights run. That is right for a project with one
+  interface. It is wrong for a product that is four separate interfaces used
+  by four different people: nineteen screens in one undifferentiated list
+  makes a reader work out for themselves where the traveller's app stops and
+  the kitchen's portal starts, which is the one piece of structure the work
+  actually has.
+
+  So a project can opt in with `caseChapters`, and every section carrying a
+  walkthrough becomes its own numbered beat, titled by that section's own
+  heading, with its intro paragraph above the screens. The budget is shared
+  across all of them rather than per chapter, so opting in cannot quietly
+  make a page four times longer than the limit it declared.
+*/
+export type Chapter = { name: string; intro: string[]; items: Highlight[] };
+
+function chapters(
+  project: Project,
+  budget: number,
+  family: Budget,
+  perFamily: number,
+  claim: (t?: string | null) => string | null,
+): Chapter[] {
+  const out: Chapter[] = [];
+  let left = budget;
+
+  for (const section of project.sections ?? []) {
+    if (left <= 0) break;
+    const items = highlightsIn(section.blocks, left, family, perFamily);
+    if (!items.length) continue;
+    left -= items.length;
+
+    /*
+      Only the prose that OPENS the section. A walkthrough section usually
+      also carries a closing paragraph or two, and those belong to the
+      screens they follow rather than to the heading; hoisting them above
+      the first screen would make the chapter argue its conclusion first.
+    */
+    const intro: string[] = [];
+    for (const block of section.blocks) {
+      if (block.kind !== "prose") continue;
+      for (const para of block.body) {
+        if (intro.length >= 2) break;
+        const taken = claim(para);
+        if (taken) intro.push(taken);
+      }
+      break;
+    }
+
+    out.push({ name: section.heading ?? section.name, intro, items });
+  }
+
+  return out;
+}
+
+/*
+  What the beat called Results is allowed to show.
+
+  A `results` block anywhere on the project outranks a `stats` block that
+  happens to appear earlier. Taking whichever came first put the grievance
+  project's SCALE under the heading "Results": 20 lakh grievances a year and
+  90+ ministries are facts about the system that existed before the work, and
+  presenting them as an outcome of it is the kind of borrowed credit a
+  portfolio should not take. `stats` stays as the fallback for the projects
+  that have no outcome figures at all.
+*/
 function resultsOf(project: Project): Story["results"] {
-  for (const block of allBlocks(project)) {
+  const blocks = allBlocks(project);
+  for (const block of blocks) {
     if (block.kind === "results")
       return { items: block.items, note: block.caption };
+  }
+  for (const block of blocks) {
     if (block.kind === "stats") return { items: block.items };
   }
   return null;
@@ -455,6 +538,67 @@ function groupByShape(media: Media[]): Media[][] {
 }
 
 /*
+  Every row full, no matter how many pictures the set has.
+
+  A shape group used to be one grid at a fixed column count, so any set whose
+  size did not divide by that count ended on a short row: four mascot
+  directions in a three-column grid put three on a line and left the fourth
+  alone beside two thirds of a screen of white, and the two component sheets
+  landed in a four-column row with half of it empty. That was a deliberate
+  choice once, on the reasoning that an orphan reads as the end of a set. It
+  does not. It reads as a missing image.
+
+  So the group is cut into rows FIRST and each row is then given exactly as
+  many columns as it has pictures. The row count is chosen to keep every row
+  within one column of the shape's own preference and never below two, which
+  is what stops the fix trading a hole for a single image blown up to the
+  width of the page. A set of five desktop captures comes out three then two
+  rather than two, two and a gap.
+*/
+function balancedRows(media: Media[]): Media[][] {
+  const n = media.length;
+  const preferred = preferredCols(media);
+  if (n <= preferred) return [media];
+
+  let bestRows = 0;
+  let bestScore = Infinity;
+  for (let rows = 1; rows <= n; rows++) {
+    const base = Math.floor(n / rows);
+    const rem = n % rows;
+    const widest = rem ? base + 1 : base;
+    /* two is the floor: a lone picture takes the single-column class and
+       goes full width, which is the monolith this is trying to avoid */
+    if (base < 2 || widest > preferred + 1) continue;
+    /*
+      Closest to the shape's own column count wins. The +rows tie-break is
+      what keeps four square mascots on one line of four instead of two lines
+      of two: both are one column off the preference, and the fewer, larger
+      rows are the ones that read as a set.
+    */
+    const score = Math.abs(widest - preferred) * 10 + rows;
+    if (score < bestScore) {
+      bestScore = score;
+      bestRows = rows;
+    }
+  }
+
+  /* a prime count with no arrangement inside the tolerance keeps the old
+     behaviour rather than inventing a worse one */
+  if (!bestRows) return [media];
+
+  const base = Math.floor(n / bestRows);
+  const rem = n % bestRows;
+  const out: Media[][] = [];
+  let at = 0;
+  for (let i = 0; i < bestRows; i++) {
+    const size = base + (i < rem ? 1 : 0);
+    out.push(media.slice(at, at + size));
+    at += size;
+  }
+  return out;
+}
+
+/*
   Which shelf a picture belongs on.
 
   This was a tight ratio tolerance, and it split things that belong together:
@@ -527,15 +671,44 @@ export function buildStory(project: Project): Story {
 
   /* one image budget for the whole page, spent in beat order, sized so that
      a project made of a single family is not capped down to nothing */
+  const limits = project.caseLimits;
   const family: Budget = new Map();
-  const perFamily = perFamilyFor(project, deep ? 20 : 16);
-  const hl = highlights(project, deep ? 4 : 3, family, perFamily);
-  for (const h of hl) for (const para of h.body) claim(para);
+  const perFamily = perFamilyFor(project, limits?.images ?? (deep ? 20 : 16));
+
+  /*
+    The named screens are spent FIRST, and a project that names its own limit
+    gets it. Four is the right number for work whose argument is two or three
+    decisions; a product documented screen by screen has fifteen or sixteen
+    things to say, and truncating that at four leaves the page claiming the
+    flow ends where the budget did.
+  */
+  const budget = limits?.highlights ?? (deep ? 4 : 3);
+  const chs = project.caseChapters
+    ? chapters(project, budget, family, perFamily, claim)
+    : [];
+  const hl = chs.length ? [] : highlights(project, budget, family, perFamily);
+
+  const named = chs.length ? chs.flatMap((c) => c.items) : hl;
+  for (const h of named) for (const para of h.body) claim(para);
 
   const usedMedia = new Set<string>(
-    hl.flatMap((h) => h.media.map((m) => m.src)),
+    named.flatMap((h) => h.media.map((m) => m.src)),
   );
-  const media = pickMedia(project, usedMedia, deep ? 4 : 3, family, perFamily);
+
+  /*
+    Authored evidence beats picked evidence.
+
+    `detailMedia` is not filtered by the family budget: it is four images the
+    project has named as the ones this argument needs, and quietly dropping
+    one of them for being the fourth screenshot of a chat window would be the
+    heuristic overruling the author. They are marked used so the gallery does
+    not show them a second time.
+  */
+  const media = project.detailMedia?.length
+    ? project.detailMedia.slice(0, deep ? 4 : 3)
+    : pickMedia(project, usedMedia, deep ? 4 : 3, family, perFamily);
+  for (const m of media) usedMedia.add(m.src);
+
   const results = resultsOf(project);
 
   /*
@@ -547,11 +720,11 @@ export function buildStory(project: Project): Story {
     rather than a column, so a project with nothing else to say (no named
     decisions, no figures) is allowed twice the room.
   */
-  const visualOnly = !hl.length && !results;
+  const visualOnly = !named.length && !results;
   const gallery = pickMedia(
     project,
     usedMedia,
-    visualOnly ? 24 : 14,
+    limits?.gallery ?? (visualOnly ? 24 : 14),
     family,
     perFamily,
   );
@@ -562,6 +735,7 @@ export function buildStory(project: Project): Story {
     about: aboutParagraphs(project, claim),
     details: pairs.length || media.length ? { pairs, media } : null,
     highlights: hl,
+    chapters: chs,
     results,
     gallery,
   };
@@ -662,8 +836,29 @@ function rowClass(n: number): string {
   the column count doing the work the ratio needs no clamp at all, so the cell
   matches the image exactly and nothing is cropped OR letterboxed.
 */
+/* the median ratio of a row, which is what decides both its shape and how
+   many of it fit across; null when nothing in it is a sized asset */
+function medianRatio(media: Media[]): number | null {
+  const ratios = media
+    .map((m) => IMAGE_DIMS[m.src])
+    .filter(Boolean)
+    .map(([w, h]) => w / h)
+    .sort((a, b) => a - b);
+  return ratios.length ? ratios[Math.floor(ratios.length / 2)] : null;
+}
+
+/* narrow things want more across: four phone screens, three squares, two
+   desktop captures. See rowShape() for why this is not a fixed two. */
+function preferredCols(media: Media[]): number {
+  const mid = medianRatio(media) ?? 1.6;
+  return mid < 0.75 ? 4 : mid < 1.15 ? 3 : 2;
+}
+
 function rowShape(
   media: Media[],
+  /* balancedRows() hands each row a count it is guaranteed to fill, which
+     the shape's own preference must not override or the hole comes back */
+  colsOverride?: number,
 ): { ratio: string; cols: number; max: string } | undefined {
   const dims = media.map((m) => IMAGE_DIMS[m.src]).filter(Boolean);
   if (!dims.length) return undefined;
@@ -671,7 +866,7 @@ function rowShape(
   const ratios = dims.map(([w, h]) => w / h).sort((a, b) => a - b);
   const widths = dims.map(([w]) => w).sort((a, b) => a - b);
   const mid = ratios[Math.floor(ratios.length / 2)];
-  const cols = mid < 0.75 ? 4 : mid < 1.15 ? 3 : 2;
+  const cols = colsOverride ?? (mid < 0.75 ? 4 : mid < 1.15 ? 3 : 2);
 
   /*
     And never wider than the asset actually is.
@@ -701,19 +896,21 @@ function rowShape(
   };
 }
 
-/* one row per shape, so nothing has to be cut to sit beside its neighbour */
+/* one row per shape, so nothing has to be cut to sit beside its neighbour,
+   then cut again so no row ends short */
 export function MediaRows({ media }: { media: Media[] }) {
+  const rows = groupByShape(media).flatMap(balancedRows);
   return (
     <div className="csRows">
-      {groupByShape(media).map((group, i) => (
-        <MediaRow media={group} key={i} />
+      {rows.map((row, i) => (
+        <MediaRow media={row} cols={row.length} key={i} />
       ))}
     </div>
   );
 }
 
-export function MediaRow({ media }: { media: Media[] }) {
-  const shape = rowShape(media);
+export function MediaRow({ media, cols }: { media: Media[]; cols?: number }) {
+  const shape = rowShape(media, cols);
   return (
     <div
       className={rowClass(media.length)}

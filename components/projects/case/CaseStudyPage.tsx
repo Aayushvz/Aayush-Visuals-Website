@@ -135,8 +135,23 @@ export default function CaseStudyPage({ project }: { project: Project }) {
         <main className="cs hpParallax__stage" style={accentVars(project)}>
           <div className="cs__inner">
             <header className="csHero">
+              {/*
+                The way back.
+
+                The eyebrow here already said "Projects", which named where
+                the reader was without offering to take them there. A case
+                study is a leaf: arrive on one from a search result or a
+                shared link and the only routes out were the site nav and the
+                two cards at the very bottom of a long page. This is the same
+                word, doing the job it looked like it was doing.
+              */}
               <div className="csHero__meta">
-                <p className="cs__eyebrow">Projects</p>
+                <Link className="cs__eyebrow csBack" href="/work">
+                  <span className="csBack__arrow" aria-hidden>
+                    &#8592;
+                  </span>
+                  Projects
+                </Link>
                 <p className="cs__eyebrow csHero__cat">{project.category}</p>
               </div>
 
@@ -231,6 +246,37 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 </div>
               </section>
             ) : null}
+
+            {/*
+              A product made of four interfaces gets four beats, not one.
+
+              Nineteen named screens under a single "Highlights" makes the
+              reader work out for themselves where the traveller's app ends
+              and the kitchen's portal begins, which is the one piece of
+              structure the work has. Projects that are one interface still
+              get the single beat below.
+            */}
+            {story.chapters.length
+              ? story.chapters.map((chapter) => (
+                  <section className="csSec" key={chapter.name}>
+                    <SectionHead no={++no} name={chapter.name} />
+                    <div className="csSec__body">
+                      {chapter.intro.length ? (
+                        <div className="csChapter__lead">
+                          {chapter.intro.map((p, i) => (
+                            <p className="cs__body" key={i}>
+                              {marked(p)}
+                            </p>
+                          ))}
+                        </div>
+                      ) : null}
+                      {chapter.items.map((item, i) => (
+                        <FeatureBlock item={item} key={i} />
+                      ))}
+                    </div>
+                  </section>
+                ))
+              : null}
 
             {story.highlights.length ? (
               <section className="csSec">
