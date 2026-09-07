@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import PageLink from "./PageLink";
 import useSurfaceTone from "./useSurfaceTone";
 import LogoMark from "./LogoMark";
-import ThemeToggle from "./ThemeToggle";
 
 /*
   Glass pill navbar, route-aware: HOME, ABOUT and WORKS are real pages (the
@@ -66,15 +65,9 @@ export default function Navbar() {
           </PageLink>
         ))}
       </nav>
-      <div
-        className="navbar__actions"
-        style={{ display: "flex", alignItems: "center", gap: "8px" }}
-      >
-        <ThemeToggle />
-        <PageLink href="/contact" className="navbar__contact">
-          Contact
-        </PageLink>
-      </div>
+      <PageLink href="/contact" className="navbar__contact">
+        Contact
+      </PageLink>
     </header>
   );
 }

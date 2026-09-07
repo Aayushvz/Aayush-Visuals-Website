@@ -952,64 +952,6 @@ html.has-cursor .cursorRing {
   user-select: none;
 }
 
-/* ---------- theme switcher (inline navbar icon button) ---------- */
-
-.themeSwitch {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: -4px; /* offset inner padding */
-}
-
-.themeSwitch:hover {
-  border-color: var(--hero-brand);
-}
-
-.themeSwitch button {
-  position: relative;
-  z-index: 1;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 50%;
-  /* both derived from the bar's own colour, so the control flips with the
-     surface instead of staying pinned to one theme's foreground */
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  color: inherit;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.themeSwitch__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  line-height: 0;
-}
-
-.themeSwitch button svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-  margin: auto;
-}
-
-.themeSwitch button:hover {
-  background: color-mix(in srgb, currentColor 16%, transparent);
-}
-
-.themeSwitch button:focus-visible {
-  outline: 2px solid var(--hero-brand);
-  outline-offset: 2px;
-}
-
 /* ---------- logo strip ---------- */
 
 .logoStrip {
@@ -5550,10 +5492,6 @@ html.has-cursor .cursorRing {
     display: flex;
   }
 
-  .themeSwitch {
-    display: none;
-  }
-
   /* hide the fixed ruler frame entirely on mobile; mobile labels live inside the
      heroWorld typography block so they naturally drag and scroll with the title */
   .heroRuler {
@@ -9271,12 +9209,7 @@ html.contact-page-active[data-theme="light"] body {
 
 /* --- footer (uses shared Footer component) --- */
 
-/* --- light mode (themeSwitch + hero border) --- */
-
-html.contact-page-active .themeSwitch {
-  opacity: 1;
-  pointer-events: auto;
-}
+/* --- light mode (hero border) --- */
 
 [data-theme="light"] .contactPage__hero {
   border-bottom-color: var(--cp-border);
@@ -11099,7 +11032,6 @@ html.dpl-page .preloader {
 .wallet__actionBtn,
 .mobileNav__menuBtn,
 .mobileNav__themeBtn,
-.themeSwitch button,
 .projTile__mobileCta,
 .navbar__contact {
   transition: transform var(--dur-state) var(--ease-quint);
@@ -11112,7 +11044,6 @@ html.dpl-page .preloader {
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
 .mobileNav__themeBtn:active,
-.themeSwitch button:active,
 .projTile__mobileCta:active,
 .navbar__contact:active {
   transform: scale(0.97);
@@ -11178,7 +11109,6 @@ html.dpl-page .preloader {
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
 .mobileNav__themeBtn:active,
-.themeSwitch button:active,
 .projTile__mobileCta:active,
 .navbar__contact:active,
 .aboutContact__submit:active:not(:disabled),
