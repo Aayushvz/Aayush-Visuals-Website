@@ -653,12 +653,14 @@ export const PROJECTS: Project[] = [
   {
     id: "mike-tyson-invitational",
     challenge: [
-      "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Both at full volume is a mess with a fire filter on it.",
-      "The site also has four audiences arriving at the same homepage: spectators buying tickets, amateur fighters applying to compete, partners looking to get involved, and donors. Each one wants a different page, and none of them should have to hunt for it.",
+      "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Turn both up and you get a mess with a fire filter over it.",
+      "Four different people then land on the same homepage: a spectator buying a ticket, an amateur fighter applying to compete, a brand with a marketing budget, and a donor. Each of them wants a different site, and none of them should have to hunt for it.",
+      "And this is edition one. There is no last year to borrow credibility from, so it has to look like the tenth.",
     ],
     solution: [
-      "**Ratio, not blending.** 65% near black, 25% smelting orange, no more than 10% cold teal, so the forge reads as heat on a technical surface instead of the two fighting each other.",
-      "The sitemap gives every audience its own route off the homepage. Tickets, fighter registration, get involved and donations each land somewhere built for that one job.",
+      "**Ration one side instead of blending both.** Once the split was written down as a number, a screen could be checked against it rather than argued about, and the forge stopped fighting the technology.",
+      "Then a sitemap that gives every audience its own route off the homepage. Tickets, fighter registration, sponsorship and donations each land somewhere built for that one job, and four of the ten surfaces hand off to software somebody else owns.",
+      "Texture stays inside artwork and headline fills. Buttons, forms and body copy stay flat, so the heat reads as something sitting on a technical surface rather than as a filter over the whole page.",
     ],
     title: "Mike Tyson Invitational",
     /* the only case study whose screens really are a browser: every frame in
@@ -721,7 +723,7 @@ export const PROJECTS: Project[] = [
       fill: "#450503",
     },
     description:
-      "A high-impact tournament site for the Mike Tyson Invitational, built for momentum, clarity and a heavyweight first impression.",
+      "The first Mike Tyson Invitational had a date, a venue in Las Vegas and a name everyone in boxing recognises, and nowhere to send anybody. Ten pages had to sell a ticket, sign up a fighter, court a sponsor and take a donation, without ever once looking like a student project.",
     highlights: [
       "Countdown-driven landing built around a hard launch deadline",
       "Custom Webflow interactions tuned for mobile performance",
@@ -756,6 +758,19 @@ export const PROJECTS: Project[] = [
                 label: "Honestly",
                 body: "First project at this size, with a name on the door that leaves no room for a shrug. I was nervous the whole way.",
               },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "Heat and precision do not blend, so they were rationed instead: 65% near black, 25% smelting orange, never more than 10% cold teal.",
+          },
+          /* Written for the About beat: the two paragraphs that sit under the
+             statement band and say what that one line assumes. */
+          {
+            kind: "prose",
+            body: [
+              "Tyson's name on a poster does most of the selling. It also sets a bar. Anything carrying it has to look like it belongs in Las Vegas on fight night, not like a campus event with a famous guest.",
+              "So the work was never really about layout. It was about holding two opposite moods in one place, heat and precision, without letting either of them go quiet.",
             ],
           },
         ],
@@ -942,7 +957,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             caption:
-              "**Cool tint, 5 to 10%.** The smallest budget, and the easiest one to overspend.",
+              "**Cool tint, 5 to 10%.** The smallest budget, and the easiest one to overspend. Capping the teal here is the only reason the site reads as a forge with technology in it rather than a tech site in an orange coat.",
           },
           {
             kind: "specs",
@@ -974,10 +989,6 @@ export const PROJECTS: Project[] = [
                 swatch: "#3D6D67",
               },
             ],
-          },
-          {
-            kind: "statement",
-            text: "Capping the teal at 10% is the only reason this reads as a forge with technology in it, rather than a tech site in an orange coat.",
           },
         ],
       },
@@ -1295,11 +1306,13 @@ export const PROJECTS: Project[] = [
     id: "elevation-capital",
     challenge: [
       "**The State of AI Adoption in Indian Startups** is research worth reading, and research usually ships as a PDF that almost nobody finishes.",
-      "The findings are the whole point: **86% of founders** plan to increase AI spending, **85% of engineering teams** have moved AI into production, and productivity has become the primary proving ground. Buried in a document, none of that lands.",
+      "The findings are the whole point. **86% of founders** plan to increase AI spending, **85% of engineering teams** have already moved AI into production, and productivity has become the proving ground. Buried in a forty-page document, none of that lands.",
+      "The people it is written for read on a phone between meetings. A report asks them for a sitting they are never going to give it.",
     ],
     solution: [
-      "The report is rebuilt as an interactive site, so the numbers **are** the interface rather than illustrations sitting inside it.",
-      "Built natively in Framer with dynamic data visualisations and motion, which keeps the findings readable on a phone and lets the team publish updates without a rebuild.",
+      "Rebuild the report as a site, so the numbers **are** the interface rather than illustrations sitting inside it. Each finding gets its own moment on screen, and the reader arrives at the conclusion by moving through it.",
+      "Built natively in Framer with live data visualisations and motion, which keeps every chart readable on a phone.",
+      "And keeps it current. The team can publish an update themselves, so the research stays a live document instead of going stale two months after launch.",
     ],
     title: "Elevation Capital",
     logoText: "ELEVATION",
@@ -1316,22 +1329,43 @@ export const PROJECTS: Project[] = [
     role: "Website Development",
     tools: ["Framer", "Figma", "AI"],
     description:
-      "Elevation Capital’s The State of AI Adoption in Indian Startups report reveals that 86% of startup founders plan to increase AI spending, 85% of engineering teams have moved AI into production, and productivity has become the primary proving ground.",
+      "Elevation Capital had genuinely useful findings about how Indian startups are using AI, and a PDF almost nobody was going to finish. The report was rebuilt as a site where the numbers are the interface, so the research gets read instead of downloaded.",
     highlights: [
       "Interactive report detailing AI adoption across 86% of Indian startup founders",
       "Developed natively on Framer with dynamic data visualizations and smooth motion",
       "Highlighting engineering teams moving AI into production and driving productivity",
     ],
+    /* The About beat, written rather than assembled: the one line the page
+       opens on, and the two paragraphs underneath it. */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          {
+            kind: "statement",
+            text: "Research does not travel as a document, it travels as something you can move through.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "A fund publishes research to be quoted. The people who do the quoting are founders and operators reading on a phone between two meetings, and a PDF is a format that assumes a desk and a free hour.",
+              "So the findings were treated as the product rather than as the contents of one. Nothing here is a chart dropped into a page; the page is the chart, and the argument is the thing you scroll through.",
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     id: "riviera",
     challenge: [
-      "Riviera is **one of the country's largest student fests**, and the site has to do two things that pull against each other: convey the scale of the whole event, and let one student find the one thing they came for.",
-      "Dozens of events and sub-brands sit underneath it. Put them all on the homepage and it becomes a directory. Hide them and the fest looks smaller than it is.",
+      "Riviera is **one of the country's largest student fests**, with dozens of events and sub-brands sitting underneath the one name.",
+      "Put them all on the homepage and it becomes a directory. Hide them and the fest looks smaller than it is.",
+      "The two people arriving want opposite things. One heard a single event named once and wants the date, the price and the sign-up link. The other has never heard of any of it and needs a reason to care about a whole week.",
     ],
     solution: [
-      "A **motion-forward homepage** carries the energy and signals the scale, so the first impression is the event itself rather than a list of its parts.",
-      "Underneath that, a content architecture built to hold dozens of events and sub-brands, so the depth is there for anyone looking for it without the front page having to carry all of it at once.",
+      "A **motion-forward homepage** carries the energy and signals the scale, so the first impression is the event itself rather than a list of its parts. That answers the second reader before they have scrolled.",
+      "Underneath it, a content architecture built to hold dozens of events and sub-brands. The depth is there the moment somebody goes looking for it, and the front page never has to carry all of it at once.",
     ],
     title: "Riviera",
     logoText: "RIVIERA",
@@ -1348,11 +1382,29 @@ export const PROJECTS: Project[] = [
     role: "Web Design",
     tools: ["Framer", "Figma", "Motion"],
     description:
-      "Website design for Riviera, one of the country's largest student fests, built to carry the scale and energy of the event.",
+      "Riviera is one of the largest student fests in the country, and its website has to do two things that pull against each other. It has to make the scale of a whole week land, and still let one student find the one event they actually came for.",
     highlights: [
       "Website built to carry one of the country's largest student fests",
       "Motion-forward homepage designed to signal scale and energy",
       "Content architecture built for dozens of events and sub-brands",
+    ],
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          {
+            kind: "statement",
+            text: "Show everything and it becomes a directory, hide it and the fest looks smaller than it is.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "Most students opening the Riviera site are not browsing. They heard one event named once, and they want to know when it is, what it costs and where to sign up.",
+              "Everybody else is doing the exact opposite. They know the name, they have no idea what is inside it, and the first screen is the only chance to make a week look worth clearing a calendar for.",
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1395,7 +1447,7 @@ export const PROJECTS: Project[] = [
     role: "Product Design · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
     description:
-      "CPGRAMS is how you complain to the Government of India. Twenty lakh grievances a year, more than ninety ministries, and a fifteen-field form that in practice only works if you read English or Hindi. I designed a chatbot that sits on top of it. You say what went wrong, in whichever of the 22 official languages you actually think in, and it files the grievance for you.",
+      "CPGRAMS is how you complain to the Government of India: twenty lakh grievances a year, more than ninety ministries, and a fifteen-field form that in practice only works if you read English or Hindi. I designed the chatbot that sits on top of it, so you can say what went wrong in whichever of the 22 official languages you actually think in, and it files the grievance for you.",
     extraFacts: [
       ["Client", "DARPG, Government of India"],
       ["Delivered with", "KPMG India"],
@@ -1627,7 +1679,7 @@ export const PROJECTS: Project[] = [
           },
           {
             kind: "statement",
-            text: "A channel built for **1.4 billion people** was, in practice, being used by the **top 15%**.",
+            text: "A channel built for **1.4 billion people**, used in practice by the **top 15%**.",
           },
         ],
       },
@@ -2409,7 +2461,7 @@ export const PROJECTS: Project[] = [
     role: "Lead Product Designer",
     tools: ["Figma", "Prototyping"],
     description:
-      "A layover is dead time you have already paid for. Layover turns it into something usable: put in your airport or your PNR and it shows what is actually open in your terminal right now, so you can order a meal to your gate or book a lounge seat. I joined at zero and took it to four surfaces: the site people land on, the app they order from, the portal a restaurant runs its kitchen on, and the console the whole platform is operated from.",
+      "A layover is dead time you have already paid for, and Layover turns it into something usable: put in your airport or your PNR and it shows what is open in your terminal right now, so you can order a meal to your gate or book a lounge seat. I joined at zero and took it to four surfaces: the site people land on, the app they order from, the portal a restaurant runs its kitchen on, and the console the whole platform is operated from.",
     extraFacts: [
       ["Timeline", "2024 to 2026"],
       ["Scope", "Research, IA, user flows, UX, UI, brand, design system"],
@@ -2562,7 +2614,7 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "statement",
-            text: "Travellers were not struggling because ordering was hard. They were struggling because they could not predict time.",
+            text: "Travellers were not struggling to order, they were struggling to predict time.",
           },
           {
             kind: "prose",
@@ -3007,12 +3059,14 @@ export const PROJECTS: Project[] = [
   {
     id: "yantra",
     challenge: [
-      "Yantra is a week of technical events, workshops and hackathons, spread across formats and audiences. There was no single place for a student to see what was on and sign up for it.",
-      "A technical fest also has to feel worth a week of someone's time. A page that only lists things reads like a timetable, which is not a reason to turn up.",
+      "Yantra runs a week of technical events, workshops and hackathons, spread across formats and audiences. There was no single place for a student to see what was on and sign up for it.",
+      "The information problem is only half of it. A page that lists everything accurately still reads like a timetable, and **a timetable is not a reason to turn up.**",
+      "Everything on it is competing with a week a student has already filled: lectures, deadlines, and every other club running something on the same seven days.",
     ],
     solution: [
-      "A **3D interactive environment** as the front door, so the fest is something you enter rather than something you scroll past.",
-      "Behind it, a unified portal covering technical events, workshops and hackathons in one place. The experience does the persuading and the portal does the work.",
+      "A **3D interactive environment** as the front door, so the fest is something you walk into rather than something you scroll past. The experience does the persuading.",
+      "Behind it, a unified portal covering technical events, workshops and hackathons in one place, so the moment somebody is convinced, signing up takes seconds.",
+      "The spectacle is at the front and the work is underneath it, which is the only arrangement where neither one gets in the other's way.",
     ],
     title: "Yantra",
     logoText: "Yantra",
@@ -3028,17 +3082,45 @@ export const PROJECTS: Project[] = [
     role: "Web Design",
     tools: ["3D", "Web Design"],
     description:
-      "Yantra is a week-long technical fest exclusive to VIT students, focused on enriching student life and elevating event experiences. It brings together technical events, workshops, and hackathons, while fostering a secure, inclusive, and welcoming environment that promotes holistic student growth.",
+      "Yantra is a week of technical events, workshops and hackathons at VIT, and until this there was no single place to see what was on or sign up for any of it. A page that only lists things reads like a timetable, so the front door was built as a 3D environment you walk into instead.",
     highlights: [
       "3D interactive environment built for high engagement",
       "Unified portal for technical events and hackathons",
       "Elevated event experience focused on holistic student growth",
+    ],
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          {
+            kind: "statement",
+            text: "A timetable tells you what is happening, it does not give you a reason to turn up.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "A technical fest is competing for a week of a student's life against lectures, deadlines and every other club running something on the same days. Accuracy is the easy half of that argument.",
+              "The harder half is making a week look worth clearing a calendar for, and nothing about a table of dates has ever done that. So the listing stayed underneath, and the front of the site became somewhere you arrive.",
+            ],
+          },
+        ],
+      },
     ],
   },
   {
     id: "dropby",
     /* a brand system with a full deep dive behind it, so it belongs in both */
     alsoCaseStudy: true,
+    challenge: [
+      "DropBy rewards you for **showing up**, not for posting. That is the entire product, and the old identity said none of it.",
+      "There was **no cohesion, no typographic clarity and no colour strategy**, so every touchpoint looked like it had come from a different app. Nothing in the writing sounded like a person either.",
+      "A brand whose one job is to get somebody off the sofa cannot be the quietest thing on the screen.",
+    ],
+    solution: [
+      "**Build the brand out of the product.** The radar ping, the app's own drop mechanic, becomes the repeating element: the mark, the layouts and the campaign are all the same gesture at different sizes.",
+      "One loud blue carries the system, with warm accents to break it before it goes cold, and a bolder sans so a headline can hold a wall on its own.",
+      "Then a voice written the way somebody would actually say it, out loud, to a friend who is already comfortable at home. **Just Drop By.**",
+    ],
     title: "DropBy",
     logoText: "dropby.",
     logoUrl: "/projects/dropby-logo.webp",
@@ -3072,7 +3154,7 @@ export const PROJECTS: Project[] = [
     role: "Brand Identity",
     tools: ["Figma", "Illustrator", "Photoshop"],
     description:
-      "DropBy is a real-world presence engine for people who want to meet, but on their own terms: it rewards you for showing up rather than for posting. The old brand did not say any of that. This is the rebrand, built around a radar that borrows the app's own drop mechanic and a voice loud enough to get somebody off the sofa.",
+      "DropBy is for people who want to see other people without performing it: the app rewards you for showing up, not for posting. The old brand said none of that, so this rebuild takes the app's own radar ping and makes it the thing the whole identity is built out of.",
     extraFacts: [
       ["Scope", "Identity, logo, colour, design system, campaign"],
       ["Team", "Crestic Era"],
@@ -3116,6 +3198,18 @@ export const PROJECTS: Project[] = [
                 label: "Team",
                 body: "Made with **Crestic Era**.",
               },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "An app about turning up was being advertised by a brand that looked like it would rather stay in.",
+          },
+          /* the About beat: the two paragraphs that sit under that line */
+          {
+            kind: "prose",
+            body: [
+              "DropBy exists for the person who wants to see people and does not want to perform doing it. The product already understood that. It counts the turning up, not the posting about it.",
+              "The identity was arguing the other way. Quiet, unsure, easy to scroll past, which is a strange thing to be when your entire pitch is that somebody should get off the sofa tonight.",
             ],
           },
           {
@@ -3347,12 +3441,14 @@ export const PROJECTS: Project[] = [
   {
     id: "futurepreneurs",
     challenge: [
-      "A campus event site is read once, fast, on a phone, usually while deciding whether to sign up. Everything on it competes with **the one thing that matters: the deadline.**",
+      "A campus event site is read once, fast, on a phone, usually while somebody is deciding whether to bother. Everything on it competes with **the one thing that matters: the deadline.**",
       "A tenth edition also has to look like one. The easy version is fest-poster maximalism, which is exactly what makes a student event look like a student event.",
+      "And it had to be run by students. A multi-week campaign means the content changes constantly, with no developer on call to ship any of it.",
     ],
     solution: [
-      "**Lead with the countdown, not the copy.** The clock is the first thing on the page, and the deadline is never more than a scroll away from wherever you are.",
-      "Five dates get their own visual system so the timeline reads as a sequence rather than a list, and **one accent colour** carries the whole page. Built in Framer so the team could run a multi-week campaign without a developer.",
+      "**Lead with the countdown, not the copy.** The clock is the first thing on the page, and from anywhere else on it the deadline is never more than a scroll away.",
+      "Five dates get their own visual system, so the timeline reads as a sequence rather than a list, and **one accent colour** carries the whole page where a fest poster would have used ten.",
+      "Built in Framer, so the team could run the entire campaign themselves and keep changing the site right up to the morning of the event.",
     ],
     kind: "case-study",
     title: "Futurepreneurs",
@@ -3370,7 +3466,7 @@ export const PROJECTS: Project[] = [
     role: "Web Design",
     tools: ["Framer", "Figma"],
     description:
-      "The site for Futurepreneurs 10.0, E-Cell VIT Vellore's flagship business simulation event. A tenth edition needed to look like one, so the design leans on a countdown, a timeline and one hard deadline rather than on fest-poster maximalism.",
+      "Futurepreneurs 10.0 is E-Cell VIT Vellore's flagship business simulation, and its site gets read once, fast, on a phone, by somebody deciding whether to bother. Everything on the page competes with the only fact that changes their mind, so the countdown leads and the copy follows it.",
     highlights: [
       "Countdown-led landing page built around one hard registration deadline",
       "Five-stage event timeline designed to read as a sequence, not a list",
@@ -3405,6 +3501,18 @@ export const PROJECTS: Project[] = [
                 label: "Outcome",
                 body: "A tenth-edition site that reads startup-grade rather than student-fest, built in Framer so the team could update content through a multi-week campaign without a developer.",
               },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "A tenth edition has to look like one, and fest-poster maximalism is exactly what makes a student event look like a student event.",
+          },
+          /* the About beat: the two paragraphs that sit under that line */
+          {
+            kind: "prose",
+            body: [
+              "Nobody reads an event site. They scan it on a phone, between two other things, and they leave with a single fact: whether they have missed it yet.",
+              "So the page is built around that one fact rather than around the event. Everything else on it, the format, the prizes, the story of nine previous editions, is there for the person the clock has already convinced.",
             ],
           },
         ],
@@ -3548,11 +3656,13 @@ export const PROJECTS: Project[] = [
     id: "posterfolio",
     challenge: [
       "**One canvas, 4:5.** Every poster gets the same rectangle, so nothing can be solved by changing the shape of the page. Composition, type and contrast are the only variables left.",
-      "Most of these are read at **thumbnail scale first**, in a feed or on a contact sheet. A layout has to survive being small before it earns being large.",
+      "Most of these are seen at **thumbnail scale first**, in a feed or on a contact sheet. A layout has to survive being small before it earns being large.",
+      "And the subjects refuse to sit still. A startup teardown, a title card and a streetwear drop want completely different energy out of the same rectangle.",
     ],
     solution: [
-      "Every poster is judged at thumbnail size before it is judged at full size. If the idea does not survive that, the composition changes rather than the type getting bigger.",
-      "Running one format across **41 subjects**, from startup teardowns to title cards, is what makes it a practice rather than a campaign. The constraint stays fixed, so the thinking is the part that has to move.",
+      "Judge every poster small before judging it large. If the idea does not survive the thumbnail, the composition changes rather than the type getting bigger.",
+      "Running one format across **41 subjects** is what turns a set of posters into a practice. The constraint never moves, so the thinking is the only thing that can.",
+      "What that buys is range. The same rectangle has to carry a teardown, an editorial cover, a title card and a merch drop, and getting it to change temperature without changing shape is the part worth repeating.",
     ],
     /* deliberately NOT kind: "case-study" — a wall of posters is a body of
        work, not an argument about one, and the works page splits the two on
@@ -3572,7 +3682,7 @@ export const PROJECTS: Project[] = [
     role: "Graphic Design",
     tools: ["Photoshop", "Illustrator", "Figma"],
     description:
-      "A running series of posters: startup teardowns, product launches, editorial covers, merch and title cards. One format, held across dozens of subjects, as a way of practising composition and type under a fixed constraint.",
+      "Forty-one posters on one canvas: startup teardowns, product launches, editorial covers, merch and title cards, every one of them 4:5. Holding the format still means nothing can be fixed by changing the shape of the page, which leaves composition, type and contrast as the only things there are to get right.",
     highlights: [
       "41 posters across startup, editorial, product and merch briefs",
       "One 4:5 format throughout, so the variation is in composition rather than canvas",
@@ -3603,6 +3713,18 @@ export const PROJECTS: Project[] = [
                 label: "What it is for",
                 body: "Most of these are read at **thumbnail scale first**: a feed, a grid, a contact sheet. The layout has to survive being small before it earns being large.",
               },
+            ],
+          },
+          {
+            kind: "statement",
+            text: "Every poster gets the same rectangle, so the only thing left to improve is the thinking.",
+          },
+          /* the About beat: the two paragraphs that sit under that line */
+          {
+            kind: "prose",
+            body: [
+              "Almost nobody sees a poster at poster size any more. They see it small, in a feed or a grid, next to forty other things competing for the same second.",
+              "So each of these is judged at thumbnail scale before it is judged at any other. If the idea does not survive being small, the composition gets rebuilt rather than the type getting bigger, which is a harder fix and the only one that works.",
             ],
           },
         ],
@@ -3807,6 +3929,18 @@ export const PROJECTS: Project[] = [
     id: "gravitas",
     /* a shipped site and a full deep dive, so it belongs in both lists */
     alsoCaseStudy: true,
+    /* Written rather than assembled, so the Details beat argues the same
+       thing the page does instead of quoting two brief labels at each other. */
+    challenge: [
+      "Gravitas runs **200+ events over three days**, and the site is how almost everybody finds out any of them exist. It had scaled into **content saturation**: the same wall of text, in the same order, for everyone, with no way to narrow it.",
+      "A first-year looking for a beginner workshop and a final-year hunting a hackathon were handed identical pages. Neither of them was the audience for it.",
+      "And there was nowhere to put a maybe. An event you liked but were not ready to pay for had **no place to go**, so coming back meant starting the search over.",
+    ],
+    solution: [
+      "**Ask who you are before asking what you want.** Role-based entry filters the catalogue the moment somebody signs in, so the page starts narrow instead of starting with everything.",
+      "A **retro-tech system** gives the density somewhere to live. A hard grid, pixel display type and high-contrast panels make scale read as organisation rather than as noise.",
+      "Then filters by category, price and team size, and a **wishlist that sits ahead of the receipt**, so a maybe finally has somewhere to go and coming back is not a fresh start.",
+    ],
     title: "Gravitas",
     logoText: "GRAVITAS·25",
     logoUrl: "/projects/gravitas-logo.webp",
@@ -3842,7 +3976,7 @@ export const PROJECTS: Project[] = [
     role: "Website Design",
     tools: ["Figma", "Illustrator"],
     description:
-      "Gravitas is VIT Vellore's flagship techno-management fest, and the website is where thousands of students find and register for hundreds of workshops and competitions. The old one had grown into a wall of text. This is a rebuild around a retro-tech system that makes a catalogue that size searchable, and turns browsing into booking.",
+      "Gravitas is VIT Vellore's flagship techno-management fest, and its website is where thousands of students find and register for a catalogue of more than 200 events. The old one had grown into a wall of text that everybody saw the same way, so this is a rebuild around a retro-tech system that turns browsing into booking.",
     extraFacts: [
       ["Event", "Gravitas'25, VIT Vellore"],
       ["Live at", "gravitas25-frontend.vercel.app"],
@@ -3890,6 +4024,15 @@ export const PROJECTS: Project[] = [
               },
             ],
           },
+          /* the About beat: the two paragraphs that sit under the statement
+             band, which is a whole screen holding one line */
+          {
+            kind: "prose",
+            body: [
+              "A fest site gets about ten seconds from a student who already half knows what they want. Gravitas had the opposite problem to most sites: nothing was missing, everything was there at once.",
+              "Two hundred events is a good problem to have and a terrible page to read. Most of the rebuild is about giving a student permission to ignore nearly all of it.",
+            ],
+          },
         ],
       },
       {
@@ -3925,7 +4068,7 @@ export const PROJECTS: Project[] = [
           },
           {
             kind: "statement",
-            text: "Users were **browsing, not committing**. The catalogue was all there. It just could not be worked through.",
+            text: "Nobody was failing to find events, they were failing to get from two hundred of them down to one.",
           },
         ],
       },
@@ -4128,6 +4271,7 @@ export const PROJECTS: Project[] = [
     challenge: [
       "Meal planning fails in the same place every time, and it is not the cooking. Working professionals aged 28 to 45 said it plainly: “I plan on Sunday and I’ve quit by Wednesday”, and “by the time I’m home, I’ve got no decisions left in me.”",
       "Twelve interviews and 140 survey responses pointed at the same cause. People do not lack motivation, they lack **time and cognitive space**, and the apps they had already tried were widening the gap rather than closing it: “every app gives me recipes, none give me a plan.”",
+      "Which makes most of the category the wrong shape. An app that hands you more options at seven in the evening is adding to the exact thing that broke the week.",
     ],
     solution: [
       "**Automation over education.** The app does the planning instead of teaching someone to plan. It takes what you like, what you avoid and what is already in your kitchen, and returns a week of recipes with the one grocery list that covers them.",
@@ -4148,7 +4292,7 @@ export const PROJECTS: Project[] = [
     role: "UI design",
     tools: ["Figma"],
     description:
-      "A meal-planning app built around one idea: the hard part isn’t cooking, it’s deciding. Meal Maestro takes what you like, what you avoid and what’s already in the kitchen, and turns it into a week of recipes and the one grocery list that covers them. Placed third at the GDG Design-a-thon.",
+      "Meal Maestro is a meal-planning app built on the one thing twelve interviews kept saying: the hard part is not the cooking, it is the deciding. It takes what you like, what you avoid and what is already in your kitchen, and hands back a week of recipes with the single grocery list that covers all of them.",
     extraFacts: [
       ["Recognition", "3rd: GDG Design-a-thon"],
       ["Research", "12 interviews · 140 survey responses · 5 weeks"],
@@ -4157,6 +4301,27 @@ export const PROJECTS: Project[] = [
       "Grounded in primary research: 12 discovery interviews, 140 survey responses and 4 comparison teardowns",
       "Built on why people abandon meal planning, not on what an app could do",
       "Full design system: Poppins for display and headings, Open Sans for body",
+    ],
+    /* The About beat, written rather than assembled: the line the page opens
+       on, and the two paragraphs underneath it. The 22,306px case-study strip
+       below is untouched by this, since neither block carries an image. */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          {
+            kind: "statement",
+            text: "People do not give up on meal planning because they cannot cook, they give up because by Wednesday they have no decisions left.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "Almost everybody who quits meal planning quits in the same place, and it is never the stove. It is a Wednesday evening, at the end of a working day, in front of a fridge.",
+              "So the product had to remove decisions rather than add features, which is the opposite of what the category does. Twelve interviews, 140 survey responses and third place at the GDG Design-a-thon all came out of following that one line.",
+            ],
+          },
+        ],
+      },
     ],
     /*
       Green, because the product is about food and the site's default purple
