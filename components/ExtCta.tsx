@@ -119,9 +119,35 @@ export default function ExtCta({
     );
   }
 
+  /*
+    Somebody else's site opens in its own tab.
+
+    Every use of this button that is not a route change points off this
+    site: a live deployment, a Behance gallery, a client's product. Sending
+    the reader there in the same tab throws away the case study they were
+    halfway through, and the way back is the browser's own back button
+    rather than anything on the page. `noopener` because a new tab can
+    otherwise reach back through `window.opener`.
+
+    A mailto: is deliberately excluded. It hands off to a mail client and
+    leaves nothing to look at, so opening a tab for it just leaves a blank
+    one behind.
+  */
+  const external = /^(https?:)?\/\//.test(href);
+
   return (
-    <a href={href} className={cls} {...rest}>
+    <a
+      href={href}
+      className={cls}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      {...rest}
+    >
       {inner}
+      {/* the accessible name has to say where the link goes; the visible
+          label cannot, without every button on the site ending in the same
+          four words */}
+      {external && <span className="srOnly"> (opens in a new tab)</span>}
     </a>
   );
 }
