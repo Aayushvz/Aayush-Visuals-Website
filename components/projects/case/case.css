@@ -1027,3 +1027,272 @@
     transform: none;
   }
 }
+
+/* ==========================================================================
+   MOTION
+   --------------------------------------------------------------------------
+   No observer, no scroll loop, no JavaScript at all.
+
+   The page's resting state IS its finished state: every element here is
+   fully visible with no class on it and nothing waiting to be added. The
+   motion sits on top, driven by a scroll-progress timeline, so it is a
+   function of position rather than a promise that something will run later.
+
+   That distinction is the whole reason for the approach. The observer-and-
+   transition version of this page was measured sitting at opacity 0
+   indefinitely in a tab that had stopped painting: the callback never
+   arrived, the class never landed, and the case study was blank. A timeline
+   cannot fail that way, because scroll position is always defined. And
+   where `view()` is unsupported the @supports block simply does not apply,
+   which leaves a static page rather than an empty one.
+
+   Three behaviours, because a paragraph, a screenshot and a rule are not
+   the same object arriving:
+
+     text      12px and a fade
+     pictures  18px, a fade, and 1.2% of scale coming off
+     the rule  above a section, drawn out from the left
+
+   Everything else on the page stays still.
+   ========================================================================== */
+
+/*
+  `from` only, with `both` fill.
+
+  The to-state is then the element's own computed style rather than a
+  duplicate of it here, which is what keeps the resting state authoritative:
+  there is no second place for it to drift out of sync.
+*/
+@keyframes csRise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--rise-y, 12px), 0);
+  }
+}
+
+@keyframes csRiseShot {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(1.012);
+  }
+}
+
+@keyframes csDraw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .cs [data-rise] {
+      animation: csRise both linear;
+      animation-timeline: view();
+      /*
+        A fixed distance, not a percentage.
+
+        The `entry` range spans the element's own height plus the viewport,
+        so a percentage makes a 1200px screenshot fade over three times the
+        scroll a paragraph does, and the page loses any common tempo. 300px
+        of travel is the same beat for both.
+      */
+      animation-range: entry 24px entry 324px;
+    }
+
+    .cs [data-rise="shot"] {
+      animation-name: csRiseShot;
+      animation-range: entry 24px entry 400px;
+    }
+
+    /*
+      Stagger without animation-delay, which a scroll timeline ignores.
+
+      Pushing the START of each item's range further down the scroll is the
+      equivalent move, and it is the better one here: the offset is spatial,
+      so a row of four phone screens resolves left to right at whatever
+      speed the reader is actually scrolling.
+    */
+    .csRow--pair [data-rise],
+    .csResults__row,
+    .csNext__card {
+      animation-range: entry calc(24px + var(--i, 0) * 46px) entry
+        calc(324px + var(--i, 0) * 46px);
+    }
+
+    /* pictures keep their own longer travel while being staggered */
+    .csRow--pair [data-rise="shot"] {
+      animation-range: entry calc(24px + var(--i, 0) * 46px) entry
+        calc(400px + var(--i, 0) * 46px);
+    }
+
+    /*
+      The one drawn line.
+
+      It runs off the section head's own timeline rather than the
+      pseudo-element's, because the pseudo is a 1px strip and a timeline
+      built from that box is too short to read as a draw.
+    */
+    .csSec__head {
+      view-timeline-name: --csHead;
+    }
+
+    .csSec__head::before {
+      animation: csDraw both linear;
+      animation-timeline: --csHead;
+      animation-range: entry 24px entry 460px;
+    }
+  }
+
+  /*
+    The hero gets no entrance, and that is a decision rather than an
+    omission.
+
+    Two were tried here and both failed the same way. `animation: csRise
+    both` holds an element at its `from` state until the animation runs, and
+    animations do not run in a tab that has stopped painting; @starting-style
+    inverts that correctly but its transition freezes for the same reason.
+    Measured both times: the hero sat at opacity 0 indefinitely. Anything
+    above the fold that begins invisible is betting the whole first screen on
+    a callback, and this page does not need to make that bet. The site
+    already plays a full page-transition wipe on the way in. That IS the
+    entrance; arriving to the title already set is the calmer answer anyway.
+
+    Hero elements still carry data-rise and still match the timeline rule
+    above. They simply sit past the end of their own entry range at scroll
+    zero, so the timeline resolves them to their resting state on the first
+    frame, with nothing to wait for.
+  */
+}
+
+/* ---------- the hairline above a section ---------- */
+
+/*
+  Kept as a border and made transparent rather than removed, so the box
+  measures the same whether or not the line is drawn, and the line itself is
+  a pseudo-element because a border cannot be scaled from one end.
+*/
+.csSec__head {
+  position: relative;
+  border-top-color: transparent;
+  /* the navbar is fixed over the page, so an in-page anchor stops short */
+  scroll-margin-top: clamp(76px, 10vh, 120px);
+}
+
+.csSec__head::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 1px;
+  background: var(--cs-line);
+  transform-origin: left center;
+}
+
+.csSec--dark .csSec__head::before {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ---------- hover ---------- */
+
+/*
+  Three pixels and almost no shadow.
+
+  The work is the only object on a white page, and the least that says "this
+  is a thing, not a print" is the most that belongs here. `translate` rather
+  than `transform`, because the entrance owns that one; the two compose, so
+  a picture can be lifted while it is still settling.
+*/
+.cs .csShot {
+  transition:
+    translate var(--dur-state) var(--ease-quint),
+    box-shadow var(--dur-state) var(--ease-quint);
+}
+
+@media (hover: hover) {
+  .csRow .csShot:hover,
+  .csDetails__media .csShot:hover {
+    translate: 0 -3px;
+    box-shadow: 0 14px 32px -24px rgba(16, 16, 16, 0.4);
+  }
+}
+
+.csHero__factVal,
+.csResults__value {
+  transition: color var(--dur-hover) var(--ease-quint);
+}
+
+@media (hover: hover) {
+  .csHero__fact:hover .csHero__factVal,
+  .csResults__row:hover .csResults__value {
+    color: var(--cs-accent-ink);
+  }
+}
+
+/*
+  The related-project cards are the one place the page asks for a click, so
+  they are the one place a hover does more than change a colour.
+*/
+.csNext__frame {
+  position: relative;
+}
+
+.csNext__frame::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--cs-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-panel) var(--ease-quint);
+}
+
+.csNext__card:hover .csNext__frame::after,
+.csNext__card:focus-visible .csNext__frame::after {
+  transform: none;
+}
+
+.csNext__no {
+  transition:
+    transform var(--dur-state) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint);
+}
+
+.csNext__card:hover .csNext__no,
+.csNext__card:focus-visible .csNext__no {
+  transform: translate3d(-4px, 0, 0);
+  color: var(--cs-accent-ink);
+}
+
+/* ---------- reduced motion, and paper ---------- */
+
+/*
+  Nothing to undo. Every animation above is already inside a
+  `prefers-reduced-motion: no-preference` query, so the preference does not
+  disable the page, it simply never adds anything to it. What is left are
+  the two hover transitions, which stay: feedback survives reduced motion,
+  it just stops travelling.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .csNext__card:hover .csNext__no {
+    transform: none;
+  }
+
+  .csNext__frame::after {
+    transition: none;
+  }
+}
+
+@media print {
+  .cs [data-rise],
+  .csSec__head::before {
+    animation: none;
+  }
+
+  .csSec__head {
+    border-top-color: var(--cs-line);
+  }
+
+  .csSec__head::before {
+    display: none;
+  }
+}

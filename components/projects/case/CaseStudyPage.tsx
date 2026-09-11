@@ -84,7 +84,7 @@ function liveHref(project: Project): string | null {
 /* the small crosses the comps place in the whitespace; see .csMarks */
 function Marks() {
   return (
-    <div className="csMarks" aria-hidden>
+    <div className="csMarks" data-rise aria-hidden>
       <span className="csMark" />
       <span className="csMark csMark--sm" />
       <span className="csMark" />
@@ -92,11 +92,27 @@ function Marks() {
   );
 }
 
+/*
+  The rule above a section is drawn rather than printed.
+
+  It is the one element every beat shares, so it is the right place to put
+  the page's rhythm: the hairline runs out from the left edge, and the two
+  labels arrive behind it. The border itself is kept (transparent) so the
+  box never changes height between the drawn and undrawn states.
+*/
 function SectionHead({ no, name }: { no: number; name: string }) {
   return (
     <div className="csSec__head">
-      <p className="csSec__no">({String(no).padStart(2, "0")})</p>
-      <p className="csSec__name">({name})</p>
+      <p className="csSec__no" data-rise style={{ "--i": 1 } as CSSProperties}>
+        ({String(no).padStart(2, "0")})
+      </p>
+      <p
+        className="csSec__name"
+        data-rise
+        style={{ "--i": 2 } as CSSProperties}
+      >
+        ({name})
+      </p>
     </div>
   );
 }
@@ -145,7 +161,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 two cards at the very bottom of a long page. This is the same
                 word, doing the job it looked like it was doing.
               */}
-              <div className="csHero__meta">
+              <div className="csHero__meta" data-rise>
                 <Link className="cs__eyebrow csBack" href="/work">
                   <span className="csBack__arrow" aria-hidden>
                     &#8592;
@@ -155,9 +171,19 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 <p className="cs__eyebrow csHero__cat">{project.category}</p>
               </div>
 
-              <h1 className="csHero__title">{project.title}</h1>
+              <h1
+                className="csHero__title"
+                data-rise
+                style={{ "--i": 1 } as CSSProperties}
+              >
+                {project.title}
+              </h1>
 
-              <div className="csHero__intro">
+              <div
+                className="csHero__intro"
+                data-rise
+                style={{ "--i": 2 } as CSSProperties}
+              >
                 {story.intro.map((p, i) => (
                   <p className="cs__body" key={i}>
                     {marked(p)}
@@ -168,16 +194,28 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               {/* the three facts a hiring manager checks first, in the order
                 they check them */}
               <ul className="csHero__facts">
-                <li className="csHero__fact">
+                <li
+                  className="csHero__fact"
+                  data-rise
+                  style={{ "--i": 3 } as CSSProperties}
+                >
                   <span className="csHero__factKey">Role</span>
                   <span className="csHero__factVal">{project.role}</span>
                 </li>
-                <li className="csHero__fact">
+                <li
+                  className="csHero__fact"
+                  data-rise
+                  style={{ "--i": 4 } as CSSProperties}
+                >
                   <span className="csHero__factKey">Year</span>
                   <span className="csHero__factVal">{project.year}</span>
                 </li>
                 {project.tools?.length ? (
-                  <li className="csHero__fact">
+                  <li
+                    className="csHero__fact"
+                    data-rise
+                    style={{ "--i": 5 } as CSSProperties}
+                  >
                     <span className="csHero__factKey">Tools</span>
                     <span className="csHero__factVal">
                       {project.tools.slice(0, 3).join(", ")}
@@ -187,7 +225,11 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               </ul>
 
               {live ? (
-                <div className="csHero__cta">
+                <div
+                  className="csHero__cta"
+                  data-rise
+                  style={{ "--i": 6 } as CSSProperties}
+                >
                   <ExtCta href={live}>
                     {project.cta || "Visit live site"}
                   </ExtCta>
@@ -198,6 +240,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 <div className="csHero__cover">
                   <img
                     className="csShot"
+                    data-rise="shot"
                     src={project.cover}
                     alt={`${project.title}, cover`}
                     /* the largest thing in the first screen, so it is the one
@@ -213,7 +256,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec csSec--dark">
                 <SectionHead no={++no} name="About" />
                 <div className="csSec__body">
-                  <p className="csStatement">
+                  <p className="csStatement" data-rise>
                     <span className="csStatement__lead">
                       {marked(story.statement.lead)}
                     </span>
@@ -224,7 +267,12 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                   {story.about.length ? (
                     <div className="csAbout">
                       {story.about.map((p, i) => (
-                        <p className="cs__body" key={i}>
+                        <p
+                          className="cs__body"
+                          data-rise
+                          style={{ "--i": i + 1 } as CSSProperties}
+                          key={i}
+                        >
                           {marked(p)}
                         </p>
                       ))}
@@ -262,7 +310,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                     <SectionHead no={++no} name={chapter.name} />
                     <div className="csSec__body">
                       {chapter.intro.length ? (
-                        <div className="csChapter__lead">
+                        <div className="csChapter__lead" data-rise>
                           {chapter.intro.map((p, i) => (
                             <p className="cs__body" key={i}>
                               {marked(p)}
@@ -329,6 +377,9 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                       <Link
                         className="csNext__card"
                         href={`/work/${p.id}`}
+                        data-rise
+                        data-cursor="project"
+                        style={{ "--i": i } as CSSProperties}
                         key={p.id}
                       >
                         <div className="csNext__frame">

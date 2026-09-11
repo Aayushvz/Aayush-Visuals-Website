@@ -748,12 +748,18 @@ function Img({
   alt,
   className = "csShot",
   capWidth = false,
+  reveal,
+  index,
 }: {
   src: string;
   alt: string;
   className?: string;
   /** stop a small asset being blown up; only where there is no sized cell */
   capWidth?: boolean;
+  /** opt this picture into the page's reveal; omit for a still image */
+  reveal?: boolean;
+  /** position in its row, which is all the stagger needs */
+  index?: number;
 }) {
   /*
     min() of the two, not the natural width alone.
@@ -766,9 +772,11 @@ function Img({
     rather than showing up as a scrollbar in any of my overflow checks.
   */
   const dims = capWidth ? IMAGE_DIMS[src] : undefined;
-  const cap = dims
-    ? ({ maxWidth: `min(100%, ${dims[0]}px)` } as CSSProperties)
-    : undefined;
+  const style = {
+    ...(dims ? { maxWidth: `min(100%, ${dims[0]}px)` } : null),
+    ...(index === undefined ? null : { "--i": index }),
+  } as CSSProperties;
+  const cap = Object.keys(style).length ? style : undefined;
   /* a .webm in an <img> renders nothing, so a moving asset gets a video that
      behaves like an image: no controls, no sound, and no reason to notice it
      is a video until it moves */
@@ -777,6 +785,8 @@ function Img({
       <video
         className={className}
         src={src}
+        style={cap}
+        data-rise={reveal ? "shot" : undefined}
         muted
         loop
         playsInline
@@ -791,6 +801,7 @@ function Img({
       src={src}
       alt={alt}
       style={cap}
+      data-rise={reveal ? "shot" : undefined}
       loading="lazy"
       decoding="async"
     />
@@ -925,7 +936,7 @@ export function MediaRow({ media, cols }: { media: Media[]; cols?: number }) {
       }
     >
       {media.map((m, i) => (
-        <Img key={m.src + i} src={m.src} alt={m.alt} />
+        <Img key={m.src + i} src={m.src} alt={m.alt} reveal index={i} />
       ))}
     </div>
   );
@@ -938,7 +949,12 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
           scrolls past on the right */}
       <div className="csDetails__pin">
         {pairs.map((pair, i) => (
-          <div className="csDetails__pair" key={i}>
+          <div
+            className="csDetails__pair"
+            data-rise
+            style={{ "--i": i } as CSSProperties}
+            key={i}
+          >
             <p className="csDetails__label">({pair.label})</p>
             <div className="csDetails__text">
               {pair.body.map((para, k) => (
@@ -953,7 +969,7 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
       {media.length ? (
         <div className="csDetails__media">
           {media.map((m, i) => (
-            <Img key={m.src + i} src={m.src} alt={m.alt} capWidth />
+            <Img key={m.src + i} src={m.src} alt={m.alt} capWidth reveal />
           ))}
         </div>
       ) : null}
@@ -964,7 +980,7 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
 export function FeatureBlock({ item }: { item: Highlight }) {
   return (
     <div className="csFeature">
-      <div className="csFeature__head">
+      <div className="csFeature__head" data-rise>
         <p className="csFeature__name">{item.name}</p>
         <div>
           {item.body.map((p, i) => (
@@ -993,7 +1009,12 @@ export function ResultRows({
   return (
     <div className="csResults">
       {items.map((it, i) => (
-        <div className="csResults__row" key={i}>
+        <div
+          className="csResults__row"
+          data-rise
+          style={{ "--i": i } as CSSProperties}
+          key={i}
+        >
           <span className="csResults__label">{marked(it.label)}</span>
           <span className="csResults__value">
             {it.value}
@@ -1001,7 +1022,11 @@ export function ResultRows({
           </span>
         </div>
       ))}
-      {note ? <p className="csResults__note">{note}</p> : null}
+      {note ? (
+        <p className="csResults__note" data-rise>
+          {note}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -1017,7 +1042,7 @@ export function ShotStack({ shots }: { shots: ProjectShot[] }) {
   return (
     <div className="csStack">
       {shots.map((shot, si) => (
-        <figure className="csFig" key={si}>
+        <figure className="csFig" data-rise key={si}>
           <div className="csStack__strip">
             {shotSources(shot).map((src, i) => (
               <Img
