@@ -57,6 +57,17 @@
   */
   --cs-r-shot: 12px;
 
+  /*
+    And the corner a small outlined box takes.
+
+    Separate from --cs-r-shot rather than sharing it, because a radius is
+    read against the height it sits on: 12px on a 307px screenshot is a
+    softened edge, and the same 12px on a 37px chip is a quarter of its
+    height and turns it into a pill. 6 is the value that reads as the same
+    amount of rounding at this size.
+  */
+  --cs-r-chip: 6px;
+
   --cs-2xs: clamp(6px, 0.6vw, 10px);
   --cs-xs: clamp(10px, 1vw, 16px);
   --cs-sm: clamp(16px, 1.6vw, 24px);
@@ -2055,6 +2066,7 @@
 .csLane__steps li {
   padding: var(--cs-2xs) var(--cs-xs);
   border: 1px solid var(--cs-line);
+  border-radius: var(--cs-r-chip);
   font-size: var(--cs-t-label);
   line-height: 1.3;
   color: var(--cs-mute);
