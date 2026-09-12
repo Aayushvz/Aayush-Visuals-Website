@@ -1392,14 +1392,74 @@
 }
 
 .csHero__factVal,
-.csResults__value {
+.csResults__value,
+.csContext__val,
+.csFlow__sub {
   transition: color var(--dur-hover) var(--ease-quint);
 }
 
 @media (hover: hover) {
   .csHero__fact:hover .csHero__factVal,
-  .csResults__row:hover .csResults__value {
+  .csResults__row:hover .csResults__value,
+  .csContext__row:hover .csContext__val {
     color: var(--cs-accent-ink);
+  }
+}
+
+/*
+  The small things that sit on a hairline.
+
+  One behaviour across the four of them, because they are the same object
+  drawn at four sizes: a rule, a label, and something under it. The rule is
+  what answers - it takes the accent - and anything card-shaped enough to
+  have an edge travels the same 2px the pictures travel at 3.
+
+  `translate` rather than `transform`, for the reason the shots use it: the
+  entrance owns transform, and these two compose rather than fight.
+*/
+.csLane__steps li,
+.csFlow__step,
+.csLesson,
+.csWire__art {
+  transition:
+    translate var(--dur-state) var(--ease-quint),
+    border-color var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint);
+}
+
+@media (hover: hover) {
+  /*
+    A crossed-off step comes up to full ink under the cursor.
+
+    This is the one hover on the page that is worth more than feedback. The
+    rejected lane is deliberately hard to read - that is the argument - but
+    a reader who wants to know what was actually removed should not have to
+    squint at it. The strike stays, so nothing about the meaning changes;
+    only the legibility does, and only for the one being pointed at.
+  */
+  .csLane--before .csLane__steps li:hover {
+    translate: 0 -2px;
+    border-color: var(--cs-ink);
+    color: var(--cs-ink);
+  }
+
+  .csLane--after .csLane__steps li:hover {
+    translate: 0 -2px;
+    border-color: var(--cs-accent-ink);
+  }
+
+  .csFlow__step:hover,
+  .csLesson:hover {
+    border-top-color: var(--cs-accent-ink);
+  }
+
+  .csFlow__step:hover .csFlow__sub {
+    color: var(--cs-ink);
+  }
+
+  .csWire:hover .csWire__art {
+    translate: 0 -3px;
+    border-color: var(--cs-ink);
   }
 }
 
@@ -1455,6 +1515,12 @@
 
   .csNext__frame::after {
     transition: none;
+  }
+
+  /* the colour still answers, it just stops travelling */
+  .csLane__steps li:hover,
+  .csWire:hover .csWire__art {
+    translate: none;
   }
 }
 
@@ -1746,8 +1812,15 @@
   heading is not using, which is the same asymmetric rail .csSec__head,
   .csFeature__head and .csDetails are all built on.
 
-  Bottom-aligned, so the last line of the paragraph and the last line of the
-  heading sit on one line rather than floating at two different heights.
+  Aligned on the first baseline, not the last.
+
+  Bottom-aligning them put a one-line heading level with the FOURTH line of
+  a four-line paragraph, which left it sitting sixty pixels below the top of
+  its own band with nothing above it - the heading reading as a footnote to
+  the paragraph rather than the thing the paragraph explains. On the first
+  baseline the two start together, and because the heading is twice the size
+  its cap rises above the paragraph's first line, which is what makes it
+  read as the opening mark.
 
   Split only when there IS a lead-in: a heading on its own keeps the whole
   band and simply does not need the width. Browsers without :has() fall back
@@ -1761,7 +1834,7 @@
      enough to read as two unrelated blocks rather than one band. */
   column-gap: var(--cs-lg);
   row-gap: var(--cs-sm);
-  align-items: end;
+  align-items: baseline;
 }
 
 .csGroup__lead:has(.csGroup__intro) {
