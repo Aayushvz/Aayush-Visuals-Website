@@ -170,63 +170,103 @@
 /*
   The way back to /work.
 
-  A hairline pill rather than a filled button. It sits above the title, which
-  is the largest thing on the page, and a solid orange control there would be
-  the first thing the eye lands on when the last thing it should compete with
-  is the project's own name. So it reads as an eyebrow that happens to be
-  clickable: same micro type, same tracking, with an outline and an arrow to
-  say it goes somewhere.
+  It was a hairline pill wrapped round an arrow and a word, which put a
+  bordered object directly above the largest type on the page and made the
+  first thing you see a piece of chrome. This is the same two elements with
+  the box taken off: a mark and a label, sitting on the baseline of the
+  category opposite it.
 
-  The pill's padding is set so its optical height matches the category label
-  opposite it, which is why .csHero__meta centres rather than sitting on a
-  shared baseline the border would ignore.
+  The mark is deliberately the same object as the back-to-top control at the
+  other end of the page. One hairline circle holding one arrow, inverting to
+  ink on hover. Up in the corner, left at the top: the two ways out of a leaf
+  page, drawn the same way, so learning one teaches the other.
 */
 .csBack {
   display: inline-flex;
   align-items: center;
-  gap: 0.6em;
-  /* the top value is smaller because uppercase type sits high in its box */
-  padding: 0.62em 1.05em 0.66em;
-  border: 1px solid var(--cs-line);
-  border-radius: 999px;
+  gap: 0.85em;
   color: var(--cs-mute);
   text-decoration: none;
   white-space: nowrap;
-  transition:
-    color var(--dur-hover) var(--ease-quint),
-    border-color var(--dur-hover) var(--ease-quint);
+  transition: color var(--dur-hover) var(--ease-quint);
 }
 
-.csBack:hover {
-  color: var(--cs-accent-ink);
-  border-color: var(--cs-accent);
+.csBack__mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 1px solid var(--cs-line);
+  border-radius: 50%;
+  color: var(--cs-ink);
+  transition:
+    background-color var(--dur-hover) var(--ease-quint),
+    border-color var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+/*
+  The label carries the underline, not the whole control.
+
+  A rule that grows under two words is a link acknowledging the pointer. The
+  same rule under a circle as well would be underlining an icon, which is
+  what the pill was doing in a different shape.
+*/
+.csBack__label {
+  position: relative;
+}
+
+.csBack__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.35em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-state) var(--ease-quint);
+}
+
+.csBack:hover,
+.csBack:focus-visible {
+  color: var(--cs-ink);
+}
+
+.csBack:hover .csBack__label::after,
+.csBack:focus-visible .csBack__label::after {
+  transform: none;
+}
+
+/* ink rather than the project's colour: the accent is a light mint on one
+   project and a pale gold on another, and an arrow has to stay readable on
+   whatever fills the circle behind it */
+.csBack:hover .csBack__mark,
+.csBack:focus-visible .csBack__mark {
+  background: var(--cs-ink);
+  border-color: var(--cs-ink);
+  color: var(--cs-bg);
+  /* it points left, so it leaves to the left */
+  transform: translateX(-3px);
 }
 
 .csBack:focus-visible {
-  outline: 2px solid var(--cs-accent);
-  outline-offset: 3px;
-}
-
-/* the arrow leads, so it is the part that moves */
-.csBack__arrow {
-  display: block;
-  /* the glyph is drawn small next to uppercase caps at this size */
-  font-size: 1.15em;
-  line-height: 1;
-  transition: transform var(--dur-hover) var(--ease-quint);
-}
-
-.csBack:hover .csBack__arrow {
-  transform: translateX(-3px);
+  outline: 2px solid var(--cs-accent-ink);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .csBack,
-  .csBack__arrow {
+  .csBack__mark,
+  .csBack__label::after {
     transition: none;
   }
 
-  .csBack:hover .csBack__arrow {
+  .csBack:hover .csBack__mark {
     transform: none;
   }
 }
@@ -1294,5 +1334,49 @@
 
   .csSec__head::before {
     display: none;
+  }
+}
+
+/* ---------- the primary button, on paper ---------- */
+
+/*
+  Two things the shared button gets wrong on a case study.
+
+  It ships a 24px drop shadow, which is right on the homepage's cream sheet
+  where it sits among floating objects, and wrong on a white wall where it is
+  the only soft edge on the page: at a glance the control reads as blurred
+  rather than raised. The 3px stroke it already carries is its edge; it does
+  not need a second one made of blur.
+
+  And its accent was stuck on the site purple. `--ext-accent` is declared on
+  `.extCta` itself, and a custom property set on an element beats the same
+  property inherited from an ancestor, so the value the page was publishing
+  never reached it: every project shipped a purple tile, including the ones
+  whose whole identity is a red or a gold. Scoping it one level deeper is
+  what lets the page win.
+*/
+.cs .extCta {
+  --ext-accent: var(--cs-accent);
+  box-shadow: none;
+}
+
+/*
+  The two layers that actually sit on the accent, and nothing else.
+
+  The tile holds a glyph over the accent square at rest; the march is the
+  row of arrows that appears once the fill has spread across the bar. Both
+  were inheriting the button's white, which is the right colour for the
+  label on charcoal and the wrong one on a mint or a gold. The label itself
+  is untouched: it never sits on the accent.
+*/
+.cs .extCta__tile,
+.cs .extCta__march {
+  color: var(--cs-on-accent, #fff);
+}
+
+@media (hover: hover) {
+  .cs .extCta:hover {
+    transform: translateY(-2px);
+    box-shadow: none;
   }
 }

@@ -69,8 +69,16 @@ function accentVars(project: Project): CSSProperties {
   return {
     "--cs-accent": a.solid ?? a.dark,
     "--cs-accent-ink": a.light,
-    /* the CTA carries its own token, so the button matches its page */
-    "--ext-accent": a.solid ?? a.dark,
+    /*
+      What reads ON the accent once something is filled with it.
+
+      The primary button paints white glyphs over its accent square, which
+      is fine on a smelting red and not fine on Gravitas' mint (2.4:1) or
+      Layover's gold (2.3:1). Every project that names an accent already
+      names the colour that survives sitting on it, for exactly this reason,
+      so the button borrows that rather than assuming white.
+    */
+    "--cs-on-accent": a.ink ?? "#fff",
   } as CSSProperties;
 }
 
@@ -163,10 +171,24 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               */}
               <div className="csHero__meta" data-rise>
                 <Link className="cs__eyebrow csBack" href="/work">
-                  <span className="csBack__arrow" aria-hidden>
-                    &#8592;
+                  {/* drawn rather than the &larr; glyph, which is a
+                      different weight in every font that has it and sits
+                      off-centre in a circle */}
+                  <span className="csBack__mark" aria-hidden>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
                   </span>
-                  Projects
+                  <span className="csBack__label">Projects</span>
                 </Link>
                 <p className="cs__eyebrow csHero__cat">{project.category}</p>
               </div>
