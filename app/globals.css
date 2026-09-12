@@ -8404,7 +8404,7 @@ html.has-cursor .cursorRing {
 
 html.contact-page-active,
 html.contact-page-active body {
-  background-color: #4c1d95;
+  background-color: #6a1eed;
 }
 
 /*
@@ -8415,16 +8415,21 @@ html.contact-page-active body {
   reads and the only page whose job is to be memorable rather than
   informative.
 
-  The shade is a deep violet rather than the brand's own #7c3aed. At full
-  brightness across a whole viewport the page vibrates, and the ink ramp
-  collapses with it: cream at 55% over #7c3aed measures 2.5:1, so every
-  muted line on the page would have failed. On this ground cream is 9.7:1
-  and there is room to build a real ramp underneath it.
+  The shade is #6a1eed, the same purple the preloader and the page-transition
+  circle are painted in, so arriving here from anywhere on the site lands on
+  a colour you have already seen twice.
 
-  Every alpha below was chosen against that measurement, not by eye.
+  It is a bright ground, and a bright ground is expensive: cream on it is
+  6.2:1 rather than the 9.7 a deeper violet gives, and no dark ink works at
+  all (a near-black violet measures 2.9:1 against it, so text cannot go the
+  other way). That leaves one usable direction and very little room in it,
+  which is why the ramp below is two steps and why hierarchy on this page is
+  carried by size and weight rather than by fading things out.
+
+  Every value here was chosen against that measurement, not by eye.
 */
 .contactPage {
-  --cp-bg: #4c1d95;
+  --cp-bg: #6a1eed;
   --cp-fg: #f4f1ea;
   /*
     Two inks and an accent, where there used to be four inks.
@@ -8436,22 +8441,27 @@ html.contact-page-active body {
 
     So the ramp collapses honestly rather than being nudged. Solid cream
     carries headings and the values you type; this one carries everything
-    else that is words, at 4.6:1; and the accent below carries the small
-    labels' focus state. A placeholder is still distinguishable from a typed
-    value, by the much larger gap between 4.6 and 9.7.
+    else that is words; and the accent below carries the small labels' focus
+    state.
+
+    84%, which is barely muted at all, is simply what the ground allows: at
+    80% this ink is 4.4:1 and already under the bar. On a colour this bright
+    there is no such thing as a quiet grey, so the difference between a
+    heading and a sentence is made with size and weight instead.
   */
-  --cp-fg-muted: rgba(244, 241, 234, 0.62);
-  --cp-line: rgba(244, 241, 234, 0.16);
-  --cp-border: rgba(244, 241, 234, 0.12);
+  --cp-fg-muted: rgba(244, 241, 234, 0.84);
+  --cp-line: rgba(244, 241, 234, 0.24);
+  --cp-border: rgba(244, 241, 234, 0.18);
   /*
     The accent has to change with the ground.
 
     Every purple highlight on this page was --purple or --purple-soft, and
-    both disappear into a purple surface: the brand purple measures 1.9:1 on
-    this ground. A light violet from the same family reads as the same idea
-    and clears the text bar at 5.9:1.
+    both disappear into a purple surface. The accent has to climb with the
+    ground too: the violet that carried it at 5.9:1 on the deeper shade is
+    only 3.8:1 on this one, which fails for the small labels that use it. A
+    step lighter again clears it at 5.0:1.
   */
-  --cp-accent: #c4b5fd;
+  --cp-accent: #ddd6fe;
   position: relative;
   min-height: 100vh;
   background: var(--cp-bg);
@@ -8682,47 +8692,74 @@ html.contact-page-active body {
   color: var(--cp-fg-muted);
 }
 
+/*
+  Cream fields, cut into the purple.
+
+  These were bare text with a hairline under them, which is a fine pattern
+  on paper and a poor one on a saturated ground: an underline is the weakest
+  mark available, and the form read as four labels floating in colour.
+
+  The first attempt lifted each field slightly out of the page with a
+  translucent cream fill and a cream border, and the measurements killed it.
+  A boundary has to clear 3:1 against what surrounds it, and on #6a1eed
+  NOTHING dark can: even a near-black violet is 2.89:1 against this purple,
+  so a darker field can never read as an edge no matter how it is bordered.
+  The only direction with room in it is up.
+
+  So the fields go nearly to cream, which is the same move the submit button
+  makes and which gives the form a shape you can see from across the page.
+  The numbers it buys: the field is 5.6:1 against the page, a typed value is
+  13.9:1 inside it, and the placeholder sits at 4.8:1 — past the text bar,
+  and far enough below a real value that an empty field still looks empty.
+*/
 .contactPage__input,
 .contactPage__textarea {
   width: 100%;
-  background: none;
-  border: none;
+  background: rgba(244, 241, 234, 0.94);
+  /* transparent, because the fill is already the edge; the border exists so
+     focus has something to colour without shifting the layout by a pixel */
+  border: 1px solid transparent;
+  border-radius: 12px;
   outline: none;
   font-family: var(--font-primary);
   font-size: 16px;
-  color: var(--cp-fg);
-  padding: 12px 0;
+  color: #25064d;
+  padding: 14px 16px;
   resize: none;
-  transition: color 0.2s ease;
+  transition:
+    background-color var(--dur-state) var(--ease-quint),
+    border-color var(--dur-state) var(--ease-quint),
+    box-shadow var(--dur-state) var(--ease-quint);
 }
 
+@media (hover: hover) {
+  .contactPage__input:hover,
+  .contactPage__textarea:hover {
+    background: rgba(244, 241, 234, 1);
+  }
+}
+
+/*
+  Focus draws a dark edge on a light field.
+
+  The reverse of the usual move, and the only one available here: a cream
+  ring around a cream field is invisible, while the deep violet of the type
+  inside reads at 13.9:1 against it. The outer shadow is the page's own
+  colour deepened, so the field looks pressed into the surface rather than
+  outlined on top of it.
+*/
+.contactPage__input:focus,
+.contactPage__textarea:focus {
+  background: #ffffff;
+  border-color: #25064d;
+  box-shadow: 0 0 0 3px rgba(37, 6, 77, 0.55);
+}
+
+/* measured against the FIELD, not the page: the field is nearly cream, so
+   the page's cream ink would be invisible inside it */
 .contactPage__input::placeholder,
 .contactPage__textarea::placeholder {
-  color: var(--cp-fg-muted);
-}
-
-.contactPage__inputLine {
-  display: block;
-  height: 1px;
-  background: var(--cp-line);
-  position: relative;
-}
-
-.contactPage__inputLine::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--cp-accent);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.4s var(--ease-quint);
-}
-
-.contactPage__field:focus-within .contactPage__inputLine::after {
-  transform: scaleX(1);
+  color: rgba(37, 6, 77, 0.62);
 }
 
 .contactPage__field:focus-within .contactPage__label {
@@ -8740,16 +8777,23 @@ html.contact-page-active body {
   gap: 12px;
   padding: 16px 36px;
   /*
-    Inverted, because the page took its colour.
+    Dark, now that the fields are light.
 
-    A purple button on a purple page is a rectangle you have to hunt for.
-    Cream on violet is the highest contrast this palette can make (9.7:1)
-    and it makes the one thing you are here to do the brightest object on
-    the screen.
+    This was cream, which was right while the inputs were bare text on the
+    page and wrong the moment they became cream wells: same fill, same 12px
+    radius, and the button read as a fifth input rather than the thing you
+    press. Colour is doing the sorting here, so the three tiers each get
+    their own: purple page, light wells to type into, one dark solid to act.
+
+    The hairline is not decoration. A filled dark shape is only 2.9:1
+    against this purple, which is under the bar for identifying a control,
+    and no dark fill can clear it on a ground this bright. The cream edge
+    carries that boundary at 7:1 instead, and the label inside sits at
+    13.9:1.
   */
-  background: var(--cp-fg);
-  color: #3b1178;
-  border: none;
+  background: #25064d;
+  color: var(--cp-fg);
+  border: 1px solid rgba(244, 241, 234, 0.9);
   border-radius: 12px;
   font-family: var(--font-primary);
   font-size: 15px;
@@ -8761,7 +8805,8 @@ html.contact-page-active body {
 }
 
 .contactPage__submit:hover:not(:disabled) {
-  background: #ffffff;
+  background: #3b1178;
+  border-color: #ffffff;
   transform: translateY(-2px);
 }
 
@@ -8865,8 +8910,8 @@ html.contact-page-active body {
   gap: 10px;
   padding: 14px 18px;
   border-radius: 10px;
-  background: rgba(244, 241, 234, 0.07);
-  border: 1px solid rgba(244, 241, 234, 0.14);
+  background: rgba(244, 241, 234, 0.1);
+  border: 1px solid rgba(244, 241, 234, 0.22);
   font-size: 14px;
   font-weight: 500;
   color: var(--cp-fg-muted);

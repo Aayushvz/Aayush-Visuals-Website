@@ -177,27 +177,55 @@ function InteractiveGlobe() {
     onResize();
 
     /*
-      Lit for the violet the page is drenched in.
+      A light globe, and the reason the first attempt was a white blob.
 
-      It was tuned for a near-black ground: a grey sphere, a brand-purple
-      marker and a nearly black halo. All three stop working on #4c1d95, the
-      marker worst of all, since it was the page's new background colour.
+      In cobe the land dots are not a separate colour: they are `baseColor`
+      multiplied by `mapBrightness`. Setting the base to near-white AND the
+      brightness below 1 put the dots and the ocean within a few percent of
+      each other, which is exactly what a featureless pale ball looks like.
 
-      The sphere now sits DARKER than the page so it reads as an object on
-      it rather than a hole in it, the halo is tinted toward the page so the
-      edge dissolves instead of ringing, and the marker is the same light
-      violet the rest of the page uses as its accent.
+      So the base is a light LILAC rather than white, and the brightness is
+      well under 1 so the continents resolve downward out of it into a real
+      violet. The sphere stays light, which is what it is here to be, and it
+      finally has something drawn on it.
+
+      The warmth is deliberate. Everything on this page is one cool hue, and
+      a cool globe on a violet ground had nothing to push against; the
+      marker and the arcs are the site's own secondary orange, which is the
+      only warm colour in the system and is otherwise almost never spent.
     */
     const globeTheme = {
-      dark: 1 as number,
-      diffuse: 1.4,
-      mapBrightness: 4.6,
-      mapBaseBrightness: 0.02,
-      baseColor: [0.2, 0.08, 0.4] as [number, number, number],
-      markerColor: [0.769, 0.71, 0.992] as [number, number, number],
-      glowColor: [0.32, 0.13, 0.62] as [number, number, number],
+      dark: 0 as number,
+      diffuse: 1.2,
+      /* under 1, so land resolves DOWN from the base instead of blowing out.
+         0.46 left the continents as a suggestion; this is far enough below
+         the base that they read as coastlines at a glance. */
+      mapBrightness: 0.32,
+      mapBaseBrightness: 0.06,
+      baseColor: [0.79, 0.66, 1.0] as [number, number, number],
+      markerColor: [0.91, 0.51, 0.29] as [number, number, number],
+      /* a warm rim on a cool sphere, which is the whole reason the globe
+         reads as lit rather than as a flat circle */
+      glowColor: [0.99, 0.82, 0.62] as [number, number, number],
     };
 
+    /*
+      Arcs, purely as motion and colour.
+
+      They carry no claim: nothing in the interface names a destination, and
+      the only place on this page that states a fact about location is the
+      "based in" line. They are here because a still globe on a still page
+      was the dullest object on it.
+    */
+    const ARCS = [
+      { from: [28.6139, 77.209], to: [51.5072, -0.1276] },
+      { from: [28.6139, 77.209], to: [40.7128, -74.006] },
+      { from: [28.6139, 77.209], to: [1.3521, 103.8198] },
+      { from: [28.6139, 77.209], to: [-33.8688, 151.2093] },
+    ].map((a) => ({
+      from: a.from as [number, number],
+      to: a.to as [number, number],
+    }));
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
@@ -206,9 +234,11 @@ function InteractiveGlobe() {
       phi: 1.2,
       theta: 0.25,
       mapSamples: 16000,
-      markers: [
-        { location: [28.6139, 77.209], size: 0.08 },
-      ],
+      markers: [{ location: [28.6139, 77.209], size: 0.1 }],
+      arcs: ARCS,
+      arcColor: [0.91, 0.51, 0.29] as [number, number, number],
+      arcWidth: 0.35,
+      arcHeight: 0.32,
       ...globeTheme,
     });
 
@@ -362,7 +392,6 @@ export default function ContactPageClient() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <span className="contactPage__inputLine" aria-hidden />
                 </div>
                 <div className="contactPage__field">
                   <label className="contactPage__label" htmlFor="c-email">
@@ -377,7 +406,6 @@ export default function ContactPageClient() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <span className="contactPage__inputLine" aria-hidden />
                 </div>
               </div>
               <div className="contactPage__field">
@@ -392,7 +420,6 @@ export default function ContactPageClient() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                 />
-                <span className="contactPage__inputLine" aria-hidden />
               </div>
               <div className="contactPage__field contactPage__field--textarea">
                 <label className="contactPage__label" htmlFor="c-message">
@@ -407,7 +434,6 @@ export default function ContactPageClient() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
-                <span className="contactPage__inputLine" aria-hidden />
               </div>
               <button
                 type="submit"
