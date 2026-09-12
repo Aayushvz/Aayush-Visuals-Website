@@ -1,0 +1,424 @@
+/* ==========================================================================
+   THE ERROR SCENE
+   --------------------------------------------------------------------------
+   The site's front door is a dark canvas with a grid on it and objects you
+   can throw around. This is the same room with nothing in it but the error
+   code, which is the point: you have arrived somewhere the site knows it
+   has nothing for you, and the only things here are the code, the way out,
+   and something to fiddle with while you decide.
+
+   Every colour is a --hero-* token, which is what makes this page art-direct
+   itself: those are the only tokens on the site that react to the light and
+   dark toggle, so the error page follows whatever the visitor last chose
+   rather than inventing an eleventh palette.
+   ========================================================================== */
+
+.errScene {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  /*
+    Room for the floating nav at the top and the instrument line at the
+    bottom, and the reason this is padding rather than a shorter grid: a
+    centred grid whose content outgrows it overflows in BOTH directions, so
+    the top of the message is the first thing to go. With the padding here
+    and nothing clipping, a viewport too short for the composition scrolls
+    instead of swallowing it, which is the case that arrives with reduced
+    motion (the numerals become a row above the copy rather than a layer
+    behind it) and with a browser zoomed to 200%.
+  */
+  padding-block: clamp(84px, 12vh, 132px);
+  background: var(--hero-bg);
+  color: var(--hero-fg);
+  font-family: var(--font-primary), system-ui, sans-serif;
+}
+
+/* ---------- the room ---------- */
+
+.errScene__grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--hero-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  /* fades at all four edges so the grid reads as a surface the page is
+     sitting on rather than a texture tiled to the crop */
+  mask-image: radial-gradient(
+    ellipse 78% 74% at 50% 48%,
+    #000 38%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/*
+  A pool of the page's own background under the copy.
+
+  The numerals pass behind the text, and an outline big enough to read as an
+  object is also big enough to run a stroke straight through a sentence.
+  This is the page colour at its own centre fading to nothing, so the type
+  always has ground under it without a card, a blur or a panel appearing to
+  hold it.
+*/
+.errScene__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 46% 42% at 50% 50%,
+    var(--hero-bg) 0%,
+    color-mix(in oklab, var(--hero-bg) 82%, transparent) 46%,
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ---------- the loose numerals ---------- */
+
+.errStage {
+  position: absolute;
+  /* inset from the viewport so a numeral resting against a wall is not also
+     resting against the edge of the screen */
+  inset: clamp(12px, 4vw, 56px);
+  z-index: 1;
+  /* the stage itself is not a target; only the glyphs in it are */
+  pointer-events: none;
+}
+
+.errGlyph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: auto;
+  /* a finger dragging a numeral must not also pan the page */
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+
+  font-size: clamp(104px, 21vw, 300px);
+  font-weight: 600;
+  line-height: 0.78;
+  letter-spacing: -0.04em;
+
+  /*
+    Outlined, not filled.
+
+    A solid numeral at this size is a wall, and the heading has to sit on
+    top of it. An outline is an object you can see through, which is what
+    lets these roam the whole stage instead of being parked in a corner, and
+    it is the thin-line language the rest of the site already uses.
+  */
+  color: transparent;
+  -webkit-text-stroke: clamp(1px, 0.16vw, 2px) var(--hero-fg-2);
+  opacity: 0.55;
+
+  transition:
+    opacity var(--dur-state) var(--ease-quint),
+    -webkit-text-stroke-color var(--dur-state) var(--ease-quint);
+}
+
+@media (hover: hover) {
+  .errGlyph:hover {
+    opacity: 0.85;
+    -webkit-text-stroke-color: var(--hero-brand);
+  }
+}
+
+/* the one in your hand takes the brand colour and the grabbing cursor, so
+   the page acknowledges the hold before anything has moved */
+.errGlyph[data-held] {
+  cursor: grabbing;
+  opacity: 1;
+  -webkit-text-stroke-color: var(--hero-brand);
+}
+
+/*
+  Reduced motion keeps the objects and drops the physics.
+
+  LooseGlyphs never starts its loop under the preference, which leaves the
+  three numerals unpositioned, so the stage lays them out as a plain row
+  instead. They are still the error code, they simply stay where they are
+  put.
+*/
+.errStage[data-still="true"] {
+  position: static;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 3vw, 40px);
+  /* it is a row above the message now rather than a layer behind it, so it
+     needs the separation a layer never did */
+  margin-bottom: clamp(20px, 4vh, 48px);
+  pointer-events: none;
+}
+
+.errStage[data-still="true"] .errGlyph {
+  position: static;
+  pointer-events: none;
+  cursor: default;
+  transform: none !important;
+  /* smaller, because these are stacked with the copy rather than sitting
+     behind it, and the whole column has to fit a phone */
+  font-size: clamp(72px, 16vw, 160px);
+}
+
+/* ---------- what the page actually says ---------- */
+
+.errScene__copy {
+  position: relative;
+  z-index: 3;
+  width: min(560px, 100% - clamp(32px, 10vw, 96px));
+  text-align: center;
+  /* the copy is a hole in the stage: everything here is clickable, but the
+     gaps between the lines let a numeral through to be grabbed */
+  pointer-events: none;
+}
+
+.errScene__copy > * {
+  pointer-events: auto;
+}
+
+.errScene__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0 0 clamp(16px, 2.4vw, 26px);
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  font-size: clamp(10px, 0.75vw, 12px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hero-fg-2);
+}
+
+.errScene__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hero-brand);
+  flex: none;
+}
+
+/* the connection case is the one that might fix itself while you are
+   looking at it, so its indicator is the one that breathes */
+.errScene[data-kind="offline"] .errScene__dot {
+  animation: errPulse 2.4s var(--ease-inout) infinite;
+}
+
+@keyframes errPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+
+.errScene__title {
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 58px);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.errScene__body {
+  margin: clamp(14px, 1.8vw, 22px) auto 0;
+  max-width: 46ch;
+  font-size: clamp(14px, 1vw, 16px);
+  line-height: 1.6;
+  color: var(--hero-fg-2);
+  text-wrap: pretty;
+}
+
+/* ---------- the ways out ---------- */
+
+.errScene__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(10px, 1.2vw, 16px);
+  margin-top: clamp(26px, 3.4vw, 40px);
+}
+
+/*
+  One filled control and two quiet ones.
+
+  A dead end is the wrong place to be subtle about the exit, so the primary
+  inverts the page: the foreground colour becomes the surface and the
+  background becomes the ink. That holds in both themes without a second
+  palette, which a charcoal button would not.
+*/
+.errBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.15em;
+  border: 1px solid var(--hero-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hero-fg-2);
+  font: inherit;
+  font-size: clamp(13px, 0.92vw, 14px);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-hover) var(--ease-quint),
+    border-color var(--dur-hover) var(--ease-quint),
+    background-color var(--dur-hover) var(--ease-quint),
+    transform var(--dur-press) var(--ease-quint);
+}
+
+.errBtn:hover {
+  color: var(--hero-fg);
+  border-color: var(--hero-fg-2);
+}
+
+.errBtn--primary {
+  background: var(--hero-fg);
+  border-color: var(--hero-fg);
+  color: var(--hero-bg);
+  font-weight: 600;
+  padding-inline: 1.45em;
+}
+
+.errBtn--primary:hover {
+  background: var(--hero-brand);
+  border-color: var(--hero-brand);
+  color: #fff;
+}
+
+.errBtn:active {
+  transform: scale(0.97);
+}
+
+.errBtn:disabled {
+  cursor: default;
+  opacity: 0.5;
+  transform: none;
+}
+
+.errBtn:disabled:hover {
+  background: var(--hero-fg);
+  border-color: var(--hero-fg);
+  color: var(--hero-bg);
+}
+
+.errBtn:focus-visible {
+  outline: 2px solid var(--hero-brand);
+  outline-offset: 3px;
+}
+
+/* ---------- the instrument line ---------- */
+
+.errScene__meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-sm, 16px);
+  padding: clamp(12px, 1.6vw, 20px) clamp(14px, 4vw, 44px);
+  border-top: 1px solid var(--hero-grid-line);
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  font-size: clamp(9px, 0.66vw, 11px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hero-fg-2);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.errScene__metaCell {
+  /* the numerals in a clock must not shuffle their neighbours every second */
+  font-variant-numeric: tabular-nums;
+}
+
+.errScene__metaPath {
+  /* the one cell that can be any length, and the only one allowed to lose
+     characters rather than push the clock off the screen */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- the invitation ---------- */
+
+/*
+  A hint that leaves once it has been taken.
+
+  Nobody knows the numerals are draggable until they are told, and nobody
+  needs to be told twice; it goes on the first pointer down anywhere on the
+  page and does not come back.
+*/
+.errScene__hint {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  bottom: clamp(52px, 7vw, 78px);
+  z-index: 3;
+  margin: 0;
+  font-size: clamp(11px, 0.8vw, 12px);
+  letter-spacing: 0.02em;
+  color: var(--hero-fg-2);
+  opacity: 0.6;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-panel) var(--ease-quint),
+    translate var(--dur-panel) var(--ease-quint);
+}
+
+.errScene__hint[data-gone="true"] {
+  opacity: 0;
+  translate: -50% 6px;
+}
+
+/* the numerals cannot be thrown with a finger-free device, so the
+   invitation would be a lie */
+@media (hover: none) and (pointer: coarse) {
+  .errScene__hint {
+    content: normal;
+  }
+}
+
+@media (max-width: 560px) {
+  .errScene__hint {
+    display: none;
+  }
+
+  .errScene__meta {
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .errScene__dot,
+  .errScene[data-kind="offline"] .errScene__dot {
+    animation: none;
+  }
+
+  .errBtn,
+  .errScene__hint,
+  .errGlyph {
+    transition: none;
+  }
+
+  .errBtn:active {
+    transform: none;
+  }
+}
