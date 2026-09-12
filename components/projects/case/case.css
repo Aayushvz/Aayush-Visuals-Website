@@ -2589,12 +2589,15 @@
   align-content: start;
 }
 
+/* the picture corner, not the chip one: a swatch is a surface the size of a
+   thumbnail, and it sits in the same section as the screenshots */
 .csSwatch__chip {
   display: flex;
   align-items: flex-end;
   aspect-ratio: 3 / 2;
   padding: var(--cs-2xs);
   border: 1px solid var(--cs-line);
+  border-radius: var(--cs-r-shot);
 }
 
 .csSwatch__hex {
@@ -2605,6 +2608,9 @@
   background: var(--cs-bg);
   color: var(--cs-ink);
   padding: 2px 5px;
+  /* under the chip's own corner, because the plate is a third of its
+     height: --cs-r-chip here would round it into a pill */
+  border-radius: 4px;
 }
 
 .csSwatch__name {
