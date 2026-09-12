@@ -50,7 +50,11 @@
   --hero-fg-2: #9ba1a5;
   --hero-brand: #8b5cf6;
   --hero-grid-line: rgba(244, 241, 234, 0.055);
-  --trail-max: 0.24;
+  /* the hover trail is its own colour, not --hero-brand: the brand violet is
+     tuned to be readable as TEXT on this canvas, and a lit grid cell wants
+     the brighter, more saturated end of the same hue */
+  --trail-color: #a855f7;
+  --trail-max: 0.58;
   --hero-line: rgba(244, 241, 234, 0.16);
   --heroCard-border: rgba(255, 255, 255, 0.1);
   --heroCard-shadow: 0 4px 8px rgba(0, 0, 0, 0.25), 0 24px 52px rgba(0, 0, 0, 0.38);
@@ -580,7 +584,7 @@ html.has-cursor .cursorRing {
    --cellMax carries the per-cell recency × distance intensity */
 .gridTrail__cell {
   position: absolute;
-  background: var(--hero-brand);
+  background: var(--trail-color);
   opacity: 0;
   animation: trailCell 3.4s var(--ease-quint) forwards;
 }

@@ -22,7 +22,47 @@ import { motion, MotionConfig } from "framer-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const DRAG_THRESHOLD = 6;
-const TRAIL_MAX = 12;
+/*
+  The trail scatters, it does not stamp.
+
+  A single cell per pointer move drew a one-cell thread across a grid whose
+  cells are only 20px, which at any normal mouse speed is a dotted line with
+  gaps in it. Lighting the full 3x3 around the pointer fixed the coverage and
+  introduced a worse problem: nine cells in a perfect square reads as a
+  cursor box being dragged around, not as a trail being left behind.
+
+  So the block becomes a field. Every cell within about two of the pointer is
+  a CANDIDATE, and each one lights on a coin flip weighted by how close it
+  is: the neighbours almost always, the far diagonals rarely. The centre is
+  the only cell guaranteed to light. Two passes over the same spot therefore
+  produce different shapes, which is the entire point.
+
+  The randomness lives in the pointer handler rather than in render, so a
+  cell's brightness is decided once when it is born and never changes under
+  it on a re-render.
+*/
+const TRAIL_RADIUS = 2.35;
+
+/* every offset inside the radius, with its distance, built once */
+const TRAIL_FIELD: [number, number, number][] = (() => {
+  const out: [number, number, number][] = [];
+  const r = Math.ceil(TRAIL_RADIUS);
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (!dx && !dy) continue;
+      const d = Math.hypot(dx, dy);
+      if (d <= TRAIL_RADIUS) out.push([dx, dy, d]);
+    }
+  }
+  return out;
+})();
+
+/*
+  Roughly seven cells a move, spread over a five-cell square rather than
+  packed into a three-cell one: the same amount of light, scattered far
+  enough that no two moves make the same shape.
+*/
+const TRAIL_MAX = 72;
 const TRAIL_LIFE_MS = 3400;
 
 /*
@@ -93,7 +133,16 @@ function DragIcon() {
   current pointer cell, exposed as --cellMax for the fade keyframes.
 */
 function GridTrail({ patternRef }: { patternRef: React.RefObject<HTMLDivElement | null> }) {
-  const [cells, setCells] = useState<{ x: number; y: number; key: number }[]>([]);
+  const [cells, setCells] = useState<
+    {
+      x: number;
+      y: number;
+      key: number;
+      w: number;
+      batchKey: number;
+      delay: number;
+    }[]
+  >([]);
   const gsRef = useRef(20.28);
   const lastCell = useRef({ x: NaN, y: NaN });
   const keyRef = useRef(0);
@@ -137,17 +186,48 @@ function GridTrail({ patternRef }: { patternRef: React.RefObject<HTMLDivElement 
       }
 
       lastCell.current = { x: cx, y: cy };
-      const key = keyRef.current++;
+      /*
+        One key for the whole block, not one per cell.
+
+        All nine are born together and die together, so they expire on a
+        single timeout. Nine timeouts would mean nine setState calls per
+        pointer cell, each re-rendering a list of up to seventy-two nodes,
+        where the single-cell version this replaces only ever caused one.
+      */
+      const batchKey = keyRef.current++;
+      const batch = [
+        /* the cell under the pointer is the one certainty */
+        { x: cx, y: cy, w: 1, d: 0 },
+        ...TRAIL_FIELD.filter(([, , d]) => Math.random() < 0.62 / d).map(
+          ([dx, dy, d]) => ({
+            x: cx + dx,
+            y: cy + dy,
+            /* brightness varies per cell as well as by distance, so even the
+               cells that do light do not light evenly */
+            w: (0.4 + Math.random() * 0.55) / d,
+            d,
+          }),
+        ),
+      ].map((c, i) => ({
+        ...c,
+        batchKey,
+        key: batchKey * 32 + i,
+        /* a few frames of stagger so the scatter appears rather than snaps */
+        delay: Math.round(Math.random() * 150),
+      }));
+      /* a cell the block covers again is replaced rather than stacked, so
+         doubling back over your own trail cannot pile opacity on one cell */
+      const taken = new Set(batch.map((b) => `${b.x},${b.y}`));
       setCells((prev) =>
-        [...prev.filter((c) => !(c.x === cx && c.y === cy)), { x: cx, y: cy, key }].slice(
+        [...prev.filter((c) => !taken.has(`${c.x},${c.y}`)), ...batch].slice(
           -TRAIL_MAX
         )
       );
       timeoutsMap.set(
-        key,
+        batchKey,
         setTimeout(() => {
-          timeoutsMap.delete(key);
-          setCells((prev) => prev.filter((c) => c.key !== key));
+          timeoutsMap.delete(batchKey);
+          setCells((prev) => prev.filter((c) => c.batchKey !== batchKey));
         }, TRAIL_LIFE_MS)
       );
     };
@@ -168,7 +248,7 @@ function GridTrail({ patternRef }: { patternRef: React.RefObject<HTMLDivElement 
         // recency (position in trail) × distance from the current cell
         const recency = Math.pow((i + 1) / cells.length, 0.75);
         const dist = cur ? Math.hypot(c.x - cur.x, c.y - cur.y) : 0;
-        const intensity = recency * (1 / (1 + dist * 0.14));
+        const intensity = c.w * recency * (1 / (1 + dist * 0.1));
         return (
           <span
             key={c.key}
@@ -180,6 +260,7 @@ function GridTrail({ patternRef }: { patternRef: React.RefObject<HTMLDivElement 
                 width: gs,
                 height: gs,
                 "--cellMax": `calc(var(--trail-max) * ${intensity.toFixed(3)})`,
+                animationDelay: `${c.delay}ms`,
               } as React.CSSProperties
             }
           />
