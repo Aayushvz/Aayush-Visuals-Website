@@ -1380,3 +1380,756 @@
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   THE RESTORED BEATS
+   --------------------------------------------------------------------------
+   Iteration archive, research evidence, UI system and reflection: the blocks
+   the five-beat page dropped. Ported from the Figma-framed version of this
+   page onto the current language, which means hairlines and air rather than
+   cards and fills. Nothing here invents a colour: the accent is the
+   project's own, and everything else is --cs-line, --cs-mute or --cs-ink.
+   ========================================================================== */
+
+/* ---------- direction boards ---------- */
+
+/*
+  A wall of candidates, not a sequence.
+
+  These are whole comps competing for the same job, so they sit at one size
+  in one grid and the winner is marked rather than placed first. Each one
+  carries its own note because a wall of four boards under a single caption
+  makes the reader guess which sentence belongs to which picture.
+*/
+.csDirs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(268px, 100%), 1fr));
+  gap: var(--cs-md);
+}
+
+.csDir {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--cs-xs);
+}
+
+.csDir__frame {
+  display: block;
+  overflow: hidden;
+  background: #f4f4f4;
+  border: 1px solid var(--cs-line);
+}
+
+/* the winner takes the project's colour, because a ring in a house grey
+   would be one more hairline on a page already made of them */
+.csDir--chosen .csDir__frame {
+  border-color: var(--cs-accent);
+  box-shadow: 0 0 0 1px var(--cs-accent);
+}
+
+.csDir__shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.csDir__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--cs-xs);
+}
+
+.csDir__label {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csDir__tag {
+  flex: none;
+  font-size: var(--cs-t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cs-accent-ink);
+}
+
+.csDir__note {
+  font-size: var(--cs-t-body);
+  line-height: 1.5;
+  color: var(--cs-mute);
+  max-width: 46ch;
+}
+
+/* ---------- type trials ---------- */
+
+.csTrials {
+  display: grid;
+  gap: var(--cs-md);
+  margin: 0;
+}
+
+.csTrial {
+  padding: var(--cs-sm) 0;
+  border-top: 1px solid var(--cs-line);
+}
+
+.csTrial--chosen {
+  border-top-color: var(--cs-accent);
+}
+
+.csTrial__grid {
+  display: grid;
+  /* the specimen is a mask with no intrinsic size, so without a ceiling it
+     takes the full column: a headline sample rendered 1147px wide and 447
+     tall, which is a poster rather than a specimen */
+  grid-template-columns: minmax(0, 560px) auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-md);
+}
+
+@media (max-width: 700px) {
+  .csTrial__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*
+  A specimen drawn as a mask, not an image.
+
+  The file supplies the shape and `background` supplies the colour, which is
+  what lets one asset read as ink on paper here and as the accent when its
+  row is the chosen one. An <img> could not: an SVG loaded that way is its
+  own document and its currentColor resolves to black.
+*/
+.csOutline {
+  display: block;
+  width: 100%;
+  background: var(--cs-ink);
+  -webkit-mask-image: var(--mask);
+  mask-image: var(--mask);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+}
+
+.csTrial--chosen .csOutline {
+  background: var(--cs-accent-ink);
+}
+
+.csTrial__side {
+  display: grid;
+  justify-items: end;
+  gap: var(--cs-2xs);
+  min-width: 96px;
+}
+
+.csTrial__num {
+  width: 84px;
+}
+
+.csTrial__face,
+.csTrial__numLive {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csTrial__numLive {
+  font-size: var(--cs-t-heading);
+}
+
+.csTrial__live {
+  display: block;
+  font-size: clamp(26px, 3.4vw, 46px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--cs-ink);
+}
+
+.csTrials--pairing .csTrial__pair {
+  display: grid;
+  gap: var(--cs-xs);
+}
+
+.csTrial__pairHead {
+  max-width: 260px;
+}
+
+.csTrial__head .csOutline {
+  max-width: 100%;
+}
+
+.csTrial__body {
+  margin: 0;
+  max-width: 58ch;
+  font-size: var(--cs-t-body);
+  line-height: 1.6;
+  color: var(--cs-mute);
+}
+
+.csTrial__note {
+  display: block;
+  margin-top: var(--cs-2xs);
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+  max-width: 56ch;
+}
+
+/* ---------- before and after ---------- */
+
+/*
+  Two paths side by side.
+
+  Where a flow describes one journey, this argues: the reader sees the shape
+  of the difference, eight steps against two, before reading a single label.
+  That is the whole point of a redesign that removes work rather than
+  rearranging it, so the counts are set large and the losing lane is struck.
+*/
+.csCompare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: var(--cs-md);
+}
+
+.csLane {
+  border-top: 1px solid var(--cs-line);
+  padding-top: var(--cs-xs);
+}
+
+.csLane--after {
+  border-top-color: var(--cs-accent);
+}
+
+.csLane__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--cs-xs);
+}
+
+.csLane__label {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csLane__count {
+  font-size: var(--cs-t-heading);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-mute);
+}
+
+.csLane--after .csLane__count {
+  color: var(--cs-accent-ink);
+}
+
+.csLane__note {
+  margin: var(--cs-2xs) 0 0;
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+}
+
+.csLane__steps {
+  margin: var(--cs-sm) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  counter-reset: lane;
+}
+
+.csLane__steps li {
+  counter-increment: lane;
+  position: relative;
+  padding-left: 2.1em;
+  font-size: var(--cs-t-body);
+  line-height: 1.45;
+  color: var(--cs-ink);
+}
+
+.csLane__steps li::before {
+  content: counter(lane, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the lane being replaced reads as replaced */
+.csLane--before .csLane__steps li {
+  color: var(--cs-mute);
+  text-decoration: line-through;
+  text-decoration-color: var(--cs-line);
+}
+
+/* ---------- wireframes ---------- */
+
+.csWires {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--cs-md);
+}
+
+.csWire {
+  display: grid;
+  gap: var(--cs-2xs);
+  align-content: start;
+}
+
+.csWire__art {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  aspect-ratio: 3 / 4;
+  padding: 14px;
+  border: 1px solid var(--cs-line);
+  background: #fafafa;
+}
+
+.csWire__art--centre {
+  align-items: center;
+  justify-content: center;
+}
+
+.csWire__bar,
+.csWire__blockLg,
+.csWire__disc,
+.csWire__bubble,
+.csWire__rows span {
+  background: var(--cs-line);
+  display: block;
+  border-radius: 2px;
+}
+
+.csWire__blockLg {
+  flex: 1;
+  width: 100%;
+}
+
+.csWire__disc {
+  width: 52%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.csWire__bubble {
+  height: 26px;
+  border-radius: 8px;
+}
+
+.csWire__bubble--in {
+  width: 62%;
+}
+
+.csWire__bubble--out {
+  width: 48%;
+  align-self: flex-end;
+  background: color-mix(in oklab, var(--cs-accent) 26%, var(--cs-line));
+}
+
+.csWire__rows {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+}
+
+.csWire__rows span {
+  height: 100%;
+}
+
+.csWire__label {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csWire__note {
+  font-size: var(--cs-t-micro);
+  line-height: 1.5;
+  color: var(--cs-mute);
+}
+
+/* ---------- research, drawn rather than screenshotted ---------- */
+
+/*
+  A slide exported from the deck it was presented in reads as evidence
+  somebody else made. The same number rebuilt as a component reads as an
+  argument this page is making.
+*/
+.csBars {
+  display: grid;
+  gap: var(--cs-sm);
+  margin: 0;
+  max-width: 760px;
+}
+
+.csBar__label {
+  font-size: var(--cs-t-body);
+  color: var(--cs-ink);
+  margin-bottom: 6px;
+}
+
+.csBar__row {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cs-sm);
+}
+
+.csBar__track {
+  height: 6px;
+  background: var(--cs-line);
+  overflow: hidden;
+}
+
+.csBar__fill {
+  display: block;
+  height: 100%;
+  background: var(--cs-mute);
+}
+
+.csBar--bad .csBar__fill {
+  background: var(--cs-accent);
+}
+
+.csBar--good .csBar__fill {
+  background: var(--cs-ink);
+}
+
+.csBar__value {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-ink);
+}
+
+/*
+  "N of TOTAL", as a grid with N lit.
+
+  For quantities where the ratio is the point and the number alone hides it:
+  two supported languages out of twenty-two is a sentence, but twenty dark
+  cells is an argument.
+*/
+.csCoverage {
+  display: grid;
+  gap: var(--cs-sm);
+  max-width: 520px;
+  margin: 0;
+}
+
+.csCoverage__grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 5px;
+}
+
+.csCell {
+  aspect-ratio: 1;
+  background: var(--cs-line);
+}
+
+.csCell.is-on {
+  background: var(--cs-accent);
+}
+
+.csCoverage__meta {
+  display: grid;
+  gap: 3px;
+}
+
+.csCoverage__count {
+  font-size: var(--cs-t-heading);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-ink);
+}
+
+.csCoverage__label {
+  font-size: var(--cs-t-label);
+  color: var(--cs-ink);
+}
+
+.csCoverage__note {
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+  max-width: 52ch;
+}
+
+/* ---------- flow ---------- */
+
+/*
+  Redrawn rather than screenshotted. A working flow board is dense,
+  half-abandoned and full of notes to yourself; it is evidence that thinking
+  happened, not something a reader can follow. This is the conclusion: the
+  steps that survived, in order, with what each one decides.
+*/
+.csFlow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.csFlow__step {
+  flex: 1 1 150px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  padding-top: var(--cs-xs);
+  border-top: 1px solid var(--cs-line);
+}
+
+.csFlow__step--decision {
+  border-top-color: var(--cs-accent);
+}
+
+.csFlow__index {
+  font-size: var(--cs-t-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-mute);
+}
+
+.csFlow__step--decision .csFlow__index {
+  color: var(--cs-accent-ink);
+}
+
+.csFlow__label {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csFlow__sub {
+  display: grid;
+  gap: 2px;
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+}
+
+/* ---------- the palette ---------- */
+
+/*
+  Big enough that the colours are the content.
+
+  A 12px chip beside a hex is the right weight for a spec table and the
+  wrong weight for the section that is ABOUT the palette. These are large
+  enough to judge one colour against the one beside it, which is the only
+  reason to put a palette on a page at all.
+*/
+/*
+  Capped, not stretched.
+
+  auto-fit with a 1fr track divides the whole column between however many
+  swatches a block has, so a two-colour palette rendered as two 570px slabs
+  419px tall. A colour needs to be big enough to judge against its neighbour
+  and no bigger; the track tops out and the row packs from the left instead.
+*/
+.csPalette {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 200px));
+  justify-content: start;
+  gap: var(--cs-sm);
+}
+
+.csSwatch {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.csSwatch__chip {
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 3 / 2;
+  padding: 8px 10px;
+  border: 1px solid var(--cs-line);
+}
+
+.csSwatch__hex {
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  font-size: var(--cs-t-micro);
+  /* the chip is any colour at all, so the hex rides in a plate of the
+     page's own paper rather than guessing at a legible ink */
+  background: var(--cs-bg);
+  color: var(--cs-ink);
+  padding: 2px 5px;
+}
+
+.csSwatch__name {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csSwatch__use {
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+}
+
+/* ---------- typefaces, set in themselves ---------- */
+
+/* a row saying "Interface - Inter" tells you nothing a specimen does not
+   tell you better */
+.csTypeset {
+  display: grid;
+  gap: var(--cs-md);
+}
+
+.csType {
+  display: grid;
+  gap: 6px;
+  padding-top: var(--cs-xs);
+  border-top: 1px solid var(--cs-line);
+}
+
+.csType__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cs-xs);
+}
+
+.csType__role {
+  font-size: var(--cs-t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cs-mute);
+}
+
+.csType__family {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csType__sample {
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--cs-ink);
+}
+
+.csType__use {
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+  max-width: 52ch;
+}
+
+/* ---------- specs ---------- */
+
+.csSpecs {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  max-width: 720px;
+}
+
+.csSpec {
+  display: grid;
+  grid-template-columns: var(--cs-rail) minmax(0, 1fr);
+  gap: var(--cs-sm);
+  padding: var(--cs-xs) 0;
+  border-bottom: 1px solid var(--cs-line);
+}
+
+@media (max-width: 640px) {
+  .csSpec {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+.csSpec__name {
+  font-size: var(--cs-t-label);
+  color: var(--cs-mute);
+}
+
+.csSpec__val {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.csSpec__value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--cs-t-label);
+  font-weight: 500;
+  color: var(--cs-ink);
+}
+
+.csSpec__swatch {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 1px solid var(--cs-line);
+}
+
+.csSpec__note {
+  font-size: var(--cs-t-micro);
+  color: var(--cs-mute);
+}
+
+/* ---------- lessons ---------- */
+
+/*
+  Numbered, because this IS a sequence: they are the order the project
+  taught them, and the last one is usually the one that cost the most.
+*/
+.csLessons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: var(--cs-lg);
+}
+
+.csLesson {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding-top: var(--cs-xs);
+  border-top: 1px solid var(--cs-line);
+}
+
+.csLesson__index {
+  font-size: var(--cs-t-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-accent-ink);
+}
+
+.csLesson__title {
+  margin: 0;
+  font-size: var(--cs-t-lead);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--cs-ink);
+}
+
+.csLesson__body {
+  margin: 0;
+  font-size: var(--cs-t-body);
+  line-height: 1.55;
+  color: var(--cs-mute);
+  max-width: 52ch;
+}
+
+/* research sits under the argument it supports, not in its own beat */
+.csSec__evidence {
+  margin-top: var(--cs-xl);
+  display: grid;
+  gap: var(--cs-lg);
+}

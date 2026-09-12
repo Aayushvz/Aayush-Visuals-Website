@@ -46,7 +46,35 @@ export type Story = {
   chapters: Chapter[];
   results: { items: ResultItem[]; note?: string } | null;
   gallery: Media[];
+  /*
+    The beats this page used to drop on the floor.
+
+    projectData defines twenty-four block kinds and the five-beat page read
+    ten. The twelve it ignored were not filler: the direction boards and
+    type trials ARE the iteration archive, the palette and typeset ARE the
+    UI system, the lessons ARE the reflection. Every one of them was written
+    and never reached a reader. These four arrays carry them through, in
+    authored order, and CaseSections draws them.
+  */
+  evidence: CaseBlock[];
+  iteration: CaseBlock[];
+  system: CaseBlock[];
+  reflection: CaseBlock[];
 };
+
+/* research that belongs beside the problem it measured */
+export const EVIDENCE_KINDS = ["bars", "coverage", "flow"] as const;
+/* what was tried and thrown away */
+export const ITERATION_KINDS = [
+  "directions",
+  "typetrial",
+  "compare",
+  "wireframes",
+] as const;
+/* the visual system, as a system rather than a grid of screens */
+export const SYSTEM_KINDS = ["palette", "typeset", "specs"] as const;
+/* what the project taught, honestly */
+export const REFLECTION_KINDS = ["lessons"] as const;
 
 type ResultItem = {
   value: string;
@@ -712,6 +740,27 @@ export function buildStory(project: Project): Story {
   const results = resultsOf(project);
 
   /*
+    The restored beats, taken whole and in authored order.
+
+    No budget and no picker: unlike the gallery, these were composed by hand
+    as arguments, and dropping the fourth direction board because it is the
+    fourth image of its kind would be the heuristic overruling the author.
+    Their images ARE marked used, so a direction board cannot also turn up
+    further down as an anonymous gallery tile.
+  */
+  const of = (kinds: readonly string[]) =>
+    allBlocks(project).filter((b) => kinds.includes(b.kind));
+
+  const evidence = of(EVIDENCE_KINDS);
+  const iteration = of(ITERATION_KINDS);
+  const system = of(SYSTEM_KINDS);
+  const reflection = of(REFLECTION_KINDS);
+
+  for (const b of [...iteration, ...system]) {
+    for (const m of mediaOf(b)) usedMedia.add(m.src);
+  }
+
+  /*
     Whatever is left over becomes the gallery.
 
     Trimming the prose hard was the point; trimming the PICTURES hard was a
@@ -738,6 +787,10 @@ export function buildStory(project: Project): Story {
     chapters: chs,
     results,
     gallery,
+    evidence,
+    iteration,
+    system,
+    reflection,
   };
 }
 

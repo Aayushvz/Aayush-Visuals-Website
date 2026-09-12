@@ -14,6 +14,7 @@ import {
   ShotStack,
   MediaRows,
 } from "./CaseBlocks";
+import { Blocks } from "./CaseSections";
 import BackToTop from "./BackToTop";
 import ExtCta from "@/components/ExtCta";
 import type { CSSProperties } from "react";
@@ -313,6 +314,14 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                     pairs={story.details.pairs}
                     media={story.details.media}
                   />
+                  {/* the numbers that made the case, beside the case they
+                      made: research shown anywhere else is an artefact, and
+                      research shown here is an argument */}
+                  {story.evidence.length ? (
+                    <div className="csSec__evidence">
+                      <Blocks blocks={story.evidence} />
+                    </div>
+                  ) : null}
                 </div>
               </section>
             ) : null}
@@ -359,6 +368,35 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               </section>
             ) : null}
 
+            {/*
+              What was tried and thrown away.
+
+              A case study with no visible iteration is suspicious: nobody
+              who has built anything believes a finished screen arrived
+              first time, so a reader with no failures to look at fills the
+              blank in themselves, usually with "got lucky" or "hid the
+              messy parts". Both work against the page.
+            */}
+            {story.iteration.length ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="What I tried" />
+                <div className="csSec__body">
+                  <Blocks blocks={story.iteration} />
+                </div>
+              </section>
+            ) : null}
+
+            {/* the visual system as a system, which is a different claim
+                from a grid of finished screens */}
+            {story.system.length ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="The system" />
+                <div className="csSec__body">
+                  <Blocks blocks={story.system} />
+                </div>
+              </section>
+            ) : null}
+
             {story.results ? (
               <section className="csSec">
                 <SectionHead no={++no} name="Results" />
@@ -368,6 +406,18 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                     note={story.results.note}
                   />
                   <Marks />
+                </div>
+              </section>
+            ) : null}
+
+            {/* honest, and specific enough to be uncomfortable; a
+                reflection that only reports successes reads as a project
+                that never met any difficulty, which nobody believes */}
+            {story.reflection.length ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="What it taught me" />
+                <div className="csSec__body">
+                  <Blocks blocks={story.reflection} />
                 </div>
               </section>
             ) : null}
