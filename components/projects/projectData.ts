@@ -520,6 +520,20 @@ export type Project = {
   /** project-specific facts appended after Role/Category/Year on the
       case-study page (e.g. Surfaces, Airports) */
   extraFacts?: [string, string][];
+  /*
+    The case-study headline, which is a different job from the name.
+
+    `title` has to stay short: it is the label on the works grid, the two
+    cards at the foot of every project page, the sitemap and the browser
+    tab. A headline has to do what a newspaper headline does - name the
+    product, the user problem and the design intent in one line - and
+    "CPGRAMS" does none of that. It is the first and often only sentence a
+    recruiter reads on LinkedIn or in a portfolio list, so it gets its own
+    field rather than stretching the one that has four other jobs.
+
+    Omitted, the page falls back to `title`.
+  */
+  headline?: string;
     /*
     The two points the Details beat is built from, written rather than
     derived.
@@ -636,6 +650,8 @@ export type Project = {
 export const PROJECTS: Project[] = [
   {
     id: "mike-tyson-invitational",
+    headline:
+      "Ten pages, four audiences, and two moods that hate each other: the first Mike Tyson Invitational",
     challenge: [
       "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Turn both up and you get a mess with a fire filter over it.",
       "Four different people then land on the same homepage: a spectator buying a ticket, an amateur fighter applying to compete, a brand with a marketing budget, and a donor. Each of them wants a different site, and none of them should have to hunt for it.",
@@ -1289,6 +1305,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "elevation-capital",
+    headline:
+      "Elevation Capital: turning a PDF nobody finishes into a report you scroll",
     challenge: [
       "**The State of AI Adoption in Indian Startups** is research worth reading, and research usually ships as a PDF that almost nobody finishes.",
       "The findings are the whole point. **86% of founders** plan to increase AI spending, **85% of engineering teams** have already moved AI into production, and productivity has become the proving ground. Buried in a forty-page document, none of that lands.",
@@ -1343,6 +1361,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "riviera",
+    headline:
+      "Riviera: carrying a week-long fest without letting the homepage become a directory",
     challenge: [
       "Riviera is **one of the country's largest student fests**, with dozens of events and sub-brands sitting underneath the one name.",
       "Put them all on the homepage and it becomes a directory. Hide them and the fest looks smaller than it is.",
@@ -1394,6 +1414,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "cpgrams",
+    headline:
+      "CPGRAMS: filing a government grievance by speaking, in any of 22 languages",
     /* a shipped government product and a full deep dive, so it belongs in both */
     alsoCaseStudy: true,
     /* the product's own orange. #FE700E measures 5.98:1 on the dark canvas
@@ -2405,6 +2427,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "layover",
+    headline:
+      "Layover: turning dead airport time into something you can actually use, across four interfaces",
     /* a shipped product and a full deep dive, so it belongs in both lists */
     alsoCaseStudy: true,
     title: "Layover",
@@ -3043,6 +3067,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "yantra",
+    headline:
+      "Yantra: a 3D front door for a fest that otherwise reads like a timetable",
     challenge: [
       "Yantra runs a week of technical events, workshops and hackathons, spread across formats and audiences. There was no single place for a student to see what was on and sign up for it.",
       "The information problem is only half of it. A page that lists everything accurately still reads like a timetable, and **a timetable is not a reason to turn up.**",
@@ -3094,6 +3120,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "dropby",
+    headline:
+      "DropBy: rebuilding a shy brand around the radar ping that gets people off the sofa",
     /* a brand system with a full deep dive behind it, so it belongs in both */
     alsoCaseStudy: true,
     challenge: [
@@ -3425,6 +3453,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "futurepreneurs",
+    headline:
+      "Futurepreneurs 10.0: leading with the deadline, because that is the only fact anyone acts on",
     challenge: [
       "A campus event site is read once, fast, on a phone, usually while somebody is deciding whether to bother. Everything on it competes with **the one thing that matters: the deadline.**",
       "A tenth edition also has to look like one. The easy version is fest-poster maximalism, which is exactly what makes a student event look like a student event.",
@@ -3639,6 +3669,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "posterfolio",
+    headline:
+      "Forty-one posters on one 4:5 canvas, where the only thing allowed to change is the thinking",
     challenge: [
       "**One canvas, 4:5.** Every poster gets the same rectangle, so nothing can be solved by changing the shape of the page. Composition, type and contrast are the only variables left.",
       "Most of these are seen at **thumbnail scale first**, in a feed or on a contact sheet. A layout has to survive being small before it earns being large.",
@@ -3912,6 +3944,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "gravitas",
+    headline:
+      "Gravitas: turning a 200-event wall of text into a catalogue a student can book from",
     /* a shipped site and a full deep dive, so it belongs in both lists */
     alsoCaseStudy: true,
     /* Written rather than assembled, so the Details beat argues the same
@@ -4253,6 +4287,8 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "meal-maestro",
+    headline:
+      "Meal Maestro: planning a week of food without making a single decision",
     challenge: [
       "Meal planning fails in the same place every time, and it is not the cooking. Working professionals aged 28 to 45 said it plainly: “I plan on Sunday and I’ve quit by Wednesday”, and “by the time I’m home, I’ve got no decisions left in me.”",
       "Twelve interviews and 140 survey responses pointed at the same cause. People do not lack motivation, they lack **time and cognitive space**, and the apps they had already tried were widening the gap rather than closing it: “every app gives me recipes, none give me a plan.”",

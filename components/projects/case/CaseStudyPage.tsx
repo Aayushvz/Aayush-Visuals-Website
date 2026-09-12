@@ -194,12 +194,16 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 <p className="cs__eyebrow csHero__cat">{project.category}</p>
               </div>
 
+              {/* the headline where there is one, the name where there is
+                  not; sized down when it is a sentence rather than a word */}
               <h1
-                className="csHero__title"
+                className={`csHero__title${
+                  project.headline ? " csHero__title--head" : ""
+                }`}
                 data-rise
                 style={{ "--i": 1 } as CSSProperties}
               >
-                {project.title}
+                {project.headline ?? project.title}
               </h1>
 
               <div
@@ -310,6 +314,26 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="Details" />
                 <div className="csSec__body">
+                  {/*
+                    The context card, which the guide puts with the problem
+                    rather than in the hero: what the thing was, how long it
+                    took, what was in scope, and what constrained it. These
+                    facts were authored on every project as `extraFacts` and
+                    had no renderer at all, so a reader could not learn that
+                    CPGRAMS was delivered with KPMG for DARPG, or that
+                    Layover ran from 2024 to 2026 across four airports.
+                  */}
+                  {project.extraFacts?.length ? (
+                    <dl className="csContext" data-rise>
+                      {project.extraFacts.map(([k, v]) => (
+                        <div className="csContext__row" key={k}>
+                          <dt className="csContext__key">{k}</dt>
+                          <dd className="csContext__val">{v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
+
                   <Details
                     pairs={story.details.pairs}
                     media={story.details.media}

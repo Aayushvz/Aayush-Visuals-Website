@@ -2133,3 +2133,69 @@
   display: grid;
   gap: var(--cs-lg);
 }
+
+/* ---------- the headline, and the context card ---------- */
+
+/*
+  A headline is a sentence, so it cannot take the size a one-word name takes.
+
+  `CPGRAMS` at 76px is a title. "CPGRAMS: filing a government grievance by
+  speaking, in any of 22 languages" at 76px is four lines of shouting. The
+  display size drops by about a third when the h1 is carrying a headline,
+  which lands it at two lines on a laptop and keeps it the largest thing on
+  the page without it becoming the whole first screen.
+*/
+.csHero__title--head {
+  font-size: clamp(26px, 3.3vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.026em;
+  /*
+    No measure cap, which is the opposite of what display type usually
+    wants. A 22ch measure broke a fourteen-word headline over four lines and
+    turned it into a paragraph set large; a headline is one object and wants
+    to be read in one or two passes, so it takes the column the way a
+    newspaper headline takes its column, and `text-wrap: balance` on .csHero__title
+    keeps the last line from stranding a word.
+  */
+  max-width: none;
+}
+
+/*
+  What the project was, as facts rather than prose.
+
+  The guide keeps this small and puts it with the problem: product, how long,
+  what was in scope, your role, and what constrained you. It is a reference
+  the reader checks, not something they read, so it is a definition list on
+  hairlines rather than a row of cards - cards here would give five one-line
+  facts the same visual weight as the argument they sit above.
+*/
+.csContext {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 0 var(--cs-lg);
+  margin: 0 0 var(--cs-xl);
+  border-top: 1px solid var(--cs-line);
+}
+
+.csContext__row {
+  display: grid;
+  grid-template-columns: minmax(0, 7em) minmax(0, 1fr);
+  gap: var(--cs-sm);
+  align-items: baseline;
+  padding: var(--cs-2xs) 0;
+  border-bottom: 1px solid var(--cs-line);
+}
+
+.csContext__key {
+  font-size: var(--cs-t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cs-mute);
+}
+
+.csContext__val {
+  margin: 0;
+  font-size: var(--cs-t-label);
+  font-weight: 500;
+  color: var(--cs-ink);
+}
