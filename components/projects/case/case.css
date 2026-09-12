@@ -1157,18 +1157,22 @@
 
 @media (max-width: 560px) {
   /*
-    One across on a phone for a desktop capture, two for a phone screen.
+    One across on a phone for a desktop capture, two for anything narrower.
 
     A flat 1fr here was right for the 1600px screenshots - two of those at
     163px each is a thumbnail of an interface, which shows nothing - and
     wrong for the 644x1399 exports, which went to 335x728 apiece and turned
-    eleven phone states into eight thousand pixels of scrolling. Driven off
-    the column count the row already carries, so a row of phones keeps a
-    pair and everything wider still gets the full width.
+    eleven phone states into eight thousand pixels of scrolling.
+
+    Driven off the column count the row already carries: a desktop capture
+    asks for two across and lands on one, while phone screens and 4:5 art
+    ask for four and three and both land on a pair. Posterfolio is why the
+    square case matters - forty-one posters one to a row is seventeen
+    thousand pixels of phone, and a wall of posters should read as a wall.
   */
   .csRow--pair {
     grid-template-columns: repeat(
-      min(2, max(1, calc(var(--cs-shot-cols, 2) - 2))),
+      min(2, max(1, calc(var(--cs-shot-cols, 2) - 1))),
       minmax(0, 1fr)
     );
   }

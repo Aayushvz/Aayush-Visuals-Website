@@ -734,6 +734,20 @@ export const PROJECTS: Project[] = [
       ["Surfaces", "10 pages"],
       ["Typefaces", "Legend, Chakra Petch, IBM Plex Sans"],
     ],
+
+    /*
+      Ten pages, and the page was showing two of them.
+
+      The default of four named screens is right for work whose argument is
+      three or four decisions. This project's argument is the opposite: its
+      own headline is "ten pages, four audiences", the sitemap block counts
+      the surfaces out, and every one of them was written up with a heading,
+      a paragraph and a recording. At four, Tickets, Get Involved, Fighter
+      Registration and Donations never reached the page at all - not trimmed
+      to a screenshot, absent, headings and prose included. Eighteen is the
+      count its own sections add up to.
+    */
+    caseLimits: { highlights: 18, images: 40 },
     sections: [
       {
         name: "Overview",
@@ -3676,6 +3690,18 @@ export const PROJECTS: Project[] = [
       ["Posters", "41"],
       ["Format", "4:5, poster"],
     ],
+
+    /*
+      Forty-one, because the headline says forty-one.
+
+      A project with no named screens and no results is read as visual-only
+      and gets a gallery of twenty-four, which is a sensible default for work
+      that has something else to say. Here the count IS the argument - "the
+      only thing allowed to change is the thinking" only lands if the whole
+      series is on the page - and fourteen posters were being dropped off the
+      end of it.
+    */
+    caseLimits: { gallery: 45, images: 60 },
     sections: [
       {
         name: "overview",

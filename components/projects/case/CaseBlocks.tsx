@@ -880,6 +880,11 @@ function Img({
     The attributes are the intrinsic size, not the rendered one - CSS still
     sizes the image - and the browser uses the pair only to work out the
     ratio to hold the space with.
+
+    Videos need this more than images do, not less: a recording's own
+    dimensions arrive with its metadata, which is a second request after the
+    markup, so a .webm with nothing declared is a zero-height box for longer
+    than a picture is. Mike Tyson's page is six of them.
   */
   const box = IMAGE_DIMS[src];
   const style = {
@@ -896,6 +901,8 @@ function Img({
         className={className}
         src={src}
         style={cap}
+        width={box?.[0]}
+        height={box?.[1]}
         data-rise={reveal ? "shot" : undefined}
         muted
         loop
