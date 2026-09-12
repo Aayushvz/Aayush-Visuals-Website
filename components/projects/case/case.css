@@ -1693,8 +1693,42 @@
   margin-top: var(--cs-lg);
 }
 
-.csGroup__title + .csGroup__intro {
-  margin-top: var(--cs-sm);
+/*
+  The heading and its lead-in, side by side.
+
+  Stacked, they used the left half of the column and left the other half
+  empty, directly above a flow that runs the full width - the page arguing
+  with itself about how wide it is. An eight-word heading does not want a
+  1296px measure, but the paragraph explaining it can take the space the
+  heading is not using, which is the same asymmetric rail .csSec__head,
+  .csFeature__head and .csDetails are all built on.
+
+  Bottom-aligned, so the last line of the paragraph and the last line of the
+  heading sit on one line rather than floating at two different heights.
+
+  Split only when there IS a lead-in: a heading on its own keeps the whole
+  band and simply does not need the width. Browsers without :has() fall back
+  to the stacked single column, which is what this replaces.
+*/
+.csGroup__lead {
+  display: grid;
+  /* the gutter is the gap alone. At --cs-xl the two caps below left their
+     own slack inside each track on top of it, and the space between the
+     heading and its lead-in measured nearly two hundred pixels: a gap wide
+     enough to read as two unrelated blocks rather than one band. */
+  column-gap: var(--cs-lg);
+  row-gap: var(--cs-sm);
+  align-items: end;
+}
+
+.csGroup__lead:has(.csGroup__intro) {
+  grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+}
+
+@media (max-width: 860px) {
+  .csGroup__lead:has(.csGroup__intro) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .csGroup + .csGroup {
@@ -1716,7 +1750,9 @@
   letter-spacing: -0.02em;
   line-height: 1.14;
   margin: 0;
-  max-width: 24ch;
+  /* the column is the measure at any normal width; this only bites on an
+     ultrawide, where 44% of the page would otherwise be one long line */
+  max-width: 30ch;
   color: var(--cs-ink);
   text-wrap: balance;
 }
@@ -1726,7 +1762,9 @@
   font-size: var(--cs-t-body);
   line-height: 1.6;
   color: var(--cs-mute);
-  max-width: 58ch;
+  /* wide enough to fill its own track on a laptop, where the track is about
+     62ch, and still inside a readable measure when the track grows */
+  max-width: 66ch;
 }
 
 .csGroup__intro b {
@@ -2020,17 +2058,43 @@
   somebody else made. The same number rebuilt as a component reads as an
   argument this page is making.
 */
+/*
+  One line per bar: what it measures, the bar, the number.
+
+  Capped at 760px with the label stacked above the track, this used a bit
+  over half the column and left the rest empty, which on a page whose flow
+  and screens both run the full width read as an unfinished block rather
+  than a narrow one. Three facts became six rows for no reason.
+
+  Laid out on a rail instead, the label sits where every other label on this
+  page sits, the track gets the width it should have had - a longer track is
+  a more readable bar, not just a wider one - and the number lands on a
+  column of its own at the end.
+*/
 .csBars {
   display: grid;
-  gap: var(--cs-sm);
+  gap: var(--cs-md);
   margin: 0;
-  max-width: 760px;
+}
+
+.csBar {
+  display: grid;
+  grid-template-columns: minmax(0, 32%) minmax(0, 1fr);
+  column-gap: var(--cs-lg);
+  align-items: center;
 }
 
 .csBar__label {
   font-size: var(--cs-t-body);
+  line-height: 1.4;
   color: var(--cs-ink);
-  margin-bottom: var(--cs-2xs);
+}
+
+@media (max-width: 720px) {
+  .csBar {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--cs-2xs);
+  }
 }
 
 .csBar__row {
@@ -2075,10 +2139,20 @@
   two supported languages out of twenty-two is a sentence, but twenty dark
   cells is an argument.
 */
+/*
+  The count beside the grid, not under it.
+
+  Stacked inside a 520px cap this left two thirds of the column empty and
+  put "2 of 22" below the twenty-two cells that say the same thing, so the
+  reader met the argument twice in sequence instead of once. Side by side
+  the number annotates the picture, which is the job it was written for.
+*/
 .csCoverage {
   display: grid;
-  gap: var(--cs-sm);
-  max-width: 520px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--cs-xl);
+  row-gap: var(--cs-sm);
+  align-items: center;
   margin: 0;
 }
 
@@ -2086,6 +2160,15 @@
   display: grid;
   grid-template-columns: repeat(11, 1fr);
   gap: 5px;
+  /* a cell is a tally mark, not a tile: past this it stops reading as a
+     count of twenty-two things and starts reading as a colour block */
+  max-width: 560px;
+}
+
+@media (max-width: 720px) {
+  .csCoverage {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .csCell {
@@ -2099,7 +2182,8 @@
 
 .csCoverage__meta {
   display: grid;
-  gap: 3px;
+  gap: var(--cs-2xs);
+  align-content: center;
 }
 
 .csCoverage__count {

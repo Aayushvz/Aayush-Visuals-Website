@@ -537,15 +537,22 @@ export function Blocks({ groups }: { groups: Group[] }) {
     <>
       {groups.map((g, gi) => (
         <div className="csGroup" key={g.heading ?? `g-${gi}`}>
-          {g.heading ? (
-            <h3 className="csGroup__title" data-rise>
-              {g.heading}
-            </h3>
-          ) : null}
-          {g.intro ? (
-            <p className="csGroup__intro" data-rise>
-              {marked(g.intro)}
-            </p>
+          {/* one band rather than two stacked blocks: the heading is display
+              type and the lead-in is body, and side by side they fill the
+              column the figures below them already use */}
+          {g.heading || g.intro ? (
+            <div className="csGroup__lead">
+              {g.heading ? (
+                <h3 className="csGroup__title" data-rise>
+                  {g.heading}
+                </h3>
+              ) : null}
+              {g.intro ? (
+                <p className="csGroup__intro" data-rise>
+                  {marked(g.intro)}
+                </p>
+              ) : null}
+            </div>
           ) : null}
           {g.blocks.map((b, i) => (
             <Block block={b} key={`${b.kind}-${i}`} />
