@@ -1862,8 +1862,24 @@
   padding-top: var(--cs-xs);
 }
 
+/*
+  One orange in this lane, not three.
+
+  The rule on top was the brand saffron, the chip outlines were the
+  paper-safe ink and the count was the ink as well - three values inside one
+  object, none of them matching. They are one now.
+
+  It is the loud end taken down a notch against black, which is what buys
+  the contrast back: the brand's own #FE6700 measures 2.94:1 on white and
+  cannot be used literally for either a numeral or an outline. Nothing here
+  is small text - the count is 32px at 600 and the rest are 1px boundaries,
+  so all of it is on the 3:1 bar, and this clears it at 3.95:1 on CPGRAMS
+  and 3.35:1 on Gravitas' mint. The 11px indices elsewhere on the page keep
+  --cs-accent-ink, which is tuned for their 4.5:1.
+*/
 .csLane--after {
-  border-top-color: var(--cs-accent);
+  --lane-accent: color-mix(in srgb, var(--cs-accent) 85%, #000);
+  border-top-color: var(--lane-accent);
 }
 
 .csLane__head {
@@ -1895,7 +1911,7 @@
 }
 
 .csLane--after .csLane__count {
-  color: var(--cs-accent-ink);
+  color: var(--lane-accent);
 }
 
 .csLane__note {
@@ -1955,7 +1971,7 @@
 
 /* and the one that replaced it is the only thing here drawn in the accent */
 .csLane--after .csLane__steps li {
-  border-color: var(--cs-accent-ink);
+  border-color: var(--lane-accent);
   color: var(--cs-ink);
 }
 
