@@ -1921,33 +1921,29 @@ export const PROJECTS: Project[] = [
               "Seen once, the first time someone opens the chatbot. Everything after it assumes you know you can press a button and just talk, and **no government website has ever suggested that**.",
             ],
           },
+          /*
+            One frame of the tutorial, not five.
+
+            A first-run sequence is the least interesting thing a product
+            does and it was taking more room here than the conversation the
+            product exists for: five desktop frames and four phone frames,
+            nine screens to say "it points at a control and explains it".
+            Arrive, Spotlight and Hand over are all the same screen with a
+            different mask on it, so one frame carries the mechanic and the
+            paragraphs below carry the reasoning.
+
+            This one, because it is the only frame showing all three things
+            at once: the dimmed interface, the control being pointed at, and
+            Didi at full height beside it, which is what the phone frame is
+            then measured against.
+          */
           {
             kind: "grid",
             items: [
               {
-                src: "/projects/cpgrams/demo-01.webp",
-                label: "01 Arrive",
-                alt: "The CPGRAMS chatbot opening screen with a welcome message and the option to speak or type.",
-              },
-              {
-                src: "/projects/cpgrams/demo-02.webp",
-                label: "02 Meet the guide",
-                alt: "Samadhan Didi introduced at full height beside the CPGRAMS chatbot interface.",
-              },
-              {
-                src: "/projects/cpgrams/demo-03.webp",
-                label: "03 Spotlight",
-                alt: "The CPGRAMS chatbot with the interface dimmed and a single control spotlit during the tutorial.",
-              },
-              {
                 src: "/projects/cpgrams/demo-04.webp",
-                label: "04 The microphone",
+                label: "Spotlight, on desktop",
                 alt: "The tutorial spotlighting the microphone with Samadhan Didi explaining to press it and speak in a preferred language.",
-              },
-              {
-                src: "/projects/cpgrams/demo-05.webp",
-                label: "05 Hand over",
-                alt: "The final tutorial screen of the CPGRAMS chatbot with a skip tutorial control visible.",
               },
             ],
           },
@@ -1958,28 +1954,17 @@ export const PROJECTS: Project[] = [
               "**Skip sits on the first frame**, not the last. Onboarding should not tax the confident user to reassure the uncertain one.",
             ],
           },
+          /* the same moment on a phone, kept because the paragraph under it
+             makes a claim you have to see to believe: at 402px the guide
+             cannot stand at full height without covering the control she is
+             pointing at. One frame proves it; four repeat it. */
           {
             kind: "gallery",
             items: [
               {
-                src: "/projects/cpgrams/m-demo-1.webp",
-                label: "Open",
-                alt: "The CPGRAMS chatbot onboarding on a phone, opening state.",
-              },
-              {
-                src: "/projects/cpgrams/m-demo-3.webp",
-                label: "Spotlight",
-                alt: "The phone tutorial dimming the screen around one control.",
-              },
-              {
                 src: "/projects/cpgrams/m-demo-4.webp",
-                label: "Microphone",
-                alt: "The phone tutorial spotlighting the microphone button.",
-              },
-              {
-                src: "/projects/cpgrams/m-demo-5.webp",
-                label: "Hand over",
-                alt: "The final phone tutorial screen with a skip control.",
+                label: "The same moment, on a phone",
+                alt: "The phone tutorial spotlighting the microphone button, with Samadhan Didi reduced to a corner presence so she does not cover it.",
               },
             ],
           },

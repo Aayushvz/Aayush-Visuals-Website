@@ -870,6 +870,18 @@ function Img({
     rather than showing up as a scrollbar in any of my overflow checks.
   */
   const dims = capWidth ? IMAGE_DIMS[src] : undefined;
+  /*
+    Separate from `dims`, which only exists when the caller asked for a width
+    cap. This one is for every shot: with no width/height attributes the
+    browser reserves nothing, so each lazy image landed at its full height
+    the moment it decoded and shoved everything below it down the page.
+    Thirteen paired screens meant thirteen of those jumps while reading.
+
+    The attributes are the intrinsic size, not the rendered one - CSS still
+    sizes the image - and the browser uses the pair only to work out the
+    ratio to hold the space with.
+  */
+  const box = IMAGE_DIMS[src];
   const style = {
     ...(dims ? { maxWidth: `min(100%, ${dims[0]}px)` } : null),
     ...(index === undefined ? null : { "--i": index }),
@@ -899,6 +911,8 @@ function Img({
       src={src}
       alt={alt}
       style={cap}
+      width={box?.[0]}
+      height={box?.[1]}
       data-rise={reveal ? "shot" : undefined}
       loading="lazy"
       decoding="async"
@@ -1075,9 +1089,58 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
   );
 }
 
-export function FeatureBlock({ item }: { item: Highlight }) {
+/*
+  A run of named screens, two to a row.
+
+  One screen per row is the right shape for a beat with three of them and
+  the wrong shape for a conversation. CPGRAMS documents its voice path in
+  eight consecutive states and its text path in five; at one full-bleed
+  capture each that is thirteen screenfuls of scrolling, and the reader
+  never sees two states of the same conversation at once, which is the only
+  way to read what changed between them.
+
+  Paired from four up. Below that the beat is a few standalone decisions
+  rather than a sequence, and a decision wants the room.
+*/
+export function Features({ items }: { items: Highlight[] }) {
+  const paired = items.length >= 4;
+  if (!paired)
+    return (
+      <>
+        {items.map((item, i) => (
+          <FeatureBlock item={item} key={i} />
+        ))}
+      </>
+    );
   return (
-    <div className="csFeature">
+    <div className="csFeatures">
+      {items.map((item, i) => (
+        <FeatureBlock item={item} dense key={i} />
+      ))}
+    </div>
+  );
+}
+
+export function FeatureBlock({
+  item,
+  dense,
+}: {
+  item: Highlight;
+  dense?: boolean;
+}) {
+  /* in a pair the screen comes first: the reader is following a sequence of
+     states, so the state is the thing to see and the paragraph explains what
+     they are looking at. On its own the text still leads, which is the
+     shape the rest of the page uses. */
+  const media = item.media.length ? (
+    <div className="csFeature__media">
+      <MediaRow media={item.media} />
+    </div>
+  ) : null;
+
+  return (
+    <div className={dense ? "csFeature csFeature--dense" : "csFeature"}>
+      {dense ? media : null}
       <div className="csFeature__head" data-rise>
         <p className="csFeature__name">{item.name}</p>
         <div>
@@ -1088,11 +1151,7 @@ export function FeatureBlock({ item }: { item: Highlight }) {
           ))}
         </div>
       </div>
-      {item.media.length ? (
-        <div className="csFeature__media">
-          <MediaRow media={item.media} />
-        </div>
-      ) : null}
+      {dense ? null : media}
     </div>
   );
 }

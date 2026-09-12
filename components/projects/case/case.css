@@ -608,6 +608,70 @@
   margin-top: var(--cs-xl);
 }
 
+/*
+  Two states of one conversation, side by side.
+
+  A flow read one screen at a time is a slideshow: the reader never holds
+  two states at once, so what changed between them has to be remembered
+  rather than seen. Paired, the eight voice states become four rows and the
+  comparison is free.
+
+  The row gap is a full rung larger than the column gap on purpose. Within a
+  row the two screens are consecutive and belong together; between rows the
+  conversation has moved on.
+*/
+.csFeatures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--cs-lg);
+  row-gap: var(--cs-2xl);
+}
+
+/* the grid gap owns the spacing in here */
+.csFeatures .csFeature + .csFeature {
+  margin-top: 0;
+}
+
+/*
+  An odd last screen stays the size of the others.
+
+  It was spanning the row so it would not sit beside a gap, and that made it
+  1281px wide - one full-bleed capture at the end of a run, which is exactly
+  the shape this grid exists to get rid of. A two-column grid ending with one
+  item on its last row is ordinary and reads as the end of a sequence; a
+  single screen three times the size of the twelve above it reads as a
+  different design.
+*/
+
+/*
+  No rail at half width.
+
+  .csFeature__head puts the name on a 20% rail with the body beside it,
+  which works across a full column and collapses at half of one: the rail
+  becomes 120px and the paragraph a gutter. Paired, the name sits above its
+  own text.
+*/
+.csFeature--dense .csFeature__head {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--cs-2xs);
+}
+
+.csFeature--dense .csFeature__media {
+  margin-top: 0;
+  margin-bottom: var(--cs-sm);
+}
+
+.csFeature--dense .csFeature__head .cs__body {
+  max-width: 60ch;
+}
+
+@media (max-width: 860px) {
+  .csFeatures {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--cs-xl);
+  }
+}
+
 .csFeature__head {
   display: grid;
   grid-template-columns: var(--cs-rail) minmax(0, 1fr);
@@ -1059,8 +1123,21 @@
 }
 
 @media (max-width: 560px) {
+  /*
+    One across on a phone for a desktop capture, two for a phone screen.
+
+    A flat 1fr here was right for the 1600px screenshots - two of those at
+    163px each is a thumbnail of an interface, which shows nothing - and
+    wrong for the 644x1399 exports, which went to 335x728 apiece and turned
+    eleven phone states into eight thousand pixels of scrolling. Driven off
+    the column count the row already carries, so a row of phones keeps a
+    pair and everything wider still gets the full width.
+  */
   .csRow--pair {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(
+      min(2, max(1, calc(var(--cs-shot-cols, 2) - 2))),
+      minmax(0, 1fr)
+    );
   }
 
   .csShot {
@@ -2063,12 +2140,27 @@
 */
 .csFlow {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr));
+  /* set per block from the step count so no row ends short; see the flow
+     case in CaseSections for how it is chosen */
+  grid-template-columns: repeat(var(--cs-flow-cols, 4), minmax(0, 1fr));
   column-gap: var(--cs-sm);
   row-gap: var(--cs-md);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+@media (max-width: 900px) {
+  .csFlow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .csFlow {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--cs-sm);
+  }
 }
 
 .csFlow__step {
@@ -2354,21 +2446,38 @@
   hairlines rather than a row of cards - cards here would give five one-line
   facts the same visual weight as the argument they sit above.
 */
+/*
+  Three columns, and the rule sits on top of each cell.
+
+  Two things were wrong with this as four auto-fit columns of key-beside-
+  value. The rule was drawn under each cell, and cells in one row are not
+  the same height - "Conversational architecture, voice UX, UI, mascot,
+  design system" runs to four lines beside a one-line "KPMG India" - so the
+  underlines finished at four different heights and the card read as
+  unaligned. And a 7em label rail inside a 185px cell left the value about
+  a hundred pixels, which broke cpgramsaichatbot.com across a line in the
+  middle of a word.
+
+  Moving the rule to the TOP of the cell fixes the alignment outright,
+  because grid rows all start together however tall they get. Dropping the
+  label above its value gives the value the whole cell: at three columns
+  that is around 390px, which holds the URL on one line and the longest
+  scope on two.
+*/
 .csContext {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-  gap: 0 var(--cs-lg);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--cs-lg);
+  row-gap: var(--cs-md);
   margin: 0 0 var(--cs-xl);
-  border-top: 1px solid var(--cs-line);
 }
 
 .csContext__row {
   display: grid;
-  grid-template-columns: minmax(0, 7em) minmax(0, 1fr);
-  gap: var(--cs-sm);
-  align-items: baseline;
-  padding: var(--cs-2xs) 0;
-  border-bottom: 1px solid var(--cs-line);
+  align-content: start;
+  gap: var(--cs-2xs);
+  padding-top: var(--cs-xs);
+  border-top: 1px solid var(--cs-line);
 }
 
 .csContext__key {
@@ -2382,5 +2491,23 @@
   margin: 0;
   font-size: var(--cs-t-label);
   font-weight: 500;
+  line-height: 1.45;
   color: var(--cs-ink);
+  /* a domain has no spaces to break at, so without this it either overflows
+     the cell or splits mid-word; breaking it as a last resort beats both */
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 860px) {
+  .csContext {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--cs-md);
+  }
+}
+
+@media (max-width: 520px) {
+  .csContext {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--cs-sm);
+  }
 }

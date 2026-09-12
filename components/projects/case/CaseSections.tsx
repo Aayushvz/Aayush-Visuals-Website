@@ -377,12 +377,26 @@ export function Block({ block }: { block: CaseBlock }) {
         </figure>
       );
 
-    case "flow":
+    case "flow": {
+      /*
+        Enough columns to fill every row.
+
+        Left to auto-fill, an eight-step flow fitted six across and dropped
+        the last two onto a row of their own beside four empty tracks. Six
+        is the most this is allowed to use, so eight becomes four and four
+        rather than six and two, and a flow that already fits one row still
+        gets it.
+      */
+      const rows = Math.ceil(block.steps.length / 6);
+      const cols = Math.ceil(block.steps.length / rows);
       return (
         <figure className="csFig">
           {/* an ordered list, so a screen reader gets the sequence without
               having to interpret the arrows */}
-          <ol className="csFlow">
+          <ol
+            className="csFlow"
+            style={{ "--cs-flow-cols": cols } as CSSProperties}
+          >
             {block.steps.map((step, i) => (
               <li
                 className={`csFlow__step${step.decision ? " csFlow__step--decision" : ""}`}
@@ -408,6 +422,7 @@ export function Block({ block }: { block: CaseBlock }) {
           ) : null}
         </figure>
       );
+    }
 
     /* ---------- the UI system ---------- */
 

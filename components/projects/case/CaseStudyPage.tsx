@@ -9,7 +9,7 @@ import {
   buildStory,
   marked,
   Details,
-  FeatureBlock,
+  Features,
   ResultRows,
   ShotStack,
   MediaRows,
@@ -373,9 +373,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                           ))}
                         </div>
                       ) : null}
-                      {chapter.items.map((item, i) => (
-                        <FeatureBlock item={item} key={i} />
-                      ))}
+                      <Features items={chapter.items} />
                     </div>
                   </section>
                 ))
@@ -385,9 +383,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="Highlights" />
                 <div className="csSec__body">
-                  {story.highlights.map((item, i) => (
-                    <FeatureBlock item={item} key={i} />
-                  ))}
+                  <Features items={story.highlights} />
                 </div>
               </section>
             ) : null}
