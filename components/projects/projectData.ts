@@ -520,23 +520,7 @@ export type Project = {
   /** project-specific facts appended after Role/Category/Year on the
       case-study page (e.g. Surfaces, Airports) */
   extraFacts?: [string, string][];
-  /*
-    Which side of the light/dark switch this project's case study opens on.
-
-    Case studies default to light because most of them are screenshots of
-    light interfaces and a dark canvas around those fights the thing the
-    page exists to present. A project designed dark has the opposite
-    problem: a near-black event site inside a parchment page reads as a
-    mistake, and every screenshot on it becomes a hole punched in the
-    layout. So the default is a default, not a rule.
-
-    This sets where the page STARTS. The dock's toggle still works from
-    either value, and neither this nor the pre-paint script writes to
-    localStorage, so the reader's preference for the rest of the site
-    survives a visit here untouched.
-  */
-  theme?: "dark" | "light";
-  /*
+    /*
     The two points the Details beat is built from, written rather than
     derived.
 
@@ -684,8 +668,9 @@ export const PROJECTS: Project[] = [
       shipped as first. It was wrong: the screenshots carry their own
       darkness now that the browser chrome around them is dark too, so they
       read as objects sitting ON a light page rather than holes punched in
-      it. The `theme` field stays on the Project type for the next project
-      that genuinely needs it.
+      Every case study is light now, and there is no per-page theme left to
+      opt out with: the site's light/dark switch and the data that drove it
+      were both removed.
     */
     preview: {
       kind: "website",
@@ -4401,19 +4386,6 @@ const SELECTED_IDS = [
   "yantra",
   "posterfolio",
 ];
-
-/*
-  The slugs whose case study opens dark, for the pre-paint theme script.
-
-  Derived rather than hand-listed, so `theme: "dark"` on a project is the
-  only place the fact lives. The script in app/layout.tsx runs before React
-  and cannot import a component tree, so it needs this as plain data — and
-  it has to be plain data at BUILD time, because a theme decided after
-  hydration is a white flash on a black page.
-*/
-export const DARK_CASE_STUDIES: string[] = PROJECTS.filter(
-  (p) => p.theme === "dark",
-).map((p) => p.id);
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {
   const project = PROJECTS.find((p) => p.id === id);

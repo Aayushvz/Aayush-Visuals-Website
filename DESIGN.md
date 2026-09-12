@@ -12,10 +12,12 @@ BEM-ish class names on components.
 
 - **Styling:** one global stylesheet, `app/globals.css`. Components carry class
   names (e.g. `.capCard`, `.services-heading`); all rules live in `globals.css`.
-- **Tokens:** CSS variables on `:root`. Global tokens are fixed. Only the
-  `--hero-*` and `--glass-*` tokens react to `html[data-theme]`, so the
-  light/dark toggle **art-directs the hero and floating glass chrome only** —
-  everything below the hero keeps the fixed light look with the purple accent.
+- **Tokens:** CSS variables on `:root`. **One set, no themes.** The site had
+  a light/dark switch that art-directed the hero and the floating glass
+  chrome; it was removed, along with the light variants of `/contact` and the
+  About collage, because its only remaining control was a button in the
+  mobile nav and a stored preference could strand a desktop visitor on a look
+  they had no way back from. There is no `data-theme` attribute any more.
 - **Units:** `clamp()` for anything fluid (type, insets, section heights). Avoid
   fixed px for layout that must breathe across viewports.
 
@@ -39,13 +41,16 @@ BEM-ish class names on components.
 | `--faded` | `#c9c2b4` | Muted lines on cream |
 | `--card-hover` | `#faf7f1` | Card hover fill |
 
-### Hero + glass (theme-reactive: `:root` = dark default, `[data-theme="light"]`)
+### Hero + glass (fixed dark)
 
-`--hero-bg`, `--hero-fg`, `--hero-fg-2`, `--hero-brand`, `--hero-line`,
-`--hero-grid-line`, `--heroCard-*`, and the Apple-glass set `--glass-bg`,
-`--glass-fg`, `--glass-border`, `--glass-highlight`, `--glass-shadow`. The
-navbar/mobile-nav pills also sample the section beneath them and swap
-light/dark chrome independently (see `components/useSurfaceTone.ts`).
+`--hero-bg` (#1a1a1a), `--hero-fg`, `--hero-fg-2`, `--hero-brand`,
+`--hero-line`, `--hero-grid-line`, `--heroCard-*`, and the Apple-glass set
+`--glass-bg`, `--glass-fg`, `--glass-border`, `--glass-highlight`,
+`--glass-shadow`. These are the dark canvas the hero and the error scene are
+both built on; nothing switches them. The navbar/mobile-nav pills still
+sample the section beneath them and swap light/dark chrome on their own (see
+`components/useSurfaceTone.ts`), which is a surface-tone decision rather than
+a theme.
 
 ### Contrast rule
 

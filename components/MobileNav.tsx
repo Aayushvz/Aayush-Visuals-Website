@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { SunIcon, MoonIcon } from "./icons";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLink from "./PageLink";
 import useSurfaceTone from "./useSurfaceTone";
@@ -27,22 +26,6 @@ export default function MobileNav({
      desktop bar does; the expanded sheet stays dark on purpose */
   const overLight = useSurfaceTone(barRef) === "light";
   const [open, setOpen] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  useEffect(() => {
-    setTheme(
-      document.documentElement.dataset.theme === "light" ? "light" : "dark",
-    );
-  }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try {
-      localStorage.setItem("theme", next);
-    } catch {}
-    setTheme(next);
-  };
 
   const renderBar = (isOpen: boolean) => (
     <div className="mobileNav__bar">
@@ -74,19 +57,6 @@ export default function MobileNav({
       >
         <LogoMark className="mobileNav__logoMark" />
       </PageLink>
-
-      <button
-        type="button"
-        className="mobileNav__themeBtn"
-        aria-label={
-          theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-        }
-        onClick={toggleTheme}
-      >
-        <span key={theme} className="mobileNav__themeBadge">
-          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-        </span>
-      </button>
     </div>
   );
 

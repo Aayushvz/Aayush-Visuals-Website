@@ -7,10 +7,10 @@
    has nothing for you, and the only things here are the code, the way out,
    and something to fiddle with while you decide.
 
-   Every colour is a --hero-* token, which is what makes this page art-direct
-   itself: those are the only tokens on the site that react to the light and
-   dark toggle, so the error page follows whatever the visitor last chose
-   rather than inventing an eleventh palette.
+   Every colour is a --hero-* token rather than a value of its own, so this
+   page and the site's front door cannot drift apart. They were the site's
+   theme-reactive set until the light mode was removed; they are now simply
+   the dark canvas both pages are built on.
    ========================================================================== */
 
 .errScene {
