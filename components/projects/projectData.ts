@@ -2287,24 +2287,20 @@ export const PROJECTS: Project[] = [
             caption:
               "Roboto is in the stack for one reason: **Devanagari and most regional scripts**. A product claiming **22 languages** cannot ship a typeface that renders two.",
           },
+/*
+            The two Figma component sheets came out here.
+
+            They were contact sheets of the same microphone button repeated
+            down a column with its own label under each copy - a screenshot
+            of a Figma canvas rather than a drawing of the system, and the
+            thing they documented is visible in the flow screens anyway. The
+            sentence they carried is not about the pictures, so it stays.
+          */
           {
-            kind: "grid",
-            items: [
-              {
-                src: "/projects/cpgrams/components-1.webp",
-                small: true,
-                label: "Message and input components",
-                alt: "A Figma component set for the CPGRAMS chatbot showing message bubble and input variants.",
-              },
-              {
-                src: "/projects/cpgrams/components-2.webp",
-                small: true,
-                label: "State variants",
-                alt: "A Figma component set showing state variants for the CPGRAMS chatbot controls.",
-              },
-            ],
-            caption:
+            kind: "prose",
+            body: [
               "The component set behind all of it, built as **variants rather than screens**. A conversation has no fixed layout to hand a developer, only states and the rules for moving between them.",
+            ],
           },
         ],
       },

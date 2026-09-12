@@ -71,6 +71,18 @@ function accentVars(project: Project): CSSProperties {
     "--cs-accent": a.solid ?? a.dark,
     "--cs-accent-ink": a.light,
     /*
+      And the one for a dark ground.
+
+      `light` is the variant that survives on paper and `dark` is the one
+      that survives on ink - the names describe the canvas, not the colour.
+      Until now only the first two were wired up, because nothing on the page
+      put accent-coloured TEXT on a dark surface. The reflection band does.
+      Measured on #141414: cpgrams' #FE700E is 6.6:1 and Mike Tyson's
+      #FF8D3C is 8.0:1, where their `light` variants are 1.6:1 and 1.3:1 -
+      unreadable, which is what reusing --cs-accent-ink there would have got.
+    */
+    "--cs-accent-lit": a.dark ?? a.solid,
+    /*
       What reads ON the accent once something is filled with it.
 
       The primary button paints white glyphs over its accent square, which
@@ -434,7 +446,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 reflection that only reports successes reads as a project
                 that never met any difficulty, which nobody believes */}
             {story.reflection.length ? (
-              <section className="csSec">
+              <section className="csSec csSec--invert">
                 <SectionHead no={++no} name="What it taught me" />
                 <div className="csSec__body">
                   <Blocks groups={story.reflection} />

@@ -1297,6 +1297,49 @@
   */
 }
 
+/* ---------- a section on ink instead of paper ---------- */
+
+/*
+  The reflection runs on the dark ground, and it does it by moving the
+  tokens rather than by restating the colours.
+
+  Every rule inside this beat already reads from --cs-ink, --cs-mute,
+  --cs-line and --cs-accent-ink, so redefining those four on the section
+  flips the heading, the lead-in, the rules above each lesson, the numbers,
+  the body copy and the section label in one place. Restating them as
+  `.csSec--invert .csLesson__title { color: ... }` and so on would be a
+  second copy of the design that drifts the first time either changes.
+
+  It is a different device from .csSec--dark. That one is the statement
+  band: a full viewport with a single sentence in it, and the ink is the
+  point. This is an ordinary section that happens to be set on ink, so it
+  keeps the page's normal rhythm and just changes ground - which is also why
+  it takes the page padding back as a negative margin and bleeds to the
+  edges instead of sitting in the column as a dark box.
+
+  Contrast, measured on #141414: the lesson body at #a7a29a is 7.4:1 and the
+  titles at #f7f4ee are 16:1, both well past the 4.5:1 body-text bar, and
+  the index takes the accent variant meant for dark grounds.
+*/
+.csSec--invert {
+  --cs-ink: #f7f4ee;
+  --cs-mute: #a7a29a;
+  --cs-line: rgba(255, 255, 255, 0.22);
+  --cs-accent-ink: var(--cs-accent-lit, var(--cs-accent));
+  --cs-bg: var(--cs-dark);
+
+  background: var(--cs-dark);
+  color: var(--cs-ink);
+  padding: var(--cs-xl) var(--cs-pad);
+  margin-inline: calc(var(--cs-pad) * -1);
+}
+
+/* the head's rule is drawn by a pseudo-element so it can be scaled from one
+   end, and it reads --cs-line like everything else in here */
+.csSec--invert .csSec__head {
+  border-top-color: transparent;
+}
+
 /* ---------- the hairline above a section ---------- */
 
 /*
@@ -2486,6 +2529,14 @@
   line-height: 1.55;
   color: var(--cs-mute);
   max-width: 52ch;
+}
+
+/* the same lift .cs__body b gets. This paragraph is not .cs__body, so the
+   emphasised phrase was carrying weight without the colour everywhere else
+   on the page pairs it with - which the dark ground made obvious */
+.csLesson__body b {
+  color: var(--cs-ink);
+  font-weight: 600;
 }
 
 /* research sits under the argument it supports, not in its own beat. The
