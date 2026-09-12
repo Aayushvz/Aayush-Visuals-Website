@@ -2246,17 +2246,50 @@
   a more readable bar, not just a wider one - and the number lands on a
   column of its own at the end.
 */
+/*
+  The label column is sized by the labels, not by a percentage.
+
+  At 32% of the column the rail was 410px wide holding about 300px of text,
+  so the longest label stopped a hundred pixels short of its own track and
+  the rest stopped further - on a wide screen the gap measured 239px, which
+  is enough that a bar stops reading as belonging to the line beside it.
+
+  Subgrid is what makes one shared column possible without giving up the
+  per-bar element: the rail is declared once here, and each bar borrows it
+  rather than resolving its own. `fit-content` lets it hug the widest label
+  and stop at 42ch, so a long label wraps instead of pushing every track off
+  the screen. Without subgrid the bars fall back to the fixed rail below,
+  which is what they had.
+*/
 .csBars {
   display: grid;
-  gap: var(--cs-md);
+  grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
+  column-gap: var(--cs-md);
+  /* three rows of one chart: tight enough to read as a set */
+  row-gap: var(--cs-sm);
   margin: 0;
 }
 
 .csBar {
   display: grid;
-  grid-template-columns: minmax(0, 32%) minmax(0, 1fr);
-  column-gap: var(--cs-lg);
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
+  column-gap: var(--cs-md);
   align-items: center;
+}
+
+@supports (grid-template-columns: subgrid) {
+  .csBars {
+    grid-template-columns: fit-content(42ch) minmax(0, 1fr);
+  }
+
+  /* no column-gap here: a subgrid takes the parent's gutters unless it
+     states its own, and stating 0 put the longest label hard against its
+     own track - measured at 0px where every other pair on the page has a
+     rung between them */
+  .csBar {
+    grid-template-columns: subgrid;
+  }
 }
 
 .csBar__label {
@@ -2266,8 +2299,13 @@
 }
 
 @media (max-width: 720px) {
+  .csBars,
   .csBar {
+    /* subgrid included: a rail is not worth having at this width */
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .csBar {
     row-gap: var(--cs-2xs);
   }
 }
@@ -2322,13 +2360,33 @@
   reader met the argument twice in sequence instead of once. Side by side
   the number annotates the picture, which is the job it was written for.
 */
+/*
+  No `margin: 0` here, which is the bug this had.
+
+  .csFig already zeroes the figure margin, and `.csGroup > * + *` sets the
+  interval between one figure and the next - both at one class of
+  specificity, so the group rule wins on source order. Restating margin: 0
+  on this one block, further down the file, beat the group rule as well and
+  the coverage grid sat flush against the caption of the chart above it:
+  measured at 0px where its siblings had 63.
+
+  The first track is the cell grid's own width rather than half the column.
+  At 1fr it was a 590px track holding a 560px grid, so the count started
+  131px after the cells it annotates instead of one gap after them.
+*/
 .csCoverage {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: var(--cs-xl);
+  /*
+    The cells take their own width and the count takes the rest, but the
+    count has a floor: at a 705px column the cell track held its full 560
+    and left the meta 105px, which wrapped "scheduled Indian languages
+    supported by the portal" into four lines in a gutter. Past that floor
+    the cells give way instead - they scale, and the sentence does not.
+  */
+  grid-template-columns: minmax(0, 560px) minmax(min(280px, 100%), 1fr);
+  column-gap: var(--cs-lg);
   row-gap: var(--cs-sm);
   align-items: center;
-  margin: 0;
 }
 
 .csCoverage__grid {
@@ -2340,7 +2398,9 @@
   max-width: 560px;
 }
 
-@media (max-width: 720px) {
+/* 900 rather than 720: below this the two tracks together need more than
+   the column has, and the cells were shrinking to pay for it */
+@media (max-width: 900px) {
   .csCoverage {
     grid-template-columns: minmax(0, 1fr);
   }
