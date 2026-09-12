@@ -499,17 +499,11 @@
    TYPE HELPERS
    ========================================================= */
 
-/* the scored-number treatment: gold, filled top-down, with the same relief
-   as the buttons so numerals and lettering read as one material */
-.gk-num {
-  font-family: var(--ckt-display, var(--font-primary));
-  background: linear-gradient(180deg, #fff6cf, var(--gk-gold) 55%, var(--gk-gold-deep));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-variant-numeric: tabular-nums;
-  filter: drop-shadow(0 2px 0 var(--gk-ink-shadow));
-}
+/* .gk-num lived here: the scored-number treatment, gold filled top-down.
+   It had no call sites in the game - .ckt-score carries the same declarations
+   inline for the running score, which is the only number that ever wanted
+   them - so it was a second copy of a treatment nobody imported. Removed
+   rather than wired up, because one of the two would have drifted. */
 
 .gk-label {
   font-family: var(--font-mono, ui-monospace, monospace);

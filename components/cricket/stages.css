@@ -669,7 +669,12 @@
 /* --- states --- */
 
 .tcard.is-picked .tcard__panel {
-  animation: stgPicked 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  /* ease-out-quint, not an overshoot curve. stgPicked already overshoots in
+     its own keyframes - 1 to 1.07 and back to 1.03 - so a bezier that also
+     overshoots ran the pop twice, once past the 1.07 peak and again past the
+     1.03 rest. The keyframes keep the pop; the curve just lands it, and it is
+     now the same curve the meter and the buttons use. */
+  animation: stgPicked 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* the pick confirms in gold — the kit's earned colour — which is the only

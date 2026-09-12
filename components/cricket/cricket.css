@@ -677,6 +677,30 @@
 .cktXp__track {
   height: 12px;
 }
+
+/*
+  This fill is driven by a spring in XpBar, not by CSS.
+
+  It carries .gk-meter__fill for the gold material, and that class also
+  eases its own size over half a second for the loading bar, which sets the
+  value once and lets CSS run it. Here framer-motion writes a new size every
+  frame, so each of those writes started its own 500ms ease: a spring with
+  stiffness 130 pulling against sixty overlapping tweens. The bar lagged
+  behind the XP it was reporting and the weight the spring exists to give it
+  was averaged away.
+
+  Whoever sets the value owns the animation. XpBar already handles reduced
+  motion by dropping the spring to zero duration, so nothing is lost here.
+*/
+/* Scoped through .cktXp deliberately. A bare .cktXp__fill ties with
+   .gk-meter__fill at one class each, so which one wins comes down to the
+   order Next happens to emit the two stylesheets in - and CricketGame
+   imports cricket.css alone while CricketExperience imports all three, so
+   that order is not the same on every route. Measured: the bare selector
+   lost, and the fill still reported the inherited half-second ease. */
+.cktXp .cktXp__fill {
+  transition: none;
+}
 .cktXp__up {
   position: absolute;
   right: 0;
