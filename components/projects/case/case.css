@@ -45,6 +45,18 @@
   --cs-line: rgba(16, 16, 16, 0.12);
 
   /* ---- space: one scale, used everywhere, nothing hand-typed ---- */
+  /*
+    The corner every picture on this page takes.
+
+    12 rather than the 18 the works grid uses on its thumbnails: those are
+    cards, sitting on a tinted ground with a shadow, and this page is
+    hairlines and square rules, where 18 would read as a card dropped into
+    an editorial layout. It is also not zero, which is what the case pages
+    had while every thumbnail leading into them was round - the same cover
+    image changing shape between the grid and the page it opens.
+  */
+  --cs-r-shot: 12px;
+
   --cs-2xs: clamp(6px, 0.6vw, 10px);
   --cs-xs: clamp(10px, 1vw, 16px);
   --cs-sm: clamp(16px, 1.6vw, 24px);
@@ -730,6 +742,7 @@
   width: 100%;
   height: auto;
   background: #f4f4f4;
+  border-radius: var(--cs-r-shot);
 }
 
 /*
@@ -846,9 +859,14 @@
   gap: var(--cs-lg);
 }
 
+/* one long export cut into slices and stacked with nothing between them, so
+   the corner belongs to the assembled strip rather than to each slice -
+   rounding the slices would notch the seams down the middle of the artwork */
 .csStack__strip {
   font-size: 0;
   line-height: 0;
+  overflow: hidden;
+  border-radius: var(--cs-r-shot);
 }
 
 .csStack__slice {
@@ -912,6 +930,10 @@
 .csNext__frame {
   overflow: hidden;
   background: #f4f4f4;
+  /* the frame, not the shot inside it: this one scales on hover and the
+     frame is what holds it in. The 2px accent bar at its foot is clipped
+     by the same corner, which is why it sits on the frame too. */
+  border-radius: var(--cs-r-shot);
 }
 
 .csNext__shot {
@@ -1620,6 +1642,9 @@
   overflow: hidden;
   background: #f4f4f4;
   border: 1px solid var(--cs-line);
+  /* the chosen board's 1px ring is a box-shadow, which follows this on its
+     own, so the border and the ring stay concentric */
+  border-radius: var(--cs-r-shot);
 }
 
 /* the winner takes the project's colour, because a ring in a house grey
@@ -2110,6 +2135,10 @@
   padding: var(--cs-xs);
   border: 1px solid var(--cs-line);
   background: #f4f4f4;
+  /* these are drawings of screens, and they sit in a row with real
+     screenshots, so they take the same corner - a square greybox beside a
+     rounded capture reads as one of them having been missed */
+  border-radius: var(--cs-r-shot);
 }
 
 .csWire__art--centre {
