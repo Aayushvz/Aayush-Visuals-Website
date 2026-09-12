@@ -176,17 +176,26 @@ function InteractiveGlobe() {
     window.addEventListener("resize", onResize);
     onResize();
 
-    /* One palette. The page had a light art direction reachable from the
-       mobile nav's theme control, and both are gone; the globe is lit for
-       the only surface it now sits on. */
-    const darkTheme = {
+    /*
+      Lit for the violet the page is drenched in.
+
+      It was tuned for a near-black ground: a grey sphere, a brand-purple
+      marker and a nearly black halo. All three stop working on #4c1d95, the
+      marker worst of all, since it was the page's new background colour.
+
+      The sphere now sits DARKER than the page so it reads as an object on
+      it rather than a hole in it, the halo is tinted toward the page so the
+      edge dissolves instead of ringing, and the marker is the same light
+      violet the rest of the page uses as its accent.
+    */
+    const globeTheme = {
       dark: 1 as number,
       diffuse: 1.4,
-      mapBrightness: 4,
+      mapBrightness: 4.6,
       mapBaseBrightness: 0.02,
-      baseColor: [0.15, 0.15, 0.18] as [number, number, number],
-      markerColor: [0.486, 0.231, 0.929] as [number, number, number],
-      glowColor: [0.08, 0.05, 0.14] as [number, number, number],
+      baseColor: [0.2, 0.08, 0.4] as [number, number, number],
+      markerColor: [0.769, 0.71, 0.992] as [number, number, number],
+      glowColor: [0.32, 0.13, 0.62] as [number, number, number],
     };
 
 
@@ -200,7 +209,7 @@ function InteractiveGlobe() {
       markers: [
         { location: [28.6139, 77.209], size: 0.08 },
       ],
-      ...darkTheme,
+      ...globeTheme,
     });
 
     let raf: number;

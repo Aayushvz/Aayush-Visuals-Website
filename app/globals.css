@@ -8404,15 +8404,54 @@ html.has-cursor .cursorRing {
 
 html.contact-page-active,
 html.contact-page-active body {
-  background-color: #0e0e10;
-}.contactPage {
-  --cp-bg: #0e0e10;
+  background-color: #4c1d95;
+}
+
+/*
+  The one page that is drenched in the brand colour.
+
+  Everywhere else purple is an accent at ten percent; here it is the
+  surface, which is the right place for it: contact is the last thing anyone
+  reads and the only page whose job is to be memorable rather than
+  informative.
+
+  The shade is a deep violet rather than the brand's own #7c3aed. At full
+  brightness across a whole viewport the page vibrates, and the ink ramp
+  collapses with it: cream at 55% over #7c3aed measures 2.5:1, so every
+  muted line on the page would have failed. On this ground cream is 9.7:1
+  and there is room to build a real ramp underneath it.
+
+  Every alpha below was chosen against that measurement, not by eye.
+*/
+.contactPage {
+  --cp-bg: #4c1d95;
   --cp-fg: #f4f1ea;
-  --cp-fg-muted: rgba(244, 241, 234, 0.55);
-  --cp-fg-dim: rgba(244, 241, 234, 0.4);
-  --cp-fg-faint: rgba(244, 241, 234, 0.18);
-  --cp-line: rgba(244, 241, 234, 0.1);
-  --cp-border: rgba(244, 241, 234, 0.06);
+  /*
+    Two inks and an accent, where there used to be four inks.
+
+    The old ramp had a muted, a dim and a faint step, and on a near-black
+    ground all three were legible. On this one they measured 4.0, 3.1 and
+    1.9: every step below the first failed, and the two that carried actual
+    text (the 11px field labels, and the input placeholders) failed as text.
+
+    So the ramp collapses honestly rather than being nudged. Solid cream
+    carries headings and the values you type; this one carries everything
+    else that is words, at 4.6:1; and the accent below carries the small
+    labels' focus state. A placeholder is still distinguishable from a typed
+    value, by the much larger gap between 4.6 and 9.7.
+  */
+  --cp-fg-muted: rgba(244, 241, 234, 0.62);
+  --cp-line: rgba(244, 241, 234, 0.16);
+  --cp-border: rgba(244, 241, 234, 0.12);
+  /*
+    The accent has to change with the ground.
+
+    Every purple highlight on this page was --purple or --purple-soft, and
+    both disappear into a purple surface: the brand purple measures 1.9:1 on
+    this ground. A light violet from the same family reads as the same idea
+    and clears the text bar at 5.9:1.
+  */
+  --cp-accent: #c4b5fd;
   position: relative;
   min-height: 100vh;
   background: var(--cp-bg);
@@ -8486,7 +8525,7 @@ html.contact-page-active body {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: rgba(167, 139, 250, 0.25);
+  background: rgba(244, 241, 234, 0.22);
 }
 
 .contactPage__rail--left {
@@ -8547,15 +8586,15 @@ html.contact-page-active body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--purple);
-  box-shadow: 0 0 8px var(--purple);
+  background: var(--cp-accent);
+  box-shadow: 0 0 8px var(--cp-accent);
   animation: contactGlobePulse 2s ease-in-out infinite;
 }
 
 @keyframes contactGlobePulse {
   0%,
-100% { opacity: 1; box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.6); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(124, 58, 237, 0); }
+100% { opacity: 1; box-shadow: 0 0 0 0 rgba(196, 181, 253, 0.6); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(196, 181, 253, 0); }
 }
 
 .contactPage__kicker {
@@ -8564,7 +8603,7 @@ html.contact-page-active body {
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--purple-soft);
+  color: var(--cp-accent);
   margin-bottom: 28px;
 }
 
@@ -8585,7 +8624,7 @@ html.contact-page-active body {
 }
 
 .contactPage__title .contactPage__letter:hover {
-  color: var(--purple-soft);
+  color: var(--cp-accent);
   transform: translateY(-4px);
 }
 
@@ -8594,7 +8633,7 @@ html.contact-page-active body {
 }
 
 .contactPage__titleDot {
-  color: var(--purple-soft);
+  color: var(--cp-accent);
 }
 
 .contactPage__subtitle {
@@ -8640,7 +8679,7 @@ html.contact-page-active body {
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--cp-fg-dim);
+  color: var(--cp-fg-muted);
 }
 
 .contactPage__input,
@@ -8659,7 +8698,7 @@ html.contact-page-active body {
 
 .contactPage__input::placeholder,
 .contactPage__textarea::placeholder {
-  color: var(--cp-fg-faint);
+  color: var(--cp-fg-muted);
 }
 
 .contactPage__inputLine {
@@ -8676,7 +8715,7 @@ html.contact-page-active body {
   bottom: 0;
   width: 100%;
   height: 1px;
-  background: var(--purple-soft);
+  background: var(--cp-accent);
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.4s var(--ease-quint);
@@ -8687,7 +8726,7 @@ html.contact-page-active body {
 }
 
 .contactPage__field:focus-within .contactPage__label {
-  color: var(--purple-soft);
+  color: var(--cp-accent);
 }
 
 .contactPage__textarea {
@@ -8700,8 +8739,16 @@ html.contact-page-active body {
   align-items: center;
   gap: 12px;
   padding: 16px 36px;
-  background: var(--purple);
-  color: #f4f1ea;
+  /*
+    Inverted, because the page took its colour.
+
+    A purple button on a purple page is a rectangle you have to hunt for.
+    Cream on violet is the highest contrast this palette can make (9.7:1)
+    and it makes the one thing you are here to do the brightest object on
+    the screen.
+  */
+  background: var(--cp-fg);
+  color: #3b1178;
   border: none;
   border-radius: 12px;
   font-family: var(--font-primary);
@@ -8714,7 +8761,7 @@ html.contact-page-active body {
 }
 
 .contactPage__submit:hover:not(:disabled) {
-  background: var(--purple-mid);
+  background: #ffffff;
   transform: translateY(-2px);
 }
 
@@ -8757,7 +8804,7 @@ html.contact-page-active body {
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--cp-fg-dim);
+  color: var(--cp-fg-muted);
   margin: 0;
 }
 
@@ -8769,7 +8816,7 @@ html.contact-page-active body {
 
 .contactPage__emailLink {
   font-size: 16px;
-  color: var(--purple-soft);
+  color: var(--cp-accent);
   text-decoration: none;
   transition: color 0.2s ease;
   word-break: break-all;
@@ -8808,7 +8855,7 @@ html.contact-page-active body {
 }
 
 .contactPage__socialLink:hover {
-  color: var(--purple-soft);
+  color: var(--cp-accent);
   transform: translateX(4px);
 }
 
@@ -8818,8 +8865,8 @@ html.contact-page-active body {
   gap: 10px;
   padding: 14px 18px;
   border-radius: 10px;
-  background: rgba(167, 139, 250, 0.06);
-  border: 1px solid rgba(167, 139, 250, 0.1);
+  background: rgba(244, 241, 234, 0.07);
+  border: 1px solid rgba(244, 241, 234, 0.14);
   font-size: 14px;
   font-weight: 500;
   color: var(--cp-fg-muted);
