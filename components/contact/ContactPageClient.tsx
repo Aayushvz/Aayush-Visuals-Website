@@ -177,38 +177,37 @@ function InteractiveGlobe() {
     onResize();
 
     /*
-      A light globe, and the reason the first attempt was a white blob.
+      A dark globe on a bright page.
 
-      In cobe the land dots are not a separate colour: they are `baseColor`
-      multiplied by `mapBrightness`. Setting the base to near-white AND the
-      brightness below 1 put the dots and the ocean within a few percent of
-      each other, which is exactly what a featureless pale ball looks like.
+      Worth keeping the mechanic written down, because it is not obvious and
+      it has caught me twice: in cobe the land dots are not a separate
+      colour, they are `baseColor` multiplied by `mapBrightness`. Which
+      direction the continents resolve in therefore depends on whether that
+      product lands above or below the base. Lit dark, the base is a deep
+      violet and the brightness is well above 1, so land comes UP out of the
+      sphere and glows; the light version had to do the exact opposite.
 
-      So the base is a light LILAC rather than white, and the brightness is
-      well under 1 so the continents resolve downward out of it into a real
-      violet. The sphere stays light, which is what it is here to be, and it
-      finally has something drawn on it.
+      `dark: 1` also restores the terminator, so the sphere has a lit side
+      and a shadowed one. That is most of what makes it read as a ball
+      rather than a circle, and it is the thing the flat light version was
+      missing even after the continents were fixed.
 
-      The warmth is deliberate. Everything on this page is one cool hue, and
-      a cool globe on a violet ground had nothing to push against; the
-      marker and the arcs are the site's own secondary orange, which is the
-      only warm colour in the system and is otherwise almost never spent.
+      The warmth stays. Everything else on this page is one cool hue, so the
+      marker, the rim and the arcs are the site's own secondary orange, the
+      only warm colour in the system and one it otherwise almost never
+      spends. A warm limb around a cold planet is also just what a sunrise
+      looks like from orbit.
     */
     const globeTheme = {
-      dark: 0 as number,
-      diffuse: 1.2,
-      /* under 1, so land resolves DOWN from the base instead of blowing out.
-         0.46 left the continents as a suggestion; this is far enough below
-         the base that they read as coastlines at a glance. */
-      mapBrightness: 0.32,
-      mapBaseBrightness: 0.06,
-      baseColor: [0.79, 0.66, 1.0] as [number, number, number],
-      markerColor: [0.91, 0.51, 0.29] as [number, number, number],
-      /* a warm rim on a cool sphere, which is the whole reason the globe
-         reads as lit rather than as a flat circle */
-      glowColor: [0.99, 0.82, 0.62] as [number, number, number],
+      dark: 1 as number,
+      diffuse: 1.35,
+      /* well ABOVE 1, so land resolves up out of the sphere and lights up */
+      mapBrightness: 4.4,
+      mapBaseBrightness: 0.05,
+      baseColor: [0.26, 0.11, 0.48] as [number, number, number],
+      markerColor: [0.96, 0.62, 0.36] as [number, number, number],
+      glowColor: [0.62, 0.3, 0.52] as [number, number, number],
     };
-
     /*
       Arcs, purely as motion and colour.
 
