@@ -1012,11 +1012,33 @@ function rowShape(
     the interface it belongs to.
   */
   const used = Math.min(cols, media.length);
-  return {
-    ratio: mid.toFixed(3),
-    cols,
-    max: `${used * natural + (used - 1) * 24}px`,
-  };
+  const px = `${used * natural + (used - 1) * 24}px`;
+
+  /*
+    A lone portrait has nothing beside it to bound its height.
+
+    Four phone screens in a row are 290px wide because the row is sharing
+    itself four ways. One on its own takes the single-column class, which is
+    the full column, and a 1440x3402 full-page capture rendered at 1281 wide
+    is 3026 tall - three thousand pixels of scrolling for one image, and on
+    a phone the same picture is 791px tall in an 812px window.
+
+    So a single narrow image is capped by the WINDOW rather than by the
+    column: at most a screenful tall, whatever the viewport is. Capped on
+    width rather than height on purpose, because the row keeps its own
+    proportions and simply gets smaller - clamping the height instead is
+    what letterboxed these before.
+
+    Landscape images never reach this. Their ratio puts the bound well past
+    the column they already fit in, which is why the test is on the ratio
+    and not on the count alone.
+  */
+  const max =
+    media.length === 1 && mid < 1
+      ? `min(${px}, calc(86vh * ${mid.toFixed(3)}))`
+      : px;
+
+  return { ratio: mid.toFixed(3), cols, max };
 }
 
 /* one row per shape, so nothing has to be cut to sit beside its neighbour,

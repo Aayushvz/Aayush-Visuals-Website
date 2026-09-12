@@ -1922,31 +1922,17 @@ export const PROJECTS: Project[] = [
             ],
           },
           /*
-            One frame of the tutorial, not five.
+            No desktop frame of the tutorial at all now.
 
-            A first-run sequence is the least interesting thing a product
-            does and it was taking more room here than the conversation the
-            product exists for: five desktop frames and four phone frames,
-            nine screens to say "it points at a control and explains it".
-            Arrive, Spotlight and Hand over are all the same screen with a
-            different mask on it, so one frame carries the mechanic and the
-            paragraphs below carry the reasoning.
-
-            This one, because it is the only frame showing all three things
-            at once: the dimmed interface, the control being pointed at, and
-            Didi at full height beside it, which is what the phone frame is
-            then measured against.
+            It went from five to one and then to none. A first-run sequence
+            is the least interesting thing a product does, and what it was
+            showing - a dimmed screen with one control lit and a speech
+            bubble over it - is a pattern the reader already knows by name.
+            The paragraphs below carry the reasoning, and the phone frame
+            further down carries the one claim that has to be seen: that at
+            402px the guide cannot stand at full height without covering the
+            control she is pointing at.
           */
-          {
-            kind: "grid",
-            items: [
-              {
-                src: "/projects/cpgrams/demo-04.webp",
-                label: "Spotlight, on desktop",
-                alt: "The tutorial spotlighting the microphone with Samadhan Didi explaining to press it and speak in a preferred language.",
-              },
-            ],
-          },
           {
             kind: "prose",
             body: [
