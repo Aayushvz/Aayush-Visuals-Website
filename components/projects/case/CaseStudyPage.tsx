@@ -343,7 +343,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                       research shown here is an argument */}
                   {story.evidence.length ? (
                     <div className="csSec__evidence">
-                      <Blocks blocks={story.evidence} />
+                      <Blocks groups={story.evidence} />
                     </div>
                   ) : null}
                 </div>
@@ -405,7 +405,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="What I tried" />
                 <div className="csSec__body">
-                  <Blocks blocks={story.iteration} />
+                  <Blocks groups={story.iteration} />
                 </div>
               </section>
             ) : null}
@@ -416,7 +416,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="The system" />
                 <div className="csSec__body">
-                  <Blocks blocks={story.system} />
+                  <Blocks groups={story.system} />
                 </div>
               </section>
             ) : null}
@@ -441,7 +441,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="What it taught me" />
                 <div className="csSec__body">
-                  <Blocks blocks={story.reflection} />
+                  <Blocks groups={story.reflection} />
                 </div>
               </section>
             ) : null}

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { marked } from "./CaseBlocks";
+import type { Group } from "./CaseBlocks";
 import { IMAGE_DIMS } from "@/components/projects/imageDims";
 import type { CaseBlock } from "@/components/projects/projectData";
 
@@ -92,9 +93,21 @@ function WireFrame({ layout }: { layout: "entry" | "listen" | "chat" | "review" 
   if (layout === "chat")
     return (
       <span className="csWire__art">
-        <span className="csWire__bubble csWire__bubble--in" />
-        <span className="csWire__bubble csWire__bubble--out" />
-        <span className="csWire__bubble csWire__bubble--in" />
+        {/*
+          The thread is what stretches; the composer stays pinned to the
+          bottom rail, which is the point of the layout.
+
+          Four of these sit in one row at a fixed 3/4 ratio, so a layout
+          whose parts add up to less than the frame leaves a hole: this one
+          filled 122px of a 367px box. Four frames the same size with four
+          different amounts of air in them is what made the row read as
+          placeholder boxes rather than four drawings of four screens.
+        */}
+        <span className="csWire__thread">
+          <span className="csWire__bubble csWire__bubble--in" />
+          <span className="csWire__bubble csWire__bubble--out" />
+          <span className="csWire__bubble csWire__bubble--in" />
+        </span>
         {bar("100%", 20)}
       </span>
     );
@@ -107,6 +120,26 @@ function WireFrame({ layout }: { layout: "entry" | "listen" | "chat" | "review" 
         <span />
       </span>
       {bar("46%", 18)}
+    </span>
+  );
+}
+
+/*
+  "01 Entry" is one authored string, and the number in it wants a different
+  weight from the word. Split here rather than restyled in the data, because
+  the numbering is the renderer's business: the flow steps and the lessons
+  both already draw their index in micro grey, and a wireframe label that
+  shouted its number at label weight was a third convention for one idea.
+*/
+function WireLabel({ text }: { text: string }) {
+  const m = /^(\d+)[.)]?\s+(.+)$/.exec(text);
+  if (!m) return <span className="csWire__label">{text}</span>;
+  return (
+    <span className="csWire__label">
+      <span className="csWire__index" aria-hidden>
+        {m[1]}
+      </span>
+      {m[2]}
     </span>
   );
 }
@@ -242,9 +275,19 @@ export function Block({ block }: { block: CaseBlock }) {
           <div className="csCompare">
             {block.lanes.map((lane, i) => (
               <div className={`csLane csLane--${lane.tone}`} key={lane.label} {...rise(i)}>
+                {/*
+                  The count leads.
+
+                  It used to sit at the far end of a space-between row, which
+                  on a 629px lane put four hundred pixels between a label and
+                  the number belonging to it, and landed the two counts - the
+                  comparison the block exists to make - on different rails.
+                  Reading order is now the argument: eight, of these; two, of
+                  these.
+                */}
                 <div className="csLane__head">
-                  <span className="csLane__label">{lane.label}</span>
                   <span className="csLane__count">{lane.steps.length}</span>
+                  <span className="csLane__label">{lane.label}</span>
                 </div>
                 {lane.note ? (
                   <p className="csLane__note">{marked(lane.note)}</p>
@@ -270,7 +313,7 @@ export function Block({ block }: { block: CaseBlock }) {
             {block.items.map((item, i) => (
               <div className="csWire" key={item.label} {...rise(i)}>
                 <WireFrame layout={item.layout} />
-                <span className="csWire__label">{item.label}</span>
+                <WireLabel text={item.label} />
                 <span className="csWire__note">{marked(item.note)}</span>
               </div>
             ))}
@@ -464,11 +507,35 @@ export function Block({ block }: { block: CaseBlock }) {
   }
 }
 
-export function Blocks({ blocks }: { blocks: CaseBlock[] }) {
+/*
+  One authored section, with the title and lead-in it was written with.
+
+  The heading is the first-order type these sections never had: a reader
+  scanning "What I tried" now meets "Constraints, and what they ruled out" at
+  heading size before meeting a diagram, instead of three unlabelled figures
+  and an 11px word out in the margin. Groups are separated by the page's
+  largest interval and the figures inside one group by the next size down, so
+  the spacing itself says which figures are part of the same argument.
+*/
+export function Blocks({ groups }: { groups: Group[] }) {
   return (
     <>
-      {blocks.map((b, i) => (
-        <Block block={b} key={`${b.kind}-${i}`} />
+      {groups.map((g, gi) => (
+        <div className="csGroup" key={g.heading ?? `g-${gi}`}>
+          {g.heading ? (
+            <h3 className="csGroup__title" data-rise>
+              {g.heading}
+            </h3>
+          ) : null}
+          {g.intro ? (
+            <p className="csGroup__intro" data-rise>
+              {marked(g.intro)}
+            </p>
+          ) : null}
+          {g.blocks.map((b, i) => (
+            <Block block={b} key={`${b.kind}-${i}`} />
+          ))}
+        </div>
       ))}
     </>
   );

@@ -751,11 +751,27 @@
   margin: 0;
 }
 
+/*
+  A caption, at a caption's distance and in its own register.
+
+  Six things on these pages were set in micro grey - the figure caption, the
+  lane note, the wireframe note, the flow sub-line, the coverage note and the
+  section label - so a caption was indistinguishable from the notes above it
+  and, at --cs-2xs, no further away than a note is from its own card. It goes
+  up one step to label size and out to a full rung of space, and the phrase
+  the author emphasised carries in ink.
+*/
 .csFig__cap {
-  font-size: var(--cs-t-micro);
+  font-size: var(--cs-t-label);
+  line-height: 1.5;
   color: var(--cs-mute);
-  margin-top: var(--cs-2xs);
-  max-width: 60ch;
+  margin-top: var(--cs-md);
+  max-width: 58ch;
+}
+
+.csFig__cap b {
+  color: var(--cs-ink);
+  font-weight: 600;
 }
 
 /* the flat gallery: slices of one export, stacked with nothing between them.
@@ -1583,6 +1599,64 @@
   max-width: 56ch;
 }
 
+/* ---------- a group of blocks, under the heading it was written with ---------- */
+
+/*
+  The interval says what belongs to what.
+
+  Every restored figure used to sit flush against the next one - `.csFig` is
+  `margin: 0` and nothing between siblings - so four separate arguments in
+  "What I tried" fused into one continuous field of hairlines and grey text.
+  Three intervals now: the largest the page has between one argument and the
+  next, the next size down between figures inside one argument, and a tight
+  one between a title and its own lead-in. Nothing here is a new value; they
+  are the same rungs the rest of the page runs on.
+*/
+.csGroup > * + * {
+  margin-top: var(--cs-lg);
+}
+
+.csGroup__title + .csGroup__intro {
+  margin-top: var(--cs-sm);
+}
+
+.csGroup + .csGroup {
+  margin-top: var(--cs-2xl);
+}
+
+/*
+  The first-order type these sections never had.
+
+  `.csSec__heading` was defined and never rendered by anything, so the only
+  title above a diagram was SectionHead: eleven grey pixels, right-aligned
+  out at the two-thirds line. A reader met three unlabelled figures and had
+  to infer what each was arguing. The authored heading was sitting in the
+  data the whole time.
+*/
+.csGroup__title {
+  font-size: var(--cs-t-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.14;
+  margin: 0;
+  max-width: 24ch;
+  color: var(--cs-ink);
+  text-wrap: balance;
+}
+
+.csGroup__intro {
+  margin: 0;
+  font-size: var(--cs-t-body);
+  line-height: 1.6;
+  color: var(--cs-mute);
+  max-width: 58ch;
+}
+
+.csGroup__intro b {
+  color: var(--cs-ink);
+  font-weight: 600;
+}
+
 /* ---------- before and after ---------- */
 
 /*
@@ -1595,11 +1669,30 @@
 */
 .csCompare {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-  gap: var(--cs-md);
+  /* 340 rather than 260: at 260 the grid built four tracks and auto-fit
+     collapsed two of them, which is the same two columns arrived at by
+     accident. The wider floor states the intent, and the column gap is a
+     rung larger than the row gap so the two lanes read as two arguments
+     rather than as one four-across row */
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  column-gap: var(--cs-lg);
+  row-gap: var(--cs-lg);
+  /* a two-step lane is not a 300px box that happens to be mostly empty */
+  align-items: start;
 }
 
+/*
+  One rail down the lane.
+
+  The count, the step numbers and the label all line up on it: the big
+  numeral crowns the column of small ones it is counting, and the lane label
+  sits directly above the first step it introduces. Before this the count was
+  at the far end of a `space-between` row - four hundred pixels from its own
+  label on a 629px lane - and the step numbers were indented to a rail of
+  their own that matched nothing.
+*/
 .csLane {
+  --lane-rail: clamp(40px, 3.6vw, 58px);
   border-top: 1px solid var(--cs-line);
   padding-top: var(--cs-xs);
 }
@@ -1609,10 +1702,9 @@
 }
 
 .csLane__head {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--lane-rail) minmax(0, 1fr);
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--cs-xs);
 }
 
 .csLane__label {
@@ -1621,12 +1713,20 @@
   color: var(--cs-ink);
 }
 
+/*
+  Full ink on both lanes.
+
+  The count was the largest mark in the section and the palest, at
+  `--cs-t-heading` in `--cs-mute`: the two signals cancelled and neither won.
+  Eight is not a weaker number than two, it is the whole complaint, so both
+  carry - the accent only says which one was chosen.
+*/
 .csLane__count {
   font-size: var(--cs-t-heading);
   font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--cs-mute);
+  color: var(--cs-ink);
 }
 
 .csLane--after .csLane__count {
@@ -1635,25 +1735,33 @@
 
 .csLane__note {
   margin: var(--cs-2xs) 0 0;
+  padding-left: var(--lane-rail);
   font-size: var(--cs-t-micro);
+  line-height: 1.5;
   color: var(--cs-mute);
+  max-width: 46ch;
 }
 
 .csLane__steps {
-  margin: var(--cs-sm) 0 0;
+  margin: var(--cs-md) 0 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 6px;
+  gap: var(--cs-2xs);
   counter-reset: lane;
 }
 
 .csLane__steps li {
   counter-increment: lane;
   position: relative;
-  padding-left: 2.1em;
+  /* the same rail the count sits on, so the small numbers run directly
+     under the big one and the step text under the lane label */
+  padding-left: var(--lane-rail);
   font-size: var(--cs-t-body);
   line-height: 1.45;
+  /* short phrases on a 629px line left five hundred pixels of rag; a step
+     is a sentence fragment and wants a sentence measure */
+  max-width: calc(var(--lane-rail) + 42ch);
   color: var(--cs-ink);
 }
 
@@ -1666,11 +1774,14 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* the lane being replaced reads as replaced */
+/* the lane being replaced reads as replaced. The strike was drawn in
+   --cs-line, twelve per cent black, which at body size reads as a rendering
+   artefact rather than a mark somebody made */
 .csLane--before .csLane__steps li {
   color: var(--cs-mute);
   text-decoration: line-through;
-  text-decoration-color: var(--cs-line);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
 }
 
 /* ---------- wireframes ---------- */
@@ -1678,7 +1789,9 @@
 .csWires {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: var(--cs-md);
+  column-gap: var(--cs-md);
+  row-gap: var(--cs-lg);
+  align-items: start;
 }
 
 .csWire {
@@ -1687,14 +1800,26 @@
   align-content: start;
 }
 
+/*
+  A drawing, not a skeleton.
+
+  This read as a loading placeholder for two reasons, and both were colour.
+  The frame was #fafafa, two per cent off the white it sits on, so nothing
+  but a hairline said there was a frame at all; and every mark inside it was
+  --cs-line, twelve per cent black with a 2px radius, which is precisely the
+  visual signature of a shimmer stub. The frame now uses the same grey the
+  page already gives every other image ground (.csShot, .csDir__frame,
+  .csNext__frame), and the marks are opaque enough to read as deliberate.
+*/
 .csWire__art {
+  --wire-ink: rgba(16, 16, 16, 0.24);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--cs-2xs);
   aspect-ratio: 3 / 4;
-  padding: 14px;
+  padding: var(--cs-xs);
   border: 1px solid var(--cs-line);
-  background: #fafafa;
+  background: #f4f4f4;
 }
 
 .csWire__art--centre {
@@ -1702,12 +1827,21 @@
   justify-content: center;
 }
 
+/* the thread grows and the composer stays on the bottom rail, so this card
+   fills its frame the way the other three do */
+.csWire__thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-2xs);
+  flex: 1;
+}
+
 .csWire__bar,
 .csWire__blockLg,
 .csWire__disc,
 .csWire__bubble,
 .csWire__rows span {
-  background: var(--cs-line);
+  background: var(--wire-ink);
   display: block;
   border-radius: 2px;
 }
@@ -1735,12 +1869,12 @@
 .csWire__bubble--out {
   width: 48%;
   align-self: flex-end;
-  background: color-mix(in oklab, var(--cs-accent) 26%, var(--cs-line));
+  background: color-mix(in oklab, var(--cs-accent) 52%, var(--wire-ink));
 }
 
 .csWire__rows {
   display: grid;
-  gap: 6px;
+  gap: var(--cs-2xs);
   flex: 1;
 }
 
@@ -1748,16 +1882,58 @@
   height: 100%;
 }
 
+/* the art is 395px tall and the note is one line of 11px: giving both the
+   same 8px separation from the label made the three read as one flat stack */
 .csWire__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cs-xs);
+  margin-top: var(--cs-xs);
   font-size: var(--cs-t-label);
   font-weight: 600;
   color: var(--cs-ink);
+}
+
+/* "01 Entry" split by the renderer, so the number carries the same weight
+   here as it does on a flow step and a lesson */
+.csWire__index {
+  flex: none;
+  font-size: var(--cs-t-micro);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-accent-ink);
 }
 
 .csWire__note {
   font-size: var(--cs-t-micro);
   line-height: 1.5;
   color: var(--cs-mute);
+  max-width: 42ch;
+}
+
+/*
+  On a phone the greybox becomes a thumbnail beside its text.
+
+  One column at 335px makes a 3/4 frame 447px tall, so four of them is
+  eighteen hundred pixels of scrolling past grey rectangles to reach the
+  second half of the argument. The drawing only has to be big enough to tell
+  four layouts apart, and at 104px it still is; the words move alongside it
+  and the set reads as a list of four states rather than four posters.
+*/
+@media (max-width: 640px) {
+  .csWire {
+    grid-template-columns: 104px minmax(0, 1fr);
+    column-gap: var(--cs-sm);
+    align-items: start;
+  }
+
+  .csWire__art {
+    grid-row: 1 / span 2;
+  }
+
+  .csWire__label {
+    margin-top: 0;
+  }
 }
 
 /* ---------- research, drawn rather than screenshotted ---------- */
@@ -1777,7 +1953,7 @@
 .csBar__label {
   font-size: var(--cs-t-body);
   color: var(--cs-ink);
-  margin-bottom: 6px;
+  margin-bottom: var(--cs-2xs);
 }
 
 .csBar__row {
@@ -1876,19 +2052,28 @@
   happened, not something a reader can follow. This is the conclusion: the
   steps that survived, in order, with what each one decides.
 */
+/*
+  auto-fill, not flex-grow.
+
+  `flex: 1 1 150px` fits seven steps on a 1296px column and then grows the
+  eighth to the full width of the page - one step eight times wider than its
+  siblings, with a hairline running edge to edge above it. auto-fill keeps
+  every track the same width whether the row is full or not, so a wrapped
+  step still reads as a step.
+*/
 .csFlow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-sm);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr));
+  column-gap: var(--cs-sm);
+  row-gap: var(--cs-md);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .csFlow__step {
-  flex: 1 1 150px;
   display: grid;
-  gap: 4px;
+  gap: var(--cs-2xs);
   align-content: start;
   padding-top: var(--cs-xs);
   border-top: 1px solid var(--cs-line);
@@ -1956,7 +2141,7 @@
   display: flex;
   align-items: flex-end;
   aspect-ratio: 3 / 2;
-  padding: 8px 10px;
+  padding: var(--cs-2xs);
   border: 1px solid var(--cs-line);
 }
 
@@ -1992,7 +2177,7 @@
 
 .csType {
   display: grid;
-  gap: 6px;
+  gap: var(--cs-2xs);
   padding-top: var(--cs-xs);
   border-top: 1px solid var(--cs-line);
 }
@@ -2067,7 +2252,7 @@
 .csSpec__value {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--cs-2xs);
   font-size: var(--cs-t-label);
   font-weight: 500;
   color: var(--cs-ink);
@@ -2099,7 +2284,7 @@
 
 .csLesson {
   display: grid;
-  gap: 6px;
+  gap: var(--cs-2xs);
   align-content: start;
   padding-top: var(--cs-xs);
   border-top: 1px solid var(--cs-line);
@@ -2127,11 +2312,11 @@
   max-width: 52ch;
 }
 
-/* research sits under the argument it supports, not in its own beat */
+/* research sits under the argument it supports, not in its own beat. The
+   spacing between groups is the groups' own business now, so this sets the
+   distance from the argument above and nothing else */
 .csSec__evidence {
   margin-top: var(--cs-xl);
-  display: grid;
-  gap: var(--cs-lg);
 }
 
 /* ---------- the headline, and the context card ---------- */

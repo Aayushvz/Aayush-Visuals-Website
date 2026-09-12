@@ -55,11 +55,29 @@ export type Story = {
     UI system, the lessons ARE the reflection. Every one of them was written
     and never reached a reader. These four arrays carry them through, in
     authored order, and CaseSections draws them.
+
+    Grouped by the section they were authored in rather than flattened.
+
+    A section in the data is not a container, it is an argument: `heading`
+    says what the blocks under it are for ("Structure before surface",
+    "Constraints, and what they ruled out"), and the paragraph that opens it
+    says why. Flattening threw both away, so the page rendered four diagrams
+    in a row under one 11px section label and left the reader to work out
+    what each was arguing. There was no first-order type in the section at
+    all, which is most of what the page looking unfinished amounted to.
   */
-  evidence: CaseBlock[];
-  iteration: CaseBlock[];
-  system: CaseBlock[];
-  reflection: CaseBlock[];
+  evidence: Group[];
+  iteration: Group[];
+  system: Group[];
+  reflection: Group[];
+};
+
+/* the blocks of one authored section, carrying the section's own title and
+   the single paragraph that opens it */
+export type Group = {
+  heading: string | null;
+  intro: string | null;
+  blocks: CaseBlock[];
 };
 
 /* research that belongs beside the problem it measured */
@@ -739,6 +757,10 @@ export function buildStory(project: Project): Story {
 
   const results = resultsOf(project);
 
+  /* About claims its paragraphs before the restored beats look for a lead-in,
+     so a group intro can never take a sentence out of a higher beat */
+  const about = aboutParagraphs(project, claim);
+
   /*
     The restored beats, taken whole and in authored order.
 
@@ -748,16 +770,39 @@ export function buildStory(project: Project): Story {
     Their images ARE marked used, so a direction board cannot also turn up
     further down as an anonymous gallery tile.
   */
-  const of = (kinds: readonly string[]) =>
-    allBlocks(project).filter((b) => kinds.includes(b.kind));
+  const of = (kinds: readonly string[]): Group[] => {
+    const out: Group[] = [];
+    for (const section of project.sections ?? []) {
+      const blocks = section.blocks.filter((b) => kinds.includes(b.kind));
+      if (!blocks.length) continue;
+
+      /*
+        Only the paragraph that OPENS the section, and only one.
+
+        Two would be a chapter rather than a lead-in, and the closing
+        paragraphs of a section argue its conclusion - hoisting those above
+        the figure would give the answer before the evidence. `claim` keeps a
+        paragraph that already ran in About or Details from running twice.
+      */
+      let intro: string | null = null;
+      for (const block of section.blocks) {
+        if (block.kind !== "prose") continue;
+        intro = claim(block.body[0]);
+        break;
+      }
+
+      out.push({ heading: section.heading ?? null, intro, blocks });
+    }
+    return out;
+  };
 
   const evidence = of(EVIDENCE_KINDS);
   const iteration = of(ITERATION_KINDS);
   const system = of(SYSTEM_KINDS);
   const reflection = of(REFLECTION_KINDS);
 
-  for (const b of [...iteration, ...system]) {
-    for (const m of mediaOf(b)) usedMedia.add(m.src);
+  for (const g of [...iteration, ...system]) {
+    for (const b of g.blocks) for (const m of mediaOf(b)) usedMedia.add(m.src);
   }
 
   /*
@@ -781,7 +826,7 @@ export function buildStory(project: Project): Story {
   return {
     statement,
     intro,
-    about: aboutParagraphs(project, claim),
+    about,
     details: pairs.length || media.length ? { pairs, media } : null,
     highlights: hl,
     chapters: chs,
