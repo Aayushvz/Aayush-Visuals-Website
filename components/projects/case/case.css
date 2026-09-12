@@ -2678,24 +2678,71 @@
 
 /* ---------- specs ---------- */
 
+/*
+  A spec sheet reads across, not down.
+
+  Capped at 720px inside a 1281px column this used a bit over half the page
+  and left the rest empty, and the half it did use was spent stacking the
+  note under the value - so "Notched corners, solid fill" and "Tickets,
+  Register, Donate" sat in a column about four hundred pixels wide with a
+  hairline running past both of them into nothing.
+
+  Three columns instead: what it is, what it is set to, and the caveat. The
+  name column is sized by the names through subgrid, the same way the bar
+  labels are, so it hugs the longest one rather than taking a fixed fifth of
+  the page and leaving slack. Rows with no caveat simply leave the third
+  column empty, which is what a table does.
+*/
 .csSpecs {
   display: grid;
-  gap: 0;
+  grid-template-columns: var(--cs-rail) minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--cs-lg);
+  row-gap: 0;
   margin: 0;
-  max-width: 720px;
 }
 
 .csSpec {
   display: grid;
-  grid-template-columns: var(--cs-rail) minmax(0, 1fr);
-  gap: var(--cs-sm);
+  grid-column: 1 / -1;
+  grid-template-columns: var(--cs-rail) minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--cs-lg);
+  align-items: baseline;
   padding: var(--cs-xs) 0;
   border-bottom: 1px solid var(--cs-line);
 }
 
-@media (max-width: 640px) {
+@supports (grid-template-columns: subgrid) {
+  .csSpecs {
+    /* the value hugs too, so the caveat sits beside what it qualifies. Split
+       evenly the note started 830px in, which is a table row with its three
+       parts too far apart to read as one line. */
+    grid-template-columns: fit-content(24ch) fit-content(34ch) minmax(0, 1fr);
+  }
+
   .csSpec {
-    grid-template-columns: 1fr;
+    grid-template-columns: subgrid;
+  }
+}
+
+/* the value and its caveat are two cells of the row, not a stack inside one
+   of them, so they take their own columns rather than sharing the second */
+.csSpec__val {
+  display: contents;
+}
+
+@media (max-width: 640px) {
+  .csSpecs,
+  .csSpec {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .csSpec {
+    row-gap: 2px;
+  }
+
+  /* back to a stack, where there is no width to read across */
+  .csSpec__val {
+    display: grid;
     gap: 2px;
   }
 }
@@ -2703,12 +2750,6 @@
 .csSpec__name {
   font-size: var(--cs-t-label);
   color: var(--cs-mute);
-}
-
-.csSpec__val {
-  margin: 0;
-  display: grid;
-  gap: 2px;
 }
 
 .csSpec__value {
