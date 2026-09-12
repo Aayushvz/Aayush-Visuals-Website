@@ -33,9 +33,9 @@ const DRAG_THRESHOLD = 6;
 
   So the block becomes a field. Every cell within about two of the pointer is
   a CANDIDATE, and each one lights on a coin flip weighted by how close it
-  is: the neighbours almost always, the far diagonals rarely. The centre is
-  the only cell guaranteed to light. Two passes over the same spot therefore
-  produce different shapes, which is the entire point.
+  is, at odds low enough that most candidates stay dark on any given move.
+  The centre is the only cell guaranteed to light. Two passes over the same
+  spot therefore produce different shapes, which is the entire point.
 
   The randomness lives in the pointer handler rather than in render, so a
   cell's brightness is decided once when it is born and never changes under
@@ -58,11 +58,15 @@ const TRAIL_FIELD: [number, number, number][] = (() => {
 })();
 
 /*
-  Roughly seven cells a move, spread over a five-cell square rather than
-  packed into a three-cell one: the same amount of light, scattered far
-  enough that no two moves make the same shape.
+  Roughly four cells a move, spread over a five-cell square.
+
+  The spread is what makes the trail irregular and the COUNT is what decides
+  whether it reads as a trail or as a cloud; at seven a move the field was
+  dense enough that the gaps closed up and it went back to looking like a
+  shape being dragged. Fewer cells over the same radius keeps the scatter
+  and gives it air.
 */
-const TRAIL_MAX = 72;
+const TRAIL_MAX = 40;
 const TRAIL_LIFE_MS = 3400;
 
 /*
@@ -198,7 +202,7 @@ function GridTrail({ patternRef }: { patternRef: React.RefObject<HTMLDivElement 
       const batch = [
         /* the cell under the pointer is the one certainty */
         { x: cx, y: cy, w: 1, d: 0 },
-        ...TRAIL_FIELD.filter(([, , d]) => Math.random() < 0.62 / d).map(
+        ...TRAIL_FIELD.filter(([, , d]) => Math.random() < 0.3 / d).map(
           ([dx, dy, d]) => ({
             x: cx + dx,
             y: cy + dy,
