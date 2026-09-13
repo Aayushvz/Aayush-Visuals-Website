@@ -28,6 +28,21 @@ type ShotBase = {
      ~720px across, which is a phone the size of a television. Constrains the
      frame to something a phone is actually shaped like. */
   narrow?: boolean;
+  /*
+    A whole page, top to bottom, rather than a view of one.
+
+    These break every rule the media rows are built on. A full site scroll
+    is 0.36 wide-to-tall, and the lone-narrow-image cap in rowShape() -
+    which is right for a tall screen, and exists because one 4465px picture
+    is several thousand pixels of scrolling - reads that as a portrait and
+    holds it to a screenful tall. A screenful tall at 0.36 is a 277px-wide
+    website: legible as a shape, and as nothing else.
+
+    So a page marked here leaves the rows entirely and is shown at the full
+    width of the column, its own height, uncapped. It was drawn as a page
+    and it is read as one: long, and large enough to read.
+  */
+  fullPage?: true;
 };
 
 /*
@@ -3680,6 +3695,16 @@ export const PROJECTS: Project[] = [
             shot: {
               src: "/projects/futurepreneurs/fullview.webp",
               wide: true,
+              /*
+                Whole, and at the width of the page it sits on.
+
+                This is 1600x4465, which the media rows read as a portrait
+                and hold to a screenful tall - and a screenful tall at 0.358
+                is a 277px-wide website with the desktop page 122px across
+                inside it. fullPage takes it out of that arithmetic: it is
+                shown at the full column, uncropped, the length it is.
+              */
+              fullPage: true,
               caption:
                 "The full page in both views: webview left, mobview right.",
               alt: "Full-length screenshots of the Futurepreneurs site: the desktop page beside the mobile page, both showing masthead, timeline, ten-years section, FAQs and footer.",

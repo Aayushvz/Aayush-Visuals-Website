@@ -888,6 +888,56 @@
   height: 100%;
 }
 
+/* =====================================================================
+   A PAGE, SHOWN AS A PAGE
+   =====================================================================
+
+   Full width, own height, nothing around it.
+
+   These are whole site scrolls, and every automatic rule the media rows
+   apply is wrong for one. rowShape() caps a lone portrait by the window,
+   which is right for a phone screen and which held a 1600x4465 site to
+   277px across, with the desktop page 122px wide inside it. A page does not
+   get capped: it gets the column, uncropped, and it is as long as it is.
+
+   The two tracks are set from the images' own ratios in fr units (see
+   PageRow). Tracks in the ratio r1:r2 produce widths in the ratio r1:r2,
+   and width in proportion to ratio is constant height - so the desktop page
+   and the phone page end up exactly as tall as each other and the row fills
+   the column, with no per-breakpoint arithmetic anywhere.
+*/
+.csPages {
+  display: grid;
+  grid-template-columns: var(--cs-pages-cols, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--cs-sm);
+}
+
+.csPageImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--cs-r-shot);
+}
+
+/*
+  On a phone the two stop sharing a row.
+
+  Side by side at 360px the desktop page is 270px wide, which reproduces the
+  exact failure this block exists to fix. Stacked, the site gets the whole
+  width and the phone page gets a width a phone has.
+*/
+@media (max-width: 620px) {
+  .csPages {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .csPages > .csPageImg:not(:first-child) {
+    width: min(62%, 240px);
+  }
+}
+
 .csRow {
   display: grid;
   gap: var(--cs-sm);

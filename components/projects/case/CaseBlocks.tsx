@@ -43,6 +43,8 @@ type Media = {
     being re-derived from the picture's shape.
   */
   small?: boolean;
+  /** a whole page rather than a view of one; see ShotBase.fullPage */
+  page?: true;
 };
 
 export type Highlight = { name: string; body: string[]; media: Media[] };
@@ -176,6 +178,7 @@ function mediaOf(block: CaseBlock): Media[] {
       return shotSources(block.shot).map((src) => ({
         src,
         alt: block.shot.alt,
+        page: block.shot.fullPage,
       }));
     case "grid":
     case "gallery":
@@ -1107,6 +1110,67 @@ function rowShape(
   return { ratio: mid.toFixed(3), cols, max };
 }
 
+/*
+  A whole page, at the width of the page it is being shown on.
+
+  No frame, no crop, no cap: the site was drawn as a page and it is shown as
+  one, full width and its own height. That is three and a half thousand
+  pixels of scrolling, and that is what a website is.
+
+  Where more than one page shares a row, the columns are the images' own
+  ratios as fr units. Tracks in the ratio r1:r2 give widths in the ratio
+  r1:r2, and width in proportion to ratio is constant height, so the pages
+  come out exactly as tall as each other and the row fills the column edge
+  to edge with no per-breakpoint arithmetic. Equal columns would have left a
+  phone-shaped page a third the height of a desktop one with a thousand
+  pixels of nothing beside it.
+*/
+export function PageRow({ media }: { media: Media[] }) {
+  const ratios = media.map((m) => {
+    const dim = IMAGE_DIMS[m.src];
+    return dim ? dim[0] / dim[1] : 1;
+  });
+  /*
+    Scaled by a hundred, because a flex factor under 1 is not a share.
+
+    Grid reads a track list whose factors sum to less than 1 as a request
+    for that fraction of the free space, not as proportions of all of it.
+    The honest ratios here are 0.2456 and 0.0739, which sum to 0.32, so the
+    row laid itself out across 402px of a 1281px column and left the rest
+    empty - the same complaint this change started from, arrived at from the
+    other direction. The proportions are what matter and they survive any
+    constant, so everything is multiplied up past the threshold.
+  */
+  const cols = ratios.map((r) => `${(r * 100).toFixed(2)}fr`).join(" ");
+  return (
+    <div
+      className="csPages"
+      data-count={media.length}
+      style={{ "--cs-pages-cols": cols } as CSSProperties}
+    >
+      {media.map((m, i) => (
+        <img
+          className="csPageImg"
+          key={m.src + i}
+          src={m.src}
+          alt={m.alt}
+          /*
+            The box has to exist before the picture arrives.
+
+            Without a ratio an unloaded img is its width by zero, and a
+            zero-height box is both a page that jumps four thousand pixels
+            when it decodes and, because these are lazy, one the loader
+            never decides is worth fetching: it sat at natural 0x0 forever.
+          */
+          style={{ aspectRatio: ratios[i].toFixed(4) }}
+          loading="lazy"
+          decoding="async"
+        />
+      ))}
+    </div>
+  );
+}
+
 /* one row per shape, so nothing has to be cut to sit beside its neighbour,
    then cut again so no row ends short */
 export function MediaRows({
@@ -1116,12 +1180,40 @@ export function MediaRows({
   media: Media[];
   frame?: boolean;
 }) {
-  const rows = groupByShape(media).flatMap(balancedRows);
+  /*
+    Pages come out first, and consecutive ones stay together.
+
+    Everything downstream of here - the shape buckets, the row balancer, the
+    width and height caps - is arithmetic about fitting pictures beside each
+    other, and a page is not being fitted beside anything. Taking them out
+    before any of that runs is cheaper than teaching each step an exception,
+    and adjacent ones stay in one group so a site's desktop and phone views
+    read as one thing rather than two stacked windows.
+  */
+  const runs: { page: boolean; media: Media[] }[] = [];
+  for (const m of media) {
+    const isPage = Boolean(m.page);
+    const last = runs[runs.length - 1];
+    if (last && last.page === isPage) last.media.push(m);
+    else runs.push({ page: isPage, media: [m] });
+  }
+
   return (
     <div className="csRows">
-      {rows.map((row, i) => (
-        <MediaRow media={row} cols={row.length} frame={frame} key={i} />
-      ))}
+      {runs.flatMap((run, i) =>
+        run.page
+          ? [<PageRow media={run.media} key={`p${i}`} />]
+          : groupByShape(run.media)
+              .flatMap(balancedRows)
+              .map((row, j) => (
+                <MediaRow
+                  media={row}
+                  cols={row.length}
+                  frame={frame}
+                  key={`${i}-${j}`}
+                />
+              )),
+      )}
     </div>
   );
 }
