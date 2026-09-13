@@ -1804,12 +1804,25 @@
   box-shadow: 0 0 0 1px var(--cs-accent);
 }
 
+/*
+  A direction board keeps its own proportions.
+
+  These were forced into a 16/10 box with object-fit: cover, and they are
+  1400x803, which is 1.743. Covering a 1.600 box out of a 1.743 image throws
+  away eight per cent of the width - about 57px a side on the original - and
+  57px is almost exactly the margin these boards were drawn with, so the
+  headline lost its first letter on every one of them. "LOREM IPSUM" came
+  out reading "OREM IPSUM".
+
+  The board is the artwork, not a thumbnail of it, so the frame takes the
+  shape the board has rather than the other way round. The four in this
+  project are all the same size, so the row stays even; a set that is not
+  will be uneven rather than cut, which is the right way round.
+*/
 .csDir__shot {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
 }
 
 .csDir__head {

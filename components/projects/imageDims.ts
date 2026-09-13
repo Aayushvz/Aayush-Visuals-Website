@@ -195,7 +195,7 @@ export const IMAGE_DIMS: Record<string, [number, number]> = {
   "/projects/mike-tyson/home-footer.webp": [1600, 762],
   "/projects/mike-tyson/home-hero-alt.webp": [1600, 752],
   "/projects/mike-tyson/home-hero-cursor.webp": [1600, 757],
-  "/projects/mike-tyson/home-hero.webp": [1600, 770],
+  "/projects/mike-tyson/home-hero.webp": [1600, 724],
   "/projects/mike-tyson/home-highlights.webp": [1600, 765],
   "/projects/mike-tyson/home-live-stream.webp": [1600, 760],
   "/projects/mike-tyson/homepage-poster.webp": [1280, 580],
