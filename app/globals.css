@@ -382,6 +382,9 @@ html.has-cursor .cursorRing {
 .navbar__logo {
   display: flex;
   align-items: center;
+  /* the mark is 30px tall and the link was the same; the box grows, the art
+     does not */
+  min-height: 44px;
   line-height: 1;
 }
 
@@ -411,7 +414,24 @@ html.has-cursor .cursorRing {
   text-transform: none;
 }
 
+/*
+  These are tap targets, not just click targets.
+
+  The mobile bar only takes over below 640, so every tablet - 768 and 1024,
+  both touch - gets this bar, and the links were bare anchors with no
+  padding: 35x17, 37x17, 51x17, 42x17 for Home, About, Projects and Games.
+  Seventeen pixels of height for the site's whole navigation, on a device
+  with no cursor.
+
+  The bar already had the room: 61px tall with the links using 17 of it. The
+  text does not move, because .navbar centres its children - the anchor just
+  claims the height that was already around it.
+*/
 .navbar__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 4px;
   opacity: 0.66;
   transition: opacity 0.2s ease, color 0.2s ease;
 }
@@ -435,6 +455,9 @@ html.has-cursor .cursorRing {
 .navbar__contact {
   display: flex;
   align-items: center;
+  /* 39px before, which is close enough to look right and not close enough
+     to hit */
+  min-height: 44px;
   padding: 9px 20px;
   /* scaled to the bar's own corner: a capsule inside a rounded rectangle
      reads as a foreign shape dropped in */
@@ -2149,6 +2172,21 @@ html.has-cursor .cursorRing {
 .procHalo__cta .extCta::after {
   border-radius: 9px;
 }
+
+/*
+  This one stays at 39px, and it is the only target on the site that does.
+
+  It is deliberately three quarters the size of the button closing Selected
+  Projects - it sits inside a dial of seven chips and at full height it
+  outweighed the headline it is under. Extending the hit area with a
+  pseudo-element is the usual answer and does not work here: .extCta carries
+  overflow: hidden for the fill's clip animation, so anything drawn outside
+  its box is clipped away. It was tried and measured doing nothing.
+
+  Growing the button would undo a composition decision to buy five pixels,
+  so it is left as it is: past the 24px WCAG minimum, under the 44px
+  enhanced target, and noted here rather than quietly forgotten.
+*/
 
 .procHalo__cta .extCta__fill {
   clip-path: inset(
@@ -6540,6 +6578,28 @@ html.has-cursor .cursorRing {
   padding-left: clamp(22px, 3.4vw, 56px);
 }
 
+@media (max-width: 900px) {
+  /*
+    The status bar was wider than the tablet it was on.
+
+    Six cells come to 873px and a 768 iPad has 753 of them, so the clock on
+    the end sat past the edge - and `body` carries overflow-x: hidden, so it
+    was not scrolled to, it was cut off and gone. The two that go are the
+    scroll readout and the cursor coordinates, which together are the 227px
+    that made it fit, and which are the two a touch device cannot produce a
+    value for anyway. The phone rule below drops more.
+
+    Placed here rather than up with the other 900px work on purpose: the
+    base .aboutPage__barCell rule is defined below that point at the same
+    one-class specificity, so a hide written earlier loses on source order.
+    It did, silently, and the clock stayed clipped.
+  */
+  .aboutPage__barCell--scrl,
+  .aboutPage__barCell--crsr {
+    display: none;
+  }
+}
+
 .aboutPage__barCell--section {
   flex: 1;
   justify-content: center;
@@ -8346,6 +8406,8 @@ html.has-cursor .cursorRing {
 .aboutPage__barCell--theme {
     display: none;
   }
+
+  /* see the tablet rule further down for why these two go first */
 
   .aboutPage__barCell--section {
     flex: 1;
