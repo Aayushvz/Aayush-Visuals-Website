@@ -92,6 +92,7 @@ export const IMAGE_DIMS: Record<string, [number, number]> = {
   "/projects/futurepreneurs-cover.webp": [1024, 576],
   "/projects/futurepreneurs-logo.webp": [640, 55],
   "/projects/futurepreneurs/about.webp": [1600, 450],
+  "/projects/futurepreneurs/board.webp": [1600, 10269],
   "/projects/futurepreneurs/elements.webp": [1600, 900],
   "/projects/futurepreneurs/fullview.webp": [1600, 4465],
   "/projects/futurepreneurs/hero.webp": [1600, 900],

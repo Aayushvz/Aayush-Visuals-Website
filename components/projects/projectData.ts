@@ -616,6 +616,25 @@ export type Project = {
     Wrong for everything else: a poster is not a web page, a phone screen
     has its own chrome already, and a Figma board is a document.
   */
+  /*
+    The case-study board, on the page at full length.
+
+    Some of this work was laid out as one long board before it was ever a
+    web page - the Behance deliverable, with its own sequence and its own
+    spacing - and that board is the artefact. Cutting it into the page's
+    own sections would be rearranging somebody's layout to fit a template.
+
+    It goes on the canvas rather than in a scroll box. A box with its own
+    scrollbar reads as a modal - a thing to open, not a thing to read - and
+    a board that is the case study should not need opening. So it is the
+    width of the column and as long as it is, which for Futurepreneurs is
+    eight thousand pixels.
+
+    It also replaces the gallery. Everything a gallery would show is
+    already in here, in an order somebody chose; showing both is the same
+    pictures twice with the second pass in an order nobody chose.
+  */
+  caseBoard?: { src: string; alt: string; caption?: string };
   caseFrame?: "browser";
   caseLimits?: {
     /** named screens the page shows, shared across chapters when they are on */
@@ -3517,6 +3536,14 @@ export const PROJECTS: Project[] = [
     cta: "Visit Live Website",
     role: "Web Design",
     tools: ["Framer", "Figma"],
+    /* Figma frame 2008:331, exported whole at 2x and brought down to the
+       1600px this project's other captures use. See
+       scripts/futurepreneurs-board.mjs. */
+    caseBoard: {
+      src: "/projects/futurepreneurs/board.webp",
+      alt: "The full Futurepreneurs case-study board: the landing page, the about copy, desktop and phone mockups, the Whyte Inktrap, Almarai and Gantari type specimens, the four-colour theme, the process map, and the complete site in both views.",
+      caption: "The full case-study board, in the order it was laid out.",
+    },
     description:
       "Futurepreneurs 10.0 is E-Cell VIT Vellore's flagship business simulation, and its site gets read once, fast, on a phone, by somebody deciding whether to bother. Everything on the page competes with the only fact that changes their mind, so the countdown leads and the copy follows it.",
     highlights: [

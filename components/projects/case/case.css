@@ -889,6 +889,50 @@
 }
 
 /* =====================================================================
+   THE BOARD
+   =====================================================================
+
+   On the canvas, at the width of the column, as long as it is.
+
+   This was a scroll box first - `height: min(78vh, 780px)` with its own
+   scrollbar - which is the obvious way to spend the Futurepreneurs board's
+   eight thousand pixels and the wrong one. A bordered box with a scrollbar
+   inside a scrolling page reads as a modal: something to open, not
+   something to read. The board is the case study, so it is simply on the
+   page, and the page is as long as the work is.
+*/
+.csBoard {
+  /*
+    Edge to edge, out of the column it is nested three levels inside.
+
+    Percentage margins resolve against the containing block's width, so
+    `50% - 50vw` is half the column minus half the window: exactly the
+    inset the page put on each side, taken back off. Nothing above needs
+    to know, which matters here because the board sits inside a figure
+    inside a section body inside the content column.
+
+    `100vw` counts the scrollbar and `100%` of the viewport does not, so a
+    classic scrollbar leaves the picture a few pixels wider than the window
+    and a few pixels off centre. The site already carries overflow-x:
+    hidden on the body, and on an image with no edge detail at its margins
+    there is nothing to see - but it is why this is not clamped tighter.
+
+    No radius: a rounded corner at the screen edge reads as a mistake
+    rather than as a corner.
+  */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  overflow: hidden;
+}
+
+.csBoard__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+
+/* =====================================================================
    A PAGE, SHOWN AS A PAGE
    =====================================================================
 

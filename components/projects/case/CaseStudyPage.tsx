@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import HomeContact from "@/components/HomeContact";
 import { PROJECTS, type Project } from "@/components/projects/projectData";
 import {
+  Board,
   buildStory,
   marked,
   Details,
@@ -386,6 +387,22 @@ export default function CaseStudyPage({ project }: { project: Project }) {
             ) : null}
 
             {/*
+              The board goes here because the page counts its own sections,
+              and this is the one the reader was sent to: Details is 02, so
+              "after section 2" is the gap between it and whatever follows.
+              Everything below renumbers itself, since `no` is a counter
+              rather than a written-down number.
+            */}
+            {project.caseBoard ? (
+              <section className="csSec">
+                <SectionHead no={++no} name="The full case study" />
+                <div className="csSec__body">
+                  <Board {...project.caseBoard} />
+                </div>
+              </section>
+            ) : null}
+
+            {/*
               A product made of four interfaces gets four beats, not one.
 
               Nineteen named screens under a single "Highlights" makes the
@@ -477,7 +494,16 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               </section>
             ) : null}
 
-            {story.gallery.length ? (
+            {/*
+              A project that shows its whole board has already shown these.
+
+              The gallery picks up whatever images the beats above did not
+              use, which on a project with a board is a second pass over the
+              same pictures - and the board's order was chosen by somebody
+              while the gallery's is whatever survived a budget. Two of
+              those, one after the other, is the page repeating itself.
+            */}
+            {story.gallery.length && !project.caseBoard ? (
               <section className="csSec">
                 <SectionHead no={++no} name="Gallery" />
                 <div className="csSec__body">

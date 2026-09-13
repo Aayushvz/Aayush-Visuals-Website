@@ -1125,6 +1125,49 @@ function rowShape(
   phone-shaped page a third the height of a desktop one with a thousand
   pixels of nothing beside it.
 */
+/*
+  The board, on the page. Full width, full length, nothing around it.
+
+  It was in a window with its own scrollbar first, which is the obvious way
+  to spend eight thousand pixels responsibly and the wrong one: a box with a
+  scrollbar inside a scrolling page reads as a modal, a thing to open rather
+  than a thing to read, and this board IS the case study. So it goes on the
+  canvas and the page is as long as the work is.
+
+  The aspect ratio is set from the asset's own dimensions because the
+  picture is lazy and an unloaded img is its width by zero: a zero-height
+  box is both a page that jumps eight thousand pixels when it decodes and
+  one the loader never decides is worth fetching.
+*/
+export function Board({
+  src,
+  alt,
+  caption,
+}: {
+  src: string;
+  alt: string;
+  caption?: string;
+}) {
+  const dim = IMAGE_DIMS[src];
+  return (
+    <figure className="csFig" data-rise>
+      <div className="csBoard">
+        <img
+          className="csBoard__img"
+          src={src}
+          alt={alt}
+          style={dim ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) } : undefined}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      {caption ? (
+        <figcaption className="csFig__cap">{caption}</figcaption>
+      ) : null}
+    </figure>
+  );
+}
+
 export function PageRow({ media }: { media: Media[] }) {
   const ratios = media.map((m) => {
     const dim = IMAGE_DIMS[m.src];
