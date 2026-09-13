@@ -1,37 +1,40 @@
 /*
-  The Meal Maestro case-study board, divided into sections.
+  Divide a case-study board into sections that can load one at a time.
 
-  The board is Figma frame 381:885, 1920x25254. Unlike Layover's it is not
-  built as a stack of section frames - it is one flat canvas of overlapping
-  elements, so there are no children to export one at a time and no list of
-  boundaries to read off. The cuts have to be found in the picture.
+  Some boards arrive as a stack of labelled section frames and can simply be
+  exported one frame at a time - Layover's does, and scripts/layover-board
+  reads its boundaries straight out of the file. This is for the others: a
+  single flat canvas of overlapping elements, with no children to export and
+  no boundary list anywhere. Meal Maestro's and IP&TT Cell's are both that.
 
-  They are found by looking for rows the board is quiet on. A row that is
-  one flat colour all the way across has nothing crossing it: no text, no
-  card edge, no phone. Cutting there can never split a sentence or slice a
-  mockup in half. The script walks out from evenly spaced targets and takes
-  the longest quiet run it finds nearby, so the pieces come out roughly
-  even in size but always land in the gaps the layout already has.
+  The cuts have to be found in the picture instead. A row with no edge
+  anywhere along it has nothing crossing it - no text, no card, no mockup -
+  so cutting there cannot split a sentence or slice a phone in half. The
+  test is the biggest step between neighbouring samples rather than the
+  row's total range, because total range rejects a row crossing a
+  full-width gradient band, and a gradient is the safest thing there is to
+  cut through.
 
-  Why it is cut at all: nobody should download twenty-five thousand pixels
-  of case study to read the first screen. Every piece is lazy, so a reader
-  fetches the section they have scrolled to and nothing else.
+  Cuts are chosen by walking down rather than by dividing up: once a piece
+  is tall enough, take the next good gap, and force one only if the piece
+  would otherwise grow past the maximum. Evenly spaced targets ask for a cut
+  at a fixed height and take whatever is nearest, which fails wherever a
+  stretch of board has no gap within reach.
 
-  Resolution is what Figma will give. A whole-frame export is clamped to
-  32768px on its long side, so a 25254-tall frame tops out at 2492 wide -
-  1.3x - and this board has no sub-frames to export separately at 2x the
-  way Layover's did. Written at 2400, which is a downscale from 2492 and
-  covers a 1440 window at 1.67x. The 1400px slices this replaces were
-  0.97x of that window.
+  Why cut at all: nobody should download a whole case study to read the
+  first screen of it. Every piece is lazy, so a reader fetches the sections
+  they reach.
 
-  Usage: node scripts/meal-maestro-board.mjs <exported-png> [parts]
+  Usage:
+    node scripts/board-sections.mjs <exported-png> <project> <design-width>
+
+  Example:
+    node scripts/board-sections.mjs board.png meal-maestro 1920
 */
 import sharp from "sharp";
 import { mkdir, rm } from "node:fs/promises";
 
-const DIR = "public/projects/meal-maestro/board";
 const WIDTH = 2400;
-const DESIGN_W = 1920;
 /*
   How big a step along a row may be, 0-255, for the row to count as empty.
 
@@ -45,12 +48,13 @@ const QUIET = 9;
 /* how far from an even target the script may wander to find one */
 const SEARCH = 0.45;
 
-const src = process.argv[2];
-const PARTS = Number(process.argv[3] ?? 13);
-if (!src) {
-  console.error("usage: node scripts/meal-maestro-board.mjs <exported-png> [parts]");
+const [, , src, project, designWidth] = process.argv;
+if (!src || !project || !designWidth) {
+  console.error("usage: node scripts/board-sections.mjs <exported-png> <project> <design-width>");
   process.exit(1);
 }
+const DIR = `public/projects/${project}/board`;
+const DESIGN_W = Number(designWidth);
 
 const meta = await sharp(src, { limitInputPixels: false }).metadata();
 const scale = meta.width / DESIGN_W;

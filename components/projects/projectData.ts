@@ -4516,7 +4516,7 @@ export const PROJECTS: Project[] = [
     */
     /*
       Figma frame 381:885, 1920x25254, re-exported and divided into ten
-      sections - see scripts/meal-maestro-board.mjs. This replaces an
+      sections - see scripts/board-sections.mjs. This replaces an
       earlier pass at 1400px in 18 even slices, which was under the width
       of the window it is shown at and cut wherever 1240px happened to
       land. The cuts are now found in the picture: this board is one flat
@@ -4531,6 +4531,81 @@ export const PROJECTS: Project[] = [
       caption:
         "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
       alt: "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",
+    },
+  },
+  {
+    id: "ip-tt-cell",
+    headline:
+      "One pillar that spells I, P and TT, for the cell that turns university research into patents",
+    challenge: [
+      "The name is the problem. **Intellectual Property and Technology Transfer Cell** is five words nobody reads twice, and whatever replaces them has to hold at the size of a favicon and at the size of a building sign.",
+      "It faces two audiences who trust different things: **researchers inside the university** and **industry outside it**. A mark that reads as a student society to one, or as a law firm to the other, loses the half it was meant to convince.",
+      "And it was a first round against a deadline, so the form had to be settled before the detail was. A mark that is only right once it is finished cannot be reviewed.",
+    ],
+    solution: [
+      "**One monolithic form, not a monogram.** I, P and TT are merged into a single Sthambh - a pillar - so the acronym is the shape rather than four letters standing next to each other. The vertical, structured mass is where the authority comes from.",
+      "**The IP cycle is built into the letterform.** The I is the core pillar, with structural slabs and outward notches for expansion. The P gains a square for ideas and research and a circle for application and commercialisation. The TT resolves as twin pillars joined by cuts: technology transfer, and the two-way flow between academia and industry.",
+      "**Proved as a solid before it was a lockup.** Drawn on a construction grid, then set on black, light grey, mid blue and the brand navy, so versatility was tested rather than assumed. The lockups came last.",
+    ],
+    kind: "case-study",
+    title: "IP&TT Cell",
+    logoText: "IP&TT Cell",
+    category: "Branding",
+    /* the board carries no date; taken from when it was handed over */
+    year: "2026",
+    cover: "/projects/ip-tt-cell-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/ip-tt-cell-cover.webp",
+    },
+    cta: "See the Identity",
+    role: "Brand Identity",
+    tools: ["Figma"],
+    description:
+      "VIT's Intellectual Property and Technology Transfer Cell protects what the university invents and gets it into industry. The identity is a single pillar built out of the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
+    highlights: [
+      "A monolithic mark that merges I, P and TT into one pillar rather than a monogram",
+      "The IP cycle drawn into the letterform: a square for research, a circle for commercialisation",
+      "Tested as a solid on four grounds before any lockup was set",
+    ],
+    extraFacts: [
+      ["Client", "IP&TT Cell, VIT Vellore"],
+      ["Scope", "Logo and identity direction"],
+      ["Stage", "First round, for selection"],
+    ],
+    /*
+      Navy is the whole identity - 44% of the board by area - and it reads
+      on paper at 11.6:1, so it carries the light side on its own. It cannot
+      carry the dark side: on #1e1e1e it is nearly invisible, so `dark` and
+      `bright` take the mid blue the board uses for the two-tone concept
+      marks, which measures 5.75:1 there.
+
+      `ink` is near-black rather than white because white on that mid blue
+      is 2.9:1 and fails outright; near-black on it is 6.03:1.
+    */
+    accent: {
+      dark: "#8098c8",
+      light: "#23395b",
+      solid: "#23395b",
+      bright: "#8098c8",
+      ink: "#0e1a2b",
+      fill: "#23395b",
+      hover: "#2f4a75",
+    },
+    /*
+      Figma frame 2001:2, 1920x17280, divided into seven sections - see
+      scripts/board-sections.mjs. Like Meal Maestro's this board is one flat
+      canvas rather than a stack of section frames, so the cuts were found
+      by walking it for rows with no edge along them; all seven landed in a
+      gap with none forced through content.
+    */
+    caseBoard: {
+      pieces: Array.from(
+        { length: 7 },
+        (_, i) => `/projects/ip-tt-cell/board/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      caption: "The full identity board, in the order it was laid out.",
+      alt: "The IP&TT Cell identity board: the navy title lockup, the mark on its own, the research behind the Cell and the logo concept, the Ashoka pillar and the I-P-TT letters it came from, the construction grid in light and dark, the design process, the concept marks in outline and two-tone, the mark on black, grey, mid blue and navy, business card and website mockups, and the final lockups.",
     },
   },
 ];
