@@ -58,7 +58,26 @@
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
+  justify-items: center;
+  /*
+    `safe center`, and it scrolls. At every size, not only on a phone.
+
+    This pairing was written for phones, where two stacked cards ran off
+    the bottom of a `.dpl` that is `overflow: hidden` and the pick screen
+    silently offered one choice. The cause was never the width: it is that
+    the content is taller than the window, and a laptop does that too. A
+    1440x560 window - which is what a 768-tall laptop becomes once the
+    browser has taken its chrome - put both CHOOSE SIDE buttons at y=621
+    with no way to reach them. Measured: 664px of content in 560px of
+    stage, and 104px of it unreachable.
+
+    `safe center` centres while the content fits and falls back to start
+    alignment the moment it would overflow, so nothing is ever cut off at
+    the top edge either.
+  */
+  align-content: safe center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: clamp(16px, 4vw, 48px);
   color: var(--stg-ink);
   /* the stadium canvas runs underneath every one of these, so the layer
@@ -920,6 +939,51 @@
 }
 
 /* =====================================================================
+   SHORT WINDOW — team selection
+   =====================================================================
+
+   Scrolling is the safety net, not the plan.
+
+   A 768-tall laptop is a 560-to-640-tall window once the browser has taken
+   its chrome, and at that height the pick screen wanted 664px: the title,
+   the hint, and a card whose face carries a 330px floor that a 46vh clamp
+   can no longer reach down to. The stage scrolls now so nothing is ever
+   unreachable, but a screen whose whole job is "choose one of these two"
+   should not ask anyone to scroll to find the buttons.
+
+   So the type, the gaps and the card floor all come down together on a
+   short window. Nothing here is driven by width - a wide, short window is
+   the case that was broken.
+*/
+@media (max-height: 780px) {
+  .stg {
+    padding-block: clamp(10px, 2vh, 20px);
+  }
+
+  .stgPick {
+    gap: clamp(10px, 1.6vh, 18px);
+  }
+
+  .stgPick__title {
+    font-size: clamp(20px, 2.8vw, 32px);
+  }
+
+  .stgPick__hint {
+    margin-top: 6px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+
+  .tcard__face {
+    /* the floor is what bites: 46vh is only 258px at 560, so the card was
+       sitting on its 330px minimum and pushing the buttons off the screen */
+    min-height: clamp(250px, 44vh, 380px);
+    gap: clamp(8px, 1.1vw, 13px);
+    padding: clamp(11px, 1.5vw, 18px);
+  }
+}
+
+/* =====================================================================
    PHONE — team selection
    =====================================================================
 
@@ -934,19 +998,9 @@
 */
 @media (max-width: 720px) {
   .stg {
-    /*
-      `safe center`, not `start`.
-
-      Plain `start` was there so a team-select column taller than the
-      viewport could not hide its own beginning — but it applies to every
-      stage, and it left the opening screen hanging off the top with all
-      the empty space below it. The safe keyword does both jobs: centre
-      while the content fits, fall back to start alignment the moment it
-      would overflow, so nothing is ever cut off at the top edge.
-    */
-    align-content: safe center;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    /* the scrolling and the safe centring moved up to the base rule, since
+       they were never about width. What is left here is the phone's own
+       business: the safe-area insets and momentum scrolling. */
     padding-block: calc(env(safe-area-inset-top, 0px) + 14px)
       calc(env(safe-area-inset-bottom, 0px) + 20px);
     -webkit-overflow-scrolling: touch;
