@@ -148,8 +148,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+  The hit area is bigger than the pill.
+
+  These two sit over a canvas you are tapping to play with, so a miss is not
+  a nothing - it pokes the pond. The mute came to 37x21 and the leave link to
+  133x35, both under the floor. The visual stays the size it is: the padding
+  grows to a 44px line box and a pseudo-element carries the rest, which is
+  what keeps a 10.5px label from becoming a button.
+*/
 .pond__mute {
   appearance: none;
+  position: relative;
   min-width: 34px;
   padding: 4px 8px;
   border: 1px solid rgba(150, 205, 214, 0.18);
@@ -164,6 +174,12 @@
   line-height: 1;
   cursor: pointer;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.pond__mute::before {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
 }
 
 .pond__mute:hover {
@@ -190,7 +206,8 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 13px 8px 9px;
+  min-height: 44px;
+  padding: 8px 16px 8px 11px;
   border: 1px solid rgba(150, 205, 214, 0.18);
   border-radius: 999px;
   background: rgba(12, 20, 32, 0.5);

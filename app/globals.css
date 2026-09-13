@@ -1012,7 +1012,9 @@ html.has-cursor .cursorRing {
     padding: 28px 0 32px;
   }
   .logoStrip__label {
-    font-size: 9px;
+    /* was 9px here, two under the 11 it takes everywhere else. The line is a
+       sentence, not a tick mark, and shrinking it on the smallest screen is
+       the wrong direction. */
     margin-bottom: 22px;
   }
   .logoStrip__img {
@@ -5232,6 +5234,10 @@ html.has-cursor .cursorRing {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* the mark is 26px tall and the link was the same, so the target was 26
+     where the menu button beside it is 44. The mark does not grow; the area
+     around it does. */
+  min-height: 44px;
   color: inherit;
   text-decoration: none;
   white-space: nowrap;
@@ -6395,8 +6401,15 @@ html.has-cursor .cursorRing {
   display: flex;
   align-items: center;
   gap: 10px;
-  /* sized to the Figma — same optical weight as the status bar text */
-  font-size: clamp(9.5px, 0.78vw, 12px);
+  /*
+    Sized to the Figma, but the floor was read off the wrong end of it.
+
+    0.78vw is about 12px on the desktop comp and 2.9px on a phone, so the
+    clamp floor is what every phone actually gets - and it was set to 9.5,
+    which is the vw value at some middling width rather than a size anybody
+    can read. These are real facts about the work, not decoration.
+  */
+  font-size: clamp(11px, 0.78vw, 12px);
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -8900,6 +8913,11 @@ html.contact-page-active body {
 }
 
 .contactPage__emailLink {
+  /* inline-block with real vertical padding, so the address is a 44px
+     target rather than a 24px line of text. It is the primary action on
+     this page and it was the smallest thing on it. */
+  display: inline-block;
+  padding: 10px 0;
   font-size: 16px;
   color: var(--cp-accent);
   text-decoration: none;
@@ -8921,7 +8939,9 @@ html.contact-page-active body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
+  /* 14 rather than 10: at 10 the row came to 36px, and these are stacked
+     with a hairline between them, where a miss lands on the neighbour */
+  padding: 14px 0;
   font-size: 15px;
   color: var(--cp-fg-muted);
   text-decoration: none;
@@ -9026,7 +9046,10 @@ html.contact-page-active body {
 
   .contactPage__socialLink {
     border-bottom: none;
-    padding: 8px 14px;
+    /* the label is hidden at this width, so the chip is an 18px icon and
+       whatever padding it is given - at 8px that came to 36, under the
+       floor, and these sit in a wrapping row where a miss hits a sibling */
+    padding: 13px 15px;
     border-radius: 8px;
     border: 1px solid rgba(244, 241, 234, 0.08);
     font-size: 13px;
@@ -10359,8 +10382,9 @@ html.contact-page-active body {
 }
 
 .seaFooter__topBtn {
-  width: 42px;
-  height: 42px;
+  /* 44, not 42: it is a single icon with nothing beside it to catch a miss */
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   background: rgba(138, 92, 246, 0.22);
   border: 1px solid rgba(138, 92, 246, 0.45);
@@ -10401,9 +10425,9 @@ html.contact-page-active body {
     margin-top: 0;
     flex-shrink: 0;
   }
+  /* no shrink to 38 here, for the reason the socials above it are not
+     shrunk either: this is the touch context, not the forgiving one */
   .seaFooter__topBtn {
-    width: 38px;
-    height: 38px;
     border-radius: 50%;
   }
   .seaFooter__topBtn svg {
@@ -10455,10 +10479,12 @@ html.contact-page-active body {
     gap: 10px;
     margin: 2px 0 18px;
   }
-  .seaFooter__centerSocials .seaFooter__socialBtn {
-    width: 38px;
-    height: 38px;
-  }
+  /*
+    Left at 44. This used to shrink them to 38 here, which is backwards: a
+    mouse can hit a 38px circle and a thumb is about 45px wide, so the one
+    context that was being given the smaller target is the only one that
+    cannot afford it. They are the only way to any of the social links.
+  */
 }
 
 /* ============================================================

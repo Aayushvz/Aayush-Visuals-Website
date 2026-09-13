@@ -208,6 +208,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.85em;
+  /* the mark inside is 32px, which made the whole link 32 tall. The padding
+     carries it to 44 without moving the mark, and the negative inline start
+     keeps the mark optically on the page margin where it was. */
+  min-height: 44px;
+  padding-block: 6px;
   color: var(--cs-mute);
   text-decoration: none;
   white-space: nowrap;
