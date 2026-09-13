@@ -1359,9 +1359,25 @@
   }
 }
 
+/*
+  A picture rises into place. It does not fade.
+
+  The fade was the haze. These captures average a luminance of 22 out of 255
+  - they are nearly black - and a nearly-black picture at partial opacity
+  over a cream page is a pale grey rectangle, which is exactly what a white
+  fog looks like. At rest it measured 1 and centred in the viewport it
+  measured 1, which is why it kept coming back clean: the fog only exists
+  while the range is resolving, which is the whole time someone is scrolling
+  through it.
+
+  Everything else was ruled out first, by measurement rather than by eye:
+  no filter, opacity, blend or transform anywhere on the ancestor chain, no
+  alpha in the source files (minimum 255 across twelve thousand samples),
+  and nothing absolutely positioned over the column carrying a backdrop
+  filter. The travel stays, so the entrance is still an entrance.
+*/
 @keyframes csRiseShot {
   from {
-    opacity: 0;
     transform: translate3d(0, 18px, 0) scale(1.012);
   }
 }

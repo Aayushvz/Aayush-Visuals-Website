@@ -761,6 +761,33 @@ export const PROJECTS: Project[] = [
       count its own sections add up to.
     */
     caseFrame: "browser",
+    /*
+      The front door leads, and the ticket does not belong here at all.
+
+      Left to the picker this column opened on the About page and closed on
+      a piece of physical ticket artwork - so the first thing beside "the
+      challenge" was an interior page, and the last was not a web page. The
+      homepage hero is what the argument above is about: a date, a venue and
+      a name nobody in boxing recognises, answered in the first screen.
+    */
+    detailMedia: [
+      {
+        src: "/projects/mike-tyson/home-hero.webp",
+        alt: "Homepage hero with the headline in smelting red over a portrait lit with flame",
+      },
+      {
+        src: "/projects/mike-tyson/about-page.webp",
+        alt: "The Evolution hero on the About page, a portrait lit from behind in red and orange",
+      },
+      {
+        src: "/projects/mike-tyson/vision.webp",
+        alt: "The Vision Behind The Invitational section in orange and cream over deep red",
+      },
+      {
+        src: "/projects/mike-tyson/event-dates.webp",
+        alt: "Three date cards for March 12, 13 and 14 with sale status labels",
+      },
+    ],
     caseLimits: { highlights: 18, images: 40 },
     sections: [
       {
