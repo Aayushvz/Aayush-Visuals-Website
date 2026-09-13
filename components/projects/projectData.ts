@@ -624,9 +624,14 @@ export type Project = {
     spacing - and that board is the artefact. Cutting it into the page's
     own sections would be rearranging somebody's layout to fit a template.
 
-    A ProjectShot, so a board too tall for one WebP can be the strip it has
-    to be. Meal Maestro's is 1400x22306, well past the format's 16383px
-    limit, and arrived as 18 slices; Futurepreneurs' fits in one file.
+    `pieces` rather than one src, because a board is delivered in parts and
+    the parts are the point. WebP forces it on anything over 16383px a side
+    - Meal Maestro's is 1400x22306 and Layover's 1600x22434 - but the real
+    reason is loading: each piece is lazy, so a reader fetches the section
+    they have scrolled to rather than twenty-two thousand pixels of case
+    study to read the first screen of it. Where the cut can follow the
+    board's own sections it does, so nobody ever waits on the bottom half
+    of a sentence. A board that fits in one file is a one-element array.
 
     It goes on the canvas rather than in a scroll box. A box with its own
     scrollbar reads as a modal - a thing to open, not a thing to read - and
@@ -638,7 +643,16 @@ export type Project = {
     already in here, in an order somebody chose; showing both is the same
     pictures twice with the second pass in an order nobody chose.
   */
-  caseBoard?: ProjectShot;
+  caseBoard?: { pieces: string[]; alt: string; caption?: string };
+  /*
+    The board stands in for the case study rather than joining it.
+
+    Layover's covers the same ground as the page's own eight sections, in
+    its own order and at its own pace, so running both is the argument made
+    twice with the reader left to work out that they are the same argument.
+    Everything between the opening statement and More Work gives way to it.
+  */
+  caseBoardOnly?: true;
   caseFrame?: "browser";
   caseLimits?: {
     /** named screens the page shows, shared across chapters when they are on */
@@ -2504,6 +2518,32 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Website",
     /*
+      Figma frame 222:6942, 1600x22434, exported as its own twelve section
+      frames rather than cut out of one raster - see
+      scripts/layover-board.mjs. The heights Figma reports for those frames
+      sum to exactly 22434, so the pieces reassemble the board with no gap
+      and no doubled row.
+    */
+    caseBoard: {
+      pieces: [
+        "00-cover",
+        "01-problem",
+        "02-insight",
+        "03-prep-time",
+        "04-traveller",
+        "05-counter",
+        "06-onboarding",
+        "07-operator",
+        "08-brand",
+        "09-explorations",
+        "10-reflection",
+        "11-close",
+      ].map((n) => `/projects/layover/board/${n}.webp`),
+      caption: "The full case study, in the order it was laid out.",
+      alt: "The Layover case-study board: the billboard cover, the problem of ninety minutes nobody tells you how to use, the insight that both sides are solving the same equation from opposite ends, one number across five surfaces, the traveller's app, the restaurant counter, onboarding, the operator console, the brand system, the explorations that were discarded, a reflection, and the closing mark.",
+    },
+    caseBoardOnly: true,
+    /*
       The product's own gold. 7.32:1 on the dark canvas but only 2.28:1 on
       white, so light-mode TEXT drops to a deeper gold of the same hue while
       `solid` keeps the true brand value for borders and rings.
@@ -3544,7 +3584,7 @@ export const PROJECTS: Project[] = [
        1600px this project's other captures use. See
        scripts/futurepreneurs-board.mjs. */
     caseBoard: {
-      src: "/projects/futurepreneurs/board.webp",
+      pieces: ["/projects/futurepreneurs/board.webp"],
       alt: "The full Futurepreneurs case-study board: the landing page, the about copy, desktop and phone mockups, the Whyte Inktrap, Almarai and Gantari type specimens, the four-colour theme, the process map, and the complete site in both views.",
       caption: "The full case-study board, in the order it was laid out.",
     },
@@ -4475,17 +4515,13 @@ export const PROJECTS: Project[] = [
       section 2, at the width of the window.
     */
     caseBoard: {
-      /* The complete case study, exported at 1400x22306 and sliced into 18
-         pieces — see the note on the strip shot type above for why it
-         cannot ship as a single file. */
-      strip: Array.from(
+      /* 1400x22306, cut into 18 even pieces. Even rather than sectional
+         because this one was sliced before the board was the unit: the
+         cuts land wherever 1240px lands. Layover's follow its own frames. */
+      pieces: Array.from(
         { length: 18 },
         (_, i) => `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`,
       ),
-      sliceW: 1400,
-      sliceH: 1240,
-      lastSliceH: 1226,
-      wide: true,
       caption:
         "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
       alt: "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",

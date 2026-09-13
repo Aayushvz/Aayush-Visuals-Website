@@ -1139,28 +1139,34 @@ function rowShape(
   box is both a page that jumps eight thousand pixels when it decodes and
   one the loader never decides is worth fetching.
 */
-export function Board({ shot }: { shot: ProjectShot }) {
+export function Board({
+  board,
+}: {
+  board: { pieces: string[]; alt: string; caption?: string };
+}) {
   /*
-    A strip stacks with nothing between the pieces.
+    The pieces stack with nothing between them.
 
-    Meal Maestro's board is 1400x22306, which no WebP can be - the format
-    stops at 16383px a side - so it arrives as eighteen slices of one
-    picture. Any gap, border or radius on a slice would draw a line across
-    the middle of the artwork, which is why the corner and the clip belong
-    to the strip and the slices carry neither.
+    A board arrives in parts - twelve for Layover, eighteen for Meal
+    Maestro - and they have to read as one picture, so any gap, border or
+    radius on a piece would draw a line straight across the artwork. The
+    corner and the clip belong to the board; the pieces carry neither.
+
+    Only the first piece takes the alt text. Twelve identical descriptions
+    of one board is twelve times the same sentence to anyone listening to
+    the page rather than looking at it.
   */
-  const sources = shotSources(shot);
   return (
     <figure className="csFig" data-rise>
       <div className="csBoard">
-        {sources.map((src, i) => {
+        {board.pieces.map((src, i) => {
           const dim = IMAGE_DIMS[src];
           return (
             <img
               className="csBoard__img"
               key={src}
               src={src}
-              alt={i === 0 ? shot.alt : ""}
+              alt={i === 0 ? board.alt : ""}
               style={
                 dim ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) } : undefined
               }
@@ -1170,8 +1176,8 @@ export function Board({ shot }: { shot: ProjectShot }) {
           );
         })}
       </div>
-      {shot.caption ? (
-        <figcaption className="csFig__cap">{shot.caption}</figcaption>
+      {board.caption ? (
+        <figcaption className="csFig__cap">{board.caption}</figcaption>
       ) : null}
     </figure>
   );

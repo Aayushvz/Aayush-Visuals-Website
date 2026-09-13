@@ -345,7 +345,17 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               </section>
             ) : null}
 
-            {story.details ? (
+            {/*
+              Everything from here to More Work is the board's ground.
+
+              On a project with `caseBoardOnly` the board covers the same
+              material as these sections do, in its own order, so running
+              both is the argument made twice at two different paces. The
+              board is placed after this block in source order, which is
+              what puts it directly after the opening statement once these
+              are gone.
+            */}
+            {story.details && !project.caseBoardOnly ? (
               <section className="csSec">
                 <SectionHead no={++no} name="Details" />
                 <div className="csSec__body">
@@ -393,11 +403,26 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               Everything below renumbers itself, since `no` is a counter
               rather than a written-down number.
             */}
+            {/*
+              A board that IS the case study gets no heading and no gap.
+
+              Where the board sits among the page's own sections it is one
+              of them and takes a numbered head like the rest. Where it
+              replaces them there is nothing left to number it against, and
+              a rule, an "(02)", and the interval either side of them put
+              three hundred pixels of empty paper between the end of the
+              opening statement and the start of the work. The board's own
+              cover does the job a section head would have done.
+            */}
             {project.caseBoard ? (
-              <section className="csSec">
-                <SectionHead no={++no} name="The full case study" />
+              <section
+                className={`csSec${project.caseBoardOnly ? " csSec--board" : ""}`}
+              >
+                {project.caseBoardOnly ? null : (
+                  <SectionHead no={++no} name="The full case study" />
+                )}
                 <div className="csSec__body">
-                  <Board shot={project.caseBoard} />
+                  <Board board={project.caseBoard} />
                 </div>
               </section>
             ) : null}
@@ -411,7 +436,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               structure the work has. Projects that are one interface still
               get the single beat below.
             */}
-            {story.chapters.length
+            {story.chapters.length && !project.caseBoardOnly
               ? story.chapters.map((chapter) => (
                   <section className="csSec" key={chapter.name}>
                     <SectionHead no={++no} name={chapter.name} />
@@ -431,7 +456,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 ))
               : null}
 
-            {story.highlights.length ? (
+            {story.highlights.length && !project.caseBoardOnly ? (
               <section className="csSec">
                 <SectionHead no={++no} name="Highlights" />
                 <div className="csSec__body">
@@ -449,7 +474,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               blank in themselves, usually with "got lucky" or "hid the
               messy parts". Both work against the page.
             */}
-            {story.iteration.length ? (
+            {story.iteration.length && !project.caseBoardOnly ? (
               <section className="csSec">
                 <SectionHead no={++no} name="What I tried" />
                 <div className="csSec__body">
@@ -460,7 +485,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
 
             {/* the visual system as a system, which is a different claim
                 from a grid of finished screens */}
-            {story.system.length ? (
+            {story.system.length && !project.caseBoardOnly ? (
               <section className="csSec">
                 <SectionHead no={++no} name="The system" />
                 <div className="csSec__body">
@@ -469,7 +494,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               </section>
             ) : null}
 
-            {story.results ? (
+            {story.results && !project.caseBoardOnly ? (
               <section className="csSec">
                 <SectionHead no={++no} name="Results" />
                 <div className="csSec__body">
@@ -485,7 +510,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
             {/* honest, and specific enough to be uncomfortable; a
                 reflection that only reports successes reads as a project
                 that never met any difficulty, which nobody believes */}
-            {story.reflection.length ? (
+            {story.reflection.length && !project.caseBoardOnly ? (
               <section className="csSec csSec--invert">
                 <SectionHead no={++no} name="What it taught me" />
                 <div className="csSec__body">

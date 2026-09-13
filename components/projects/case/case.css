@@ -962,6 +962,27 @@
   gap: var(--cs-sm);
 }
 
+/*
+  A board that replaces the case study butts straight against it.
+
+  .csSec carries a --cs-2xl interval and .csSec__body its own offset under
+  the head, which is right for a section that follows another section. This
+  one follows the dark opening band and IS the rest of the page, so the
+  interval is dead paper between the statement and the work - measured at
+  330px on a 1440 window, most of a screen of nothing.
+*/
+.csSec--board {
+  margin-top: 0;
+}
+
+.csSec--board .csSec__body {
+  margin-top: 0;
+}
+
+.csSec--board .csFig {
+  margin-top: 0;
+}
+
 .csPageImg {
   display: block;
   width: 100%;
