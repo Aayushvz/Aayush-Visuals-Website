@@ -4514,13 +4514,19 @@ export const PROJECTS: Project[] = [
       screen. As a board it is where it was always meant to be: after
       section 2, at the width of the window.
     */
+    /*
+      Figma frame 381:885, 1920x25254, re-exported and divided into ten
+      sections - see scripts/meal-maestro-board.mjs. This replaces an
+      earlier pass at 1400px in 18 even slices, which was under the width
+      of the window it is shown at and cut wherever 1240px happened to
+      land. The cuts are now found in the picture: this board is one flat
+      canvas rather than a stack of section frames, so the script walks it
+      looking for rows with no edge anywhere along them and takes those.
+    */
     caseBoard: {
-      /* 1400x22306, cut into 18 even pieces. Even rather than sectional
-         because this one was sliced before the board was the unit: the
-         cuts land wherever 1240px lands. Layover's follow its own frames. */
       pieces: Array.from(
-        { length: 18 },
-        (_, i) => `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`,
+        { length: 10 },
+        (_, i) => `/projects/meal-maestro/board/s${String(i).padStart(2, "0")}.webp`,
       ),
       caption:
         "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
