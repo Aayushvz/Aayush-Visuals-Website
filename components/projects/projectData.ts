@@ -589,6 +589,19 @@ export type Project = {
     portal starts without having to work it out from the screenshots.
   */
   caseChapters?: boolean;
+  /*
+    Show page captures inside a browser window.
+
+    Opt-in, because it is only true of some work. A website's screens were
+    designed to sit in a browser and read as flat letterboxes without one -
+    Mike Tyson's are 1280x580, so at column width they are 276px of image
+    under 300px of nothing much. The chrome gives them the proportion they
+    were drawn at and tells the reader what they are looking at.
+
+    Wrong for everything else: a poster is not a web page, a phone screen
+    has its own chrome already, and a Figma board is a document.
+  */
+  caseFrame?: "browser";
   caseLimits?: {
     /** named screens the page shows, shared across chapters when they are on */
     highlights?: number;
@@ -747,6 +760,7 @@ export const PROJECTS: Project[] = [
       to a screenshot, absent, headings and prose included. Eighteen is the
       count its own sections add up to.
     */
+    caseFrame: "browser",
     caseLimits: { highlights: 18, images: 40 },
     sections: [
       {

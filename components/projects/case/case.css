@@ -774,6 +774,87 @@
   still fills its frame and a letterboxed one advertises the mismatch.
 */
 
+/* ---------- the browser window a page capture sits in ---------- */
+
+/*
+  A frame for work that was drawn to sit in one.
+
+  These captures are 1280x580, which at column width is a long letterbox
+  with no top or bottom to it - a website screenshot reads as a flat strip
+  the moment it loses the window it was designed inside. The chrome gives
+  it back: about thirty pixels of bar, which takes a 276px picture to 306
+  and, more to the point, says "this is a page" before the caption has to.
+
+  The corner moves up here from the shot. The window is the object now, so
+  it is what takes --cs-r-shot and what clips; the picture inside it keeps
+  square corners and meets the bar with no seam.
+*/
+.csFrame {
+  display: grid;
+  /* both rows auto by default: the picture keeps its own height and the
+     window is as tall as the bar plus the picture. Stretching the shot to
+     100% here instead was circular - the row is sized by the shot and the
+     shot was sized by the row, and the whole frame resolved to 30px of bar
+     with a zero-height picture under it. */
+  grid-template-rows: auto auto;
+  overflow: hidden;
+  border-radius: var(--cs-r-shot);
+  background: #f4f4f4;
+  min-width: 0;
+}
+
+/*
+  Inside a paired row the height IS imposed, because every cell in the row
+  shares one ratio. There the picture does stretch, and the window with it.
+*/
+.csRow--pair > .csFrame {
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+}
+
+.csFrame__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: clamp(22px, 2.2vw, 30px);
+  padding-inline: clamp(8px, 0.9vw, 13px);
+  background: color-mix(in srgb, var(--cs-ink) 7%, #f4f4f4);
+  border-bottom: 1px solid var(--cs-line);
+}
+
+.csFrame__dot {
+  width: clamp(5px, 0.5vw, 7px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--cs-ink) 26%, transparent);
+}
+
+/*
+  An empty address field.
+
+  Deliberately blank: the live link is a webflow.io staging URL and writing
+  a tidier domain across it would be inventing one. The page's own name is
+  already set under the picture, so there is nothing for this to say that
+  is not said better six pixels lower.
+*/
+.csFrame__addr {
+  flex: 1;
+  height: clamp(8px, 0.85vw, 12px);
+  margin-left: clamp(4px, 0.5vw, 8px);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cs-ink) 9%, transparent);
+}
+
+/* the window owns the corner and the clip, so the picture inside is square
+   and meets the bar with no seam */
+.csFrame .csShot {
+  border-radius: 0;
+}
+
+.csRow--pair > .csFrame .csShot {
+  height: 100%;
+}
+
 .csRow {
   display: grid;
   gap: var(--cs-sm);

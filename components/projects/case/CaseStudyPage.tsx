@@ -139,6 +139,9 @@ function SectionHead({ no, name }: { no: number; name: string }) {
 }
 
 export default function CaseStudyPage({ project }: { project: Project }) {
+  /* website captures get browser chrome; see Project.caseFrame */
+  const framed = project.caseFrame === "browser";
+
   const story = buildStory(project);
   const next = otherProjects(project);
   const live = liveHref(project);
@@ -368,6 +371,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                   <Details
                     pairs={story.details.pairs}
                     media={story.details.media}
+                    frame={framed}
                   />
                   {/* the numbers that made the case, beside the case they
                       made: research shown anywhere else is an artefact, and
@@ -404,7 +408,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                           ))}
                         </div>
                       ) : null}
-                      <Features items={chapter.items} />
+                      <Features items={chapter.items} frame={framed} />
                     </div>
                   </section>
                 ))
@@ -414,7 +418,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="Highlights" />
                 <div className="csSec__body">
-                  <Features items={story.highlights} />
+                  <Features items={story.highlights} frame={framed} />
                 </div>
               </section>
             ) : null}
@@ -477,7 +481,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="Gallery" />
                 <div className="csSec__body">
-                  <MediaRows media={story.gallery} />
+                  <MediaRows media={story.gallery} frame={framed} />
                 </div>
               </section>
             ) : null}

@@ -32,7 +32,18 @@ import {
 */
 
 type Pair = { label: string; body: string[] };
-type Media = { src: string; alt: string };
+type Media = {
+  src: string;
+  alt: string;
+  /*
+    Authored on items that are a component or an artifact rather than a
+    screen - a Figma sheet, a piece of product artwork. It already meant
+    "do not treat this as a full capture", which is exactly the question
+    the browser frame has to answer, so it carries through rather than
+    being re-derived from the picture's shape.
+  */
+  small?: boolean;
+};
 
 export type Highlight = { name: string; body: string[]; media: Media[] };
 
@@ -172,7 +183,11 @@ function mediaOf(block: CaseBlock): Media[] {
     case "step":
     case "screens":
     case "mockup":
-      return block.items.map((i) => ({ src: i.src, alt: i.alt }));
+      return block.items.map((i) => ({
+        src: i.src,
+        alt: i.alt,
+        small: (i as { small?: boolean }).small,
+      }));
     default:
       return [];
   }
@@ -841,6 +856,25 @@ export function buildStory(project: Project): Story {
 
 /* ---------- rendering ---------- */
 
+/*
+  The window a page capture sits in.
+
+  Dots and an empty address field, and no URL text on purpose: the project's
+  own link is a webflow.io staging address, and writing a tidier domain over
+  it would be inventing one. The page's name is already under the picture,
+  so the bar has nothing left to say and says nothing.
+*/
+function BrowserBar() {
+  return (
+    <span className="csFrame__bar" aria-hidden>
+      <span className="csFrame__dot" />
+      <span className="csFrame__dot" />
+      <span className="csFrame__dot" />
+      <span className="csFrame__addr" />
+    </span>
+  );
+}
+
 function Img({
   src,
   alt,
@@ -848,6 +882,7 @@ function Img({
   capWidth = false,
   reveal,
   index,
+  frame = false,
 }: {
   src: string;
   alt: string;
@@ -858,6 +893,8 @@ function Img({
   reveal?: boolean;
   /** position in its row, which is all the stagger needs */
   index?: number;
+  /** wrap the shot in browser chrome; see Project.caseFrame */
+  frame?: boolean;
 }) {
   /*
     min() of the two, not the natural width alone.
@@ -892,15 +929,37 @@ function Img({
     ...(index === undefined ? null : { "--i": index }),
   } as CSSProperties;
   const cap = Object.keys(style).length ? style : undefined;
+  /* the chrome wraps whichever element this turns out to be, so a screen
+     recording is framed the same way a still is */
+  const wrap = (node: ReactNode) =>
+    frame ? (
+      /*
+        The width cap rides on the window, not on the picture inside it.
+
+        Left on the picture it capped that and not the frame, so a 507px
+        asset sat in a 616px window with a hundred pixels of empty ground
+        beside it. The window is the object; it is what should be 507 wide.
+      */
+      <span className="csFrame" style={cap}>
+        <BrowserBar />
+        {node}
+      </span>
+    ) : (
+      node
+    );
+
+  /* ...and once it has, the picture inside simply fills it */
+  const inner = frame ? (index === undefined ? undefined : style) : cap;
+
   /* a .webm in an <img> renders nothing, so a moving asset gets a video that
      behaves like an image: no controls, no sound, and no reason to notice it
      is a video until it moves */
   if (src.endsWith(".webm") || src.endsWith(".mp4")) {
-    return (
+    return wrap(
       <video
         className={className}
         src={src}
-        style={cap}
+        style={inner}
         width={box?.[0]}
         height={box?.[1]}
         data-rise={reveal ? "shot" : undefined}
@@ -909,21 +968,21 @@ function Img({
         playsInline
         autoPlay
         aria-label={alt}
-      />
+      />,
     );
   }
-  return (
+  return wrap(
     <img
       className={className}
       src={src}
       alt={alt}
-      style={cap}
+      style={inner}
       width={box?.[0]}
       height={box?.[1]}
       data-rise={reveal ? "shot" : undefined}
       loading="lazy"
       decoding="async"
-    />
+    />,
   );
 }
 
@@ -1050,18 +1109,32 @@ function rowShape(
 
 /* one row per shape, so nothing has to be cut to sit beside its neighbour,
    then cut again so no row ends short */
-export function MediaRows({ media }: { media: Media[] }) {
+export function MediaRows({
+  media,
+  frame,
+}: {
+  media: Media[];
+  frame?: boolean;
+}) {
   const rows = groupByShape(media).flatMap(balancedRows);
   return (
     <div className="csRows">
       {rows.map((row, i) => (
-        <MediaRow media={row} cols={row.length} key={i} />
+        <MediaRow media={row} cols={row.length} frame={frame} key={i} />
       ))}
     </div>
   );
 }
 
-export function MediaRow({ media, cols }: { media: Media[]; cols?: number }) {
+export function MediaRow({
+  media,
+  cols,
+  frame,
+}: {
+  media: Media[];
+  cols?: number;
+  frame?: boolean;
+}) {
   const shape = rowShape(media, cols);
   return (
     <div
@@ -1077,13 +1150,30 @@ export function MediaRow({ media, cols }: { media: Media[]; cols?: number }) {
       }
     >
       {media.map((m, i) => (
-        <Img key={m.src + i} src={m.src} alt={m.alt} reveal index={i} />
+        <Img
+          key={m.src + i}
+          src={m.src}
+          alt={m.alt}
+          reveal
+          index={i}
+          /* a ticket design is not a web page, whatever the row around it
+             happens to be full of */
+          frame={frame && !m.small}
+        />
       ))}
     </div>
   );
 }
 
-export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
+export function Details({
+  pairs,
+  media,
+  frame,
+}: {
+  pairs: Pair[];
+  media: Media[];
+  frame?: boolean;
+}) {
   return (
     <div className="csDetails">
       {/* one sticky block, so the whole argument holds while its evidence
@@ -1110,7 +1200,14 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
       {media.length ? (
         <div className="csDetails__media">
           {media.map((m, i) => (
-            <Img key={m.src + i} src={m.src} alt={m.alt} capWidth reveal />
+            <Img
+              key={m.src + i}
+              src={m.src}
+              alt={m.alt}
+              capWidth
+              reveal
+              frame={frame && !m.small}
+            />
           ))}
         </div>
       ) : null}
@@ -1131,20 +1228,26 @@ export function Details({ pairs, media }: { pairs: Pair[]; media: Media[] }) {
   Paired from four up. Below that the beat is a few standalone decisions
   rather than a sequence, and a decision wants the room.
 */
-export function Features({ items }: { items: Highlight[] }) {
+export function Features({
+  items,
+  frame,
+}: {
+  items: Highlight[];
+  frame?: boolean;
+}) {
   const paired = items.length >= 4;
   if (!paired)
     return (
       <>
         {items.map((item, i) => (
-          <FeatureBlock item={item} key={i} />
+          <FeatureBlock item={item} frame={frame} key={i} />
         ))}
       </>
     );
   return (
     <div className="csFeatures">
       {items.map((item, i) => (
-        <FeatureBlock item={item} dense key={i} />
+        <FeatureBlock item={item} dense frame={frame} key={i} />
       ))}
     </div>
   );
@@ -1153,9 +1256,11 @@ export function Features({ items }: { items: Highlight[] }) {
 export function FeatureBlock({
   item,
   dense,
+  frame,
 }: {
   item: Highlight;
   dense?: boolean;
+  frame?: boolean;
 }) {
   /* in a pair the screen comes first: the reader is following a sequence of
      states, so the state is the thing to see and the paragraph explains what
@@ -1163,7 +1268,7 @@ export function FeatureBlock({
      shape the rest of the page uses. */
   const media = item.media.length ? (
     <div className="csFeature__media">
-      <MediaRow media={item.media} />
+      <MediaRow media={item.media} frame={frame} />
     </div>
   ) : null;
 
