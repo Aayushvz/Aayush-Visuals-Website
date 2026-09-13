@@ -5159,6 +5159,42 @@ html.has-cursor .cursorRing {
   justify-self: start;
 }
 
+/*
+  The button itself had no rule at all.
+
+  Not a styling choice that went wrong - nothing was ever written for it, and
+  there is no global button reset in this file, so it was rendering the raw
+  user-agent control: a 1.6px outset border in pure black on a #f0f0f0 fill
+  with 1px 6px of padding and square corners. A grey box with a bevel around
+  the three bars, on a bar that is otherwise a soft pill.
+
+  It carries an icon and nothing else, so it takes none of the chrome. The
+  hit area stays at 44px because the icon inside it is 36, and the focus ring
+  is explicit: removing the UA border removes the default focus affordance
+  with it, and this is the only way into the menu from a keyboard.
+*/
+.mobileNav__menuBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileNav__menuBtn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .mobileNav__hamburger {
   display: flex;
   flex-direction: column;

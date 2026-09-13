@@ -206,17 +206,36 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 <p className="cs__eyebrow csHero__cat">{project.category}</p>
               </div>
 
-              {/* the headline where there is one, the name where there is
-                  not; sized down when it is a sentence rather than a word */}
+              {/*
+                The name is the title. The sentence is the line under it.
+
+                Putting the headline in the h1 was the wrong read of the
+                guide: its stage order is Title then Hook, two things, and I
+                collapsed them into one. A case study opens with what the
+                thing is called - that is what the reader came from the works
+                grid looking for, and a fourteen-word sentence set at display
+                size is a paragraph shouting rather than a name.
+
+                The headline still does its job, one step down: it is the
+                first sentence after the name, which is where a hook belongs.
+              */}
               <h1
-                className={`csHero__title${
-                  project.headline ? " csHero__title--head" : ""
-                }`}
+                className="csHero__title"
                 data-rise
                 style={{ "--i": 1 } as CSSProperties}
               >
-                {project.headline ?? project.title}
+                {project.title}
               </h1>
+
+              {project.headline ? (
+                <p
+                  className="csHero__hook"
+                  data-rise
+                  style={{ "--i": 2 } as CSSProperties}
+                >
+                  {project.headline}
+                </p>
+              ) : null}
 
               <div
                 className="csHero__intro"

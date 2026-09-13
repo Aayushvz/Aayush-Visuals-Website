@@ -2833,27 +2833,22 @@
 /* ---------- the headline, and the context card ---------- */
 
 /*
-  A headline is a sentence, so it cannot take the size a one-word name takes.
+  The hook: the headline, one step under the name.
 
-  `CPGRAMS` at 76px is a title. "CPGRAMS: filing a government grievance by
-  speaking, in any of 22 languages" at 76px is four lines of shouting. The
-  display size drops by about a third when the h1 is carrying a headline,
-  which lands it at two lines on a laptop and keeps it the largest thing on
-  the page without it becoming the whole first screen.
+  It is a sentence, so it takes a sentence's size and measure rather than the
+  display size the name takes - the whole reason it did not belong in the h1.
+  Large enough to read as part of the opening rather than as body copy, and
+  capped at a measure so a fourteen-word line breaks where a reader expects.
 */
-.csHero__title--head {
-  font-size: clamp(26px, 3.3vw, 44px);
-  line-height: 1.08;
-  letter-spacing: -0.026em;
-  /*
-    No measure cap, which is the opposite of what display type usually
-    wants. A 22ch measure broke a fourteen-word headline over four lines and
-    turned it into a paragraph set large; a headline is one object and wants
-    to be read in one or two passes, so it takes the column the way a
-    newspaper headline takes its column, and `text-wrap: balance` on .csHero__title
-    keeps the last line from stranding a word.
-  */
-  max-width: none;
+.csHero__hook {
+  margin: var(--cs-sm) 0 0;
+  font-size: var(--cs-t-lead);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  max-width: 46ch;
+  color: var(--cs-ink);
+  text-wrap: balance;
 }
 
 /*
