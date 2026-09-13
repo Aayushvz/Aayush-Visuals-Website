@@ -1139,30 +1139,39 @@ function rowShape(
   box is both a page that jumps eight thousand pixels when it decodes and
   one the loader never decides is worth fetching.
 */
-export function Board({
-  src,
-  alt,
-  caption,
-}: {
-  src: string;
-  alt: string;
-  caption?: string;
-}) {
-  const dim = IMAGE_DIMS[src];
+export function Board({ shot }: { shot: ProjectShot }) {
+  /*
+    A strip stacks with nothing between the pieces.
+
+    Meal Maestro's board is 1400x22306, which no WebP can be - the format
+    stops at 16383px a side - so it arrives as eighteen slices of one
+    picture. Any gap, border or radius on a slice would draw a line across
+    the middle of the artwork, which is why the corner and the clip belong
+    to the strip and the slices carry neither.
+  */
+  const sources = shotSources(shot);
   return (
     <figure className="csFig" data-rise>
       <div className="csBoard">
-        <img
-          className="csBoard__img"
-          src={src}
-          alt={alt}
-          style={dim ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) } : undefined}
-          loading="lazy"
-          decoding="async"
-        />
+        {sources.map((src, i) => {
+          const dim = IMAGE_DIMS[src];
+          return (
+            <img
+              className="csBoard__img"
+              key={src}
+              src={src}
+              alt={i === 0 ? shot.alt : ""}
+              style={
+                dim ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) } : undefined
+              }
+              loading="lazy"
+              decoding="async"
+            />
+          );
+        })}
       </div>
-      {caption ? (
-        <figcaption className="csFig__cap">{caption}</figcaption>
+      {shot.caption ? (
+        <figcaption className="csFig__cap">{shot.caption}</figcaption>
       ) : null}
     </figure>
   );

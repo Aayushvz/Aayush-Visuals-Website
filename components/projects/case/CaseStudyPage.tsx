@@ -397,7 +397,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="The full case study" />
                 <div className="csSec__body">
-                  <Board {...project.caseBoard} />
+                  <Board shot={project.caseBoard} />
                 </div>
               </section>
             ) : null}

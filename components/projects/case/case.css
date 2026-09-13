@@ -923,6 +923,11 @@
   width: 100vw;
   margin-inline: calc(50% - 50vw);
   overflow: hidden;
+  /* a sliced board is one picture in eighteen files, so the line boxes the
+     slices would otherwise sit on have to go: an inline image's baseline
+     gap would draw a stripe across the artwork at every seam */
+  font-size: 0;
+  line-height: 0;
 }
 
 .csBoard__img {

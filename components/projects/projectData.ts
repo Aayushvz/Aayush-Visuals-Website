@@ -624,6 +624,10 @@ export type Project = {
     spacing - and that board is the artefact. Cutting it into the page's
     own sections would be rearranging somebody's layout to fit a template.
 
+    A ProjectShot, so a board too tall for one WebP can be the strip it has
+    to be. Meal Maestro's is 1400x22306, well past the format's 16383px
+    limit, and arrived as 18 slices; Futurepreneurs' fits in one file.
+
     It goes on the canvas rather than in a scroll box. A box with its own
     scrollbar reads as a modal - a thing to open, not a thing to read - and
     a board that is the case study should not need opening. So it is the
@@ -634,7 +638,7 @@ export type Project = {
     already in here, in an order somebody chose; showing both is the same
     pictures twice with the second pass in an order nobody chose.
   */
-  caseBoard?: { src: string; alt: string; caption?: string };
+  caseBoard?: ProjectShot;
   caseFrame?: "browser";
   caseLimits?: {
     /** named screens the page shows, shared across chapters when they are on */
@@ -4463,25 +4467,29 @@ export const PROJECTS: Project[] = [
       fill: "#385A41",
       hover: "#5C8F69",
     },
-    shots: [
-      {
-        /* The complete case study, exported at 1400x22306 and sliced into 18
-           pieces — see the note on the strip shot type above for why it
-           cannot ship as a single file. */
-        strip: Array.from(
-          { length: 18 },
-          (_, i) =>
-            `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`,
-        ),
-        sliceW: 1400,
-        sliceH: 1240,
-        lastSliceH: 1226,
-        wide: true,
-        caption:
-          "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
-        alt: "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",
-      },
-    ],
+    /*
+      This was authored as `shots`, which renders only on a project that has
+      neither a gallery nor highlights - and this one has highlights, so all
+      eighteen slices of it have been in the repository and on nobody's
+      screen. As a board it is where it was always meant to be: after
+      section 2, at the width of the window.
+    */
+    caseBoard: {
+      /* The complete case study, exported at 1400x22306 and sliced into 18
+         pieces — see the note on the strip shot type above for why it
+         cannot ship as a single file. */
+      strip: Array.from(
+        { length: 18 },
+        (_, i) => `/projects/meal-maestro/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      sliceW: 1400,
+      sliceH: 1240,
+      lastSliceH: 1226,
+      wide: true,
+      caption:
+        "The full case study: research with real users, the insights it earned, the design system, and the flows it produced.",
+      alt: "The Meal Maestro case study: a smart meal-planning app for personalised recommendations and nutrition guidance. It runs from the goal of making healthy eating simpler, through branding and primary research grounded in real voices and real data (12 discovery interviews, 140 survey responses, 4 comparison teardowns, 5 weeks), into key insights about why people abandon meal planning, then a design system of colour and type: Poppins for display and headings, Open Sans for body: and finally the home, recipe detail, tracker and explore flows.",
+    },
   },
 ];
 
