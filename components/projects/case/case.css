@@ -689,6 +689,39 @@
   margin-bottom: var(--cs-sm);
 }
 
+/*
+  One screen wide per feature, so the page never shows more than two.
+
+  A feature that carries two screens was putting them side by side inside a
+  cell that is already half the column, so a 1600x770 capture rendered at
+  293x140 - a five and a half times downscale. A dense web page at that size
+  is not small, it is illegible: the type dissolves and the whole picture
+  averages out to a pale grey haze, which is what it looked like. Stacked,
+  the same capture gets the full 616px cell and reads.
+
+  It also answers the count. Two features across, one screen wide each, is
+  two windows at a time however many screens a feature happens to carry.
+*/
+.csFeature--dense .csRow--pair {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/*
+  And with no neighbour on the row, nothing has to be cut to a shared ratio:
+  each capture keeps its own proportions instead of being letterboxed into
+  the median of the pair it used to sit in.
+*/
+.csFeature--dense .csRow--pair > .csFrame {
+  grid-template-rows: auto auto;
+  height: auto;
+}
+
+.csFeature--dense .csRow--pair .csShot {
+  aspect-ratio: auto;
+  height: auto;
+  object-fit: fill;
+}
+
 .csFeature--dense .csFeature__head .cs__body {
   max-width: 60ch;
 }
