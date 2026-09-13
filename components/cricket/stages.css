@@ -96,7 +96,7 @@
 */
 .stgOpen__kicker {
   font-family: var(--stg-mono);
-  font-size: clamp(10px, 1vw, 12px);
+  font-size: clamp(11px, 1vw, 12px);
   letter-spacing: 0.42em;
   text-transform: uppercase;
   color: var(--stg-faint);

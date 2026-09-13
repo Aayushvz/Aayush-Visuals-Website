@@ -954,7 +954,8 @@ html.has-cursor .cursorRing {
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #8a857a;
+  /* was #8a857a, 3.67:1 on the cream */
+  color: #6d685e;
   margin: 0 0 32px;
   font-style: italic;
 }
@@ -1349,7 +1350,8 @@ html.has-cursor .cursorRing {
   display: block;
   font-size: clamp(15px, 1vw, 18px);
   font-weight: 400;
-  color: rgba(31, 31, 31, 0.44);
+  /* was 0.44, 2.71:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.66);
   letter-spacing: 0;
   white-space: nowrap;
 }
@@ -1388,7 +1390,8 @@ html.has-cursor .cursorRing {
   margin: 0;
   font-size: clamp(15px, 1vw, 17px);
   line-height: 1.4;
-  color: rgba(31, 31, 31, 0.52);
+  /* was 0.52, 3.45:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.66);
   max-width: 32ch;
 }
 
@@ -3765,7 +3768,8 @@ html.has-cursor .cursorRing {
 
 .selWork__cat {
   font-weight: 400;
-  color: rgba(31, 31, 31, 0.5);
+  /* was 0.5, 3.23:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.66);
 }
 
 /* platform/domain subline — mono, mixed case, muted */
@@ -3775,7 +3779,8 @@ html.has-cursor .cursorRing {
   font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
   font-size: clamp(11px, 0.9vw, 13px);
   letter-spacing: 0.01em;
-  color: rgba(31, 31, 31, 0.42);
+  /* was 0.42, 2.58:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.66);
 }
 
 /* big thin index numeral (reference weight), no hover */
@@ -3872,7 +3877,8 @@ html.has-cursor .cursorRing {
   font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
   font-size: clamp(11.5px, 0.95vw, 13.5px);
   letter-spacing: 0.01em;
-  color: rgba(31, 31, 31, 0.42);
+  /* was 0.42, 2.58:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.66);
   transition: color 0.25s ease-out;
 }
 
@@ -6333,7 +6339,9 @@ html.has-cursor .cursorRing {
 
 .aboutPage__meta {
   margin: 8px 0 0;
-  font-size: clamp(9px, 0.78vw, 11px);
+  /* the floor is what a phone gets, so it has to be a readable size and
+     not the vw value at some middling width */
+  font-size: clamp(11px, 0.78vw, 11px);
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -8101,7 +8109,10 @@ html.has-cursor .cursorRing {
 
 .hc__tagline {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.74);
+  /* was 0.74, which is 3.82:1 on the #7c3aed band. White loses contrast
+     fast against a mid purple, so the alpha has to sit higher here than the
+     same muted line would need on paper. */
+  color: rgba(255, 255, 255, 0.88);
   line-height: 1.65;
   margin: 0 0 36px;
   max-width: 300px;
@@ -9728,7 +9739,8 @@ html.contact-page-active body {
   margin: 0;
   font-size: clamp(15px, 1.2vw, 17px);
   line-height: 1.5;
-  color: rgba(31, 31, 31, 0.6);
+  /* was 0.6, 4.35:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.66);
 }
 
 /* --- search + category filters --- */

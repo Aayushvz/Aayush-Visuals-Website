@@ -424,6 +424,9 @@
 
 .abFormation__gave {
   font-size: 14.5px;
+  /* no cap, so it grew with the column: 89ch at 1920. A measure is the one
+     thing that should not scale with the window. */
+  max-width: 68ch;
   line-height: 1.65;
   color: var(--ab-ink-2);
   text-wrap: pretty;
@@ -660,6 +663,8 @@
 .abCraft__copy {
   margin: 0;
   font-size: clamp(14px, 1vw, 15.5px);
+  /* same: 85ch at 1920, 82 at 1440 */
+  max-width: 68ch;
   line-height: 1.72;
   color: var(--ab-ink-2);
   text-wrap: pretty;

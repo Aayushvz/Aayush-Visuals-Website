@@ -118,7 +118,9 @@
   padding: 0.72em 1.15em 1.15em;
   border-radius: 10px 10px 0 0;
   background: color-mix(in srgb, var(--ab-ink) 7%, var(--ab-bg));
-  font-size: clamp(9.5px, 0.62vw, 12px);
+  /* the floor is what a phone gets, so it has to be a readable size and
+     not the vw value at some middling width */
+  font-size: clamp(11px, 0.62vw, 12px);
   font-weight: 600;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -181,11 +183,14 @@
 .card__k {
   display: block;
   margin-bottom: 0.5em;
-  font-size: clamp(9.5px, 0.62vw, 12px);
+  /* the floor is what a phone gets, so it has to be a readable size and
+     not the vw value at some middling width */
+  font-size: clamp(11px, 0.62vw, 12px);
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ab-ink) 62%, transparent);
+  /* 62% measured 4.25:1 on the card's own ground; 68 clears the bar */
+  color: color-mix(in srgb, var(--ab-ink) 68%, transparent);
 }
 
 /*

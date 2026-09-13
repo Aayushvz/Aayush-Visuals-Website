@@ -187,7 +187,7 @@
   gap: 0.6em;
   margin: 0 0 clamp(16px, 2.4vw, 26px);
   font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-  font-size: clamp(10px, 0.75vw, 12px);
+  font-size: clamp(11px, 0.75vw, 12px);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--hero-fg-2);
@@ -333,7 +333,7 @@
   padding: clamp(12px, 1.6vw, 20px) clamp(14px, 4vw, 44px);
   border-top: 1px solid var(--hero-grid-line);
   font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-  font-size: clamp(9px, 0.66vw, 11px);
+  font-size: clamp(11px, 0.66vw, 11px);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--hero-fg-2);
