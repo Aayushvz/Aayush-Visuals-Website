@@ -4912,6 +4912,78 @@ export const PROJECTS: Project[] = [
       alt: "The Solo Leveling case-study board: the title card on a laptop, the about and features copy beside a phone, the Sora specimen and three-value palette, the homepage interface, the about section, the rating, stream and manga row with the watch-now player, the manga carousel and wallpapers, the merch rail and footer, the season video player, the merch grid and secondary screens, the onboarding and checkout screens, the product page for the Level UP hoodie, a laptop mockup, and the closing frame.",
     },
   },
+  {
+    id: "gravitas-showcase",
+    headline:
+      "One identity stretched across a website, a gate, an ID card and a t-shirt, for a fest with 250 events and 30,000 people",
+    challenge: [
+      "graVITas is not one thing to design. It is **250+ events, 30,000+ attendees** and participants from around the world, and every one of those needs something printed, worn, worn on a lanyard or walked through.",
+      "The pieces get made by different people at different times under different deadlines. Without one system, a fest's identity **drifts between the poster and the pass** and stops reading as a single event.",
+      "And the physical and the digital have opposite constraints. A hoarding is read at fifty metres, an ID card at fifty centimetres, and a website by somebody deciding in three seconds whether to register.",
+    ],
+    solution: [
+      "**The mark carries the name inside it.** graVITas sets VIT in the middle of its own word, with an orbital ring drawn around it - one form that is a wordmark, a monogram and the fest's whole idea at once.",
+      "**One dark ground, one cyan.** Everything - site, brochure, flyer, hoarding, pass, certificate - sits on near-black with a single electric cyan doing all the signalling, so a piece is recognisable before any of it is read.",
+      "**The system is proved on the hardest surfaces, not the easiest.** Six ID card variants from Chief Patron to Volunteer, a gate taken from sketch to a built structure people walk through, certificates, merchandise, hoardings and brochures.",
+    ],
+    kind: "case-study",
+    title: "Gravitas Product Design and Event Branding",
+    logoText: "graVITas '25",
+    category: "Branding",
+    year: "2025",
+    cover: "/projects/gravitas-showcase-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/gravitas-showcase-cover.webp",
+    },
+    cta: "See the Showcase",
+    role: "Event Branding",
+    tools: ["Figma", "Illustrator", "Photoshop"],
+    description:
+      "graVITas '25 is VIT's techno-management fest: 250+ events, 30,000+ attendees and participants from across the globe. This is the identity built for it - logo, website, merchandise, ID cards, brochures, flyers, hoardings, certificates and the entrance gate - held together by one dark ground and a single cyan.",
+    highlights: [
+      "A wordmark that sets VIT inside graVITas, ringed by an orbital mark",
+      "One identity carried across ten surfaces, from a website to a built gate",
+      "The site drew 2+ million views in its first two weeks",
+    ],
+    extraFacts: [
+      ["Event", "graVITas '25, VIT Vellore"],
+      ["Scale", "250+ events, 30,000+ attendees"],
+      ["Scope", "Identity, web and print"],
+    ],
+    /*
+      The brand is one cyan on near-black, and the cyan cannot carry the
+      light side: #40e0f8 is 10.5:1 on ink but 1.59:1 on white, which is
+      invisible. So light-mode text drops to #0a6b76, a deeper teal of the
+      same hue at 5.34:1 on the cream, while `solid` and `bright` keep the
+      real brand value for borders and anything meant to be spotted.
+
+      `ink` is the near-black the whole board sits on, 12.3:1 on that cyan.
+    */
+    accent: {
+      dark: "#40e0f8",
+      light: "#0a6b76",
+      solid: "#40e0f8",
+      bright: "#40e0f8",
+      ink: "#001018",
+      fill: "#0a6b76",
+      hover: "#086069",
+    },
+    /*
+      Figma frame 236:6257, 1920x17280. Sixteen children, contiguous and
+      exactly 1080 design px each, so the 3641x32768 export divides into 16
+      equal bands of 2048 with no remainder - the boundaries were already
+      known, so no cut detection was used or wanted.
+    */
+    caseBoard: {
+      pieces: Array.from(
+        { length: 16 },
+        (_, i) => `/projects/gravitas-showcase/board/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      caption: "The full showcase, in the order it was laid out.",
+      alt: "The graVITas '25 showcase board: the cover lockup, an introduction to the fest, the logo from first exploration through iterations to the final mark, two spreads of the event website, merchandise, two sets of ID cards from Chief Patron down to Volunteer, brochures, flyers, hoardings, the entrance gate from sketch to built structure, flyer design, certificates, the branding system, and the closing mark.",
+    },
+  },
 ];
 
 /*
