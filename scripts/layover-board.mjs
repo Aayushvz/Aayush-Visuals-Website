@@ -27,6 +27,7 @@
 */
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
+import { writePiece, summarise } from "./lib/board-encode.mjs";
 
 const DIR = "public/projects/layover/board";
 const WIDTH = 2400;
@@ -74,25 +75,23 @@ for (const [name, h, label] of SECTIONS) {
     bad++;
   }
 
-  const info = await sharp(file, { limitInputPixels: false })
-    .resize({ width: WIDTH })
-    .webp({ quality: 82 })
-    .toFile(`${DIR}/${name}.webp`);
+  const info = await writePiece(
+    () => sharp(file, { limitInputPixels: false }).resize({ width: WIDTH }),
+    `${DIR}/${name}`,
+  );
 
   out.push({
-    file: `${name}.webp`,
+    file: name,
     source: `${meta.width}x${meta.height}`,
     written: `${info.width}x${info.height}`,
-    kb: Math.round(info.size / 1024),
+    avifKb: info.avifKb,
+    webpKb: info.webpKb,
     section: label,
   });
 }
 
 console.table(out);
-const total = out.reduce((n, o) => n + o.kb, 0);
-console.log(
-  `${out.length} files, ${total}kb total — but lazy, so a reader downloads the sections they reach`,
-);
+console.log(summarise(out) + " — and lazy, so a reader downloads the sections they reach");
 if (bad) {
   console.error(`${bad} piece(s) were not the size Figma reports for that frame`);
   process.exit(1);

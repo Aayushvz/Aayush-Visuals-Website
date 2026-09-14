@@ -930,6 +930,13 @@
   line-height: 0;
 }
 
+/* a <picture> is inline by default, which would put every piece back on a
+   line box and draw the baseline gap across the artwork that font-size: 0
+   above exists to prevent. It is a wrapper, so it takes no box of its own. */
+.csBoard__piece {
+  display: contents;
+}
+
 .csBoard__img {
   display: block;
   width: 100%;

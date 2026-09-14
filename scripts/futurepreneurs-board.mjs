@@ -14,10 +14,12 @@
   Usage: node scripts/futurepreneurs-board.mjs <exported-png>
 */
 import sharp from "sharp";
+import { writePiece } from "./lib/board-encode.mjs";
 
 const WIDTH = 1600;
 const LIMIT = 16383;
-const OUT = "public/projects/futurepreneurs/board.webp";
+/* no extension: writePiece appends .avif and .webp */
+const OUT = "public/projects/futurepreneurs/board";
 
 const src = process.argv[2];
 if (!src) {
@@ -34,9 +36,12 @@ if (height > LIMIT) {
   process.exit(1);
 }
 
-const info = await sharp(src, { limitInputPixels: false })
-  .resize({ width: WIDTH })
-  .webp({ quality: 82 })
-  .toFile(OUT);
+const info = await writePiece(
+  () => sharp(src, { limitInputPixels: false }).resize({ width: WIDTH }),
+  OUT,
+);
 
-console.log(`wrote ${OUT}  ${info.width}x${info.height}  ${Math.round(info.size / 1024)}kb`);
+console.log(
+  `wrote ${OUT}.avif and ${OUT}.webp  ${info.width}x${info.height}  ` +
+    `AVIF ${info.avifKb}kb, WebP fallback ${info.webpKb}kb`,
+);

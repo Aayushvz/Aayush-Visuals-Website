@@ -33,6 +33,7 @@
 */
 import sharp from "sharp";
 import { mkdir, rm } from "node:fs/promises";
+import { writePiece, summarise } from "./lib/board-encode.mjs";
 
 const WIDTH = 2400;
 /*
@@ -153,25 +154,26 @@ for (let i = 0; i < cuts.length - 1; i++) {
   const top = cuts[i];
   const height = cuts[i + 1] - top;
   const name = `s${String(i).padStart(2, "0")}`;
-  const info2 = await sharp(src, { limitInputPixels: false })
-    .extract({ left: 0, top, width: meta.width, height })
-    .resize({ width: WIDTH })
-    .webp({ quality: 82 })
-    .toFile(`${DIR}/${name}.webp`);
+  const info2 = await writePiece(
+    () =>
+      sharp(src, { limitInputPixels: false })
+        .extract({ left: 0, top, width: meta.width, height })
+        .resize({ width: WIDTH }),
+    `${DIR}/${name}`,
+  );
   out.push({
-    file: `${name}.webp`,
+    file: name,
     cutAt: Math.round(top / scale),
     written: `${info2.width}x${info2.height}`,
-    kb: Math.round(info2.size / 1024),
+    avifKb: info2.avifKb,
+    webpKb: info2.webpKb,
   });
 }
 
 console.table(out);
 const covered = cuts[cuts.length - 1] - cuts[0];
 console.log(forced ? `${forced} cut(s) had to be forced through content` : "every cut landed in a gap");
-console.log(
-  `${out.length} pieces, ${out.reduce((n, o) => n + o.kb, 0)}kb total, covering ${covered} of ${meta.height} source rows`,
-);
+console.log(`${summarise(out)}, covering ${covered} of ${meta.height} source rows`);
 if (covered !== meta.height) {
   console.error("the pieces do not cover the whole board");
   process.exit(1);

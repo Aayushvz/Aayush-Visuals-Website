@@ -25,6 +25,7 @@
 import sharp from "sharp";
 import { existsSync } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
+import { writePiece, summarise } from "./lib/board-encode.mjs";
 
 const WIDTH = 2400;
 
@@ -77,25 +78,27 @@ const out = [];
 for (const s of slides) {
   const meta = await sharp(s.src, { limitInputPixels: false }).metadata();
   const name = `s${String(s.n - 1).padStart(2, "0")}`;
-  const info = await sharp(s.src, { limitInputPixels: false })
-    /* withoutEnlargement, because a slide exported smaller than the rest
-       should stay its own size rather than be upscaled to match */
-    .resize({ width: WIDTH, withoutEnlargement: true })
-    .webp({ quality: 82 })
-    .toFile(`${DIR}/${name}.webp`);
+  const info = await writePiece(
+    () =>
+      sharp(s.src, { limitInputPixels: false })
+        /* withoutEnlargement, because a slide exported smaller than the rest
+           should stay its own size rather than be upscaled to match */
+        .resize({ width: WIDTH, withoutEnlargement: true }),
+    `${DIR}/${name}`,
+  );
   out.push({
     slide: s.n,
-    file: `${name}.webp`,
+    file: name,
     source: `${meta.width}x${meta.height}`,
     written: `${info.width}x${info.height}`,
-    kb: Math.round(info.size / 1024),
+    avifKb: info.avifKb,
+    webpKb: info.webpKb,
   });
 }
 
 console.table(out);
-const total = out.reduce((n, o) => n + o.kb, 0);
 const widest = out.filter((o) => Number(o.written.split("x")[0]) < WIDTH);
-console.log(`${out.length} slides, ${total}kb total - lazy, so a reader fetches the ones they reach`);
+console.log(summarise(out) + " - and lazy, so a reader fetches the ones they reach");
 if (widest.length) {
   console.log(
     `note: ${widest.map((o) => o.file).join(", ")} came in under ${WIDTH}px and were left at source size`,

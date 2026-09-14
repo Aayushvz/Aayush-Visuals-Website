@@ -1156,23 +1156,41 @@ export function Board({
     of one board is twelve times the same sentence to anyone listening to
     the page rather than looking at it.
   */
+  /*
+    AVIF where the browser takes it, WebP where it does not.
+
+    Measured against the resized original on the five kinds of content
+    these boards contain, AVIF at q62 came out both smaller AND closer to
+    the source than WebP at q82 every time - see scripts/lib/board-encode.
+    Across the eight boards that is 8.6MB of WebP down to 6.4MB of AVIF,
+    and the biggest wins are on the flat slides, the palettes and type
+    specimens, where WebP was spending bytes on gradients that are not
+    there.
+
+    The <img> keeps the .webp src, which matters for more than the
+    fallback: IMAGE_DIMS is keyed on those paths, so the aspect-ratio
+    reservation below still resolves, and anything reading the markup sees
+    a URL that has always existed.
+  */
   return (
     <figure className="csFig" data-rise>
       <div className="csBoard">
         {board.pieces.map((src, i) => {
           const dim = IMAGE_DIMS[src];
           return (
-            <img
-              className="csBoard__img"
-              key={src}
-              src={src}
-              alt={i === 0 ? board.alt : ""}
-              style={
-                dim ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) } : undefined
-              }
-              loading="lazy"
-              decoding="async"
-            />
+            <picture className="csBoard__piece" key={src}>
+              <source srcSet={src.replace(/\.webp$/, ".avif")} type="image/avif" />
+              <img
+                className="csBoard__img"
+                src={src}
+                alt={i === 0 ? board.alt : ""}
+                style={
+                  dim ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) } : undefined
+                }
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           );
         })}
       </div>
