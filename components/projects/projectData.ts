@@ -4626,9 +4626,7 @@ export const PROJECTS: Project[] = [
     title: "Moon Store",
     logoText: "MOON",
     category: "UI Design",
-    /* the board carries no date; confirm before this ships anywhere it
-       matters, since nothing in the file evidences a year */
-    year: "2025",
+    year: "2023",
     cover: "/projects/moon-store-cover.webp",
     preview: {
       kind: "image",
