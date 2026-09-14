@@ -182,6 +182,7 @@ const PROJECT_ORDER = [
   "posterfolio",
   "dropby",
   "riviera",
+  "fuzion",
   "yantra",
 ] as const;
 

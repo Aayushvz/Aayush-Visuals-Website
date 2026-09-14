@@ -1520,6 +1520,88 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "fuzion",
+    headline:
+      "A wordmark that fuses roman and italic inside one six-letter word, for a brand whose whole premise is old and new at once",
+    challenge: [
+      "**Vintage-modern is a contradiction you have to hold in a single mark.** Lean retro and it reads as a throwback label; lean contemporary and the heritage claim quietly disappears.",
+      "Streetwear is judged on its applications, not on a logo sheet. The same mark has to hold on **a tote, a hangtag, a letterhead and a billboard four storeys up**, at every one of those sizes.",
+      "And the name gives you nothing to hide behind: one word, six letters, no symbol, no monogram.",
+    ],
+    solution: [
+      "**The fusion is inside the word.** `fuz` stays roman, `ion` turns italic - one typeface, one weight, one word. The premise is stated by the letterforms before a line of copy is read, which is why the mark needs no symbol.",
+      "**Two typefaces doing opposite jobs.** Zodiak carries the class and the luxe; Switzer Variable keeps it minimal and current. The contrast between them is the same contrast the wordmark makes, one level up.",
+      "**Four values, weighted to earth.** Burnt sienna is the only loud colour in the set, against bright grey, onyx and dusty auburn - so the photography stays effectively monochrome and the colour lands only where it is meant to.",
+      "**A line that does real work.** *Wear The Legacy*, with heritage vocabulary running through the ad lines: heavy on heritage, legacy in layers, worn history.",
+    ],
+    kind: "case-study",
+    title: "Fuzion Brand Identity",
+    logoText: "fuzion",
+    category: "Branding",
+    /* nothing in the exports evidences a year - confirm */
+    year: "2025",
+    cover: "/projects/fuzion-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/fuzion-cover.webp",
+    },
+    cta: "See the Identity",
+    /* the board carries the whole argument, so the page gives Details over
+       to it - see caseBoardOnly. The challenge and solution below stay
+       authored: nothing renders them while this flag is set, and they come
+       straight back if it is ever removed. */
+    caseBoardOnly: true,
+    role: "Brand Identity",
+    tools: ["Figma", "Illustrator"],
+    description:
+      "Fuzion is a vintage-modern streetwear brand drawing on classic Americana, 90s hip-hop and old-school workwear. The identity puts that contradiction inside the wordmark itself - roman and italic in one word - and carries it out through Zodiak and Switzer, a four-value palette led by burnt sienna, and the line Wear The Legacy.",
+    highlights: [
+      "A wordmark that fuses roman and italic inside a single six-letter word",
+      "Zodiak and Switzer Variable, paired to make the same old-and-new contrast",
+      "Applied across tote, stationery, hangtag and two billboards",
+    ],
+    extraFacts: [
+      ["Client", "Fuzion"],
+      ["Studio", "Crestic Era"],
+      ["Scope", "Visual identity development"],
+    ],
+    /*
+      Burnt sienna is the brand, and it cannot carry the light side: #eb7452
+      is 5.68:1 on ink but only 2.52:1 on the cream, well under what real
+      text needs. So light-mode text drops to #ad4a2a, a deeper sienna of
+      the same hue at 4.76:1, while `solid` and `bright` keep the true brand
+      value for borders, rings and anything meant to be spotted rather than
+      read through.
+
+      `ink` is near-black rather than the brand's own onyx: onyx on sienna
+      is 4.23:1 and misses, #241f1c makes 5.55:1.
+    */
+    accent: {
+      dark: "#eb7452",
+      light: "#ad4a2a",
+      solid: "#eb7452",
+      bright: "#eb7452",
+      ink: "#241f1c",
+      fill: "#ad4a2a",
+      hover: "#9c3f22",
+    },
+    /*
+      Twelve slides, supplied as separate exports - see
+      scripts/board-slides.mjs. Mixed .jpg and .jpeg, and mixed sizes: seven
+      of the twelve arrived under 2400px and were left at source rather than
+      upscaled. The hoodie still (s08) is the outlier at 673px wide and is
+      the one piece that will look soft at full bleed.
+    */
+    caseBoard: {
+      pieces: Array.from(
+        { length: 12 },
+        (_, i) => `/projects/fuzion/board/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      caption: "The full identity board, in the order it was laid out.",
+      alt: "The Fuzion identity board: the cover with the brand history over a street portrait, the wordmark on burnt sienna, a Morden Class spread, the wordmark on grey and on sienna, the four-value palette of bright grey, burnt sienna, onyx and dusty auburn, the Zodiak and Switzer type specimens, the Wear The Legacy tagline with its ad lines, a tote bag, a hoodie still, a street billboard, the stationery set, and a building billboard.",
+    },
+  },
+  {
     id: "cpgrams",
     headline:
       "Filing a government grievance by speaking, in any of 22 languages",
@@ -4828,83 +4910,6 @@ export const PROJECTS: Project[] = [
       ),
       caption: "The full case study, in the order it was laid out.",
       alt: "The Solo Leveling case-study board: the title card on a laptop, the about and features copy beside a phone, the Sora specimen and three-value palette, the homepage interface, the about section, the rating, stream and manga row with the watch-now player, the manga carousel and wallpapers, the merch rail and footer, the season video player, the merch grid and secondary screens, the onboarding and checkout screens, the product page for the Level UP hoodie, a laptop mockup, and the closing frame.",
-    },
-  },
-  {
-    id: "fuzion",
-    headline:
-      "A wordmark that fuses roman and italic inside one six-letter word, for a brand whose whole premise is old and new at once",
-    challenge: [
-      "**Vintage-modern is a contradiction you have to hold in a single mark.** Lean retro and it reads as a throwback label; lean contemporary and the heritage claim quietly disappears.",
-      "Streetwear is judged on its applications, not on a logo sheet. The same mark has to hold on **a tote, a hangtag, a letterhead and a billboard four storeys up**, at every one of those sizes.",
-      "And the name gives you nothing to hide behind: one word, six letters, no symbol, no monogram.",
-    ],
-    solution: [
-      "**The fusion is inside the word.** `fuz` stays roman, `ion` turns italic - one typeface, one weight, one word. The premise is stated by the letterforms before a line of copy is read, which is why the mark needs no symbol.",
-      "**Two typefaces doing opposite jobs.** Zodiak carries the class and the luxe; Switzer Variable keeps it minimal and current. The contrast between them is the same contrast the wordmark makes, one level up.",
-      "**Four values, weighted to earth.** Burnt sienna is the only loud colour in the set, against bright grey, onyx and dusty auburn - so the photography stays effectively monochrome and the colour lands only where it is meant to.",
-      "**A line that does real work.** *Wear The Legacy*, with heritage vocabulary running through the ad lines: heavy on heritage, legacy in layers, worn history.",
-    ],
-    kind: "case-study",
-    title: "Fuzion Brand Identity",
-    logoText: "fuzion",
-    category: "Branding",
-    /* nothing in the exports evidences a year - confirm */
-    year: "2025",
-    cover: "/projects/fuzion-cover.webp",
-    preview: {
-      kind: "image",
-      src: "/projects/fuzion-cover.webp",
-    },
-    cta: "See the Identity",
-    role: "Brand Identity",
-    tools: ["Figma", "Illustrator"],
-    description:
-      "Fuzion is a vintage-modern streetwear brand drawing on classic Americana, 90s hip-hop and old-school workwear. The identity puts that contradiction inside the wordmark itself - roman and italic in one word - and carries it out through Zodiak and Switzer, a four-value palette led by burnt sienna, and the line Wear The Legacy.",
-    highlights: [
-      "A wordmark that fuses roman and italic inside a single six-letter word",
-      "Zodiak and Switzer Variable, paired to make the same old-and-new contrast",
-      "Applied across tote, stationery, hangtag and two billboards",
-    ],
-    extraFacts: [
-      ["Client", "Fuzion"],
-      ["Studio", "Crestic Era"],
-      ["Scope", "Visual identity development"],
-    ],
-    /*
-      Burnt sienna is the brand, and it cannot carry the light side: #eb7452
-      is 5.68:1 on ink but only 2.52:1 on the cream, well under what real
-      text needs. So light-mode text drops to #ad4a2a, a deeper sienna of
-      the same hue at 4.76:1, while `solid` and `bright` keep the true brand
-      value for borders, rings and anything meant to be spotted rather than
-      read through.
-
-      `ink` is near-black rather than the brand's own onyx: onyx on sienna
-      is 4.23:1 and misses, #241f1c makes 5.55:1.
-    */
-    accent: {
-      dark: "#eb7452",
-      light: "#ad4a2a",
-      solid: "#eb7452",
-      bright: "#eb7452",
-      ink: "#241f1c",
-      fill: "#ad4a2a",
-      hover: "#9c3f22",
-    },
-    /*
-      Twelve slides, supplied as separate exports - see
-      scripts/board-slides.mjs. Mixed .jpg and .jpeg, and mixed sizes: seven
-      of the twelve arrived under 2400px and were left at source rather than
-      upscaled. The hoodie still (s08) is the outlier at 673px wide and is
-      the one piece that will look soft at full bleed.
-    */
-    caseBoard: {
-      pieces: Array.from(
-        { length: 12 },
-        (_, i) => `/projects/fuzion/board/s${String(i).padStart(2, "0")}.webp`,
-      ),
-      caption: "The full identity board, in the order it was laid out.",
-      alt: "The Fuzion identity board: the cover with the brand history over a street portrait, the wordmark on burnt sienna, a Morden Class spread, the wordmark on grey and on sienna, the four-value palette of bright grey, burnt sienna, onyx and dusty auburn, the Zodiak and Switzer type specimens, the Wear The Legacy tagline with its ad lines, a tote bag, a hoodie still, a street billboard, the stationery set, and a building billboard.",
     },
   },
 ];
