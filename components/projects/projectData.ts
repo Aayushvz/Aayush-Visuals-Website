@@ -4937,7 +4937,7 @@ export const PROJECTS: Project[] = [
       src: "/projects/gravitas-showcase-cover.webp",
     },
     cta: "See the Showcase",
-    role: "Event Branding",
+    role: "Design Coordinator",
     tools: ["Figma", "Illustrator", "Photoshop"],
     description:
       "graVITas '25 is VIT's techno-management fest: 250+ events, 30,000+ attendees and participants from across the globe. This is the identity built for it - logo, website, merchandise, ID cards, brochures, flyers, hoardings, certificates and the entrance gate - held together by one dark ground and a single cyan.",
