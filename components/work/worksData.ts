@@ -42,18 +42,26 @@ export type WorkItem = {
 
 /* map each existing project onto the listing taxonomy. Categories the site
    doesn't have work for yet (Posters, Motion Graphics, ...) simply stay empty
-   until matching projects are added to PROJECTS. */
+   until matching projects are added to PROJECTS.
+
+   Branding is deliberately narrow: Aayush's call, and it is currently the
+   three projects that are identity work first - dropby, IP-TT Cell and AIU.
+   Several others do carry identity work (Mike Tyson, Layover, Riviera,
+   Elevation, Futurepreneurs, Gravitas) and used to sit under this chip; they
+   were taken out so the filter answers "show me branding" with branding
+   rather than with most of the site. Their `tags` still carry the words, so
+   a text search for "branding" or "identity" still finds them. */
 const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   "mike-tyson-invitational": {
-    categories: ["UI/UX", "Branding"],
+    categories: ["UI/UX"],
     tags: ["website", "webflow", "sports", "boxing", "branding", "motion"],
   },
   "elevation-capital": {
-    categories: ["UI/UX", "Branding"],
+    categories: ["UI/UX"],
     tags: ["website", "framer", "ai", "report", "startups", "development"],
   },
   riviera: {
-    categories: ["UI/UX", "Branding"],
+    categories: ["UI/UX"],
     tags: ["website", "festival", "framer", "event", "identity"],
   },
   cpgrams: {
@@ -73,7 +81,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     ],
   },
   layover: {
-    categories: ["Product Design", "UI/UX", "Branding"],
+    categories: ["Product Design", "UI/UX"],
     tags: ["app", "booking", "travel", "mobile", "prototyping", "airport", "identity"],
   },
   "meal-maestro": {
@@ -89,7 +97,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     tags: ["app", "social", "location", "mobile", "identity", "rebrand", "campaign", "logo"],
   },
   futurepreneurs: {
-    categories: ["UI/UX", "Branding"],
+    categories: ["UI/UX"],
     tags: ["event", "website", "framer", "startup", "founders"],
   },
   posterfolio: {
@@ -99,7 +107,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     tags: ["poster", "print", "typography", "editorial", "series", "graphic design", "social"],
   },
   gravitas: {
-    categories: ["Branding", "UI/UX"],
+    categories: ["UI/UX"],
     tags: ["branding", "website", "fest", "identity", "print"],
   },
   /*
@@ -120,6 +128,10 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   "moon-store": {
     categories: ["UI/UX"],
     tags: ["website", "ecommerce", "fashion", "clothing", "gen-z", "storefront", "customisation"],
+  },
+  "solo-leveling": {
+    categories: ["UI/UX"],
+    tags: ["website", "anime", "manga", "streaming", "ecommerce", "merch", "fan", "concept", "dark mode"],
   },
 };
 

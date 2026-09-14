@@ -28,7 +28,9 @@ import { mkdir, rm, stat } from "node:fs/promises";
 const WIDTH = 2400;
 
 const [, , dir, prefix, project, countArg] = process.argv;
-if (!dir || !prefix || !project || !countArg) {
+/* prefix may legitimately be "" - exports numbered 1.png..14.png with no
+   stem at all are common, so it is checked for presence, not for truth */
+if (!dir || prefix === undefined || !project || !countArg) {
   console.error("usage: node scripts/board-slides.mjs <dir> <prefix> <project> <count>");
   process.exit(1);
 }

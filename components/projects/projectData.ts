@@ -4755,6 +4755,81 @@ export const PROJECTS: Project[] = [
       alt: "The AIU identity board: a summary card carrying the mark, the about copy, the technical parameters and the applications; the LOGO REDESIGN title card; the existing line-drawn seal beside the new concept; the inspiration behind the symbolism; the six-value colour palette; the size breakdown from 100px down to a 25px minimum; the mark on a clipboard, keychain, cup and t-shirt; the business card, sticker and letterhead; and the closing frame.",
     },
   },
+  {
+    id: "solo-leveling",
+    headline:
+      "One place to watch it, read it and buy the shirt, for a fandom currently sent to three",
+    challenge: [
+      "A fan of a series like this gets handed around. **The episodes are on a streamer, the source is on a manga reader, the merch is on a third site**, and nothing owns the whole relationship with the person who cares most.",
+      "The art is both the draw and the problem. Solo Leveling's key art is dense, high-contrast and already purple, and **an interface laid over it disappears into it.**",
+      "And it has to be a shop as well as a library. A hoodie needs sizes, a quantity, a wishlist, a bag and a payment route, inside what is otherwise a reading and watching experience.",
+    ],
+    solution: [
+      "**One nav, six routes.** Store, Merch, Updates, News, Ongoing and Upcoming, so the series and the shop sit under the same roof rather than behind different front doors.",
+      "**Three values and nothing else.** #FFFFFF, #130423 and #2B1445. The key art supplies every other colour on the page, and the interface stays out of its way - Sora carries all of the reading, at one weight.",
+      "**It points outward instead of pretending.** The Rating, Stream and Manga row names where the thing actually lives: IMDb and popularity, Prime and Crunchyroll, Mangareader and Solomanga. A fan site that claims to host everything is lying; this one routes.",
+      "**Commerce as a real flow, not a button.** Merch grid, product page with size and quantity, wishlist, bag, shipping address and four payment routes, all in the same dark.",
+    ],
+    kind: "case-study",
+    title: "Solo Leveling Website Design",
+    logoText: "SOLO LEVELING",
+    category: "UI Design",
+    year: "2023",
+    cover: "/projects/solo-leveling-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/solo-leveling-cover.webp",
+    },
+    cta: "See the Screens",
+    role: "UI Design",
+    tools: ["Figma"],
+    description:
+      "A self-directed UI concept for the anime Solo Leveling: one site that carries the episodes, the manga, the news and the merch, with a video player, a full shop flow and a rating row that routes fans to where the series actually streams rather than pretending to host it.",
+    highlights: [
+      "One nav over six routes: store, merch, updates, news, ongoing and upcoming",
+      "A video player built around a season rather than a single episode",
+      "A full commerce flow - grid, product, wishlist, bag, shipping and four payment routes",
+    ],
+    extraFacts: [
+      ["Type", "Self-directed concept"],
+      ["Scope", "Web and mobile UI"],
+      ["Typeface", "Sora"],
+    ],
+    /*
+      The board states three values and all three are ground, not accent:
+      #130423 and #2b1445 are 19.6:1 and 16.3:1 on white and carry the light
+      side outright, but on #1e1e1e they are 1.18 and 1.02 - invisible.
+
+      So the dark side takes the lavender the interface itself runs on,
+      sampled off the screens at #d0b8f8, which measures 9.44:1 on ink. It
+      is the same colour the buttons, links and form fields use, so nothing
+      here is invented. `ink` is the deeper of the two grounds, 11:1 on that
+      lavender.
+    */
+    accent: {
+      dark: "#d0b8f8",
+      light: "#2b1445",
+      solid: "#2b1445",
+      bright: "#d0b8f8",
+      ink: "#130423",
+      fill: "#2b1445",
+      hover: "#3d1d61",
+    },
+    /*
+      Fourteen slides, exported at 3x (5760px) and written at 2400 for
+      1338kb - see scripts/board-slides.mjs. Numbered 1.png..14.png with no
+      stem, which is why that script checks its prefix for presence rather
+      than for truth.
+    */
+    caseBoard: {
+      pieces: Array.from(
+        { length: 14 },
+        (_, i) => `/projects/solo-leveling/board/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      caption: "The full case study, in the order it was laid out.",
+      alt: "The Solo Leveling case-study board: the title card on a laptop, the about and features copy beside a phone, the Sora specimen and three-value palette, the homepage interface, the about section, the rating, stream and manga row with the watch-now player, the manga carousel and wallpapers, the merch rail and footer, the season video player, the merch grid and secondary screens, the onboarding and checkout screens, the product page for the Level UP hoodie, a laptop mockup, and the closing frame.",
+    },
+  },
 ];
 
 /*
