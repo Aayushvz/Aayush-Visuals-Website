@@ -136,7 +136,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   /* Branding was narrowed to identity-first work; this is identity and
      nothing else, so it joins dropby, IP-TT Cell and AIU there. */
   "gravitas-showcase": {
-    categories: ["Branding"],
+    categories: ["Branding", "Product Design"],
     tags: ["event", "fest", "identity", "branding", "logo", "website", "print", "merch", "signage", "vit", "gravitas"],
   },
   fuzion: {
