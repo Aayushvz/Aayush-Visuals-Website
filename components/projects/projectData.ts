@@ -4608,6 +4608,81 @@ export const PROJECTS: Project[] = [
       alt: "The IP&TT Cell identity board: the navy title lockup, the mark on its own, the research behind the Cell and the logo concept, the Ashoka pillar and the I-P-TT letters it came from, the construction grid in light and dark, the design process, the concept marks in outline and two-tone, the mark on black, grey, mid blue and navy, business card and website mockups, and the final lockups.",
     },
   },
+  {
+    id: "moon-store",
+    headline:
+      "A Gen-Z clothing store built around one photograph of the moon, where the thing you buy is the thing you configure",
+    challenge: [
+      "Gen-Z fashion storefronts all resolve to the same page: a grid of products on white. The brief wanted **luxury and exclusivity** out of a label with none of a luxury house's budget, which rules out buying the look.",
+      "Fashion retail lives or dies on browse. Men, women, sneakers, oversized tees, retro flannels, hoodies and sweatshirts are **seven routes into one catalogue**, and a shopper who cannot find their aisle in the first screen leaves.",
+      "And the differentiator is customisation, which is the hardest thing to fit inside a shopping flow. Fabric, GSM and manufacture are **factory questions asked of somebody who just wants a t-shirt.**",
+    ],
+    solution: [
+      "**One photograph carries the whole brand.** The moon sits behind the login, the bag, the payment screen and the shipping form, on near-black, at the same scale every time. The palette is three values, so the product photography is the only colour in the room and the clothes read as the expensive thing.",
+      "**LunarLook is a form, not a factory.** The configurator asks five questions on one screen - fabric, manufacture, quality, GSM, style - and then hands off to a separate Customise step for artwork, colour and size. The manufacturing decisions are contained, so they never interrupt the buy.",
+      "**Two typefaces doing opposite jobs.** Krona One is wide and mechanical and used only for section titles; Sora carries everything a shopper actually reads. The contrast is what makes a three-colour page feel designed rather than unfinished.",
+    ],
+    kind: "case-study",
+    title: "Moon Store",
+    logoText: "MOON",
+    category: "UI Design",
+    /* the board carries no date; confirm before this ships anywhere it
+       matters, since nothing in the file evidences a year */
+    year: "2025",
+    cover: "/projects/moon-store-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/moon-store-cover.webp",
+    },
+    cta: "See the Screens",
+    role: "UI Design",
+    tools: ["Figma"],
+    description:
+      "Moon Store is an online platform for high-end fashion aimed at a Gen-Z shopper: a lunar-inspired storefront where the homepage does the selling, seven category routes keep a wide catalogue navigable, and LunarLook lets a customer specify the fabric, quality and style of the garment before they buy it.",
+    highlights: [
+      "Seven browse routes into one catalogue: men, women, sneakers, oversized tees, retro flannels, hoodies and sweatshirts",
+      "LunarLook, a five-field configurator for fabric, manufacture, quality, GSM and style",
+      "A three-value palette, so the product photography is the only colour on the page",
+    ],
+    extraFacts: [
+      ["Brand", "Moon"],
+      ["Scope", "Web and mobile UI"],
+      ["Typefaces", "Sora, Krona One"],
+    ],
+    /*
+      A monochrome brand: white, #060505 and #87888A, and that is the whole
+      palette. None of the three can be an accent - the grey is 3.55:1 on
+      white and fails body text, the black cannot read on ink, the white
+      cannot read on paper.
+
+      So the accent is the slate the board uses for its own titles, which is
+      the one hue in the deck. #485060 is 8.1:1 on white and 6.96:1 on the
+      cream; its light end, #ccd2de, is 10.99:1 on #1e1e1e. `ink` is the
+      brand's near-black, 13.42:1 on that light slate.
+    */
+    accent: {
+      dark: "#ccd2de",
+      light: "#485060",
+      solid: "#485060",
+      bright: "#ccd2de",
+      ink: "#060505",
+      fill: "#485060",
+      hover: "#5a6478",
+    },
+    /*
+      Twelve slides, arriving as twelve separate 4x exports rather than one
+      tall frame - see scripts/board-slides.mjs. 7680px wide and about 50MB
+      of PNG between them, written at 2400 for 1115kb total.
+    */
+    caseBoard: {
+      pieces: Array.from(
+        { length: 12 },
+        (_, i) => `/projects/moon-store/board/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      caption: "The full case study, in the order it was laid out.",
+      alt: "The Moon Store case-study board: the cover on a laptop and phone, the about and features copy with a research-ideate-design timeline, the Sora and Krona One type specimens beside a white, black and grey palette, the homepage interface, the product page with the oversized tees and retro flannel rails, the hoodies rail and mobile view beside the LunarLook configurator and the Customise screen, the six onboarding and shopping screens, two product previews, the women, men, sneakers and oversized tees category pages, a desktop mockup, a bento of every screen, and the closing frame.",
+    },
+  },
 ];
 
 /*
