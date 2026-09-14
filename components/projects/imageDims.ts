@@ -7,6 +7,16 @@
   height and then shoves the page down as each one arrives.
 */
 export const IMAGE_DIMS: Record<string, [number, number]> = {
+  "/projects/aiu-cover.webp": [1024, 826],
+  "/projects/aiu/board/s00.webp": [2400, 1935],
+  "/projects/aiu/board/s01.webp": [2400, 1350],
+  "/projects/aiu/board/s02.webp": [2400, 1350],
+  "/projects/aiu/board/s03.webp": [2400, 1350],
+  "/projects/aiu/board/s04.webp": [2400, 1350],
+  "/projects/aiu/board/s05.webp": [2400, 1350],
+  "/projects/aiu/board/s06.webp": [2400, 1350],
+  "/projects/aiu/board/s07.webp": [2400, 1350],
+  "/projects/aiu/board/s08.webp": [2400, 1350],
   "/projects/cpgrams-cover.webp": [1536, 1024],
   "/projects/cpgrams/components-1.webp": [453, 1751],
   "/projects/cpgrams/components-2.webp": [467, 1193],

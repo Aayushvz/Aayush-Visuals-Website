@@ -4548,11 +4548,10 @@ export const PROJECTS: Project[] = [
       "**Proved as a solid before it was a lockup.** Drawn on a construction grid, then set on black, light grey, mid blue and the brand navy, so versatility was tested rather than assumed. The lockups came last.",
     ],
     kind: "case-study",
-    title: "IP&TT Cell",
+    title: "IP-TT Cell Branding",
     logoText: "IP&TT Cell",
     category: "Branding",
-    /* the board carries no date; taken from when it was handed over */
-    year: "2026",
+    year: "2024",
     cover: "/projects/ip-tt-cell-cover.webp",
     preview: {
       kind: "image",
@@ -4679,6 +4678,81 @@ export const PROJECTS: Project[] = [
       ),
       caption: "The full case study, in the order it was laid out.",
       alt: "The Moon Store case-study board: the cover on a laptop and phone, the about and features copy with a research-ideate-design timeline, the Sora and Krona One type specimens beside a white, black and grey palette, the homepage interface, the product page with the oversized tees and retro flannel rails, the hoodies rail and mobile view beside the LunarLook configurator and the Customise screen, the six onboarding and shopping screens, two product previews, the women, men, sneakers and oversized tees category pages, a desktop mockup, a bento of every screen, and the closing frame.",
+    },
+  },
+  {
+    id: "aiu",
+    headline:
+      "Redrawing the seal of a body that has represented every university in India since 1925",
+    challenge: [
+      "The existing mark is a **line-drawn seal**: fine strokes, a full circle of type, and detail that only survives at the size it was drawn. A century-old institution cannot simply be handed something fashionable instead.",
+      "It has to work as a **stamp and as a favicon**. On a degree certificate, a letterhead, a keychain and a 25px avatar, and the old mark loses its centre well before the smallest of those.",
+      "And the symbolism is not optional. The tricolour, the open book, the graduation cap and the Sanskrit motto all have to stay, and all have to stay legible.",
+    ],
+    solution: [
+      "**Weight, not simplification.** The seal keeps its architecture - the ring of type, the building, the open book - and gains the mass it needs to hold together small, or printed in one colour.",
+      "**A stated floor, measured rather than asserted.** The mark is set out at 100px, 50px, 30px and 25px, with 25px named as the minimum: below 35px it starts losing its identity, so the guidance is to stay above that rather than to hope.",
+      "**Six values, each carrying meaning.** Deep blue for wisdom, stability and trust; the orange, white and green of the tricolour beneath the open book for the national heritage; and a motto, *एकता विद्या शक्ति*, that the system is built to support rather than decorate.",
+    ],
+    kind: "case-study",
+    title: "Association of Indian Universities Branding",
+    logoText: "AIU",
+    category: "Branding",
+    year: "2024",
+    cover: "/projects/aiu-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/aiu-cover.webp",
+    },
+    cta: "See the Identity",
+    role: "Brand Identity",
+    tools: ["Figma", "Illustrator"],
+    description:
+      "The Association of Indian Universities has been the central body bringing Indian universities together since 1925. This is a redesign of its seal: the same architecture and the same symbolism, given the weight to survive being a favicon as well as a stamp, with a stated minimum size and a six-value palette where every value means something.",
+    highlights: [
+      "A seal redrawn for weight rather than simplified, so the symbolism survives",
+      "A measured size ladder down to a stated 25px floor",
+      "Six brand values, each tied to what the mark is saying",
+    ],
+    extraFacts: [
+      ["Client", "Association of Indian Universities"],
+      ["Founded", "1925"],
+      ["Scope", "Logo redesign and identity"],
+    ],
+    /*
+      The board names its own palette, and most of it cannot be an accent.
+      #0a2c50 is 14.1:1 on white and carries the light side outright, but on
+      #1e1e1e it is 1.18 and invisible; the mid blue #026adc only reaches
+      3.25 there, under the 4.5 real text needs. So `dark` is that blue
+      lightened to #6aa6ea, which measures 6.55:1 on ink.
+
+      `bright` is the yellow the board uses for its own badges and section
+      markers, sampled off the file at #f6c600 - the one colour in the set
+      that exists to be spotted rather than read through. `ink` is the brand
+      navy, which is what reads on it; white on that yellow is about 1.4:1.
+    */
+    accent: {
+      dark: "#6aa6ea",
+      light: "#0a2c50",
+      solid: "#0a2c50",
+      bright: "#f6c600",
+      ink: "#0a2c50",
+      fill: "#0a2c50",
+      hover: "#17406e",
+    },
+    /*
+      Nine frames, exported one per slide at 2x through the Figma REST API
+      and ordered by their y position on the canvas rather than by layer
+      order - see scripts/board-slides.mjs. 5120px wide, written at 2400 for
+      1000kb total.
+    */
+    caseBoard: {
+      pieces: Array.from(
+        { length: 9 },
+        (_, i) => `/projects/aiu/board/s${String(i).padStart(2, "0")}.webp`,
+      ),
+      caption: "The full identity board, in the order it was laid out.",
+      alt: "The AIU identity board: a summary card carrying the mark, the about copy, the technical parameters and the applications; the LOGO REDESIGN title card; the existing line-drawn seal beside the new concept; the inspiration behind the symbolism; the six-value colour palette; the size breakdown from 100px down to a 25px minimum; the mark on a clipboard, keychain, cup and t-shirt; the business card, sticker and letterhead; and the closing frame.",
     },
   },
 ];

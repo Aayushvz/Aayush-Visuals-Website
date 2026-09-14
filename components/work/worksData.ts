@@ -14,7 +14,7 @@ export const WORK_CATEGORIES = [
   "Product Design",
   "UI/UX",
   "Posters",
-  "Brand Design",
+  "Branding",
   "Social Media Creatives",
   "Motion Graphics",
   "Video Edits",
@@ -45,15 +45,15 @@ export type WorkItem = {
    until matching projects are added to PROJECTS. */
 const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   "mike-tyson-invitational": {
-    categories: ["UI/UX", "Brand Design"],
+    categories: ["UI/UX", "Branding"],
     tags: ["website", "webflow", "sports", "boxing", "branding", "motion"],
   },
   "elevation-capital": {
-    categories: ["UI/UX", "Brand Design"],
+    categories: ["UI/UX", "Branding"],
     tags: ["website", "framer", "ai", "report", "startups", "development"],
   },
   riviera: {
-    categories: ["UI/UX", "Brand Design"],
+    categories: ["UI/UX", "Branding"],
     tags: ["website", "festival", "framer", "event", "identity"],
   },
   cpgrams: {
@@ -73,7 +73,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     ],
   },
   layover: {
-    categories: ["Product Design", "UI/UX", "Brand Design"],
+    categories: ["Product Design", "UI/UX", "Branding"],
     tags: ["app", "booking", "travel", "mobile", "prototyping", "airport", "identity"],
   },
   "meal-maestro": {
@@ -85,11 +85,11 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     tags: ["3d", "website", "fest", "interactive", "webgl"],
   },
   dropby: {
-    categories: ["Brand Design", "Product Design", "UI/UX"],
+    categories: ["Branding", "Product Design", "UI/UX"],
     tags: ["app", "social", "location", "mobile", "identity", "rebrand", "campaign", "logo"],
   },
   futurepreneurs: {
-    categories: ["UI/UX", "Brand Design"],
+    categories: ["UI/UX", "Branding"],
     tags: ["event", "website", "framer", "startup", "founders"],
   },
   posterfolio: {
@@ -99,8 +99,27 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     tags: ["poster", "print", "typography", "editorial", "series", "graphic design", "social"],
   },
   gravitas: {
-    categories: ["Brand Design", "UI/UX"],
+    categories: ["Branding", "UI/UX"],
     tags: ["branding", "website", "fest", "identity", "print"],
+  },
+  /*
+    Without an entry here a project falls back to [p.category], and a
+    category that is not one of WORK_CATEGORIES matches no chip at all - see
+    the note on posterfolio. "Branding" now IS a chip, but "UI Design" is
+    not, so all three of these needed naming against the real taxonomy
+    rather than against the label in their hero.
+  */
+  "ip-tt-cell": {
+    categories: ["Branding"],
+    tags: ["logo", "branding", "identity", "university", "vit", "intellectual property", "patents", "pillar"],
+  },
+  aiu: {
+    categories: ["Branding"],
+    tags: ["logo", "branding", "identity", "redesign", "seal", "emblem", "university", "education"],
+  },
+  "moon-store": {
+    categories: ["UI/UX"],
+    tags: ["website", "ecommerce", "fashion", "clothing", "gen-z", "storefront", "customisation"],
   },
 };
 
