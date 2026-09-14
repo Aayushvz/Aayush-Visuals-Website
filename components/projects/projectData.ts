@@ -4616,77 +4616,78 @@ export const PROJECTS: Project[] = [
     },
   },
   {
-    id: "ip-tt-cell",
+    id: "aiu",
     headline:
-      "One pillar that spells I, P and TT, for the cell that turns university research into patents",
+      "Redrawing the seal of a body that has represented every university in India since 1925",
     challenge: [
-      "The name is the problem. **Intellectual Property and Technology Transfer Cell** is five words nobody reads twice, and whatever replaces them has to hold at the size of a favicon and at the size of a building sign.",
-      "It faces two audiences who trust different things: **researchers inside the university** and **industry outside it**. A mark that reads as a student society to one, or as a law firm to the other, loses the half it was meant to convince.",
-      "And it was a first round against a deadline, so the form had to be settled before the detail was. A mark that is only right once it is finished cannot be reviewed.",
+      "The existing mark is a **line-drawn seal**: fine strokes, a full circle of type, and detail that only survives at the size it was drawn. A century-old institution cannot simply be handed something fashionable instead.",
+      "It has to work as a **stamp and as a favicon**. On a degree certificate, a letterhead, a keychain and a 25px avatar, and the old mark loses its centre well before the smallest of those.",
+      "And the symbolism is not optional. The tricolour, the open book, the graduation cap and the Sanskrit motto all have to stay, and all have to stay legible.",
     ],
     solution: [
-      "**One monolithic form, not a monogram.** I, P and TT are merged into a single Sthambh - a pillar - so the acronym is the shape rather than four letters standing next to each other. The vertical, structured mass is where the authority comes from.",
-      "**The IP cycle is built into the letterform.** The I is the core pillar, with structural slabs and outward notches for expansion. The P gains a square for ideas and research and a circle for application and commercialisation. The TT resolves as twin pillars joined by cuts: technology transfer, and the two-way flow between academia and industry.",
-      "**Proved as a solid before it was a lockup.** Drawn on a construction grid, then set on black, light grey, mid blue and the brand navy, so versatility was tested rather than assumed. The lockups came last.",
+      "**Weight, not simplification.** The seal keeps its architecture - the ring of type, the building, the open book - and gains the mass it needs to hold together small, or printed in one colour.",
+      "**A stated floor, measured rather than asserted.** The mark is set out at 100px, 50px, 30px and 25px, with 25px named as the minimum: below 35px it starts losing its identity, so the guidance is to stay above that rather than to hope.",
+      "**Six values, each carrying meaning.** Deep blue for wisdom, stability and trust; the orange, white and green of the tricolour beneath the open book for the national heritage; and a motto, *एकता विद्या शक्ति*, that the system is built to support rather than decorate.",
     ],
     kind: "case-study",
-    title: "IP-TT Cell Branding",
-    logoText: "IP&TT Cell",
+    title: "Association of Indian Universities Branding",
+    logoText: "AIU",
     category: "Branding",
     year: "2024",
-    cover: "/projects/ip-tt-cell-cover.webp",
+    cover: "/projects/aiu-cover.webp",
     preview: {
       kind: "image",
-      src: "/projects/ip-tt-cell-cover.webp",
+      src: "/projects/aiu-cover.webp",
     },
     cta: "See the Identity",
     role: "Brand Identity",
-    tools: ["Figma"],
+    tools: ["Figma", "Illustrator"],
     description:
-      "VIT's Intellectual Property and Technology Transfer Cell protects what the university invents and gets it into industry. The identity is a single pillar built out of the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
+      "The Association of Indian Universities has been the central body bringing Indian universities together since 1925. This is a redesign of its seal: the same architecture and the same symbolism, given the weight to survive being a favicon as well as a stamp, with a stated minimum size and a six-value palette where every value means something.",
     highlights: [
-      "A monolithic mark that merges I, P and TT into one pillar rather than a monogram",
-      "The IP cycle drawn into the letterform: a square for research, a circle for commercialisation",
-      "Tested as a solid on four grounds before any lockup was set",
+      "A seal redrawn for weight rather than simplified, so the symbolism survives",
+      "A measured size ladder down to a stated 25px floor",
+      "Six brand values, each tied to what the mark is saying",
     ],
     extraFacts: [
-      ["Client", "IP&TT Cell, VIT Vellore"],
-      ["Scope", "Logo and identity direction"],
-      ["Stage", "First round, for selection"],
+      ["Client", "Association of Indian Universities"],
+      ["Founded", "1925"],
+      ["Scope", "Logo redesign and identity"],
     ],
     /*
-      Navy is the whole identity - 44% of the board by area - and it reads
-      on paper at 11.6:1, so it carries the light side on its own. It cannot
-      carry the dark side: on #1e1e1e it is nearly invisible, so `dark` and
-      `bright` take the mid blue the board uses for the two-tone concept
-      marks, which measures 5.75:1 there.
+      The board names its own palette, and most of it cannot be an accent.
+      #0a2c50 is 14.1:1 on white and carries the light side outright, but on
+      #1e1e1e it is 1.18 and invisible; the mid blue #026adc only reaches
+      3.25 there, under the 4.5 real text needs. So `dark` is that blue
+      lightened to #6aa6ea, which measures 6.55:1 on ink.
 
-      `ink` is near-black rather than white because white on that mid blue
-      is 2.9:1 and fails outright; near-black on it is 6.03:1.
+      `bright` is the yellow the board uses for its own badges and section
+      markers, sampled off the file at #f6c600 - the one colour in the set
+      that exists to be spotted rather than read through. `ink` is the brand
+      navy, which is what reads on it; white on that yellow is about 1.4:1.
     */
     accent: {
-      dark: "#8098c8",
-      light: "#23395b",
-      solid: "#23395b",
-      bright: "#8098c8",
-      ink: "#0e1a2b",
-      fill: "#23395b",
-      hover: "#2f4a75",
+      dark: "#6aa6ea",
+      light: "#0a2c50",
+      solid: "#0a2c50",
+      bright: "#f6c600",
+      ink: "#0a2c50",
+      fill: "#0a2c50",
+      hover: "#17406e",
     },
     /*
-      Figma frame 2001:2, 1920x17280, divided into seven sections - see
-      scripts/board-sections.mjs. Like Meal Maestro's this board is one flat
-      canvas rather than a stack of section frames, so the cuts were found
-      by walking it for rows with no edge along them; all seven landed in a
-      gap with none forced through content.
+      Nine frames, exported one per slide at 2x through the Figma REST API
+      and ordered by their y position on the canvas rather than by layer
+      order - see scripts/board-slides.mjs. 5120px wide, written at 2400 for
+      1000kb total.
     */
     caseBoard: {
       pieces: Array.from(
-        { length: 7 },
-        (_, i) => `/projects/ip-tt-cell/board/s${String(i).padStart(2, "0")}.webp`,
+        { length: 9 },
+        (_, i) => `/projects/aiu/board/s${String(i).padStart(2, "0")}.webp`,
       ),
       caption: "The full identity board, in the order it was laid out.",
-      alt: "The IP&TT Cell identity board: the navy title lockup, the mark on its own, the research behind the Cell and the logo concept, the Ashoka pillar and the I-P-TT letters it came from, the construction grid in light and dark, the design process, the concept marks in outline and two-tone, the mark on black, grey, mid blue and navy, business card and website mockups, and the final lockups.",
+      alt: "The AIU identity board: a summary card carrying the mark, the about copy, the technical parameters and the applications; the LOGO REDESIGN title card; the existing line-drawn seal beside the new concept; the inspiration behind the symbolism; the six-value colour palette; the size breakdown from 100px down to a 25px minimum; the mark on a clipboard, keychain, cup and t-shirt; the business card, sticker and letterhead; and the closing frame.",
     },
   },
   {
@@ -4763,78 +4764,77 @@ export const PROJECTS: Project[] = [
     },
   },
   {
-    id: "aiu",
+    id: "ip-tt-cell",
     headline:
-      "Redrawing the seal of a body that has represented every university in India since 1925",
+      "One pillar that spells I, P and TT, for the cell that turns university research into patents",
     challenge: [
-      "The existing mark is a **line-drawn seal**: fine strokes, a full circle of type, and detail that only survives at the size it was drawn. A century-old institution cannot simply be handed something fashionable instead.",
-      "It has to work as a **stamp and as a favicon**. On a degree certificate, a letterhead, a keychain and a 25px avatar, and the old mark loses its centre well before the smallest of those.",
-      "And the symbolism is not optional. The tricolour, the open book, the graduation cap and the Sanskrit motto all have to stay, and all have to stay legible.",
+      "The name is the problem. **Intellectual Property and Technology Transfer Cell** is five words nobody reads twice, and whatever replaces them has to hold at the size of a favicon and at the size of a building sign.",
+      "It faces two audiences who trust different things: **researchers inside the university** and **industry outside it**. A mark that reads as a student society to one, or as a law firm to the other, loses the half it was meant to convince.",
+      "And it was a first round against a deadline, so the form had to be settled before the detail was. A mark that is only right once it is finished cannot be reviewed.",
     ],
     solution: [
-      "**Weight, not simplification.** The seal keeps its architecture - the ring of type, the building, the open book - and gains the mass it needs to hold together small, or printed in one colour.",
-      "**A stated floor, measured rather than asserted.** The mark is set out at 100px, 50px, 30px and 25px, with 25px named as the minimum: below 35px it starts losing its identity, so the guidance is to stay above that rather than to hope.",
-      "**Six values, each carrying meaning.** Deep blue for wisdom, stability and trust; the orange, white and green of the tricolour beneath the open book for the national heritage; and a motto, *एकता विद्या शक्ति*, that the system is built to support rather than decorate.",
+      "**One monolithic form, not a monogram.** I, P and TT are merged into a single Sthambh - a pillar - so the acronym is the shape rather than four letters standing next to each other. The vertical, structured mass is where the authority comes from.",
+      "**The IP cycle is built into the letterform.** The I is the core pillar, with structural slabs and outward notches for expansion. The P gains a square for ideas and research and a circle for application and commercialisation. The TT resolves as twin pillars joined by cuts: technology transfer, and the two-way flow between academia and industry.",
+      "**Proved as a solid before it was a lockup.** Drawn on a construction grid, then set on black, light grey, mid blue and the brand navy, so versatility was tested rather than assumed. The lockups came last.",
     ],
     kind: "case-study",
-    title: "Association of Indian Universities Branding",
-    logoText: "AIU",
+    title: "IP-TT Cell Branding",
+    logoText: "IP&TT Cell",
     category: "Branding",
     year: "2024",
-    cover: "/projects/aiu-cover.webp",
+    cover: "/projects/ip-tt-cell-cover.webp",
     preview: {
       kind: "image",
-      src: "/projects/aiu-cover.webp",
+      src: "/projects/ip-tt-cell-cover.webp",
     },
     cta: "See the Identity",
     role: "Brand Identity",
-    tools: ["Figma", "Illustrator"],
+    tools: ["Figma"],
     description:
-      "The Association of Indian Universities has been the central body bringing Indian universities together since 1925. This is a redesign of its seal: the same architecture and the same symbolism, given the weight to survive being a favicon as well as a stamp, with a stated minimum size and a six-value palette where every value means something.",
+      "VIT's Intellectual Property and Technology Transfer Cell protects what the university invents and gets it into industry. The identity is a single pillar built out of the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
     highlights: [
-      "A seal redrawn for weight rather than simplified, so the symbolism survives",
-      "A measured size ladder down to a stated 25px floor",
-      "Six brand values, each tied to what the mark is saying",
+      "A monolithic mark that merges I, P and TT into one pillar rather than a monogram",
+      "The IP cycle drawn into the letterform: a square for research, a circle for commercialisation",
+      "Tested as a solid on four grounds before any lockup was set",
     ],
     extraFacts: [
-      ["Client", "Association of Indian Universities"],
-      ["Founded", "1925"],
-      ["Scope", "Logo redesign and identity"],
+      ["Client", "IP&TT Cell, VIT Vellore"],
+      ["Scope", "Logo and identity direction"],
+      ["Stage", "First round, for selection"],
     ],
     /*
-      The board names its own palette, and most of it cannot be an accent.
-      #0a2c50 is 14.1:1 on white and carries the light side outright, but on
-      #1e1e1e it is 1.18 and invisible; the mid blue #026adc only reaches
-      3.25 there, under the 4.5 real text needs. So `dark` is that blue
-      lightened to #6aa6ea, which measures 6.55:1 on ink.
+      Navy is the whole identity - 44% of the board by area - and it reads
+      on paper at 11.6:1, so it carries the light side on its own. It cannot
+      carry the dark side: on #1e1e1e it is nearly invisible, so `dark` and
+      `bright` take the mid blue the board uses for the two-tone concept
+      marks, which measures 5.75:1 there.
 
-      `bright` is the yellow the board uses for its own badges and section
-      markers, sampled off the file at #f6c600 - the one colour in the set
-      that exists to be spotted rather than read through. `ink` is the brand
-      navy, which is what reads on it; white on that yellow is about 1.4:1.
+      `ink` is near-black rather than white because white on that mid blue
+      is 2.9:1 and fails outright; near-black on it is 6.03:1.
     */
     accent: {
-      dark: "#6aa6ea",
-      light: "#0a2c50",
-      solid: "#0a2c50",
-      bright: "#f6c600",
-      ink: "#0a2c50",
-      fill: "#0a2c50",
-      hover: "#17406e",
+      dark: "#8098c8",
+      light: "#23395b",
+      solid: "#23395b",
+      bright: "#8098c8",
+      ink: "#0e1a2b",
+      fill: "#23395b",
+      hover: "#2f4a75",
     },
     /*
-      Nine frames, exported one per slide at 2x through the Figma REST API
-      and ordered by their y position on the canvas rather than by layer
-      order - see scripts/board-slides.mjs. 5120px wide, written at 2400 for
-      1000kb total.
+      Figma frame 2001:2, 1920x17280, divided into seven sections - see
+      scripts/board-sections.mjs. Like Meal Maestro's this board is one flat
+      canvas rather than a stack of section frames, so the cuts were found
+      by walking it for rows with no edge along them; all seven landed in a
+      gap with none forced through content.
     */
     caseBoard: {
       pieces: Array.from(
-        { length: 9 },
-        (_, i) => `/projects/aiu/board/s${String(i).padStart(2, "0")}.webp`,
+        { length: 7 },
+        (_, i) => `/projects/ip-tt-cell/board/s${String(i).padStart(2, "0")}.webp`,
       ),
       caption: "The full identity board, in the order it was laid out.",
-      alt: "The AIU identity board: a summary card carrying the mark, the about copy, the technical parameters and the applications; the LOGO REDESIGN title card; the existing line-drawn seal beside the new concept; the inspiration behind the symbolism; the six-value colour palette; the size breakdown from 100px down to a 25px minimum; the mark on a clipboard, keychain, cup and t-shirt; the business card, sticker and letterhead; and the closing frame.",
+      alt: "The IP&TT Cell identity board: the navy title lockup, the mark on its own, the research behind the Cell and the logo concept, the Ashoka pillar and the I-P-TT letters it came from, the construction grid in light and dark, the design process, the concept marks in outline and two-tone, the mark on black, grey, mid blue and navy, business card and website mockups, and the final lockups.",
     },
   },
   {
