@@ -133,6 +133,12 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
     categories: ["UI/UX"],
     tags: ["website", "anime", "manga", "streaming", "ecommerce", "merch", "fan", "concept", "dark mode"],
   },
+  /* Branding was narrowed to identity-first work; this is identity and
+     nothing else, so it joins dropby, IP-TT Cell and AIU there. */
+  fuzion: {
+    categories: ["Branding"],
+    tags: ["branding", "identity", "logo", "wordmark", "streetwear", "fashion", "typography", "stationery", "billboard"],
+  },
 };
 
 /* A deep dive is a category you can filter by, not just a section further

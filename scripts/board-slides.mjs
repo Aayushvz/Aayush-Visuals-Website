@@ -23,7 +23,8 @@
     node scripts/board-slides.mjs ~/Downloads behance_img_ moon-store 12
 */
 import sharp from "sharp";
-import { mkdir, rm, stat } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, rm } from "node:fs/promises";
 
 const WIDTH = 2400;
 
@@ -38,18 +39,36 @@ if (!dir || prefix === undefined || !project || !countArg) {
 const COUNT = Number(countArg);
 const DIR = `public/projects/${project}/board`;
 
-/* numeric, not lexicographic: 1..12, never 1, 10, 11, 12, 2 */
-const slides = Array.from({ length: COUNT }, (_, i) => ({
-  n: i + 1,
-  src: `${dir}/${prefix}${i + 1}.png`,
-}));
+/* One export set can mix formats - a set arrived as .jpg with a single
+   .jpeg in the middle of it - so the extension is resolved per slide
+   rather than assumed across the set. */
+const EXT = [".png", ".jpg", ".jpeg", ".webp", ".avif"];
 
-for (const s of slides) {
-  await stat(s.src).catch(() => {
-    console.error(`missing: ${s.src}`);
+/*
+  And it refuses to guess when more than one matches.
+
+  Two different boards were exported into the same folder under the same
+  prefix, one as .png and the next as .jpg. Picking the first extension in
+  the list built an entire project out of the previous project's slides,
+  and every check downstream passed, because the pieces were real images of
+  the right shape. A wrong board is not a broken board - nothing later in
+  the pipeline can catch it, so it has to be caught here.
+*/
+const slides = Array.from({ length: COUNT }, (_, i) => {
+  const n = i + 1;
+  const hits = EXT.map((e) => `${dir}/${prefix}${n}${e}`).filter((p) => existsSync(p));
+  if (!hits.length) {
+    console.error(`missing: ${dir}/${prefix}${n} with any of ${EXT.join(" ")}`);
     process.exit(1);
-  });
-}
+  }
+  if (hits.length > 1) {
+    console.error(`ambiguous: ${hits.length} files match slide ${n} -`);
+    for (const h of hits) console.error(`  ${h}`);
+    console.error("move the set you want into a folder of its own, or rename it");
+    process.exit(1);
+  }
+  return { n, src: hits[0] };
+});
 
 await rm(DIR, { recursive: true, force: true });
 await mkdir(DIR, { recursive: true });
