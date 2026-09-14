@@ -10093,8 +10093,21 @@ html.contact-page-active body {
     height: 46px;
     font-size: 14px;
   }
+  /*
+    minmax(0, 1fr), not 1fr.
+
+    `1fr` is `minmax(auto, 1fr)`, and that `auto` minimum lets a grid item
+    push its track wider than the grid itself: measured on a 390px phone,
+    the container was 350px and the track resolved to 404.712px, so every
+    card ran 35px off the right edge. The page reported clientWidth 390
+    against scrollWidth 425 - no zoom involved, visualViewport.scale was 1 -
+    which is what made it look scaled and what ate the right-hand gutter.
+
+    The two wider breakpoints above already write minmax(0, 1fr); this one
+    was the only track in the file that did not.
+  */
   .worksGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
   .workCard__media {
