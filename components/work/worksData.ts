@@ -181,6 +181,7 @@ const PROJECT_ORDER = [
   "cpgrams",
   "layover",
   "gravitas",
+  "gravitas-showcase",
   "meal-maestro",
   "elevation-capital",
   "posterfolio",
