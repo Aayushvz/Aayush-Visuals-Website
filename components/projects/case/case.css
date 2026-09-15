@@ -1241,6 +1241,21 @@
   gap: var(--cs-sm);
 }
 
+/*
+  A shape group, which on a desktop is not a box at all.
+
+  `contents` means the rows balancedRows() cut stay direct children of
+  .csRows and nothing about the wide layout moves. The wrapper exists for
+  the narrow breakpoints below, where it becomes the grid and the rows
+  dissolve into it.
+
+  Not .csGroup: that name is taken, by the titled argument groups in
+  CaseSections, and it carries a `> * + *` margin of its own.
+*/
+.csShapes {
+  display: contents;
+}
+
 /* Deliberately no full-width-last rule any more. It was there to stop an odd
    image sitting alone beside a hole, which was reasonable at a fixed two
    columns; with four it would blow one phone screen up to the width of the
@@ -1534,6 +1549,30 @@
     );
   }
 
+  /*
+    And the set reflows as one wall rather than as rows with a column taken
+    out of each.
+
+    Taking a column off a row that was cut to be exactly full is what puts a
+    hole beside its last picture, every row, all the way down. Dissolving the
+    rows into the group lets the pictures flow into whatever count this width
+    allows, so the only short row is the last one.
+  */
+  .csShapes--wall {
+    display: grid;
+    gap: var(--cs-sm);
+    grid-template-columns: repeat(
+      max(2, calc(var(--cs-shot-cols, 2) - 1)),
+      minmax(0, 1fr)
+    );
+  }
+
+  /* the row keeps holding its own --cs-shot-ratio for its pictures; custom
+     properties inherit through `contents` even though the box is gone */
+  .csShapes--wall > .csRow {
+    display: contents;
+  }
+
   /* the floating nav is fixed over the page, so the hero starts below it
      rather than under it. --mnav-clear is the height the rest of the site
      uses for exactly this. */
@@ -1583,6 +1622,14 @@
     thousand pixels of phone, and a wall of posters should read as a wall.
   */
   .csRow--pair {
+    grid-template-columns: repeat(
+      min(2, max(1, calc(var(--cs-shot-cols, 2) - 1))),
+      minmax(0, 1fr)
+    );
+  }
+
+  /* the wall, at the phone's own column count - see the tablet rule above */
+  .csShapes--wall {
     grid-template-columns: repeat(
       min(2, max(1, calc(var(--cs-shot-cols, 2) - 1))),
       minmax(0, 1fr)

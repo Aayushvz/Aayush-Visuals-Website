@@ -1388,16 +1388,44 @@ export function MediaRows({
       {runs.flatMap((run, i) =>
         run.page
           ? [<PageRow media={run.media} key={`p${i}`} />]
-          : groupByShape(run.media)
-              .flatMap(balancedRows)
-              .map((row, j) => (
-                <MediaRow
-                  media={row}
-                  cols={row.length}
-                  frame={frame}
-                  key={`${i}-${j}`}
-                />
-              )),
+          : groupByShape(run.media).map((group, g) => {
+              /*
+                The group is wrapped, and on desktop the wrapper is nothing:
+                `display: contents` keeps every row a direct child of .csRows,
+                so the rows balancedRows() cut are laid out exactly as before.
+
+                It earns its keep on a narrow screen. balancedRows() gives
+                each row exactly as many columns as it has pictures, which is
+                what guarantees a full row - and then the responsive rules
+                take a column away, which hands the guarantee straight back:
+                a row of three in two columns is two pictures and a hole,
+                once for every row in the set. Measured on this page at
+                390px, eleven of them.
+
+                So at those widths the wrapper becomes the grid and the rows
+                dissolve into it. The set flows as one wall at the narrow
+                column count, which is what a contact sheet is, and the only
+                gap left is the one at the very end of an odd set rather than
+                one beside every third picture.
+              */
+              const cols = preferredCols(group);
+              return (
+                <div
+                  className={`csShapes${cols >= 3 ? " csShapes--wall" : ""}`}
+                  key={`${i}-g${g}`}
+                  style={{ "--cs-shot-cols": cols } as CSSProperties}
+                >
+                  {balancedRows(group).map((row, j) => (
+                    <MediaRow
+                      media={row}
+                      cols={row.length}
+                      frame={frame}
+                      key={`${i}-${g}-${j}`}
+                    />
+                  ))}
+                </div>
+              );
+            }),
       )}
     </div>
   );
