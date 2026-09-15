@@ -645,6 +645,26 @@ export type Project = {
   */
   caseBoard?: { pieces: string[]; alt: string; caption?: string };
   /*
+    A poster volume, laid out as the page it was designed as.
+
+    Not a board and not a written case study: a red masthead, then one
+    numbered entry per poster carrying its own writing and its own plates.
+    The writing lives here as text rather than inside an image, which is
+    the point - set as HTML it reflows and stays readable on a phone, where
+    the same words baked into a plate arrive at four pixels tall.
+  */
+  posterVolume?: {
+    kicker: string;
+    label: string;
+    number: string;
+    entries: {
+      no: string;
+      title: string;
+      body: string[];
+      plates: { src: string; alt: string }[];
+    }[];
+  };
+  /*
     The board stands in for the case study rather than joining it.
 
     Layover's covers the same ground as the page's own eight sections, in
@@ -4982,6 +5002,142 @@ export const PROJECTS: Project[] = [
       ),
       caption: "The full showcase, in the order it was laid out.",
       alt: "The graVITas '25 showcase board: the cover lockup, an introduction to the fest, the logo from first exploration through iterations to the final mark, two spreads of the event website, merchandise, two sets of ID cards from Chief Patron down to Volunteer, brochures, flyers, hoardings, the entrance gate from sketch to built structure, flyer design, certificates, the branding system, and the closing mark.",
+    },
+  },
+  {
+    id: "posterfolio-vol2",
+    headline:
+      "Six posters about the same quiet subject, each one written down as carefully as it was drawn",
+    kind: "case-study",
+    title: "Posterfolio Vol 2",
+    logoText: "POSTERFOLIO",
+    category: "Poster Design",
+    year: "2025",
+    cover: "/projects/posterfolio-vol2-cover.webp",
+    preview: {
+      kind: "image",
+      src: "/projects/posterfolio-vol2-cover.webp",
+    },
+    cta: "See the Volume",
+    role: "Poster Design",
+    tools: ["Photoshop", "Illustrator", "Figma"],
+    description:
+      "A volume of six typographic posters on distance, silence and the kinds of hurt that do not announce themselves. Each one carries its own short piece of writing, and the whole set runs on one red, one near-black and a single grey.",
+    highlights: [
+      "Six posters, each with its own written piece rather than a caption",
+      "One red, one near-black and a single grey across the whole volume",
+      "Shown in situ: street windows, a lightbox at night, print and a desk",
+    ],
+    extraFacts: [
+      ["Volume", "Six posters"],
+      ["Scope", "Typographic poster series"],
+      ["Shown", "Print, street and screen mockups"],
+    ],
+    /*
+      The volume is one red on near-black. #d60812 is 5.1:1 on the page's
+      own #1c1c1c ground, but only 4.05:1 on white, just under what real
+      text needs - so light-mode text drops to #b3060f at 6.2:1 on the
+      cream, while `solid` and `bright` keep the true red for the masthead
+      and anything meant to be spotted.
+    */
+    accent: {
+      dark: "#ff3b45",
+      light: "#b3060f",
+      solid: "#d60812",
+      bright: "#ff1520",
+      ink: "#ffffff",
+      fill: "#b3060f",
+      hover: "#94050c",
+    },
+    posterVolume: {
+      kicker: "creative posters.",
+      label: "volume",
+      number: "01",
+      entries: [
+        {
+          no: "01",
+          title: "BREAKING YOU",
+          body: [
+            "Some fractures don't come from impact they form in silence, over time, unnoticed by most but deeply felt by one.",
+            "This piece explores the weight of offering warmth into a void, where responses never arrive, but the awareness does.",
+            "It's about the quiet unraveling that happens not because someone left, but because they stayed just enough to be seen, yet never close enough to hold anything real.",
+            "Not every wound bleeds some just echo.",
+          ],
+          plates: [
+            { src: "/projects/posterfolio-vol2/breaking-you-single.webp", alt: "The Breaking You poster on a dark ribbed wall, red with a distorted repeated headline." },
+            { src: "/projects/posterfolio-vol2/breaking-you-street.webp", alt: "Three Breaking You posters side by side in a lit street window, two red and one white." },
+          ],
+        },
+        {
+          no: "02",
+          title: "CURSED",
+          body: [
+            "A visual exploration of unseen weight  when it feels like everything touched slowly withers.",
+            "Bonds fade, moments decay, even the brightest things begin to dull.",
+            "This piece reflects a year spent in shadows, where nothing holds, and everything slips - not with chaos, but with quiet inevitability.",
+            "It's less about destruction, more about a presence that carries silence, loss, and the haunting sense that maybe it was never luck that ran out but something deeper that never left.",
+          ],
+          plates: [
+            { src: "/projects/posterfolio-vol2/cursed-room.webp", alt: "The Cursed poster in a dark room beside two pale vases, a figure reaching through red." },
+            { src: "/projects/posterfolio-vol2/cursed-print.webp", alt: "Cursed as a printed piece lit against a deep red ground." },
+          ],
+        },
+        {
+          no: "03",
+          title: "SHATTERED BONDS",
+          body: [
+            "Some ties don't snap all at once they fray in silence, thread by thread, while one side still holds on, unaware the other let go long ago. This piece captures the haunting dissonance between what felt unbreakable and what was never held equally.",
+            "Sometimes it's not the end that hurts most  it's the realization that maybe you were the only one who ever believed it wouldn't.",
+          ],
+          plates: [
+            { src: "/projects/posterfolio-vol2/shattered-print.webp", alt: "Shattered Bonds as a booklet on red, headline reading Stitch the Silence." },
+            { src: "/projects/posterfolio-vol2/shattered-desk.webp", alt: "Shattered Bonds framed and standing on a pale desk beside a lamp." },
+          ],
+        },
+        {
+          no: "04",
+          title: "SUKOON",
+          body: [
+            "This poster holds a bittersweet truth that sometimes, peace doesn't come in silence, but in the shape of a person.",
+            "Not the kind of calm that erases chaos, but the kind that makes it survivable.",
+            "A glance, a voice, a quiet presence that makes the weight of everything feel lighter.",
+            "Yet within that stillness lives a soft ache the fragile comfort of needing someone just to feel okay.",
+            "It's not just love; it's refuge. A breath, a hush, a fleeting home in a world that keeps breaking.",
+            "Two people, momentarily, becoming each other's pause in the storm.",
+          ],
+          plates: [
+            { src: "/projects/posterfolio-vol2/sukoon-jungle.webp", alt: "The Sukoon poster standing in wet jungle, two figures silhouetted against a glowing horizon." },
+          ],
+        },
+        {
+          no: "05",
+          title: "RECIPROCATE",
+          body: [
+            "This piece explores a quieter kind of hurt not from being ignored, but from being seen and still left unnoticed.",
+            "It reflects those who show up with silent effort and unspoken feelings, hoping to be understood, only to be met with deliberate indifference.",
+            "Not distance, but closeness that avoids connection.",
+            "Sometimes, the loudest quiet echoes from the one soul you whispered toward.",
+            "The design speaks through stillness for emotions that were true, yet never acknowledged.",
+          ],
+          plates: [
+            { src: "/projects/posterfolio-vol2/reciprocate-wall.webp", alt: "Four Reciprocate posters along a curved concrete wall, alternating red and white, a figure walking past." },
+          ],
+        },
+        {
+          no: "06",
+          title: "PEACE",
+          body: [
+            "Long For Peace is a quiet reflection on stillness a poster where words don't seek answers, only presence.",
+            "The poem flows gently, like petals drifting without destination, capturing a kind of peace that arrives without noise or resolution.",
+            "It's about the feelings that remain unspoken, the silences that stay, and how something can bloom fully even when unseen.",
+            "This piece isn't loud in message it rests, breathes, and simply exists.",
+          ],
+          plates: [
+            { src: "/projects/posterfolio-vol2/peace-night.webp", alt: "Long For Peace glowing as a lightbox at night, a blue bloom against pale type." },
+            { src: "/projects/posterfolio-vol2/all-plates.webp", alt: "The whole volume laid out together: Reciprocate, Peace, Breaking You and Cursed overlapping on a dark ground." },
+          ],
+        },
+      ],
     },
   },
 ];

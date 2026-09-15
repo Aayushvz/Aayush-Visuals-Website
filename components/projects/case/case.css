@@ -908,6 +908,108 @@
 }
 
 /* =====================================================================
+   A POSTER VOLUME
+   =====================================================================
+
+   Laid out as the page it was designed as, rather than shown as pictures
+   of a page. The masthead and every word of the writing are real text, so
+   they reflow and stay readable at 390 - the plates are the only images
+   here, and they are the only things that should be.
+
+   Everything is full-bleed, because the design is edge to edge: the same
+   `50% - 50vw` trick the boards use, applied once to the wrapper so the
+   masthead, the text bands and the plates all share one edge.
+*/
+.pv {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  background: #1c1c1c;
+  color: #fff;
+}
+
+/* the red masthead */
+.pv__hero {
+  background: #d60812;
+  padding: clamp(48px, 9vw, 104px) clamp(20px, 6vw, 96px);
+  text-align: center;
+}
+
+.pv__kicker {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(30px, 6.4vw, 66px);
+  color: #fff;
+}
+
+/* "volume" and the number sit on one line with the gap between them that
+   the artwork has; on a phone they simply centre under the kicker */
+.pv__vol {
+  margin: clamp(2px, 0.6vw, 8px) 0 0;
+  display: flex;
+  justify-content: center;
+  gap: clamp(24px, 9vw, 150px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(30px, 6.4vw, 66px);
+  color: #0a0a0a;
+}
+
+.pv__entry {
+  padding-block: clamp(30px, 5vw, 64px) 0;
+}
+
+.pv__text {
+  max-width: min(1100px, 100% - clamp(40px, 12vw, 192px));
+  margin-inline: auto;
+  padding-bottom: clamp(24px, 4vw, 48px);
+}
+
+.pv__title {
+  margin: 0 0 clamp(18px, 2.6vw, 34px);
+  font-size: clamp(19px, 2.3vw, 26px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.pv__no {
+  color: #fff;
+}
+
+.pv__name {
+  color: #ff1520;
+}
+
+/*
+  The body is set as separate lines because it is written as separate
+  lines - each one is its own thought and the artwork breaks them that
+  way. They are paragraphs rather than <br>s so that a line too long for a
+  phone wraps into its own block instead of colliding with the next one.
+*/
+.pv__line {
+  margin: 0 0 clamp(10px, 1.4vw, 18px);
+  font-size: clamp(14px, 1.15vw, 16px);
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pv__line:last-child {
+  margin-bottom: 0;
+}
+
+.pv__plate {
+  display: block;
+}
+
+.pv__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* =====================================================================
    THE BOARD
    =====================================================================
 

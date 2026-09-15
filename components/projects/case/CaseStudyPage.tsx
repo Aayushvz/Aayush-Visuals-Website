@@ -7,6 +7,7 @@ import HomeContact from "@/components/HomeContact";
 import { PROJECTS, type Project } from "@/components/projects/projectData";
 import {
   Board,
+  PosterVolume,
   buildStory,
   marked,
   Details,
@@ -355,7 +356,7 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               what puts it directly after the opening statement once these
               are gone.
             */}
-            {story.details && !project.caseBoardOnly ? (
+            {story.details && !project.caseBoardOnly && !project.posterVolume ? (
               <section className="csSec">
                 <SectionHead no={++no} name="Details" />
                 <div className="csSec__body">
@@ -414,6 +415,15 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               opening statement and the start of the work. The board's own
               cover does the job a section head would have done.
             */}
+            {/* a volume is laid out as its own page; see PosterVolume */}
+            {project.posterVolume ? (
+              <section className="csSec csSec--board">
+                <div className="csSec__body">
+                  <PosterVolume volume={project.posterVolume} />
+                </div>
+              </section>
+            ) : null}
+
             {project.caseBoard ? (
               <section
                 className={`csSec${project.caseBoardOnly ? " csSec--board" : ""}`}

@@ -1139,6 +1139,87 @@ function rowShape(
   box is both a page that jumps eight thousand pixels when it decodes and
   one the loader never decides is worth fetching.
 */
+/*
+  A poster volume, laid out as the page it was designed as.
+
+  Every other project here is either a written case study or an exported
+  board. This one is neither: it was designed as a web page - a red
+  masthead, then a numbered entry per poster with its own writing, each
+  followed by its plates full-bleed - so it gets its own renderer rather
+  than being flattened into beats that would lose the structure.
+
+  The writing is real text, not part of an image. That is the whole reason
+  for this component: set as HTML it reflows on a phone, where the same
+  words baked into a plate would arrive at four pixels tall, which is the
+  problem every board on this site has.
+*/
+export function PosterVolume({
+  volume,
+}: {
+  volume: {
+    kicker: string;
+    label: string;
+    number: string;
+    entries: {
+      no: string;
+      title: string;
+      body: string[];
+      plates: { src: string; alt: string }[];
+    }[];
+  };
+}) {
+  return (
+    <div className="pv">
+      <header className="pv__hero" data-rise>
+        <p className="pv__kicker">{volume.kicker}</p>
+        <p className="pv__vol">
+          <span className="pv__volWord">{volume.label}</span>
+          <span className="pv__volNo">{volume.number}</span>
+        </p>
+      </header>
+
+      {volume.entries.map((e) => (
+        <section className="pv__entry" key={e.no + e.title}>
+          <div className="pv__text" data-rise>
+            <h2 className="pv__title">
+              <span className="pv__no">{e.no}.</span>{" "}
+              <span className="pv__name">{e.title}</span>
+            </h2>
+            {e.body.map((line, i) => (
+              <p className="pv__line" key={i}>
+                {line}
+              </p>
+            ))}
+          </div>
+          {e.plates.map((p) => {
+            const dim = IMAGE_DIMS[p.src];
+            return (
+              <picture className="pv__plate" key={p.src}>
+                <source
+                  srcSet={p.src.replace(/\.webp$/, ".avif")}
+                  type="image/avif"
+                />
+                <img
+                  className="pv__img"
+                  src={p.src}
+                  alt={p.alt}
+                  style={
+                    dim
+                      ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) }
+                      : undefined
+                  }
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+            );
+          })}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export function Board({
   board,
 }: {
