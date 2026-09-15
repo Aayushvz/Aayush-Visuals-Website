@@ -999,6 +999,33 @@
   margin-bottom: 0;
 }
 
+/*
+  The posters, three across, inside the text column's own rail.
+
+  They are the work itself rather than a photograph of it, so they sit on
+  the page at their own four-by-five rather than being cropped or bled to
+  the edge like the in-situ plates below. auto-fit with a floor means the
+  count falls to two and then one on its own as the window narrows, and no
+  poster is ever asked to be narrower than it can be read at.
+*/
+.pv__grid {
+  max-width: min(1400px, 100% - clamp(40px, 12vw, 192px));
+  margin: 0 auto clamp(28px, 4vw, 56px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: clamp(10px, 1.4vw, 20px);
+}
+
+.pv__poster {
+  display: block;
+}
+
+.pv__posterImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .pv__plate {
   display: block;
 }

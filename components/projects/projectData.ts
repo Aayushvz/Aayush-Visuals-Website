@@ -661,6 +661,9 @@ export type Project = {
       no: string;
       title: string;
       body: string[];
+      /** the poster artworks themselves, shown in a grid */
+      posters: { src: string; alt: string }[];
+      /** the same posters photographed in situ, shown full-bleed */
       plates: { src: string; alt: string }[];
     }[];
   };
@@ -5063,6 +5066,12 @@ export const PROJECTS: Project[] = [
             "It's about the quiet unraveling that happens not because someone left, but because they stayed just enough to be seen, yet never close enough to hold anything real.",
             "Not every wound bleeds some just echo.",
           ],
+          posters: [
+            { src: "/projects/posterfolio-vol2/breaking-you-1.webp", alt: "Breaking You on red, the halftone headline breaking apart across the top." },
+            { src: "/projects/posterfolio-vol2/breaking-you-2.webp", alt: "Breaking You on white, the halftone mark in red." },
+            { src: "/projects/posterfolio-vol2/breaking-you-3.webp", alt: "Breaking You on black, the halftone mark in red." },
+            { src: "/projects/posterfolio-vol2/breaking-you-4.webp", alt: "Breaking You on white, the halftone mark in black." },
+          ],
           plates: [
             { src: "/projects/posterfolio-vol2/breaking-you-single.webp", alt: "The Breaking You poster on a dark ribbed wall, red with a distorted repeated headline." },
             { src: "/projects/posterfolio-vol2/breaking-you-street.webp", alt: "Three Breaking You posters side by side in a lit street window, two red and one white." },
@@ -5077,6 +5086,11 @@ export const PROJECTS: Project[] = [
             "This piece reflects a year spent in shadows, where nothing holds, and everything slips - not with chaos, but with quiet inevitability.",
             "It's less about destruction, more about a presence that carries silence, loss, and the haunting sense that maybe it was never luck that ran out but something deeper that never left.",
           ],
+          posters: [
+            { src: "/projects/posterfolio-vol2/cursed-1.webp", alt: "Cursed, a figure pressing a hand through fogged glass." },
+            { src: "/projects/posterfolio-vol2/cursed-2.webp", alt: "Cursed set small in red on white, reading even the mirror feels unfamiliar now." },
+            { src: "/projects/posterfolio-vol2/cursed-3.webp", alt: "Cursed set in white on deep red." },
+          ],
           plates: [
             { src: "/projects/posterfolio-vol2/cursed-room.webp", alt: "The Cursed poster in a dark room beside two pale vases, a figure reaching through red." },
             { src: "/projects/posterfolio-vol2/cursed-print.webp", alt: "Cursed as a printed piece lit against a deep red ground." },
@@ -5088,6 +5102,11 @@ export const PROJECTS: Project[] = [
           body: [
             "Some ties don't snap all at once they fray in silence, thread by thread, while one side still holds on, unaware the other let go long ago. This piece captures the haunting dissonance between what felt unbreakable and what was never held equally.",
             "Sometimes it's not the end that hurts most  it's the realization that maybe you were the only one who ever believed it wouldn't.",
+          ],
+          posters: [
+            { src: "/projects/posterfolio-vol2/shattered-1.webp", alt: "Shattered Bonds, Stitch the Silence, on white with two figures pulling a thread between them." },
+            { src: "/projects/posterfolio-vol2/shattered-2.webp", alt: "Shattered Bonds, Stitch the Silence, on red." },
+            { src: "/projects/posterfolio-vol2/shattered-3.webp", alt: "Shattered Bonds, Stitch the Silence, on pale grey." },
           ],
           plates: [
             { src: "/projects/posterfolio-vol2/shattered-print.webp", alt: "Shattered Bonds as a booklet on red, headline reading Stitch the Silence." },
@@ -5105,6 +5124,11 @@ export const PROJECTS: Project[] = [
             "It's not just love; it's refuge. A breath, a hush, a fleeting home in a world that keeps breaking.",
             "Two people, momentarily, becoming each other's pause in the storm.",
           ],
+          posters: [
+            { src: "/projects/posterfolio-vol2/sukoon-1.webp", alt: "Sukoon set in English over Hindi, two glowing figures on a horizon." },
+            { src: "/projects/posterfolio-vol2/sukoon-2.webp", alt: "Sukoon in English, the two figures against a dark sky." },
+            { src: "/projects/posterfolio-vol2/sukoon-3.webp", alt: "Sukoon set in Hindi, the two figures against a dark sky." },
+          ],
           plates: [
             { src: "/projects/posterfolio-vol2/sukoon-jungle.webp", alt: "The Sukoon poster standing in wet jungle, two figures silhouetted against a glowing horizon." },
           ],
@@ -5119,6 +5143,11 @@ export const PROJECTS: Project[] = [
             "Sometimes, the loudest quiet echoes from the one soul you whispered toward.",
             "The design speaks through stillness for emotions that were true, yet never acknowledged.",
           ],
+          posters: [
+            { src: "/projects/posterfolio-vol2/reciprocate-1.webp", alt: "Reciprocate on red, a figure standing with head bowed." },
+            { src: "/projects/posterfolio-vol2/reciprocate-2.webp", alt: "Reciprocate on white, the figure in black." },
+            { src: "/projects/posterfolio-vol2/reciprocate-3.webp", alt: "Reciprocate on black, the figure in red." },
+          ],
           plates: [
             { src: "/projects/posterfolio-vol2/reciprocate-wall.webp", alt: "Four Reciprocate posters along a curved concrete wall, alternating red and white, a figure walking past." },
           ],
@@ -5131,6 +5160,11 @@ export const PROJECTS: Project[] = [
             "The poem flows gently, like petals drifting without destination, capturing a kind of peace that arrives without noise or resolution.",
             "It's about the feelings that remain unspoken, the silences that stay, and how something can bloom fully even when unseen.",
             "This piece isn't loud in message it rests, breathes, and simply exists.",
+          ],
+          posters: [
+            { src: "/projects/posterfolio-vol2/peace-1.webp", alt: "Long For Peace on blue, a tulip opening across the sheet." },
+            { src: "/projects/posterfolio-vol2/peace-2.webp", alt: "Long For Peace, the bloom filling the frame." },
+            { src: "/projects/posterfolio-vol2/peace-3.webp", alt: "Long For Peace laid among real flowers." },
           ],
           plates: [
             { src: "/projects/posterfolio-vol2/peace-night.webp", alt: "Long For Peace glowing as a lightbox at night, a blue bloom against pale type." },

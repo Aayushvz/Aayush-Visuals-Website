@@ -1164,6 +1164,7 @@ export function PosterVolume({
       no: string;
       title: string;
       body: string[];
+      posters: { src: string; alt: string }[];
       plates: { src: string; alt: string }[];
     }[];
   };
@@ -1191,6 +1192,33 @@ export function PosterVolume({
               </p>
             ))}
           </div>
+          {e.posters.length ? (
+            <div className="pv__grid" data-rise>
+              {e.posters.map((p) => {
+                const dim = IMAGE_DIMS[p.src];
+                return (
+                  <picture className="pv__poster" key={p.src}>
+                    <source
+                      srcSet={p.src.replace(/\.webp$/, ".avif")}
+                      type="image/avif"
+                    />
+                    <img
+                      className="pv__posterImg"
+                      src={p.src}
+                      alt={p.alt}
+                      style={
+                        dim
+                          ? { aspectRatio: (dim[0] / dim[1]).toFixed(4) }
+                          : undefined
+                      }
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                );
+              })}
+            </div>
+          ) : null}
           {e.plates.map((p) => {
             const dim = IMAGE_DIMS[p.src];
             return (
