@@ -932,6 +932,23 @@ function Img({
     ...(index === undefined ? null : { "--i": index }),
   } as CSSProperties;
   const cap = Object.keys(style).length ? style : undefined;
+  /*
+    The picture's OWN proportions, carried alongside whatever the row imposes.
+
+    A paired row deliberately cuts every cell to one shared ratio, so the
+    picture cannot simply declare its own. But a dense feature un-stacks that
+    row and hands each capture its proportions back, and the only way it had
+    to say so was `aspect-ratio: auto` - which on a lazy image that has not
+    loaded is no ratio at all. Measured: those shots computed `auto` where an
+    undeclared sibling computed `auto 1600 / 765`, and a replaced element with
+    no ratio and no height is its width by zero.
+
+    So the ratio travels as a variable rather than as the property. The row
+    keeps setting `aspect-ratio` as it always did, and the one rule that wants
+    the picture's own shape can ask for it by name.
+  */
+  const own = box ? { "--cs-shot-own": (box[0] / box[1]).toFixed(4) } : null;
+
   /* the chrome wraps whichever element this turns out to be, so a screen
      recording is framed the same way a still is */
   const wrap = (node: ReactNode) =>
@@ -952,7 +969,8 @@ function Img({
     );
 
   /* ...and once it has, the picture inside simply fills it */
-  const inner = frame ? (index === undefined ? undefined : style) : cap;
+  const innerBase = frame ? (index === undefined ? undefined : style) : cap;
+  const inner = own || innerBase ? ({ ...innerBase, ...own } as CSSProperties) : undefined;
 
   /* a .webm in an <img> renders nothing, so a moving asset gets a video that
      behaves like an image: no controls, no sound, and no reason to notice it

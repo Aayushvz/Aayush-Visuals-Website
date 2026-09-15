@@ -735,10 +735,33 @@
   height: auto;
 }
 
+/*
+  Its own ratio by NAME, not `auto`.
+
+  `auto` means "whatever the picture's natural ratio is", and a lazy image
+  that has not loaded does not have one yet. Chrome says so plainly: these
+  shots computed `aspect-ratio: auto` while an undeclared sibling in the same
+  feature computed `auto 1600 / 765`. With no ratio, no height and a grid
+  track sized by the thing inside it, the whole frame resolved to 30px of
+  browser bar with nothing under it - the same collapse .csFrame warns about,
+  and the lazy loader never fires for a box that is never on screen, so it
+  stayed collapsed. Four captures on this page had never painted at any width.
+
+  --cs-shot-own is the image's intrinsic ratio, set from IMAGE_DIMS by Img()
+  for exactly this. `auto` stays as the fallback so an asset with no recorded
+  size behaves as it did.
+*/
 .csFeature--dense .csRow--pair .csShot {
-  aspect-ratio: auto;
+  aspect-ratio: var(--cs-shot-own, auto);
   height: auto;
   object-fit: fill;
+}
+
+/* and the frame's own rule says height: 100% a hundred and sixty lines
+   further down at the same specificity, which would put the circularity
+   straight back */
+.csFeature--dense .csRow--pair > .csFrame .csShot {
+  height: auto;
 }
 
 .csFeature--dense .csFeature__head .cs__body {
