@@ -613,7 +613,26 @@
 */
 .csDetails__media .csShot {
   max-height: 70vh;
-  width: auto;
+  /*
+    100%, not auto.
+
+    `width: auto` on a replaced element whose picture has not arrived yet
+    has nothing to derive a width from - both axes are auto, the caps below
+    are caps rather than sizes, and the box comes out 0x0. These shots are
+    lazy, so a zero-height box never reaches the viewport, the loader never
+    fires, and the collapse holds itself shut. CPGRAMS' four Details shots
+    were 0x0 at 390 AND at 1440: they had never rendered at any width, on
+    any pass, since the rule was written.
+
+    `object-fit: contain` is what keeps the original intent once the height
+    cap bites. The point of `auto` was that a tall phone screen should scale
+    down whole rather than be cropped; contain does that inside a full-width
+    box, so the picture lands at the same size and position it would have,
+    with the leftover width transparent either side.
+  */
+  width: 100%;
+  height: auto;
+  object-fit: contain;
   max-width: 100%;
   margin-inline: auto;
 }
@@ -1018,6 +1037,24 @@
 .csRow {
   display: grid;
   gap: var(--cs-sm);
+  /*
+    A width, because the auto margins below take the stretch away.
+
+    A grid item with auto inline margins does not stretch to its track - the
+    margins absorb the free space and the box shrink-to-fits its contents
+    instead. That is invisible while the pictures have a size, and fatal
+    when they do not: the shots are lazy, an unloaded img in a
+    minmax(0, 1fr) track contributes nothing, so the row collapsed to the
+    width of its own gap. Measured on CPGRAMS at 390px, the gallery's three
+    rows were 16px wide with all thirteen images at 0x0, and because a
+    zero-height row never reaches the viewport the loader never fired -
+    the collapse kept itself collapsed.
+
+    100% restores the stretch that the margins removed; the cap below still
+    bites when a row is narrower than its column, and the margins still
+    centre it when it is.
+  */
+  width: 100%;
   /* never wider than the assets in it; see rowShape() for why */
   max-width: min(100%, var(--cs-row-max, 100%));
   /*
