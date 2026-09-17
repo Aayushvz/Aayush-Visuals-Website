@@ -14,6 +14,7 @@ export default function ContractGenerator() {
   const { draft, setField, setToggle, setDeliverables, reset, pct } = useContractDraft();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [skin, setSkin] = useState<Skin>("studio");
+  const [tab, setTab] = useState<"form" | "preview">("form");
 
   /* first paint follows the OS, then the toggle owns it. Deliberately not
      persisted: leaving the route is the way back from any choice here. */
@@ -23,7 +24,7 @@ export default function ContractGenerator() {
   }, []);
 
   return (
-    <div className="cgShell" data-cg-theme={theme} data-cg-skin={skin}>
+    <div className="cgShell" data-cg-theme={theme} data-cg-skin={skin} data-cg-tab={tab}>
       <Toolbar
         pct={pct}
         theme={theme}
@@ -34,6 +35,21 @@ export default function ContractGenerator() {
         onWord={() => downloadWord(draft)}
         onMarkdown={() => downloadMarkdown(draft)}
       />
+      <div className="cgTabs" role="tablist" aria-label="Panel">
+        {(["form", "preview"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            role="tab"
+            className="cgSeg__btn"
+            aria-selected={tab === t}
+            aria-pressed={tab === t}
+            onClick={() => setTab(t)}
+          >
+            {t === "form" ? "Contract Data" : "Preview"}
+          </button>
+        ))}
+      </div>
       <div className="cgGrid">
         <div className="cgCol cgCol--form">
           <FormPanel

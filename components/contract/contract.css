@@ -710,3 +710,140 @@
 
   .cgCol--paper { scroll-behavior: auto; }
 }
+
+/* ---------- print ----------
+   The PDF route. Everything but the paper is removed, the paper loses
+   its shadow and its max-width, and each clause is protected from being
+   split across a page break. Text stays vector and selectable, which is
+   the whole reason this is a stylesheet and not a canvas library.
+
+   The browser's own page headers and footers (URL, date, page numbers)
+   cannot be reached from CSS, so the 18mm margin is sized to sit clear
+   of them rather than fighting them. */
+
+@page {
+  size: A4;
+  margin: 18mm;
+}
+
+@media print {
+  .cgBar,
+  .cgCol--form,
+  .cgCol--rail,
+  .cgTabs {
+    display: none !important;
+  }
+
+  .cgShell {
+    min-height: 0;
+    background: #fff;
+  }
+
+  .cgGrid {
+    display: block;
+    height: auto;
+  }
+
+  .cgCol,
+  .cgCol--paper {
+    overflow: visible;
+    height: auto;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* the paper always prints light, whatever the screen theme is: a dark
+     document is a full page of toner and unreadable on paper */
+  .cgDoc {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #111;
+    box-shadow: none;
+    font-size: 10.5pt;
+  }
+
+  .cgDoc__ph {
+    background: none;
+    color: #111;
+  }
+
+  .cgDoc__clause {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cgDoc__sign {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cgDoc__title { font-size: 30pt; }
+  .cgDoc__h { font-size: 13pt; }
+
+  a { text-decoration: none; color: inherit; }
+}
+
+/* ---------- responsive ---------- */
+
+.cgTabs { display: none; }
+
+@media (max-width: 1099px) {
+  .cgGrid { grid-template-columns: 1fr; }
+
+  .cgTabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--cg-line);
+    background: var(--cg-panel);
+  }
+
+  .cgCol--rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--cg-line);
+  }
+
+  .cgRail {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px 12px;
+    gap: 4px;
+  }
+
+  .cgRail__item { flex: 0 0 auto; width: 30px; }
+  .cgRail__tip { display: none; }
+
+  .cgShell[data-cg-tab="form"] .cgCol--rail,
+  .cgShell[data-cg-tab="form"] .cgCol--paper { display: none; }
+
+  .cgShell[data-cg-tab="preview"] .cgCol--form { display: none; }
+
+  /* the mobile nav is a fixed 58px pill on every page; the toolbar has
+     to sit clear of it rather than underneath */
+  .cgBar { padding-top: var(--mnav-clear); height: auto; }
+  .cgBar__title { display: none; }
+}
+
+@media (max-width: 640px) {
+  .cgShell { --cg-form-w: 100%; }
+  .cgCol--paper { padding: 12px; }
+
+  .cgDoc {
+    padding: 24px 20px;
+    font-size: 13px;
+  }
+
+  .cgSeg__btn { padding: 5px 9px; font-size: 11px; }
+  /* the percentage is an aria-live region: shrink it out of sight rather
+     than display:none, which would drop it from the a11y tree entirely */
+  .cgRing__text {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cgField[data-half="true"] { flex: 1 1 100%; }
+}
