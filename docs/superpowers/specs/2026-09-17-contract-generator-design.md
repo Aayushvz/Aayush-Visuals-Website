@@ -338,8 +338,11 @@ Per `DESIGN.md` section 5, using the existing tokens.
 - Clause removal and renumbering: framer-motion layout animation on the paper
   and the rail, `--dur-panel`.
 - Theme swap: colour only, `--dur-state`.
-- Controls press to `0.97`, registered in the MICRO-INTERACTION LAYER block at
-  the bottom of `globals.css` by name rather than blanket styled.
+- Controls press to `0.97`, listed by name rather than blanket styled. The
+  selector list lives in `contract.css`, not in the MICRO-INTERACTION LAYER
+  block of `globals.css`: route scoped worlds own their own press feedback
+  here, which is why no `ckt` or `pond` selector appears in `globals.css`
+  either. This is what keeps section 2's "no edits to globals.css" true.
 - Under `prefers-reduced-motion: reduce`: accordions snap, layout animation is
   disabled, the theme swap is instant. Press feedback dims instead of scaling.
 
