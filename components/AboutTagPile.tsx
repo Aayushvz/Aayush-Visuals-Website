@@ -207,6 +207,21 @@ export default function AboutTagPile() {
                other at the ends instead of catching on square corners */
             Bodies.rectangle(x, y, w, h, { ...opts, chamfer: { radius: h / 2 } });
         Body.setAngle(body, (item.rot * Math.PI) / 180);
+        /*
+          A pill cannot be allowed to spin, because a pill is a word.
+
+          Left free they tumble, and one landed reading bottom-to-top with
+          REFRAMING PROBLEMS upside down, which is the one thing a label must
+          never do. Infinite inertia locks the angle where it was set, so
+          every pill keeps the tilt it was drawn at through the fall, the
+          landing and any throw. It also stacks far more tidily, which is
+          what lets the pile fill the band rather than sprawl across it.
+
+          The chips keep their inertia. They are circles with a glyph in the
+          middle and nothing to read upside down, and their rolling is most
+          of what stops the pile looking like a shelf.
+        */
+        if (!item.chip) Body.setInertia(body, Infinity);
         Body.setStatic(body, true);
         Composite.add(engine.world, body);
         live.push({ body, el, w, h, born: live.length * POP_STEP });

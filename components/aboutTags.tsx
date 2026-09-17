@@ -94,6 +94,12 @@ const Cup = (
 const Check = (
   <svg viewBox="0 0 24 24" {...s}><circle cx="12" cy="12" r="9" /><path d="m8.4 12.2 2.6 2.6 4.6-5.2" /></svg>
 );
+const Layers = (
+  <svg viewBox="0 0 24 24" {...s}><path d="m12 3 8 4.5-8 4.5-8-4.5L12 3ZM4 12l8 4.5 8-4.5M4 16.5 12 21l8-4.5" /></svg>
+);
+const Bolt = (
+  <svg viewBox="0 0 24 24" {...s}><path d="M13 3 5 13.5h6L11 21l8-10.5h-6L13 3Z" /></svg>
+);
 const Wand = (
   <svg viewBox="0 0 24 24" {...s}><path d="m5 19 9-9M15.5 5.2 16 3l.5 2.2L18.7 6l-2.2.5L16 8.7 15.5 6.5 13.3 6l2.2-.8ZM19.8 12.4l.4-1.6.4 1.6 1.6.4-1.6.4-.4 1.6-.4-1.6-1.6-.4 1.6-.4Z" /></svg>
 );
@@ -119,6 +125,10 @@ export const PILLS: Pill[] = [
   { label: "Making it pop", icon: Spark, x: 92, y: 53, rot: -11, bg: "#fb8b3c", phone: { x: 72, y: 38, rot: -7 } },
   { label: "Thinking systems", icon: Globe, x: 74, y: 66, rot: -5, bg: "#f9c5d7", phone: { x: 38, y: 50, rot: -6 } },
   { label: "Improving UX", icon: Smile, x: 43, y: 73, rot: -8, bg: "#f7c32b", phone: { x: 70, y: 62, rot: -8 } },
+  { label: "Brand identity", icon: Layers, x: 22, y: 12, rot: -10, bg: "#f9c5d7", phone: { x: 30, y: 22, rot: -7 } },
+  { label: "UI design", icon: Corner, x: 64, y: 22, rot: -7, bg: "#cbb8f8", phone: { x: 68, y: 44, rot: -9 } },
+  { label: "Wireframing", icon: Hash, x: 88, y: 85, rot: -9, bg: "#a6d7f4", phone: { x: 35, y: 57, rot: -6 } },
+  { label: "Shipping it", icon: Bolt, x: 26, y: 62, rot: 6, bg: "#bfe36d", phone: { x: 72, y: 79, rot: -8 } },
   { label: "User research", icon: Pencil, x: 72, y: 96, rot: -8, bg: "#cbb8f8", phone: { x: 32, y: 73, rot: -9 } },
   /*
     The bottom row sits lower than the reference reads it, and is meant to be
@@ -148,4 +158,6 @@ export const CHIPS: Chip[] = [
   { icon: Check, x: 26, y: 47, rot: -4, bg: "#a6d7f4", size: 3, phone: { x: 88, y: 52, rot: -4 } },
   { icon: Spark, x: 62, y: 82, rot: 6, bg: "#f7c32b", size: 3.3, phone: { x: 12, y: 62, rot: 6 } },
   { icon: Arrow, x: 2, y: 63, rot: 12, bg: "#fb8b3c", size: 3.9, phone: { x: 90, y: 88, rot: 12 } },
+  { icon: Layers, x: 48, y: 40, rot: -8, bg: "#f7f7f5", size: 3.1, phone: { x: 88, y: 30, rot: -8 } },
+  { icon: Bolt, x: 82, y: 36, rot: 7, bg: "#f7c32b", size: 3.5, phone: { x: 10, y: 90, rot: 7 } },
 ];
