@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import type { Skin } from "./types";
 import Toolbar from "./Toolbar";
+import FormPanel from "./FormPanel";
 import { useContractDraft } from "./useContractDraft";
 import { downloadMarkdown, downloadWord, printContract } from "./exporters";
 import "./contract.css";
 
 export default function ContractGenerator() {
-  const { draft, pct } = useContractDraft();
+  const { draft, setField, setToggle, setDeliverables, reset, pct } = useContractDraft();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [skin, setSkin] = useState<Skin>("studio");
 
@@ -32,7 +33,15 @@ export default function ContractGenerator() {
         onMarkdown={() => downloadMarkdown(draft)}
       />
       <div className="cgGrid">
-        <div className="cgCol cgCol--form" />
+        <div className="cgCol cgCol--form">
+          <FormPanel
+            draft={draft}
+            setField={setField}
+            setToggle={setToggle}
+            setDeliverables={setDeliverables}
+            reset={reset}
+          />
+        </div>
         <div className="cgCol cgCol--rail" />
         <div className="cgCol cgCol--paper" />
       </div>
