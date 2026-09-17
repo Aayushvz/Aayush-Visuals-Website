@@ -29,14 +29,38 @@ export default function Toolbar({
 }: Props) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  /* menu-button pattern: the trigger's aria-haspopup/aria-expanded and the
+     panel's role="menu"/"menuitem" promise a keyboard contract, so opening,
+     arrowing and closing all have to actually move focus rather than just
+     toggling visibility */
+  const exportItems: { id: string; label: string; hint: string; run: () => void }[] = [
+    { id: "pdf", label: "Save as PDF", hint: "Opens the print dialog, A4", run: onPrint },
+    { id: "word", label: "Word (.doc)", hint: "Editable in Word, Pages, Docs", run: onWord },
+    { id: "md", label: "Markdown (.md)", hint: "Plain text", run: onMarkdown },
+  ];
+
+  const closeMenu = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const chooseItem = (run: () => void) => {
+    closeMenu();
+    run();
+  };
 
   useEffect(() => {
     if (!open) return;
+    /* on open, focus moves into the menu rather than staying on the trigger */
+    itemRefs.current[0]?.focus();
     const onDown = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+      if (!wrap.current?.contains(e.target as Node)) closeMenu();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeMenu();
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -45,6 +69,34 @@ export default function Toolbar({
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = itemRefs.current.filter((el): el is HTMLButtonElement => el !== null);
+    if (items.length === 0) return;
+    const current = items.findIndex((el) => el === document.activeElement);
+    const focusAt = (i: number) => items[i]?.focus();
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        focusAt(current === -1 ? 0 : (current + 1) % items.length);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        focusAt(current === -1 ? items.length - 1 : (current - 1 + items.length) % items.length);
+        break;
+      case "Home":
+        e.preventDefault();
+        focusAt(0);
+        break;
+      case "End":
+        e.preventDefault();
+        focusAt(items.length - 1);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <header className="cgBar">
@@ -93,6 +145,7 @@ export default function Toolbar({
       <div ref={wrap} style={{ position: "relative" }}>
         <button
           type="button"
+          ref={triggerRef}
           className="cgPrimary"
           aria-expanded={open}
           aria-haspopup="menu"
@@ -101,22 +154,22 @@ export default function Toolbar({
           Export <span aria-hidden>&#9662;</span>
         </button>
         {open && (
-          <div className="cgMenu" role="menu">
-            <button type="button" role="menuitem" className="cgMenu__item"
-              onClick={() => { setOpen(false); onPrint(); }}>
-              Save as PDF
-              <span className="cgMenu__hint">Opens the print dialog, A4</span>
-            </button>
-            <button type="button" role="menuitem" className="cgMenu__item"
-              onClick={() => { setOpen(false); onWord(); }}>
-              Word (.doc)
-              <span className="cgMenu__hint">Editable in Word, Pages, Docs</span>
-            </button>
-            <button type="button" role="menuitem" className="cgMenu__item"
-              onClick={() => { setOpen(false); onMarkdown(); }}>
-              Markdown (.md)
-              <span className="cgMenu__hint">Plain text</span>
-            </button>
+          <div className="cgMenu" role="menu" onKeyDown={onMenuKeyDown}>
+            {exportItems.map((item, i) => (
+              <button
+                key={item.id}
+                type="button"
+                role="menuitem"
+                className="cgMenu__item"
+                ref={(el) => {
+                  itemRefs.current[i] = el;
+                }}
+                onClick={() => chooseItem(item.run)}
+              >
+                {item.label}
+                <span className="cgMenu__hint">{item.hint}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
