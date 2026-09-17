@@ -58,10 +58,11 @@ test("clause ids are stable and unique", () => {
 });
 
 test("no clause text contains a hardcoded clause number", () => {
-  /* numbering is derived from position at render time; a literal "09." in
-     the prose is the bug this test exists to catch */
+  /* numbering is derived from position at render time; a literal number
+     followed by a period and a space in the prose is the bug this test
+     exists to catch */
   const text = JSON.stringify(buildClauses(full));
-  assert.equal(/\b0[1-9]\.\s/.test(text), false);
+  assert.equal(/\b\d{1,2}\.\s/.test(text), false);
 });
 
 test("the late fee toggle suppresses a sub clause without changing the count", () => {
