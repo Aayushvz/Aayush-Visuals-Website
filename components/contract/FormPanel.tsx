@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useIsPresent, useReducedMotion } from "framer-motion";
 import { GROUPS, type Field } from "./schema";
-import type { Draft, Toggles } from "./types";
+import type { Draft } from "./types";
 import { PERSON_NAME, SOCIAL_PROFILES } from "@/lib/site";
 import {
   BehanceIcon,
@@ -31,25 +31,43 @@ const SOCIAL_LINKS = SOCIAL_SOURCES.map((s) => ({
   href: SOCIAL_PROFILES.find((url) => url.includes(s.match)),
 })).filter((s): s is SocialSource & { href: string } => Boolean(s.href));
 
+type FocusRequest = { group: string; field: keyof Draft } | null;
+
 type Props = {
   draft: Draft;
   setField: <K extends keyof Draft>(name: K, value: Draft[K]) => void;
-  setToggle: (name: keyof Toggles, value: boolean) => void;
   setDeliverables: (items: string[]) => void;
   reset: () => void;
+  /* the side panel's Readiness block asks the form to open a group and
+     focus one of its fields; this is the request and the acknowledgement
+     that clears it, rather than FormPanel reaching into SidePanel or the
+     accordion's open state living two levels up in ContractGenerator */
+  focusRequest: FocusRequest;
+  onFocusHandled: () => void;
 };
 
-const TOGGLE_LABELS: { name: keyof Toggles; label: string; hint: string }[] = [
-  { name: "attribution", label: "Attribution & Portfolio Rights", hint: "Lets you publish the work" },
-  { name: "confidentiality", label: "Confidentiality & Non-Solicitation", hint: "Two year NDA, six month non-solicit" },
-  { name: "warranties", label: "Warranties & Liability", hint: "Caps your liability at the fee" },
-  { name: "termination", label: "Termination & Suspension", hint: "Kill fee and hold terms" },
-  { name: "lateFee", label: "Late payment charge", hint: "A sub clause inside Fees, not its own section" },
-];
-
-export default function FormPanel({ draft, setField, setToggle, setDeliverables, reset }: Props) {
+export default function FormPanel({
+  draft, setField, setDeliverables, reset, focusRequest, onFocusHandled,
+}: Props) {
   const [open, setOpen] = useState<string>("designer");
   const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (!focusRequest) return;
+    const alreadyOpen = open === focusRequest.group;
+    setOpen(focusRequest.group);
+    /* AccordionPanel's own open transition is 420ms (see below); give it
+       time to finish before focusing, or the field would be focused while
+       still animating into view. Reduced motion (and a group that was
+       already open) skips straight to the focus. */
+    const delay = reduce || alreadyOpen ? 0 : 440;
+    const t = window.setTimeout(() => {
+      document.getElementById(`cg-${String(focusRequest.field)}`)?.focus();
+      onFocusHandled();
+    }, delay);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusRequest]);
 
   return (
     <div className="cgForm">
@@ -96,38 +114,23 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
             <AnimatePresence initial={false}>
               {isOpen && (
                 <AccordionPanel groupId={g.id} reduce={Boolean(reduce)}>
-                  {g.id === "clauses"
-                    ? TOGGLE_LABELS.map((t) => (
-                        <label className="cgSwitch" key={t.name}>
-                          <input
-                            type="checkbox"
-                            checked={draft.toggles[t.name]}
-                            onChange={(e) => setToggle(t.name, e.target.checked)}
-                          />
-                          <span className="cgSwitch__track" aria-hidden />
-                          <span className="cgSwitch__text">
-                            {t.label}
-                            <span className="cgSwitch__hint">{t.hint}</span>
-                          </span>
-                        </label>
-                      ))
-                    : g.fields.map((f) =>
-                        f.type === "list" ? (
-                          <DeliverablesList
-                            key={String(f.name)}
-                            field={f}
-                            draft={draft}
-                            setDeliverables={setDeliverables}
-                          />
-                        ) : (
-                          <FieldRow
-                            key={String(f.name)}
-                            field={f}
-                            draft={draft}
-                            setField={setField}
-                          />
-                        ),
-                      )}
+                  {g.fields.map((f) =>
+                    f.type === "list" ? (
+                      <DeliverablesList
+                        key={String(f.name)}
+                        field={f}
+                        draft={draft}
+                        setDeliverables={setDeliverables}
+                      />
+                    ) : (
+                      <FieldRow
+                        key={String(f.name)}
+                        field={f}
+                        draft={draft}
+                        setField={setField}
+                      />
+                    ),
+                  )}
                 </AccordionPanel>
               )}
             </AnimatePresence>
@@ -259,7 +262,10 @@ function DeliverablesList({
   return (
     <div className="cgField" data-half={false}>
       <span className="cgField__label" id={`${id}-label`}>{field.label}</span>
-      <div className="cgList" role="group" aria-labelledby={`${id}-label`}>
+      {/* id + tabIndex so the side panel's Readiness block can focus this
+         group the same way it focuses a plain input, even though a
+         role="group" div is not natively focusable */}
+      <div className="cgList" id={id} tabIndex={-1} role="group" aria-labelledby={`${id}-label`}>
         {items.map((item, i) => (
           <div className="cgList__row" key={rowIds[i] ?? i}>
             <input

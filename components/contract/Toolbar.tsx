@@ -3,13 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import PageLink from "@/components/PageLink";
 import LogoMark from "@/components/LogoMark";
-import type { Skin } from "./types";
 import {
   ArrowLeftIcon,
   ChevronDownIcon,
   DownloadIcon,
   FileTextIcon,
   MoonIcon,
+  PanelIcon,
   PrinterIcon,
   SunIcon,
 } from "./icons";
@@ -18,24 +18,18 @@ type Props = {
   pct: number;
   theme: "light" | "dark";
   onTheme: () => void;
-  skin: Skin;
-  onSkin: (s: Skin) => void;
+  sideOpen: boolean;
+  onToggleSide: () => void;
   onPrint: () => void;
   onWord: () => void;
   onMarkdown: () => void;
 };
 
-const SKINS: { id: Skin; label: string }[] = [
-  { id: "studio", label: "Studio" },
-  { id: "editorial", label: "Editorial" },
-  { id: "plain", label: "Plain" },
-];
-
 const R = 9;
 const C = 2 * Math.PI * R;
 
 export default function Toolbar({
-  pct, theme, onTheme, skin, onSkin, onPrint, onWord, onMarkdown,
+  pct, theme, onTheme, sideOpen, onToggleSide, onPrint, onWord, onMarkdown,
 }: Props) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -140,19 +134,23 @@ export default function Toolbar({
         <span className="cgRing__text" aria-live="polite">{pct}% complete</span>
       </span>
 
-      <span className="cgSeg" role="group" aria-label="Document skin">
-        {SKINS.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            className="cgSeg__btn"
-            aria-pressed={skin === s.id}
-            onClick={() => onSkin(s.id)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </span>
+      {/* only meaningful between 1100 and 1279px: below that the tab
+         strip owns switching between form and preview and the panel is
+         not offered at all; at 1280 and up the panel is its own grid
+         column and always visible, so this toggle is hidden by CSS at
+         both ends and only shown in the gap where the panel is an
+         overlay */}
+      <button
+        type="button"
+        id="cg-side-toggle"
+        className="cgGhost cgBar__sideToggle"
+        aria-expanded={sideOpen}
+        aria-controls="cg-side-panel"
+        aria-label={sideOpen ? "Close panel" : "Open panel"}
+        onClick={onToggleSide}
+      >
+        <PanelIcon />
+      </button>
 
       <button
         type="button"

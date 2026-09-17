@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { DEFAULT_DRAFT, GROUPS, completion } from "./schema.ts";
 import type { Draft } from "./types.ts";
 
-test("there are seven groups in the documented order", () => {
+test("there are six groups in the documented order", () => {
   assert.deepEqual(
     GROUPS.map((g) => g.id),
-    ["designer", "client", "project", "fees", "timeline", "jurisdiction", "clauses"],
+    ["designer", "client", "project", "fees", "timeline", "jurisdiction"],
   );
 });
 

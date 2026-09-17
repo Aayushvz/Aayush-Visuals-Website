@@ -110,6 +110,92 @@
   background: var(--cg-bg);
 }
 
+/* ---------- scrollbars ----------
+   Four scroll containers, two treatments. The rail is a short strip of
+   numbers that are their own position cue, so its scrollbar is hidden
+   outright: the same house pattern as .projModal__infoPane, .worksFilters
+   and .gallery__viewport in globals.css. The form, the paper and the
+   side panel are long (seven groups, thirteen clauses) and the bar is
+   the only cue for position and remaining length, so theirs is a thin
+   custom thumb instead of the OS default, not hidden.
+
+   Every rule here is scoped under .cgShell. Pseudo-elements cannot carry
+   the `cg` prefix themselves, so this scoping is what stops a bare
+   ::-webkit-scrollbar from leaking past this route into every other page
+   that shares this stylesheet chunk. */
+
+.cgShell .cgCol--rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cgShell .cgCol--rail::-webkit-scrollbar {
+  display: none;
+}
+
+.cgShell .cgCol--form,
+.cgShell .cgCol--paper,
+.cgShell .cgSide {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.cgShell .cgCol--form:hover,
+.cgShell .cgCol--paper:hover,
+.cgShell .cgSide:hover {
+  scrollbar-color: var(--cg-line) transparent;
+}
+
+.cgShell .cgCol--form::-webkit-scrollbar,
+.cgShell .cgCol--paper::-webkit-scrollbar,
+.cgShell .cgSide::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cgShell .cgCol--form::-webkit-scrollbar-track,
+.cgShell .cgCol--paper::-webkit-scrollbar-track,
+.cgShell .cgSide::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cgShell .cgCol--form::-webkit-scrollbar-button,
+.cgShell .cgCol--paper::-webkit-scrollbar-button,
+.cgShell .cgSide::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.cgShell .cgCol--form::-webkit-scrollbar-thumb,
+.cgShell .cgCol--paper::-webkit-scrollbar-thumb,
+.cgShell .cgSide::-webkit-scrollbar-thumb {
+  background-color: var(--cg-line);
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity var(--dur-hover) var(--ease-quint),
+    background-color var(--dur-hover) var(--ease-quint);
+}
+
+.cgShell .cgCol--form:hover::-webkit-scrollbar-thumb,
+.cgShell .cgCol--paper:hover::-webkit-scrollbar-thumb,
+.cgShell .cgSide:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+.cgShell .cgCol--form::-webkit-scrollbar-thumb:hover,
+.cgShell .cgCol--paper::-webkit-scrollbar-thumb:hover,
+.cgShell .cgSide::-webkit-scrollbar-thumb:hover {
+  background-color: var(--cg-fg-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cgShell .cgCol--form::-webkit-scrollbar-thumb,
+  .cgShell .cgCol--paper::-webkit-scrollbar-thumb,
+  .cgShell .cgSide::-webkit-scrollbar-thumb {
+    transition: none;
+  }
+}
+
 /* ---------- toolbar ---------- */
 
 .cgBar {
@@ -180,13 +266,6 @@
 
 /* ---------- controls ---------- */
 
-.cgSeg {
-  display: inline-flex;
-  padding: 2px;
-  border: 1px solid var(--cg-line);
-  border-radius: 999px;
-}
-
 .cgSeg__btn {
   padding: 5px 12px;
   border: 0;
@@ -217,6 +296,11 @@
   color: var(--cg-fg);
   cursor: pointer;
 }
+
+/* the panel toggle: only offered in the gap where the panel exists but
+   is not docked. Hidden by default and un-hidden by the single media
+   query below that names that exact range. */
+.cgBar__sideToggle { display: none; }
 
 /* the one filled control on the page */
 .cgPrimary {
@@ -582,7 +666,10 @@
 .cgList__add:active,
 .cgList__rm:active,
 .cgForm__reset:active,
-.cgMenu__item:active {
+.cgMenu__item:active,
+.cgSide__skinRow:active,
+.cgSide__missingBtn:active,
+.cgSide__exportRow:active {
   transform: scale(0.97);
   transition-duration: var(--dur-press);
 }
@@ -601,7 +688,10 @@
   .cgList__add:active,
   .cgList__rm:active,
   .cgForm__reset:active,
-  .cgMenu__item:active {
+  .cgMenu__item:active,
+  .cgSide__skinRow:active,
+  .cgSide__missingBtn:active,
+  .cgSide__exportRow:active {
     transform: none;
     opacity: 0.7;
   }
@@ -834,6 +924,208 @@
   .cgCol--paper { scroll-behavior: auto; }
 }
 
+/* ---------- side panel ----------
+   The fourth column. Below 1280px it is not part of the grid at all: it
+   is taken out of flow (position: fixed) and presented as an overlay
+   that data-cg-side="open" slides in, closed by default so it never
+   covers the form or the paper uninvited. At 1280 and up .cgGrid grows a
+   fourth track (see the layout media query further down) and this same
+   element becomes that track; position: static there is what puts it
+   back in flow, so the overlay transform below has nothing left to do. */
+
+.cgSide {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: min(320px, 88vw);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 24px;
+  border-left: 1px solid var(--cg-line);
+  background: var(--cg-panel);
+  box-shadow: var(--cg-paper-shadow);
+  transform: translateX(100%);
+  transition: transform var(--dur-panel) var(--ease-quint);
+}
+
+.cgShell[data-cg-side="open"] .cgSide {
+  transform: translateX(0);
+}
+
+.cgSide__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  border: 0;
+  background: rgba(0, 0, 0, 0.32);
+  cursor: default;
+}
+
+.cgSide__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--cg-bar-h);
+  flex: 0 0 auto;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--cg-line);
+}
+
+.cgSide__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cgSide__block {
+  flex: 0 0 auto;
+  padding: 18px 16px;
+  border-top: 1px solid var(--cg-line-2);
+}
+
+.cgSide__eyebrow {
+  margin: 0 0 12px;
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ---- skin radiogroup: three unfilled rows, not a segmented control ---- */
+
+.cgSide__radiogroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cgSide__skinRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-hover) var(--ease-quint),
+    background var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgSide__skinRow[data-selected="true"] {
+  border-color: var(--cg-line);
+  background: var(--cg-line-2);
+}
+
+.cgSide__skinName {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.cgSide__skinHint {
+  color: var(--cg-fg-2);
+  font-size: 12px;
+}
+
+/* ---- readiness ---- */
+
+.cgSide__ready,
+.cgSide__readyCount {
+  margin: 0 0 10px;
+  color: var(--cg-fg-2);
+  font-size: 13px;
+}
+
+.cgSide__missing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cgSide__missingBtn {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--cg-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-hover) var(--ease-quint),
+    background var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgSide__missingBtn:hover { background: var(--cg-line-2); }
+
+/* ---- export rows: the panel's explanatory second surface, never a
+   replacement for the toolbar's Export menu ---- */
+
+.cgSide__exportList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cgSide__exportRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--cg-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgSide__exportRow:hover { background: var(--cg-line-2); }
+
+.cgSide__exportIcon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--cg-fg-2);
+}
+
+.cgSide__exportText { flex: 1; font-size: 13.5px; }
+
+.cgSide__exportHint {
+  display: block;
+  color: var(--cg-fg-2);
+  font-size: 12px;
+}
+
+.cgSide__close .cgIcon,
+.cgSide__exportIcon.cgIcon { width: 16px; height: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cgSide,
+  .cgSide__skinRow,
+  .cgSide__missingBtn,
+  .cgSide__exportRow {
+    transition: none;
+  }
+}
+
 /* ---------- print ----------
    The PDF route. Everything but the paper is removed, the paper loses
    its shadow and its max-width, and each clause is protected from being
@@ -853,6 +1145,8 @@
   .cgBar,
   .cgCol--form,
   .cgCol--rail,
+  .cgSide,
+  .cgSide__backdrop,
   .cgTabs {
     display: none !important;
   }
@@ -947,7 +1241,46 @@
 
 .cgTabs { display: none; }
 
+/* the panel gets a real fourth grid track once there is room for it
+   alongside the form and rail at their full width; below this the form
+   and rail keep their wider --cg-form-w/--cg-rail-w defaults and the
+   panel is an overlay instead (see .cgSide above) */
+@media (min-width: 1280px) {
+  .cgShell {
+    --cg-form-w: 360px;
+    --cg-rail-w: 44px;
+  }
+
+  .cgGrid {
+    grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr 300px;
+  }
+
+  .cgSide {
+    position: static;
+    width: 300px;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .cgSide__backdrop { display: none; }
+}
+
+/* the toggle only exists to reveal the panel where it is an overlay and
+   the tab strip is not already the way to reach it; at 1280 and up the
+   panel is a permanent column and this button has nothing to do */
+@media (min-width: 1100px) and (max-width: 1279px) {
+  .cgBar__sideToggle { display: inline-flex; }
+}
+
 @media (max-width: 1099px) {
+  /* below the width the tab strip takes over form/preview switching, the
+     panel is not offered at all: no toggle, no overlay, no grid track */
+  .cgSide,
+  .cgSide__backdrop,
+  .cgBar__sideToggle {
+    display: none !important;
+  }
+
   .cgGrid { grid-template-columns: 1fr; }
 
   .cgTabs {
@@ -993,13 +1326,11 @@
     font-size: 13px;
   }
 
-  /* at phone width the bar cannot fit back link + ring + skin picker +
-     theme toggle + Export without pushing Export off screen. The skin
-     picker is the largest discretionary item and only affects the paper,
-     which is not even visible on the form tab, so it is dropped rather
-     than shrunk. Export, the one primary action, is never touched. */
+  /* at phone width the bar cannot fit back link + ring + theme toggle +
+     Export without pushing Export off screen; the panel toggle is
+     already gone below 1100px (see above), so just tighten the gap.
+     Export, the one primary action, is never touched. */
   .cgBar { gap: 8px; }
-  .cgSeg { display: none; }
 
   /* the percentage is an aria-live region: shrink it out of sight rather
      than display:none, which would drop it from the a11y tree entirely */

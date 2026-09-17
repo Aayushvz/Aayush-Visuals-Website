@@ -117,6 +117,17 @@ export function XIcon({ className }: IconProps) {
   );
 }
 
+/* toggles the side panel: a frame with its right column picked out,
+   the same mark other tools use for a secondary/inspector sidebar */
+export function PanelIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <path d="M15 4.5v15" />
+    </svg>
+  );
+}
+
 /*
   Footer social marks. Simple geometric shapes rather than exact brand
   logos, still outline-only so they carry the same restrained finish as

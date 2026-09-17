@@ -158,18 +158,25 @@ export const GROUPS: Group[] = [
       { name: "govCountry", label: "Country", type: "text", required: true },
     ],
   },
-  /* No fields: the toggles are their own control type and FormPanel
-     renders this group from Draft["toggles"] directly. It is still a
-     group so the accordion, the rail and the completion maths all see
-     the same seven. */
-  { id: "clauses", label: "Optional Clauses", fields: [] },
 ];
 
 const REQUIRED: (keyof Draft)[] = GROUPS.flatMap((g) =>
   g.fields.filter((f) => f.required).map((f) => f.name),
 );
 
-function isFilled(value: Draft[keyof Draft]): boolean {
+/* Which group a field lives in, derived from GROUPS rather than hand
+   maintained: the side panel's Readiness block needs to open the right
+   accordion group for a missing field, and a second, hardcoded copy of
+   this mapping would drift the moment a field moves between groups. */
+const FIELD_GROUP: Partial<Record<keyof Draft, string>> = Object.fromEntries(
+  GROUPS.flatMap((g) => g.fields.map((f) => [f.name, g.id] as const)),
+);
+
+export function groupIdForField(name: keyof Draft): string | undefined {
+  return FIELD_GROUP[name];
+}
+
+export function isFilled(value: Draft[keyof Draft]): boolean {
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === "string") return value.trim().length > 0;
   return value != null;
