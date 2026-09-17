@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Skin } from "./types";
 import Toolbar from "./Toolbar";
 import FormPanel from "./FormPanel";
@@ -12,16 +12,11 @@ import "./contract.css";
 
 export default function ContractGenerator() {
   const { draft, setField, setToggle, setDeliverables, reset, pct } = useContractDraft();
+  /* first paint is always light, then the toggle owns it. Deliberately not
+     persisted: leaving the route is the way back from any choice here. */
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [skin, setSkin] = useState<Skin>("studio");
   const [tab, setTab] = useState<"form" | "preview">("form");
-
-  /* first paint follows the OS, then the toggle owns it. Deliberately not
-     persisted: leaving the route is the way back from any choice here. */
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    setTheme(mq.matches ? "dark" : "light");
-  }, []);
 
   return (
     <div className="cgShell" data-cg-theme={theme} data-cg-skin={skin} data-cg-tab={tab}>
