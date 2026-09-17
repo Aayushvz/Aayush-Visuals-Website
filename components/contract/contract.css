@@ -1,0 +1,283 @@
+/*
+  Contract generator, route scoped.
+
+  Every selector here is prefixed `cg` and every token is declared on
+  .cgShell rather than :root. That scoping is the whole reason this route
+  can carry a light/dark switch while the rest of the site keeps its
+  single fixed palette: nothing here can reach past the shell, and
+  leaving the route is the way back from any choice made inside it.
+
+  Press feedback lives at the bottom of this file, not in the
+  MICRO-INTERACTION LAYER block of globals.css, matching cricket.css and
+  pond.css: a route scoped world owns its own micro-interactions.
+*/
+
+.cgShell {
+  --cg-radius: 10px;
+  --cg-rail-w: 46px;
+  --cg-form-w: 380px;
+  /* declared here, not on .cgBar: .cgGrid subtracts it, and a token set on
+     a sibling is not in scope for it */
+  --cg-bar-h: 56px;
+
+  min-height: 100vh;
+  background: var(--cg-bg);
+  color: var(--cg-fg);
+  font-family: var(--font-primary);
+  transition: background var(--dur-state) var(--ease-quint),
+    color var(--dur-state) var(--ease-quint);
+}
+
+.cgShell[data-cg-theme="light"] {
+  --cg-bg: #f2ede6;
+  --cg-panel: #faf7f1;
+  --cg-fg: #1f1f1f;
+  --cg-fg-2: #6b6459;
+  --cg-line: rgba(31, 31, 31, 0.14);
+  --cg-line-2: rgba(31, 31, 31, 0.07);
+  --cg-field: #ffffff;
+  --cg-accent: #7c3aed;
+  --cg-accent-fg: #ffffff;
+  --cg-paper: #ffffff;
+  --cg-paper-fg: #1f1f1f;
+  --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 18px 44px rgba(0, 0, 0, 0.09);
+}
+
+.cgShell[data-cg-theme="dark"] {
+  --cg-bg: #121212;
+  --cg-panel: #1a1a1a;
+  --cg-fg: #f4f1ea;
+  --cg-fg-2: #9a948a;
+  --cg-line: rgba(244, 241, 234, 0.14);
+  --cg-line-2: rgba(244, 241, 234, 0.07);
+  --cg-field: #212121;
+  /* the brand violet is tuned for readability on cream; on near-black it
+     needs the lighter step to clear 4.5:1 */
+  --cg-accent: #a78bfa;
+  --cg-accent-fg: #17141f;
+  --cg-paper: #1e1e1e;
+  --cg-paper-fg: #ece8e1;
+  --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- layout ---------- */
+
+.cgGrid {
+  display: grid;
+  grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr;
+  height: calc(100vh - var(--cg-bar-h));
+}
+
+.cgCol {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cgCol--form {
+  border-right: 1px solid var(--cg-line);
+  background: var(--cg-panel);
+}
+
+.cgCol--rail {
+  border-right: 1px solid var(--cg-line);
+}
+
+.cgCol--paper {
+  padding: clamp(20px, 3vw, 44px);
+  background: var(--cg-bg);
+}
+
+/* ---------- toolbar ---------- */
+
+.cgBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--cg-bar-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--cg-line);
+  background: var(--cg-panel);
+}
+
+.cgBar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cg-fg-2);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color var(--dur-hover) var(--ease-quint);
+}
+
+.cgBar__back:hover {
+  color: var(--cg-fg);
+}
+
+.cgBar__title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cgBar__spacer {
+  flex: 1;
+}
+
+/* the completion readout: a ring and a number, the only progress chrome */
+.cgRing {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cg-fg-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cgRing__svg {
+  transform: rotate(-90deg);
+}
+
+.cgRing__track {
+  stroke: var(--cg-line);
+}
+
+.cgRing__fill {
+  stroke: var(--cg-accent);
+  transition: stroke-dashoffset var(--dur-panel) var(--ease-quint);
+}
+
+/* ---------- controls ---------- */
+
+.cgSeg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+}
+
+.cgSeg__btn {
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint);
+}
+
+.cgSeg__btn[aria-pressed="true"] {
+  background: var(--cg-line-2);
+  color: var(--cg-fg);
+}
+
+.cgGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg);
+  cursor: pointer;
+}
+
+/* the one filled control on the page */
+.cgPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cg-accent);
+  color: var(--cg-accent-fg);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cgMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 210px;
+  padding: 6px;
+  border: 1px solid var(--cg-line);
+  border-radius: var(--cg-radius);
+  background: var(--cg-panel);
+  box-shadow: var(--cg-paper-shadow);
+  z-index: 20;
+}
+
+.cgMenu__item {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cgMenu__item:hover {
+  background: var(--cg-line-2);
+}
+
+.cgMenu__hint {
+  display: block;
+  color: var(--cg-fg-2);
+  font-size: 11px;
+}
+
+/* scoped to the shell: contract.css is a plain stylesheet import, so a
+   bare universal selector here would leak to every page that ever loads
+   this chunk. cricket.css and pond.css keep everything prefixed for the
+   same reason. `@page` below is the one rule that cannot be scoped, and
+   it is safe because Next only loads this stylesheet on /contract. */
+.cgShell *:focus-visible {
+  outline: 2px solid var(--cg-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- press feedback ---------- */
+
+.cgPrimary,
+.cgGhost,
+.cgSeg__btn,
+.cgAcc__head {
+  transition: transform var(--dur-state) var(--ease-quint);
+}
+
+.cgPrimary:active,
+.cgGhost:active,
+.cgSeg__btn:active,
+.cgAcc__head:active {
+  transform: scale(0.97);
+  transition-duration: var(--dur-press);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cgShell,
+  .cgRing__fill {
+    transition: none;
+  }
+
+  /* feedback survives reduced motion: the press dims instead of scaling */
+  .cgPrimary:active,
+  .cgGhost:active,
+  .cgSeg__btn:active,
+  .cgAcc__head:active {
+    transform: none;
+    opacity: 0.7;
+  }
+}
