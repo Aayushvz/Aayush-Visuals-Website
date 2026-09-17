@@ -6,6 +6,7 @@ import type { Draft, Skin, Toggles } from "./types";
 import {
   DownloadIcon,
   FileTextIcon,
+  PanelCollapseRightIcon,
   PrinterIcon,
   XIcon,
 } from "./icons";
@@ -52,6 +53,13 @@ type Props = {
   onJumpToField: (field: keyof Draft) => void;
   open: boolean;
   onClose: () => void;
+  /* the panel's own collapse rail, only meaningful once it is docked as a
+     real grid column (>=1280px, see useIsDocked below and .cgPanelRail in
+     contract.css); the overlay case below that already has its own full
+     close affordance (the header's X and the backdrop), so it never reads
+     this or renders the control that would set it */
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 };
 
 /* whether the panel is currently docked as its own grid column (>=1280px)
@@ -72,6 +80,7 @@ function useIsDocked(): boolean {
 
 export default function SidePanel({
   draft, setToggle, skin, onSkin, onPrint, onWord, onMarkdown, onJumpToField, open, onClose,
+  collapsed, onToggleCollapse,
 }: Props) {
   const docked = useIsDocked();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -115,6 +124,35 @@ export default function SidePanel({
     { id: "md", label: "Markdown (.md)", hint: "Plain text", Icon: DownloadIcon, run: onMarkdown },
   ];
 
+  /* docked and collapsed: the whole panel reduces to a narrow rail with
+     just the control that expands it again, mirroring FormPanel's own
+     collapsed state. Not offered while the panel is an overlay (below
+     1280px), where it is either fully open or fully closed already. */
+  if (docked && collapsed) {
+    return (
+      <div
+        id="cg-side-panel"
+        className="cgSide"
+        ref={panelRef}
+        tabIndex={-1}
+        aria-label="Document panel"
+      >
+        <div className="cgPanelRail">
+          <button
+            type="button"
+            className="cgGhost"
+            aria-expanded={false}
+            aria-label="Expand document panel"
+            onClick={onToggleCollapse}
+          >
+            <PanelCollapseRightIcon />
+          </button>
+          <span className="cgPanelRail__label" aria-hidden="true">Document</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -135,6 +173,21 @@ export default function SidePanel({
               aria-label="Close panel"
             >
               <XIcon />
+            </button>
+          </div>
+        )}
+
+        {docked && (
+          <div className="cgSide__bar">
+            <p className="cgForm__eyebrow">Document</p>
+            <button
+              type="button"
+              className="cgGhost"
+              aria-expanded={true}
+              aria-label="Collapse document panel"
+              onClick={onToggleCollapse}
+            >
+              <PanelCollapseRightIcon />
             </button>
           </div>
         )}

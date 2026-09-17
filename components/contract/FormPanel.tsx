@@ -7,13 +7,36 @@ import type { Draft } from "./types";
 import { PERSON_NAME, SOCIAL_PROFILES } from "@/lib/site";
 import {
   BehanceIcon,
+  BriefcaseIcon,
+  BuildingIcon,
+  CalendarIcon,
+  CardIcon,
   ChevronDownIcon,
   InstagramIcon,
   LinkedInIcon,
+  PanelCollapseLeftIcon,
+  PersonIcon,
   PlusIcon,
   RotateCcwIcon,
+  ScaleIcon,
   XIcon,
 } from "./icons";
+
+/* One icon per accordion group, keyed by group id rather than lined up
+   positionally with GROUPS: a lookup by id cannot silently drift out of
+   sync if a group is reordered, renamed, or a new one is inserted, the
+   way a parallel array indexed by position could. Fees & Payment gets a
+   generic card mark rather than a currency symbol, since the tool prices
+   in INR, USD, EUR and GBP and a single symbol would misdescribe three
+   of the four. */
+const GROUP_ICONS: Record<string, typeof PersonIcon> = {
+  designer: PersonIcon,
+  client: BuildingIcon,
+  project: BriefcaseIcon,
+  fees: CardIcon,
+  timeline: CalendarIcon,
+  jurisdiction: ScaleIcon,
+};
 
 /* Only three of the four profiles in lib/site.ts belong here (no GitHub);
    matched by hostname rather than array position so a reorder of
@@ -33,6 +56,25 @@ const SOCIAL_LINKS = SOCIAL_SOURCES.map((s) => ({
 
 type FocusRequest = { group: string; field: keyof Draft } | null;
 
+/* whether the form is currently docked as a real grid column (>=1100px)
+   rather than governed by the tab strip; mirrors SidePanel's own
+   useIsDocked at its own breakpoint (see contract.css's matching
+   @media (min-width: 1100px) collapse override). Only gates whether the
+   collapsed rail actually renders: below this width the tab strip
+   already owns showing the whole panel full width, and a collapsed rail
+   inside that single column would just be a stranded button. */
+function useIsDocked(): boolean {
+  const [docked, setDocked] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1100px)");
+    const update = () => setDocked(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return docked;
+}
+
 type Props = {
   draft: Draft;
   setField: <K extends keyof Draft>(name: K, value: Draft[K]) => void;
@@ -44,13 +86,22 @@ type Props = {
      accordion's open state living two levels up in ContractGenerator */
   focusRequest: FocusRequest;
   onFocusHandled: () => void;
+  /* the panel's own collapse rail (see .cgPanelRail in contract.css and
+     the collapse control in ContractGenerator); state lives one level up
+     because it has to survive FormPanel unmounting nothing, but mainly
+     to match how every other cross-cutting bit of chrome on this route
+     (theme, skin, tab) is owned by ContractGenerator */
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 };
 
 export default function FormPanel({
   draft, setField, setDeliverables, reset, focusRequest, onFocusHandled,
+  collapsed, onToggleCollapse,
 }: Props) {
   const [open, setOpen] = useState<string>("designer");
   const reduce = useReducedMotion();
+  const docked = useIsDocked();
 
   useEffect(() => {
     if (!focusRequest) return;
@@ -69,9 +120,39 @@ export default function FormPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusRequest]);
 
+  if (collapsed && docked) {
+    return (
+      <div className="cgForm">
+        <div className="cgPanelRail">
+          <button
+            type="button"
+            className="cgGhost"
+            aria-expanded={false}
+            aria-label="Expand contract data"
+            onClick={onToggleCollapse}
+          >
+            <PanelCollapseLeftIcon />
+          </button>
+          <span className="cgPanelRail__label" aria-hidden="true">Contract Data</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="cgForm">
-      <p className="cgForm__eyebrow">Contract Data</p>
+      <div className="cgForm__bar">
+        <p className="cgForm__eyebrow">Contract Data</p>
+        <button
+          type="button"
+          className="cgGhost cgPanelToggle"
+          aria-expanded={true}
+          aria-label="Collapse contract data"
+          onClick={onToggleCollapse}
+        >
+          <PanelCollapseLeftIcon />
+        </button>
+      </div>
 
       {GROUPS.map((g) => {
         const isOpen = open === g.id;
@@ -80,6 +161,7 @@ export default function FormPanel({
           const val = draft[f.name];
           return Array.isArray(val) ? val.length > 0 : String(val ?? "").trim().length > 0;
         }).length;
+        const GroupIcon = GROUP_ICONS[g.id];
 
         return (
           <div className="cgAcc" key={g.id}>
@@ -102,6 +184,7 @@ export default function FormPanel({
                 e.currentTarget.focus();
               }}
             >
+              {GroupIcon && <GroupIcon className="cgAcc__icon" />}
               <span className="cgAcc__label">{g.label}</span>
               {req.length > 0 && (
                 <span className="cgAcc__count">{done}/{req.length}</span>

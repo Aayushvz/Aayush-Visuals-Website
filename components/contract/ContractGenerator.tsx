@@ -23,6 +23,17 @@ export default function ContractGenerator() {
      and .cgSide in contract.css); harmless to leave set at wider widths
      since CSS docks the panel and ignores this attribute there */
   const [sideOpen, setSideOpen] = useState(false);
+  /* the two docked-panel collapse rails (see .cgPanelRail in contract.css).
+     React state only, not persisted, same rule the route's theme already
+     follows: nothing here should be able to strand a visitor on a look
+     they have no way back from, and a collapsed panel resets on leave.
+     formCollapsed only has a visual effect at >=1100px and sideCollapsed
+     only at >=1280px (see the matching @media blocks in contract.css);
+     below those widths the buttons that flip these still render but the
+     grid ignores the state, matching how sideOpen is already harmless at
+     wide viewports. */
+  const [formCollapsed, setFormCollapsed] = useState(false);
+  const [sideCollapsed, setSideCollapsed] = useState(false);
   /* Readiness (in the panel) asks the form to open a group and focus a
      field; FormPanel owns the accordion's open state, so this is passed
      down as a request rather than lifting that state up here */
@@ -32,6 +43,10 @@ export default function ContractGenerator() {
     const group = groupIdForField(field);
     if (!group) return;
     setSideOpen(false);
+    /* the field this jumps to lives inside the accordion, which is not
+       rendered while the form panel is collapsed to its rail; expand it
+       first or the focus below would target a node that does not exist */
+    setFormCollapsed(false);
     setFocusRequest({ group, field });
   };
 
@@ -42,6 +57,8 @@ export default function ContractGenerator() {
       data-cg-skin={skin}
       data-cg-tab={tab}
       data-cg-side={sideOpen ? "open" : "closed"}
+      data-cg-panel-form={formCollapsed ? "collapsed" : "expanded"}
+      data-cg-panel-side={sideCollapsed ? "collapsed" : "expanded"}
     >
       <Toolbar
         pct={pct}
@@ -77,6 +94,8 @@ export default function ContractGenerator() {
             reset={reset}
             focusRequest={focusRequest}
             onFocusHandled={() => setFocusRequest(null)}
+            collapsed={formCollapsed}
+            onToggleCollapse={() => setFormCollapsed((c) => !c)}
           />
         </div>
         <div className="cgCol cgCol--rail"><ClauseRail draft={draft} /></div>
@@ -92,6 +111,8 @@ export default function ContractGenerator() {
           onJumpToField={handleJumpToField}
           open={sideOpen}
           onClose={() => setSideOpen(false)}
+          collapsed={sideCollapsed}
+          onToggleCollapse={() => setSideCollapsed((c) => !c)}
         />
       </div>
     </div>

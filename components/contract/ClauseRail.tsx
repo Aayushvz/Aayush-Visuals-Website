@@ -15,12 +15,14 @@ export default function ClauseRail({ draft }: { draft: Draft }) {
           key={c.id}
           href={`#cg-c-${c.id}`}
           className="cgRail__item"
-          title={c.title}
           layout={reduce ? false : "position"}
           transition={reduce ? { duration: 0 } : { duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
         >
-          {String(i + 1).padStart(2, "0")}
-          <span className="cgRail__tip">{c.title}</span>
+          {/* numbering is array position, not stored data, so it keeps
+             renumbering whenever an optional clause is toggled off and
+             buildClauses returns a shorter array */}
+          <span className="cgRail__num">{String(i + 1).padStart(2, "0")}</span>
+          <span className="cgRail__title">{c.title}</span>
         </motion.a>
       ))}
     </nav>

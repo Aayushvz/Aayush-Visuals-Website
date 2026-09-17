@@ -66,7 +66,7 @@ export const EXPERIMENTS: Experiment[] = [
   {
     id: "contract",
     index: "03",
-    title: "Contract Generator",
+    title: "Contract Generator Tool",
     kind: "Freelance tool",
     href: "/contract",
     cta: "Draft an agreement",

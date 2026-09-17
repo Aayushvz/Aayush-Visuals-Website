@@ -14,8 +14,12 @@
 
 .cgShell {
   --cg-radius: 10px;
-  --cg-rail-w: 46px;
+  /* wide enough to carry a number and a title (see .cgRail__title); below
+     1100px the rail becomes a horizontal strip instead and this variable
+     stops applying at all (that breakpoint hardcodes a 30px chip) */
+  --cg-rail-w: 190px;
   --cg-form-w: 380px;
+  --cg-side-w: 300px;
   /* still sets .cgBar's own fixed height on desktop; .cgGrid no longer
      subtracts it (see the flex comment below), so it is not load-bearing
      for layout, only for the bar's own size */
@@ -88,6 +92,11 @@
      overflow-y: auto to scroll internally */
   flex: 1;
   min-height: 0;
+  /* collapsing a docked panel (see the panel collapse section further
+     down) only ever changes --cg-form-w/--cg-side-w, so the track count
+     and value types never change between states, which is what makes
+     interpolating this track list possible at all */
+  transition: grid-template-columns var(--dur-panel) var(--ease-quint);
 }
 
 .cgCol {
@@ -411,6 +420,20 @@
   text-transform: uppercase;
 }
 
+/* the panel's header row: its eyebrow plus the collapse control at the
+   header's right edge, per the reference this task is beating. Reused
+   as-is by SidePanel's docked header (see .cgSide__bar) so both panels'
+   titles sit on the same rule rather than two near-duplicate ones. */
+.cgForm__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 8px 10px 16px;
+}
+
+.cgForm__bar .cgForm__eyebrow { margin: 0; }
+
 .cgAcc {
   border-top: 1px solid var(--cg-line-2);
 }
@@ -431,7 +454,20 @@
   cursor: pointer;
 }
 
-.cgAcc__label { flex: 1; }
+.cgAcc__icon {
+  flex: 0 0 auto;
+  color: var(--cg-fg-2);
+}
+
+/* a group name is a small heading, not a body label, so it gets the same
+   600 weight DESIGN.md reserves for headings/emphasis rather than the
+   400 it would otherwise inherit from .cgAcc__head; the half-step bump in
+   size gives it room to read as deliberate next to the new icon */
+.cgAcc__label {
+  flex: 1;
+  font-size: 14.5px;
+  font-weight: 600;
+}
 
 .cgAcc__count {
   color: var(--cg-fg-2);
@@ -871,7 +907,11 @@
 
 .cgShell[data-cg-skin="plain"] .cgDoc__title { font-size: clamp(30px, 4vw, 42px); }
 
-/* ---------- clause rail ---------- */
+/* ---------- clause rail ----------
+   Number and title both visible at all times (>=1100px; see the
+   horizontal-strip override further down), so there is no hover tooltip
+   left to maintain - the old .cgRail__tip existed only to reveal a title
+   that is now always on screen. */
 
 .cgRail {
   display: flex;
@@ -882,44 +922,45 @@
 .cgRail__item {
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 30px;
-  color: var(--cg-fg-2);
-  font-family: ui-monospace, "SF Mono", monospace;
-  font-size: 11px;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 34px;
+  padding: 7px 14px;
   text-decoration: none;
   transition: color var(--dur-hover) var(--ease-quint);
 }
 
-.cgRail__item:hover { color: var(--cg-accent); }
-
-.cgRail__tip {
-  position: absolute;
-  left: calc(100% + 8px);
-  padding: 4px 8px;
-  border: 1px solid var(--cg-line);
-  border-radius: 6px;
-  background: var(--cg-panel);
-  color: var(--cg-fg);
-  font-family: var(--font-primary);
+.cgRail__num {
+  flex: 0 0 auto;
+  padding-top: 1px;
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
   font-size: 11px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--dur-hover) var(--ease-quint);
-  z-index: 10;
+  transition: color var(--dur-hover) var(--ease-quint);
 }
 
-.cgRail__item:hover .cgRail__tip,
-.cgRail__item:focus-visible .cgRail__tip { opacity: 1; }
+.cgRail__title {
+  flex: 1;
+  color: var(--cg-fg);
+  font-family: var(--font-primary);
+  font-size: 12.5px;
+  line-height: 1.35;
+  transition: color var(--dur-hover) var(--ease-quint);
+}
+
+.cgRail__item:hover .cgRail__num,
+.cgRail__item:hover .cgRail__title,
+.cgRail__item:focus-visible .cgRail__num,
+.cgRail__item:focus-visible .cgRail__title {
+  color: var(--cg-accent);
+}
 
 /* lets rail anchors glide to their clause instead of jumping the page */
 .cgCol--paper { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cgRail__item,
-  .cgRail__tip { transition: none; }
+  .cgRail__num,
+  .cgRail__title { transition: none; }
 
   .cgCol--paper { scroll-behavior: auto; }
 }
@@ -949,7 +990,12 @@
   background: var(--cg-panel);
   box-shadow: var(--cg-paper-shadow);
   transform: translateX(100%);
-  transition: transform var(--dur-panel) var(--ease-quint);
+  /* width only ever changes once docked (position: static, see the 1280
+     media query), where it is what the panel's own collapse rail
+     animates; transform is what the overlay case animates instead, so
+     only one of the two is ever doing anything at a given width */
+  transition: transform var(--dur-panel) var(--ease-quint),
+    width var(--dur-panel) var(--ease-quint);
 }
 
 .cgShell[data-cg-side="open"] .cgSide {
@@ -980,6 +1026,23 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+/* the docked header (>=1280px): reuses .cgForm__eyebrow for its "Document"
+   label rather than a second near-identical rule, so the two panels'
+   header rows share one source of truth for size and tracking. Only
+   rendered when docked; the overlay keeps .cgSide__header above instead. */
+.cgSide__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: var(--cg-bar-h);
+  flex: 0 0 auto;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--cg-line);
+}
+
+.cgSide__bar .cgForm__eyebrow { margin: 0; }
 
 .cgSide__block {
   flex: 0 0 auto;
@@ -1118,6 +1181,7 @@
 .cgSide__exportIcon.cgIcon { width: 16px; height: 16px; }
 
 @media (prefers-reduced-motion: reduce) {
+  .cgGrid,
   .cgSide,
   .cgSide__skinRow,
   .cgSide__missingBtn,
@@ -1237,27 +1301,91 @@
   .cgDoc a { text-decoration: none; color: inherit; }
 }
 
+/* ---------- panel collapse ----------
+   Reduces a docked panel to a ~44px rail so the paper can reclaim the
+   width, per the reference this task is beating: FormPanel and SidePanel
+   each swap their normal content for a single .cgPanelRail (button plus
+   the panel's own name, rotated) when collapsed. The width change itself
+   is just --cg-form-w/--cg-side-w, animated by .cgGrid's own transition
+   (see above) and, once docked, by .cgSide's own width transition.
+
+   Both overrides are gated to the width where their panel is an actual
+   grid column rather than tab- or overlay-driven (>=1100px for the form,
+   >=1280px for the side panel, matching FormPanel's and SidePanel's own
+   docked checks) - collapsing a column that does not exist at the
+   current width would have nothing to animate. The attribute selector
+   here is more specific than the bare `.cgShell` rules that set these
+   same variables elsewhere in this file, so it wins regardless of the
+   two blocks' order in the cascade. */
+
+@media (min-width: 1100px) {
+  .cgShell[data-cg-panel-form="collapsed"] {
+    --cg-form-w: 44px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .cgShell[data-cg-panel-side="collapsed"] {
+    --cg-side-w: 44px;
+  }
+}
+
+.cgShell[data-cg-panel-form="collapsed"] .cgCol--form,
+.cgShell[data-cg-panel-side="collapsed"] .cgSide {
+  overflow: hidden;
+}
+
+.cgShell[data-cg-panel-form="collapsed"] .cgForm {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+
+.cgPanelRail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 16px 0;
+  gap: 16px;
+}
+
+.cgPanelRail__label {
+  margin: 0;
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
 /* ---------- responsive ---------- */
 
 .cgTabs { display: none; }
 
 /* the panel gets a real fourth grid track once there is room for it
    alongside the form and rail at their full width; below this the form
-   and rail keep their wider --cg-form-w/--cg-rail-w defaults and the
-   panel is an overlay instead (see .cgSide above) */
+   keeps its wider --cg-form-w default and the panel is an overlay
+   instead (see .cgSide above). The rail keeps its base --cg-rail-w at
+   every width down to 1100px, since the number-plus-title rail (see
+   above) needs the same ~190px whether or not the panel is docked. */
 @media (min-width: 1280px) {
   .cgShell {
     --cg-form-w: 360px;
-    --cg-rail-w: 44px;
   }
 
   .cgGrid {
-    grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr 300px;
+    grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr var(--cg-side-w);
   }
 
   .cgSide {
     position: static;
-    width: 300px;
+    width: var(--cg-side-w);
     transform: none;
     box-shadow: none;
   }
@@ -1274,10 +1402,16 @@
 
 @media (max-width: 1099px) {
   /* below the width the tab strip takes over form/preview switching, the
-     panel is not offered at all: no toggle, no overlay, no grid track */
+     panel is not offered at all: no toggle, no overlay, no grid track.
+     .cgPanelToggle (the form's own collapse button) has nothing to do
+     here either: the tab strip already owns showing the whole form, and
+     FormPanel's own docked check keeps the collapsed rail from ever
+     rendering at this width, so hide the control rather than leave a
+     button that visibly does nothing when pressed. */
   .cgSide,
   .cgSide__backdrop,
-  .cgBar__sideToggle {
+  .cgBar__sideToggle,
+  .cgPanelToggle {
     display: none !important;
   }
 
@@ -1303,8 +1437,19 @@
     gap: 4px;
   }
 
-  .cgRail__item { flex: 0 0 auto; width: 30px; }
-  .cgRail__tip { display: none; }
+  /* the compact index: number only, centred, fixed-width chips - a title
+     genuinely will not fit in a horizontal strip this narrow, so it is
+     hidden here rather than truncated */
+  .cgRail__item {
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    min-height: 30px;
+    padding: 0;
+  }
+
+  .cgRail__title { display: none; }
 
   .cgShell[data-cg-tab="form"] .cgCol--rail,
   .cgShell[data-cg-tab="form"] .cgCol--paper { display: none; }

@@ -129,6 +129,104 @@ export function PanelIcon({ className }: IconProps) {
 }
 
 /*
+  Collapse controls for the two docked panels: the same frame-plus-divider
+  mark as PanelIcon, with a small chevron pointing further toward the edge
+  the panel collapses into. The pair is a mirror of each other (divider and
+  chevron on opposite sides) rather than one icon reused with a CSS flip,
+  so the SVG itself always reads correctly regardless of how it is placed.
+  One icon serves both the collapse and expand state of its control; only
+  the button's aria-expanded/aria-label change between the two.
+*/
+export function PanelCollapseLeftIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <path d="M9 4.5v15" />
+      <path d="M6.5 12h-2m0 0 2-2m-2 2 2 2" />
+    </svg>
+  );
+}
+
+export function PanelCollapseRightIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <path d="M15 4.5v15" />
+      <path d="M17.5 12h2m0 0-2-2m2 2-2 2" />
+    </svg>
+  );
+}
+
+/*
+  One icon per accordion group in FormPanel, mapped by group id rather
+  than by array position (see GROUP_ICONS there). Fees & Payment gets a
+  generic card mark rather than a currency symbol, since the tool prices
+  in INR, USD, EUR and GBP and a dollar sign would misdescribe three of
+  the four.
+*/
+
+export function PersonIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
+    </svg>
+  );
+}
+
+export function BuildingIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="4" y="3.5" width="11" height="17" rx="1" />
+      <path d="M15 10h5v10.5h-5" />
+      <path d="M7.5 7.5h.01M11 7.5h.01M7.5 11h.01M11 11h.01M7.5 14.5h.01M11 14.5h.01" />
+    </svg>
+  );
+}
+
+export function BriefcaseIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="3" y="8" width="18" height="12" rx="2" />
+      <path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M3 13h18" />
+    </svg>
+  );
+}
+
+export function CardIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="2" />
+      <path d="M2.5 9.5h19" />
+      <path d="M6 14.5h4" />
+    </svg>
+  );
+}
+
+export function CalendarIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M3.5 9.5h17" />
+      <path d="M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+
+export function ScaleIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <path d="M12 3v15" />
+      <path d="M5 6h14" />
+      <path d="M5 6 2 12a3 3 0 0 0 6 0Z" />
+      <path d="M19 6l-3 6a3 3 0 0 0 6 0Z" />
+      <path d="M8 18h8" />
+    </svg>
+  );
+}
+
+/*
   Footer social marks. Simple geometric shapes rather than exact brand
   logos, still outline-only so they carry the same restrained finish as
   the rest of the set.
