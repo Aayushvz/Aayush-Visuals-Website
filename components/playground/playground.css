@@ -712,7 +712,8 @@
 .contractCover__ground,
 .contractCover__glow,
 .contractCover__sheet,
-.contractCover__scrim {
+.contractCover__scrim,
+.contractCover__markLayer {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -770,21 +771,44 @@
   stroke: var(--pg-accent);
 }
 
+/*
+  Steep on purpose. The lockup only needs solid backing through roughly the
+  bottom fifth of the frame it sits in - unlike DplCover's and PondCover's
+  scrims, which back a much bigger subject and so run most of the card's
+  height, this one is holding up two lines of text over ground that is
+  already dark. Running it further up would dim the clause rules and the
+  signature baseline above it for no reason the lockup needs served, so it
+  is tuned to be fully spent well before either.
+*/
 .contractCover__scrim {
   z-index: 2;
   background: linear-gradient(
     to top,
-    rgba(8, 8, 11, 0.92) 0%,
-    rgba(8, 8, 11, 0.5) 46%,
-    rgba(8, 8, 11, 0) 100%
+    rgba(8, 8, 11, 0.94) 0%,
+    rgba(8, 8, 11, 0.82) 20%,
+    rgba(8, 8, 11, 0) 34%
   );
-  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 66%);
-  mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 66%);
+}
+
+/*
+  The signature mark's own layer, stacked above the scrim the same way the
+  title lockup already is. The scrim has a job (the lockup); the mark is not
+  it, and it is the one accent colour on the cover, so it is painted after
+  the scrim rather than dimmed by a layer that exists for something else.
+  Same viewBox as the page group below it, and the same rotation, so it
+  still sits exactly on the baseline it belongs to.
+*/
+.contractCover__markLayer {
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  transform: rotate(-1.1deg);
+  transform-origin: 50% 48%;
 }
 
 .contractCover__lock {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   left: 8%;
   right: 8%;
   bottom: 7%;

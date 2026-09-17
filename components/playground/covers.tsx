@@ -310,8 +310,8 @@ export function ContractCover() {
             />
           ))}
 
-          {/* the signature line, and the one mark a person makes on this
-              page rather than the tool */}
+          {/* the signature baseline. The mark that sits on it is painted
+              separately, above the scrim below - see contractCover__mark */}
           <rect
             className="contractCover__rule contractCover__rule--sig"
             x="92"
@@ -319,18 +319,37 @@ export function ContractCover() {
             width="76"
             height="1.5"
           />
-          <path
-            className="contractCover__mark"
-            d="M97 262 C104 251, 112 268, 120 256 S 136 246, 144 258 S 160 250, 166 259"
-            fill="none"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
         </g>
       </svg>
 
       <div className="contractCover__scrim" />
+
+      {/*
+        The signature mark, painted in its own layer above the scrim rather
+        than inside the page group. The scrim's job is to keep the title
+        lockup legible against whatever is under it; it has nothing to do on
+        the paper. But the mark is the one accent colour on the cover and
+        the one mark that says what this thing produces, so it is the one
+        piece of art that cannot sit under a dimming layer built for
+        something else. Same viewBox and the same rotation as the page
+        group, so it still lands exactly on the baseline it belongs to.
+      */}
+      <svg
+        className="contractCover__markLayer"
+        viewBox="0 0 300 400"
+        aria-hidden
+        focusable="false"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <path
+          className="contractCover__mark"
+          d="M97 262 C104 251, 112 268, 120 256 S 136 246, 144 258 S 160 250, 166 259"
+          fill="none"
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
 
       <div className="contractCover__lock">
         <span className="contractCover__name">
