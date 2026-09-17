@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import PageLink from "@/components/PageLink";
+import LogoMark from "@/components/LogoMark";
 import type { Skin } from "./types";
 import {
   ArrowLeftIcon,
@@ -115,8 +116,13 @@ export default function Toolbar({
 
   return (
     <header className="cgBar">
-      <PageLink href="/playground" className="cgBar__back">
-        <ArrowLeftIcon /> Playground
+      <PageLink
+        href="/playground"
+        className="cgBar__back"
+        aria-label="aayush vz, back to playground"
+      >
+        <ArrowLeftIcon />
+        <LogoMark className="cgBar__logo" />
       </PageLink>
       <span className="cgBar__title">Service Agreement</span>
       <span className="cgBar__spacer" />

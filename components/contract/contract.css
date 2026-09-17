@@ -136,6 +136,16 @@
   color: var(--cg-fg);
 }
 
+/* replaces the word "Playground": the wordmark sits at a size that reads
+   comfortably next to .cgBar__title, muted with the rest of the control
+   and brought to full strength on the same hover/transition as the arrow
+   beside it. currentColor drives that fade; the mark's own purple square
+   is a fixed fill inside LogoMark and never changes with it. */
+.cgBar__logo {
+  width: 72px;
+  height: auto;
+}
+
 .cgBar__title {
   font-size: 14px;
   font-weight: 500;
@@ -499,40 +509,41 @@
 }
 
 /* ---------- footer ----------
-   A quiet signature at the foot of the panel, not a call to action: the
-   wordmark stays muted (the accent square inside LogoMark keeps its own
-   fixed purple regardless), and the socials only pick up colour on
-   hover/focus. */
+   A quiet signature at the foot of the panel, not a call to action: a
+   muted credit line (the wordmark itself now lives in the toolbar, in
+   place of "Playground", so it does not also repeat down here) and the
+   socials, which only pick up colour on hover/focus. */
 
 .cgFoot {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: 10px;
   margin: 28px 16px 0;
   padding-top: 20px;
   border-top: 1px solid var(--cg-line-2);
 }
 
-.cgFoot__logo {
-  width: 76px;
-  height: auto;
+.cgFoot__credit {
+  margin: 0;
   color: var(--cg-fg-2);
+  font-size: 12px;
 }
 
 .cgFoot__socials {
   display: flex;
   gap: 2px;
-  /* the 44px touch target pads well past the 18px glyph inside it; pull
-     the row back so the glyph's own edge lines up with the panel's other
-     left-aligned content instead of the invisible hit area */
-  margin-left: -13px;
 }
 
 .cgFoot__social {
+  /* the 44px box is a touch target, not a frame to center the glyph in:
+     anchoring the icon to the box's own start edge means that edge lines
+     up with the rest of the panel's left-aligned content directly,
+     rather than needing a hand-tuned negative margin to undo an inset
+     that centering would otherwise put in the way */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 44px;
   height: 44px;
   border-radius: 999px;

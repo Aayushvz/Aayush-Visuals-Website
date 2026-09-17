@@ -4,8 +4,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence, useIsPresent, useReducedMotion } from "framer-motion";
 import { GROUPS, type Field } from "./schema";
 import type { Draft, Toggles } from "./types";
-import LogoMark from "@/components/LogoMark";
-import { SOCIAL_PROFILES } from "@/lib/site";
+import { PERSON_NAME, SOCIAL_PROFILES } from "@/lib/site";
 import {
   BehanceIcon,
   ChevronDownIcon,
@@ -141,7 +140,7 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
       </button>
 
       <div className="cgFoot">
-        <LogoMark className="cgFoot__logo" />
+        <p className="cgFoot__credit">Built by {PERSON_NAME}</p>
         {SOCIAL_LINKS.length > 0 && (
           <div className="cgFoot__socials" role="group" aria-label="Elsewhere">
             {SOCIAL_LINKS.map((s) => (
