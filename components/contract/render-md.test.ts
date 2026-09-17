@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { renderMarkdown } from "./render-md.ts";
+import { PLACEHOLDER } from "./clauses.ts";
 import { DEFAULT_DRAFT } from "./schema.ts";
 import type { Draft } from "./types.ts";
 
@@ -68,4 +69,12 @@ test("output ends with exactly one trailing newline", () => {
   const md = renderMarkdown(d);
   assert.ok(md.endsWith("\n"));
   assert.equal(md.endsWith("\n\n"), false);
+});
+
+test("the placeholder sentinel never reaches the exported markdown, and an unfilled field still shows --", () => {
+  /* DEFAULT_DRAFT leaves most fields blank, so this exercises the fallback
+     path directly rather than relying on `d` above, which is mostly filled */
+  const md = renderMarkdown(DEFAULT_DRAFT);
+  assert.equal(md.includes(PLACEHOLDER), false);
+  assert.ok(md.includes("--"));
 });

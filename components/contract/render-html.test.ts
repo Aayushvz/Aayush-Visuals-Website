@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { renderWordHtml } from "./render-html.ts";
 import { renderMarkdown } from "./render-md.ts";
+import { PLACEHOLDER } from "./clauses.ts";
 import { DEFAULT_DRAFT } from "./schema.ts";
 import type { Draft } from "./types.ts";
 
@@ -56,4 +57,12 @@ test("ampersands in clause titles are escaped", () => {
 test("the disclaimer appears exactly once", () => {
   const html = renderWordHtml(d);
   assert.equal(html.split("Consult a qualified legal professional").length - 1, 1);
+});
+
+test("the placeholder sentinel never reaches the exported html, and an unfilled field still shows --", () => {
+  /* DEFAULT_DRAFT leaves most fields blank, so this exercises the fallback
+     path directly rather than relying on `d` above, which is mostly filled */
+  const html = renderWordHtml(DEFAULT_DRAFT);
+  assert.equal(html.includes(PLACEHOLDER), false);
+  assert.ok(html.includes("--"));
 });

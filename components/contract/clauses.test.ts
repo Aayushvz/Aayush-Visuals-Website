@@ -113,3 +113,21 @@ test("the jurisdiction reads back the governing location", () => {
   const general = buildClauses({ ...full, govCity: "Berlin", govState: "", govCountry: "Germany" });
   assert.ok(JSON.stringify(general).includes("Berlin, Germany"));
 });
+
+test("user text containing -- survives unchanged and is never mistaken for the placeholder sentinel", () => {
+  /* regression: PLACEHOLDER used to be the visible string "--" itself, so a
+     renderer splitting on it would also split a user's own "Q3--Q4 rollout"
+     and mute half of it. PLACEHOLDER is now a Private Use Area sentinel a
+     user cannot type, so their hyphens must reach the output untouched and
+     the sentinel must not appear anywhere in the result. */
+  const withHyphens = buildClauses({
+    ...full,
+    projectDescription: "Q3--Q4 rollout",
+    deliverables: ["Wireframes v1--v2 handoff"],
+  });
+  const scope = withHyphens.find((c) => c.id === "scope");
+  const text = JSON.stringify(scope);
+  assert.ok(text.includes("Q3--Q4 rollout"));
+  assert.ok(text.includes("Wireframes v1--v2 handoff"));
+  assert.equal(text.includes(PLACEHOLDER), false);
+});

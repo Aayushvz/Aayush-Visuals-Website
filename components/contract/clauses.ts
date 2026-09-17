@@ -14,10 +14,23 @@ import { formatDate, formatMoney } from "./format.ts";
   renumbers the whole document for free.
 */
 
-/* Two hyphens, deliberately not an em dash: the no-em-dash rule applies to
-   the contract prose too, and clauses.test.ts asserts it by serialising the
-   whole output, which would catch an em dash hiding in this constant. */
-export const PLACEHOLDER = "--";
+/* A Private Use Area sentinel, not visible text. It marks an unfilled value
+   internally so a renderer can find and style every occurrence with a plain
+   `split`, the way DocPaper's withPlaceholders does. It deliberately cannot
+   collide with anything a user types, including a deliberate "--" inside
+   their own text (e.g. "Q3--Q4 rollout" or "Wireframes v1--v2 handoff"),
+   which a substring match on a visible placeholder string would wrongly
+   catch and mute.
+
+   PLACEHOLDER_TEXT is what a reader actually sees: two hyphens, deliberately
+   not an em dash, because the no-em-dash rule applies to the contract prose
+   too, and clauses.test.ts asserts it by serialising the whole output, which
+   would catch an em dash hiding in this constant. Every renderer (DocPaper,
+   render-md, render-html) is responsible for swapping the sentinel for
+   PLACEHOLDER_TEXT before it reaches the reader; the sentinel itself must
+   never leave this module's output undisplayed. */
+export const PLACEHOLDER = "";
+export const PLACEHOLDER_TEXT = "--";
 
 /* value-or-placeholder: the document is never allowed to show an empty gap */
 function v(value: string): string {

@@ -1,5 +1,5 @@
 import type { Block, Draft } from "./types.ts";
-import { buildClauses } from "./clauses.ts";
+import { buildClauses, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
 import { formatDate } from "./format.ts";
 
 /*
@@ -85,5 +85,8 @@ export function renderMarkdown(d: Draft): string {
   parts.push("---", "", `_${DISCLAIMER}_`);
   /* collapse the runs of blank lines the loop above leaves behind, then
      guarantee exactly one trailing newline */
-  return parts.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
+  const out = parts.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
+  /* swap the internal sentinel for its visible form last, so the exported
+     .md file never carries a Private Use Area character */
+  return out.split(PLACEHOLDER).join(PLACEHOLDER_TEXT);
 }

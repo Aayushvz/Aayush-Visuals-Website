@@ -3,17 +3,19 @@
 import { Fragment } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { Block, Draft } from "./types";
-import { buildClauses, PLACEHOLDER } from "./clauses";
+import { buildClauses, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses";
 import { formatDate } from "./format";
 import { DISCLAIMER } from "./render-md";
 
-/* splits on the placeholder so an unfilled value reads as muted rather
+/* splits on the sentinel (never on visible text, so a user's own "--" can
+   never be mistaken for an unfilled field) and renders PLACEHOLDER_TEXT,
+   the sentinel's display form, so an unfilled value reads as muted rather
    than as text the reader might mistake for a real term */
 function withPlaceholders(text: string) {
   return text.split(PLACEHOLDER).map((part, i, all) => (
     <Fragment key={i}>
       {part}
-      {i < all.length - 1 && <span className="cgDoc__ph">{PLACEHOLDER}</span>}
+      {i < all.length - 1 && <span className="cgDoc__ph">{PLACEHOLDER_TEXT}</span>}
     </Fragment>
   ));
 }
@@ -84,7 +86,7 @@ export default function DocPaper({ draft }: { draft: Draft }) {
         ] as [string, string][]).map(([k, v]) => (
           <tr key={k}>
             <th scope="row">{k}</th>
-            <td>{v || <span className="cgDoc__ph">{PLACEHOLDER}</span>}</td>
+            <td>{v || <span className="cgDoc__ph">{PLACEHOLDER_TEXT}</span>}</td>
           </tr>
         ))}
       </tbody></table>

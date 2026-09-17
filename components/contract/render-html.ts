@@ -1,5 +1,5 @@
 import type { Block, Draft } from "./types.ts";
-import { buildClauses } from "./clauses.ts";
+import { buildClauses, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
 import { formatDate } from "./format.ts";
 import { DISCLAIMER } from "./render-md.ts";
 
@@ -12,8 +12,17 @@ import { DISCLAIMER } from "./render-md.ts";
   here is deliberately conservative for that reason.
 */
 
+/* the sentinel is swapped for its visible form BEFORE HTML escaping, not
+   after. It makes no observable difference today, since PLACEHOLDER_TEXT
+   ("--") contains none of `& < > "`, but doing it first means the visible
+   placeholder text flows through the same escaping pass as any other
+   content, so it stays correct even if PLACEHOLDER_TEXT ever changes to
+   something that needs escaping. Doing it after would require esc() to
+   already be html-safe, which is not guaranteed. */
 function esc(s: string): string {
   return s
+    .split(PLACEHOLDER)
+    .join(PLACEHOLDER_TEXT)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
