@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"components/contract/**/*.test.ts\""
   },
   "dependencies": {
     "@types/matter-js": "^0.20.2",

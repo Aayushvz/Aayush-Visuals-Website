@@ -1,0 +1,913 @@
+/*
+  Contract generator, route scoped.
+
+  Every selector here is prefixed `cg` and every token is declared on
+  .cgShell rather than :root. That scoping is the whole reason this route
+  can carry a light/dark switch while the rest of the site keeps its
+  single fixed palette: nothing here can reach past the shell, and
+  leaving the route is the way back from any choice made inside it.
+
+  Press feedback lives at the bottom of this file, not in the
+  MICRO-INTERACTION LAYER block of globals.css, matching cricket.css and
+  pond.css: a route scoped world owns its own micro-interactions.
+*/
+
+.cgShell {
+  --cg-radius: 10px;
+  --cg-rail-w: 46px;
+  --cg-form-w: 380px;
+  /* still sets .cgBar's own fixed height on desktop; .cgGrid no longer
+     subtracts it (see the flex comment below), so it is not load-bearing
+     for layout, only for the bar's own size */
+  --cg-bar-h: 56px;
+
+  /* a flex column that is exactly the viewport tall, not a min-height: the
+     shell is a fixed-height dashboard and its two chrome rows (.cgBar,
+     .cgTabs) are meant to give up whatever they grow to and let .cgGrid
+     take the rest, rather than the page growing to fit them and scrolling.
+     This used to be done by hand: .cgGrid subtracted a hardcoded
+     --cg-bar-h from 100vh, which only accounted for .cgBar's own height
+     and never the .cgTabs row that appears at <= 1099px, or .cgBar's own
+     growth at that width from the mobile nav clearance padding. Both grew
+     silently and the sum was never re-subtracted, which is what produced
+     111px of page overflow below that breakpoint. Flex removes the
+     bookkeeping entirely: whatever the chrome rows measure, .cgGrid gets
+     what is left. 100dvh over 100vh so mobile browser chrome (the address
+     bar showing/hiding) does not leave a sliver of the page scrollable. */
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--cg-bg);
+  color: var(--cg-fg);
+  font-family: var(--font-primary);
+  transition: background var(--dur-state) var(--ease-quint),
+    color var(--dur-state) var(--ease-quint);
+}
+
+.cgShell[data-cg-theme="light"] {
+  --cg-bg: #f2ede6;
+  --cg-panel: #faf7f1;
+  --cg-fg: #1f1f1f;
+  --cg-fg-2: #6b6459;
+  --cg-line: rgba(31, 31, 31, 0.14);
+  --cg-line-2: rgba(31, 31, 31, 0.07);
+  --cg-field: #ffffff;
+  --cg-accent: #7c3aed;
+  --cg-accent-fg: #ffffff;
+  --cg-paper: #ffffff;
+  --cg-paper-fg: #1f1f1f;
+  --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 18px 44px rgba(0, 0, 0, 0.09);
+}
+
+.cgShell[data-cg-theme="dark"] {
+  --cg-bg: #121212;
+  --cg-panel: #1a1a1a;
+  --cg-fg: #f4f1ea;
+  --cg-fg-2: #9a948a;
+  --cg-line: rgba(244, 241, 234, 0.14);
+  --cg-line-2: rgba(244, 241, 234, 0.07);
+  --cg-field: #212121;
+  /* the brand violet is tuned for readability on cream; on near-black it
+     needs the lighter step to clear 4.5:1 */
+  --cg-accent: #a78bfa;
+  --cg-accent-fg: #17141f;
+  --cg-paper: #1e1e1e;
+  --cg-paper-fg: #ece8e1;
+  --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- layout ---------- */
+
+.cgGrid {
+  display: grid;
+  grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr;
+  /* takes whatever height .cgShell's flex column has left after .cgBar and
+     .cgTabs; min-height: 0 is required for a flex item's height to shrink
+     below its content's intrinsic size, otherwise the grid (and the page)
+     grows to fit .cgCol's content instead of clipping it for .cgCol's own
+     overflow-y: auto to scroll internally */
+  flex: 1;
+  min-height: 0;
+}
+
+.cgCol {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cgCol--form {
+  border-right: 1px solid var(--cg-line);
+  background: var(--cg-panel);
+}
+
+.cgCol--rail {
+  border-right: 1px solid var(--cg-line);
+}
+
+.cgCol--paper {
+  padding: clamp(20px, 3vw, 44px);
+  background: var(--cg-bg);
+}
+
+/* ---------- toolbar ---------- */
+
+.cgBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--cg-bar-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--cg-line);
+  background: var(--cg-panel);
+}
+
+.cgBar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cg-fg-2);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color var(--dur-hover) var(--ease-quint);
+}
+
+.cgBar__back:hover {
+  color: var(--cg-fg);
+}
+
+.cgBar__title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cgBar__spacer {
+  flex: 1;
+}
+
+/* the completion readout: a ring and a number, the only progress chrome */
+.cgRing {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cg-fg-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cgRing__svg {
+  transform: rotate(-90deg);
+}
+
+.cgRing__track {
+  stroke: var(--cg-line);
+}
+
+.cgRing__fill {
+  stroke: var(--cg-accent);
+  transition: stroke-dashoffset var(--dur-panel) var(--ease-quint);
+}
+
+/* ---------- controls ---------- */
+
+.cgSeg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+}
+
+.cgSeg__btn {
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint);
+}
+
+.cgSeg__btn[aria-pressed="true"] {
+  background: var(--cg-line-2);
+  color: var(--cg-fg);
+}
+
+.cgGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg);
+  cursor: pointer;
+}
+
+/* the one filled control on the page */
+.cgPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cg-accent);
+  color: var(--cg-accent-fg);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cgMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 210px;
+  padding: 6px;
+  border: 1px solid var(--cg-line);
+  border-radius: var(--cg-radius);
+  background: var(--cg-panel);
+  box-shadow: var(--cg-paper-shadow);
+  z-index: 20;
+}
+
+.cgMenu__item {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cgMenu__item:hover {
+  background: var(--cg-line-2);
+}
+
+.cgMenu__hint {
+  display: block;
+  color: var(--cg-fg-2);
+  font-size: 11px;
+}
+
+/* scoped to the shell: contract.css is a plain stylesheet import, so a
+   bare universal selector here would leak to every page that ever loads
+   this chunk. cricket.css and pond.css keep everything prefixed for the
+   same reason. `@page` below is the one rule that cannot be scoped, and
+   it is safe because Next only loads this stylesheet on /contract. */
+.cgShell *:focus-visible {
+  outline: 2px solid var(--cg-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- form panel ---------- */
+
+.cgForm {
+  padding: 16px 0 40px;
+}
+
+.cgForm__eyebrow {
+  margin: 0 16px 10px;
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.cgAcc {
+  border-top: 1px solid var(--cg-line-2);
+}
+
+.cgAcc__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cgAcc__label { flex: 1; }
+
+.cgAcc__count {
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cgAcc__chev {
+  color: var(--cg-fg-2);
+  transition: transform var(--dur-state) var(--ease-quint);
+}
+
+.cgAcc__chev[data-open="true"] { transform: rotate(180deg); }
+
+.cgAcc__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 4px 16px 20px;
+}
+
+.cgField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 100%;
+}
+
+.cgField[data-half="true"] { flex: 1 1 calc(50% - 6px); }
+
+.cgField__label {
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cgField__opt { opacity: 0.6; text-transform: none; letter-spacing: 0; }
+
+.cgInput {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--cg-line);
+  border-radius: 8px;
+  background: var(--cg-field);
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 15px;
+  transition: border-color var(--dur-hover) var(--ease-quint);
+}
+
+.cgInput:hover { border-color: var(--cg-fg-2); }
+.cgInput--area { resize: vertical; min-height: 76px; }
+
+.cgList { display: flex; flex-direction: column; gap: 6px; }
+.cgList__row { display: flex; gap: 6px; }
+
+.cgList__rm,
+.cgList__add {
+  border: 1px solid var(--cg-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cgList__rm { width: 36px; flex: 0 0 36px; }
+.cgList__add { padding: 8px; font-size: 13px; border-style: dashed; }
+
+/* switches: 44px tall so the whole row is the touch target */
+.cgSwitch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  flex: 1 1 100%;
+  cursor: pointer;
+}
+
+.cgSwitch input {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+}
+
+.cgSwitch__track {
+  position: relative;
+  flex: 0 0 34px;
+  width: 34px; height: 20px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  transition: background var(--dur-state) var(--ease-quint),
+    border-color var(--dur-state) var(--ease-quint);
+}
+
+.cgSwitch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 12px; height: 12px;
+  border-radius: 999px;
+  background: var(--cg-fg-2);
+  transition: transform var(--dur-state) var(--ease-quint),
+    background var(--dur-state) var(--ease-quint);
+}
+
+.cgSwitch input:checked + .cgSwitch__track {
+  background: var(--cg-accent);
+  border-color: var(--cg-accent);
+}
+
+.cgSwitch input:checked + .cgSwitch__track::after {
+  transform: translateX(14px);
+  background: var(--cg-accent-fg);
+}
+
+.cgSwitch input:focus-visible + .cgSwitch__track {
+  outline: 2px solid var(--cg-accent);
+  outline-offset: 2px;
+}
+
+.cgSwitch__text { font-size: 14px; }
+
+.cgSwitch__hint {
+  display: block;
+  color: var(--cg-fg-2);
+  font-size: 12px;
+}
+
+.cgForm__reset {
+  margin: 20px 16px 0;
+  padding: 8px 12px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cgAcc__chev,
+  .cgSwitch__track,
+  .cgSwitch__track::after,
+  .cgInput {
+    transition: none;
+  }
+}
+
+/* ---------- press feedback ---------- */
+
+.cgPrimary,
+.cgGhost,
+.cgSeg__btn,
+.cgAcc__head,
+.cgList__add,
+.cgList__rm,
+.cgForm__reset,
+.cgMenu__item {
+  transition: transform var(--dur-state) var(--ease-quint);
+}
+
+.cgPrimary:active,
+.cgGhost:active,
+.cgSeg__btn:active,
+.cgAcc__head:active,
+.cgList__add:active,
+.cgList__rm:active,
+.cgForm__reset:active,
+.cgMenu__item:active {
+  transform: scale(0.97);
+  transition-duration: var(--dur-press);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cgShell,
+  .cgRing__fill {
+    transition: none;
+  }
+
+  /* feedback survives reduced motion: the press dims instead of scaling */
+  .cgPrimary:active,
+  .cgGhost:active,
+  .cgSeg__btn:active,
+  .cgAcc__head:active,
+  .cgList__add:active,
+  .cgList__rm:active,
+  .cgForm__reset:active,
+  .cgMenu__item:active {
+    transform: none;
+    opacity: 0.7;
+  }
+}
+
+/* ---------- the paper ---------- */
+
+.cgDoc {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 64px);
+  border-radius: 2px;
+  background: var(--cg-paper);
+  color: var(--cg-paper-fg);
+  box-shadow: var(--cg-paper-shadow);
+  font-family: var(--cg-doc-body, var(--font-primary));
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.cgDoc__title {
+  margin: 0 0 28px;
+  font-family: var(--cg-doc-display, var(--font-primary));
+  font-size: clamp(40px, 6vw, 66px);
+  font-weight: var(--cg-doc-display-weight, 600);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.cgDoc__meta {
+  width: 100%;
+  margin: 0 0 40px;
+  border-top: 1px solid var(--cg-line);
+  border-bottom: 1px solid var(--cg-line);
+  border-collapse: collapse;
+}
+
+.cgDoc__meta th,
+.cgDoc__kv th {
+  width: 36%;
+  padding: 7px 0;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  opacity: 0.6;
+}
+
+.cgDoc__meta td,
+.cgDoc__kv td { padding: 7px 0; }
+
+.cgDoc__clause { margin: 0 0 34px; }
+
+.cgDoc__num {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+.cgDoc__h {
+  margin: 2px 0 14px;
+  font-family: var(--cg-doc-display, var(--font-primary));
+  font-size: 21px;
+  font-weight: var(--cg-doc-h-weight, 600);
+  letter-spacing: -0.02em;
+}
+
+.cgDoc__sub {
+  margin: 18px 0 7px;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.cgDoc__p { margin: 0 0 11px; max-width: 72ch; }
+.cgDoc__ul { margin: 0 0 11px; padding-left: 18px; }
+.cgDoc__ul li { margin: 0 0 5px; }
+
+/* unfilled values read as muted, so the document is whole from the first
+   second without ever looking like it states a term it does not */
+.cgDoc__ph {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: var(--cg-line-2);
+  color: var(--cg-fg-2);
+  opacity: 0.75;
+}
+
+.cgDoc__kv,
+.cgDoc__ledger { width: 100%; margin: 0 0 12px; border-collapse: collapse; }
+
+.cgDoc__ledger th {
+  padding: 6px 12px 6px 0;
+  border-bottom: 1px solid var(--cg-line);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  opacity: 0.6;
+}
+
+.cgDoc__ledger td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--cg-line-2);
+  vertical-align: top;
+}
+
+.cgDoc__sign {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 24px;
+}
+
+.cgDoc__signWho {
+  margin: 0 0 30px;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.cgDoc__signLine {
+  margin: 0 0 22px;
+  padding-top: 6px;
+  border-top: 1px solid var(--cg-line);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.cgDoc__disclaimer {
+  margin: 34px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--cg-line);
+  font-size: 11.5px;
+  opacity: 0.55;
+}
+
+/* ---------- skins ----------
+   Independent of the light/dark theme: the theme paints the chrome, the
+   skin art-directs the paper inside it. */
+
+.cgShell[data-cg-skin="studio"] .cgDoc {
+  --cg-doc-display: var(--font-primary);
+  --cg-doc-display-weight: 600;
+}
+
+.cgShell[data-cg-skin="editorial"] .cgDoc {
+  --cg-doc-display: var(--font-serif), Georgia, serif;
+  --cg-doc-display-weight: 400;
+  --cg-doc-h-weight: 400;
+  line-height: 1.7;
+}
+
+.cgShell[data-cg-skin="editorial"] .cgDoc__title { letter-spacing: -0.02em; }
+
+.cgShell[data-cg-skin="plain"] .cgDoc {
+  --cg-doc-display: var(--font-primary);
+  --cg-doc-display-weight: 500;
+  --cg-doc-h-weight: 500;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.cgShell[data-cg-skin="plain"] .cgDoc__title { font-size: clamp(30px, 4vw, 42px); }
+
+/* ---------- clause rail ---------- */
+
+.cgRail {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.cgRail__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  text-decoration: none;
+  transition: color var(--dur-hover) var(--ease-quint);
+}
+
+.cgRail__item:hover { color: var(--cg-accent); }
+
+.cgRail__tip {
+  position: absolute;
+  left: calc(100% + 8px);
+  padding: 4px 8px;
+  border: 1px solid var(--cg-line);
+  border-radius: 6px;
+  background: var(--cg-panel);
+  color: var(--cg-fg);
+  font-family: var(--font-primary);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-hover) var(--ease-quint);
+  z-index: 10;
+}
+
+.cgRail__item:hover .cgRail__tip,
+.cgRail__item:focus-visible .cgRail__tip { opacity: 1; }
+
+/* lets rail anchors glide to their clause instead of jumping the page */
+.cgCol--paper { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cgRail__item,
+  .cgRail__tip { transition: none; }
+
+  .cgCol--paper { scroll-behavior: auto; }
+}
+
+/* ---------- print ----------
+   The PDF route. Everything but the paper is removed, the paper loses
+   its shadow and its max-width, and each clause is protected from being
+   split across a page break. Text stays vector and selectable, which is
+   the whole reason this is a stylesheet and not a canvas library.
+
+   The browser's own page headers and footers (URL, date, page numbers)
+   cannot be reached from CSS, so the 18mm margin is sized to sit clear
+   of them rather than fighting them. */
+
+@page {
+  size: A4;
+  margin: 18mm;
+}
+
+@media print {
+  .cgBar,
+  .cgCol--form,
+  .cgCol--rail,
+  .cgTabs {
+    display: none !important;
+  }
+
+  /* .cgShell is a flex column at height: 100dvh on screen (see the layout
+     comment on .cgShell above), which exists to give .cgGrid whatever
+     height is left after .cgBar and .cgTabs on a fixed-height dashboard.
+     In paged media that same dvh resolves against the PAGE BOX, exactly
+     one page tall, so left as a flex column the shell caps the document
+     at a single page and .cgGrid's flex: 1; min-height: 0 explicitly
+     permits it to shrink below its content instead of flowing across
+     pages. Undo the flex column entirely here rather than trying to
+     override height alone: display: block is what makes .cgGrid stop
+     being a flex item, which is what makes its flex sizing stop applying.
+     A thirteen-clause contract is several pages; this has to keep
+     flowing, not fit one. */
+  .cgShell {
+    display: block;
+    height: auto;
+    min-height: 0;
+    background: #fff;
+  }
+
+  .cgGrid {
+    display: block;
+    height: auto;
+    /* belt and braces: with .cgShell no longer a flex container these two
+       are already inert, but stating that explicitly here means a later
+       edit to .cgShell's print rule can't silently revive them */
+    flex: none;
+    min-height: 0;
+  }
+
+  .cgCol,
+  .cgCol--paper {
+    overflow: visible;
+    height: auto;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* @media (max-width: 1099px) below sets .cgCol--paper to display:none
+     whenever data-cg-tab="form", which is the desktop default and a state
+     a desktop visitor can never leave (the tab strip that would let them
+     switch to "preview" is itself display:none above that breakpoint). In
+     paged media, a width media query evaluates against the PAGE BOX, not
+     the browser window: @page above gives an A4 box with 18mm margins, an
+     effective content width of roughly 658px, which is under 1099px. So
+     that mobile-only rule fires during printing regardless of how wide the
+     actual window is, and Export -> Save as PDF renders a blank page. Force
+     the paper back with !important, which wins regardless of specificity
+     against that non-important rule, so printing never depends on which
+     tab was active or the window's screen width. */
+  .cgCol--paper {
+    display: block !important;
+  }
+
+  /* the paper always prints light, whatever the screen theme is: a dark
+     document is a full page of toner and unreadable on paper */
+  .cgDoc {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #111;
+    box-shadow: none;
+    font-size: 10.5pt;
+  }
+
+  .cgDoc__ph {
+    background: none;
+    color: #111;
+  }
+
+  .cgDoc__clause {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cgDoc__sign {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cgDoc__title { font-size: 30pt; }
+  .cgDoc__h { font-size: 13pt; }
+
+  .cgDoc a { text-decoration: none; color: inherit; }
+}
+
+/* ---------- responsive ---------- */
+
+.cgTabs { display: none; }
+
+@media (max-width: 1099px) {
+  .cgGrid { grid-template-columns: 1fr; }
+
+  .cgTabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--cg-line);
+    background: var(--cg-panel);
+  }
+
+  .cgCol--rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--cg-line);
+  }
+
+  .cgRail {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px 12px;
+    gap: 4px;
+  }
+
+  .cgRail__item { flex: 0 0 auto; width: 30px; }
+  .cgRail__tip { display: none; }
+
+  .cgShell[data-cg-tab="form"] .cgCol--rail,
+  .cgShell[data-cg-tab="form"] .cgCol--paper { display: none; }
+
+  .cgShell[data-cg-tab="preview"] .cgCol--form { display: none; }
+
+  /* the mobile nav is a fixed 58px pill on every page; the toolbar has
+     to sit clear of it rather than underneath */
+  .cgBar { padding-top: var(--mnav-clear); height: auto; }
+  .cgBar__title { display: none; }
+}
+
+@media (max-width: 640px) {
+  .cgShell { --cg-form-w: 100%; }
+  .cgCol--paper { padding: 12px; }
+
+  .cgDoc {
+    padding: 24px 20px;
+    font-size: 13px;
+  }
+
+  /* at phone width the bar cannot fit back link + ring + skin picker +
+     theme toggle + Export without pushing Export off screen. The skin
+     picker is the largest discretionary item and only affects the paper,
+     which is not even visible on the form tab, so it is dropped rather
+     than shrunk. Export, the one primary action, is never touched. */
+  .cgBar { gap: 8px; }
+  .cgSeg { display: none; }
+
+  /* the percentage is an aria-live region: shrink it out of sight rather
+     than display:none, which would drop it from the a11y tree entirely */
+  .cgRing__text {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cgField[data-half="true"] { flex: 1 1 100%; }
+}

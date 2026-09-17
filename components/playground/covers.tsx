@@ -231,6 +231,138 @@ export function PondCover() {
 }
 
 /*
+  Contract Generator's cover.
+
+  The other two covers mirror a scene - a stadium, a pond at night. This one
+  mirrors a document, because that is the whole product: type into a form on
+  the left, watch a page assemble itself on the right. So the cover is that
+  page, standing upright on a dark ground the way box art plants its subject
+  in a room. Hairline rules stand in for clause text the way the arc stood in
+  for the six on the cricket cover - a reading of the thing rather than the
+  thing itself, legible at card size - and one violet mark sits where a
+  signature goes, because that is the single moment the tool is building
+  toward.
+
+  Drawn, not photographed, same as the other two: the ground is a gradient,
+  the page is an SVG rect with a hairline border, and the rules and the
+  signature are vector paths. Nothing here is a raster asset. The paper and
+  its rules borrow the shelf's own ink tokens (`--pg-fg`, `--pg-mute`,
+  `--pg-faint`, `--pg-hair`) rather than inventing a second grayscale, and the
+  signature is `--pg-accent` - the same violet the rest of the shelf already
+  uses for its one accent colour.
+*/
+export function ContractCover() {
+  /* body rules: two short paragraphs with a gap between them, each line a
+     little narrower or wider than its neighbour so the block reads as
+     ragged-right text instead of a bar chart. x is constant (rules are
+     left-aligned, like real copy); y and width vary. */
+  const rules: [number, number][] = [
+    [84, 118], [99, 100], [114, 124], [129, 90],
+    [152, 112], [167, 96], [182, 120], [197, 104],
+    [220, 108], [235, 88],
+  ];
+
+  return (
+    <div className="contractCover">
+      {/* the ground the page stands on, lit low and slightly warm behind
+          it so the sheet reads as the one lit thing in the frame */}
+      <div className="contractCover__ground" />
+      <div className="contractCover__glow" />
+
+      <svg
+        className="contractCover__sheet"
+        viewBox="0 0 300 400"
+        aria-hidden
+        focusable="false"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <g className="contractCover__page">
+          <rect
+            className="contractCover__paper"
+            x="66"
+            y="28"
+            width="168"
+            height="326"
+            rx="4"
+          />
+
+          {/* the heading rule - the one line heavy enough to read as a
+              title rather than body copy */}
+          <rect
+            className="contractCover__rule contractCover__rule--head"
+            x="92"
+            y="58"
+            width="84"
+            height="7"
+            rx="2"
+          />
+
+          {/* clause text, standing in for itself */}
+          {rules.map(([y, w]) => (
+            <rect
+              key={y}
+              className="contractCover__rule contractCover__rule--body"
+              x="92"
+              y={y}
+              width={w}
+              height="4"
+              rx="1.5"
+            />
+          ))}
+
+          {/* the signature baseline. The mark that sits on it is painted
+              separately, above the scrim below - see contractCover__mark */}
+          <rect
+            className="contractCover__rule contractCover__rule--sig"
+            x="92"
+            y="270"
+            width="76"
+            height="1.5"
+          />
+        </g>
+      </svg>
+
+      <div className="contractCover__scrim" />
+
+      {/*
+        The signature mark, painted in its own layer above the scrim rather
+        than inside the page group. The scrim's job is to keep the title
+        lockup legible against whatever is under it; it has nothing to do on
+        the paper. But the mark is the one accent colour on the cover and
+        the one mark that says what this thing produces, so it is the one
+        piece of art that cannot sit under a dimming layer built for
+        something else. Same viewBox and the same rotation as the page
+        group, so it still lands exactly on the baseline it belongs to.
+      */}
+      <svg
+        className="contractCover__markLayer"
+        viewBox="0 0 300 400"
+        aria-hidden
+        focusable="false"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <path
+          className="contractCover__mark"
+          d="M97 262 C104 251, 112 268, 120 256 S 136 246, 144 258 S 160 250, 166 259"
+          fill="none"
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+
+      <div className="contractCover__lock">
+        <span className="contractCover__name">
+          Contract
+          <br />
+          Generator
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/*
   The vacant cover.
 
   Same footprint and the same darkness as a real one, so the row keeps its
