@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Agent skill tooling (local only)
 .agent/
+
+# Subagent-driven development scratch (local only)
+.superpowers/

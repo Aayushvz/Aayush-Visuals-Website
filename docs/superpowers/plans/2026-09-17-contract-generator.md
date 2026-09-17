@@ -2112,7 +2112,12 @@ Create `components/contract/contract.css`. Every token is scoped to `.cgShell`. 
   font-size: 11px;
 }
 
-*:focus-visible {
+/* scoped to the shell: contract.css is a plain stylesheet import, so a
+   bare universal selector here would leak to every page that ever loads
+   this chunk. cricket.css and pond.css keep everything prefixed for the
+   same reason. `@page` below is the one rule that cannot be scoped, and
+   it is safe because Next only loads this stylesheet on /contract. */
+.cgShell *:focus-visible {
   outline: 2px solid var(--cg-accent);
   outline-offset: 2px;
 }
