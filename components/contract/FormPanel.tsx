@@ -4,6 +4,33 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence, useIsPresent, useReducedMotion } from "framer-motion";
 import { GROUPS, type Field } from "./schema";
 import type { Draft, Toggles } from "./types";
+import LogoMark from "@/components/LogoMark";
+import { SOCIAL_PROFILES } from "@/lib/site";
+import {
+  BehanceIcon,
+  ChevronDownIcon,
+  InstagramIcon,
+  LinkedInIcon,
+  PlusIcon,
+  RotateCcwIcon,
+  XIcon,
+} from "./icons";
+
+/* Only three of the four profiles in lib/site.ts belong here (no GitHub);
+   matched by hostname rather than array position so a reorder of
+   SOCIAL_PROFILES cannot silently swap a label onto the wrong URL. */
+type SocialSource = { match: string; label: string; Icon: typeof BehanceIcon };
+
+const SOCIAL_SOURCES: SocialSource[] = [
+  { match: "behance.net", label: "Behance", Icon: BehanceIcon },
+  { match: "instagram.com", label: "Instagram", Icon: InstagramIcon },
+  { match: "linkedin.com", label: "LinkedIn", Icon: LinkedInIcon },
+];
+
+const SOCIAL_LINKS = SOCIAL_SOURCES.map((s) => ({
+  ...s,
+  href: SOCIAL_PROFILES.find((url) => url.includes(s.match)),
+})).filter((s): s is SocialSource & { href: string } => Boolean(s.href));
 
 type Props = {
   draft: Draft;
@@ -62,7 +89,9 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
               {req.length > 0 && (
                 <span className="cgAcc__count">{done}/{req.length}</span>
               )}
-              <span className="cgAcc__chev" aria-hidden data-open={isOpen}>&#9662;</span>
+              <span className="cgAcc__chev" aria-hidden data-open={isOpen}>
+                <ChevronDownIcon />
+              </span>
             </button>
 
             <AnimatePresence initial={false}>
@@ -108,8 +137,28 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
       })}
 
       <button type="button" className="cgForm__reset" onClick={reset}>
-        Reset all
+        <RotateCcwIcon /> Reset all
       </button>
+
+      <div className="cgFoot">
+        <LogoMark className="cgFoot__logo" />
+        {SOCIAL_LINKS.length > 0 && (
+          <div className="cgFoot__socials" role="group" aria-label="Elsewhere">
+            {SOCIAL_LINKS.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noreferrer"
+                className="cgFoot__social"
+                aria-label={s.label}
+              >
+                <s.Icon />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -226,12 +275,12 @@ function DeliverablesList({
               aria-label={`Remove ${field.label} ${i + 1}`}
               onClick={() => handleRemove(i)}
             >
-              &times;
+              <XIcon />
             </button>
           </div>
         ))}
         <button type="button" className="cgList__add" onClick={handleAdd}>
-          + {field.placeholder ?? "Add"}
+          <PlusIcon /> {field.placeholder ?? "Add"}
         </button>
       </div>
     </div>

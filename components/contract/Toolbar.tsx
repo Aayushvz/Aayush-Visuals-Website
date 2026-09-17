@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import PageLink from "@/components/PageLink";
 import type { Skin } from "./types";
+import {
+  ArrowLeftIcon,
+  ChevronDownIcon,
+  DownloadIcon,
+  FileTextIcon,
+  MoonIcon,
+  PrinterIcon,
+  SunIcon,
+} from "./icons";
 
 type Props = {
   pct: number;
@@ -36,10 +45,16 @@ export default function Toolbar({
      panel's role="menu"/"menuitem" promise a keyboard contract, so opening,
      arrowing and closing all have to actually move focus rather than just
      toggling visibility */
-  const exportItems: { id: string; label: string; hint: string; run: () => void }[] = [
-    { id: "pdf", label: "Save as PDF", hint: "Opens the print dialog, A4", run: onPrint },
-    { id: "word", label: "Word (.doc)", hint: "Editable in Word, Pages, Docs", run: onWord },
-    { id: "md", label: "Markdown (.md)", hint: "Plain text", run: onMarkdown },
+  const exportItems: {
+    id: string;
+    label: string;
+    hint: string;
+    Icon: typeof PrinterIcon;
+    run: () => void;
+  }[] = [
+    { id: "pdf", label: "Save as PDF", hint: "Opens the print dialog, A4", Icon: PrinterIcon, run: onPrint },
+    { id: "word", label: "Word (.doc)", hint: "Editable in Word, Pages, Docs", Icon: FileTextIcon, run: onWord },
+    { id: "md", label: "Markdown (.md)", hint: "Plain text", Icon: DownloadIcon, run: onMarkdown },
   ];
 
   const closeMenu = () => {
@@ -101,7 +116,7 @@ export default function Toolbar({
   return (
     <header className="cgBar">
       <PageLink href="/playground" className="cgBar__back">
-        <span aria-hidden>&larr;</span> Playground
+        <ArrowLeftIcon /> Playground
       </PageLink>
       <span className="cgBar__title">Service Agreement</span>
       <span className="cgBar__spacer" />
@@ -139,7 +154,7 @@ export default function Toolbar({
         onClick={onTheme}
         aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       >
-        {theme === "dark" ? "○" : "●"}
+        {theme === "dark" ? <SunIcon /> : <MoonIcon />}
       </button>
 
       <div ref={wrap} style={{ position: "relative" }}>
@@ -151,7 +166,7 @@ export default function Toolbar({
           aria-haspopup="menu"
           onClick={() => setOpen((o) => !o)}
         >
-          Export <span aria-hidden>&#9662;</span>
+          Export <ChevronDownIcon />
         </button>
         {open && (
           <div className="cgMenu" role="menu" onKeyDown={onMenuKeyDown}>
@@ -166,8 +181,11 @@ export default function Toolbar({
                 }}
                 onClick={() => chooseItem(item.run)}
               >
-                {item.label}
-                <span className="cgMenu__hint">{item.hint}</span>
+                <item.Icon className="cgMenu__icon" />
+                <span className="cgMenu__itemText">
+                  {item.label}
+                  <span className="cgMenu__hint">{item.hint}</span>
+                </span>
               </button>
             ))}
           </div>
