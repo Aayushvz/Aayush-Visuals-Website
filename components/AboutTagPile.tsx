@@ -168,6 +168,17 @@ export default function AboutTagPile() {
       const T = 240;
       Composite.add(engine.world, [
         Bodies.rectangle(W / 2, H + T / 2, W + 800, T, { isStatic: true }),
+        /*
+          A lid, and the reason for it is the text above.
+
+          The band is only as tall as the room left under the last line, and
+          on a short phone that is less than a deep pile needs: at twenty
+          tags the pile was taller than the band and simply kept stacking
+          upward, straight over the statement. Thinning the phone set fixes
+          this instance; the lid makes it structural, so no count, no throw
+          and no window shape can ever put a tag on a word.
+        */
+        Bodies.rectangle(W / 2, -4 - T / 2, W + 800, T, { isStatic: true }),
         Bodies.rectangle(-edge - T / 2, H / 2, T, H * 4, { isStatic: true }),
         Bodies.rectangle(W + edge + T / 2, H / 2, T, H * 4, { isStatic: true }),
       ]);
