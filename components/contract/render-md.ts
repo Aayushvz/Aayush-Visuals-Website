@@ -1,6 +1,5 @@
 import type { Block, Draft } from "./types.ts";
-import { buildClauses, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
-import { formatDate } from "./format.ts";
+import { buildClauses, documentMeta, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
 
 /*
   Clause array to Markdown.
@@ -62,10 +61,7 @@ export function renderMarkdown(d: Draft): string {
     "",
     "| | |",
     "| --- | --- |",
-    `| Effective Date | ${cell(formatDate(d.effectiveDate))} |`,
-    `| Designer | ${cell(d.designerName)} |`,
-    `| Client | ${cell(d.clientName)} |`,
-    `| Project | ${cell(d.projectName)} |`,
+    ...documentMeta(d).map(([k, val]) => `| ${cell(k)} | ${cell(val)} |`),
     "",
   ];
 

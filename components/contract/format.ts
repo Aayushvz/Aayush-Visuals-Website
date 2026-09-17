@@ -1,4 +1,4 @@
-import type { Currency } from "./types.ts";
+import type { Currency, EntityType } from "./types.ts";
 
 /*
   Formatting for the document.
@@ -51,6 +51,20 @@ export function formatDate(iso: string): string {
     month: "long",
     year: "numeric",
   }).format(d);
+}
+
+/* the Parties clause states the designer's business type in words, never
+   the stored enum: schema.ts's select options are the source for the label
+   text a user picks from, this is the same wording read back into the
+   document */
+const ENTITY_LABEL: Record<EntityType, string> = {
+  individual: "Individual",
+  proprietor: "Sole Proprietor",
+  company: "Company",
+};
+
+export function formatEntity(entity: EntityType): string {
+  return ENTITY_LABEL[entity];
 }
 
 export function slugify(input: string): string {

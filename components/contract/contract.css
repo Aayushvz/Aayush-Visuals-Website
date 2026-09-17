@@ -16,11 +16,27 @@
   --cg-radius: 10px;
   --cg-rail-w: 46px;
   --cg-form-w: 380px;
-  /* declared here, not on .cgBar: .cgGrid subtracts it, and a token set on
-     a sibling is not in scope for it */
+  /* still sets .cgBar's own fixed height on desktop; .cgGrid no longer
+     subtracts it (see the flex comment below), so it is not load-bearing
+     for layout, only for the bar's own size */
   --cg-bar-h: 56px;
 
-  min-height: 100vh;
+  /* a flex column that is exactly the viewport tall, not a min-height: the
+     shell is a fixed-height dashboard and its two chrome rows (.cgBar,
+     .cgTabs) are meant to give up whatever they grow to and let .cgGrid
+     take the rest, rather than the page growing to fit them and scrolling.
+     This used to be done by hand: .cgGrid subtracted a hardcoded
+     --cg-bar-h from 100vh, which only accounted for .cgBar's own height
+     and never the .cgTabs row that appears at <= 1099px, or .cgBar's own
+     growth at that width from the mobile nav clearance padding. Both grew
+     silently and the sum was never re-subtracted, which is what produced
+     111px of page overflow below that breakpoint. Flex removes the
+     bookkeeping entirely: whatever the chrome rows measure, .cgGrid gets
+     what is left. 100dvh over 100vh so mobile browser chrome (the address
+     bar showing/hiding) does not leave a sliver of the page scrollable. */
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
   background: var(--cg-bg);
   color: var(--cg-fg);
   font-family: var(--font-primary);
@@ -65,7 +81,13 @@
 .cgGrid {
   display: grid;
   grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr;
-  height: calc(100vh - var(--cg-bar-h));
+  /* takes whatever height .cgShell's flex column has left after .cgBar and
+     .cgTabs; min-height: 0 is required for a flex item's height to shrink
+     below its content's intrinsic size, otherwise the grid (and the page)
+     grows to fit .cgCol's content instead of clipping it for .cgCol's own
+     overflow-y: auto to scroll internally */
+  flex: 1;
+  min-height: 0;
 }
 
 .cgCol {
@@ -750,6 +772,22 @@
     height: auto;
     padding: 0;
     background: #fff;
+  }
+
+  /* @media (max-width: 1099px) below sets .cgCol--paper to display:none
+     whenever data-cg-tab="form", which is the desktop default and a state
+     a desktop visitor can never leave (the tab strip that would let them
+     switch to "preview" is itself display:none above that breakpoint). In
+     paged media, a width media query evaluates against the PAGE BOX, not
+     the browser window: @page above gives an A4 box with 18mm margins, an
+     effective content width of roughly 658px, which is under 1099px. So
+     that mobile-only rule fires during printing regardless of how wide the
+     actual window is, and Export -> Save as PDF renders a blank page. Force
+     the paper back with !important, which wins regardless of specificity
+     against that non-important rule, so printing never depends on which
+     tab was active or the window's screen width. */
+  .cgCol--paper {
+    display: block !important;
   }
 
   /* the paper always prints light, whatever the screen theme is: a dark

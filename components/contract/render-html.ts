@@ -1,6 +1,5 @@
 import type { Block, Draft } from "./types.ts";
-import { buildClauses, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
-import { formatDate } from "./format.ts";
+import { buildClauses, documentMeta, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
 import { DISCLAIMER } from "./render-md.ts";
 
 /*
@@ -73,13 +72,7 @@ function block(b: Block): string {
 
 export function renderWordHtml(d: Draft): string {
   const clauses = buildClauses(d);
-
-  const meta: [string, string][] = [
-    ["Effective Date", formatDate(d.effectiveDate)],
-    ["Designer", d.designerName],
-    ["Client", d.clientName],
-    ["Project Name", d.projectName],
-  ];
+  const meta = documentMeta(d);
 
   const body = clauses
     .map(

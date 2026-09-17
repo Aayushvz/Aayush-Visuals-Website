@@ -114,6 +114,40 @@ test("the jurisdiction reads back the governing location", () => {
   assert.ok(JSON.stringify(general).includes("Berlin, Germany"));
 });
 
+test("the designer's role appears in the parties clause", () => {
+  const parties = buildClauses({ ...full, designerRole: "Brand Strategist" }).find(
+    (c) => c.id === "parties",
+  );
+  assert.ok(JSON.stringify(parties).includes("Brand Strategist"));
+});
+
+test("an unfilled designer role falls back to the placeholder, not an empty gap", () => {
+  const parties = buildClauses({ ...full, designerRole: "" }).find((c) => c.id === "parties");
+  assert.ok(JSON.stringify(parties).includes(PLACEHOLDER));
+});
+
+test("the designer's entity type renders its human label, never the raw enum value", () => {
+  const cases: [Draft["designerEntity"], string][] = [
+    ["individual", "Individual"],
+    ["proprietor", "Sole Proprietor"],
+    ["company", "Company"],
+  ];
+  for (const [entity, label] of cases) {
+    const parties = buildClauses({ ...full, designerEntity: entity }).find(
+      (c) => c.id === "parties",
+    );
+    assert.ok(JSON.stringify(parties).includes(label), `${entity} should render as "${label}"`);
+  }
+  /* the raw stored value must never leak into the document text; "Company"
+     containing the substring "company" only by a case difference is the
+     reason this is a separate, case-sensitive assertion rather than folded
+     into the loop above */
+  const parties = buildClauses({ ...full, designerEntity: "proprietor" }).find(
+    (c) => c.id === "parties",
+  );
+  assert.equal(JSON.stringify(parties).includes("proprietor"), false);
+});
+
 test("user text containing -- survives unchanged and is never mistaken for the placeholder sentinel", () => {
   /* regression: PLACEHOLDER used to be the visible string "--" itself, so a
      renderer splitting on it would also split a user's own "Q3--Q4 rollout"

@@ -59,6 +59,33 @@ test("the disclaimer appears exactly once", () => {
   assert.equal(html.split("Consult a qualified legal professional").length - 1, 1);
 });
 
+test("the header table agrees with the markdown renderer, label for label and value for value", () => {
+  /* the screen renderer can't be exercised here without a DOM, so this
+     checks the two renderers that can be, in the same spirit as the
+     numbering parity test above: both must be reading documentMeta rather
+     than a hand copied header, or a drift like the branch already shipped
+     once (render-md said "Project", the others said "Project Name") would
+     go uncaught again */
+  const html = renderWordHtml(d);
+  const md = renderMarkdown(d);
+
+  const mdHeader = md.slice(0, md.indexOf("## 01."));
+  const fromMd = [...mdHeader.matchAll(/^\| (.+) \| (.+) \|$/gm)]
+    .filter(([, k]) => k !== "---")
+    .map(([, k, v]) => [k, v] as [string, string]);
+
+  const htmlHeader = html.slice(html.indexOf("<h1"), html.indexOf("<h2"));
+  const fromHtml = [
+    ...htmlHeader.matchAll(/<td[^>]*><strong>(.+?)<\/strong><\/td><td[^>]*>(.*?)<\/td><\/tr>/g),
+  ].map(([, k, v]) => [k, v] as [string, string]);
+
+  assert.deepEqual(fromHtml, fromMd);
+  assert.deepEqual(
+    fromMd.map(([k]) => k),
+    ["Effective Date", "Designer", "Client", "Project Name"],
+  );
+});
+
 test("the placeholder sentinel never reaches the exported html, and an unfilled field still shows --", () => {
   /* DEFAULT_DRAFT leaves most fields blank, so this exercises the fallback
      path directly rather than relying on `d` above, which is mostly filled */

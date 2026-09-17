@@ -3,8 +3,7 @@
 import { Fragment } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { Block, Draft } from "./types";
-import { buildClauses, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses";
-import { formatDate } from "./format";
+import { buildClauses, documentMeta, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses";
 import { DISCLAIMER } from "./render-md";
 
 /* splits on the sentinel (never on visible text, so a user's own "--" can
@@ -78,15 +77,10 @@ export default function DocPaper({ draft }: { draft: Draft }) {
       <h1 className="cgDoc__title">Service<br />Agreement</h1>
 
       <table className="cgDoc__meta"><tbody>
-        {([
-          ["Effective Date", formatDate(draft.effectiveDate)],
-          ["Designer", draft.designerName],
-          ["Client", draft.clientName],
-          ["Project Name", draft.projectName],
-        ] as [string, string][]).map(([k, v]) => (
+        {documentMeta(draft).map(([k, val]) => (
           <tr key={k}>
             <th scope="row">{k}</th>
-            <td>{v || <span className="cgDoc__ph">{PLACEHOLDER_TEXT}</span>}</td>
+            <td>{withPlaceholders(val)}</td>
           </tr>
         ))}
       </tbody></table>

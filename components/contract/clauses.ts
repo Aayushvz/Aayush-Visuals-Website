@@ -1,5 +1,5 @@
 import type { Block, Clause, Draft } from "./types.ts";
-import { formatDate, formatMoney } from "./format.ts";
+import { formatDate, formatEntity, formatMoney } from "./format.ts";
 
 /*
   The contract, as data.
@@ -48,6 +48,23 @@ function jurisdiction(d: Draft): string {
     || PLACEHOLDER;
 }
 
+/* The four header rows shown above the clauses: Effective Date, Designer,
+   Client, Project Name. This used to be hand written three times, once per
+   renderer (DocPaper, render-md, render-html), and had already drifted
+   within this branch: one renderer's label read "Project" where the other
+   two read "Project Name", and the screen renderer showed the placeholder
+   for an empty value while both exporters emitted a blank cell. Exporting
+   it here, beside buildClauses, is the same fix the clause architecture
+   already applies to the numbered prose: one source, three consumers. */
+export function documentMeta(d: Draft): [string, string][] {
+  return [
+    ["Effective Date", formatDate(d.effectiveDate) || PLACEHOLDER],
+    ["Designer", v(d.designerName)],
+    ["Client", v(d.clientName)],
+    ["Project Name", v(d.projectName)],
+  ];
+}
+
 export function buildClauses(d: Draft): Clause[] {
   const total = num(d.totalFee);
   const advancePct = num(d.advancePct);
@@ -60,6 +77,8 @@ export function buildClauses(d: Draft): Clause[] {
   /* ---- 01 Parties ---------------------------------------------------- */
   const designerLines: string[] = [
     `Full Name: ${v(d.designerName)}`,
+    `Role: ${v(d.designerRole)}`,
+    `Business Type: ${formatEntity(d.designerEntity)}`,
     `Address: ${v(d.designerAddress)}`,
     `Email: ${v(d.designerEmail)}`,
     `Phone: ${v(d.designerPhone)}`,
