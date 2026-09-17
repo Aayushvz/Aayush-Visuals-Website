@@ -835,7 +835,14 @@
     font-size: 13px;
   }
 
-  .cgSeg__btn { padding: 5px 9px; font-size: 11px; }
+  /* at phone width the bar cannot fit back link + ring + skin picker +
+     theme toggle + Export without pushing Export off screen. The skin
+     picker is the largest discretionary item and only affects the paper,
+     which is not even visible on the form tab, so it is dropped rather
+     than shrunk. Export, the one primary action, is never touched. */
+  .cgBar { gap: 8px; }
+  .cgSeg { display: none; }
+
   /* the percentage is an aria-live region: shrink it out of sight rather
      than display:none, which would drop it from the a11y tree entirely */
   .cgRing__text {
