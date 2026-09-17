@@ -14,7 +14,7 @@
 
 - **Zero new npm dependencies**, runtime or dev. Verified by `git diff package.json` being empty at the end of every task.
 - **Node 24 built in test runner.** Tests run with `node --test "components/contract/**/*.test.ts"`. Node strips types natively, so **test files and every module they import must avoid TypeScript features that require code generation**: no `enum`, no `namespace`, no decorators, no constructor parameter properties. Type only imports must be written `import type { X } from "./y.ts"`.
-- **Test imports use relative paths with an explicit `.ts` extension** (`from "./clauses.ts"`). The `@/` alias is a tsconfig path that bare Node does not resolve.
+- **Test imports use relative paths with an explicit `.ts` extension** (`from "./clauses.ts"`). The `@/` alias is a tsconfig path that bare Node does not resolve. This requires `"allowImportingTsExtensions": true` in `tsconfig.json` (valid because that file already sets `"noEmit": true`), otherwise `next build` fails type checking with "An import path can only end with a '.ts' extension". It is a compiler option, not a package, so the zero-dependency rule still holds. Do not solve this by dropping the extensions: Node cannot resolve extensionless relative imports under native type stripping, so that trades a broken build for broken tests.
 - **Tested modules must not import React or contain JSX.** `schema.ts`, `clauses.ts`, `render-md.ts`, `render-html.ts` and `format.ts` are pure and stay that way. `.tsx` files are verified in the browser instead.
 - **No edits to `app/globals.css`.** Every token and selector for this route lives in `components/contract/contract.css`, including press feedback. This matches `cricket.css` and `pond.css`, neither of which has a selector in `globals.css`.
 - **Every selector is prefixed `cg`.** The stylesheet is route scoped and must not collide with the global sheet.
@@ -30,13 +30,16 @@
 
 ```bash
 # unit tests for the pure modules
-node --test "components/contract/**/*.test.ts"
+npm test
 
 # type check and production build
 npm run build
 ```
 
-There is no test script in `package.json` and adding one is Task 2's job.
+Task 1 adds the `test` script. **Both gates must be green at the end of every
+task from Task 1 onward, not only the browser tasks.** An earlier run of this
+plan let a type error sit undetected through three tasks because only `npm test`
+was being run.
 
 ---
 
