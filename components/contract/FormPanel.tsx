@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, AnimatePresence, useIsPresent, useReducedMotion } from "framer-motion";
 import { GROUPS, type Field } from "./schema";
 import type { Draft, Toggles } from "./types";
 
@@ -45,7 +45,18 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
               id={`cg-head-${g.id}`}
               aria-expanded={isOpen}
               aria-controls={`cg-panel-${g.id}`}
-              onClick={() => setOpen(isOpen ? "" : g.id)}
+              onClick={(e) => {
+                setOpen(isOpen ? "" : g.id);
+                /* Clicking a different header closes the currently open
+                   panel. That panel is marked inert as soon as it starts
+                   exiting (see AccordionPanel), but a click does not focus
+                   a <button> in every browser (Safari does not), so if the
+                   user's focus was inside the closing panel it could be
+                   left on a node that just went inert. Move focus to the
+                   header that was actually clicked, the natural landing
+                   spot, rather than trusting default click-to-focus. */
+                e.currentTarget.focus();
+              }}
             >
               <span className="cgAcc__label">{g.label}</span>
               {req.length > 0 && (
@@ -56,43 +67,40 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
 
             <AnimatePresence initial={false}>
               {isOpen && (
-                <motion.section
-                  id={`cg-panel-${g.id}`}
-                  role="region"
-                  aria-labelledby={`cg-head-${g.id}`}
-                  initial={reduce ? false : { height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={reduce ? { height: 0 } : { height: 0, opacity: 0 }}
-                  transition={reduce ? { duration: 0 } : { duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <div className="cgAcc__body">
-                    {g.id === "clauses"
-                      ? TOGGLE_LABELS.map((t) => (
-                          <label className="cgSwitch" key={t.name}>
-                            <input
-                              type="checkbox"
-                              checked={draft.toggles[t.name]}
-                              onChange={(e) => setToggle(t.name, e.target.checked)}
-                            />
-                            <span className="cgSwitch__track" aria-hidden />
-                            <span className="cgSwitch__text">
-                              {t.label}
-                              <span className="cgSwitch__hint">{t.hint}</span>
-                            </span>
-                          </label>
-                        ))
-                      : g.fields.map((f) => (
+                <AccordionPanel groupId={g.id} reduce={Boolean(reduce)}>
+                  {g.id === "clauses"
+                    ? TOGGLE_LABELS.map((t) => (
+                        <label className="cgSwitch" key={t.name}>
+                          <input
+                            type="checkbox"
+                            checked={draft.toggles[t.name]}
+                            onChange={(e) => setToggle(t.name, e.target.checked)}
+                          />
+                          <span className="cgSwitch__track" aria-hidden />
+                          <span className="cgSwitch__text">
+                            {t.label}
+                            <span className="cgSwitch__hint">{t.hint}</span>
+                          </span>
+                        </label>
+                      ))
+                    : g.fields.map((f) =>
+                        f.type === "list" ? (
+                          <DeliverablesList
+                            key={String(f.name)}
+                            field={f}
+                            draft={draft}
+                            setDeliverables={setDeliverables}
+                          />
+                        ) : (
                           <FieldRow
                             key={String(f.name)}
                             field={f}
                             draft={draft}
                             setField={setField}
-                            setDeliverables={setDeliverables}
                           />
-                        ))}
-                  </div>
-                </motion.section>
+                        ),
+                      )}
+                </AccordionPanel>
               )}
             </AnimatePresence>
           </div>
@@ -106,56 +114,138 @@ export default function FormPanel({ draft, setField, setToggle, setDeliverables,
   );
 }
 
+/*
+  The exiting panel of an AnimatePresence stays mounted, tabbable and
+  focusable for the whole exit transition: once the parent stops
+  rendering it (isOpen flips false), AnimatePresence keeps its last
+  known props frozen and animates it out on its own, so a prop computed
+  from the parent's `isOpen` cannot reach it after that point. useIsPresent
+  is a context read from *inside* this component, so it keeps updating on
+  its own schedule and flips to false the instant the exit starts,
+  independent of when the (possibly multi-hundred-ms) exit animation
+  finishes. `inert` removes the closing panel and everything in it from
+  the tab order and from assistive tech immediately, rather than waiting
+  for onExitComplete or unmount.
+*/
+function AccordionPanel({
+  groupId, reduce, children,
+}: {
+  groupId: string;
+  reduce: boolean;
+  children: React.ReactNode;
+}) {
+  const isPresent = useIsPresent();
+
+  return (
+    <motion.section
+      id={`cg-panel-${groupId}`}
+      role="region"
+      aria-labelledby={`cg-head-${groupId}`}
+      inert={!isPresent}
+      initial={reduce ? false : { height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={reduce ? { height: 0 } : { height: 0, opacity: 0 }}
+      transition={reduce ? { duration: 0 } : { duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      style={{ overflow: "hidden" }}
+    >
+      <div className="cgAcc__body">{children}</div>
+    </motion.section>
+  );
+}
+
+/*
+  The deliverables row editor.
+
+  Rows were originally keyed by array index, so removing a row above the
+  one a user is typing into makes React reconcile the focused <input> in
+  place while its underlying value silently swaps to a different
+  deliverable's text. `deliverables` itself must stay a plain string[]
+  (persisted to localStorage, consumed by clauses.ts, asserted as
+  string[] in earlier tasks' tests), so the fix keeps a parallel array of
+  stable synthetic ids in local state instead, and keys each row on its
+  id rather than its position.
+
+  That id array can be invalidated from outside this component: `Reset
+  all` empties `draft.deliverables` directly, and a restored localStorage
+  draft replaces it on mount. Both change the array's length without
+  going through handleAdd/handleRemove below, so on every render this
+  checks whether the id array and the value array have drifted apart and
+  resynchronises by minting fresh ids rather than rendering a mismatch.
+*/
+function DeliverablesList({
+  field, draft, setDeliverables,
+}: {
+  field: Field;
+  draft: Draft;
+  setDeliverables: Props["setDeliverables"];
+}) {
+  const items = draft.deliverables;
+  const id = `cg-${String(field.name)}`;
+  const nextId = useRef(items.length);
+  const [rowIds, setRowIds] = useState<number[]>(() => items.map((_, i) => i));
+  const [syncedLength, setSyncedLength] = useState(items.length);
+
+  if (items.length !== syncedLength) {
+    setRowIds(items.map(() => nextId.current++));
+    setSyncedLength(items.length);
+  }
+
+  const handleEdit = (i: number, value: string) => {
+    const next = [...items];
+    next[i] = value;
+    setDeliverables(next);
+  };
+
+  const handleRemove = (i: number) => {
+    setDeliverables(items.filter((_, j) => j !== i));
+    setRowIds((prev) => prev.filter((_, j) => j !== i));
+    setSyncedLength(items.length - 1);
+  };
+
+  const handleAdd = () => {
+    setDeliverables([...items, ""]);
+    setRowIds((prev) => [...prev, nextId.current++]);
+    setSyncedLength(items.length + 1);
+  };
+
+  return (
+    <div className="cgField" data-half={false}>
+      <span className="cgField__label" id={`${id}-label`}>{field.label}</span>
+      <div className="cgList" role="group" aria-labelledby={`${id}-label`}>
+        {items.map((item, i) => (
+          <div className="cgList__row" key={rowIds[i] ?? i}>
+            <input
+              className="cgInput"
+              value={item}
+              aria-label={`${field.label} ${i + 1}`}
+              onChange={(e) => handleEdit(i, e.target.value)}
+            />
+            <button
+              type="button"
+              className="cgList__rm"
+              aria-label={`Remove ${field.label} ${i + 1}`}
+              onClick={() => handleRemove(i)}
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button type="button" className="cgList__add" onClick={handleAdd}>
+          + {field.placeholder ?? "Add"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function FieldRow({
-  field, draft, setField, setDeliverables,
+  field, draft, setField,
 }: {
   field: Field;
   draft: Draft;
   setField: Props["setField"];
-  setDeliverables: Props["setDeliverables"];
 }) {
   const id = `cg-${String(field.name)}`;
-
-  if (field.type === "list") {
-    const items = draft.deliverables;
-    return (
-      <div className="cgField" data-half={false}>
-        <span className="cgField__label" id={`${id}-label`}>{field.label}</span>
-        <div className="cgList" role="group" aria-labelledby={`${id}-label`}>
-          {items.map((item, i) => (
-            <div className="cgList__row" key={i}>
-              <input
-                className="cgInput"
-                value={item}
-                aria-label={`${field.label} ${i + 1}`}
-                onChange={(e) => {
-                  const next = [...items];
-                  next[i] = e.target.value;
-                  setDeliverables(next);
-                }}
-              />
-              <button
-                type="button"
-                className="cgList__rm"
-                aria-label={`Remove ${field.label} ${i + 1}`}
-                onClick={() => setDeliverables(items.filter((_, j) => j !== i))}
-              >
-                &times;
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className="cgList__add"
-            onClick={() => setDeliverables([...items, ""])}
-          >
-            + {field.placeholder ?? "Add"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const value = String(draft[field.name] ?? "");
 
   return (
