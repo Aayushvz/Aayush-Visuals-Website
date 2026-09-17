@@ -154,14 +154,22 @@ export default function AboutTagPile() {
       const engine = Engine.create();
       engine.gravity.y = 1;
 
-      /* walls just outside the frame, so a tag can come to rest half off the
-         edge the way the reference's do, and a thick floor so nothing can
-         tunnel through it at speed */
+      /*
+        Walls just outside the frame, so a tag can come to rest half off the
+        edge the way the reference's do, and a thick floor so nothing can
+        tunnel through it at speed.
+
+        The overhang is a share of the width rather than a fixed 52px: that
+        is 3.6% of a 1425 desktop and 13% of a 390 phone, and at 13% the
+        chips - which are circles, and roll - ended up outside the screen.
+        Replayed at 390, four of the five finished beyond the edge.
+      */
+      const edge = Math.min(52, W * 0.04);
       const T = 240;
       Composite.add(engine.world, [
         Bodies.rectangle(W / 2, H + T / 2, W + 800, T, { isStatic: true }),
-        Bodies.rectangle(-52 - T / 2, H / 2, T, H * 4, { isStatic: true }),
-        Bodies.rectangle(W + 52 + T / 2, H / 2, T, H * 4, { isStatic: true }),
+        Bodies.rectangle(-edge - T / 2, H / 2, T, H * 4, { isStatic: true }),
+        Bodies.rectangle(W + edge + T / 2, H / 2, T, H * 4, { isStatic: true }),
       ]);
 
       type Live = {

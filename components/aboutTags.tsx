@@ -21,12 +21,17 @@ import type { ReactNode } from "react";
 /*
   Where a thing goes on a phone, or nothing if it does not go there at all.
 
-  A phone is a third of the width with pills that have to stay legible, so
-  the desktop arrangement cannot simply scale: at 390px the full set landed
-  on top of itself. Anything without a `phone` position is dropped at that
-  width rather than squeezed, which is why this is one optional field and not
-  a separate list - a tag cannot accidentally be given phone coordinates and
-  then forgotten, or kept on the phone with nowhere to sit.
+  A phone is a third of the width, so the desktop arrangement cannot simply
+  scale: at 390px the full set landed on top of itself. Every tag carries its
+  own phone coordinates instead, spread down the band rather than packed into
+  the same three rows.
+
+  They all keep one now. Thinning the set was right while the tags sat where
+  they were placed and overlapped each other; once they fall into a pile the
+  overlap resolves itself, and nine pills stack into something worth looking
+  at where five left the bottom of the screen bare. Anything without a phone
+  position would still be dropped at that width, which keeps the mechanism
+  for a tag that genuinely does not fit.
 */
 type Phone = { x: number; y: number; rot: number };
 
@@ -108,13 +113,13 @@ const Wand = (
   the frame rather than as a row that happens to end.
 */
 export const PILLS: Pill[] = [
-  { label: "Prototyping", icon: Shuffle, x: 4, y: 16, rot: -9, bg: "#eeeeec" },
-  { label: "Design systems", icon: Corner, x: 41, y: 23, rot: -15, bg: "#bfe36d", phone: { x: 38, y: 12, rot: -10 } },
-  { label: "Motion design", icon: Move, x: 58, y: 51, rot: -13, bg: "#a6d7f4", phone: { x: 62, y: 33, rot: -8 } },
-  { label: "Making it pop", icon: Spark, x: 92, y: 53, rot: -11, bg: "#fb8b3c" },
-  { label: "Thinking systems", icon: Globe, x: 74, y: 66, rot: -5, bg: "#f9c5d7", phone: { x: 40, y: 90, rot: -9 } },
-  { label: "Improving UX", icon: Smile, x: 43, y: 73, rot: -8, bg: "#f7c32b", phone: { x: 58, y: 70, rot: -7 } },
-  { label: "User research", icon: Pencil, x: 72, y: 96, rot: -8, bg: "#cbb8f8" },
+  { label: "Prototyping", icon: Shuffle, x: 4, y: 16, rot: -9, bg: "#eeeeec", phone: { x: 20, y: 8, rot: -8 } },
+  { label: "Design systems", icon: Corner, x: 41, y: 23, rot: -15, bg: "#bfe36d", phone: { x: 62, y: 16, rot: -10 } },
+  { label: "Motion design", icon: Move, x: 58, y: 51, rot: -13, bg: "#a6d7f4", phone: { x: 30, y: 28, rot: -9 } },
+  { label: "Making it pop", icon: Spark, x: 92, y: 53, rot: -11, bg: "#fb8b3c", phone: { x: 72, y: 38, rot: -7 } },
+  { label: "Thinking systems", icon: Globe, x: 74, y: 66, rot: -5, bg: "#f9c5d7", phone: { x: 38, y: 50, rot: -6 } },
+  { label: "Improving UX", icon: Smile, x: 43, y: 73, rot: -8, bg: "#f7c32b", phone: { x: 70, y: 62, rot: -8 } },
+  { label: "User research", icon: Pencil, x: 72, y: 96, rot: -8, bg: "#cbb8f8", phone: { x: 32, y: 73, rot: -9 } },
   /*
     The bottom row sits lower than the reference reads it, and is meant to be
     half cut off by the fold. On a short wide window the 42vh cap flattens
@@ -122,7 +127,7 @@ export const PILLS: Pill[] = [
     into "improving ux"; dropping it past the edge separates them without
     moving it sideways out of the composition.
   */
-  { label: "Reframing problems", icon: Hash, x: 41, y: 95, rot: -8, bg: "#54cf99" },
+  { label: "Reframing problems", icon: Hash, x: 41, y: 95, rot: -8, bg: "#54cf99", phone: { x: 58, y: 86, rot: -7 } },
   /*
     The one pill that goes somewhere, and the only one not painted in a
     pastel: white on a violet reads as the actionable object in a field of
@@ -134,13 +139,13 @@ export const PILLS: Pill[] = [
     phone position unconditionally: the others are decoration and can be
     dropped at that width, this one is the route to /about.
   */
-  { label: "About me", icon: Arrow, x: 13, y: 80, rot: 7, bg: "#7c3aed", href: "/about", phone: { x: 22, y: 52, rot: 6 } },
+  { label: "About me", icon: Arrow, x: 13, y: 80, rot: 7, bg: "#7c3aed", href: "/about", phone: { x: 20, y: 95, rot: 7 } },
 ];
 
 export const CHIPS: Chip[] = [
-  { icon: Wand, x: 5, y: 45, rot: -6, bg: "#f7f7f5", size: 3.4 },
-  { icon: Cup, x: 29, y: 31, rot: 9, bg: "#d8c9fb", size: 3.2, phone: { x: 10, y: 78, rot: 9 } },
-  { icon: Check, x: 26, y: 47, rot: -4, bg: "#a6d7f4", size: 3, phone: { x: 8, y: 26, rot: -4 } },
-  { icon: Spark, x: 62, y: 82, rot: 6, bg: "#f7c32b", size: 3.3, phone: { x: 85, y: 58, rot: 6 } },
-  { icon: Arrow, x: 2, y: 63, rot: 12, bg: "#fb8b3c", size: 3.9 },
+  { icon: Wand, x: 5, y: 45, rot: -6, bg: "#f7f7f5", size: 3.4, phone: { x: 82, y: 8, rot: -6 } },
+  { icon: Cup, x: 29, y: 31, rot: 9, bg: "#d8c9fb", size: 3.2, phone: { x: 10, y: 40, rot: 9 } },
+  { icon: Check, x: 26, y: 47, rot: -4, bg: "#a6d7f4", size: 3, phone: { x: 88, y: 52, rot: -4 } },
+  { icon: Spark, x: 62, y: 82, rot: 6, bg: "#f7c32b", size: 3.3, phone: { x: 12, y: 62, rot: 6 } },
+  { icon: Arrow, x: 2, y: 63, rot: 12, bg: "#fb8b3c", size: 3.9, phone: { x: 90, y: 88, rot: 12 } },
 ];

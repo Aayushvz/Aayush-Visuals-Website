@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
   never animating itself.
 
   Inside, three depth planes:
-    PLANE 1  .dotsLight base + .statement__dotsCanvas magnetic glow
+    PLANE 1  .dotsLight — a static CSS dot lattice, nothing more
     PLANE 2  .statement__inner typography (slight scroll drift)
     PLANE 3  .toolTile four premium glass tiles (3D float + cursor tilt)
 
@@ -90,7 +90,6 @@ const TOOLS = [
 export default function Statement() {
   const sectionRef = useRef<HTMLElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const toolRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotRef = useRef<HTMLSpanElement>(null);
   const [revealed, setRevealed] = useState(false);
@@ -106,32 +105,20 @@ export default function Statement() {
       return;
     }
 
-    const fine = window.matchMedia("(pointer: fine)").matches;
+    /*
+      Nothing on this panel tracks the pointer any more.
 
-    // last pointer in viewport coords; the loop converts to section-local
-    // each frame so it stays correct while the panel is still rising
-    const ptr = { cx: -9999, cy: -9999 };
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      ptr.cx = e.clientX;
-      ptr.cy = e.clientY;
-    };
-    if (fine) window.addEventListener("pointermove", onMove, { passive: true });
+      There used to be a canvas here holding a heat buffer over a 16px dot
+      lattice, brightening every dot within 165px of the cursor and decaying
+      it behind them. It is gone by request, along with the pointermove
+      listener that fed it. The dots the panel shows are .dotsLight, a static
+      CSS lattice that was always the base layer underneath, so the panel
+      looks the same at rest and simply stops answering the mouse.
 
-    // ---- magnetic dot field ----
-    const canvas = canvasRef.current;
-    const ctx = canvas ? canvas.getContext("2d") : null;
-    const GAP = 16;
-    const OFF = 8;
-    const RADIUS = 165;
-    const DECAY = 0.9;
-    let cw = 0;
-    let ch = 0;
-    let cols = 0;
-    let rows = 0;
-    let heat = new Float32Array(0);
-    let heatActive = false;
-    if (ctx) ctx.fillStyle = "rgba(244, 241, 234, 1)";
+      It also takes a real cost out of the frame: the loop was walking every
+      cell of that lattice, about seven thousand of them on a 1440x900
+      window, on every frame the cursor was anywhere near the section.
+    */
 
     /* Nothing here measures the tiles any more. Their smoothed per-tile
        cursor proximity, and the box geometry it needed, went with the
@@ -214,67 +201,6 @@ export default function Statement() {
         }
       }
 
-      // is the pointer over the section right now?
-      const inside =
-        fine &&
-        ptr.cx >= r.left &&
-        ptr.cx <= r.right &&
-        ptr.cy >= r.top &&
-        ptr.cy <= r.bottom;
-
-      // ---- dots ----
-      if (canvas && ctx) {
-        const w = window.innerWidth || 1;
-        const h = window.innerHeight || 1;
-        if (w !== cw || h !== ch) {
-          cw = w;
-          ch = h;
-          const dpr = Math.min(window.devicePixelRatio || 1, 2);
-          canvas.width = Math.max(1, Math.round(w * dpr));
-          canvas.height = Math.max(1, Math.round(h * dpr));
-          canvas.style.width = `${w}px`;
-          canvas.style.height = `${h}px`;
-          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-          ctx.fillStyle = "rgba(244, 241, 234, 1)";
-          cols = Math.ceil(w / GAP) + 1;
-          rows = Math.ceil(h / GAP) + 1;
-          heat = new Float32Array(cols * rows);
-        }
-
-        const px = ptr.cx;
-        const py = ptr.cy;
-
-        if (inside || heatActive) {
-          ctx.clearRect(0, 0, w, h);
-          let anyHeat = false;
-          for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-              const i = row * cols + col;
-              if (inside) {
-                const dx = col * GAP + OFF - px;
-                const dy = row * GAP + OFF - py;
-                const d = Math.hypot(dx, dy);
-                if (d < RADIUS) {
-                  const f = Math.pow(1 - d / RADIUS, 1.8);
-                  if (f > heat[i]) heat[i] = f;
-                }
-              }
-              const hv = heat[i];
-              heat[i] = hv > 0.01 ? hv * DECAY : 0;
-              if (heat[i] > 0) anyHeat = true;
-              if (hv > 0.02) {
-                ctx.globalAlpha = hv * 0.55;
-                ctx.beginPath();
-                ctx.arc(col * GAP + OFF, row * GAP + OFF, 1 + hv * 0.7, 0, Math.PI * 2);
-                ctx.fill();
-              }
-            }
-          }
-          ctx.globalAlpha = 1;
-          heatActive = inside || anyHeat;
-        }
-      }
-
       /*
         Tools: scroll parallax only.
 
@@ -305,7 +231,6 @@ export default function Statement() {
       io.disconnect();
       window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
-      if (fine) window.removeEventListener("pointermove", onMove);
     };
   }, []);
 
@@ -358,9 +283,6 @@ export default function Statement() {
             .statement__br--desktop { display: none; }
           }
         `}</style>
-
-        {/* magnetic light field: additive glow over the static CSS base dots */}
-        <canvas className="statement__dotsCanvas" ref={canvasRef} aria-hidden />
 
         {/* ruler frame — same architecture as the hero (.heroRuler): two
             light vertical rails at the shared --page-rail-inset, plus a flex

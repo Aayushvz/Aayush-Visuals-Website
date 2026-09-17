@@ -1503,18 +1503,6 @@ html.has-cursor .cursorRing {
   background-size: 16px 16px;
 }
 
-/* magnetic light field: a canvas overlaid exactly on the base dots that
-   additively brightens dots within ~165px of the cursor (heat buffer +
-   exponential decay in the rAF loop → a soft light ripple that follows the
-   pointer and fades smoothly when it leaves). Sits above the base dots,
-   below the ruler / text / tools. */
-.statement__dotsCanvas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
 /* PLANE 2: typography wrapper — receives a slight scroll drift from the
    rAF loop (transform only, never layout) */
 
@@ -5383,9 +5371,13 @@ html.has-cursor .cursorRing {
     padding: clamp(100px, 17vh, 160px) 0 clamp(180px, 26vh, 260px);
   }
 
-  .aboutTags {
-    height: clamp(180px, 27vh, 290px);
-  }
+  /*
+    No height here, deliberately. The band is `top: --pile-top; bottom: 0`,
+    so its floor IS the bottom of the section; a height caps it short and the
+    tags fall onto a floor 146px above the panel's edge, which measured
+    exactly that at 390x844 and is what left the bottom of the phone view
+    empty.
+  */
 
   /* tablet statement: recomposed, not shrunk — objects pulled inward and
      slightly smaller so they never collide with the wrapping statement */
@@ -5536,7 +5528,11 @@ html.has-cursor .cursorRing {
        so the room left for the pile comes out of the statement's padding */
     width: 100%;
     margin-inline: auto;
-    padding: clamp(32px, 5vh, 48px) 24px clamp(200px, 35vh, 300px);
+    /* the statement sits lower on a phone than the desktop ratio puts it,
+       so there is less bare paper between the last line and the pile: the
+       tags only ever fill the bottom of the band, and the taller the band
+       the more white is left above them */
+    padding: clamp(32px, 5vh, 48px) 24px clamp(170px, 27vh, 240px);
   }
 
   /*
@@ -5829,7 +5825,9 @@ html.has-cursor .cursorRing {
    full sticky viewport still shows all content without overflow */
 @media (max-width: 400px) {
   .about__content {
-    padding: clamp(28px, 4.5vh, 40px) 20px clamp(180px, 33vh, 260px);
+    /* same reasoning as the 640 block: the pile only fills the bottom of the
+       band, so a shorter band means less bare paper between it and the text */
+    padding: clamp(28px, 4.5vh, 40px) 20px clamp(150px, 24vh, 210px);
   }
 
   .aboutTags {
