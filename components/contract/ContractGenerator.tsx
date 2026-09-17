@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import type { Skin } from "./types";
 import Toolbar from "./Toolbar";
 import FormPanel from "./FormPanel";
+import ClauseRail from "./ClauseRail";
+import DocPaper from "./DocPaper";
 import { useContractDraft } from "./useContractDraft";
 import { downloadMarkdown, downloadWord, printContract } from "./exporters";
 import "./contract.css";
@@ -42,8 +44,8 @@ export default function ContractGenerator() {
             reset={reset}
           />
         </div>
-        <div className="cgCol cgCol--rail" />
-        <div className="cgCol cgCol--paper" />
+        <div className="cgCol cgCol--rail"><ClauseRail draft={draft} /></div>
+        <div className="cgCol cgCol--paper"><DocPaper draft={draft} /></div>
       </div>
     </div>
   );
