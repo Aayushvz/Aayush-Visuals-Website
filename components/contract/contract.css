@@ -756,7 +756,21 @@
     display: none !important;
   }
 
+  /* .cgShell is a flex column at height: 100dvh on screen (see the layout
+     comment on .cgShell above), which exists to give .cgGrid whatever
+     height is left after .cgBar and .cgTabs on a fixed-height dashboard.
+     In paged media that same dvh resolves against the PAGE BOX, exactly
+     one page tall, so left as a flex column the shell caps the document
+     at a single page and .cgGrid's flex: 1; min-height: 0 explicitly
+     permits it to shrink below its content instead of flowing across
+     pages. Undo the flex column entirely here rather than trying to
+     override height alone: display: block is what makes .cgGrid stop
+     being a flex item, which is what makes its flex sizing stop applying.
+     A thirteen-clause contract is several pages; this has to keep
+     flowing, not fit one. */
   .cgShell {
+    display: block;
+    height: auto;
     min-height: 0;
     background: #fff;
   }
@@ -764,6 +778,11 @@
   .cgGrid {
     display: block;
     height: auto;
+    /* belt and braces: with .cgShell no longer a flex container these two
+       are already inert, but stating that explicitly here means a later
+       edit to .cgShell's print rule can't silently revive them */
+    flex: none;
+    min-height: 0;
   }
 
   .cgCol,
