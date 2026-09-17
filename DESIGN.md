@@ -18,6 +18,15 @@ BEM-ish class names on components.
   About collage, because its only remaining control was a button in the
   mobile nav and a stored preference could strand a desktop visitor on a look
   they had no way back from. There is no `data-theme` attribute any more.
+
+  One route is an exception. `/contract` (the contract generator) carries a
+  light/dark switch, but its tokens are declared on `.cgShell[data-cg-theme]`
+  rather than `:root` and the choice is React state that is never persisted.
+  That scoping is what keeps it from reopening the problem above: nothing it
+  sets can reach the rest of the site, and leaving the route is the way back
+  from any choice made inside it. The tool's draft does persist to
+  `localStorage`, which is data the user typed rather than a look they can be
+  stranded on, and `Reset all` is the unconditional way out.
 - **Units:** `clamp()` for anything fluid (type, insets, section heights). Avoid
   fixed px for layout that must breathe across viewports.
 

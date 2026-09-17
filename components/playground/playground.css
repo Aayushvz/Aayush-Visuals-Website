@@ -693,6 +693,116 @@
   text-shadow: 0 2px 20px rgba(4, 8, 18, 0.75);
 }
 
+/* ---- Contract Generator's cover ---- */
+
+/*
+  A page standing on a dark ground rather than a scene, because the product
+  behind this card is a page. The ground and its glow are the only hardcoded
+  colour in the block - box art still does not follow the site's theme - but
+  the page itself draws from the shelf's own ink tokens (`--pg-fg` through
+  `--pg-hair`) and the one violet mark uses `--pg-accent`, the same token the
+  rest of the shelf already spends on its one accent colour.
+*/
+.contractCover {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0d;
+}
+
+.contractCover__ground,
+.contractCover__glow,
+.contractCover__sheet,
+.contractCover__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.contractCover__ground {
+  background: linear-gradient(180deg, #0b0b10 0%, #17161d 58%, #09090c 100%);
+}
+
+/* a low, slightly warm light behind the page, the way a real cover throws
+   one soft source at its subject rather than lighting the whole room */
+.contractCover__glow {
+  background: radial-gradient(
+    46% 30% at 50% 64%,
+    color-mix(in srgb, var(--pg-accent) 40%, transparent),
+    transparent 74%
+  );
+  opacity: 0.55;
+}
+
+.contractCover__sheet {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.contractCover__page {
+  transform: rotate(-1.1deg);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.5));
+}
+
+.contractCover__paper {
+  fill: var(--cream);
+  stroke: var(--pg-hair);
+  stroke-width: 1.2;
+}
+
+.contractCover__rule--head {
+  fill: var(--pg-fg);
+}
+
+.contractCover__rule--body {
+  fill: var(--pg-faint);
+}
+
+.contractCover__rule--sig {
+  fill: var(--pg-hair);
+}
+
+/* the signature: the one mark on the page that is not a rule standing in
+   for text, drawn the way a pen would, not a bar */
+.contractCover__mark {
+  stroke: var(--pg-accent);
+}
+
+.contractCover__scrim {
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(8, 8, 11, 0.92) 0%,
+    rgba(8, 8, 11, 0.5) 46%,
+    rgba(8, 8, 11, 0) 100%
+  );
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 66%);
+  mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 66%);
+}
+
+.contractCover__lock {
+  position: absolute;
+  z-index: 3;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.contractCover__name {
+  display: block;
+  /* the vw clamp is the fallback for engines without container units */
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f6f2fb;
+  text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
+}
+
 /* ---- the vacant cover ---- */
 
 .slotCover {

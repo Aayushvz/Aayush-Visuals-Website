@@ -19,7 +19,7 @@
 */
 
 import type { ComponentType } from "react";
-import { DplCover, PondCover } from "./covers";
+import { ContractCover, DplCover, PondCover } from "./covers";
 
 export type Experiment = {
   id: string;
@@ -63,14 +63,27 @@ export const EXPERIMENTS: Experiment[] = [
     cover: PondCover,
     status: "live",
   },
+  {
+    id: "contract",
+    index: "03",
+    title: "Contract Generator",
+    kind: "Freelance tool",
+    href: "/contract",
+    cta: "Draft an agreement",
+    /* the price line. For a tool, the question someone actually has before
+       typing a client's name and fee is where that data goes, so that is
+       what this answers rather than inventing a challenge to beat */
+    meta: "Free · no signup, nothing leaves your browser",
+    cover: ContractCover,
+    status: "live",
+  },
 ];
 
 /* Vacant slots. Deliberately not derived from a count: each one is a real
-   place on the shelf that a future experiment moves into, and there are
-   two so the live pair plus these fills the top row of the grid rather
-   than leaving a gap after the last real card. */
+   place on the shelf that a future experiment moves into, and there is one
+   so the live trio plus this fills the top row of the grid rather than
+   leaving a gap after the last real card. */
 export const SOON: { index: string; hint: string; kind: string }[] = [
-  { index: "03", hint: "Sketched, not built", kind: "Canvas sketch" },
-  { index: "04", hint: "Not started yet", kind: "Unclaimed" },
+  { index: "04", hint: "Sketched, not built", kind: "Canvas sketch" },
 ];
 
