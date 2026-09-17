@@ -133,23 +133,9 @@ export default function Statement() {
     let heatActive = false;
     if (ctx) ctx.fillStyle = "rgba(244, 241, 234, 1)";
 
-    // ---- per-tile smoothed cursor proximity ----
-    const tState = TOOLS.map(() => ({ p: 0, dx: 0, dy: 0 }));
-
-    /* Tile box geometry, measured once instead of per frame. Reading
-       offsetLeft/offsetWidth inside the loop *after* writing a transform to
-       the previous tile forced a synchronous layout for every tile on every
-       frame (read-write-read-write thrash). The boxes only move when the
-       layout reflows, so measure on mount + resize and reuse. */
-    type Box = { left: number; top: number; w: number; h: number };
-    let boxes: Box[] = [];
-    const measure = () => {
-      boxes = toolRefs.current.map((el) =>
-        el
-          ? { left: el.offsetLeft, top: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }
-          : { left: 0, top: 0, w: 0, h: 0 }
-      );
-    };
+    /* Nothing here measures the tiles any more. Their smoothed per-tile
+       cursor proximity, and the box geometry it needed, went with the
+       tilt below. */
 
     let raf = 0;
     let shown = false;
@@ -172,10 +158,7 @@ export default function Statement() {
     const io = new IntersectionObserver(
       ([entry]) => {
         visible = entry.isIntersecting;
-        if (visible) {
-          measure();
-          wake();
-        }
+        if (visible) wake();
       },
       { rootMargin: "200px 0px" }
     );
@@ -292,43 +275,30 @@ export default function Statement() {
         }
       }
 
-      // ---- tools: proximity-driven 3D tilt + magnetic pull, all lerped ----
+      /*
+        Tools: scroll parallax only.
+
+        These used to tilt toward the cursor and drift after it, on a
+        per-tile lerped proximity, and the CSS gave them a lift and a violet
+        border on hover. All of it is gone by request, so the panel no longer
+        answers the mouse at all. The one transform left is driven by scroll
+        position, which the reader does not aim.
+      */
+      const tileT = `translate3d(0px, ${(-sp * 40).toFixed(1)}px, 0)`;
       toolRefs.current.forEach((el, i) => {
         if (!el) return;
-        const s = tState[i];
-        const box = boxes[i];
-        if (!box) return;
-        const cx0 = r.left + box.left + box.w / 2;
-        const cy0 = r.top + box.top + box.h / 2;
-        const dx = ptr.cx - cx0;
-        const dy = ptr.cy - cy0;
-        const dist = Math.hypot(dx, dy) || 1;
-        const prox = inside ? Math.max(0, 1 - dist / 320) : 0;
-        s.p += (prox - s.p) * 0.08;
-        s.dx += (dx / dist - s.dx) * 0.08;
-        s.dy += (dy / dist - s.dy) * 0.08;
-        const pull = s.p;
-        const tx = s.dx * 10 * pull;
-        const ty = s.dy * 10 * pull - sp * 40;
-        const ry = s.dx * 6 * pull; // tilt toward cursor horizontally
-        const rx = -s.dy * 6 * pull; // and vertically
-        const t = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
-        if (t !== lastTileT[i]) {
-          lastTileT[i] = t;
-          el.style.transform = t;
+        if (tileT !== lastTileT[i]) {
+          lastTileT[i] = tileT;
+          el.style.transform = tileT;
         }
       });
 
       raf = requestAnimationFrame(loop);
     };
 
-    const onResize = () => {
-      measure();
-      wake();
-    };
+    const onResize = () => wake();
     window.addEventListener("resize", onResize, { passive: true });
 
-    measure();
     wake();
 
     return () => {

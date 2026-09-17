@@ -1176,262 +1176,263 @@ html.has-cursor .cursorRing {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  /* one shared centred container, constrained well inside the viewport so
-     the composition reads as a calm block surrounded by whitespace (per the
-     reference) rather than stretching to the page edges */
-  width: min(1320px, calc(100vw - 240px));
+  text-align: center;
+  width: min(1100px, calc(100vw - 120px));
   margin-inline: auto;
-  padding-block: clamp(48px, 8vh, 96px);
+  /* the pile owns the bottom of the panel, so the statement is centred in
+     the room ABOVE it rather than in the middle of the whole section */
+  /*
+    Top padding clears the navbar, which is fixed at 18px and 64px tall, so
+    it ends at 82 and this section scrolls underneath it. The old 9vh put the
+    greeting at 136 on a 900-tall window and at 48 on a 700-tall one, which
+    is behind the bar: the shorter the window, the further a vh-based offset
+    pulled the block up into the one place it must not go.
+  */
+  padding: clamp(120px, 21vh, 220px) 0 clamp(200px, 27vh, 300px);
 }
 
-.about__marker {
+/* ---------- greeting ---------- */
+
+/*
+  A name, a face and two words, set small directly above a very large
+  sentence. The size gap is the whole device: it reads as somebody saying
+  hello before making a claim, which is what stops the claim sounding like
+  a slogan.
+*/
+.aboutHi {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(31, 31, 31, 0.48);
-  margin-bottom: 18px;
+  margin: 0 0 clamp(16px, 2.2vh, 28px);
+  font-size: clamp(14px, 1.05vw, 16px);
+  /* 4.6:1 on the paper, and it is running text */
+  color: rgba(31, 31, 31, 0.62);
 }
 
-.about__markerNum {
+.aboutHi__face {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* a night shot at 34px: the hairline stops it dissolving into the paper */
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.12);
+}
+
+/* ---------- the statement ---------- */
+
+.aboutSay {
+  margin: 0;
+  /* General Sans carries the sentence, which is the same face the rest of
+     the site is set in; the serif is reserved for what is being emphasised */
+  font-family: var(--font-primary);
+  font-weight: 500;
+  /* big, and the composition depends on it staying big: the greeting and
+     the detail line are sized against this, not the other way round */
+  /*
+    Sized off the width, but capped against the HEIGHT as well.
+
+    5.5vw alone is right on any normal window and wrong on a short wide one:
+    at 1900x700 it asks for 80px, the three lines plus the greeting and the
+    detail line come to 430, and with the pile below there is no room left,
+    so the whole block gets pushed up under the navbar. 9vh only bites below
+    about 890px of height, where it is the difference between a composition
+    that fits and one that collides.
+  */
+  font-size: clamp(36px, min(5.5vw, 9vh), 80px);
+  /* a shade looser than the serif wanted, because General Sans has the
+     taller x-height and the longer descenders */
+  line-height: 1.06;
+  /* it is drawn for text and runs loose at eighty pixels */
+  letter-spacing: -0.035em;
   color: var(--ink);
-  font-weight: 600;
 }
 
-.about__heading {
-  font-size: clamp(42px, 3.2vw, 58px);
+/*
+  The emphasis, and the only place the serif appears in the sentence.
+
+  Marked up as <em> rather than a class because that is what it is: the words
+  the sentence leans on. Instrument Serif italic against upright General Sans
+  is a hard contrast in shape, weight and axis all at once, so two short
+  phrases carry it and everything between them stays plain.
+
+  1.06em because the two faces disagree about size. Measured at a common
+  100px their cap heights are identical, 72 and 72, but General Sans has the
+  taller x-height, 54 against 51. This line is almost entirely lowercase, so
+  the x-height is what the eye matches on, and 54/51 is the ratio that makes
+  the serif read as the same size rather than as a smaller face dropped in.
+*/
+.aboutSay em {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.06em;
+  /* the serif is already a display face and does not want the sans's
+     tracking correction */
+  letter-spacing: -0.005em;
+}
+
+.aboutNow {
+  margin: clamp(20px, 3vh, 36px) 0 0;
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.5;
+  color: rgba(31, 31, 31, 0.62);
+}
+
+.aboutNow b {
   font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 1;
   color: var(--ink);
-  margin: 0 0 clamp(40px, 5.5vh, 64px);
 }
 
-.about__grid {
-  display: grid;
-  /* card ≈36% / stats ≈64% of the constrained container */
-  grid-template-columns: clamp(390px, 33%, 420px) 1fr;
-  gap: clamp(48px, 6vw, 96px);
-  align-items: center;
+/* ---------- the tag pile ---------- */
+
+/*
+  Pinned to the bottom edge and taller than the room left for it, so the
+  lowest row is cut off by the fold rather than tidily ending above it.
+
+  One font-size, taken from the viewport width, and every measurement inside
+  it in em. That is what keeps the pile a picture instead of a layout: at any
+  width the pills hold their size relative to each other and to the stage, so
+  the arrangement scales rather than reflowing into a different arrangement.
+  Positions are percentages of the stage for the same reason.
+*/
+.aboutTags {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /*
+    The band begins under the last line of text, at a top edge AboutTagPile
+    measures and publishes. Sized off the viewport it kept climbing into the
+    copy: on a 1900x866 window its top sat 115px above the text and a pill
+    landed across "across product thinking".
+
+    The fallback has to be safe on its own, because it is what stands if the
+    measurement never arrives. 64% was not: it put two tags over the text at
+    1440x900. 76% clears the last line at every window this was checked at,
+    and the measurement tightens it from there.
+  */
+  top: var(--pile-top, 76%);
+  z-index: 3;
+  /*
+    Deeper than the room the statement leaves, on purpose. In the reference
+    the top pills graze the detail line rather than waiting politely below
+    it, and the pile only reads as a pile if it is crowding something.
+  */
+  pointer-events: none;
+  font-size: clamp(9px, 1.02vw, 15px);
 }
 
-/* ---------- about identity card ---------- */
-
-.aboutCard {
-  position: relative;
-  /* compact tall editorial proportion (≈410 × 545 desktop), not a giant
-     panel — the empty lower zone is deliberate negative space */
-  min-height: clamp(500px, 60vh, 560px);
-  padding: clamp(26px, 2.2vw, 34px);
-  display: flex;
-  flex-direction: column;
-  background: var(--bridge-dark);
-  border-radius: 28px;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.14), 0 6px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.5s var(--ease-quint), box-shadow 0.4s ease;
-  will-change: transform;
-}
-
-/* moving highlight sheen — a soft purple wedge that slow-orbits the card
-   at all times but only becomes visible on hover, so the card reads as
-   quietly alive rather than a static dashboard tile. */
-/* ambient living gradient — three soft purple blobs slowly drifting behind
-   the card content, always faintly alive, brightening a little on hover */
-.aboutCard::before {
-  content: "";
+.aboutTags__stage {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.4), transparent 42%),
-    radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.3), transparent 46%),
-    radial-gradient(circle at 50% 100%, rgba(168, 85, 247, 0.26), transparent 50%);
-  background-size: 200% 200%;
-  background-position: 0% 30%, 100% 20%, 50% 100%;
-  opacity: 0.22;
-  mix-blend-mode: screen;
-  animation: aboutCardGradient 16s ease-in-out infinite;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
 }
 
-.aboutCard:hover::before {
-  opacity: 0.4;
-}
-
-@keyframes aboutCardGradient {
-  0%,
-100% {
-    background-position: 0% 30%, 100% 20%, 50% 100%;
-  }
-  50% {
-    background-position: 40% 70%, 60% 60%, 30% 30%;
-  }
-}
-
-.aboutCard:hover {
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.22);
-}
-
-.aboutCard__dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--purple);
-  margin-bottom: clamp(20px, 3vh, 32px);
-}
-
-.aboutCard__name {
-  position: relative;
-  font-size: clamp(24px, 1.9vw, 30px);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  color: #fff;
-  margin: 0 0 16px;
-}
-
-.aboutCard__desc {
-  position: relative;
-  font-size: clamp(15px, 1.1vw, 18px);
-  font-weight: 400;
-  line-height: 1.5;
-  color: rgba(244, 241, 234, 0.6);
-  margin: 0;
-  max-width: 40ch;
-}
-
-/* wide reference-style CTA: spans the card, anchored at the bottom */
-.aboutCard__cta {
-  position: relative;
-  margin-top: auto;
-  align-self: stretch;
+.aboutTags__pill,
+.aboutTags__chip {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 24px;
-  border-radius: 999px;
-  background: #fff;
-  color: #141414;
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.aboutCard__cta:hover {
-  background: #f3efe8;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
-}
-
-/* ---------- stats ---------- */
-
-.about__stats {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-auto-rows: min-content;
-  align-content: center;
-  /* one aligned system: uniform rows, controlled rhythm (per reference) */
-  gap: clamp(44px, 6vh, 72px) clamp(36px, 4vw, 64px);
-}
-
-.aboutStat {
-  position: relative;
-}
-
-.aboutStat__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.aboutStat__num {
-  display: block;
-  font-size: clamp(44px, 3.6vw, 64px);
-  /* Medium, not bold — the reference numbers read clean because of scale,
-     not weight. tabular-nums keeps the count-up from shifting layout. */
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: 1;
   color: var(--ink);
-  font-variant-numeric: tabular-nums;
-  transition: color 0.3s ease;
+  left: var(--x);
+  top: var(--y);
+  /* they are objects to be picked up, so they take the pointer back from the
+     container and keep a finger's drag away from the page's scroll */
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* translate and rotate as their own properties, so framer-motion's
+     entrance can own `transform` without the two fighting over it */
+  translate: -50% -50%;
+  rotate: var(--rot, 0deg);
 }
 
-.aboutStat:hover .aboutStat__num {
-  color: var(--purple);
-}
-
-.aboutStat__label {
-  display: block;
-  font-size: clamp(15px, 1vw, 18px);
-  font-weight: 400;
-  /* was 0.44, 2.71:1 on the cream, and this is text */
-  color: rgba(31, 31, 31, 0.66);
-  letter-spacing: 0;
+.aboutTags__pill {
+  gap: 0.6em;
+  padding: 0.95em 1.45em;
+  border-radius: 999px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.aboutStat__rule {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 1px;
-  margin: 16px 0 18px;
-  background: rgba(31, 31, 31, 0.12);
+.aboutTags__label {
+  line-height: 1;
 }
 
-/* hover accent: a short purple segment draws in from the left — never the
-   full-width line */
-.aboutStat__rule::after {
-  content: "";
-  position: absolute;
+.aboutTags__icon,
+.aboutTags__icon svg {
+  display: block;
+  width: 1.25em;
+  height: 1.25em;
+}
+
+.aboutTags__chip {
+  width: var(--size, 3.2em);
+  height: var(--size, 3.2em);
+  border-radius: 50%;
+}
+
+.aboutTags__chip svg {
+  display: block;
+  width: 42%;
+  height: 42%;
+}
+
+/*
+  Once the solver owns them, every position comes from the transform it
+  writes each frame, so the stylesheet's own placement has to get out of the
+  way entirely. Anything left here - a left, a rotate - would compose with
+  that transform and put the tag somewhere the physics does not think it is.
+*/
+.aboutTags--live .aboutTags__pill,
+.aboutTags--live .aboutTags__chip {
   left: 0;
   top: 0;
-  /* drawn with scaleX rather than an animated width: same 40px segment,
-     but it runs on the compositor instead of relaying out on every frame */
-  width: 40px;
-  height: 100%;
-  background: var(--purple);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.35s var(--ease-quint);
+  translate: none;
+  rotate: none;
+  transform-origin: center;
+  will-change: transform;
 }
 
-.aboutStat:hover .aboutStat__rule::after {
-  transform: scaleX(1);
+.aboutTags__held {
+  cursor: grabbing;
+  z-index: 2;
 }
 
-.aboutStat__desc {
-  margin: 0;
-  font-size: clamp(15px, 1vw, 17px);
-  line-height: 1.4;
-  /* was 0.52, 3.45:1 on the cream, and this is text */
-  color: rgba(31, 31, 31, 0.66);
-  max-width: 32ch;
+/* the one pill that goes somewhere */
+.aboutTags__pill--link {
+  color: #fff;
+  transition: filter 0.25s ease;
 }
 
-/* touch devices: neutralise the hover-only accents so a tap never leaves a
-   stuck highlight — the entrance motion already carries the polish there */
-@media (hover: none) {
-  .aboutStat:hover .aboutStat__num {
-    color: var(--ink);
-  }
+.aboutTags__link {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: inherit;
+  text-decoration: none;
+  cursor: inherit;
+}
 
-  .aboutStat:hover .aboutStat__rule::after {
-    transform: scaleX(0);
-  }
+.aboutTags__pill--link:hover {
+  filter: brightness(1.14);
+}
 
-  .aboutCard:hover::before {
-    opacity: 0.22;
-  }
+/* the pill is rotated and sits in a decorative field, so the ring has to be
+   on the pill itself rather than on a box drawn around the text */
+.aboutTags__link:focus-visible {
+  outline: none;
+}
+
+.aboutTags__pill--link:has(.aboutTags__link:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 /* ---------- statement (full-screen dark canvas) ---------- */
@@ -1740,8 +1741,6 @@ html.has-cursor .cursorRing {
     inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -12px 20px rgba(0, 0, 0, 0.28);
   transform-style: preserve-3d;
   animation: toolFloat3d var(--dur, 7s) cubic-bezier(0.37, 0, 0.63, 1) var(--del, 0s) infinite;
-  transition: scale 0.35s var(--ease-quint), border-color 0.35s ease,
-    box-shadow 0.35s ease;
 }
 
 .toolTile__obj svg {
@@ -1753,33 +1752,30 @@ html.has-cursor .cursorRing {
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
 }
 
-.toolTile:hover .toolTile__obj {
-  scale: 1.05;
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.58), 0 6px 14px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -12px 20px rgba(0, 0, 0, 0.28);
-}
+/*
+  No hover state on these tiles, by request.
 
-/* tiny label on hover — minimal, no tooltip card */
+  They used to lift and take a violet border under the cursor, and a small
+  uppercase caption faded in beneath them. Both are gone, along with the
+  proximity tilt that Statement.tsx used to write into their transform, so
+  nothing on this panel now answers the mouse. What is left is the idle
+  float and the scroll parallax, neither of which the reader drives.
+
+  The captions stay in the markup as screen-reader text. They were the only
+  thing naming these logos, and a tile that is a picture of a tool with no
+  name is worth less to somebody listening to the page than to somebody
+  looking at it.
+*/
 .toolTile__label {
   position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  translate: -50% 4px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(244, 241, 234, 0.6);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s ease, translate 0.3s ease;
-  pointer-events: none;
-}
-
-.toolTile:hover .toolTile__label {
-  opacity: 1;
-  translate: -50% 0;
+  border: 0;
 }
 
 /* idle 3D float: subtle translateY + rotateX/Y/Z drift, oscillating
@@ -4938,7 +4934,8 @@ html.has-cursor .cursorRing {
 }
 
 /* ambient idle motion: two soft light blobs slowly drifting behind the
-   watermark, same technique as .aboutCard's living gradient */
+   watermark, the same technique the About card used before that section was
+   rebuilt around its statement */
 .footer__glow {
   position: absolute;
   inset: 0;
@@ -5325,10 +5322,10 @@ html.has-cursor .cursorRing {
     transition: none;
   }
 
-  .aboutCard,
-.aboutCard::before {
+  /* the pile is decorative and framer-motion already honours the setting;
+     this pins the hover tint on the one pill that is a link */
+  .aboutTags__pill--link {
     transition: none;
-    animation: none;
   }
 
   /* the JS rAF loop that drives --transP is skipped under reduced motion;
@@ -5382,21 +5379,12 @@ html.has-cursor .cursorRing {
      over 100svh would clip the lower stats). The ≤640 block refines the
      phone composition further. */
   .about__content {
-    padding-block: clamp(44px, 5vh, 60px);
+    width: calc(100vw - 80px);
+    padding: clamp(100px, 17vh, 160px) 0 clamp(180px, 26vh, 260px);
   }
 
-  .about__grid {
-    grid-template-columns: 1fr;
-    gap: clamp(32px, 4vh, 44px);
-  }
-
-  .aboutCard {
-    min-height: 300px;
-    max-width: 560px;
-  }
-
-  .about__stats {
-    gap: clamp(32px, 4vh, 48px) clamp(28px, 4vw, 52px);
+  .aboutTags {
+    height: clamp(180px, 27vh, 290px);
   }
 
   /* tablet statement: recomposed, not shrunk — objects pulled inward and
@@ -5544,91 +5532,63 @@ html.has-cursor .cursorRing {
   }
 
   .about__content {
-    /* Tighter top/bottom so the entire sticky section fits within 100svh:
-       heading + card + 2×2 stats all need to land on one pinned screen.
-       Left/right padding is 32px to ensure clean breathing room between content
-       and the vertical side ruler rails. */
+    /* the whole sticky section still has to land inside one 100svh screen,
+       so the room left for the pile comes out of the statement's padding */
     width: 100%;
-    max-width: 560px;
     margin-inline: auto;
-    padding: clamp(36px, 5vh, 52px) 32px clamp(28px, 4vh, 44px);
+    padding: clamp(32px, 5vh, 48px) 24px clamp(200px, 35vh, 300px);
   }
 
-  .about__marker {
-    margin-bottom: 12px;
+  /*
+    The pile keeps its arrangement and simply gets a bigger cell relative to
+    the screen, because the alternative - rewrapping the tags into a tidy
+    list - is a different picture rather than the same one smaller.
+  */
+  /*
+    Fewer tags, each one bigger.
+
+    The full set at 8.5px was fourteen objects in a third of the width, which
+    is where the desktop arrangement stops being a pile and becomes a heap:
+    they overlapped each other and none of them was comfortably readable.
+    Five pills and three chips at 11px is the same picture with the same
+    bands, thinned to what the width can actually hold.
+  */
+  .aboutTags {
     font-size: 11px;
   }
 
-  .about__heading {
-    font-size: clamp(26px, 7.5vw, 38px);
-    line-height: 1;
-    letter-spacing: -0.03em;
-    margin-bottom: clamp(18px, 3vh, 28px);
-  }
-
-  .about__grid {
-    grid-template-columns: 1fr;
-    gap: clamp(20px, 3.5vh, 32px);
-  }
-
-  /* card: compact height so the whole pinned section fits on one screen */
-  .aboutCard {
-    min-height: 220px;
-    padding: 22px 20px;
-    border-radius: 22px;
-  }
-
-  .aboutCard__dot {
-    width: 11px;
-    height: 11px;
-    margin-bottom: 14px;
-  }
-
-  .aboutCard__name {
-    font-size: 22px;
-    margin-bottom: 10px;
-  }
-
-  .aboutCard__desc {
-    font-size: 14px;
-    line-height: 1.45;
-    max-width: none;
-    margin-bottom: 20px;
-  }
-
-  .aboutCard__cta {
-    padding: 13px 20px;
-    font-size: 14px;
-  }
-
-  /* 2×2 stats grid: numbers stacked above their label */
-  .about__stats {
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(16px, 2.8vh, 26px) 18px;
-  }
-
-  .aboutStat__row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-  }
-
-  .aboutStat__num {
-    font-size: clamp(32px, 10vw, 42px);
-  }
-
-  .aboutStat__label {
-    font-size: 12px;
-    white-space: normal;
-  }
-
-  .aboutStat__rule {
-    width: 28px;
-    margin: 9px 0 0;
-  }
-
-  .aboutStat__desc {
+  /* anything without a phone position is dropped rather than squeezed */
+  .aboutTags__off {
     display: none;
+  }
+
+  /* and what stays takes its own coordinates, falling back to the desktop
+     ones so a tag can keep a position it is happy with */
+  .aboutTags__pill,
+  .aboutTags__chip {
+    left: var(--px, var(--x));
+    top: var(--py, var(--y));
+    rotate: var(--prot, var(--rot, 0deg));
+  }
+
+  .aboutSay {
+    letter-spacing: -0.02em;
+  }
+
+  /* The authored line breaks are a desktop composition; at this width the
+     sentence is better left to find its own measure.
+
+     The JSX puts an explicit space before each break, because hiding the
+     <br> takes the newline with it: without that space the sentence set
+     itself as "problemsinto products", measured at 390px. */
+  .aboutSay br,
+  .aboutNow br {
+    display: none;
+  }
+
+  .aboutHi__face {
+    width: 28px;
+    height: 28px;
   }
 
   /* shorter stepped bands on phones — same skyline, roughly half the
@@ -5869,41 +5829,11 @@ html.has-cursor .cursorRing {
    full sticky viewport still shows all content without overflow */
 @media (max-width: 400px) {
   .about__content {
-    padding: clamp(32px, 5vh, 48px) 24px clamp(24px, 4vh, 36px);
+    padding: clamp(28px, 4.5vh, 40px) 20px clamp(180px, 33vh, 260px);
   }
 
-  .about__marker {
-    margin-bottom: 10px;
-  }
-
-  .about__heading {
-    margin-bottom: clamp(16px, 3vh, 24px);
-  }
-
-  .about__grid {
-    gap: clamp(16px, 3.5vh, 28px);
-  }
-
-  .aboutCard {
-    min-height: 200px;
-    padding: 18px 16px;
-  }
-
-  .aboutCard__name {
-    font-size: 20px;
-  }
-
-  .aboutCard__desc {
-    font-size: 13.5px;
-    margin-bottom: 16px;
-  }
-
-  .about__stats {
-    gap: 14px 14px;
-  }
-
-  .aboutStat__num {
-    font-size: clamp(28px, 9vw, 36px);
+  .aboutTags {
+    font-size: 10.5px;
   }
 }
 
@@ -10980,8 +10910,7 @@ html.dpl-page .preloader {
      pulse — it reports state, and it's opacity-only) and the cursor CTA
      arrow (already handled at the top of this file). Reduced motion means
      less movement, not no feedback. */
-  .aboutCard::before,
-.aboutPage__portrait,
+  .aboutPage__portrait,
 .collage__badge > svg,
 .capCurtain--a,
 .capCurtain--b,

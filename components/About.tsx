@@ -1,185 +1,65 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import PageLink from "./PageLink";
+import AboutTagPile from "./AboutTagPile";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 /*
-  White "About / Impact" section — the bridge between the dark draggable
-  hero and the rest of the portfolio. Purple appears only as a small brand
-  accent (card dot, cursor-proximity glow, hover states) — the section itself
-  is white/off-white.
+  The About panel - the bridge between the dark draggable hero and the rest
+  of the portfolio, and the one place on the home page that says who this is
+  in the first person.
+
+  It is laid out as a single centred statement with a pile of tags settling
+  under it, which is a composition that only works if it is allowed to be
+  mostly empty: a greeting, one large serif sentence, one line of detail,
+  and then colour arriving all at once at the bottom edge. Everything that
+  used to compete with that sentence - a dark bio card, four counting stats,
+  a section marker - is gone rather than rearranged.
 
   Structure:
 
   .about (white, rises over the pinned hero via the aboutStage
           margin-top:-100vh panel mechanic, then pins for the Statement)
-    ├── .about__steps   (five flat, sharp-cornered white bands anchored to
-    │     the panel's top edge — a stepped skyline, centre tallest — whose
-    │     heights grow linearly with this section's own scroll progress, so
-    │     the silhouette starts flush and spreads apart as the panel rises —
-    │     self-contained rAF loop, writes only its own CSS var, never
-    │     touches Hero.tsx's drag state)
-    └── .about__inner (clips; everything lives here)
-          ├── DotField        (canvas micro-dot grid — near-invisible grey/
-          │     purple glow that only shows near the cursor)
-          └── .about__content (padded in from the global .rails ruler frame)
-                ├── marker + heading
-                └── .about__grid → AboutIdentityCard + StatsComposition
+    |- .about__steps   (five flat, sharp-cornered white bands anchored to
+    |    the panel's top edge - a stepped skyline, centre tallest - whose
+    |    heights grow linearly with this section's own scroll progress, so
+    |    the silhouette starts flush and spreads apart as the panel rises -
+    |    self-contained rAF loop, writes only its own CSS var, never
+    |    touches Hero.tsx's drag state)
+    \- .about__inner (clips; everything lives here)
+         |- DotField      (canvas micro-dot grid - near-invisible grey/
+         |    purple glow that only shows near the cursor)
+         |- .about__content (the greeting, the statement, the detail line)
+         \- .aboutTags    (the pile, pinned to the bottom edge and cut off
+              by it, so the field reads as continuing past the fold)
 */
 
-type Stat = {
-  value: number;
-  suffix: string;
-  label: string;
-  desc: string;
-  duration: number;
-};
+/*
+  The greeting.
 
-const STATS: Stat[] = [
-  {
-    value: 5,
-    suffix: "+",
-    label: "years creating",
-    desc: "Designing across product, interaction, visual systems, and motion.",
-    duration: 1000,
-  },
-  {
-    value: 30,
-    suffix: "+",
-    label: "projects shipped",
-    desc: "From product interfaces and websites to complete digital experiences.",
-    duration: 1300,
-  },
-  {
-    value: 35,
-    suffix: "+",
-    label: "collaborations",
-    desc: "Working across teams, startups, communities, and ambitious projects.",
-    duration: 1450,
-  },
-  {
-    value: 99,
-    suffix: "%",
-    label: "craft obsession",
-    desc: "A constant push toward clearer interactions, stronger systems, and thoughtful details.",
-    duration: 1650,
-  },
-];
-
-function useCountUp(active: boolean, target: number, duration: number, delayMs: number) {
-  const [value, setValue] = useState(0);
-
-  useEffect(() => {
-    if (!active) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setValue(target);
-      return;
-    }
-    let raf = 0;
-    const startTimer = setTimeout(() => {
-      const start = performance.now();
-      const tick = (now: number) => {
-        const p = Math.min(1, (now - start) / duration);
-        const eased = 1 - Math.pow(1 - p, 3);
-        setValue(Math.round(target * eased));
-        if (p < 1) raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    }, delayMs);
-    return () => {
-      clearTimeout(startTimer);
-      cancelAnimationFrame(raf);
-    };
-  }, [active, target, duration, delayMs]);
-
-  return value;
-}
-
-function StatItem({ stat, index, active }: { stat: Stat; index: number; active: boolean }) {
-  const value = useCountUp(active, stat.value, stat.duration, index * 130);
+  A name, a face and two words, set small directly above a very large
+  sentence. The size gap is the whole device: it reads as somebody saying
+  hello before making a claim, which is what stops the claim sounding like a
+  slogan.
+*/
+function Greeting() {
   return (
-    <div className={`aboutStat aboutStat--${index}`} data-reveal>
-      <div className="aboutStat__row">
-        <span className="aboutStat__num">
-          {value}
-          {stat.suffix}
-        </span>
-        <span className="aboutStat__label">{stat.label}</span>
-      </div>
-      <span className="aboutStat__rule" aria-hidden />
-      <p className="aboutStat__desc">{stat.desc}</p>
-    </div>
-  );
-}
-
-const cardStagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
-};
-
-const cardChild = {
-  hidden: { opacity: 0, y: 14 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
-
-function AboutIdentityCard() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const raf = useRef(0);
-
-  const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const el = cardRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() => {
-      el.style.transform = `perspective(900px) rotateX(${(-py * 3.4).toFixed(2)}deg) rotateY(${(px * 3.4).toFixed(2)}deg) translateY(-4px)`;
-    });
-  };
-
-  const onLeave = () => {
-    cancelAnimationFrame(raf.current);
-    if (cardRef.current) cardRef.current.style.transform = "";
-  };
-
-  return (
-    <motion.div
-      className="aboutCard"
-      ref={cardRef}
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-      variants={cardStagger}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.4 }}
+    <motion.p
+      className="aboutHi"
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.6 }}
+      transition={{ duration: 0.5, ease: EASE }}
     >
-      <motion.span className="aboutCard__dot" variants={cardChild} aria-hidden />
-      {/* Deliberate negative space below the copy — the card reads as a tall
-          editorial object, per the approved reference. If a portrait is ever
-          added, it belongs in this quiet zone. */}
-      <motion.h3 className="aboutCard__name" variants={cardChild}>
-        I&rsquo;m Aayush Raj
-      </motion.h3>
-      <motion.p className="aboutCard__desc" variants={cardChild}>
-        I&rsquo;m a product designer and builder focused on turning complex problems into
-        clear, intuitive digital experiences. I work across product thinking, interaction
-        design, visual systems, and prototyping, from early ideas to polished, usable
-        products.
-      </motion.p>
-      <motion.div variants={cardChild} style={{ marginTop: 28 }}>
-        <PageLink href="/about" className="aboutCard__cta">
-          About me
-        </PageLink>
-      </motion.div>
-    </motion.div>
+      <span>Hello</span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="aboutHi__face" src="/about/avatar.webp" alt="" width={112} height={112} />
+      <span>I&rsquo;m Aayush</span>
+    </motion.p>
   );
 }
 
@@ -334,29 +214,13 @@ function DotField() {
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
-  const [statsActive, setStatsActive] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            setStatsActive(true);
-            io.disconnect();
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-    io.observe(section);
-
     const steps = stepsRef.current;
-    if (!steps || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return () => io.disconnect();
-    }
+    if (!steps || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     // Stepped-band transition progress, driven purely by this section's own
     // scroll position — independent of the hero's rAF loop, so it can't
@@ -402,7 +266,6 @@ export default function About() {
     bandIo.observe(section);
 
     return () => {
-      io.disconnect();
       bandIo.disconnect();
       cancelAnimationFrame(raf);
     };
@@ -422,27 +285,44 @@ export default function About() {
         <DotField />
 
         <div className="about__content">
-          <div className="about__marker" data-reveal>
-            <span className="about__markerNum">02</span>
-            <span className="about__markerLabel">About</span>
-          </div>
-          <h2 className="about__heading" data-reveal>
-            From problem
-            <br />
-            to product.
-          </h2>
+          <Greeting />
 
-          <div className="about__grid">
-            <div className="about__cardCol">
-              <AboutIdentityCard />
-            </div>
-            <div className="about__stats">
-              {STATS.map((s, i) => (
-                <StatItem key={s.label} stat={s} index={i} active={statsActive} />
-              ))}
-            </div>
-          </div>
+          {/*
+            The line breaks are authored rather than left to the measure.
+            A sentence set this large is a shape before it is a sentence, and
+            letting it wrap on its own puts the break wherever the window
+            happens to be wide - the three-line stack, with the short last
+            line, is the composition. Below 900px it falls back to wrapping,
+            where the shape stops being readable anyway.
+          */}
+          <motion.h2
+            className="aboutSay"
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.72, delay: 0.06, ease: EASE }}
+          >
+            I turn <em>complex problems</em>{" "}
+            <br />
+            into products that{" "}
+            <br />
+            <em>feel obvious.</em>
+          </motion.h2>
+
+          <motion.p
+            className="aboutNow"
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.16, ease: EASE }}
+          >
+            Working across <b>product thinking</b>, interaction{" "}
+            <br />
+            design, <b>visual systems</b> and prototyping.
+          </motion.p>
         </div>
+
+        <AboutTagPile />
       </div>
     </section>
   );
