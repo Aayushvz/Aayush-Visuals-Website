@@ -134,9 +134,9 @@ export default function Toolbar({
         <span className="cgRing__text" aria-live="polite">{pct}% complete</span>
       </span>
 
-      {/* only meaningful between 1100 and 1279px: below that the tab
+      {/* only meaningful between 1100 and 1535px: below that the tab
          strip owns switching between form and preview and the panel is
-         not offered at all; at 1280 and up the panel is its own grid
+         not offered at all; at 1536 and up the panel is its own grid
          column and always visible, so this toggle is hidden by CSS at
          both ends and only shown in the gap where the panel is an
          overlay */}

@@ -581,14 +581,18 @@
     background var(--dur-state) var(--ease-quint);
 }
 
+/* on stays a thin outline, not a filled pill: Export is the page's one
+   filled control (see .cgPrimary), so five switches all filling
+   with --cg-accent would read as five more calls to action. The knob
+   alone carries the accent, and on/off also differ by knob position
+   (left/right), so the state never depends on colour alone. */
 .cgSwitch input:checked + .cgSwitch__track {
-  background: var(--cg-accent);
   border-color: var(--cg-accent);
 }
 
 .cgSwitch input:checked + .cgSwitch__track::after {
   transform: translateX(14px);
-  background: var(--cg-accent-fg);
+  background: var(--cg-accent);
 }
 
 .cgSwitch input:focus-visible + .cgSwitch__track {
@@ -966,10 +970,10 @@
 }
 
 /* ---------- side panel ----------
-   The fourth column. Below 1280px it is not part of the grid at all: it
+   The fourth column. Below 1536px it is not part of the grid at all: it
    is taken out of flow (position: fixed) and presented as an overlay
    that data-cg-side="open" slides in, closed by default so it never
-   covers the form or the paper uninvited. At 1280 and up .cgGrid grows a
+   covers the form or the paper uninvited. At 1536 and up .cgGrid grows a
    fourth track (see the layout media query further down) and this same
    element becomes that track; position: static there is what puts it
    back in flow, so the overlay transform below has nothing left to do. */
@@ -990,7 +994,7 @@
   background: var(--cg-panel);
   box-shadow: var(--cg-paper-shadow);
   transform: translateX(100%);
-  /* width only ever changes once docked (position: static, see the 1280
+  /* width only ever changes once docked (position: static, see the 1536
      media query), where it is what the panel's own collapse rail
      animates; transform is what the overlay case animates instead, so
      only one of the two is ever doing anything at a given width */
@@ -1027,7 +1031,7 @@
   font-weight: 500;
 }
 
-/* the docked header (>=1280px): reuses .cgForm__eyebrow for its "Document"
+/* the docked header (>=1536px): reuses .cgForm__eyebrow for its "Document"
    label rather than a second near-identical rule, so the two panels'
    header rows share one source of truth for size and tracking. Only
    rendered when docked; the overlay keeps .cgSide__header above instead. */
@@ -1311,7 +1315,7 @@
 
    Both overrides are gated to the width where their panel is an actual
    grid column rather than tab- or overlay-driven (>=1100px for the form,
-   >=1280px for the side panel, matching FormPanel's and SidePanel's own
+   >=1536px for the side panel, matching FormPanel's and SidePanel's own
    docked checks) - collapsing a column that does not exist at the
    current width would have nothing to animate. The attribute selector
    here is more specific than the bare `.cgShell` rules that set these
@@ -1324,7 +1328,7 @@
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1536px) {
   .cgShell[data-cg-panel-side="collapsed"] {
     --cg-side-w: 44px;
   }
@@ -1373,8 +1377,17 @@
    keeps its wider --cg-form-w default and the panel is an overlay
    instead (see .cgSide above). The rail keeps its base --cg-rail-w at
    every width down to 1100px, since the number-plus-title rail (see
-   above) needs the same ~190px whether or not the panel is docked. */
-@media (min-width: 1280px) {
+   above) needs the same ~190px whether or not the panel is docked.
+
+   1536 rather than 1280: the fixed chrome once docked is form (360) +
+   rail (190) + side (300) = 850px, which only leaves a readable document
+   once the viewport itself is wide enough to spare it. At 1280 that is
+   343px, narrower than the undocked layout at 1150 and narrower than a
+   phone; at 1536 it is about 618px. There is still a step down at the
+   docking boundary (the panel's 300px has to come from somewhere), but
+   1536 is the first width where that step lands on a readable width
+   instead of an unusable one. */
+@media (min-width: 1536px) {
   .cgShell {
     --cg-form-w: 360px;
   }
@@ -1394,9 +1407,9 @@
 }
 
 /* the toggle only exists to reveal the panel where it is an overlay and
-   the tab strip is not already the way to reach it; at 1280 and up the
+   the tab strip is not already the way to reach it; at 1536 and up the
    panel is a permanent column and this button has nothing to do */
-@media (min-width: 1100px) and (max-width: 1279px) {
+@media (min-width: 1100px) and (max-width: 1535px) {
   .cgBar__sideToggle { display: inline-flex; }
 }
 

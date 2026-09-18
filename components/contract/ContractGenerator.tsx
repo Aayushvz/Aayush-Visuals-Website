@@ -19,7 +19,7 @@ export default function ContractGenerator() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [skin, setSkin] = useState<Skin>("studio");
   const [tab, setTab] = useState<"form" | "preview">("form");
-  /* the side panel overlay, only meaningful below 1280px (see SidePanel
+  /* the side panel overlay, only meaningful below 1536px (see SidePanel
      and .cgSide in contract.css); harmless to leave set at wider widths
      since CSS docks the panel and ignores this attribute there */
   const [sideOpen, setSideOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function ContractGenerator() {
      follows: nothing here should be able to strand a visitor on a look
      they have no way back from, and a collapsed panel resets on leave.
      formCollapsed only has a visual effect at >=1100px and sideCollapsed
-     only at >=1280px (see the matching @media blocks in contract.css);
+     only at >=1536px (see the matching @media blocks in contract.css);
      below those widths the buttons that flip these still render but the
      grid ignores the state, matching how sideOpen is already harmless at
      wide viewports. */

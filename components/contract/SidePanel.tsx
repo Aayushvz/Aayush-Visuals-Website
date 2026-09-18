@@ -20,9 +20,9 @@ import {
   otherwise follows has no answer for "what's left", so this is the
   one block built from scratch rather than relocated.
 
-  Layout: a real grid column at >= 1280px (.cgGrid gets a fourth track),
+  Layout: a real grid column at >= 1536px (.cgGrid gets a fourth track),
   an overlay everywhere below that (see contract.css's .cgSide rules).
-  `open` and `onClose` only matter for the overlay case; at >= 1280 the
+  `open` and `onClose` only matter for the overlay case; at >= 1536 the
   panel is always visible and CSS ignores them.
 */
 
@@ -54,7 +54,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   /* the panel's own collapse rail, only meaningful once it is docked as a
-     real grid column (>=1280px, see useIsDocked below and .cgPanelRail in
+     real grid column (>=1536px, see useIsDocked below and .cgPanelRail in
      contract.css); the overlay case below that already has its own full
      close affordance (the header's X and the backdrop), so it never reads
      this or renders the control that would set it */
@@ -62,14 +62,14 @@ type Props = {
   onToggleCollapse: () => void;
 };
 
-/* whether the panel is currently docked as its own grid column (>=1280px)
+/* whether the panel is currently docked as its own grid column (>=1536px)
    rather than an overlay; only affects focus/inert handling, the layout
    itself is CSS's job. Starts false so server and first client paint
    agree, then corrects itself on mount like the route's theme default. */
 function useIsDocked(): boolean {
   const [docked, setDocked] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1280px)");
+    const mq = window.matchMedia("(min-width: 1536px)");
     const update = () => setDocked(mq.matches);
     update();
     mq.addEventListener("change", update);
@@ -127,7 +127,7 @@ export default function SidePanel({
   /* docked and collapsed: the whole panel reduces to a narrow rail with
      just the control that expands it again, mirroring FormPanel's own
      collapsed state. Not offered while the panel is an overlay (below
-     1280px), where it is either fully open or fully closed already. */
+     1536px), where it is either fully open or fully closed already. */
   if (docked && collapsed) {
     return (
       <div
