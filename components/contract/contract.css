@@ -990,7 +990,10 @@
    background/color), and a second `transition` declaration here would
    replace that whole list rather than add to it, exactly the reason
    .cgSide__skinRow/.cgSide__exportRow are also only in the :active block
-   below and not here. */
+   below and not here. .cgGhostLabel/.cgEditBar__toggle/.cgConfirm__danger
+   (see the edit mode section below) are the same case: `transform` is
+   folded straight into their own transition declarations instead of
+   listed here. */
 .cgPrimary,
 .cgGhost,
 .cgSeg__btn,
@@ -1005,6 +1008,9 @@
 
 .cgPrimary:active,
 .cgGhost:active,
+.cgGhostLabel:active,
+.cgEditBar__toggle:active,
+.cgConfirm__danger:active,
 .cgSeg__btn:active,
 .cgAcc__head:active,
 .cgList__add:active,
@@ -1029,6 +1035,9 @@
   /* feedback survives reduced motion: the press dims instead of scaling */
   .cgPrimary:active,
   .cgGhost:active,
+  .cgGhostLabel:active,
+  .cgEditBar__toggle:active,
+  .cgConfirm__danger:active,
   .cgSeg__btn:active,
   .cgAcc__head:active,
   .cgList__add:active,
@@ -1042,6 +1051,142 @@
   .cgCal__day:active {
     transform: none;
     opacity: 0.7;
+  }
+}
+
+/* ---------- edit mode ----------
+   The "Edit content" control and its Save/Cancel/Revert bar (Task 2),
+   above the document in the paper column. See EditBar.tsx for the
+   behaviour; this is only the paint.
+
+   .cgGhostLabel is a labelled ghost pill - the same shape .cgBar__reset
+   already is, generalised under its own name because it is now used in
+   three places that have nothing to do with the toolbar (Export dropped
+   to a ghost here, Cancel, Revert to default). */
+.cgEditBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 820px;
+  margin: 0 auto 14px;
+}
+
+.cgEditBar__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint),
+    border-color var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgEditBar__toggle .cgIcon { width: 14px; height: 14px; }
+
+.cgEditBar__toggle:hover { border-color: var(--cg-fg-2); color: var(--cg-fg); }
+
+.cgEditBar__toggle[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--cg-line-2);
+  color: var(--cg-fg);
+}
+
+.cgEditBar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cgGhostLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgGhostLabel:hover { border-color: var(--cg-fg-2); color: var(--cg-fg); }
+
+/* ---- the destructive confirm (Task 2) ----
+   Weight and a heavier border carry "this one is serious", the same
+   text-not-colour rule .cgContrast__verdict's failing reading already
+   follows, rather than a new red that would be the one hardcoded hue on
+   this whole themed route. */
+.cgConfirm__backdrop { z-index: 60; }
+
+.cgConfirm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 61;
+  width: min(360px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--cg-line);
+  border-radius: var(--cg-radius);
+  background: var(--cg-panel);
+  box-shadow: var(--cg-paper-shadow);
+}
+
+.cgConfirm__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cgConfirm__body {
+  margin: 0 0 18px;
+  color: var(--cg-fg-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cgConfirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cgConfirm__danger {
+  padding: 8px 14px;
+  border: 1px solid var(--cg-fg);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgConfirm__danger:hover { background: var(--cg-line-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cgEditBar__toggle,
+  .cgGhostLabel,
+  .cgConfirm__danger {
+    transition: none;
   }
 }
 
@@ -1121,6 +1266,12 @@
 
 .cgDoc__clause { margin: 0 0 34px; }
 
+.cgDoc__numRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
 .cgDoc__num {
   margin: 0;
   font-family: ui-monospace, "SF Mono", monospace;
@@ -1132,6 +1283,40 @@
      looks identical to before */
   color: var(--cg-doc-accent, currentColor);
 }
+
+/* ---- edited mark (Task 3) ----
+   Quiet on purpose: --cg-fg-2/--cg-line-2 are the same "muted, secondary
+   information" pair the meta table's labels and the placeholder chip
+   already use, not a new accent colour, so it reads in both themes for
+   free and never competes with the accent touch on .cgDoc__num above.
+   Text carries the meaning (the word "edited" plus a labelled action),
+   never colour alone - the same rule .cgContrast__verdict already
+   follows for its own pass/fail readout. */
+.cgDoc__edited {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 8px 1px 2px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  color: var(--cg-fg-2);
+  font-family: var(--font-primary);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+
+.cgDoc__editedRevert {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.cgDoc__editedRevert:hover { color: var(--cg-fg); }
 
 /* --cg-doc-h completes a pairing the skins already half-have:
    --cg-doc-h-weight exists for the heading's weight but there was no
@@ -1174,6 +1359,59 @@
   color: var(--cg-fg-2);
   opacity: 0.75;
 }
+
+/* ---- editing in place (Task 2) ----
+   A dashed outline rather than a solid border or a background fill: the
+   block is still the exact same .cgDoc__p/.cgDoc__sub/<li> the read-only
+   view uses (see DocPaper's EditableBlock), so a solid fill would read
+   as new content, not an affordance on existing content. Padding/margin
+   compensate for the outline so nothing shifts against its read-only
+   neighbours (a bare list item, a locked table two blocks down). Focus
+   swaps the dashed line for a solid one in the accent colour, the same
+   "this one is live" language a text input's own focus ring already
+   uses elsewhere on this route. */
+.cgDoc__editable {
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  outline: 1px dashed var(--cg-line);
+  outline-offset: 2px;
+  cursor: text;
+  transition: outline-color var(--dur-hover) var(--ease-quint);
+}
+
+.cgDoc__editable:hover { outline-color: var(--cg-fg-2); }
+
+.cgDoc__editable:focus-visible,
+.cgDoc__editable:focus {
+  outline: 1.5px solid var(--cg-doc-accent, var(--cg-fg));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cgDoc__editable { transition: none; }
+}
+
+/* ---- locked blocks while editing (Task 2) ----
+   table/ledger/signature never gain an outline or a cursor change of
+   their own - only this small label is added, and only while editing,
+   so the read-only view (editMode off) is untouched pixel for pixel. */
+.cgDoc__locked { position: relative; }
+
+.cgDoc__lockBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 8px;
+  color: var(--cg-fg-2);
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cgDoc__lockBadge .cgIcon { width: 12px; height: 12px; }
 
 .cgDoc__kv,
 .cgDoc__ledger { width: 100%; margin: 0 0 12px; border-collapse: collapse; }
@@ -1725,7 +1963,15 @@
   .cgCol--rail,
   .cgSide,
   .cgSide__backdrop,
-  .cgTabs {
+  .cgTabs,
+  /* Task 2/3: the edit bar, its confirm dialog and backdrop, and the
+     edited mark are all screen-only chrome; the document underneath
+     already renders whatever they'd otherwise let a reader change */
+  .cgEditBar,
+  .cgConfirm,
+  .cgConfirm__backdrop,
+  .cgDoc__edited,
+  .cgDoc__lockBadge {
     display: none !important;
   }
 

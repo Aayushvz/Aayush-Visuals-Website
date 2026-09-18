@@ -118,6 +118,29 @@ export function RotateCcwIcon({ className }: IconProps) {
   );
 }
 
+/* the Edit content toggle: a pencil, tip down, the same mark used for
+   "edit this" everywhere else */
+export function PencilIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+/* the "not editable here" badge on table/ledger/signature blocks while
+   editing: a closed padlock, since those blocks are locked to whatever
+   the form computes, not to the reader in general */
+export function LockIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+    </svg>
+  );
+}
+
 export function PlusIcon({ className }: IconProps) {
   return (
     <svg className={iconClass(className)} {...svgProps}>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Draft } from "./types";
+import type { Draft, Overrides } from "./types";
 import { renderMarkdown } from "./render-md";
 import { renderWordHtml } from "./render-html";
 import { exportFilename } from "./format";
@@ -12,6 +12,16 @@ import { exportFilename } from "./format";
   than a canvas library, which is why its text stays vector and
   selectable. Word and Markdown are Blobs built from the same clause
   array the preview renders.
+
+  `overrides` here is always the PERSISTED store from useOverrides.ts,
+  never a live edit session's own unsaved deltas: these two exports
+  serialise a fresh document from buildClauses rather than reading the
+  screen's DOM, so they can only ever reflect what has actually been
+  saved. That is also exactly what the screen itself shows whenever the
+  user is not mid-edit, which covers every normal use of Export - see
+  the edit-ui.md report for the one case (exporting while actively
+  editing, before hitting Save) where this and the PDF path can briefly
+  differ.
 */
 
 function download(filename: string, mime: string, contents: string): void {
@@ -32,14 +42,14 @@ function stem(d: Draft): string {
   return exportFilename(d.projectName, iso);
 }
 
-export function downloadWord(d: Draft, logo?: string | null): void {
-  download(`${stem(d)}.doc`, "application/msword", renderWordHtml(d, undefined, logo));
+export function downloadWord(d: Draft, overrides?: Overrides, logo?: string | null): void {
+  download(`${stem(d)}.doc`, "application/msword", renderWordHtml(d, overrides, logo));
 }
 
 /* hasLogo rather than the logo itself: render-md.ts only ever notes that
    one is set, it never embeds it (see the comment there for why) */
-export function downloadMarkdown(d: Draft, hasLogo?: boolean): void {
-  download(`${stem(d)}.md`, "text/markdown;charset=utf-8", renderMarkdown(d, undefined, hasLogo));
+export function downloadMarkdown(d: Draft, overrides?: Overrides, hasLogo?: boolean): void {
+  download(`${stem(d)}.md`, "text/markdown;charset=utf-8", renderMarkdown(d, overrides, hasLogo));
 }
 
 export function printContract(): void {

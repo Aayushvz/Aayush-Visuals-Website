@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import type { Draft, Skin } from "./types";
-import { groupIdForField } from "./schema";
+import type { Overrides, Skin } from "./types";
 import Toolbar from "./Toolbar";
 import FormPanel from "./FormPanel";
 import ClauseRail from "./ClauseRail";
 import DocPaper from "./DocPaper";
 import SidePanel from "./SidePanel";
+import EditBar from "./EditBar";
 import { useContractDraft } from "./useContractDraft";
 import { useDocStyle } from "./useDocStyle";
 import { useDocLogo } from "./useDocLogo";
+import { useOverrides, mergeOverrides, withOverride, withoutClause } from "./useOverrides";
 import { processLogoFile } from "./logo";
 import { downloadMarkdown, downloadWord, printContract } from "./exporters";
 import "./contract.css";
@@ -21,6 +22,9 @@ export default function ContractGenerator() {
      off each other's - see useDocStyle.ts and useDocLogo.ts for why */
   const { style, setStyleField } = useDocStyle();
   const { logo, setLogo, error: logoError, clearError: clearLogoError } = useDocLogo();
+  /* hand-edited clause prose, on its own key again for the same reason
+     (see useOverrides.ts) */
+  const { overrides, setOverride, clearClauseOverride, clearAllOverrides } = useOverrides();
   /* surfaces logo.ts's own validation (wrong type, source file too big)
      alongside useDocLogo's storage-quota error, in one place: whichever
      fired most recently is what the LOGO block shows */
@@ -63,20 +67,71 @@ export default function ContractGenerator() {
      wide viewports. */
   const [formCollapsed, setFormCollapsed] = useState(false);
   const [sideCollapsed, setSideCollapsed] = useState(false);
-  /* Readiness (in the panel) asks the form to open a group and focus a
-     field; FormPanel owns the accordion's open state, so this is passed
-     down as a request rather than lifting that state up here */
-  const [focusRequest, setFocusRequest] = useState<{ group: string; field: keyof Draft } | null>(null);
 
-  const handleJumpToField = (field: keyof Draft) => {
-    const group = groupIdForField(field);
-    if (!group) return;
-    setSideOpen(false);
-    /* the field this jumps to lives inside the accordion, which is not
-       rendered while the form panel is collapsed to its rail; expand it
-       first or the focus below would target a node that does not exist */
-    setFormCollapsed(false);
-    setFocusRequest({ group, field });
+  /* Edit mode (Task 2). `pendingEdits` is the current session's own
+     unsaved deltas ONLY, never a copy of `overrides` - entering edit
+     mode does not snapshot anything, it just starts this at {}. Cancel
+     (and the toggle acting as Cancel) discards it outright; Save folds
+     each entry into the persisted store via setOverride and then clears
+     it. Because it holds nothing until something is actually typed and
+     blurred, "leaving previously saved overrides intact" on Cancel is
+     true by construction, not by restoring a snapshot. */
+  const [editMode, setEditMode] = useState(false);
+  const [pendingEdits, setPendingEdits] = useState<Overrides>({});
+
+  /* what DocPaper actually renders: outside edit mode this is exactly
+     `overrides`, so leaving edit mode (or never entering it) shows only
+     what was saved. While editing, a block the user has touched but not
+     yet saved still has to appear where it is (and the "edited" mark
+     still has to react live), which needs the two layered - see the
+     `overrides` comment on DocPaper's own props. */
+  const effectiveOverrides = editMode ? mergeOverrides(overrides, pendingEdits) : overrides;
+
+  const handleEditBlock = (clauseId: string, key: number, text: string) => {
+    setPendingEdits((p) => withOverride(p, clauseId, key, text));
+  };
+
+  const handleEnterEdit = () => setEditMode(true);
+
+  const handleCancelEdit = () => {
+    setPendingEdits({});
+    setEditMode(false);
+  };
+
+  const handleSaveEdit = () => {
+    for (const [clauseId, entries] of Object.entries(pendingEdits)) {
+      for (const [key, text] of Object.entries(entries)) {
+        setOverride(clauseId, Number(key), text);
+      }
+    }
+    setPendingEdits({});
+    setEditMode(false);
+  };
+
+  /* the per-clause Revert next to the "edited" mark (Task 3): reattaches
+     one clause to the form without touching any other clause's override,
+     and without reviving a not-yet-saved edit to the same clause once
+     its persisted override is gone */
+  const handleRevertClause = (clauseId: string) => {
+    clearClauseOverride(clauseId);
+    setPendingEdits((p) => withoutClause(p, clauseId));
+  };
+
+  /* "Revert to default" in the edit bar: the whole document, confirmed
+     first (EditBar owns that confirmation), unconditional like the
+     toolbar's own Reset */
+  const handleRevertAll = () => {
+    clearAllOverrides();
+    setPendingEdits({});
+  };
+
+  /* Reset all (toolbar): clears the draft and every override together,
+     unconditionally - see Toolbar's own aria-label for the wording */
+  const handleResetAll = () => {
+    reset();
+    clearAllOverrides();
+    setPendingEdits({});
+    setEditMode(false);
   };
 
   return (
@@ -95,10 +150,11 @@ export default function ContractGenerator() {
         onTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
         sideOpen={sideOpen}
         onToggleSide={() => setSideOpen((o) => !o)}
-        onReset={reset}
+        onReset={handleResetAll}
         onPrint={printContract}
-        onWord={() => downloadWord(draft, logo)}
-        onMarkdown={() => downloadMarkdown(draft, Boolean(logo))}
+        onWord={() => downloadWord(draft, overrides, logo)}
+        onMarkdown={() => downloadMarkdown(draft, overrides, Boolean(logo))}
+        editMode={editMode}
       />
       <div className="cgTabs" role="tablist" aria-label="Panel">
         {(["form", "preview"] as const).map((t) => (
@@ -121,14 +177,29 @@ export default function ContractGenerator() {
             draft={draft}
             setField={setField}
             setDeliverables={setDeliverables}
-            focusRequest={focusRequest}
-            onFocusHandled={() => setFocusRequest(null)}
             collapsed={formCollapsed}
             onToggleCollapse={() => setFormCollapsed((c) => !c)}
           />
         </div>
         <div className="cgCol cgCol--rail"><ClauseRail draft={draft} /></div>
-        <div className="cgCol cgCol--paper"><DocPaper draft={draft} style={style} logo={logo} /></div>
+        <div className="cgCol cgCol--paper">
+          <EditBar
+            editMode={editMode}
+            onEnter={handleEnterEdit}
+            onCancel={handleCancelEdit}
+            onSave={handleSaveEdit}
+            onRevertAll={handleRevertAll}
+          />
+          <DocPaper
+            draft={draft}
+            style={style}
+            logo={logo}
+            overrides={effectiveOverrides}
+            editMode={editMode}
+            onEditBlock={handleEditBlock}
+            onRevertClause={handleRevertClause}
+          />
+        </div>
         <SidePanel
           draft={draft}
           setToggle={setToggle}
@@ -142,9 +213,8 @@ export default function ContractGenerator() {
           onLogoFile={handleLogoFile}
           onRemoveLogo={handleRemoveLogo}
           onPrint={printContract}
-          onWord={() => downloadWord(draft, logo)}
-          onMarkdown={() => downloadMarkdown(draft, Boolean(logo))}
-          onJumpToField={handleJumpToField}
+          onWord={() => downloadWord(draft, overrides, logo)}
+          onMarkdown={() => downloadMarkdown(draft, overrides, Boolean(logo))}
           open={sideOpen}
           onClose={() => setSideOpen(false)}
           collapsed={sideCollapsed}

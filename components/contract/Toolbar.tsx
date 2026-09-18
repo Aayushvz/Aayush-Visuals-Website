@@ -25,13 +25,17 @@ type Props = {
   onPrint: () => void;
   onWord: () => void;
   onMarkdown: () => void;
+  /* while Edit content (see EditBar.tsx) is on, Save becomes the page's
+     one filled control and Export has to drop to a ghost to keep it that
+     way - see the filled-control comment on EditBar itself */
+  editMode: boolean;
 };
 
 const R = 9;
 const C = 2 * Math.PI * R;
 
 export default function Toolbar({
-  pct, theme, onTheme, sideOpen, onToggleSide, onReset, onPrint, onWord, onMarkdown,
+  pct, theme, onTheme, sideOpen, onToggleSide, onReset, onPrint, onWord, onMarkdown, editMode,
 }: Props) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -163,7 +167,7 @@ export default function Toolbar({
         type="button"
         className="cgBar__reset"
         onClick={onReset}
-        aria-label="Reset all fields to their defaults"
+        aria-label="Reset all fields and hand-edited text to their defaults"
       >
         <RotateCcwIcon /> Reset
       </button>
@@ -181,7 +185,7 @@ export default function Toolbar({
         <button
           type="button"
           ref={triggerRef}
-          className="cgPrimary"
+          className={editMode ? "cgGhostLabel" : "cgPrimary"}
           aria-expanded={open}
           aria-haspopup="menu"
           onClick={() => setOpen((o) => !o)}
