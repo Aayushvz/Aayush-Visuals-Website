@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GROUPS, isFilled, type Field } from "./schema";
 import type { Draft, DocStyle, Skin, Toggles } from "./types";
 import { contrastRatio, passesWcagAA } from "./contrast";
 import Select from "./Select";
@@ -18,9 +17,14 @@ import {
   three columns used to own: the skin picker lived in the toolbar, the
   clause toggles lived at the bottom of the form. They moved here rather
   than being copied, so Toolbar and FormPanel no longer render them at
-  all (see those files). Readiness is new: the reference this route
-  otherwise follows has no answer for "what's left", so this is the
-  one block built from scratch rather than relocated.
+  all (see those files).
+
+  A Readiness block used to live here too (every unfilled required field,
+  fourteen items deep), but the toolbar's completion ring already reports
+  the same information as a single percentage, so the list was removed
+  along with the accordion-group lookup and jump-to-field wiring that
+  existed only to serve it (see schema.ts, FormPanel.tsx and
+  ContractGenerator.tsx).
 
   Layout: a real grid column at >= 1536px (.cgGrid gets a fourth track),
   an overlay everywhere below that (see contract.css's .cgSide rules).
@@ -95,7 +99,6 @@ type Props = {
   onPrint: () => void;
   onWord: () => void;
   onMarkdown: () => void;
-  onJumpToField: (field: keyof Draft) => void;
   open: boolean;
   onClose: () => void;
   /* the panel's own collapse rail, only meaningful once it is docked as a
@@ -125,7 +128,7 @@ function useIsDocked(): boolean {
 
 export default function SidePanel({
   draft, setToggle, skin, onSkin, theme, style, setStyleField, logo, logoMessage, onLogoFile,
-  onRemoveLogo, onPrint, onWord, onMarkdown, onJumpToField, open, onClose,
+  onRemoveLogo, onPrint, onWord, onMarkdown, open, onClose,
   collapsed, onToggleCollapse,
 }: Props) {
   const docked = useIsDocked();
@@ -150,13 +153,6 @@ export default function SidePanel({
     return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overlayVisible]);
-
-  const missing: Field[] = [];
-  for (const g of GROUPS) {
-    for (const f of g.fields) {
-      if (f.required && !isFilled(draft[f.name])) missing.push(f);
-    }
-  }
 
   const exportItems: {
     id: string;
@@ -356,32 +352,6 @@ export default function SidePanel({
               </span>
             </label>
           ))}
-        </div>
-
-        <div className="cgSide__block">
-          <p className="cgSide__eyebrow">Readiness</p>
-          {missing.length === 0 ? (
-            <p className="cgSide__ready">Every required field is filled.</p>
-          ) : (
-            <>
-              <p className="cgSide__readyCount">
-                {missing.length} required field{missing.length === 1 ? "" : "s"} left
-              </p>
-              <ul className="cgSide__missing">
-                {missing.map((f) => (
-                  <li key={String(f.name)}>
-                    <button
-                      type="button"
-                      className="cgSide__missingBtn"
-                      onClick={() => onJumpToField(f.name)}
-                    >
-                      {f.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
         </div>
 
         <div className="cgSide__block">

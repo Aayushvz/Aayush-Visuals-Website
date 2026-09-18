@@ -55,8 +55,6 @@ const SOCIAL_LINKS = SOCIAL_SOURCES.map((s) => ({
   href: SOCIAL_PROFILES.find((url) => url.includes(s.match)),
 })).filter((s): s is SocialSource & { href: string } => Boolean(s.href));
 
-type FocusRequest = { group: string; field: keyof Draft } | null;
-
 /* whether the form is currently docked as a real grid column (>=1100px)
    rather than governed by the tab strip; mirrors SidePanel's own
    useIsDocked at its own breakpoint (see contract.css's matching
@@ -80,12 +78,6 @@ type Props = {
   draft: Draft;
   setField: <K extends keyof Draft>(name: K, value: Draft[K]) => void;
   setDeliverables: (items: string[]) => void;
-  /* the side panel's Readiness block asks the form to open a group and
-     focus one of its fields; this is the request and the acknowledgement
-     that clears it, rather than FormPanel reaching into SidePanel or the
-     accordion's open state living two levels up in ContractGenerator */
-  focusRequest: FocusRequest;
-  onFocusHandled: () => void;
   /* the panel's own collapse rail (see .cgPanelRail in contract.css and
      the collapse control in ContractGenerator); state lives one level up
      because it has to survive FormPanel unmounting nothing, but mainly
@@ -96,29 +88,12 @@ type Props = {
 };
 
 export default function FormPanel({
-  draft, setField, setDeliverables, focusRequest, onFocusHandled,
+  draft, setField, setDeliverables,
   collapsed, onToggleCollapse,
 }: Props) {
   const [open, setOpen] = useState<string>("designer");
   const reduce = useReducedMotion();
   const docked = useIsDocked();
-
-  useEffect(() => {
-    if (!focusRequest) return;
-    const alreadyOpen = open === focusRequest.group;
-    setOpen(focusRequest.group);
-    /* AccordionPanel's own open transition is 420ms (see below); give it
-       time to finish before focusing, or the field would be focused while
-       still animating into view. Reduced motion (and a group that was
-       already open) skips straight to the focus. */
-    const delay = reduce || alreadyOpen ? 0 : 440;
-    const t = window.setTimeout(() => {
-      document.getElementById(`cg-${String(focusRequest.field)}`)?.focus();
-      onFocusHandled();
-    }, delay);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusRequest]);
 
   if (collapsed && docked) {
     return (
@@ -342,10 +317,7 @@ function DeliverablesList({
   return (
     <div className="cgField" data-half={false}>
       <span className="cgField__label" id={`${id}-label`}>{field.label}</span>
-      {/* id + tabIndex so the side panel's Readiness block can focus this
-         group the same way it focuses a plain input, even though a
-         role="group" div is not natively focusable */}
-      <div className="cgList" id={id} tabIndex={-1} role="group" aria-labelledby={`${id}-label`}>
+      <div className="cgList" id={id} role="group" aria-labelledby={`${id}-label`}>
         {items.map((item, i) => (
           <div className="cgList__row" key={rowIds[i] ?? i}>
             <input

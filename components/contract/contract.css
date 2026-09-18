@@ -989,8 +989,8 @@
    first combines with .cgInput's border-color, the second with its own
    background/color), and a second `transition` declaration here would
    replace that whole list rather than add to it, exactly the reason
-   .cgSide__skinRow/.cgSide__missingBtn/.cgSide__exportRow are also only
-   in the :active block below and not here. */
+   .cgSide__skinRow/.cgSide__exportRow are also only in the :active block
+   below and not here. */
 .cgPrimary,
 .cgGhost,
 .cgSeg__btn,
@@ -1012,7 +1012,6 @@
 .cgBar__reset:active,
 .cgMenu__item:active,
 .cgSide__skinRow:active,
-.cgSide__missingBtn:active,
 .cgSide__exportRow:active,
 .cgSelect__trigger:active,
 .cgSelect__option:active,
@@ -1037,7 +1036,6 @@
   .cgBar__reset:active,
   .cgMenu__item:active,
   .cgSide__skinRow:active,
-  .cgSide__missingBtn:active,
   .cgSide__exportRow:active,
   .cgSelect__trigger:active,
   .cgSelect__option:active,
@@ -1477,42 +1475,6 @@
   font-size: 12px;
 }
 
-/* ---- readiness ---- */
-
-.cgSide__ready,
-.cgSide__readyCount {
-  margin: 0 0 10px;
-  color: var(--cg-fg-2);
-  font-size: 13px;
-}
-
-.cgSide__missing {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cgSide__missingBtn {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--cg-line);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--cg-fg);
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color var(--dur-hover) var(--ease-quint),
-    background var(--dur-hover) var(--ease-quint),
-    transform var(--dur-state) var(--ease-quint);
-}
-
-.cgSide__missingBtn:hover { background: var(--cg-line-2); }
-
 /* ---- export rows: the panel's explanatory second surface, never a
    replacement for the toolbar's Export menu ---- */
 
@@ -1562,7 +1524,6 @@
   .cgGrid,
   .cgSide,
   .cgSide__skinRow,
-  .cgSide__missingBtn,
   .cgSide__exportRow {
     transition: none;
   }

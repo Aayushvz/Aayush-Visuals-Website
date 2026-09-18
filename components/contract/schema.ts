@@ -164,19 +164,7 @@ const REQUIRED: (keyof Draft)[] = GROUPS.flatMap((g) =>
   g.fields.filter((f) => f.required).map((f) => f.name),
 );
 
-/* Which group a field lives in, derived from GROUPS rather than hand
-   maintained: the side panel's Readiness block needs to open the right
-   accordion group for a missing field, and a second, hardcoded copy of
-   this mapping would drift the moment a field moves between groups. */
-const FIELD_GROUP: Partial<Record<keyof Draft, string>> = Object.fromEntries(
-  GROUPS.flatMap((g) => g.fields.map((f) => [f.name, g.id] as const)),
-);
-
-export function groupIdForField(name: keyof Draft): string | undefined {
-  return FIELD_GROUP[name];
-}
-
-export function isFilled(value: Draft[keyof Draft]): boolean {
+function isFilled(value: Draft[keyof Draft]): boolean {
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === "string") return value.trim().length > 0;
   return value != null;
