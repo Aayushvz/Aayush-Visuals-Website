@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Archivo,
   Instrument_Serif,
@@ -153,6 +153,19 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+};
+
+/*
+  The CSS in globals.css already locks this, but the stylesheet is not the
+  first thing the browser makes a decision with: Chrome's auto dark theme
+  and Samsung Internet's dark mode look for a colour scheme as the document
+  head arrives. Declaring it here puts it in the markup ahead of the CSS, so
+  there is no window where the page still looks like a pre-dark-mode site
+  and gets inverted for it. `only` is what forbids that override; the
+  surfaces we paint dark re-declare their own in CSS.
+*/
+export const viewport: Viewport = {
+  colorScheme: "only light",
 };
 
 /*
