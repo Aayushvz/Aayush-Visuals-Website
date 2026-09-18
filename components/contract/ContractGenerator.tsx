@@ -111,7 +111,7 @@ export default function ContractGenerator() {
             aria-pressed={tab === t}
             onClick={() => setTab(t)}
           >
-            {t === "form" ? "Contract Data" : "Preview"}
+            {t === "form" ? "Agreement Details" : "Preview"}
           </button>
         ))}
       </div>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { GROUPS, isFilled, type Field } from "./schema";
 import type { Draft, DocStyle, Skin, Toggles } from "./types";
 import { contrastRatio, passesWcagAA } from "./contrast";
+import Select from "./Select";
 import {
   DownloadIcon,
   FileTextIcon,
@@ -586,16 +587,7 @@ function FontField({
   return (
     <div className="cgField">
       <label className="cgField__label" htmlFor={id}>{label}</label>
-      <select
-        id={id}
-        className="cgInput"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {FONT_OPTIONS.map((o) => (
-          <option key={o.label} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+      <Select id={id} value={value} options={FONT_OPTIONS} onChange={onChange} />
     </div>
   );
 }

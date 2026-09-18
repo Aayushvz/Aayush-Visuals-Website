@@ -458,32 +458,55 @@
 .cgList__rm .cgIcon,
 .cgList__add .cgIcon,
 .cgBar__reset .cgIcon { width: 14px; height: 14px; }
+.cgSelect__chevron,
+.cgCal__nav .cgIcon { width: 14px; height: 14px; }
 
 /* ---------- form panel ---------- */
 
 .cgForm {
-  padding: 16px 0 40px;
+  padding: 16px 0 0;
 }
 
+/* the panel's own title, not a caption on it - full --cg-fg contrast and a
+   700 weight (heavier than the 600 DESIGN.md reserves for headings, since
+   this has to read as the anchor for the whole panel, not one heading
+   among several) rather than the faint --cg-fg-2 label this used to share
+   with every other mono caption in the route. Still mono/uppercase/tracked,
+   the same eyebrow idiom, just given enough weight to earn the name. */
 .cgForm__eyebrow {
   margin: 0 16px 10px;
-  color: var(--cg-fg-2);
+  color: var(--cg-fg);
   font-family: ui-monospace, "SF Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 /* the panel's header row: its eyebrow plus the collapse control at the
    header's right edge, per the reference this task is beating. Reused
    as-is by SidePanel's docked header (see .cgSide__bar) so both panels'
-   titles sit on the same rule rather than two near-duplicate ones. */
+   titles sit on the same rule rather than two near-duplicate ones.
+
+   position: sticky + an opaque background is what keeps this from
+   scrolling away with the six groups beneath it: .cgCol--form is the
+   scroll container (see .cgCol above), and without this the header would
+   scroll out of view exactly like the footer used to (see .cgFoot below).
+   The border only appears once the header is actually pinned against
+   scrolled content, which is what makes it read as a fixed piece of
+   furniture rather than just the first row of the list. */
 .cgForm__bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin: 0 8px 10px 16px;
+  margin: 0 8px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--cg-line-2);
+  background: var(--cg-panel);
 }
 
 .cgForm__bar .cgForm__eyebrow { margin: 0; }
@@ -513,14 +536,21 @@
   color: var(--cg-fg-2);
 }
 
-/* a group name is a small heading, not a body label, so it gets the same
-   600 weight DESIGN.md reserves for headings/emphasis rather than the
-   400 it would otherwise inherit from .cgAcc__head; the half-step bump in
-   size gives it room to read as deliberate next to the new icon */
+/* a calm list item, not a small heading: 500 is DESIGN.md's UI-label
+   weight (section 3), a step down from the 600 this used to carry, and
+   the colour now matches .cgAcc__icon's --cg-fg-2 exactly rather than
+   inheriting .cgAcc__head's full-contrast --cg-fg. Icon and name read as
+   one object this way instead of a dark label next to a grey glyph, and
+   the row overall sits quieter than the eyebrow above it (see
+   .cgForm__eyebrow), which is now the one bold thing in the header. The
+   half-step size bump stays, so the row is still legible at the softer
+   weight. .cgAcc__count and .cgAcc__chev keep their own colour/size, so
+   they stay quieter than the name the way they always were. */
 .cgAcc__label {
   flex: 1;
+  color: var(--cg-fg-2);
   font-size: 14.5px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cgAcc__count {
@@ -671,20 +701,247 @@
   }
 }
 
+/* ---------- custom select ----------
+   Replaces the native <select> everywhere this route offers a fixed list
+   (currency, entity type, the three font pickers in SidePanel) - see
+   Select.tsx for why the native popup cannot be styled at all and the
+   interaction model this borrows.
+
+   .cgSelect__trigger reuses .cgInput wholesale (border, background,
+   radius, font, hover) rather than a second field skin, so the closed
+   control is pixel-identical to every plain text input in both themes;
+   this block only adds the layout .cgInput does not need for itself. The
+   popup is position: fixed (set inline from Select.tsx's own measurement,
+   not here) so FormPanel's accordion overflow:hidden and .cgCol--form's
+   own scrolling can never clip it, and z-index: 50 clears both .cgBar
+   (40) and .cgSide (30) - see the comment on .cgBar above for why those
+   two numbers exist at all. */
+
+.cgSelect {
+  position: relative;
+  width: 100%;
+}
+
+.cgSelect__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+  /* .cgInput's own border-color transition, restated alongside transform:
+     a second `transition` declaration here does not merge with .cgInput's,
+     it replaces it for elements carrying both classes, so this has to
+     name everything the control needs in one list */
+  transition: border-color var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgSelect__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cgSelect__chevron {
+  flex: 0 0 auto;
+  color: var(--cg-fg-2);
+  transition: transform var(--dur-hover) var(--ease-quint);
+}
+
+.cgSelect__trigger[aria-expanded="true"] .cgSelect__chevron {
+  transform: rotate(180deg);
+}
+
+.cgSelect__popup {
+  z-index: 50;
+  padding: 4px;
+  border: 1px solid var(--cg-line);
+  border-radius: var(--cg-radius);
+  background: var(--cg-panel);
+  box-shadow: var(--cg-paper-shadow);
+  overflow-y: auto;
+}
+
+.cgSelect__option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--cg-fg);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cgSelect__option[data-active="true"] {
+  background: var(--cg-line-2);
+}
+
+.cgSelect__option[aria-selected="true"] {
+  color: var(--cg-accent);
+  font-weight: 500;
+}
+
+/* ---------- custom date field ----------
+   Replaces <input type="date"> for the same reason as .cgSelect above -
+   see DateField.tsx. The text input reuses .cgInput exactly like the
+   select trigger does; .cgDate__toggle reuses .cgGhost (the same 32px
+   circular icon button used everywhere else in this route), which is
+   also what gives it the same :active press feedback for free (see the
+   press-feedback section below - .cgGhost is already in that list). */
+
+.cgDate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.cgDate__input {
+  flex: 1;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.cgDate__toggle {
+  flex: 0 0 auto;
+}
+
+.cgCal {
+  z-index: 50;
+  padding: 12px;
+  border: 1px solid var(--cg-line);
+  border-radius: var(--cg-radius);
+  background: var(--cg-panel);
+  box-shadow: var(--cg-paper-shadow);
+}
+
+.cgCal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cgCal__nav.cgGhost {
+  width: 28px;
+  height: 28px;
+}
+
+.cgCal__month {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.cgCal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.cgCal__weekday {
+  padding: 4px 0;
+  color: var(--cg-fg-2);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cgCal__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cgCal__row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cgCal__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cg-fg);
+  font: inherit;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-quint),
+    color var(--dur-hover) var(--ease-quint),
+    transform var(--dur-state) var(--ease-quint);
+}
+
+.cgCal__day:hover {
+  background: var(--cg-line-2);
+}
+
+.cgCal__day[data-outside="true"] {
+  color: var(--cg-fg-2);
+  opacity: 0.55;
+}
+
+.cgCal__day[data-today="true"] {
+  border-color: var(--cg-line);
+}
+
+/* the chosen day, not the keyboard-focused one - .cgShell *:focus-visible
+   already draws the accent ring a roving-tabindex cell needs when it is
+   reached by keyboard, so this only ever has to mark which date the form
+   actually holds */
+.cgCal__day[aria-selected="true"] {
+  background: var(--cg-accent);
+  color: var(--cg-accent-fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cgSelect__trigger,
+  .cgSelect__chevron,
+  .cgCal__day {
+    transition: none;
+  }
+}
+
 /* ---------- footer ----------
    A quiet signature at the foot of the panel, not a call to action: a
    muted credit line (the wordmark itself now lives in the toolbar, in
    place of "Playground", so it does not also repeat down here) and the
-   socials, which only pick up colour on hover/focus. */
+   socials, which only pick up colour on hover/focus.
 
+   position: sticky + bottom: 0 is what makes this the panel's own fixed
+   piece of furniture rather than just the last thing in the scrolling
+   list: .cgCol--form is the actual scroll container (see .cgCol above),
+   so without this the credit line and socials would scroll out of view
+   with the six groups exactly like the header used to (see .cgForm__bar).
+   The opaque --cg-panel background is what keeps scrolled content from
+   showing through underneath it once it is pinned, and the top border is
+   what visually separates it from the list the same way .cgForm__bar's
+   bottom border separates the header - the same idiom applied to the
+   other end of the panel. .cgForm's own bottom padding moved to 0 (see
+   above) now that this block owns the panel's bottom edge and its own
+   spacing, rather than leaving 40px of dead space below it that a sticky
+   element can never actually sit inside. */
 .cgFoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  margin: 28px 16px 0;
-  padding-top: 20px;
-  border-top: 1px solid var(--cg-line-2);
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--cg-line);
+  background: var(--cg-panel);
 }
 
 .cgFoot__credit {
@@ -727,6 +984,13 @@
 
 /* ---------- press feedback ---------- */
 
+/* .cgSelect__trigger and .cgCal__day are deliberately absent from this
+   list: each already declares its own multi-property transition (the
+   first combines with .cgInput's border-color, the second with its own
+   background/color), and a second `transition` declaration here would
+   replace that whole list rather than add to it, exactly the reason
+   .cgSide__skinRow/.cgSide__missingBtn/.cgSide__exportRow are also only
+   in the :active block below and not here. */
 .cgPrimary,
 .cgGhost,
 .cgSeg__btn,
@@ -734,7 +998,8 @@
 .cgList__add,
 .cgList__rm,
 .cgBar__reset,
-.cgMenu__item {
+.cgMenu__item,
+.cgSelect__option {
   transition: transform var(--dur-state) var(--ease-quint);
 }
 
@@ -748,7 +1013,10 @@
 .cgMenu__item:active,
 .cgSide__skinRow:active,
 .cgSide__missingBtn:active,
-.cgSide__exportRow:active {
+.cgSide__exportRow:active,
+.cgSelect__trigger:active,
+.cgSelect__option:active,
+.cgCal__day:active {
   transform: scale(0.97);
   transition-duration: var(--dur-press);
 }
@@ -770,7 +1038,10 @@
   .cgMenu__item:active,
   .cgSide__skinRow:active,
   .cgSide__missingBtn:active,
-  .cgSide__exportRow:active {
+  .cgSide__exportRow:active,
+  .cgSelect__trigger:active,
+  .cgSelect__option:active,
+  .cgCal__day:active {
     transform: none;
     opacity: 0.7;
   }

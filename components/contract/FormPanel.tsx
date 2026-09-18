@@ -5,6 +5,8 @@ import { motion, AnimatePresence, useIsPresent, useReducedMotion } from "framer-
 import { GROUPS, type Field } from "./schema";
 import type { Draft } from "./types";
 import { PERSON_NAME, SOCIAL_PROFILES } from "@/lib/site";
+import Select from "./Select";
+import DateField from "./DateField";
 import {
   BehanceIcon,
   BriefcaseIcon,
@@ -126,12 +128,12 @@ export default function FormPanel({
             type="button"
             className="cgGhost"
             aria-expanded={false}
-            aria-label="Expand contract data"
+            aria-label="Expand agreement details"
             onClick={onToggleCollapse}
           >
             <PanelCollapseLeftIcon />
           </button>
-          <span className="cgPanelRail__label" aria-hidden="true">Contract Data</span>
+          <span className="cgPanelRail__label" aria-hidden="true">Agreement Details</span>
         </div>
       </div>
     );
@@ -140,12 +142,12 @@ export default function FormPanel({
   return (
     <div className="cgForm">
       <div className="cgForm__bar">
-        <p className="cgForm__eyebrow">Contract Data</p>
+        <p className="cgForm__eyebrow">Agreement Details</p>
         <button
           type="button"
           className="cgGhost cgPanelToggle"
           aria-expanded={true}
-          aria-label="Collapse contract data"
+          aria-label="Collapse agreement details"
           onClick={onToggleCollapse}
         >
           <PanelCollapseLeftIcon />
@@ -220,7 +222,7 @@ export default function FormPanel({
       })}
 
       <div className="cgFoot">
-        <p className="cgFoot__credit">Built by {PERSON_NAME}</p>
+        <p className="cgFoot__credit">Made by {PERSON_NAME}</p>
         {SOCIAL_LINKS.length > 0 && (
           <div className="cgFoot__socials" role="group" aria-label="Elsewhere">
             {SOCIAL_LINKS.map((s) => (
@@ -397,16 +399,18 @@ function FieldRow({
           onChange={(e) => setField(field.name, e.target.value as Draft[typeof field.name])}
         />
       ) : field.type === "select" ? (
-        <select
+        <Select
           id={id}
-          className="cgInput"
           value={value}
-          onChange={(e) => setField(field.name, e.target.value as Draft[typeof field.name])}
-        >
-          {field.options?.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+          options={field.options ?? []}
+          onChange={(v) => setField(field.name, v as Draft[typeof field.name])}
+        />
+      ) : field.type === "date" ? (
+        <DateField
+          id={id}
+          value={value}
+          onChange={(v) => setField(field.name, v as Draft[typeof field.name])}
+        />
       ) : (
         <input
           id={id}
