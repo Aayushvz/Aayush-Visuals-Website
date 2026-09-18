@@ -1041,8 +1041,22 @@
 
    .cgGhostLabel is a labelled ghost pill - the same shape .cgBar__reset
    already is, generalised under its own name because it is now used in
-   three places that have nothing to do with the toolbar (Export dropped
-   to a ghost here, Cancel, Revert to default). */
+   two places that have nothing to do with the toolbar (Export dropped to
+   a ghost here, and Cancel below).
+
+   Hierarchy: .cgEditBar__toggle is a ghost at every point, pressed or
+   not (no filled state - see the "never a second filled control" note
+   in EditBar.tsx). Inside .cgEditBar__actions, Revert to default
+   (.cgEditBar__danger) is deliberately not a pill at all: a quiet text
+   link, smaller and unbordered, set apart from Cancel/Save by a hairline
+   divider and its own left margin so it cannot be hit reaching for
+   Cancel. Cancel (.cgGhostLabel) and Save (.cgPrimary) are grouped
+   tightly in .cgEditBar__pair, the ordinary secondary-then-primary
+   pairing. .cgEditBar__pair .cgPrimary picks up a transparent 1px
+   border purely so its box height matches Cancel's real one exactly -
+   .cgPrimary is shared with Toolbar's Export button, which never gets a
+   border, so this is scoped to inside the edit bar rather than changing
+   .cgPrimary itself. */
 .cgEditBar {
   display: flex;
   align-items: center;
@@ -1057,7 +1071,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 8px 14px;
   border: 1px solid var(--cg-line);
   border-radius: 999px;
   background: transparent;
@@ -1065,8 +1079,7 @@
   font: inherit;
   font-size: 12.5px;
   cursor: pointer;
-  transition: background var(--dur-hover) var(--ease-quint),
-    color var(--dur-hover) var(--ease-quint),
+  transition: color var(--dur-hover) var(--ease-quint),
     border-color var(--dur-hover) var(--ease-quint),
     transform var(--dur-state) var(--ease-quint);
 }
@@ -1075,16 +1088,60 @@
 
 .cgEditBar__toggle:hover { border-color: var(--cg-fg-2); color: var(--cg-fg); }
 
+/* pressed reads as "on" through the icon/label's own colour, never a
+   background fill - a fill would make this a second filled control
+   alongside Save, which the whole point of dropping Export to a ghost
+   was to avoid */
 .cgEditBar__toggle[aria-pressed="true"] {
-  border-color: transparent;
-  background: var(--cg-line-2);
+  border-color: var(--cg-fg-2);
   color: var(--cg-fg);
 }
 
 .cgEditBar__actions {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.cgEditBar__pair {
+  display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.cgEditBar__pair .cgPrimary { border: 1px solid transparent; }
+
+/* a hairline, not a gap alone: the destructive action needs a visible
+   seam between it and Cancel/Save, not just extra padding a narrower
+   window could shrink away */
+.cgEditBar__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--cg-line);
+}
+
+/* the quiet one: text only, no pill, no border - the same "text carries
+   the weight" idiom the per-clause revert (.cgDoc__editedRevert) already
+   uses, so the whole route has exactly one visual language for "revert
+   something, no drama about it" */
+.cgEditBar__danger {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color var(--dur-hover) var(--ease-quint),
+    text-decoration-color var(--dur-hover) var(--ease-quint);
+}
+
+.cgEditBar__danger:hover {
+  color: var(--cg-fg);
+  text-decoration-color: currentColor;
 }
 
 .cgGhostLabel {
@@ -1103,6 +1160,9 @@
     color var(--dur-hover) var(--ease-quint),
     transform var(--dur-state) var(--ease-quint);
 }
+
+.cgGhostLabel .cgIcon,
+.cgEditBar__pair .cgPrimary .cgIcon { width: 14px; height: 14px; }
 
 .cgGhostLabel:hover { border-color: var(--cg-fg-2); color: var(--cg-fg); }
 
@@ -1165,6 +1225,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cgEditBar__toggle,
   .cgGhostLabel,
+  .cgEditBar__danger,
   .cgConfirm__danger {
     transition: none;
   }

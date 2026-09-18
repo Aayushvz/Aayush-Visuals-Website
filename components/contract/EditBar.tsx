@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { PencilIcon } from "./icons";
+import { CheckIcon, PencilIcon, XIcon } from "./icons";
 
 /*
   The "Edit content" control, above the document in the paper column
@@ -24,6 +24,17 @@ import { PencilIcon } from "./icons";
   page. Editing changes what the primary action is, so ContractGenerator
   passes `editMode` down to Toolbar too, which drops Export to a ghost
   for exactly as long as Save here is filled - never both, never neither.
+  The toggle itself is a ghost at every point (never filled, whether
+  pressed or not), so entering edit mode never introduces a second
+  filled control alongside Save.
+
+  Hierarchy inside the action bar: Revert to default is destructive and
+  the least common of the three, so it renders as a quiet text link (no
+  pill, no border - the same "text carries the weight, not colour" idiom
+  the per-clause revert in DocPaper.tsx already uses) and sits behind a
+  hairline divider, away from Cancel/Save, so reaching for Cancel cannot
+  land on it by muscle memory. Cancel is a plain ghost pill and Save is
+  the one filled pill, the ordinary "secondary, then primary" pairing.
 */
 
 type Props = {
@@ -88,17 +99,20 @@ export default function EditBar({ editMode, onEnter, onCancel, onSave, onRevertA
           <button
             type="button"
             ref={revertTriggerRef}
-            className="cgGhostLabel"
+            className="cgEditBar__danger"
             onClick={() => setConfirmOpen(true)}
           >
             Revert to default
           </button>
-          <button type="button" className="cgGhostLabel" onClick={() => exit(onCancel)}>
-            Cancel
-          </button>
-          <button type="button" className="cgPrimary" onClick={() => exit(onSave)}>
-            Save
-          </button>
+          <span className="cgEditBar__divider" aria-hidden="true" />
+          <div className="cgEditBar__pair">
+            <button type="button" className="cgGhostLabel" onClick={() => exit(onCancel)}>
+              <XIcon /> Cancel
+            </button>
+            <button type="button" className="cgPrimary" onClick={() => exit(onSave)}>
+              <CheckIcon /> Save
+            </button>
+          </div>
         </div>
       )}
 

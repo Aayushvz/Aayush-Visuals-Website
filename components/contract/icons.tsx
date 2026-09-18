@@ -141,6 +141,17 @@ export function LockIcon({ className }: IconProps) {
   );
 }
 
+/* Save, in the edit bar: a plain checkmark, the same mark "confirm/done"
+   uses everywhere else, never mixed with PlusIcon's or XIcon's stroke
+   idiom */
+export function CheckIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <path d="M5 12.5l4.5 4.5L19 7" />
+    </svg>
+  );
+}
+
 export function PlusIcon({ className }: IconProps) {
   return (
     <svg className={iconClass(className)} {...svgProps}>
