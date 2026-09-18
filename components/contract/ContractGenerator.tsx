@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Overrides, Skin } from "./types";
 import Toolbar from "./Toolbar";
 import FormPanel from "./FormPanel";
@@ -75,9 +75,36 @@ export default function ContractGenerator() {
      each entry into the persisted store via setOverride and then clears
      it. Because it holds nothing until something is actually typed and
      blurred, "leaving previously saved overrides intact" on Cancel is
-     true by construction, not by restoring a snapshot. */
+     true by construction, not by restoring a snapshot.
+
+     `pendingEditsRef` mirrors the state below and is the one Save
+     actually reads. A blur on a contentEditable block and a click on
+     Save are two SEPARATE native events; the blur's `setPendingEdits`
+     schedules a state update but does not necessarily commit and
+     re-render before Save's own click handler runs (this depends on
+     exactly how the browser and React interleave those two discrete
+     events, which is not something this code should have to reason
+     about correctly by accident). Reading `pendingEdits` from
+     `handleSaveEdit`'s render closure was exactly that bet, and it lost:
+     Save would read whatever `pendingEdits` was on the render that
+     created `handleSaveEdit`, which could be the value from BEFORE the
+     just-typed edit landed, silently discarding it. The ref is written
+     synchronously, in the same tick as the event that changed it,
+     independent of whether React has re-rendered yet, so `handleSaveEdit`
+     always sees the true latest value regardless of batching. `setPendingEdits`
+     is still called alongside every ref write, purely so the on-screen
+     preview (`effectiveOverrides` below) and the live "edited" mark keep
+     updating as before - the ref is not a replacement for the state, it
+     is what makes reading that state safe from this one call site. */
   const [editMode, setEditMode] = useState(false);
   const [pendingEdits, setPendingEdits] = useState<Overrides>({});
+  const pendingEditsRef = useRef<Overrides>({});
+
+  const updatePendingEdits = (compute: (current: Overrides) => Overrides) => {
+    const next = compute(pendingEditsRef.current);
+    pendingEditsRef.current = next;
+    setPendingEdits(next);
+  };
 
   /* what DocPaper actually renders: outside edit mode this is exactly
      `overrides`, so leaving edit mode (or never entering it) shows only
@@ -88,23 +115,25 @@ export default function ContractGenerator() {
   const effectiveOverrides = editMode ? mergeOverrides(overrides, pendingEdits) : overrides;
 
   const handleEditBlock = (clauseId: string, key: number, text: string) => {
-    setPendingEdits((p) => withOverride(p, clauseId, key, text));
+    updatePendingEdits((p) => withOverride(p, clauseId, key, text));
   };
 
   const handleEnterEdit = () => setEditMode(true);
 
   const handleCancelEdit = () => {
-    setPendingEdits({});
+    updatePendingEdits(() => ({}));
     setEditMode(false);
   };
 
   const handleSaveEdit = () => {
-    for (const [clauseId, entries] of Object.entries(pendingEdits)) {
+    /* the ref, not the `pendingEdits` closure - see the comment above */
+    const edits = pendingEditsRef.current;
+    for (const [clauseId, entries] of Object.entries(edits)) {
       for (const [key, text] of Object.entries(entries)) {
         setOverride(clauseId, Number(key), text);
       }
     }
-    setPendingEdits({});
+    updatePendingEdits(() => ({}));
     setEditMode(false);
   };
 
@@ -114,7 +143,7 @@ export default function ContractGenerator() {
      its persisted override is gone */
   const handleRevertClause = (clauseId: string) => {
     clearClauseOverride(clauseId);
-    setPendingEdits((p) => withoutClause(p, clauseId));
+    updatePendingEdits((p) => withoutClause(p, clauseId));
   };
 
   /* "Revert to default" in the edit bar: the whole document, confirmed
@@ -122,7 +151,7 @@ export default function ContractGenerator() {
      toolbar's own Reset */
   const handleRevertAll = () => {
     clearAllOverrides();
-    setPendingEdits({});
+    updatePendingEdits(() => ({}));
   };
 
   /* Reset all (toolbar): clears the draft and every override together,
@@ -130,7 +159,7 @@ export default function ContractGenerator() {
   const handleResetAll = () => {
     reset();
     clearAllOverrides();
-    setPendingEdits({});
+    updatePendingEdits(() => ({}));
     setEditMode(false);
   };
 

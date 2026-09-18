@@ -98,3 +98,60 @@ test("withoutClause fully detaches a clause from isClauseEdited, not just emptie
   const cleared = withoutClause(base, "parties");
   assert.equal(isClauseEdited("parties", cleared), false);
 });
+
+/*
+  Regression test for the Save bug: handleSaveEdit in ContractGenerator.tsx
+  commits a session's pendingEdits by looping its entries and calling
+  setOverride(clauseId, key, text) once per (clause, block) pair - the
+  same shape a real save performs, entry by entry, rather than one bulk
+  replace. This exercises exactly that composition with a non-empty
+  pending set on top of a non-empty starting store (a save on top of an
+  already-saved earlier edit), and checks it lands on the same result a
+  single mergeOverrides call would produce, entry order included.
+
+  This does not (and cannot, without a DOM/React renderer) catch the
+  actual runtime bug, which was a stale closure reading React state
+  across two separate native events, not a defect in this compose logic.
+  It guards the piece that IS pure and testable: if a future change to
+  the drain loop or to withOverride/mergeOverrides ever stopped folding
+  a pending edit into the result, this fails.
+*/
+test("draining pendingEdits via repeated withOverride calls (the Save commit path) matches mergeOverrides", () => {
+  const overrides: Overrides = { parties: { 0: "previously saved opening line" } };
+  const pendingEdits: Overrides = {
+    parties: { 1: "a second, not-yet-saved paragraph" },
+    fees: { 0: "hand-edited fee text" },
+  };
+
+  let committed = overrides;
+  for (const [clauseId, entries] of Object.entries(pendingEdits)) {
+    for (const [key, text] of Object.entries(entries)) {
+      committed = withOverride(committed, clauseId, Number(key), text);
+    }
+  }
+
+  assert.deepEqual(committed, mergeOverrides(overrides, pendingEdits));
+  assert.deepEqual(committed, {
+    parties: { 0: "previously saved opening line", 1: "a second, not-yet-saved paragraph" },
+    fees: { 0: "hand-edited fee text" },
+  });
+  // the pending set itself is never mutated by draining it
+  assert.deepEqual(pendingEdits, {
+    parties: { 1: "a second, not-yet-saved paragraph" },
+    fees: { 0: "hand-edited fee text" },
+  });
+});
+
+test("draining an empty pendingEdits leaves overrides untouched (Save with nothing pending is a no-op)", () => {
+  const overrides: Overrides = { parties: { 0: "existing" } };
+  const pendingEdits: Overrides = {};
+
+  let committed = overrides;
+  for (const [clauseId, entries] of Object.entries(pendingEdits)) {
+    for (const [key, text] of Object.entries(entries)) {
+      committed = withOverride(committed, clauseId, Number(key), text);
+    }
+  }
+
+  assert.equal(committed, overrides);
+});
