@@ -85,6 +85,29 @@ export type Clause = {
   blocks: Block[];
 };
 
+/* How the document is painted: colours, fonts, kept entirely separate from
+   Draft (see useDocStyle.ts for why) and from the logo (see useDocLogo.ts,
+   same reasoning, its own key again).
+
+   Every field is a plain string and "" means "not set, fall back to
+   whatever the active skin already draws" - there is deliberately no
+   colour or font baked in here as a default, since a baked-in default
+   would always win over the skin, which inverts the precedence Task 3
+   asks for (skin sets the default, an explicit pick overrides it).
+   accent/heading/background/text are 6-digit hex strings ("#rrggbb");
+   the font fields are whatever the picked option's CSS value is (a
+   var(--font-*) reference, or the system mono stack), ready to drop
+   straight onto a CSS custom property. */
+export type DocStyle = {
+  accent: string;
+  heading: string;
+  background: string;
+  text: string;
+  titleFont: string;
+  headingFont: string;
+  bodyFont: string;
+};
+
 /* Hand-edited prose, keyed by clause id then by block index within that
    clause. An entry means the user typed over the generated text, so that
    block stops tracking the form until it is reverted.

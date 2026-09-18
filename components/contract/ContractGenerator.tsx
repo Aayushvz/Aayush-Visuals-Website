@@ -9,11 +9,40 @@ import ClauseRail from "./ClauseRail";
 import DocPaper from "./DocPaper";
 import SidePanel from "./SidePanel";
 import { useContractDraft } from "./useContractDraft";
+import { useDocStyle } from "./useDocStyle";
+import { useDocLogo } from "./useDocLogo";
+import { processLogoFile } from "./logo";
 import { downloadMarkdown, downloadWord, printContract } from "./exporters";
 import "./contract.css";
 
 export default function ContractGenerator() {
   const { draft, setField, setToggle, setDeliverables, reset, pct } = useContractDraft();
+  /* document styling and the logo: both kept off Draft's own key, both
+     off each other's - see useDocStyle.ts and useDocLogo.ts for why */
+  const { style, setStyleField } = useDocStyle();
+  const { logo, setLogo, error: logoError, clearError: clearLogoError } = useDocLogo();
+  /* surfaces logo.ts's own validation (wrong type, source file too big)
+     alongside useDocLogo's storage-quota error, in one place: whichever
+     fired most recently is what the LOGO block shows */
+  const [logoPickError, setLogoPickError] = useState<string | null>(null);
+  const logoMessage = logoPickError ?? logoError;
+
+  const handleLogoFile = async (file: File) => {
+    setLogoPickError(null);
+    clearLogoError();
+    const result = await processLogoFile(file);
+    if (!result.ok) {
+      setLogoPickError(result.error);
+      return;
+    }
+    setLogo(result.dataUrl);
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoPickError(null);
+    clearLogoError();
+    setLogo(null);
+  };
   /* first paint is always light, then the toggle owns it. Deliberately not
      persisted: leaving the route is the way back from any choice here. */
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -68,8 +97,8 @@ export default function ContractGenerator() {
         onToggleSide={() => setSideOpen((o) => !o)}
         onReset={reset}
         onPrint={printContract}
-        onWord={() => downloadWord(draft)}
-        onMarkdown={() => downloadMarkdown(draft)}
+        onWord={() => downloadWord(draft, logo)}
+        onMarkdown={() => downloadMarkdown(draft, Boolean(logo))}
       />
       <div className="cgTabs" role="tablist" aria-label="Panel">
         {(["form", "preview"] as const).map((t) => (
@@ -99,15 +128,22 @@ export default function ContractGenerator() {
           />
         </div>
         <div className="cgCol cgCol--rail"><ClauseRail draft={draft} /></div>
-        <div className="cgCol cgCol--paper"><DocPaper draft={draft} /></div>
+        <div className="cgCol cgCol--paper"><DocPaper draft={draft} style={style} logo={logo} /></div>
         <SidePanel
           draft={draft}
           setToggle={setToggle}
           skin={skin}
           onSkin={setSkin}
+          theme={theme}
+          style={style}
+          setStyleField={setStyleField}
+          logo={logo}
+          logoMessage={logoMessage}
+          onLogoFile={handleLogoFile}
+          onRemoveLogo={handleRemoveLogo}
           onPrint={printContract}
-          onWord={() => downloadWord(draft)}
-          onMarkdown={() => downloadMarkdown(draft)}
+          onWord={() => downloadWord(draft, logo)}
+          onMarkdown={() => downloadMarkdown(draft, Boolean(logo))}
           onJumpToField={handleJumpToField}
           open={sideOpen}
           onClose={() => setSideOpen(false)}

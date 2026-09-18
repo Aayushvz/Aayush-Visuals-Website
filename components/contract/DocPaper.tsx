@@ -1,10 +1,12 @@
 "use client";
 
 import { Fragment } from "react";
+import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { Block, Draft } from "./types";
+import type { Block, Draft, DocStyle } from "./types";
 import { buildClauses, documentMeta, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses";
 import { DISCLAIMER } from "./render-md";
+import { DEFAULT_DOC_STYLE } from "./useDocStyle";
 
 /* splits on the sentinel (never on visible text, so a user's own "--" can
    never be mistaken for an unfilled field) and renders PLACEHOLDER_TEXT,
@@ -68,12 +70,40 @@ function BlockView({ b }: { b: Block }) {
   }
 }
 
-export default function DocPaper({ draft }: { draft: Draft }) {
+/* Every field here is "" by default (see DEFAULT_DOC_STYLE), and an
+   unset field must leave the skin's own value alone rather than paint
+   over it with some hardcoded fallback. Inline style is what makes
+   that precedence work for free: a custom property set inline on this
+   element beats any class selector targeting the same element,
+   whatever that selector's specificity, so simply omitting a key here
+   when the user has not chosen a value lets the skin's own
+   `.cgShell[data-cg-skin=...] .cgDoc { --cg-doc-display: ... }` rule
+   apply untouched. Only keys the user has actually set are written. */
+function docStyleVars(style: DocStyle): CSSProperties {
+  const vars: Record<string, string> = {};
+  if (style.accent) vars["--cg-doc-accent"] = style.accent;
+  if (style.heading) vars["--cg-doc-heading-color"] = style.heading;
+  if (style.background) vars["--cg-doc-bg"] = style.background;
+  if (style.text) vars["--cg-doc-fg"] = style.text;
+  if (style.titleFont) vars["--cg-doc-display"] = style.titleFont;
+  if (style.headingFont) vars["--cg-doc-h"] = style.headingFont;
+  if (style.bodyFont) vars["--cg-doc-body"] = style.bodyFont;
+  return vars as CSSProperties;
+}
+
+export default function DocPaper({
+  draft, style = DEFAULT_DOC_STYLE, logo = null,
+}: { draft: Draft; style?: DocStyle; logo?: string | null }) {
   const clauses = buildClauses(draft);
   const reduce = useReducedMotion();
 
   return (
-    <article className="cgDoc" id="cg-doc">
+    <article className="cgDoc" id="cg-doc" style={docStyleVars(style)}>
+      {/* above the title, sized modestly by .cgDoc__logo; decorative
+          (the title text already states what the document is), so an
+          empty alt takes it out of the accessibility tree rather than
+          announcing an unlabelled image */}
+      {logo && <img src={logo} alt="" className="cgDoc__logo" />}
       <h1 className="cgDoc__title">Service<br />Agreement</h1>
 
       <table className="cgDoc__meta"><tbody>

@@ -54,13 +54,19 @@ function block(b: Block): string {
   }
 }
 
-export function renderMarkdown(d: Draft, overrides?: Overrides): string {
+/* hasLogo, not the logo itself: a base64 data URL is several hundred KB
+   of one unreadable line, which defeats the entire point of a Markdown
+   export (plain text, diffable, readable in any editor). Noting that a
+   logo exists without embedding it keeps the file true to that promise;
+   anyone who needs the mark itself already has the Word or PDF export. */
+export function renderMarkdown(d: Draft, overrides?: Overrides, hasLogo?: boolean): string {
   /* buildClauses is the only place that knows how to apply an override;
      this function only renders whatever array it gets back */
   const clauses = buildClauses(d, overrides);
   const parts: string[] = [
     "# Service Agreement",
     "",
+    ...(hasLogo ? ["_A logo is set for this document. It is not embedded in this plain-text export - see the Word or PDF export._", ""] : []),
     "| | |",
     "| --- | --- |",
     ...documentMeta(d).map(([k, val]) => `| ${cell(k)} | ${cell(val)} |`),

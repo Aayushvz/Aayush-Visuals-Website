@@ -32,12 +32,14 @@ function stem(d: Draft): string {
   return exportFilename(d.projectName, iso);
 }
 
-export function downloadWord(d: Draft): void {
-  download(`${stem(d)}.doc`, "application/msword", renderWordHtml(d));
+export function downloadWord(d: Draft, logo?: string | null): void {
+  download(`${stem(d)}.doc`, "application/msword", renderWordHtml(d, undefined, logo));
 }
 
-export function downloadMarkdown(d: Draft): void {
-  download(`${stem(d)}.md`, "text/markdown;charset=utf-8", renderMarkdown(d));
+/* hasLogo rather than the logo itself: render-md.ts only ever notes that
+   one is set, it never embeds it (see the comment there for why) */
+export function downloadMarkdown(d: Draft, hasLogo?: boolean): void {
+  download(`${stem(d)}.md`, "text/markdown;charset=utf-8", renderMarkdown(d, undefined, hasLogo));
 }
 
 export function printContract(): void {

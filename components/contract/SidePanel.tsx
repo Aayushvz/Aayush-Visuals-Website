@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { GROUPS, isFilled, type Field } from "./schema";
-import type { Draft, Skin, Toggles } from "./types";
+import type { Draft, DocStyle, Skin, Toggles } from "./types";
+import { contrastRatio, passesWcagAA } from "./contrast";
 import {
   DownloadIcon,
   FileTextIcon,
@@ -42,11 +43,54 @@ const TOGGLE_LABELS: { name: keyof Toggles; label: string; hint: string }[] = [
   { name: "lateFee", label: "Late payment charge", hint: "A sub clause inside Fees, not its own section" },
 ];
 
+/* the six self-hosted families app/layout.tsx offers that suit a legal
+   document; the other three (Caveat, Permanent Marker, Grenze Gotisch)
+   are the About page's handwriting/marker/gothic collage faces and have
+   no business setting a contract, and Cinzel Decorative is a display cut
+   of Cinzel meant for large ornamental type, not body or heading text.
+   "" is "skin default" - see DEFAULT_DOC_STYLE in useDocStyle.ts. */
+const FONT_OPTIONS: { value: string; label: string }[] = [
+  { value: "", label: "Skin default" },
+  { value: "var(--font-general)", label: "General Sans" },
+  { value: "var(--font-inter)", label: "Inter" },
+  { value: "var(--font-archivo)", label: "Archivo" },
+  { value: "var(--font-serif)", label: "Instrument Serif" },
+  { value: "var(--font-cinzel)", label: "Cinzel" },
+  { value: 'ui-monospace, "SF Mono", monospace', label: "System Mono" },
+];
+
+/* mirrors --cg-paper/--cg-paper-fg's light and dark values in
+   contract.css exactly. Used only as the contrast readout's baseline
+   for whichever colour the user has NOT set (see effectiveColor below)
+   - never applied to the document itself, which gets its actual default
+   from the CSS fallback chain (var(--cg-doc-bg, var(--cg-paper))), not
+   from this constant. Keeping the two in sync is a comment's job, not
+   code's: there is no way to read a CSS custom property's value out of
+   contract.css from here without a DOM round trip, and this is a
+   readout, not the styling mechanism itself. */
+const PAPER_DEFAULT: Record<"light" | "dark", { bg: string; fg: string }> = {
+  light: { bg: "#ffffff", fg: "#1f1f1f" },
+  dark: { bg: "#1e1e1e", fg: "#ece8e1" },
+};
+
 type Props = {
   draft: Draft;
   setToggle: (name: keyof Toggles, value: boolean) => void;
   skin: Skin;
   onSkin: (s: Skin) => void;
+  /* the screen theme, needed only for the contrast readout's baseline
+     (see PAPER_DEFAULT above) - never written back to the document,
+     which stays on its own axis per the "app chrome tokens stay on
+     .cgShell[data-cg-theme=...]" rule */
+  theme: "light" | "dark";
+  style: DocStyle;
+  setStyleField: <K extends keyof DocStyle>(name: K, value: DocStyle[K]) => void;
+  logo: string | null;
+  /* whichever of logo.ts's own validation or useDocLogo's storage-quota
+     error fired most recently; null when there is nothing to report */
+  logoMessage: string | null;
+  onLogoFile: (file: File) => void;
+  onRemoveLogo: () => void;
   onPrint: () => void;
   onWord: () => void;
   onMarkdown: () => void;
@@ -79,7 +123,8 @@ function useIsDocked(): boolean {
 }
 
 export default function SidePanel({
-  draft, setToggle, skin, onSkin, onPrint, onWord, onMarkdown, onJumpToField, open, onClose,
+  draft, setToggle, skin, onSkin, theme, style, setStyleField, logo, logoMessage, onLogoFile,
+  onRemoveLogo, onPrint, onWord, onMarkdown, onJumpToField, open, onClose,
   collapsed, onToggleCollapse,
 }: Props) {
   const docked = useIsDocked();
@@ -123,6 +168,20 @@ export default function SidePanel({
     { id: "word", label: "Word (.doc)", hint: "Editable in Word, Pages, Docs", Icon: FileTextIcon, run: onWord },
     { id: "md", label: "Markdown (.md)", hint: "Plain text", Icon: DownloadIcon, run: onMarkdown },
   ];
+
+  /* what the contrast readout scores: the user's own pick where they
+     made one, otherwise the same baseline the CSS fallback chain itself
+     lands on for the active theme (see PAPER_DEFAULT above and .cgDoc's
+     var(--cg-doc-bg, var(--cg-paper)) in contract.css) - heading with no
+     explicit colour inherits the text colour in the real document
+     (color: var(--cg-doc-heading-color, inherit)), so its effective
+     value here does the same rather than assuming the theme default. */
+  const paperDefault = PAPER_DEFAULT[theme];
+  const effectiveBg = style.background || paperDefault.bg;
+  const effectiveText = style.text || paperDefault.fg;
+  const effectiveHeading = style.heading || effectiveText;
+  const bodyRatio = contrastRatio(effectiveText, effectiveBg);
+  const headingRatio = contrastRatio(effectiveHeading, effectiveBg);
 
   /* docked and collapsed: the whole panel reduces to a narrow rail with
      just the control that expands it again, mirroring FormPanel's own
@@ -208,6 +267,76 @@ export default function SidePanel({
               />
             ))}
           </div>
+        </div>
+
+        <div className="cgSide__block">
+          <p className="cgSide__eyebrow">Colors</p>
+          <ColorField
+            id="cg-style-accent"
+            label="Accent"
+            value={style.accent}
+            effective={style.accent || "#7c3aed"}
+            onChange={(hex) => setStyleField("accent", hex)}
+            onClear={() => setStyleField("accent", "")}
+          />
+          <ColorField
+            id="cg-style-heading"
+            label="Heading"
+            value={style.heading}
+            effective={effectiveHeading}
+            onChange={(hex) => setStyleField("heading", hex)}
+            onClear={() => setStyleField("heading", "")}
+          />
+          <ColorField
+            id="cg-style-background"
+            label="Background"
+            value={style.background}
+            effective={effectiveBg}
+            onChange={(hex) => setStyleField("background", hex)}
+            onClear={() => setStyleField("background", "")}
+          />
+          <ColorField
+            id="cg-style-text"
+            label="Text"
+            value={style.text}
+            effective={effectiveText}
+            onChange={(hex) => setStyleField("text", hex)}
+            onClear={() => setStyleField("text", "")}
+          />
+
+          {/* factual, not a gate: every choice above works regardless of
+              what this reports (see the comment on the CSS block) */}
+          <div className="cgContrast">
+            <ContrastRow label="Text on background" ratio={bodyRatio} level="body" />
+            <ContrastRow label="Heading on background" ratio={headingRatio} level="large" />
+          </div>
+        </div>
+
+        <div className="cgSide__block">
+          <p className="cgSide__eyebrow">Typography</p>
+          <FontField
+            id="cg-style-title-font"
+            label="Title"
+            value={style.titleFont}
+            onChange={(v) => setStyleField("titleFont", v)}
+          />
+          <FontField
+            id="cg-style-heading-font"
+            label="Heading"
+            value={style.headingFont}
+            onChange={(v) => setStyleField("headingFont", v)}
+          />
+          <FontField
+            id="cg-style-body-font"
+            label="Body"
+            value={style.bodyFont}
+            onChange={(v) => setStyleField("bodyFont", v)}
+          />
+        </div>
+
+        <div className="cgSide__block">
+          <p className="cgSide__eyebrow">Logo</p>
+          <LogoField logo={logo} message={logoMessage} onFile={onLogoFile} onRemove={onRemoveLogo} />
         </div>
 
         <div className="cgSide__block">
@@ -324,5 +453,222 @@ function SkinRow({
       <span className="cgSide__skinName">{skin.label}</span>
       <span className="cgSide__skinHint">{skin.hint}</span>
     </button>
+  );
+}
+
+/*
+  One colour: a native <input type="color"> swatch plus a plain text
+  hex field, never the swatch alone - a colour value that can only be
+  read by eye is not something a keyboard user or a screen reader can
+  confirm, and typing a hex is faster than eyeballing a picker anyway.
+
+  `value` is the DocStyle field itself and may be "" (not set, see
+  DEFAULT_DOC_STYLE). `effective` is what the document actually renders
+  for this role right now - the resolved skin/theme default, or the
+  user's own value when they have set one (SidePanel computes this per
+  field; see effectiveHeading/effectiveBg/effectiveText above). The
+  swatch and the hex field both display `effective` whenever `value` is
+  unset, so what is shown always matches what is on the page, and never
+  shows an arbitrary placeholder colour.
+
+  The hex text field keeps its own local buffer rather than being fully
+  controlled by `value`: a controlled input that snaps back to the last
+  valid hex on every keystroke makes it impossible to type a new one
+  (see the commit-on-valid comment below).
+*/
+function ColorField({
+  id, label, value, effective, onChange, onClear,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  effective: string;
+  onChange: (hex: string) => void;
+  onClear: () => void;
+}) {
+  const shown = value || effective;
+  const [text, setText] = useState(shown);
+
+  useEffect(() => {
+    setText(shown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown]);
+
+  const commit = (raw: string) => {
+    const m = /^#?([0-9a-f]{6})$/i.exec(raw.trim());
+    if (m) onChange(`#${m[1].toLowerCase()}`);
+  };
+
+  return (
+    <div className="cgField">
+      <label className="cgField__label" htmlFor={`${id}-hex`}>{label}</label>
+      <div className="cgColorField">
+        <input
+          type="color"
+          id={id}
+          className="cgColorField__swatch"
+          aria-label={`${label} colour picker`}
+          value={shown}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <input
+          type="text"
+          id={`${id}-hex`}
+          className="cgInput cgColorField__hex"
+          value={text}
+          spellCheck={false}
+          maxLength={7}
+          onChange={(e) => {
+            setText(e.target.value);
+            commit(e.target.value);
+          }}
+          onBlur={() => setText(shown)}
+        />
+        {value !== "" && (
+          <button
+            type="button"
+            className="cgGhost cgColorField__reset"
+            aria-label={`Reset ${label} to the skin default`}
+            onClick={onClear}
+          >
+            <XIcon />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* honest, not alarming: the ratio is always shown, "Pass"/"Low contrast"
+   is text (never colour alone), and a failing reading is a slightly
+   heavier weight, not a red banner - see the CSS comment on .cgContrast.
+   ratio is null when a colour cannot be parsed yet (mid-edit in the hex
+   field above), which reads as a plain em dash rather than "Low
+   contrast" so an in-progress edit is never reported as a failure. */
+function ContrastRow({
+  label, ratio, level,
+}: {
+  label: string;
+  ratio: number | null;
+  level: "body" | "large";
+}) {
+  const pass = ratio !== null && passesWcagAA(ratio, level);
+  const threshold = level === "body" ? "4.5" : "3";
+  return (
+    <div className="cgContrast__row">
+      <span className="cgContrast__label">{label}</span>
+      <span>
+        <span className="cgContrast__ratio">{ratio !== null ? `${ratio.toFixed(2)}:1` : "-"}</span>
+        {ratio !== null && (
+          <>
+            {" "}
+            <span className="cgContrast__verdict" data-pass={pass}>
+              {pass ? "Pass" : `Below ${threshold}:1`}
+            </span>
+          </>
+        )}
+      </span>
+    </div>
+  );
+}
+
+/* one of the six sanctioned families (see FONT_OPTIONS) or "" for the
+   skin's own default - a plain <select>, reusing .cgField/.cgInput from
+   the form panel rather than inventing a second field style */
+function FontField({
+  id, label, value, onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="cgField">
+      <label className="cgField__label" htmlFor={id}>{label}</label>
+      <select
+        id={id}
+        className="cgInput"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {FONT_OPTIONS.map((o) => (
+          <option key={o.label} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+const LOGO_ACCEPT = "image/png,image/jpeg,image/svg+xml";
+
+/*
+  The file input is visually hidden with the same technique .cgSwitch's
+  checkbox already uses (absolute, 1x1px, opacity: 0) rather than
+  display:none, so it stays in the tab order and Enter/Space still opens
+  the OS file dialog; the label next to it carries the visible "Upload
+  logo" affordance and the focus ring moves to that label via
+  `:focus-visible + .cgLogo__browse` in contract.css, since outlining a
+  1x1px element would not be visible.
+
+  Processing (downscaling, the 2MB/size checks) happens in logo.ts,
+  called by ContractGenerator's onLogoFile; this component only ever
+  hands over the raw File and renders whatever comes back (a preview, or
+  `message` from either that validation or useDocLogo's storage-quota
+  handling).
+*/
+function LogoField({
+  logo, message, onFile, onRemove,
+}: {
+  logo: string | null;
+  message: string | null;
+  onFile: (file: File) => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onFile(file);
+    /* clear the input's own value so picking the same file again (after
+       a rejection, say) still fires a change event */
+    e.target.value = "";
+  };
+
+  return (
+    <div className="cgLogo">
+      {logo ? (
+        <div className="cgLogo__preview">
+          <img src={logo} alt="" className="cgLogo__thumb" />
+          <span className="cgLogo__meta">Logo set. Shown above the title on the page, print and Word export.</span>
+          <button
+            type="button"
+            className="cgLogo__remove"
+            aria-label="Remove logo"
+            onClick={() => {
+              onRemove();
+              if (inputRef.current) inputRef.current.value = "";
+            }}
+          >
+            <XIcon />
+          </button>
+        </div>
+      ) : (
+        <>
+          <input
+            ref={inputRef}
+            type="file"
+            id="cg-logo-file"
+            className="cgLogo__file"
+            accept={LOGO_ACCEPT}
+            onChange={handleChange}
+          />
+          <label htmlFor="cg-logo-file" className="cgLogo__browse">
+            Upload logo (PNG, JPEG or SVG, under 2MB)
+          </label>
+        </>
+      )}
+      {message && <p className="cgLogo__error" role="status">{message}</p>}
+    </div>
   );
 }

@@ -70,13 +70,24 @@ function block(b: Block): string {
   }
 }
 
-export function renderWordHtml(d: Draft, overrides?: Overrides): string {
+/* logo is a data URL (or null/undefined when none is set) coming straight
+   out of useDocLogo, already downscaled by logo.ts before it ever reaches
+   here. An <img src="data:..."> is the one embedding format Word, Pages
+   and Google Docs all accept without a linked file to go missing, which
+   is exactly why useDocLogo keeps it as a data URL rather than an object
+   URL. Sizing is a plain inline style (max-width/max-height, no custom
+   property - see the "Word-safe layout" test below), matching .cgDoc__logo
+   in contract.css so the exported file and the on-screen preview agree. */
+export function renderWordHtml(d: Draft, overrides?: Overrides, logo?: string | null): string {
   /* overrides are applied once, in buildClauses; esc() below still runs
      over every block's text regardless of whether it came from the form
      or from a hand edit, since a user's own prose is the least trusted
      input this file ever writes into a .doc */
   const clauses = buildClauses(d, overrides);
   const meta = documentMeta(d);
+  const logoHtml = logo
+    ? `<img src="${logo}" alt="" style="display:block;max-width:160px;max-height:64px;margin:0 0 14pt 0;" />`
+    : "";
 
   const body = clauses
     .map(
@@ -92,7 +103,7 @@ export function renderWordHtml(d: Draft, overrides?: Overrides): string {
 <title>Service Agreement</title>
 </head>
 <body style="font-family:Calibri,Arial,sans-serif;color:#111;margin:0;">
-<h1 style="margin:0 0 14pt 0;font-size:26pt;font-weight:normal;">Service Agreement</h1>
+${logoHtml}<h1 style="margin:0 0 14pt 0;font-size:26pt;font-weight:normal;">Service Agreement</h1>
 <table cellspacing="0" cellpadding="0" style="width:100%;margin:0 0 20pt 0;border-collapse:collapse;border-top:1px solid #999;border-bottom:1px solid #999;"><tbody>${meta
     .map(
       ([k, v]) =>
