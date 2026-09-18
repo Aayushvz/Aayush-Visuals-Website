@@ -1,10 +1,18 @@
 "use client";
 
+// TEMP INSTRUMENTATION
+function DBG(...a: unknown[]) {
+  if (typeof window === "undefined") return;
+  const w = window as unknown as { __DBG?: string[] };
+  w.__DBG = w.__DBG ?? [];
+  w.__DBG.push(a.map((x) => (typeof x === "string" ? x : JSON.stringify(x))).join(" "));
+}
+
+
 import { useRef, useState } from "react";
 import type { Overrides, Skin } from "./types";
 import Toolbar from "./Toolbar";
 import FormPanel from "./FormPanel";
-import ClauseRail from "./ClauseRail";
 import DocPaper from "./DocPaper";
 import SidePanel from "./SidePanel";
 import EditBar from "./EditBar";
@@ -113,8 +121,10 @@ export default function ContractGenerator() {
      still has to react live), which needs the two layered - see the
      `overrides` comment on DocPaper's own props. */
   const effectiveOverrides = editMode ? mergeOverrides(overrides, pendingEdits) : overrides;
+  DBG("[DBG] CG render overrides=", JSON.stringify(overrides), "pending=", JSON.stringify(pendingEdits), "editMode=", editMode);
 
   const handleEditBlock = (clauseId: string, key: number, text: string) => {
+    DBG("[DBG] handleEditBlock", clauseId, key, JSON.stringify(text));
     updatePendingEdits((p) => withOverride(p, clauseId, key, text));
   };
 
@@ -128,6 +138,7 @@ export default function ContractGenerator() {
   const handleSaveEdit = () => {
     /* the ref, not the `pendingEdits` closure - see the comment above */
     const edits = pendingEditsRef.current;
+    DBG("[DBG] handleSaveEdit ENTER ref=", JSON.stringify(edits), "state=", JSON.stringify(pendingEdits));
     for (const [clauseId, entries] of Object.entries(edits)) {
       for (const [key, text] of Object.entries(entries)) {
         setOverride(clauseId, Number(key), text);
@@ -210,7 +221,6 @@ export default function ContractGenerator() {
             onToggleCollapse={() => setFormCollapsed((c) => !c)}
           />
         </div>
-        <div className="cgCol cgCol--rail"><ClauseRail draft={draft} /></div>
         <div className="cgCol cgCol--paper">
           <EditBar
             editMode={editMode}

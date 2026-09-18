@@ -264,7 +264,6 @@ export default function DocPaper({
         return (
           <motion.section
             key={c.id}
-            id={`cg-c-${c.id}`}
             className="cgDoc__clause"
             layout={reduce ? false : "position"}
             transition={reduce ? { duration: 0 } : { duration: 0.42, ease: [0.22, 1, 0.36, 1] }}

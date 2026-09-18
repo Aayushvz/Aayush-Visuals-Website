@@ -14,10 +14,6 @@
 
 .cgShell {
   --cg-radius: 10px;
-  /* wide enough to carry a number and a title (see .cgRail__title); below
-     1100px the rail becomes a horizontal strip instead and this variable
-     stops applying at all (that breakpoint hardcodes a 30px chip) */
-  --cg-rail-w: 190px;
   --cg-form-w: 380px;
   --cg-side-w: 300px;
   /* still sets .cgBar's own fixed height on desktop; .cgGrid no longer
@@ -96,7 +92,7 @@
 
 .cgGrid {
   display: grid;
-  grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr;
+  grid-template-columns: var(--cg-form-w) 1fr;
   /* takes whatever height .cgShell's flex column has left after .cgBar and
      .cgTabs; min-height: 0 is required for a flex item's height to shrink
      below its content's intrinsic size, otherwise the grid (and the page)
@@ -122,10 +118,6 @@
   background: var(--cg-panel);
 }
 
-.cgCol--rail {
-  border-right: 1px solid var(--cg-line);
-}
-
 /* the site's own dot-grid language (see app/globals.css's --dot /
    --grid-size, e.g. .dotsInk), reproduced rather than reached for: this
    route's tokens live on .cgShell, not :root, so it declares its own
@@ -144,27 +136,15 @@
 }
 
 /* ---------- scrollbars ----------
-   Four scroll containers, two treatments. The rail is a short strip of
-   numbers that are their own position cue, so its scrollbar is hidden
-   outright: the same house pattern as .projModal__infoPane, .worksFilters
-   and .gallery__viewport in globals.css. The form, the paper and the
-   side panel are long (seven groups, thirteen clauses) and the bar is
-   the only cue for position and remaining length, so theirs is a thin
-   custom thumb instead of the OS default, not hidden.
+   Three scroll containers, all the same treatment. The form, the paper
+   and the side panel are long (seven groups, thirteen clauses) and the
+   bar is the only cue for position and remaining length, so theirs is a
+   thin custom thumb instead of the OS default.
 
    Every rule here is scoped under .cgShell. Pseudo-elements cannot carry
    the `cg` prefix themselves, so this scoping is what stops a bare
    ::-webkit-scrollbar from leaking past this route into every other page
    that shares this stylesheet chunk. */
-
-.cgShell .cgCol--rail {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.cgShell .cgCol--rail::-webkit-scrollbar {
-  display: none;
-}
 
 .cgShell .cgCol--form,
 .cgShell .cgCol--paper,
@@ -1497,64 +1477,6 @@
 
 .cgShell[data-cg-skin="plain"] .cgDoc__title { font-size: clamp(30px, 4vw, 42px); }
 
-/* ---------- clause rail ----------
-   Number and title both visible at all times (>=1100px; see the
-   horizontal-strip override further down), so there is no hover tooltip
-   left to maintain - the old .cgRail__tip existed only to reveal a title
-   that is now always on screen. */
-
-.cgRail {
-  display: flex;
-  flex-direction: column;
-  padding: 20px 0;
-}
-
-.cgRail__item {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  min-height: 34px;
-  padding: 7px 14px;
-  text-decoration: none;
-  transition: color var(--dur-hover) var(--ease-quint);
-}
-
-.cgRail__num {
-  flex: 0 0 auto;
-  padding-top: 1px;
-  color: var(--cg-fg-2);
-  font-family: ui-monospace, "SF Mono", monospace;
-  font-size: 11px;
-  transition: color var(--dur-hover) var(--ease-quint);
-}
-
-.cgRail__title {
-  flex: 1;
-  color: var(--cg-fg);
-  font-family: var(--font-primary);
-  font-size: 12.5px;
-  line-height: 1.35;
-  transition: color var(--dur-hover) var(--ease-quint);
-}
-
-.cgRail__item:hover .cgRail__num,
-.cgRail__item:hover .cgRail__title,
-.cgRail__item:focus-visible .cgRail__num,
-.cgRail__item:focus-visible .cgRail__title {
-  color: var(--cg-accent);
-}
-
-/* lets rail anchors glide to their clause instead of jumping the page */
-.cgCol--paper { scroll-behavior: smooth; }
-
-@media (prefers-reduced-motion: reduce) {
-  .cgRail__num,
-  .cgRail__title { transition: none; }
-
-  .cgCol--paper { scroll-behavior: auto; }
-}
-
 /* ---------- side panel ----------
    The fourth column. Below 1536px it is not part of the grid at all: it
    is taken out of flow (position: fixed) and presented as an overlay
@@ -1960,7 +1882,6 @@
 @media print {
   .cgBar,
   .cgCol--form,
-  .cgCol--rail,
   .cgSide,
   .cgSide__backdrop,
   .cgTabs,
@@ -2142,28 +2063,23 @@
 
 .cgTabs { display: none; }
 
-/* the panel gets a real fourth grid track once there is room for it
-   alongside the form and rail at their full width; below this the form
-   keeps its wider --cg-form-w default and the panel is an overlay
-   instead (see .cgSide above). The rail keeps its base --cg-rail-w at
-   every width down to 1100px, since the number-plus-title rail (see
-   above) needs the same ~190px whether or not the panel is docked.
+/* the panel gets a real third grid track once there is room for it
+   alongside the form at its full width; below this the form keeps its
+   wider --cg-form-w default and the panel is an overlay instead (see
+   .cgSide above).
 
-   1536 rather than 1280: the fixed chrome once docked is form (360) +
-   rail (190) + side (300) = 850px, which only leaves a readable document
-   once the viewport itself is wide enough to spare it. At 1280 that is
-   343px, narrower than the undocked layout at 1150 and narrower than a
-   phone; at 1536 it is about 618px. There is still a step down at the
-   docking boundary (the panel's 300px has to come from somewhere), but
-   1536 is the first width where that step lands on a readable width
-   instead of an unusable one. */
+   1536 was tuned when a clause rail also sat in this row (form 360 +
+   rail 190 + side 300 = 850px of fixed chrome). The rail is gone, which
+   makes this threshold conservative now - left unchanged in this pass
+   on purpose, to be measured and revisited on its own rather than
+   bundled with the rail's removal. */
 @media (min-width: 1536px) {
   .cgShell {
     --cg-form-w: 360px;
   }
 
   .cgGrid {
-    grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr var(--cg-side-w);
+    grid-template-columns: var(--cg-form-w) 1fr var(--cg-side-w);
   }
 
   /* position/width only, not transform/box-shadow: those are overlay-only
@@ -2207,33 +2123,6 @@
     background: var(--cg-panel);
   }
 
-  .cgCol--rail {
-    border-right: 0;
-    border-bottom: 1px solid var(--cg-line);
-  }
-
-  .cgRail {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 8px 12px;
-    gap: 4px;
-  }
-
-  /* the compact index: number only, centred, fixed-width chips - a title
-     genuinely will not fit in a horizontal strip this narrow, so it is
-     hidden here rather than truncated */
-  .cgRail__item {
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    min-height: 30px;
-    padding: 0;
-  }
-
-  .cgRail__title { display: none; }
-
-  .cgShell[data-cg-tab="form"] .cgCol--rail,
   .cgShell[data-cg-tab="form"] .cgCol--paper { display: none; }
 
   .cgShell[data-cg-tab="preview"] .cgCol--form { display: none; }
