@@ -66,6 +66,7 @@ export default function ContractGenerator() {
         onTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
         sideOpen={sideOpen}
         onToggleSide={() => setSideOpen((o) => !o)}
+        onReset={reset}
         onPrint={printContract}
         onWord={() => downloadWord(draft)}
         onMarkdown={() => downloadMarkdown(draft)}
@@ -91,7 +92,6 @@ export default function ContractGenerator() {
             draft={draft}
             setField={setField}
             setDeliverables={setDeliverables}
-            reset={reset}
             focusRequest={focusRequest}
             onFocusHandled={() => setFocusRequest(null)}
             collapsed={formCollapsed}

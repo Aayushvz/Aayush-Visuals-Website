@@ -65,6 +65,10 @@
   --cg-paper: #ffffff;
   --cg-paper-fg: #1f1f1f;
   --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 18px 44px rgba(0, 0, 0, 0.09);
+  /* the paper column's background texture (see .cgCol--paper); same ink
+     base as --cg-line, at an alpha low enough to read as a surface behind
+     the white sheet rather than a pattern competing with it */
+  --cg-dot: rgba(31, 31, 31, 0.09);
 }
 
 .cgShell[data-cg-theme="dark"] {
@@ -83,6 +87,9 @@
   --cg-paper: #1e1e1e;
   --cg-paper-fg: #ece8e1;
   --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
+  /* same role as light's --cg-dot, flipped to the light ink base (matching
+     --cg-fg's rgb) since the surface behind the sheet is now near-black */
+  --cg-dot: rgba(244, 241, 234, 0.07);
 }
 
 /* ---------- layout ---------- */
@@ -119,9 +126,21 @@
   border-right: 1px solid var(--cg-line);
 }
 
+/* the site's own dot-grid language (see app/globals.css's --dot /
+   --grid-size, e.g. .dotsInk), reproduced rather than reached for: this
+   route's tokens live on .cgShell, not :root, so it declares its own
+   --cg-dot per theme above instead of depending on globals.css, but
+   matches globals.css's 20.28px cell size so the route does not invent a
+   second dot rhythm. A surface the paper sits on, not a pattern next to
+   it: .cgDoc is opaque (background: var(--cg-paper)), so the dots only
+   ever show in the gutter around it, and stay out of @media print
+   entirely because that block sets this element's background with the
+   full `background` shorthand, which resets background-image to none. */
 .cgCol--paper {
   padding: clamp(20px, 3vw, 44px);
-  background: var(--cg-bg);
+  background-color: var(--cg-bg);
+  background-image: radial-gradient(var(--cg-dot) 1.4px, transparent 1.4px);
+  background-size: 20.28px 20.28px;
 }
 
 /* ---------- scrollbars ----------
@@ -212,7 +231,18 @@
 
 /* ---------- toolbar ---------- */
 
+/* position + z-index here are not decorative: .cgSide is a grid item with
+   z-index: 30, and a grid item's z-index is honoured even at
+   position: static, so without its own stacking context .cgBar (a
+   position: static sibling with no z-index) painted behind it, clipping
+   .cgMenu (the Export dropdown, z-index: 20, a descendant of .cgBar)
+   behind the docked panel's header. Giving .cgBar its own positioned
+   stacking context above 30 is what wins that fight, not raising
+   .cgMenu's own z-index, which is already scoped correctly relative to
+   its own stacking context and was never the problem. */
 .cgBar {
+  position: relative;
+  z-index: 40;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -316,6 +346,25 @@
    query below that names that exact range. */
 .cgBar__sideToggle { display: none; }
 
+/* ghost, not primary: Export stays the page's one filled control. Text
+   stays visible (not an icon-only .cgGhost square) because this sits
+   right next to Export in the toolbar rather than at the foot of a
+   scrolled panel, so it needs to read as "the other button next to
+   Export", not be identifiable by icon alone. */
+.cgBar__reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--cg-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cg-fg-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
 /* the one filled control on the page */
 .cgPrimary {
   display: inline-flex;
@@ -408,7 +457,7 @@
 .cgMenu__icon { width: 16px; height: 16px; }
 .cgList__rm .cgIcon,
 .cgList__add .cgIcon,
-.cgForm__reset .cgIcon { width: 14px; height: 14px; }
+.cgBar__reset .cgIcon { width: 14px; height: 14px; }
 
 /* ---------- form panel ---------- */
 
@@ -613,21 +662,6 @@
   font-size: 12px;
 }
 
-.cgForm__reset {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 20px 16px 0;
-  padding: 8px 12px;
-  border: 1px solid var(--cg-line);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--cg-fg-2);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .cgAcc__chev,
   .cgSwitch__track,
@@ -699,7 +733,7 @@
 .cgAcc__head,
 .cgList__add,
 .cgList__rm,
-.cgForm__reset,
+.cgBar__reset,
 .cgMenu__item {
   transition: transform var(--dur-state) var(--ease-quint);
 }
@@ -710,7 +744,7 @@
 .cgAcc__head:active,
 .cgList__add:active,
 .cgList__rm:active,
-.cgForm__reset:active,
+.cgBar__reset:active,
 .cgMenu__item:active,
 .cgSide__skinRow:active,
 .cgSide__missingBtn:active,
@@ -732,7 +766,7 @@
   .cgAcc__head:active,
   .cgList__add:active,
   .cgList__rm:active,
-  .cgForm__reset:active,
+  .cgBar__reset:active,
   .cgMenu__item:active,
   .cgSide__skinRow:active,
   .cgSide__missingBtn:active,
@@ -980,44 +1014,68 @@
    that data-cg-side="open" slides in, closed by default so it never
    covers the form or the paper uninvited. At 1536 and up .cgGrid grows a
    fourth track (see the layout media query further down) and this same
-   element becomes that track; position: static there is what puts it
-   back in flow, so the overlay transform below has nothing left to do. */
+   element becomes that track.
+
+   The overlay-only declarations (fixed positioning, the off-screen
+   transform, the backdrop) live inside their own `@media (max-width:
+   1535px)` block below rather than on the bare .cgSide/.cgSide__backdrop
+   selectors, and the docked block re-declares position/width rather than
+   trying to override them back. Two same-specificity `.cgSide` rules
+   fighting over transform (one always-on, one inside the >=1536 media
+   query) is exactly what shipped a regression once already: the docked
+   rule's `transform: none` lost the cascade to the overlay's
+   `translateX(100%)`, leaving the docked panel translated 320px past the
+   right edge of the page and the whole document 320px wider than the
+   viewport. Scoping the overlay rules to widths where the panel is
+   actually an overlay means there is nothing left at docked widths for
+   the docked block to out-cascade. */
 
 .cgSide {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
   display: flex;
   flex-direction: column;
-  width: min(320px, 88vw);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-bottom: 24px;
   border-left: 1px solid var(--cg-line);
   background: var(--cg-panel);
-  box-shadow: var(--cg-paper-shadow);
-  transform: translateX(100%);
   /* width only ever changes once docked (position: static, see the 1536
      media query), where it is what the panel's own collapse rail
-     animates; transform is what the overlay case animates instead, so
-     only one of the two is ever doing anything at a given width */
+     animates; transform is what the overlay case (below) animates
+     instead, so only one of the two is ever doing anything at a given
+     width */
   transition: transform var(--dur-panel) var(--ease-quint),
     width var(--dur-panel) var(--ease-quint);
 }
 
-.cgShell[data-cg-side="open"] .cgSide {
-  transform: translateX(0);
-}
+/* overlay only: everywhere below the 1536px docking threshold, .cgSide is
+   taken out of flow and slides in from the right; .cgSide__backdrop only
+   ever mounts in this same range (SidePanel.tsx renders it only when
+   `!docked && open`), but its positioning is scoped here too so the CSS
+   does not depend on that JS guard to stay correct. */
+@media (max-width: 1535px) {
+  .cgSide {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(320px, 88vw);
+    box-shadow: var(--cg-paper-shadow);
+    transform: translateX(100%);
+  }
 
-.cgSide__backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 25;
-  border: 0;
-  background: rgba(0, 0, 0, 0.32);
-  cursor: default;
+  .cgShell[data-cg-side="open"] .cgSide {
+    transform: translateX(0);
+  }
+
+  .cgSide__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    border: 0;
+    background: rgba(0, 0, 0, 0.32);
+    cursor: default;
+  }
 }
 
 .cgSide__header {
@@ -1401,14 +1459,13 @@
     grid-template-columns: var(--cg-form-w) var(--cg-rail-w) 1fr var(--cg-side-w);
   }
 
+  /* position/width only, not transform/box-shadow: those are overlay-only
+     declarations scoped to `@media (max-width: 1535px)` above and simply
+     do not exist at this width, so there is nothing here to reset */
   .cgSide {
     position: static;
     width: var(--cg-side-w);
-    transform: none;
-    box-shadow: none;
   }
-
-  .cgSide__backdrop { display: none; }
 }
 
 /* the toggle only exists to reveal the panel where it is an overlay and

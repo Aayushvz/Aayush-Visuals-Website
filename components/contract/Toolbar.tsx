@@ -11,6 +11,7 @@ import {
   MoonIcon,
   PanelIcon,
   PrinterIcon,
+  RotateCcwIcon,
   SunIcon,
 } from "./icons";
 
@@ -20,6 +21,7 @@ type Props = {
   onTheme: () => void;
   sideOpen: boolean;
   onToggleSide: () => void;
+  onReset: () => void;
   onPrint: () => void;
   onWord: () => void;
   onMarkdown: () => void;
@@ -29,7 +31,7 @@ const R = 9;
 const C = 2 * Math.PI * R;
 
 export default function Toolbar({
-  pct, theme, onTheme, sideOpen, onToggleSide, onPrint, onWord, onMarkdown,
+  pct, theme, onTheme, sideOpen, onToggleSide, onReset, onPrint, onWord, onMarkdown,
 }: Props) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -118,7 +120,7 @@ export default function Toolbar({
         <ArrowLeftIcon />
         <LogoMark className="cgBar__logo" />
       </PageLink>
-      <span className="cgBar__title">Service Agreement</span>
+      <span className="cgBar__title">Contract Generator</span>
       <span className="cgBar__spacer" />
 
       <span className="cgRing">
@@ -150,6 +152,20 @@ export default function Toolbar({
         onClick={onToggleSide}
       >
         <PanelIcon />
+      </button>
+
+      {/* moved here from the form panel's footer: sitting next to Export
+         makes it much easier to hit by accident than it was at the foot
+         of a scrolled panel, so the label stays visible rather than
+         shrinking to a bare icon, and the aria-label spells out the
+         consequence rather than repeating the visible text */}
+      <button
+        type="button"
+        className="cgBar__reset"
+        onClick={onReset}
+        aria-label="Reset all fields to their defaults"
+      >
+        <RotateCcwIcon /> Reset
       </button>
 
       <button

@@ -17,7 +17,6 @@ import {
   PanelCollapseLeftIcon,
   PersonIcon,
   PlusIcon,
-  RotateCcwIcon,
   ScaleIcon,
   XIcon,
 } from "./icons";
@@ -79,7 +78,6 @@ type Props = {
   draft: Draft;
   setField: <K extends keyof Draft>(name: K, value: Draft[K]) => void;
   setDeliverables: (items: string[]) => void;
-  reset: () => void;
   /* the side panel's Readiness block asks the form to open a group and
      focus one of its fields; this is the request and the acknowledgement
      that clears it, rather than FormPanel reaching into SidePanel or the
@@ -96,7 +94,7 @@ type Props = {
 };
 
 export default function FormPanel({
-  draft, setField, setDeliverables, reset, focusRequest, onFocusHandled,
+  draft, setField, setDeliverables, focusRequest, onFocusHandled,
   collapsed, onToggleCollapse,
 }: Props) {
   const [open, setOpen] = useState<string>("designer");
@@ -221,10 +219,6 @@ export default function FormPanel({
         );
       })}
 
-      <button type="button" className="cgForm__reset" onClick={reset}>
-        <RotateCcwIcon /> Reset all
-      </button>
-
       <div className="cgFoot">
         <p className="cgFoot__credit">Built by {PERSON_NAME}</p>
         {SOCIAL_LINKS.length > 0 && (
@@ -299,12 +293,13 @@ function AccordionPanel({
   stable synthetic ids in local state instead, and keys each row on its
   id rather than its position.
 
-  That id array can be invalidated from outside this component: `Reset
-  all` empties `draft.deliverables` directly, and a restored localStorage
-  draft replaces it on mount. Both change the array's length without
-  going through handleAdd/handleRemove below, so on every render this
-  checks whether the id array and the value array have drifted apart and
-  resynchronises by minting fresh ids rather than rendering a mismatch.
+  That id array can be invalidated from outside this component: the
+  toolbar's `Reset` button (see Toolbar.tsx) empties `draft.deliverables`
+  directly, and a restored localStorage draft replaces it on mount. Both
+  change the array's length without going through handleAdd/handleRemove
+  below, so on every render this checks whether the id array and the
+  value array have drifted apart and resynchronises by minting fresh ids
+  rather than rendering a mismatch.
 */
 function DeliverablesList({
   field, draft, setDeliverables,
