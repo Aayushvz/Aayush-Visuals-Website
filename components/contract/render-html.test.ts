@@ -2,9 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { renderWordHtml } from "./render-html.ts";
 import { renderMarkdown } from "./render-md.ts";
-import { PLACEHOLDER } from "./clauses.ts";
+import { listItemOverrideKey, PLACEHOLDER } from "./clauses.ts";
 import { DEFAULT_DRAFT } from "./schema.ts";
-import type { Draft } from "./types.ts";
+import type { Draft, Overrides } from "./types.ts";
 
 const d: Draft = {
   ...DEFAULT_DRAFT,
@@ -92,4 +92,38 @@ test("the placeholder sentinel never reaches the exported html, and an unfilled 
   const html = renderWordHtml(DEFAULT_DRAFT);
   assert.equal(html.includes(PLACEHOLDER), false);
   assert.ok(html.includes("--"));
+});
+
+test("an override containing <script> is escaped in the Word html output", () => {
+  /* user-typed prose is the least trusted input in the system: it must go
+     through the same esc() pass as generated text, not bypass it */
+  const overrides: Overrides = { parties: { 0: "<script>alert(1)</script>" } };
+  const html = renderWordHtml(d, overrides);
+  assert.equal(html.includes("<script>"), false);
+  assert.ok(html.includes("&lt;script&gt;"));
+});
+
+test("an override containing -- survives intact in the Word html output", () => {
+  const overrides: Overrides = { parties: { 0: "Term runs Q3--Q4, no exceptions." } };
+  const html = renderWordHtml(d, overrides);
+  assert.ok(html.includes("Term runs Q3--Q4, no exceptions."));
+  assert.equal(html.includes(PLACEHOLDER), false);
+});
+
+test("numbering matches the markdown renderer exactly, with overrides present", () => {
+  /* the model for this test is the parity test above; overrides must not
+     add, remove or reorder clauses, so the numbering the two renderers
+     derive from array position must still agree */
+  const overrides: Overrides = {
+    parties: { 0: "A hand written opening line.", [listItemOverrideKey(2, 0)]: "Full Name: hand edited" },
+    fees: { 1: "ignored, table is not overridable" },
+  };
+  const html = renderWordHtml(d, overrides);
+  const md = renderMarkdown(d, overrides);
+  const fromHtml = [...html.matchAll(/>(\d{2})\.\s/g)].map((m) => m[1]);
+  const fromMd = [...md.matchAll(/^## (\d{2})\./gm)].map((m) => m[1]);
+  assert.deepEqual(fromHtml, fromMd);
+  /* and the override itself reached both outputs */
+  assert.ok(html.includes("A hand written opening line."));
+  assert.ok(md.includes("A hand written opening line."));
 });

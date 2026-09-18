@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { renderMarkdown } from "./render-md.ts";
-import { PLACEHOLDER } from "./clauses.ts";
+import { listItemOverrideKey, PLACEHOLDER } from "./clauses.ts";
 import { DEFAULT_DRAFT } from "./schema.ts";
-import type { Draft } from "./types.ts";
+import type { Draft, Overrides } from "./types.ts";
 
 const d: Draft = {
   ...DEFAULT_DRAFT,
@@ -77,4 +77,17 @@ test("the placeholder sentinel never reaches the exported markdown, and an unfil
   const md = renderMarkdown(DEFAULT_DRAFT);
   assert.equal(md.includes(PLACEHOLDER), false);
   assert.ok(md.includes("--"));
+});
+
+test("overrides pass through to the markdown output", () => {
+  const overrides: Overrides = {
+    parties: { 0: "A hand written opening line.", [listItemOverrideKey(4, 1)]: "Contact: hand edited" },
+  };
+  const md = renderMarkdown(d, overrides);
+  assert.ok(md.includes("A hand written opening line."));
+  assert.ok(md.includes("Contact: hand edited"));
+});
+
+test("with no overrides argument, markdown output is unchanged", () => {
+  assert.equal(renderMarkdown(d), renderMarkdown(d, undefined));
 });

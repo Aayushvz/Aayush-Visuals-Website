@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildClauses, PLACEHOLDER } from "./clauses.ts";
+import { buildClauses, isClauseEdited, listItemOverrideKey, PLACEHOLDER } from "./clauses.ts";
 import { DEFAULT_DRAFT } from "./schema.ts";
-import type { Draft } from "./types.ts";
+import type { Draft, Overrides } from "./types.ts";
 
 const full: Draft = {
   ...DEFAULT_DRAFT,
@@ -165,3 +165,153 @@ test("user text containing -- survives unchanged and is never mistaken for the p
   assert.ok(text.includes("Wireframes v1--v2 handoff"));
   assert.equal(text.includes(PLACEHOLDER), false);
 });
+
+/* ---- overrides ------------------------------------------------------- */
+
+test("calling buildClauses with no overrides is unchanged from calling it with none at all", () => {
+  const bare = JSON.stringify(buildClauses(full));
+  assert.equal(JSON.stringify(buildClauses(full, undefined)), bare);
+  assert.equal(JSON.stringify(buildClauses(full, {})), bare);
+});
+
+test("an override on a para replaces that paragraph and nothing else", () => {
+  const base = buildClauses(full).find((c) => c.id === "parties")!;
+  const overrides: Overrides = { parties: { 0: "A hand written opening line." } };
+  const edited = buildClauses(full, overrides).find((c) => c.id === "parties")!;
+
+  assert.deepEqual(edited.blocks[0], { kind: "para", text: "A hand written opening line." });
+  /* every other block is untouched, byte for byte */
+  for (let i = 1; i < base.blocks.length; i++) {
+    assert.deepEqual(edited.blocks[i], base.blocks[i]);
+  }
+});
+
+test("an override on a subhead replaces it", () => {
+  const base = buildClauses(full).find((c) => c.id === "parties")!;
+  const overrides: Overrides = { parties: { 1: "Contractor (that's me)" } };
+  const edited = buildClauses(full, overrides).find((c) => c.id === "parties")!;
+
+  assert.deepEqual(edited.blocks[1], { kind: "subhead", text: "Contractor (that's me)" });
+  assert.deepEqual(edited.blocks[0], base.blocks[0]);
+  assert.deepEqual(edited.blocks[2], base.blocks[2]);
+});
+
+test("an override on one list item replaces only that item, siblings untouched", () => {
+  const base = buildClauses(full).find((c) => c.id === "parties")!;
+  const baseList = base.blocks[2];
+  assert.equal(baseList.kind, "list");
+  if (baseList.kind !== "list") throw new Error("unreachable");
+
+  const overrides: Overrides = { parties: { [listItemOverrideKey(2, 2)]: "Phone: hand edited" } };
+  const edited = buildClauses(full, overrides).find((c) => c.id === "parties")!;
+  const editedList = edited.blocks[2];
+  assert.equal(editedList.kind, "list");
+  if (editedList.kind !== "list") throw new Error("unreachable");
+
+  assert.equal(editedList.items[2], "Phone: hand edited");
+  for (let i = 0; i < baseList.items.length; i++) {
+    if (i === 2) continue;
+    assert.equal(editedList.items[i], baseList.items[i]);
+  }
+});
+
+test("an override targeting a table, ledger or signature block is ignored", () => {
+  const base = buildClauses(full);
+  const overrides: Overrides = {
+    fees: { 1: "should not apply", 3: "should not apply either" },
+    signatures: { 1: "should not apply" },
+  };
+  const edited = buildClauses(full, overrides);
+
+  assert.deepEqual(
+    edited.find((c) => c.id === "fees"),
+    base.find((c) => c.id === "fees"),
+  );
+  assert.deepEqual(
+    edited.find((c) => c.id === "signatures"),
+    base.find((c) => c.id === "signatures"),
+  );
+});
+
+test("an override for a clause id that does not exist is ignored without throwing", () => {
+  const base = JSON.stringify(buildClauses(full));
+  const overrides: Overrides = { "no-such-clause": { 0: "ghost text" } };
+  assert.doesNotThrow(() => buildClauses(full, overrides));
+  assert.equal(JSON.stringify(buildClauses(full, overrides)), base);
+});
+
+test("an override with a block index out of range is ignored without throwing", () => {
+  const base = buildClauses(full).find((c) => c.id === "parties");
+  const overrides: Overrides = { parties: { 999: "out of range" } };
+  let edited: ReturnType<typeof buildClauses> = [];
+  assert.doesNotThrow(() => {
+    edited = buildClauses(full, overrides);
+  });
+  assert.deepEqual(edited.find((c) => c.id === "parties"), base);
+});
+
+test("overrides do not change clause count, order, ids or numbering, with optional clauses switched off", () => {
+  const draft = { ...full, toggles: { ...full.toggles, attribution: false, termination: false } };
+  const base = buildClauses(draft);
+  /* an override sitting on a clause id that is currently switched off must
+     not resurrect it, and one on a clause id still present must not add
+     or remove entries */
+  const overrides: Overrides = {
+    attribution: { 0: "unused until the toggle comes back" },
+    parties: { 0: "edited opening" },
+  };
+  const edited = buildClauses(draft, overrides);
+
+  assert.equal(edited.length, base.length);
+  assert.deepEqual(
+    edited.map((c) => c.id),
+    base.map((c) => c.id),
+  );
+});
+
+test("isClauseEdited returns true only for clauses with at least one override", () => {
+  const overrides: Overrides = {
+    parties: { 0: "edited" },
+    scope: {},
+  };
+  assert.equal(isClauseEdited("parties", overrides), true);
+  assert.equal(isClauseEdited("scope", overrides), false);
+  assert.equal(isClauseEdited("fees", overrides), false);
+});
+
+test("an override containing -- survives intact and is not confused with the placeholder sentinel", () => {
+  /* `full` still leaves designerAddress and designerPhone blank, so those
+     unrelated blocks legitimately contain PLACEHOLDER; this test only
+     needs to prove the override itself is untouched by the sentinel logic,
+     which lives entirely in the renderers, not in buildClauses */
+  const overrides: Overrides = { parties: { 0: "Term runs Q3--Q4, no exceptions." } };
+  const edited = buildClauses(full, overrides).find((c) => c.id === "parties")!;
+  const overriddenBlock = edited.blocks[0];
+  assert.deepEqual(overriddenBlock, { kind: "para", text: "Term runs Q3--Q4, no exceptions." });
+  assert.equal(
+    overriddenBlock.kind === "para" && overriddenBlock.text.includes(PLACEHOLDER),
+    false,
+  );
+});
+
+test("list item override keys never collide with a plain block index", () => {
+  /* the encoding must hold even for a block index and item index that,
+     read as decimal digits stuck together, would look like another
+     block's plain index (e.g. block 3 item 1 must not read as block 31) */
+  for (let block = 0; block < 5; block++) {
+    for (let item = 0; item < 15; item++) {
+      const key = listItemOverrideKey(block, item);
+      assert.ok(key < 0, "a list item key must never be a valid non-negative block index");
+    }
+  }
+  /* distinct (block, item) pairs must never encode to the same key */
+  const seen = new Set<number>();
+  for (let block = 0; block < 5; block++) {
+    for (let item = 0; item < 15; item++) {
+      const key = listItemOverrideKey(block, item);
+      assert.equal(seen.has(key), false, `duplicate key for block ${block} item ${item}`);
+      seen.add(key);
+    }
+  }
+});
+

@@ -1,4 +1,4 @@
-import type { Block, Draft } from "./types.ts";
+import type { Block, Draft, Overrides } from "./types.ts";
 import { buildClauses, documentMeta, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
 import { DISCLAIMER } from "./render-md.ts";
 
@@ -70,8 +70,12 @@ function block(b: Block): string {
   }
 }
 
-export function renderWordHtml(d: Draft): string {
-  const clauses = buildClauses(d);
+export function renderWordHtml(d: Draft, overrides?: Overrides): string {
+  /* overrides are applied once, in buildClauses; esc() below still runs
+     over every block's text regardless of whether it came from the form
+     or from a hand edit, since a user's own prose is the least trusted
+     input this file ever writes into a .doc */
+  const clauses = buildClauses(d, overrides);
   const meta = documentMeta(d);
 
   const body = clauses

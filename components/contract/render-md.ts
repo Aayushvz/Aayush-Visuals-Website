@@ -1,4 +1,4 @@
-import type { Block, Draft } from "./types.ts";
+import type { Block, Draft, Overrides } from "./types.ts";
 import { buildClauses, documentMeta, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses.ts";
 
 /*
@@ -54,8 +54,10 @@ function block(b: Block): string {
   }
 }
 
-export function renderMarkdown(d: Draft): string {
-  const clauses = buildClauses(d);
+export function renderMarkdown(d: Draft, overrides?: Overrides): string {
+  /* buildClauses is the only place that knows how to apply an override;
+     this function only renders whatever array it gets back */
+  const clauses = buildClauses(d, overrides);
   const parts: string[] = [
     "# Service Agreement",
     "",

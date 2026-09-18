@@ -1,4 +1,4 @@
-import type { Block, Clause, Draft } from "./types.ts";
+import type { Block, Clause, Draft, Overrides } from "./types.ts";
 import { formatDate, formatEntity, formatMoney } from "./format.ts";
 
 /*
@@ -65,7 +65,82 @@ export function documentMeta(d: Draft): [string, string][] {
   ];
 }
 
-export function buildClauses(d: Draft): Clause[] {
+/*
+  Overrides let a user hand-edit a `para`, a `subhead`, or one item of a
+  `list`, and have that block stop tracking the form. `table`, `ledger`
+  and `signature` are excluded on purpose: those are computed from money
+  (Total Fee and Advance %), and a hand-edited table could disagree with
+  the form with nothing left to catch the contradiction.
+
+  A plain block override key is just the block's index in `clause.blocks`,
+  a small non-negative integer. A list item needs to address one item, not
+  the whole block, so it needs a second coordinate folded into the same
+  numeric key `Overrides` uses. A decimal encoding like "3.1" for block 3
+  item 1 looks tidy but is not actually total: item 10 reads back as the
+  same float as item 1 ("3.10" is 3.1), and floats invite exact-equality
+  bugs even where the digits look safe. Encoding a list item as a NEGATIVE
+  number instead keeps the two key spaces disjoint by construction, not by
+  a stride or digit-count convention that a long enough list could break:
+  every plain block index is >= 0, so any negative key can only ever be a
+  list item, whatever the block or item count turns out to be. The stride
+  below only needs to exceed the longest list this document ever renders
+  (deliverables, items, retained rights, and so on all top out well under
+  it), and integer arithmetic means the lookup is exact either way. */
+const LIST_ITEM_STRIDE = 1_000_000;
+
+export function listItemOverrideKey(blockIndex: number, itemIndex: number): number {
+  return -(blockIndex * LIST_ITEM_STRIDE + itemIndex + 1);
+}
+
+function overriddenBlock(block: Block, blockIndex: number, forClause: Record<number, string>): Block {
+  switch (block.kind) {
+    case "para":
+    case "subhead": {
+      const text = forClause[blockIndex];
+      return typeof text === "string" ? { ...block, text } : block;
+    }
+    case "list": {
+      /* only allocate a new items array if something in it actually
+         changes, so a clause with no matching override key returns the
+         same block reference untouched */
+      let items: string[] | undefined;
+      block.items.forEach((item, itemIndex) => {
+        const text = forClause[listItemOverrideKey(blockIndex, itemIndex)];
+        if (typeof text === "string") {
+          items ??= [...block.items];
+          items[itemIndex] = text;
+        }
+      });
+      return items ? { ...block, items } : block;
+    }
+    case "table":
+    case "ledger":
+    case "signature":
+      /* not overridable, see the comment above LIST_ITEM_STRIDE */
+      return block;
+  }
+}
+
+function withOverrides(clauses: Clause[], overrides: Overrides): Clause[] {
+  return clauses.map((clause) => {
+    const forClause = overrides[clause.id];
+    if (!forClause) return clause;
+    return {
+      ...clause,
+      blocks: clause.blocks.map((b, i) => overriddenBlock(b, i, forClause)),
+    };
+  });
+}
+
+/* the UI will use this to decide whether to show a "hand edited, revert?"
+   affordance on a clause; an entry with no keys (a clause the user edited
+   and then reverted back to empty) does not count as edited */
+export function isClauseEdited(clauseId: string, overrides: Overrides): boolean {
+  const forClause = overrides[clauseId];
+  return forClause != null && Object.keys(forClause).length > 0;
+}
+
+export function buildClauses(d: Draft, overrides?: Overrides): Clause[] {
   const total = num(d.totalFee);
   const advancePct = num(d.advancePct);
   const advance = Math.round((total * advancePct) / 100);
@@ -436,5 +511,7 @@ export function buildClauses(d: Draft): Clause[] {
     ],
   });
 
-  return out;
+  /* no overrides means byte-for-byte the same output as before this layer
+     existed; there is nothing to apply so there is nothing to allocate */
+  return overrides ? withOverrides(out, overrides) : out;
 }

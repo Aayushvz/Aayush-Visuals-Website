@@ -84,3 +84,16 @@ export type Clause = {
   title: string;
   blocks: Block[];
 };
+
+/* Hand-edited prose, keyed by clause id then by block index within that
+   clause. An entry means the user typed over the generated text, so that
+   block stops tracking the form until it is reverted.
+
+   Only `para`, `subhead`, and individual items of a `list` are
+   overridable, so the inner key is not always a plain block index: a
+   list item is addressed with a key produced by `listItemOverrideKey` in
+   clauses.ts, which is the one place that knows how to tell a block key
+   from a list-item key apart (see the comment there for why). `table`,
+   `ledger` and `signature` blocks never appear as keys here; clauses.ts
+   ignores them if they do. */
+export type Overrides = Record<string, Record<number, string>>;
