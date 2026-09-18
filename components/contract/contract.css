@@ -49,6 +49,10 @@
 }
 
 .cgShell[data-cg-theme="light"] {
+  /* the toolbar toggle is the only thing that moves this, so it has to move
+     the native chrome with it: without a scheme here the inputs, scrollbars
+     and autofill inside the panels follow the OS instead of the toggle. */
+  color-scheme: only light;
   --cg-bg: #f2ede6;
   --cg-panel: #faf7f1;
   --cg-fg: #1f1f1f;
@@ -64,6 +68,7 @@
 }
 
 .cgShell[data-cg-theme="dark"] {
+  color-scheme: only dark;
   --cg-bg: #121212;
   --cg-panel: #1a1a1a;
   --cg-fg: #f4f1ea;

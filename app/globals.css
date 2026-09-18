@@ -10,6 +10,25 @@
   stuck on the wrong side of.
 */
 :root {
+  /*
+    The palette below is the whole palette — there is no dark counterpart to
+    resolve, and nothing here reads `prefers-color-scheme`. That was true
+    before this line existed too, and it still shipped wrong on Android:
+    a page that never declares a colour scheme reads to the browser as one
+    written before dark mode existed, so Chrome's "auto dark theme" and
+    Samsung Internet's dark mode invert it themselves. They do it per
+    element, off computed colours, which is why the result was never a
+    clean flip — a cream section would come back on a dark ground with
+    half its contents still light.
+
+    `only` is the opt-out: it forbids the UA from applying a scheme of its
+    own. Surfaces we deliberately paint dark re-declare `only dark` for
+    their subtree, so their native chrome (scrollbars, form controls,
+    autofill) matches the paint. The toggles in the UI stay the only thing
+    that can move any of this.
+  */
+  color-scheme: only light;
+
   --cream: #f2ede6;
   --ink: #1f1f1f;
   --ink-soft: rgba(31, 31, 31, 0.14);
@@ -114,6 +133,7 @@ body {
 html.about-page-active,
 html.about-page-active body {
   background-color: #1A1A1A;
+  color-scheme: only dark;
 }
 
 a {
@@ -554,6 +574,9 @@ html.has-cursor .cursorRing {
   overflow: clip;
   background: var(--hero-bg);
   color: var(--hero-fg);
+  /* dark by design, so its native chrome should be dark too — the root is
+     locked to light for the cream page the hero sits on top of */
+  color-scheme: only dark;
   transition: background-color 0.55s ease, color 0.55s ease;
 }
 
@@ -10547,6 +10570,7 @@ html.contact-page-active body {
 html.dpl-page,
 html.dpl-page body {
   background: #06080e;
+  color-scheme: only dark;
   overflow: hidden;
   overscroll-behavior: none;
 }
