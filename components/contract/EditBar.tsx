@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CheckIcon, PencilIcon, XIcon } from "./icons";
+import { exitEditing, type ActiveElementLike } from "./editSession";
 
 /*
   The "Edit content" control, above the document in the paper column
@@ -51,12 +52,15 @@ export default function EditBar({ editMode, onEnter, onCancel, onSave, onRevertA
   const cancelConfirmRef = useRef<HTMLButtonElement>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  /* every exit path (Save, Cancel, or the toggle acting as Cancel) hands
-     focus back here in the same tick, so it never lands on a button that
-     is about to disappear */
+  /* every exit path (Save, Cancel, or the toggle acting as Cancel) first
+     blurs the block still being edited, so its text is committed before
+     `run` reads the pending set, and then hands focus back here, so
+     focus never lands on a button that is about to disappear. The order
+     is the whole point - see editSession.ts for what went wrong when
+     the blur was left to the browser to do by accident. */
   const exit = (run: () => void) => {
-    run();
-    toggleRef.current?.focus();
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    exitEditing(active as ActiveElementLike | null, run, () => toggleRef.current?.focus());
   };
 
   const closeConfirm = () => {

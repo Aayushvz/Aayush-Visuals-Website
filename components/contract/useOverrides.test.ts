@@ -100,21 +100,19 @@ test("withoutClause fully detaches a clause from isClauseEdited, not just emptie
 });
 
 /*
-  Regression test for the Save bug: handleSaveEdit in ContractGenerator.tsx
-  commits a session's pendingEdits by looping its entries and calling
-  setOverride(clauseId, key, text) once per (clause, block) pair - the
-  same shape a real save performs, entry by entry, rather than one bulk
-  replace. This exercises exactly that composition with a non-empty
-  pending set on top of a non-empty starting store (a save on top of an
-  already-saved earlier edit), and checks it lands on the same result a
-  single mergeOverrides call would produce, entry order included.
+  Folding a session's pendingEdits in entry by entry, rather than in one
+  bulk replace, has to land on the same result mergeOverrides gives -
+  checked here on a non-empty pending set over a non-empty starting
+  store (a save on top of an already-saved earlier edit), entry order
+  included. handleSaveEdit no longer drains it this way (it hands the
+  whole set to commitPending in one go, see editSession.test.ts), but
+  the two have to stay interchangeable: withOverride is still what
+  DocPaper's onBlur folds one block in with.
 
-  This does not (and cannot, without a DOM/React renderer) catch the
-  actual runtime bug, which was a stale closure reading React state
-  across two separate native events, not a defect in this compose logic.
-  It guards the piece that IS pure and testable: if a future change to
-  the drain loop or to withOverride/mergeOverrides ever stopped folding
-  a pending edit into the result, this fails.
+  Note what these two tests could never catch, since it is why Save
+  shipped broken twice: they both start from a pending set that already
+  holds the edit. Whether the edit ever GETS there before Save reads it
+  is a question of event order, and that lives in editSession.test.ts.
 */
 test("draining pendingEdits via repeated withOverride calls (the Save commit path) matches mergeOverrides", () => {
   const overrides: Overrides = { parties: { 0: "previously saved opening line" } };

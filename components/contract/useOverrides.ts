@@ -73,6 +73,18 @@ export function withOverride(base: Overrides, clauseId: string, key: number, tex
   return mergeOverrides(base, { [clauseId]: { [key]: text } });
 }
 
+/*
+  Save's compose step, as one pure fold: a session's unsaved edits
+  layered over what was already persisted, the pending text winning per
+  (clauseId, key). This is the whole of what Save does to the store, so
+  it is a function a test can call rather than a loop a test has to
+  re-implement (see editSession.test.ts, and the comment at the top of
+  editSession.ts for the bug that made that distinction matter).
+*/
+export function commitPending(saved: Overrides, pending: Overrides): Overrides {
+  return mergeOverrides(saved, pending);
+}
+
 /* the inverse of a clause gaining an entry: drops it entirely rather
    than leaving an empty {} behind, which matters because
    isClauseEdited (clauses.ts) checks Object.keys(forClause).length,
@@ -123,8 +135,11 @@ export function useOverrides() {
     };
   }, [overrides, hydrated]);
 
-  const setOverride = useCallback((clauseId: string, key: number, text: string) => {
-    setOverrides((o) => withOverride(o, clauseId, key, text));
+  /* Save's fold, in one functional update rather than one per edited
+     block: commitPending is the pure step (see editSession.ts), this is
+     the only thing that puts its result into state. */
+  const commitOverrides = useCallback((pending: Overrides) => {
+    setOverrides((o) => commitPending(o, pending));
   }, []);
 
   const clearClauseOverride = useCallback((clauseId: string) => {
@@ -140,5 +155,5 @@ export function useOverrides() {
     }
   }, []);
 
-  return { overrides, setOverride, clearClauseOverride, clearAllOverrides, hydrated };
+  return { overrides, commitOverrides, clearClauseOverride, clearAllOverrides, hydrated };
 }

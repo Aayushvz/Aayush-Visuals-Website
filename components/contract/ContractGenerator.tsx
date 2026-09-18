@@ -1,14 +1,5 @@
 "use client";
 
-// TEMP INSTRUMENTATION
-function DBG(...a: unknown[]) {
-  if (typeof window === "undefined") return;
-  const w = window as unknown as { __DBG?: string[] };
-  w.__DBG = w.__DBG ?? [];
-  w.__DBG.push(a.map((x) => (typeof x === "string" ? x : JSON.stringify(x))).join(" "));
-}
-
-
 import { useRef, useState } from "react";
 import type { Overrides, Skin } from "./types";
 import Toolbar from "./Toolbar";
@@ -32,7 +23,7 @@ export default function ContractGenerator() {
   const { logo, setLogo, error: logoError, clearError: clearLogoError } = useDocLogo();
   /* hand-edited clause prose, on its own key again for the same reason
      (see useOverrides.ts) */
-  const { overrides, setOverride, clearClauseOverride, clearAllOverrides } = useOverrides();
+  const { overrides, commitOverrides, clearClauseOverride, clearAllOverrides } = useOverrides();
   /* surfaces logo.ts's own validation (wrong type, source file too big)
      alongside useDocLogo's storage-quota error, in one place: whichever
      fired most recently is what the LOGO block shows */
@@ -80,10 +71,10 @@ export default function ContractGenerator() {
      unsaved deltas ONLY, never a copy of `overrides` - entering edit
      mode does not snapshot anything, it just starts this at {}. Cancel
      (and the toggle acting as Cancel) discards it outright; Save folds
-     each entry into the persisted store via setOverride and then clears
-     it. Because it holds nothing until something is actually typed and
-     blurred, "leaving previously saved overrides intact" on Cancel is
-     true by construction, not by restoring a snapshot.
+     it into the persisted store in one fold (commitOverrides) and then
+     clears it. Because it holds nothing until something is actually
+     typed and blurred, "leaving previously saved overrides intact" on
+     Cancel is true by construction, not by restoring a snapshot.
 
      `pendingEditsRef` mirrors the state below and is the one Save
      actually reads. A blur on a contentEditable block and a click on
@@ -103,7 +94,14 @@ export default function ContractGenerator() {
      is still called alongside every ref write, purely so the on-screen
      preview (`effectiveOverrides` below) and the live "edited" mark keep
      updating as before - the ref is not a replacement for the state, it
-     is what makes reading that state safe from this one call site. */
+     is what makes reading that state safe from this one call site.
+
+     The ref alone was not enough, though, and believing it was is what
+     let this ship broken a second time. It makes reading the pending
+     set safe; it does nothing about the set being EMPTY because the
+     block the user was typing in has not been blurred yet, and so has
+     never committed its text to anything. That half lives in
+     editSession.ts, whose exitEditing blurs the block first. */
   const [editMode, setEditMode] = useState(false);
   const [pendingEdits, setPendingEdits] = useState<Overrides>({});
   const pendingEditsRef = useRef<Overrides>({});
@@ -121,10 +119,8 @@ export default function ContractGenerator() {
      still has to react live), which needs the two layered - see the
      `overrides` comment on DocPaper's own props. */
   const effectiveOverrides = editMode ? mergeOverrides(overrides, pendingEdits) : overrides;
-  DBG("[DBG] CG render overrides=", JSON.stringify(overrides), "pending=", JSON.stringify(pendingEdits), "editMode=", editMode);
 
   const handleEditBlock = (clauseId: string, key: number, text: string) => {
-    DBG("[DBG] handleEditBlock", clauseId, key, JSON.stringify(text));
     updatePendingEdits((p) => withOverride(p, clauseId, key, text));
   };
 
@@ -136,14 +132,12 @@ export default function ContractGenerator() {
   };
 
   const handleSaveEdit = () => {
-    /* the ref, not the `pendingEdits` closure - see the comment above */
-    const edits = pendingEditsRef.current;
-    DBG("[DBG] handleSaveEdit ENTER ref=", JSON.stringify(edits), "state=", JSON.stringify(pendingEdits));
-    for (const [clauseId, entries] of Object.entries(edits)) {
-      for (const [key, text] of Object.entries(entries)) {
-        setOverride(clauseId, Number(key), text);
-      }
-    }
+    /* the ref, not the `pendingEdits` closure - see the comment above.
+       Reading the right variable is only half of it: by the time this
+       runs, EditBar has already blurred whichever block was still being
+       edited (exitEditing, in editSession.ts), so the ref holds every
+       edit of this session rather than every edit but the last one. */
+    commitOverrides(pendingEditsRef.current);
     updatePendingEdits(() => ({}));
     setEditMode(false);
   };
