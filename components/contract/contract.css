@@ -1663,19 +1663,19 @@
 .cgShell[data-cg-skin="plain"] .cgDoc__title { font-size: clamp(30px, 4vw, 42px); }
 
 /* ---------- side panel ----------
-   The fourth column. Below 1536px it is not part of the grid at all: it
+   The fourth column. Below 1400px it is not part of the grid at all: it
    is taken out of flow (position: fixed) and presented as an overlay
    that data-cg-side="open" slides in, closed by default so it never
-   covers the form or the paper uninvited. At 1536 and up .cgGrid grows a
+   covers the form or the paper uninvited. At 1400 and up .cgGrid grows a
    fourth track (see the layout media query further down) and this same
    element becomes that track.
 
    The overlay-only declarations (fixed positioning, the off-screen
    transform, the backdrop) live inside their own `@media (max-width:
-   1535px)` block below rather than on the bare .cgSide/.cgSide__backdrop
+   1399px)` block below rather than on the bare .cgSide/.cgSide__backdrop
    selectors, and the docked block re-declares position/width rather than
    trying to override them back. Two same-specificity `.cgSide` rules
-   fighting over transform (one always-on, one inside the >=1536 media
+   fighting over transform (one always-on, one inside the >=1400 media
    query) is exactly what shipped a regression once already: the docked
    rule's `transform: none` lost the cascade to the overlay's
    `translateX(100%)`, leaving the docked panel translated 320px past the
@@ -1692,7 +1692,7 @@
   padding-bottom: 24px;
   border-left: 1px solid var(--cg-line);
   background: var(--cg-panel);
-  /* width only ever changes once docked (position: static, see the 1536
+  /* width only ever changes once docked (position: static, see the 1400
      media query), where it is what the panel's own collapse rail
      animates; transform is what the overlay case (below) animates
      instead, so only one of the two is ever doing anything at a given
@@ -1701,12 +1701,12 @@
     width var(--dur-panel) var(--ease-quint);
 }
 
-/* overlay only: everywhere below the 1536px docking threshold, .cgSide is
+/* overlay only: everywhere below the 1400px docking threshold, .cgSide is
    taken out of flow and slides in from the right; .cgSide__backdrop only
    ever mounts in this same range (SidePanel.tsx renders it only when
    `!docked && open`), but its positioning is scoped here too so the CSS
    does not depend on that JS guard to stay correct. */
-@media (max-width: 1535px) {
+@media (max-width: 1399px) {
   .cgSide {
     position: fixed;
     top: 0;
@@ -1748,7 +1748,7 @@
   font-weight: 500;
 }
 
-/* the docked header (>=1536px): reuses .cgForm__eyebrow for its "Document"
+/* the docked header (>=1400px): reuses .cgForm__eyebrow for its "Document"
    label rather than a second near-identical rule, so the two panels'
    header rows share one source of truth for size and tracking. Only
    rendered when docked; the overlay keeps .cgSide__header above instead. */
@@ -2207,7 +2207,7 @@
 
    Both overrides are gated to the width where their panel is an actual
    grid column rather than tab- or overlay-driven (>=1100px for the form,
-   >=1536px for the side panel, matching FormPanel's and SidePanel's own
+   >=1400px for the side panel, matching FormPanel's and SidePanel's own
    docked checks) - collapsing a column that does not exist at the
    current width would have nothing to animate. The attribute selector
    here is more specific than the bare `.cgShell` rules that set these
@@ -2220,7 +2220,7 @@
   }
 }
 
-@media (min-width: 1536px) {
+@media (min-width: 1400px) {
   .cgShell[data-cg-panel-side="collapsed"] {
     --cg-side-w: 44px;
   }
@@ -2271,12 +2271,17 @@
    wider --cg-form-w default and the panel is an overlay instead (see
    .cgSide above).
 
-   1536 was tuned when a clause rail also sat in this row (form 360 +
-   rail 190 + side 300 = 850px of fixed chrome). The rail is gone, which
-   makes this threshold conservative now - left unchanged in this pass
-   on purpose, to be measured and revisited on its own rather than
-   bundled with the rail's removal. */
-@media (min-width: 1536px) {
+   1400, derived rather than picked. Docked chrome is form 360 + side
+   300 = 660, and the document measures about `paper - 99` (the column's
+   padding plus the sheet's own), capped at 820. Holding the document to
+   a 600px floor needs paper >= 699, so W >= 1359. 1400 clears that with
+   margin and gives roughly 641.
+
+   It was 1536 while a clause rail also sat in this row (form 360 + rail
+   190 + side 300 = 850 of fixed chrome). The rail is gone, so the old
+   number was stranding the panel as an overlay on 1440 laptops that now
+   have room to dock it. */
+@media (min-width: 1400px) {
   .cgShell {
     --cg-form-w: 360px;
   }
@@ -2286,7 +2291,7 @@
   }
 
   /* position/width only, not transform/box-shadow: those are overlay-only
-     declarations scoped to `@media (max-width: 1535px)` above and simply
+     declarations scoped to `@media (max-width: 1399px)` above and simply
      do not exist at this width, so there is nothing here to reset */
   .cgSide {
     position: static;
@@ -2295,9 +2300,9 @@
 }
 
 /* the toggle only exists to reveal the panel where it is an overlay and no
-   tab-driven control already reaches it; at 1536 and up the panel is a
+   tab-driven control already reaches it; at 1400 and up the panel is a
    permanent column and this button has nothing to do */
-@media (min-width: 1100px) and (max-width: 1535px) {
+@media (min-width: 1100px) and (max-width: 1399px) {
   .cgBar__sideToggle { display: inline-flex; }
 }
 
@@ -2332,7 +2337,7 @@
      .cgSide is display:none by default at this width (next rule); this
      attribute selector is what brings it back, and its higher
      specificity is what wins over both that bare rule and the
-     `@media (max-width: 1535px)` overlay block above (position/width/
+     `@media (max-width: 1399px)` overlay block above (position/width/
      transform), which are the same or lower specificity, so nothing is
      left to fight the cascade regardless of source order. See
      SidePanel.tsx's own useIsMobileNav for the matching JS-side switch:
