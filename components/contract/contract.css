@@ -1792,6 +1792,28 @@
   border-bottom: 1px solid var(--cg-line);
 }
 
+/* The panel collapse toggles carry no outline. They sit inside a header
+   that is already bounded by its own border-bottom and the column edge,
+   so a box around the icon just draws a second frame inside a frame.
+   Scoped to the two headers and the collapsed rails rather than put on
+   .cgGhost itself: the toolbar's theme toggle sits on open background
+   with nothing else defining it, and there the outline is what makes it
+   read as a control at all. */
+.cgForm__bar .cgGhost,
+.cgSide__bar .cgGhost,
+.cgPanelRail .cgGhost {
+  border-color: transparent;
+}
+
+/* hover and focus still have to say "this is a button", so the shape
+   comes back on approach rather than never existing */
+.cgForm__bar .cgGhost:hover,
+.cgSide__bar .cgGhost:hover,
+.cgPanelRail .cgGhost:hover {
+  border-color: var(--cg-line);
+  background: var(--cg-line-2);
+}
+
 .cgSide__bar .cgForm__eyebrow { margin: 0; }
 
 .cgSide__block {
