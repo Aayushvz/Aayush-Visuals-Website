@@ -70,8 +70,8 @@ export default function ProjectsSection() {
             {shown}
           </span>
           <p className="selWorks__note" data-reveal>
-            A selection of product, brand and website work across real launches,
-            crafted with intention and built for real users.
+            A selection of product, brand and website work across real
+            launches.
           </p>
           {/* the count above says how many are on show; this says how many
               there are, which is the reason to click it */}
@@ -100,7 +100,7 @@ export default function ProjectsSection() {
             <span className="selWorks__endCtaCat"> / archive</span>
           </span>
           <span className="selWorks__endCtaRole">
-            {total} projects, {SELECTED_PROJECTS.length} of them shown here
+            {PROJECTS.length - SELECTED_PROJECTS.length} more in the archive
           </span>
         </span>
         <span className="selWorks__endCtaIcon" aria-hidden>

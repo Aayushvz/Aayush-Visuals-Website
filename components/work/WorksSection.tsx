@@ -26,8 +26,8 @@ export default function WorksSection() {
         <div className="worksSection__intro" data-reveal>
           <span className="worksSection__meta">(2020-26)</span>
           <p className="worksSection__desc">
-            A selection of product, brand and website work across real launches,
-            crafted with intention and built for real users.
+            Every project, in one place. Product, brand and website work from
+            real launches.
           </p>
         </div>
       </header>

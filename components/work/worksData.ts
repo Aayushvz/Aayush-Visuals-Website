@@ -10,7 +10,7 @@ import { PROJECTS } from "@/components/projects/projectData";
 
 export const WORK_CATEGORIES = [
   "All",
-  "Case Study",
+  "Case Studies",
   "Product Design",
   "UI/UX",
   "Posters",
@@ -161,7 +161,7 @@ const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   title: p.title,
   year: p.year,
   categories: [
-    ...(isDeepDive(p) ? ["Case Study"] : []),
+    ...(isDeepDive(p) ? ["Case Studies"] : []),
     ...(TAXONOMY[p.id]?.categories ?? [p.category]),
   ],
   tags: TAXONOMY[p.id]?.tags ?? [],
@@ -221,7 +221,7 @@ const byOrder = (ids: readonly string[]) => (a: WorkItem, b: WorkItem) => {
    Case studies also appear in their own section below (see CASE_STUDIES).
    That repetition is deliberate: this grid answers "what has he made", the
    section below answers "what can I read in depth". Every deep dive carries
-   the "Case Study" chip so the filter can isolate them here too. */
+   the "Case Studies" chip so the filter can isolate them here too. */
 export const WORKS: WorkItem[] = PROJECTS.map(toWorkItem).sort(byOrder(PROJECT_ORDER));
 
 /* Long-form process work, listed in its own section below Projects.

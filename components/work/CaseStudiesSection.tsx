@@ -26,7 +26,7 @@ export default function CaseStudiesSection() {
             ({CASE_STUDIES.length.toString().padStart(2, "0")})
           </span>
           <p className="worksSection__desc">
-            The long version — research, the insights it earned, the system it
+            The long version - research, the insights it earned, the system it
             produced, and the screens it ended up as.
           </p>
         </div>

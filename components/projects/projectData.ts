@@ -782,7 +782,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/mike-tyson-poster.webp",
     },
     cta: "Visit Live Website",
-    role: "Design & Build",
+    role: "Designer & Developer",
     tools: ["Webflow", "Figma", "Motion"],
     /*
       The Smelting palette, straight off the design system.
@@ -1459,7 +1459,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/elevation-ai-cover.webp",
     },
     cta: "Visit Live Website",
-    role: "Website Development",
+    role: "Design Engineer",
     tools: ["Framer", "Figma", "AI"],
     description:
       "Elevation Capital had genuinely useful findings about how Indian startups are using AI, and a PDF almost nobody was going to finish. The report was rebuilt as a site where the numbers are the interface, so the research gets read instead of downloaded.",
@@ -1514,7 +1514,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/riviera-cover.webp",
     },
     cta: "Visit Live Website",
-    role: "Web Design",
+    role: "Web Designer",
     tools: ["Framer", "Figma", "Motion"],
     description:
       "Riviera is one of the largest student fests in the country, and its website has to do two things that pull against each other. It has to make the scale of a whole week land, and still let one student find the one event they actually came for.",
@@ -1558,7 +1558,7 @@ export const PROJECTS: Project[] = [
       "**A line that does real work.** *Wear The Legacy*, with heritage vocabulary running through the ad lines: heavy on heritage, legacy in layers, worn history.",
     ],
     kind: "case-study",
-    title: "Fuzion Brand Identity",
+    title: "Fuzion",
     logoText: "fuzion",
     category: "Branding",
     /* nothing in the exports evidences a year - confirm */
@@ -1574,7 +1574,7 @@ export const PROJECTS: Project[] = [
        authored: nothing renders them while this flag is set, and they come
        straight back if it is ever removed. */
     caseBoardOnly: true,
-    role: "Brand Identity",
+    role: "Brand Designer",
     tools: ["Figma", "Illustrator"],
     description:
       "Fuzion is a vintage-modern streetwear brand drawing on classic Americana, 90s hip-hop and old-school workwear. The identity puts that contradiction inside the wordmark itself - roman and italic in one word - and carries it out through Zodiak and Switzer, a four-value palette led by burnt sienna, and the line Wear The Legacy.",
@@ -1663,7 +1663,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/cpgrams/cover.webp",
     },
     cta: "Visit Live Chatbot",
-    role: "Product Design · Conversational UX",
+    role: "Product Designer · Conversational UX",
     tools: ["Figma", "Conversational UX", "Prototyping"],
     description:
       "CPGRAMS is how you complain to the Government of India: twenty lakh grievances a year, more than ninety ministries, and a fifteen-field form that in practice only works if you read English or Hindi. I designed the chatbot that sits on top of it, so you can say what went wrong in whichever of the 22 official languages you actually think in, and it files the grievance for you.",
@@ -3286,7 +3286,7 @@ export const PROJECTS: Project[] = [
     ],
     title: "Yantra",
     logoText: "Yantra",
-    category: "3d interactive website",
+    category: "3D Interactive Website",
     year: "2026",
     cover: "/projects/yantra-cover.webp",
     preview: {
@@ -3295,7 +3295,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/yantra-cover.webp",
     },
     cta: "Visit Live Website",
-    role: "Web Design",
+    role: "Web Designer",
     tools: ["3D", "Web Design"],
     description:
       "Yantra is a week of technical events, workshops and hackathons at VIT, and until this there was no single place to see what was on or sign up for any of it. A page that only lists things reads like a timetable, so the front door was built as a 3D environment you walk into instead.",
@@ -3369,7 +3369,7 @@ export const PROJECTS: Project[] = [
       ink: "#04122B",
       fill: "#006FFF",
     },
-    role: "Brand Identity",
+    role: "Brand Designer",
     tools: ["Figma", "Illustrator", "Photoshop"],
     description:
       "DropBy is for people who want to see other people without performing it: the app rewards you for showing up, not for posting. The old brand said none of that, so this rebuild takes the app's own radar ping and makes it the thing the whole identity is built out of.",
@@ -3683,7 +3683,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/futurepreneurs-cover.webp",
     },
     cta: "Visit Live Website",
-    role: "Web Design",
+    role: "Web Designer",
     tools: ["Framer", "Figma"],
     /* Figma frame 2008:331, exported whole at 2x and brought down to the
        1600px this project's other captures use. See
@@ -3919,7 +3919,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/posterfolio-cover.webp",
     },
     cta: "View on Behance",
-    role: "Graphic Design",
+    role: "Graphic Designer",
     tools: ["Photoshop", "Illustrator", "Figma"],
     description:
       "Forty-one posters on one canvas: startup teardowns, product launches, editorial covers, merch and title cards, every one of them 4:5. Holding the format still means nothing can be fixed by changing the shape of the page, which leaves composition, type and contrast as the only things there are to get right.",
@@ -4198,7 +4198,7 @@ export const PROJECTS: Project[] = [
     title: "Gravitas",
     logoText: "GRAVITAS·25",
     logoUrl: "/projects/gravitas-logo.webp",
-    category: "Website + Branding",
+    category: "Website Design",
     year: "2025",
     cover: "/projects/gravitas/cover.webp",
     preview: {
@@ -4227,7 +4227,7 @@ export const PROJECTS: Project[] = [
       fill: "#7FE3D4",
       fillInk: "#06231E",
     },
-    role: "Website Design",
+    role: "Web Designer",
     tools: ["Figma", "Illustrator"],
     description:
       "Gravitas is VIT Vellore's flagship techno-management fest, and its website is where thousands of students find and register for a catalogue of more than 200 events. The old one had grown into a wall of text that everybody saw the same way, so this is a rebuild around a retro-tech system that turns browsing into booking.",
@@ -4545,7 +4545,7 @@ export const PROJECTS: Project[] = [
       image: "/projects/meal-maestro/cover.webp",
     },
     cta: "View on Behance",
-    role: "UI design",
+    role: "UI Designer",
     tools: ["Figma"],
     description:
       "Meal Maestro is a meal-planning app built on the one thing twelve interviews kept saying: the hard part is not the cooking, it is the deciding. It takes what you like, what you avoid and what is already in your kitchen, and hands back a week of recipes with the single grocery list that covers all of them.",
@@ -4653,7 +4653,7 @@ export const PROJECTS: Project[] = [
       "**Six values, each carrying meaning.** Deep blue for wisdom, stability and trust; the orange, white and green of the tricolour beneath the open book for the national heritage; and a motto, *एकता विद्या शक्ति*, that the system is built to support rather than decorate.",
     ],
     kind: "case-study",
-    title: "Association of Indian Universities Branding",
+    title: "Association of Indian Universities",
     logoText: "AIU",
     category: "Branding",
     year: "2024",
@@ -4663,7 +4663,7 @@ export const PROJECTS: Project[] = [
       src: "/projects/aiu-cover.webp",
     },
     cta: "See the Identity",
-    role: "Brand Identity",
+    role: "Brand Designer",
     tools: ["Figma", "Illustrator"],
     description:
       "The Association of Indian Universities has been the central body bringing Indian universities together since 1925. This is a redesign of its seal: the same architecture and the same symbolism, given the weight to survive being a favicon as well as a stamp, with a stated minimum size and a six-value palette where every value means something.",
@@ -4738,7 +4738,7 @@ export const PROJECTS: Project[] = [
       src: "/projects/moon-store-cover.webp",
     },
     cta: "See the Screens",
-    role: "UI Design",
+    role: "UI Designer",
     tools: ["Figma"],
     description:
       "Moon Store is an online platform for high-end fashion aimed at a Gen-Z shopper: a lunar-inspired storefront where the homepage does the selling, seven category routes keep a wide catalogue navigable, and LunarLook lets a customer specify the fabric, quality and style of the garment before they buy it.",
@@ -4801,7 +4801,7 @@ export const PROJECTS: Project[] = [
       "**Proved as a solid before it was a lockup.** Drawn on a construction grid, then set on black, light grey, mid blue and the brand navy, so versatility was tested rather than assumed. The lockups came last.",
     ],
     kind: "case-study",
-    title: "IP-TT Cell Branding",
+    title: "IP-TT Cell",
     logoText: "IP&TT Cell",
     category: "Branding",
     year: "2024",
@@ -4811,7 +4811,7 @@ export const PROJECTS: Project[] = [
       src: "/projects/ip-tt-cell-cover.webp",
     },
     cta: "See the Identity",
-    role: "Brand Identity",
+    role: "Brand Designer",
     tools: ["Figma"],
     description:
       "VIT's Intellectual Property and Technology Transfer Cell protects what the university invents and gets it into industry. The identity is a single pillar built out of the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
@@ -4876,7 +4876,7 @@ export const PROJECTS: Project[] = [
       "**Commerce as a real flow, not a button.** Merch grid, product page with size and quantity, wishlist, bag, shipping address and four payment routes, all in the same dark.",
     ],
     kind: "case-study",
-    title: "Solo Leveling Website Design",
+    title: "Solo Leveling",
     logoText: "SOLO LEVELING",
     category: "UI Design",
     year: "2023",
@@ -4886,7 +4886,7 @@ export const PROJECTS: Project[] = [
       src: "/projects/solo-leveling-cover.webp",
     },
     cta: "See the Screens",
-    role: "UI Design",
+    role: "UI Designer",
     tools: ["Figma"],
     description:
       "A self-directed UI concept for the anime Solo Leveling: one site that carries the episodes, the manga, the news and the merch, with a video player, a full shop flow and a rating row that routes fans to where the series actually streams rather than pretending to host it.",
@@ -4950,7 +4950,7 @@ export const PROJECTS: Project[] = [
       "**The system is proved on the hardest surfaces, not the easiest.** Six ID card variants from Chief Patron to Volunteer, a gate taken from sketch to a built structure people walk through, certificates, merchandise, hoardings and brochures.",
     ],
     kind: "case-study",
-    title: "Gravitas Product Design and Event Branding",
+    title: "Gravitas Identity",
     logoText: "graVITas '25",
     category: "Branding",
     year: "2025",
@@ -5022,7 +5022,7 @@ export const PROJECTS: Project[] = [
       src: "/projects/posterfolio-vol2-cover.webp",
     },
     cta: "See the Volume",
-    role: "Poster Design",
+    role: "Graphic Designer",
     tools: ["Photoshop", "Illustrator", "Figma"],
     description:
       "A volume of six typographic posters on distance, silence and the kinds of hurt that do not announce themselves. Each one carries its own short piece of writing, and the whole set runs on one red, one near-black and a single grey.",
