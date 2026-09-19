@@ -2,7 +2,7 @@
 
 import PageLink from "@/components/PageLink";
 import { SELECTED_PROJECTS } from "./projectData";
-import { projectCursorProps } from "./ProjectCursor";
+import { workCursorProps } from "./ProjectCursor";
 import { saveOrigin } from "@/lib/navOrigin";
 import ProjectMedia from "./ProjectMedia";
 import ArrowUpRight from "./ArrowUpRight";
@@ -65,7 +65,9 @@ function Work({ index }: { index: number }) {
       /* remember this spot so the project's back control returns here,
          rather than to the top of /work */
       onClick={() => saveOrigin("/")}
-      {...projectCursorProps}
+      /* the cursor names what it is over; the caption is below the cover,
+         so a pointer on the artwork is not reading it */
+      {...workCursorProps(p.title, p.category)}
     >
       <div className="selWork__frame">
         <ProjectMedia

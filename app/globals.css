@@ -342,6 +342,110 @@ html.has-cursor .cursorRing {
   }
 }
 
+/* ---------- the reel's cursor: a named pill ----------
+
+   The homepage reel puts its caption below the cover, so a pointer
+   resting on the artwork is not reading the name. This pill carries it,
+   which is also why it is two lines where the generic one is a label:
+   the project, then the kind of work.
+
+   NO backdrop-filter, although the reference is glass. This element
+   translates every animation frame, often over an autoplaying WebM, and
+   a real backdrop blur re-samples what is behind it on each of those; the
+   site has been bitten by exactly that before (see the Statement tiles).
+   A dark translucent fill with a hairline edge and an inset top highlight
+   gets the same read for nothing. */
+.cursorRing__work {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: max-content;
+  max-width: 340px;
+  padding: 11px 24px 11px 20px;
+  border-radius: 999px;
+  background: rgba(26, 24, 30, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 34px rgba(10, 6, 20, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  white-space: nowrap;
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.32s var(--ease-quint), scale 0.32s var(--ease-quint);
+}
+
+.cursorRing__workArrow {
+  display: block;
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  color: #fff;
+}
+
+.cursorRing__workArrow svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.8;
+}
+
+.cursorRing__workText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cursorRing__workTitle {
+  font-family: var(--font-primary);
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cursorRing__workSub {
+  font-family: var(--font-primary);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.62);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cursorRing--work .cursorRing__work {
+  opacity: 1;
+  scale: 1;
+}
+
+/* the generic pill's nudge travels right; this arrow points up-right, so
+   its invitation goes the way it points */
+.cursorRing--work .cursorRing__workArrow {
+  animation: workArrowNudge 1.6s ease-in-out infinite;
+}
+
+@keyframes workArrowNudge {
+  0%,
+100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 2px -2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursorRing--work .cursorRing__workArrow {
+    animation: none;
+  }
+}
+
 /* ---------- side rails (light sections below the hero) ----------
 
    On the homepage they run to The Skills Deck and stop; everything from

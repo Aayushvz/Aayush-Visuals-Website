@@ -2,19 +2,32 @@
 
 import { useEffect, useRef } from "react";
 import { PROJECT_CURSOR_LABEL } from "./projects/ProjectCursor";
+import ArrowUpRight from "./projects/ArrowUpRight";
 
 /*
   Custom cursor for fine-pointer devices. A small pixel-art gem tracks the
   pointer 1:1 and is the only thing visible at rest. Disabled on touch
   devices and for reduced-motion users.
 
-  Its only special state: over a project tile the trailing ring morphs
-  into a "View Project" pill — the tile itself never shows a button, the
-  cursor carries the CTA.
+  Two special states, both hosted on the trailing ring, because the tile
+  itself never shows a button and the cursor carries the CTA:
+
+  - `project`, a cream pill reading "View project". The /work index and
+    the case-study pages use it, where the name is already on the page.
+  - `work`, the homepage reel's pill, which names the project it is over
+    and the kind of work it is. The reel's caption sits below the cover,
+    so a pointer resting on the artwork is not reading it.
+
+  The `work` pill's text is written straight to the DOM through refs
+  rather than through state. This runs on pointerover, which fires for
+  every element boundary the pointer crosses on the page; routing that
+  through React would re-render the whole cursor on each one.
 */
 export default function Cursor() {
   const dotRef = useRef<HTMLImageElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const subRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
@@ -61,9 +74,31 @@ export default function Cursor() {
       if (!raf) raf = requestAnimationFrame(loop);
     };
 
+    const title = titleRef.current;
+    const sub = subRef.current;
+    /* the last values written, so crossing between two elements inside the
+       same card does not rewrite identical text on every boundary */
+    let shownTitle = "";
+
     const onOver = (e: PointerEvent) => {
       const t = e.target as Element | null;
-      const project = !!t?.closest?.('[data-cursor="project"]');
+
+      const work = t?.closest?.("[data-cursor='work']") as HTMLElement | null;
+      if (work && title && sub) {
+        const nextTitle = work.dataset.cursorTitle ?? "";
+        if (nextTitle !== shownTitle) {
+          shownTitle = nextTitle;
+          title.textContent = nextTitle;
+          sub.textContent = work.dataset.cursorSub ?? "";
+        }
+      } else {
+        shownTitle = "";
+      }
+      ring.classList.toggle("cursorRing--work", !!work);
+
+      /* a card is never both, and checking work first means a reel tile
+         cannot also light the generic pill behind it */
+      const project = !work && !!t?.closest?.('[data-cursor="project"]');
       ring.classList.toggle("cursorRing--project", project);
     };
 
@@ -102,6 +137,18 @@ export default function Cursor() {
                 strokeLinejoin="round"
               />
             </svg>
+          </span>
+        </span>
+
+        {/* the reel's pill: arrow, then the project's name over its
+            category. Both lines are filled in by onOver. */}
+        <span className="cursorRing__work">
+          <span className="cursorRing__workArrow">
+            <ArrowUpRight />
+          </span>
+          <span className="cursorRing__workText">
+            <span className="cursorRing__workTitle" ref={titleRef} />
+            <span className="cursorRing__workSub" ref={subRef} />
           </span>
         </span>
       </div>

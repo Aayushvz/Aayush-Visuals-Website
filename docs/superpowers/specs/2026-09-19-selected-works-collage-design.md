@@ -147,6 +147,41 @@ The lesson is the same in both directions. A control needs an edge you can
 point at, and that edge has to be close to the label rather than at the far
 side of the page. Width should come from the content, not from the container.
 
+## Cursor
+
+The reel's tiles get their own cursor variant, `data-cursor="work"`, instead
+of the site-wide `data-cursor="project"` that the `/work` index and the
+case-study pages keep. The generic one is a cream pill reading "View
+project", which is the right label where the name is already on the page.
+It is not right here: the reel puts its caption *below* the cover, so a
+pointer resting on the artwork is not reading the name. The reel's pill
+carries it, over two lines, project then category.
+
+`components/projects/ProjectCursor.tsx` exports `workCursorProps(title,
+category)`, which writes the values onto the element as data attributes. The
+cursor reads them on `pointerover` rather than looking anything up, because
+the cursor has no idea which project it is over and should not have to learn
+the data layer to find out. `Cursor.tsx` writes the two strings straight to
+the DOM through refs: `pointerover` fires for every element boundary the
+pointer crosses anywhere on the page, and routing that through React state
+would re-render the cursor on each one. It also caches the last title
+written, so crossing between the frame and the caption inside one card does
+not rewrite identical text.
+
+The work check runs before the project check, so a reel tile can never light
+both pills. On exit the class comes off but the text stays: clearing it
+would blank the pill mid-fade, and it is already invisible.
+
+**No `backdrop-filter`, although the reference is glass.** This element
+translates every animation frame, frequently over an autoplaying WebM, and a
+real backdrop blur re-samples what is behind it on each of those. This repo
+has been bitten by that before (the Statement tool tiles, where it hung
+screenshot capture outright). A dark translucent fill with a hairline edge
+and an inset top highlight reads the same for nothing.
+
+Measured: 233x58px, 999px radius, `rgba(26,24,30,0.66)` fill, white 600 title
+at 14.5px over a `rgba(255,255,255,0.62)` 500 subtitle at 12.5px.
+
 ## Touch
 
 The badge lives in `@media (hover: hover)`, so on a phone it would never
