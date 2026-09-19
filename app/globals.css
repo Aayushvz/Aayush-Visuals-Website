@@ -259,17 +259,61 @@ html.has-cursor .cursorRing {
   display: block;
 }
 
-/* pixel-art gem — crisp blocky edges scaled up from a 16x16 source, with a
-   soft dark drop-shadow so it still reads against similarly-hued sections
-   (e.g. the purple footer) without needing mix-blend-mode tricks */
+/* Pixel-art arrow at rest, pointing hand while pressed.
+
+   .cursorDot is a zero-size point sitting exactly on the pointer; the two
+   artworks hang off it, each offset by its OWN hotspot. --cur-s is a
+   single scale for both, so they stay the same size relative to each
+   other and the offsets stay exact at whatever size they are drawn.
+
+   The offsets are measured, not eyeballed: the arrow's tip is at (1, 1)
+   of its 67x103 artboard, and the hand's fingertip is at (31.6, 1) of its
+   89x114 one, roughly a third of the way across. Give them a shared
+   offset and the cursor visibly jumps sideways on every click. */
 .cursorDot {
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
+  --cur-s: 0.4;
+  width: 0;
+  height: 0;
+}
+
+.cursorDot__art {
+  position: absolute;
+  display: block;
+  /* the artwork is pixel art; let it stay blocky rather than be smoothed
+     back into mush when the browser scales it */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  /* a soft dark shadow so it reads against similarly-hued sections (the
+     purple footer, the dark statement) without mix-blend-mode tricks */
   filter: drop-shadow(0 2px 3px rgba(20, 10, 40, 0.45));
   user-select: none;
+}
+
+/* tip at (1, 1) of 67x103 */
+.cursorDot__arrow {
+  width: calc(67px * var(--cur-s));
+  height: calc(103px * var(--cur-s));
+  left: calc(-1px * var(--cur-s));
+  top: calc(-1px * var(--cur-s));
+}
+
+/* fingertip at (31.6, 1) of 89x114 */
+.cursorDot__hand {
+  width: calc(89px * var(--cur-s));
+  height: calc(114px * var(--cur-s));
+  left: calc(-31.6px * var(--cur-s));
+  top: calc(-1px * var(--cur-s));
+  opacity: 0;
+}
+
+/* No transition on the swap. A press is instantaneous and the cursor
+   should say so; crossfading two arrows just looks like a dropped frame. */
+.cursorDot--down .cursorDot__arrow {
+  opacity: 0;
+}
+
+.cursorDot--down .cursorDot__hand {
+  opacity: 1;
 }
 
 .cursorRing {

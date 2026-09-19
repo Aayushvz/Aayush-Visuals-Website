@@ -5,9 +5,20 @@ import { PROJECT_CURSOR_LABEL } from "./projects/ProjectCursor";
 import ArrowUpRight from "./projects/ArrowUpRight";
 
 /*
-  Custom cursor for fine-pointer devices. A small pixel-art gem tracks the
-  pointer 1:1 and is the only thing visible at rest. Disabled on touch
-  devices and for reduced-motion users.
+  Custom cursor for fine-pointer devices. A pixel-art arrow tracks the
+  pointer 1:1 and is the only thing visible at rest; pressing swaps it for
+  a pointing hand. Disabled on touch devices and for reduced-motion users.
+
+  BOTH ARTWORKS ARE ALWAYS IN THE DOM, swapped by opacity rather than by
+  rewriting src. Swapping src would ask the browser for a file on the
+  first click of a session, and a cursor that blinks out for a frame on
+  mousedown is worse than no swap at all.
+
+  They do not share a hotspot. The arrow points from its own top-left
+  corner, but the hand points from its fingertip, which sits about a third
+  of the way across its artboard. Each is therefore offset by its own
+  measured hotspot in CSS, so the two land on the same pixel and pressing
+  does not make the cursor jump sideways.
 
   Two special states, both hosted on the trailing ring, because the tile
   itself never shows a button and the cursor carries the CTA:
@@ -24,7 +35,7 @@ import ArrowUpRight from "./projects/ArrowUpRight";
   through React would re-render the whole cursor on each one.
 */
 export default function Cursor() {
-  const dotRef = useRef<HTMLImageElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
   const subRef = useRef<HTMLSpanElement>(null);
@@ -102,28 +113,53 @@ export default function Cursor() {
       ring.classList.toggle("cursorRing--project", project);
     };
 
+    const down = () => dot.classList.add("cursorDot--down");
+    /* pointercancel as well as pointerup: a press that turns into a drag
+       the browser takes over, or a touch that becomes a scroll, never
+       sends pointerup, and the hand would stay stuck down. blur covers
+       releasing the button after alt-tabbing away. */
+    const up = () => dot.classList.remove("cursorDot--down");
+
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerover", onOver, { passive: true });
+    window.addEventListener("pointerdown", down, { passive: true });
+    window.addEventListener("pointerup", up, { passive: true });
+    window.addEventListener("pointercancel", up, { passive: true });
+    window.addEventListener("blur", up);
     wake();
 
     return () => {
       document.documentElement.classList.remove("has-cursor");
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerover", onOver);
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      window.removeEventListener("blur", up);
       cancelAnimationFrame(raf);
     };
   }, []);
 
   return (
     <div aria-hidden>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        ref={dotRef}
-        className="cursorDot"
-        src="/cursor-gem-16.png"
-        alt=""
-        draggable={false}
-      />
+      {/* the wrapper is the hotspot itself, a zero-size point at the
+          pointer; each artwork hangs off it by its own offset */}
+      <div ref={dotRef} className="cursorDot">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="cursorDot__art cursorDot__arrow"
+          src="/cursor-pointer.svg"
+          alt=""
+          draggable={false}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="cursorDot__art cursorDot__hand"
+          src="/cursor-click.svg"
+          alt=""
+          draggable={false}
+        />
+      </div>
       <div ref={ringRef} className="cursorRing">
         <span className="cursorRing__cta">
           <span className="cursorRing__ctaText">{PROJECT_CURSOR_LABEL}</span>
