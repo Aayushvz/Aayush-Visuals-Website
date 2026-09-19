@@ -209,9 +209,10 @@ Use it for the single most important action in a section. Props: `href`,
 a route change plays the page-transition wipe; omit for in-page hashes).
 
 Do not reach for it twice in one view. Selected Works deliberately pairs it
-with `.selWorks__endCta`, which is a ledger row belonging to the project reel
-rather than a button — two primary buttons there would flatten the section's
-hierarchy.
+with `.selWorks__endCta`, which is an outlined panel belonging to the project
+reel rather than a button. It takes the cards' own radius and badge, sits
+flat until hover, and only then fills. Two primary buttons there would
+flatten the section's hierarchy.
 
 ---
 

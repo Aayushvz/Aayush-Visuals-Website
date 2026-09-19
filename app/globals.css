@@ -3589,32 +3589,46 @@ html.has-cursor .cursorRing {
 
 /* ---------- projects ---------- */
 
-/* the section sits at the rail inset (not the deeper content inset) so
-   .projGrid's edges can land exactly on the rulers with zero gap; the
-   header text gets its own extra inset to stay visually centred */
 /* ============================================================
-   Selected works — numbered rows, alternating full-width + pairs
+   Selected works: a staggered collage
+
+   Two cards to a row, top-aligned, every frame 3:2, and a column split
+   that alternates 1.52fr/1fr then 1fr/1.52fr. One ratio over two unequal
+   widths is the whole mechanic: the wide card resolves taller than the
+   narrow one beside it, so no two captions in a row land on the same
+   baseline. Nothing is hand-offset, and reordering the reel cannot break
+   the rhythm, because the rhythm belongs to the rows rather than to the
+   projects sitting in them.
+
+   The shorter card in a row leaves cream beneath its caption. That gap is
+   the point. Closing it would be masonry, and masonry puts the two
+   columns on separate clocks: rows stop existing, and the eye loses the
+   pairing that makes the offset read as deliberate.
    ============================================================ */
 .selWorks {
+  --selw-gap: clamp(16px, 1.6vw, 26px);
+  --selw-rowGap: clamp(38px, 5.5vw, 96px);
+  --selw-radius: clamp(10px, 0.9vw, 16px);
+  --selw-line: rgba(31, 31, 31, 0.16);
+  /* wide slot first; .selWorks__row--flip swaps it */
+  --selw-split: 1.52fr 1fr;
   background: var(--cream);
   padding: 13vh var(--page-rail-inset) 9vh;
 }
 
-/* the projects sit just inside the fixed global side rails so the rails
-   frame them (rail = --page-rail-inset; this small gap keeps images off
-   the line) — "connected to the side rulers" */
-.selWorks {
-  --selw-gap: clamp(14px, 2vw, 34px);
-  --selw-line: rgba(31, 31, 31, 0.16);
-}
-
+/*
+  The header used to sit at the deeper content inset while the reel sat at
+  the rail inset. That only read as intentional while full-width hairlines
+  spanned the frame behind it: rules out to the rail, text in to the
+  content column. The rules are gone, so the indent has nothing left to
+  explain it and the header now starts on the cards' own left edge.
+*/
 .selWorks__head {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: clamp(24px, 5vw, 80px);
-  padding: 0 calc(var(--page-content-inset) - var(--page-rail-inset));
-  margin-bottom: clamp(28px, 4vh, 48px);
+  margin-bottom: clamp(40px, 6vh, 76px);
 }
 
 .selWorks__title {
@@ -3628,7 +3642,7 @@ html.has-cursor .cursorRing {
   text-transform: none;
 }
 
-/* small highlighted sticker sitting beside "works" */
+/* small highlighted sticker sitting beside "Projects" */
 .selWorks__tag {
   display: inline-block;
   margin-left: 0.5em;
@@ -3645,37 +3659,11 @@ html.has-cursor .cursorRing {
   vertical-align: middle;
 }
 
-.selWorks__arrow {
-  display: inline-flex;
-  margin-top: clamp(24px, 3vh, 40px);
-  color: var(--ink);
-}
-.selWorks__arrow svg {
-  width: 30px;
-  height: 30px;
-}
-
 .selWorks__headRight {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: clamp(28px, 5vh, 64px);
-  padding-top: 10px;
-}
-
-.selWorks__count {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(15px, 1.4vw, 19px);
-  letter-spacing: 0.06em;
-  color: var(--ink);
-}
-.selWorks__count svg {
-  width: 22px;
-  height: 22px;
-  color: var(--purple);
+  gap: clamp(16px, 2.4vh, 26px);
 }
 
 .selWorks__note {
@@ -3683,65 +3671,35 @@ html.has-cursor .cursorRing {
   text-align: right;
   font-size: 13.5px;
   line-height: 1.6;
-  color: rgba(31, 31, 31, 0.5);
+  /* was 0.5, which measures 3.23:1 on the cream, and this is text */
+  color: rgba(31, 31, 31, 0.62);
   margin: 0;
-}
-
-/* full-width divider under the header, edge to edge with the list */
-/* top ruler line of the grid (full width, meets the side rails) */
-.selWorks__divider {
-  height: 1px;
-  margin: 0;
-  background: var(--selw-line);
 }
 
 .selWorks__list {
   display: flex;
   flex-direction: column;
-  padding: 0;
-}
-
-/* each project row is a ruled cell: a bottom line, and content padded off
-   the lines. Pair rows split into two cells with a centre divider that
-   runs the full row height. */
-.selWorks__row {
-  border-bottom: 1px solid var(--selw-line);
-  padding-block: clamp(40px, 6vh, 78px);
-}
-
-.selWorks__row--full > .selWork {
-  padding-inline: var(--selw-gap);
+  gap: var(--selw-rowGap);
 }
 
 .selWorks__row--pair {
-  position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: var(--selw-split);
+  gap: var(--selw-gap);
+  /* top-aligned, so the height difference falls out of the bottom of the
+     row where it is visible, rather than being split above and below */
+  align-items: start;
 }
 
-.selWorks__row--pair::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1px;
-  background: var(--selw-line);
+/* every other pair leads with the narrow slot */
+.selWorks__row--flip {
+  --selw-split: 1fr 1.52fr;
 }
 
-.selWorks__row--pair > .selWork:first-child {
-  padding-left: var(--selw-gap);
-  padding-right: clamp(22px, 2.6vw, 52px);
-}
-
-.selWorks__row--pair > .selWork:last-child {
-  padding-left: clamp(22px, 2.6vw, 52px);
-  padding-right: var(--selw-gap);
-}
-
-/* -------- a single work: flat, square-cornered image + quiet caption -------- */
+/* -------- a single work -------- */
 .selWork {
   display: block;
+  text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -3749,8 +3707,16 @@ html.has-cursor .cursorRing {
 .selWork__frame {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
+  border-radius: var(--selw-radius);
+  aspect-ratio: 3 / 2;
   background: #e7e1d7;
+}
+
+/* The opener is alone on its row, and it runs 16/9 rather than the reel's
+   3/2: three-by-two across the full content width is over 850px tall,
+   which is a section, not a card. */
+.selWorks__row--solo .selWork__frame {
+  aspect-ratio: 16 / 9;
 }
 
 .selWork__img {
@@ -3762,108 +3728,157 @@ html.has-cursor .cursorRing {
   will-change: transform;
 }
 
-.selWork:hover .selWork__img,
-.selWork:focus-visible .selWork__img {
-  transform: scale(1.04);
+/*
+  The badge is permanent, not a hover reveal.
+
+  The global cursor (components/Cursor.tsx) already morphs into a "View
+  project" pill over these tiles, so a badge that faded in on hover would
+  announce the same thing twice, a beat apart. Standing there instead, it
+  is the card's corner furniture, and it spends its hover state resolving
+  rather than arriving.
+
+  It is a filled cream disc rather than the hairline ring the rest of the
+  site reaches for, because it sits on arbitrary photography: an outline in
+  ink vanishes on a dark cover and an outline in white vanishes on a pale
+  one. A disc is legible over every cover in the reel, and over whichever
+  covers replace them.
+*/
+.selWork__badge {
+  position: absolute;
+  top: clamp(11px, 1.1vw, 20px);
+  right: clamp(11px, 1.1vw, 20px);
+  display: grid;
+  place-items: center;
+  width: clamp(38px, 3.4vw, 58px);
+  height: clamp(38px, 3.4vw, 58px);
+  border-radius: 50%;
+  border: 1px solid rgba(31, 31, 31, 0.1);
+  background: var(--cream);
+  color: var(--ink);
+  transition: background-color 0.32s var(--ease-quint),
+    border-color 0.32s var(--ease-quint), color 0.32s var(--ease-quint);
 }
 
+.selWork__badge svg {
+  width: 42%;
+  height: 42%;
+  transition: transform 0.42s var(--ease-quint);
+}
+
+/*
+  One line under the card: name at the left edge, category and year at the
+  right edge of the frame above it.
+
+  The reel used to caption in three columns: year, name and category, then
+  an oversized 01-07 numeral. The numerals counted ruled rows that no
+  longer exist, and the year had nothing to do parked in a left gutter, so
+  it moved to the end of the line as a copyright mark.
+*/
+.selWork__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: clamp(14px, 2vw, 34px);
+  margin-top: clamp(13px, 1.1vw, 19px);
+}
+
+.selWork__name {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(14px, 1.25vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--ink);
+  transition: color 0.25s ease-out;
+}
+
+.selWork__tail {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: clamp(10px, 1.1vw, 20px);
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: clamp(11px, 0.92vw, 13.5px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+.selWork__cat {
+  /* 0.66 and not lower: this is text on the cream, and 0.5 measures 3.23:1 */
+  color: rgba(31, 31, 31, 0.66);
+}
+
+/* The reference sets its year in the accent, at the name's own weight.
+   Full ink does that job here without putting a second colour on the
+   line, and still sets the year a step above the category beside it. */
+.selWork__year {
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .selWork:hover .selWork__img {
+    transform: scale(1.04);
+  }
+  .selWork:hover .selWork__name {
+    color: var(--purple);
+  }
+  .selWork:hover .selWork__badge {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+  }
+  .selWork:hover .selWork__badge svg {
+    transform: translate(3px, -3px);
+  }
+}
+
+/* The keyboard gets the pointer's whole resolution, plus a ring the
+   pointer has no use for. Deliberately outside the hover query: a
+   touch-screen laptop with a keyboard matches neither `hover: hover` nor
+   the assumption that focus is a mouse. */
+.selWork:focus-visible {
+  outline: none;
+}
 .selWork:focus-visible .selWork__frame {
   outline: 2px solid var(--purple);
   outline-offset: 3px;
 }
-
-/* ledger caption row: [YEAR]  [NAME / CATEGORY + platform]  [NUMBER],
-   spanning the full column so year sits by the left rail, number by the
-   right — all in mono, matching the reference */
-.selWork__meta {
-  display: flex;
-  align-items: flex-start;
-  gap: clamp(18px, 4vw, 64px);
-  margin-top: clamp(16px, 1.5vw, 22px);
-  padding-bottom: clamp(20px, 3vw, 41px);
+.selWork:focus-visible .selWork__img {
+  transform: scale(1.04);
+}
+.selWork:focus-visible .selWork__name {
+  color: var(--purple);
+}
+.selWork:focus-visible .selWork__badge {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #fff;
+}
+.selWork:focus-visible .selWork__badge svg {
+  transform: translate(3px, -3px);
 }
 
-.selWork__year {
-  flex: 0 0 auto;
-  padding-top: 3px;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11px, 0.95vw, 13px);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(31, 31, 31, 0.55);
-}
+/* -------- closing CTA: the reel's last panel --------
 
-.selWork__info {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding-top: 1px;
-}
+   Geometry comes from the collage rather than from the ledger it used to
+   close: full width at the cards' own radius, ending on the same badge the
+   cards carry in their corners.
 
-/* NAME bold, "/ category" regular — mono uppercase */
-.selWork__name {
-  margin: 0;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(12.5px, 1.05vw, 15px);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1.25;
-  color: var(--ink);
-}
-
-.selWork__cat {
-  font-weight: 400;
-  /* was 0.5, 3.23:1 on the cream, and this is text */
-  color: rgba(31, 31, 31, 0.66);
-}
-
-/* platform/domain subline — mono, mixed case, muted */
-.selWork__role {
-  display: block;
-  margin-top: 6px;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11px, 0.9vw, 13px);
-  letter-spacing: 0.01em;
-  /* was 0.42, 2.58:1 on the cream, and this is text */
-  color: rgba(31, 31, 31, 0.66);
-}
-
-/* big thin index numeral (reference weight), no hover */
-.selWork__index {
-  flex: 0 0 auto;
-  margin-left: auto;
-  font-size: clamp(48px, 6.2vw, 108px);
-  font-weight: 400;
-  line-height: 0.7;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-}
-
-.selWorks__row--pair .selWork__index {
-  font-size: clamp(38px, 4.6vw, 70px);
-}
-
-/* -------- the section's two calls to action --------
-
-   Both go to /work, and they are deliberately different objects. The header
-   one is now the site's primary button (.extCta, shared with the case-study
-   pages) — the one solid, heavy thing in a section of ruled hairlines, which
-   is what makes it read as the action. The closing one is a full ledger row
-   (see below) that belongs to the reel rather than to the button system. */
-
-/* -------- closing CTA: the ledger's last line --------
-
-   Geometry is deliberately identical to .selWork__meta so this lands on the
-   same columns as the seven rows above it: year slot left, name and subline
-   in the middle, oversized numeral slot right. The numeral slot holds an
-   arrow instead, which is the whole idea — after counting 01 to 07 the
-   column resolves into a direction. */
+   Still not a second .extCta. The header owns the one primary button in
+   this view (DESIGN.md §7), so this is an outlined panel at rest and only
+   fills on hover, the same event arriving as a surface instead of as a
+   shape that was already solid. */
 .selWorks__endCta {
   display: flex;
-  align-items: flex-start;
-  gap: clamp(18px, 4vw, 64px);
-  padding: clamp(34px, 5vh, 64px) var(--selw-gap) clamp(34px, 5vh, 64px);
-  border-bottom: 1px solid var(--selw-line);
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 40px);
+  margin-top: var(--selw-rowGap);
+  padding: clamp(24px, 3vw, 40px) clamp(20px, 2.2vw, 34px);
+  border: 1px solid var(--selw-line);
+  border-radius: var(--selw-radius);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   /* the fill is the event, so it gets the longer, softer curve and the
@@ -3872,114 +3887,97 @@ html.has-cursor .cursorRing {
     border-color 0.3s ease-out;
 }
 
-.selWorks__endCtaYear {
-  flex: 0 0 auto;
-  /* The name column is not a fixed column: it starts wherever this slot
-     ends, plus the flex gap. Every row above holds a four-digit year, so
-     they all line up by coincidence of width. "All" is three characters and
-     would pull the name 7px left of the seven rows above it. The type here
-     is monospace, so a year is exactly four character widths plus the
-     tracking that follows each of them. */
-  min-width: calc(4ch + 4 * 0.08em);
-  padding-top: 3px;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11px, 0.95vw, 13px);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(31, 31, 31, 0.55);
-  transition: color 0.25s ease-out;
-}
-
-.selWorks__endCtaInfo {
+/* one row on the desktop line, a stack once the panel narrows */
+.selWorks__endCtaText {
   flex: 1 1 auto;
   min-width: 0;
-  padding-top: 1px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: clamp(14px, 2vw, 34px);
 }
 
-/* set a step above the rows' captions: this is the line that ends the
+/* set a step above the cards' captions: this is the line that ends the
    section, so it carries more weight than the seven it closes */
 .selWorks__endCtaName {
-  display: block;
   font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
   font-size: clamp(15px, 1.5vw, 21px);
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1.15;
   color: var(--ink);
   transition: color 0.25s ease-out;
 }
 
-.selWorks__endCtaCat {
-  font-weight: 400;
-  color: rgba(31, 31, 31, 0.5);
-  transition: color 0.25s ease-out;
-}
-
-.selWorks__endCtaRole {
-  display: block;
-  margin-top: 8px;
+/* lands on the cards' own right-hand slot, where their category and year
+   sit, so the panel reads as one more caption line */
+.selWorks__endCtaNote {
+  flex: 0 0 auto;
   font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11.5px, 0.95vw, 13.5px);
-  letter-spacing: 0.01em;
-  /* was 0.42, 2.58:1 on the cream, and this is text */
+  font-size: clamp(11px, 0.92vw, 13.5px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.15;
   color: rgba(31, 31, 31, 0.66);
   transition: color 0.25s ease-out;
 }
 
-/* sized off .selWork__index so the arrow occupies exactly the footprint the
-   numerals did, and the right-hand column stays a straight edge */
+/* the cards' badge, at the end of a line instead of in a corner. Same
+   size, same glyph, so the two resolve as one object */
 .selWorks__endCtaIcon {
   flex: 0 0 auto;
-  margin-left: auto;
-  display: inline-flex;
-  width: clamp(48px, 6.2vw, 108px);
-  height: clamp(48px, 6.2vw, 108px);
+  display: grid;
+  place-items: center;
+  width: clamp(38px, 3.4vw, 58px);
+  height: clamp(38px, 3.4vw, 58px);
+  border-radius: 50%;
+  border: 1px solid var(--selw-line);
   color: var(--ink);
+  transition: background-color 0.32s var(--ease-quint),
+    border-color 0.32s var(--ease-quint), color 0.32s var(--ease-quint);
 }
+
 .selWorks__endCtaIcon svg {
-  width: 100%;
-  height: 100%;
-  stroke-width: 1.25;
-  transition: transform 0.45s var(--ease-quint),
-    color 0.25s ease-out;
+  width: 42%;
+  height: 42%;
+  transition: transform 0.42s var(--ease-quint);
 }
 
 /*
-  The whole cell fills. Every piece of text inside it is on its own muted
-  step of the ink — 100%, 50%, 42% — and each of those is a ratio against
-  cream, not against purple. So they all resolve to white rather than being
-  left to sit at whatever they happened to be: the subline in particular
-  would be near-invisible carried unchanged onto a saturated fill.
+  The whole panel fills, and the badge inverts inside it: on the cards the
+  disc is cream on photography, so on a purple panel it is cream on purple,
+  which is the same relationship and not a new one.
+
+  Each piece of text is on its own step of the ink (100%, then 66%), and
+  both of those are ratios against cream, not against purple. So they
+  resolve out of white rather than being carried across unchanged; the note
+  in particular would be near-invisible left as it was on a saturated fill.
 */
-@media (hover: hover) {
-  .selWorks__endCta:hover,
+.selWorks__endCta:hover,
 .selWorks__endCta:focus-visible {
-    background: var(--purple);
-    border-bottom-color: var(--purple);
-  }
-  .selWorks__endCta:hover .selWorks__endCtaName,
-.selWorks__endCta:focus-visible .selWorks__endCtaName,
+  background: var(--purple);
+  border-color: var(--purple);
+}
+.selWorks__endCta:hover .selWorks__endCtaName,
+.selWorks__endCta:focus-visible .selWorks__endCtaName {
+  color: #fff;
+}
+/* 85% and not lower: on this purple that is 4.54:1, which clears the 4.5
+   bar. 78% looked right but measured 4.08:1. */
+.selWorks__endCta:hover .selWorks__endCtaNote,
+.selWorks__endCta:focus-visible .selWorks__endCtaNote {
+  color: rgba(255, 255, 255, 0.85);
+}
 .selWorks__endCta:hover .selWorks__endCtaIcon,
 .selWorks__endCta:focus-visible .selWorks__endCtaIcon {
-    color: #fff;
-  }
-  /* the year slot and the "/ archive" qualifier keep their step down in
-     emphasis, they just take it out of white instead of out of the ink */
-  .selWorks__endCta:hover .selWorks__endCtaYear,
-.selWorks__endCta:focus-visible .selWorks__endCtaYear,
-.selWorks__endCta:hover .selWorks__endCtaCat,
-.selWorks__endCta:focus-visible .selWorks__endCtaCat,
-.selWorks__endCta:hover .selWorks__endCtaRole,
-.selWorks__endCta:focus-visible .selWorks__endCtaRole {
-    /* 85% and not lower: on this purple that is 4.54:1, which clears the
-       4.5 bar. 78% looked right but measured 4.08:1. */
-    color: rgba(255, 255, 255, 0.85);
-  }
-  .selWorks__endCta:hover .selWorks__endCtaIcon svg,
+  background: var(--cream);
+  border-color: var(--cream);
+  color: var(--purple);
+}
+.selWorks__endCta:hover .selWorks__endCtaIcon svg,
 .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
-    transform: translate(6px, -6px);
-  }
+  transform: translate(3px, -3px);
 }
 
 .selWorks__endCta:focus-visible {
@@ -3987,24 +3985,45 @@ html.has-cursor .cursorRing {
   outline-offset: 3px;
 }
 
+/* Every hover here resolves as colour as well as travel, so taking the
+   travel away still leaves the state legible. */
 @media (prefers-reduced-motion: reduce) {
-  /* the hover still resolves, it just resolves as colour rather than travel */
+  .selWork__img,
+  .selWork__badge svg,
   .selWorks__endCtaIcon svg {
-    transition: color 0.25s ease-out;
+    transition: none;
   }
+  .selWork:hover .selWork__img,
+  .selWork:focus-visible .selWork__img,
+  .selWork:hover .selWork__badge svg,
+  .selWork:focus-visible .selWork__badge svg,
   .selWorks__endCta:hover .selWorks__endCtaIcon svg,
-.selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
+  .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
     transform: none;
   }
 }
 
+/* The narrow slot stops being a card and starts being a thumbnail before
+   the layout is anywhere near collapsing, so the split eases toward parity
+   on the way down rather than holding 1.52 until it breaks. */
+@media (max-width: 1080px) {
+  .selWorks {
+    --selw-split: 1.24fr 1fr;
+  }
+  .selWorks__row--flip {
+    --selw-split: 1fr 1.24fr;
+  }
+}
+
 @media (max-width: 760px) {
+  .selWorks {
+    --selw-rowGap: clamp(30px, 8vw, 46px);
+  }
   .selWorks__head {
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
-    margin-bottom: 24px;
-    padding: 0 10px;
+    margin-bottom: 26px;
   }
   .selWorks__headRight {
     align-items: flex-start;
@@ -4015,57 +4034,33 @@ html.has-cursor .cursorRing {
     text-align: left;
     max-width: 100%;
   }
-  .selWorks__arrow {
-    display: none;
-  }
-  /* pairs stack; the centre divider becomes a line between the two */
-  .selWorks__row--pair {
+  /* One column, so there is no wide slot to be wide against and every card
+     takes the reel's ratio, including the opener, which is first here
+     rather than large. */
+  .selWorks__row--pair,
+  .selWorks__row--flip {
     grid-template-columns: 1fr;
+    gap: var(--selw-rowGap);
   }
-  .selWorks__row--pair::after {
-    display: none;
+  .selWorks__row--solo .selWork__frame {
+    aspect-ratio: 3 / 2;
   }
-  .selWorks__row {
-    border-bottom: none;
-    padding-block: clamp(10px, 2vh, 16px);
-  }
-  .selWorks__row--full > .selWork,
-.selWorks__row--pair > .selWork,
-.selWorks__row--pair > .selWork:first-child,
-.selWorks__row--pair > .selWork:last-child {
-    padding-inline: 0;
-  }
-  .selWork__meta {
-    padding-inline: var(--selw-gap);
-  }
-  .selWork__year {
-    display: none;
-  }
-  .selWorks__row--pair > .selWork:first-child {
-    padding-bottom: clamp(10px, 2vh, 16px);
-    margin-bottom: 0;
-    border-bottom: none;
-  }
-  /* the year column is hidden on the rows above, so it goes here too or the
-     closing line would sit on columns the rest of the ledger no longer has */
-  .selWorks__endCtaYear {
-    display: none;
-  }
-  /* rows drop their rules at this width; this one follows, and keeps a
-     single hairline above instead so it still reads as a separate line */
   .selWorks__endCta {
-    border-bottom: none;
-    border-top: 1px solid var(--selw-line);
-    margin-top: clamp(14px, 3vh, 24px);
-    padding-block: clamp(26px, 4vh, 38px);
-    align-items: center;
+    gap: 16px;
+    padding: 22px 18px;
   }
-  .selWorks__endCtaIcon {
-    width: clamp(34px, 11vw, 52px);
-    height: clamp(34px, 11vw, 52px);
+  /* the name and the note stop competing for one line and stack, which is
+     also how the cards' captions would go if they had two things to say */
+  .selWorks__endCtaText {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
   }
 }
 
+/* the section sits at the rail inset (not the deeper content inset) so
+   .projGrid's edges can land exactly on the rulers with zero gap; the
+   header text gets its own extra inset to stay visually centred */
 .projects {
   padding: 14vh var(--page-rail-inset) 9vh;
 }

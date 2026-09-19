@@ -2,26 +2,8 @@ import SelectedWorks from "./projects/SelectedWorks";
 import PrefetchWorkMedia from "./projects/PrefetchWorkMedia";
 import PageLink from "./PageLink";
 import ExtCta from "./ExtCta";
+import ArrowUpRight from "./projects/ArrowUpRight";
 import { PROJECTS, SELECTED_PROJECTS } from "./projects/projectData";
-
-/* the closing ledger row's arrow — it resolves the 01-07 numeral column, so
-   it stays a plain glyph rather than the primary button's dot matrix */
-function ArrowUpRight() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M7 17 17 7" />
-      <path d="M8 7h9v9" />
-    </svg>
-  );
-}
 
 export default function ProjectsSection() {
   /*
@@ -29,7 +11,7 @@ export default function ProjectsSection() {
 
     One project ships a looping WebM (~0.5MB) that outweighs every static
     cover in this section by roughly ten times. It happens to open the reel
-    again right now, so "first" and "heaviest" point at the same tile — but
+    again right now, so "first" and "heaviest" point at the same tile, but
     that is a property of the current running order, not something to rely
     on. An earlier order had them apart, and picking by position then warmed
     a 56KB cover while the heavy one popped in late, which is the exact
@@ -39,68 +21,45 @@ export default function ProjectsSection() {
   const heaviest = SELECTED_PROJECTS.find((p) => p.bgVideoUrl);
   const firstMedia = heaviest?.bgVideoUrl ?? SELECTED_PROJECTS[0].cover;
 
-  /* both counts are derived, so neither can quietly go stale the next time
+  /* both numbers are derived, so neither can quietly go stale the next time
      a project is added or the reel is reordered */
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const shown = pad(SELECTED_PROJECTS.length);
-  const total = pad(PROJECTS.length);
+  const total = String(PROJECTS.length).padStart(2, "0");
+  const archived = PROJECTS.length - SELECTED_PROJECTS.length;
 
   return (
     <section className="selWorks" id="work">
       <PrefetchWorkMedia src={firstMedia} />
       <div className="selWorks__head">
-        <div className="selWorks__headLeft">
-          <h2 className="display selWorks__title" data-reveal>
-            Selected
-            <br />
-            Projects
-            <span className="selWorks__tag">from 2020-now</span>
-          </h2>
-          <span className="selWorks__arrow" aria-hidden data-reveal>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 4v16M6 14l6 6 6-6" />
-            </svg>
-          </span>
-        </div>
+        <h2 className="display selWorks__title" data-reveal>
+          Selected
+          <br />
+          Projects
+          <span className="selWorks__tag">from 2020-now</span>
+        </h2>
         <div className="selWorks__headRight">
-          <span className="selWorks__count" data-reveal>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            </svg>
-            {shown}
-          </span>
           <p className="selWorks__note" data-reveal>
             A selection of product, brand and website work across real
             launches.
           </p>
-          {/* the count above says how many are on show; this says how many
-              there are, which is the reason to click it */}
           <ExtCta href="/work" route count={total} data-reveal>
             View all projects
           </ExtCta>
         </div>
       </div>
-      <div className="selWorks__divider" aria-hidden />
       <SelectedWorks />
       {/*
-        The reel is a ruled ledger: every row is [YEAR] [NAME / CATEGORY]
-        [BIG NUMERAL], counting 01 up to 07. This is the ledger's next line
-        rather than a button parked underneath it — same rule, same columns,
-        same oversized right-hand slot. The one substitution is that slot:
-        after seven numerals it resolves into an arrow, so the sequence ends
-        by pointing somewhere instead of just stopping.
+        The closing CTA used to be the ledger's eighth line, sharing the
+        rows' three columns so that after counting 01 to 07 the numeral
+        column resolved into an arrow. Those columns went with the rows, so
+        it takes the collage's geometry instead: a full-width panel at the
+        cards' own radius, ending on the same badge the cards carry in
+        their corners. The section still finishes by pointing somewhere.
       */}
       <PageLink href="/work" className="selWorks__endCta" data-reveal>
-        <span className="selWorks__endCtaYear" aria-hidden>
-          All
-        </span>
-        <span className="selWorks__endCtaInfo">
-          <span className="selWorks__endCtaName">
-            View all projects
-            <span className="selWorks__endCtaCat"> / archive</span>
-          </span>
-          <span className="selWorks__endCtaRole">
-            {PROJECTS.length - SELECTED_PROJECTS.length} more in the archive
+        <span className="selWorks__endCtaText">
+          <span className="selWorks__endCtaName">View all projects</span>
+          <span className="selWorks__endCtaNote">
+            {archived} more in the archive
           </span>
         </span>
         <span className="selWorks__endCtaIcon" aria-hidden>
