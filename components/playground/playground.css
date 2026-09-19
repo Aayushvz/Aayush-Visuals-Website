@@ -990,3 +990,126 @@
     }
   }
 }
+
+/* ---- the invoice cover ----
+
+   Built on the same bones as .contractCover: a lit sheet on a dark ground,
+   the title lockup over a steep scrim. What differs is what the page is
+   doing. The contract cover is ragged-right prose with a signature; an
+   invoice is a table, so this one is ruled columns with amounts hanging
+   off a right edge, and the one accent is the total rather than a
+   signature - because the total is what an invoice is for.
+*/
+
+.invoiceCover {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0d;
+}
+
+.invoiceCover__ground,
+.invoiceCover__glow,
+.invoiceCover__sheet,
+.invoiceCover__scrim,
+.invoiceCover__markLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.invoiceCover__ground {
+  background: linear-gradient(180deg, #0b0b10 0%, #17161d 58%, #09090c 100%);
+}
+
+.invoiceCover__glow {
+  background: radial-gradient(
+    46% 30% at 50% 64%,
+    color-mix(in srgb, var(--pg-accent) 40%, transparent),
+    transparent 74%
+  );
+  opacity: 0.55;
+}
+
+.invoiceCover__sheet {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* tilted the opposite way from the contract's sheet, so the two cards do
+   not read as the same photograph twice on one shelf */
+.invoiceCover__page {
+  transform: rotate(1.2deg);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.5));
+}
+
+.invoiceCover__paper {
+  fill: var(--cream);
+  stroke: var(--pg-hair);
+  stroke-width: 1.2;
+}
+
+.invoiceCover__rule--head {
+  fill: var(--pg-fg);
+}
+
+.invoiceCover__rule--body {
+  fill: var(--pg-faint);
+}
+
+/* the amount column: the same weight as body text, because on a real
+   invoice the figures are not louder than the lines they belong to - only
+   the total is */
+.invoiceCover__rule--amount {
+  fill: var(--pg-faint);
+}
+
+.invoiceCover__rule--divider {
+  fill: var(--pg-hair);
+}
+
+.invoiceCover__scrim {
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(8, 8, 11, 0.94) 0%,
+    rgba(8, 8, 11, 0.82) 20%,
+    rgba(8, 8, 11, 0) 34%
+  );
+}
+
+.invoiceCover__markLayer {
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  transform: rotate(1.2deg);
+  transform-origin: 50% 48%;
+}
+
+/* the total. The one accent on the cover, painted above the scrim for the
+   same reason the contract's signature is: it is the thing the tool makes. */
+.invoiceCover__total {
+  fill: var(--pg-accent);
+}
+
+.invoiceCover__lock {
+  position: absolute;
+  z-index: 4;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.invoiceCover__name {
+  display: block;
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f6f2fb;
+  text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
+}

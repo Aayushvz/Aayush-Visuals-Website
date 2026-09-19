@@ -19,7 +19,7 @@
 */
 
 import type { ComponentType } from "react";
-import { ContractCover, DplCover, PondCover } from "./covers";
+import { ContractCover, DplCover, InvoiceCover, PondCover } from "./covers";
 
 export type Experiment = {
   id: string;
@@ -77,6 +77,21 @@ export const EXPERIMENTS: Experiment[] = [
     cover: ContractCover,
     status: "live",
   },
+  {
+    id: "invoice",
+    index: "04",
+    title: "Invoice Generator",
+    kind: "Freelance tool",
+    /* Absolute, unlike every other entry here. This one is its own
+       deployment rather than a route in this app, so the shelf cannot
+       reach it with a path. If it ever moves into this repo, this becomes
+       "/invoice" and nothing else changes. */
+    href: "https://invoice.aayushvisuals.com",
+    cta: "Bill a client",
+    meta: "Free · no signup, nothing leaves your browser",
+    cover: InvoiceCover,
+    status: "live",
+  },
 ];
 
 /* Vacant slots. Deliberately not derived from a count: each one is a real
@@ -84,6 +99,6 @@ export const EXPERIMENTS: Experiment[] = [
    so the live trio plus this fills the top row of the grid rather than
    leaving a gap after the last real card. */
 export const SOON: { index: string; hint: string; kind: string }[] = [
-  { index: "04", hint: "Sketched, not built", kind: "Canvas sketch" },
+  { index: "05", hint: "Sketched, not built", kind: "Canvas sketch" },
 ];
 

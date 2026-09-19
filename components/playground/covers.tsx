@@ -363,6 +363,159 @@ export function ContractCover() {
 }
 
 /*
+  The invoice cover.
+
+  Same bones as ContractCover - a lit sheet on a dark ground under a steep
+  scrim - because they are two tools in one family and the shelf should say
+  so. What changes is what the page is doing: a contract is prose with a
+  signature at the end, an invoice is a table with a number at the end, so
+  this is ruled columns with amounts hanging off a right edge and the total
+  as the one accent. The sheet also leans the other way, so the pair does
+  not read as the same photograph printed twice.
+*/
+export function InvoiceCover() {
+  /* line items: a description rule on the left and an amount rule hard
+     against the right edge, the way a real invoice sets a table. Widths
+     vary so the column reads as different items rather than a bar chart. */
+  const items: [number, number, number][] = [
+    /* y, description width, amount width */
+    [126, 84, 26],
+    [145, 66, 22],
+    [164, 92, 28],
+    [183, 74, 24],
+    [202, 58, 20],
+  ];
+
+  /* the right edge every amount is set against, and the left edge every
+     description starts from */
+  const left = 92;
+  const right = 208;
+
+  return (
+    <div className="invoiceCover">
+      <div className="invoiceCover__ground" />
+      <div className="invoiceCover__glow" />
+
+      <svg
+        className="invoiceCover__sheet"
+        viewBox="0 0 300 400"
+        aria-hidden
+        focusable="false"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <g className="invoiceCover__page">
+          <rect
+            className="invoiceCover__paper"
+            x="66"
+            y="28"
+            width="168"
+            height="326"
+            rx="4"
+          />
+
+          {/* the word INVOICE, set right the way the document sets it */}
+          <rect
+            className="invoiceCover__rule invoiceCover__rule--head"
+            x={right - 62}
+            y="58"
+            width="62"
+            height="7"
+            rx="2"
+          />
+
+          {/* from / bill-to block */}
+          <rect
+            className="invoiceCover__rule invoiceCover__rule--body"
+            x={left}
+            y="84"
+            width="44"
+            height="4"
+            rx="1.5"
+          />
+          <rect
+            className="invoiceCover__rule invoiceCover__rule--body"
+            x={left}
+            y="95"
+            width="58"
+            height="4"
+            rx="1.5"
+          />
+
+          {/* the table's head rule */}
+          <rect
+            className="invoiceCover__rule invoiceCover__rule--divider"
+            x={left}
+            y="114"
+            width={right - left}
+            height="1.5"
+          />
+
+          {items.map(([y, dw, aw]) => (
+            <g key={y}>
+              <rect
+                className="invoiceCover__rule invoiceCover__rule--body"
+                x={left}
+                y={y}
+                width={dw}
+                height="4"
+                rx="1.5"
+              />
+              <rect
+                className="invoiceCover__rule invoiceCover__rule--amount"
+                x={right - aw}
+                y={y}
+                width={aw}
+                height="4"
+                rx="1.5"
+              />
+            </g>
+          ))}
+
+          {/* the rule the total sits under */}
+          <rect
+            className="invoiceCover__rule invoiceCover__rule--divider"
+            x={left + 52}
+            y="228"
+            width={right - left - 52}
+            height="1.5"
+          />
+        </g>
+      </svg>
+
+      <div className="invoiceCover__scrim" />
+
+      {/* the total, above the scrim: it is the one accent on the cover and
+          the thing the tool exists to produce, so it is not dimmed by a
+          layer built to hold up the title */}
+      <svg
+        className="invoiceCover__markLayer"
+        viewBox="0 0 300 400"
+        aria-hidden
+        focusable="false"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <rect
+          className="invoiceCover__total"
+          x={right - 46}
+          y="240"
+          width="46"
+          height="9"
+          rx="2.5"
+        />
+      </svg>
+
+      <div className="invoiceCover__lock">
+        <span className="invoiceCover__name">
+          Invoice
+          <br />
+          Generator
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/*
   The vacant cover.
 
   Same footprint and the same darkness as a real one, so the row keeps its

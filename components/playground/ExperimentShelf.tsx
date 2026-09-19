@@ -65,6 +65,41 @@ function SparkIcon() {
   );
 }
 
+/*
+  One card's link. Internal hrefs keep the site's page-transition wipe;
+  absolute ones are ordinary anchors to another origin.
+*/
+function CardLink({
+  href,
+  children,
+  ...rest
+}: {
+  href: string;
+  children: React.ReactNode;
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const external = /^https?:\/\//.test(href);
+
+  if (external) {
+    return (
+      <a
+        href={href}
+        className="pgCard__link"
+        target="_blank"
+        rel="noreferrer"
+        {...rest}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <PageLink href={href} className="pgCard__link" {...rest}>
+      {children}
+    </PageLink>
+  );
+}
+
 export default function ExperimentShelf() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
@@ -177,9 +212,18 @@ export default function ExperimentShelf() {
         <ul className="pgGrid">
           {live.map((e, i) => (
             <motion.li key={e.id} className="pgCard" {...enter(i)}>
-              <PageLink
+              {/*
+                An entry can point off-site (the invoice generator is its
+                own deployment), and PageLink is built for routes in this
+                app: it swallows the click, plays the wipe and hands the
+                href to router.push. Playing a page transition on the way
+                to another origin is wrong twice over - the wipe promises a
+                route change this app is not making, and router.push is not
+                the way to leave it. External entries get a plain anchor
+                that opens in a new tab and says so.
+              */}
+              <CardLink
                 href={e.href}
-                className="pgCard__link"
                 aria-label={`${e.title}. ${e.cta}.`}
               >
                 <div className="pgCard__art">
@@ -219,7 +263,7 @@ export default function ExperimentShelf() {
                     <span className="pgCard__price">{e.meta}</span>
                   </div>
                 </div>
-              </PageLink>
+              </CardLink>
             </motion.li>
           ))}
 
