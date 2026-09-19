@@ -21,6 +21,62 @@
      for layout, only for the bar's own size */
   --cg-bar-h: 56px;
 
+  /* ---------- control system ----------
+     One language for every clickable control and text field on the
+     route, so a button sitting next to an input reads as the same
+     family of object rather than two different apps glued together.
+     Defined once, here, so every number below is a single edit away.
+
+     --cg-control-radius: every button, input, trigger and list row on
+     the page shares this one rectangular radius - the 999px pills this
+     route used to render next to 8px-radius inputs are gone. Full
+     round survives only where the shape itself is the meaning: the
+     completion ring (.cgRing is an SVG stroke, nothing to change) and
+     the switch tracks in the Clauses block (--cg-round below) - a pill
+     there genuinely reads as a physical toggle, not a button imitating
+     one.
+
+     --cg-control-h / --cg-field-h: two control heights, not three.
+     36px for every button (Export, Reset, Cancel, Save, Edit content,
+     Revert everything, every icon-only ghost). 42px for every text
+     field and the triggers standing in for one (.cgInput, and anything
+     that reuses it wholesale: Select's closed trigger, DateField's
+     text box). The 6px step between them is deliberate - a heavier,
+     more frequently focused surface reads slightly taller on purpose -
+     not the accidental gap that used to separate Export (36) from
+     Reset (36) from the inputs (42) with no button/field logic behind
+     the split. A third height appearing anywhere in this file later is
+     the bug this comment exists to catch.
+
+     --cg-control-label-size / --cg-control-label-weight: one size and
+     weight for every control's own label - Export, Reset, Cancel,
+     Save, Edit content, Revert to default and the export menu items
+     all read at the same size now, including the icon-only ghosts
+     (they show no text today, but now inherit the value a label added
+     to one later would need, instead of silently falling back to
+     whatever font-size happens to be ambient). Field labels
+     (.cgField__label) and the document's own body/heading type keep
+     their own scale (DESIGN.md section 3) - this pair is only ever
+     about words printed on a clickable control.
+
+     --cg-control-pad-x: the one horizontal padding every pill-shaped
+     text control shares, so Export/Reset/Cancel/Save/Edit content sit
+     at one rhythm instead of each having picked 8/12/14px by hand.
+
+     --cg-round: names the full-round exception itself, so the couple
+     of places still built as a pill for reasons unrelated to this
+     system (the switch tracks, and two deliberately-excluded spots
+     documented in the polish report: the mobile tab bar's selection
+     wash and the footer's circular social links) read as a decision
+     rather than a leftover. */
+  --cg-control-radius: 8px;
+  --cg-control-h: 36px;
+  --cg-field-h: 42px;
+  --cg-control-label-size: 13px;
+  --cg-control-label-weight: 500;
+  --cg-control-pad-x: 14px;
+  --cg-round: 999px;
+
   /* a flex column that is exactly the viewport tall, not a min-height: the
      shell is a fixed-height dashboard and its chrome rows (.cgBar always,
      .cgMobileTabs at <= 1099px - see the responsive section) are meant to
@@ -298,12 +354,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--cg-control-h);
+  height: var(--cg-control-h);
   border: 1px solid var(--cg-line);
-  border-radius: 999px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg);
+  font: inherit;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
 }
 
@@ -320,14 +379,16 @@
 .cgBar__reset {
   display: inline-flex;
   align-items: center;
+  height: var(--cg-control-h);
   gap: 6px;
-  padding: 8px 12px;
+  padding: 0 var(--cg-control-pad-x);
   border: 1px solid var(--cg-line);
-  border-radius: 999px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg-2);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
 }
 
@@ -335,15 +396,16 @@
 .cgPrimary {
   display: inline-flex;
   align-items: center;
+  height: var(--cg-control-h);
   gap: 8px;
-  padding: 8px 14px;
+  padding: 0 var(--cg-control-pad-x);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--cg-control-radius);
   background: var(--cg-accent);
   color: var(--cg-accent-fg);
   font: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
 }
 
@@ -367,11 +429,12 @@
   width: 100%;
   padding: 9px 10px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   text-align: left;
   cursor: pointer;
 }
@@ -394,6 +457,11 @@
   display: block;
   color: var(--cg-fg-2);
   font-size: 11px;
+  /* .cgMenu__item now carries the shared control-label weight so its
+     own name reads consistently with every other button on the route;
+     this quiet second line is not the control's label, so it resets
+     back to the ordinary body weight rather than inheriting that 500 */
+  font-weight: 400;
 }
 
 /* scoped to the shell: contract.css is a plain stylesheet import, so a
@@ -426,6 +494,7 @@
 .cgBar__reset .cgIcon { width: 14px; height: 14px; }
 .cgSelect__chevron,
 .cgCal__nav .cgIcon { width: 14px; height: 14px; }
+.cgDoc__editedRevert .cgIcon { width: 10px; height: 10px; }
 
 /* ---------- form panel ---------- */
 
@@ -563,13 +632,22 @@
   width: 100%;
   padding: 9px 10px;
   border: 1px solid var(--cg-line);
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: var(--cg-field);
   color: var(--cg-fg);
   font: inherit;
   font-size: 15px;
   transition: border-color var(--dur-hover) var(--ease-quint);
 }
+
+/* the one field height: every single-line .cgInput (plain text inputs,
+   Select's closed trigger, DateField's text box - anything that is not
+   the multi-line textarea variant below) lands on --cg-field-h through
+   this one rule rather than each control's own padding math happening
+   to agree, so nothing can quietly drift to a third height later. The
+   textarea is excluded because it has to grow with content, not sit at
+   a fixed height. */
+.cgInput:not(.cgInput--area) { height: var(--cg-field-h); }
 
 .cgInput:hover { border-color: var(--cg-fg-2); }
 .cgInput--area { resize: vertical; min-height: 76px; }
@@ -583,15 +661,26 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--cg-line);
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg-2);
   font: inherit;
   cursor: pointer;
 }
 
-.cgList__rm { width: 36px; flex: 0 0 36px; }
-.cgList__add { gap: 6px; padding: 8px; font-size: 13px; border-style: dashed; }
+/* deliberately the field height, not the control height: this sits
+   flush beside a .cgInput in the same row (see .cgList__row), so it
+   takes --cg-field-h to keep both edges of the row level rather than
+   the shorter button height leaving a visible step on one side */
+.cgList__rm { width: var(--cg-field-h); height: var(--cg-field-h); flex: 0 0 var(--cg-field-h); }
+.cgList__add {
+  height: var(--cg-control-h);
+  gap: 6px;
+  padding: 0 var(--cg-control-pad-x);
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
+  border-style: dashed;
+}
 
 /* switches: 44px tall so the whole row is the touch target */
 .cgSwitch {
@@ -609,12 +698,15 @@
   opacity: 0;
 }
 
+/* one of the two sanctioned full-round shapes (see --cg-round on
+   .cgShell): a switch genuinely reads as a physical toggle only as a
+   pill, so it stays outside the rectangular control system on purpose */
 .cgSwitch__track {
   position: relative;
   flex: 0 0 34px;
   width: 34px; height: 20px;
   border: 1px solid var(--cg-line);
-  border-radius: 999px;
+  border-radius: var(--cg-round);
   background: transparent;
   transition: background var(--dur-state) var(--ease-quint),
     border-color var(--dur-state) var(--ease-quint);
@@ -625,7 +717,7 @@
   position: absolute;
   top: 3px; left: 3px;
   width: 12px; height: 12px;
-  border-radius: 999px;
+  border-radius: var(--cg-round);
   background: var(--cg-fg-2);
   transition: transform var(--dur-state) var(--ease-quint),
     background var(--dur-state) var(--ease-quint);
@@ -733,7 +825,7 @@
 
 .cgSelect__option {
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: var(--cg-control-radius);
   color: var(--cg-fg);
   font-size: 14px;
   cursor: pointer;
@@ -790,10 +882,11 @@
   margin-bottom: 10px;
 }
 
-.cgCal__nav.cgGhost {
-  width: 28px;
-  height: 28px;
-}
+/* used to shrink to 28px to fit the compact popup header; .cgGhost is
+   now the one control height (--cg-control-h) everywhere, and the
+   288px popup has room for two full-height nav buttons beside the
+   month label without crowding it, so the override is gone rather than
+   leaving this the one ghost button that reports a third height */
 
 .cgCal__month {
   font-size: 13px;
@@ -835,7 +928,7 @@
   justify-content: center;
   aspect-ratio: 1;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg);
   font: inherit;
@@ -926,13 +1019,17 @@
      anchoring the icon to the box's own start edge means that edge lines
      up with the rest of the panel's left-aligned content directly,
      rather than needing a hand-tuned negative margin to undo an inset
-     that centering would otherwise put in the way */
+     that centering would otherwise put in the way. Kept round
+     (--cg-round) rather than folded into the control system on
+     purpose: these are credit-line social links, not form controls,
+     and never sit next to a rectangular sibling the way a button next
+     to an input does - see the polish report. */
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 44px;
   height: 44px;
-  border-radius: 999px;
+  border-radius: var(--cg-round);
   color: var(--cg-fg-2);
   transition: color var(--dur-hover) var(--ease-quint);
 }
@@ -1053,14 +1150,16 @@
 .cgEditBar__toggle {
   display: inline-flex;
   align-items: center;
+  height: var(--cg-control-h);
   gap: 6px;
-  padding: 8px 14px;
+  padding: 0 var(--cg-control-pad-x);
   border: 1px solid var(--cg-line);
-  border-radius: 999px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg-2);
   font: inherit;
-  font-size: 12.5px;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
   transition: color var(--dur-hover) var(--ease-quint),
     border-color var(--dur-hover) var(--ease-quint),
@@ -1103,10 +1202,15 @@
   background: var(--cg-line);
 }
 
-/* the quiet one: text only, no pill, no border - the same "text carries
-   the weight" idiom the per-clause revert (.cgDoc__editedRevert) already
-   uses, so the whole route has exactly one visual language for "revert
-   something, no drama about it" */
+/* the quiet one: text only, no pill, no border. This used to share its
+   exact visual language with the per-clause revert
+   (.cgDoc__editedRevert); that one is now a small bordered control of
+   its own (see the edited-mark polish comment further down) because it
+   had to compete for attention with the "edited" state sitting right
+   next to it, which this control never does - it already lives behind
+   its own divider, away from Cancel/Save, with nothing beside it
+   fighting for the same read. Revert-as-quiet-text still stands on its
+   own here for that reason, not because it was missed. */
 .cgEditBar__danger {
   padding: 4px 2px;
   border: 0;
@@ -1130,14 +1234,16 @@
 .cgGhostLabel {
   display: inline-flex;
   align-items: center;
+  height: var(--cg-control-h);
   gap: 6px;
-  padding: 8px 14px;
+  padding: 0 var(--cg-control-pad-x);
   border: 1px solid var(--cg-line);
-  border-radius: 999px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg-2);
   font: inherit;
-  font-size: 12.5px;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
   transition: border-color var(--dur-hover) var(--ease-quint),
     color var(--dur-hover) var(--ease-quint),
@@ -1190,14 +1296,20 @@
 }
 
 .cgConfirm__danger {
-  padding: 8px 14px;
+  height: var(--cg-control-h);
+  padding: 0 var(--cg-control-pad-x);
   border: 1px solid var(--cg-fg);
-  border-radius: 999px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg);
   font: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: var(--cg-control-label-size);
+  /* the full-contrast border (var(--cg-fg), not the muted --cg-line
+     every other outline control uses) is what marks this one as
+     serious now - the label itself uses the same shared weight as
+     every other button so "louder" comes from one deliberate signal,
+     not from also being the one button with its own font-weight */
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
   transition: background var(--dur-hover) var(--ease-quint),
     transform var(--dur-state) var(--ease-quint);
@@ -1209,7 +1321,8 @@
   .cgEditBar__toggle,
   .cgGhostLabel,
   .cgEditBar__danger,
-  .cgConfirm__danger {
+  .cgConfirm__danger,
+  .cgDoc__editedRevert {
     transition: none;
   }
 }
@@ -1308,39 +1421,67 @@
   color: var(--cg-doc-accent, currentColor);
 }
 
-/* ---- edited mark (Task 3) ----
-   Quiet on purpose: --cg-fg-2/--cg-line-2 are the same "muted, secondary
-   information" pair the meta table's labels and the placeholder chip
-   already use, not a new accent colour, so it reads in both themes for
-   free and never competes with the accent touch on .cgDoc__num above.
-   Text carries the meaning (the word "edited" plus a labelled action),
-   never colour alone - the same rule .cgContrast__verdict already
-   follows for its own pass/fail readout. */
+/* ---- edited mark ----
+   Two objects, not one: this used to pack the word "edited" and the
+   Revert control into a single bordered pill jammed against the clause
+   number, which read as debug output ("01. (edited Revert)") rather
+   than a considered piece of the page.
+
+   .cgDoc__edited is now the state alone - a small dot plus the word
+   "Edited", no border, no pill, nothing to click. Quiet on purpose:
+   --cg-fg-2 is the same "muted, secondary information" colour the meta
+   table's own labels and the placeholder chip already use, not a new
+   accent, so it reads in both themes for free and never competes with
+   the accent touch on .cgDoc__num above. The dot is decorative (colour
+   is never the only signal - the word "Edited" is what actually says
+   so, the same rule .cgContrast__verdict already follows for its own
+   pass/fail readout), so it carries no accessible text of its own.
+
+   .cgDoc__editedRevert is the action, and now looks like one: a small
+   bordered control with the same hairline --cg-line border and
+   --cg-control-radius every other button on the route uses, just
+   scaled down to sit inside a line of document text instead of the
+   toolbar, plus the same RotateCcwIcon Reset already uses so "revert"
+   is recognisable before the word is even read. Text still carries the
+   meaning (the visible label "Revert" and its own fuller aria-label),
+   never colour alone. */
 .cgDoc__edited {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 1px 8px 1px 2px;
-  border: 1px solid var(--cg-line);
-  border-radius: 999px;
+  gap: 5px;
   color: var(--cg-fg-2);
   font-family: var(--font-primary);
   font-size: 10.5px;
   letter-spacing: 0.02em;
 }
 
+.cgDoc__editedDot {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--cg-round);
+  background: currentColor;
+}
+
 .cgDoc__editedRevert {
-  padding: 0;
-  border: 0;
-  border-bottom: 1px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--cg-line);
+  border-radius: var(--cg-control-radius);
   background: none;
-  color: inherit;
+  color: var(--cg-fg-2);
   font: inherit;
   font-size: 10.5px;
   cursor: pointer;
+  transition: color var(--dur-hover) var(--ease-quint),
+    border-color var(--dur-hover) var(--ease-quint);
 }
 
-.cgDoc__editedRevert:hover { color: var(--cg-fg); }
+.cgDoc__editedRevert:hover {
+  color: var(--cg-fg);
+  border-color: var(--cg-fg-2);
+}
 
 /* --cg-doc-h completes a pairing the skins already half-have:
    --cg-doc-h-weight exists for the heading's weight but there was no
@@ -1653,7 +1794,7 @@
   gap: 2px;
   padding: 9px 10px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg);
   font: inherit;
@@ -1670,8 +1811,8 @@
 }
 
 .cgSide__skinName {
-  font-size: 13.5px;
-  font-weight: 500;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
 }
 
 .cgSide__skinHint {
@@ -1695,7 +1836,7 @@
   width: 100%;
   padding: 10px;
   border: 1px solid var(--cg-line);
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg);
   font: inherit;
@@ -1713,12 +1854,19 @@
   color: var(--cg-fg-2);
 }
 
-.cgSide__exportText { flex: 1; font-size: 13.5px; }
+.cgSide__exportText {
+  flex: 1;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
+}
 
 .cgSide__exportHint {
   display: block;
   color: var(--cg-fg-2);
   font-size: 12px;
+  /* resets the weight .cgSide__exportText now sets for its own label,
+     the same reason .cgMenu__hint resets it above */
+  font-weight: 400;
 }
 
 .cgSide__close .cgIcon,
@@ -1745,11 +1893,11 @@
 
 .cgColorField__swatch {
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  width: var(--cg-control-h);
+  height: var(--cg-control-h);
   padding: 0;
   border: 1px solid var(--cg-line);
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   cursor: pointer;
 }
@@ -1832,14 +1980,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: var(--cg-control-h);
   gap: 6px;
   padding: 10px;
   border: 1px dashed var(--cg-line);
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg-2);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--cg-control-label-size);
+  font-weight: var(--cg-control-label-weight);
   cursor: pointer;
 }
 
@@ -1877,10 +2027,10 @@
 
 .cgLogo__remove {
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: var(--cg-control-h);
+  height: var(--cg-control-h);
   border: 1px solid var(--cg-line);
-  border-radius: 8px;
+  border-radius: var(--cg-control-radius);
   background: transparent;
   color: var(--cg-fg-2);
   cursor: pointer;
@@ -1932,11 +2082,17 @@
   .cgMobileTabs,
   /* Task 2/3: the edit bar, its confirm dialog and backdrop, and the
      edited mark are all screen-only chrome; the document underneath
-     already renders whatever they'd otherwise let a reader change */
+     already renders whatever they'd otherwise let a reader change.
+     .cgDoc__editedRevert is listed separately from .cgDoc__edited now
+     that the state and the action are two sibling elements rather than
+     one button nested inside the other (see the edited-mark polish
+     comment above) - hiding the former no longer hides the latter for
+     free. */
   .cgEditBar,
   .cgConfirm,
   .cgConfirm__backdrop,
   .cgDoc__edited,
+  .cgDoc__editedRevert,
   .cgDoc__lockBadge {
     display: none !important;
   }
@@ -2291,13 +2447,20 @@
      selection - the same --cg-line-2 wash .cgAcc__head's own pressed
      state and the old segmented control both already used elsewhere in
      this route, never a heavy fill, per the thin-outline default */
+  /* the selected tab's background wash, not a button in its own right -
+     the whole tab (min-height var(--cg-bar-h)) is the actual control and
+     hit target, this is only the indicator behind its icon. Left round
+     (--cg-round) rather than folded into the control system: it never
+     sits beside a rectangular sibling the way a toolbar button sits
+     beside an input, so there is no 999px-pill-next-to-8px-radius clash
+     for it to cause - see the polish report. */
   .cgMobileTabs__iconWrap {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 26px;
-    border-radius: 999px;
+    border-radius: var(--cg-round);
     color: inherit;
     transition: background var(--dur-hover) var(--ease-quint);
   }

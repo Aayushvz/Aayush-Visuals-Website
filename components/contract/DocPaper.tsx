@@ -7,7 +7,7 @@ import type { Block, Draft, DocStyle, Overrides } from "./types";
 import { buildClauses, documentMeta, isClauseEdited, listItemOverrideKey, PLACEHOLDER, PLACEHOLDER_TEXT } from "./clauses";
 import { DISCLAIMER } from "./render-md";
 import { DEFAULT_DOC_STYLE } from "./useDocStyle";
-import { LockIcon } from "./icons";
+import { LockIcon, RotateCcwIcon } from "./icons";
 
 /* splits on the sentinel (never on visible text, so a user's own "--" can
    never be mistaken for an unfilled field) and renders PLACEHOLDER_TEXT,
@@ -271,17 +271,21 @@ export default function DocPaper({
             <div className="cgDoc__numRow">
               <p className="cgDoc__num">{String(i + 1).padStart(2, "0")}.</p>
               {edited && (
-                <span className="cgDoc__edited">
-                  edited
+                <>
+                  <span className="cgDoc__edited">
+                    <span className="cgDoc__editedDot" aria-hidden="true" />
+                    Edited
+                  </span>
                   <button
                     type="button"
                     className="cgDoc__editedRevert"
                     onClick={() => onRevertClause?.(c.id)}
                     aria-label={`Revert clause ${i + 1}, ${c.title}, to the generated text`}
                   >
+                    <RotateCcwIcon />
                     Revert
                   </button>
-                </span>
+                </>
               )}
             </div>
             <h2 className="cgDoc__h">{c.title}</h2>
