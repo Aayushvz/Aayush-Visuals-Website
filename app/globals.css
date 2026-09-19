@@ -271,7 +271,10 @@ html.has-cursor .cursorRing {
    89x114 one, roughly a third of the way across. Give them a shared
    offset and the cursor visibly jumps sideways on every click. */
 .cursorDot {
-  --cur-s: 0.4;
+  /* 0.27 puts the arrow at 18x28, a hair under a native cursor. It was
+     0.4 (27x41), which is roughly twice the cap height of the nav it
+     sits over and read as a graphic rather than as a pointer. */
+  --cur-s: 0.27;
   width: 0;
   height: 0;
 }
@@ -306,13 +309,17 @@ html.has-cursor .cursorRing {
   opacity: 0;
 }
 
-/* No transition on the swap. A press is instantaneous and the cursor
-   should say so; crossfading two arrows just looks like a dropped frame. */
-.cursorDot--down .cursorDot__arrow {
+/* The hand stands for "this responds", so it covers hovering anything
+   clickable as well as the press itself. See CLICKABLE in Cursor.tsx.
+
+   No transition on the swap. Crossing a link edge and pressing a button
+   are both instantaneous, and crossfading two arrows just looks like a
+   dropped frame. */
+.cursorDot--hand .cursorDot__arrow {
   opacity: 0;
 }
 
-.cursorDot--down .cursorDot__hand {
+.cursorDot--hand .cursorDot__hand {
   opacity: 1;
 }
 

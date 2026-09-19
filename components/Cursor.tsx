@@ -6,8 +6,9 @@ import ArrowUpRight from "./projects/ArrowUpRight";
 
 /*
   Custom cursor for fine-pointer devices. A pixel-art arrow tracks the
-  pointer 1:1 and is the only thing visible at rest; pressing swaps it for
-  a pointing hand. Disabled on touch devices and for reduced-motion users.
+  pointer 1:1 over ordinary page content, and swaps to a pointing hand
+  over anything clickable or while the button is down. Disabled on touch
+  devices and for reduced-motion users.
 
   BOTH ARTWORKS ARE ALWAYS IN THE DOM, swapped by opacity rather than by
   rewriting src. Swapping src would ask the browser for a file on the
@@ -85,6 +86,44 @@ export default function Cursor() {
       if (!raf) raf = requestAnimationFrame(loop);
     };
 
+    /*
+      What counts as clickable.
+
+      Written as a selector rather than a duck-typed check (has an onclick,
+      is focusable, ...) because `closest` can then answer the whole
+      question in one call per pointerover, and because the list is the
+      documentation: if something should show the hand and does not, it
+      belongs here.
+
+      :disabled is excluded deliberately. A greyed-out submit is the one
+      button on a page that must NOT invite the click.
+    */
+    const CLICKABLE = [
+      "a[href]",
+      "button:not(:disabled)",
+      "input:not(:disabled)",
+      "select:not(:disabled)",
+      "textarea:not(:disabled)",
+      "summary",
+      "label[for]",
+      '[role="button"]',
+      '[role="link"]',
+      '[role="tab"]',
+      '[role="menuitem"]',
+      /* the reel and the project tiles, which are links already, plus
+         anything else that opts in by marking itself for the cursor */
+      "[data-cursor]",
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(",");
+
+    /* The hand is shown for either reason, so neither may clobber the
+       other: releasing the mouse over a link has to leave the hand up,
+       and moving off a link mid-drag has to leave it up too. */
+    let overClickable = false;
+    let pressed = false;
+    const syncHand = () =>
+      dot.classList.toggle("cursorDot--hand", overClickable || pressed);
+
     const title = titleRef.current;
     const sub = subRef.current;
     /* the last values written, so crossing between two elements inside the
@@ -93,6 +132,9 @@ export default function Cursor() {
 
     const onOver = (e: PointerEvent) => {
       const t = e.target as Element | null;
+
+      overClickable = !!t?.closest?.(CLICKABLE);
+      syncHand();
 
       const work = t?.closest?.("[data-cursor='work']") as HTMLElement | null;
       if (work && title && sub) {
@@ -113,12 +155,18 @@ export default function Cursor() {
       ring.classList.toggle("cursorRing--project", project);
     };
 
-    const down = () => dot.classList.add("cursorDot--down");
+    const down = () => {
+      pressed = true;
+      syncHand();
+    };
     /* pointercancel as well as pointerup: a press that turns into a drag
        the browser takes over, or a touch that becomes a scroll, never
        sends pointerup, and the hand would stay stuck down. blur covers
        releasing the button after alt-tabbing away. */
-    const up = () => dot.classList.remove("cursorDot--down");
+    const up = () => {
+      pressed = false;
+      syncHand();
+    };
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerover", onOver, { passive: true });
