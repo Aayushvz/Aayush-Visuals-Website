@@ -514,7 +514,16 @@
   /* no top padding: .cgForm__bar is a header flush to the top of the
      column, exactly like .cgSide__bar on the other side. Padding here
      pushed it down 16px, which is what put the two panel headers 6px
-     out of line with each other and off the toolbar's rhythm. */
+     out of line with each other and off the toolbar's rhythm.
+
+     A flex column at the full height of its track so .cgFoot can be
+     pushed to the bottom with margin-top:auto. sticky alone was not
+     enough: it only pins once there is overflow to scroll, and with the
+     groups collapsed the content is shorter than the column, so the
+     footer simply sat wherever the list ended. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: 0;
 }
 
@@ -1018,7 +1027,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 12px;
+  /* auto, not a fixed gap: this is what actually holds it against the
+     bottom of the panel when the content above is short. sticky then
+     keeps it there once the content is long enough to scroll. */
+  margin-top: auto;
   padding: 14px 16px;
   border-top: 1px solid var(--cg-line);
   background: var(--cg-panel);
