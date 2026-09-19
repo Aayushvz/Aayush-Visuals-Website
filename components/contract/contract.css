@@ -511,7 +511,11 @@
 /* ---------- form panel ---------- */
 
 .cgForm {
-  padding: 16px 0 0;
+  /* no top padding: .cgForm__bar is a header flush to the top of the
+     column, exactly like .cgSide__bar on the other side. Padding here
+     pushed it down 16px, which is what put the two panel headers 6px
+     out of line with each other and off the toolbar's rhythm. */
+  padding: 0;
 }
 
 /* the panel's own title, not a caption on it - full --cg-fg contrast and a
@@ -550,9 +554,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin: 0 8px 0 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--cg-line-2);
+  /* matched to .cgSide__bar so both panel headers are the same height,
+     start flush at the top of their column, and put their collapse
+     buttons on one line across the whole app. --cg-bar-h is the
+     toolbar's height, so all three sit on the same rhythm. */
+  height: var(--cg-bar-h);
+  flex: 0 0 auto;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--cg-line);
   background: var(--cg-panel);
 }
 
