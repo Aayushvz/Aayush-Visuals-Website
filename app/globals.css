@@ -271,10 +271,13 @@ html.has-cursor .cursorRing {
    89x114 one, roughly a third of the way across. Give them a shared
    offset and the cursor visibly jumps sideways on every click. */
 .cursorDot {
-  /* 0.27 puts the arrow at 18x28, a hair under a native cursor. It was
-     0.4 (27x41), which is roughly twice the cap height of the nav it
-     sits over and read as a graphic rather than as a pointer. */
-  --cur-s: 0.27;
+  /* 0.22 puts the arrow at 15x23, which is about what macOS draws. It
+     started at 0.4 (27x41), roughly twice the cap height of the nav it
+     sits over, and read as a graphic rather than as a pointer; 0.27 was
+     still a touch heavy. Everything else about the cursor is expressed
+     against this number, including both artworks' hotspot offsets, so
+     this is the only line to touch to resize it. */
+  --cur-s: 0.22;
   width: 0;
   height: 0;
 }
