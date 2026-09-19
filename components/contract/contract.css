@@ -1304,12 +1304,20 @@
   color: var(--cg-fg);
   font: inherit;
   font-size: var(--cg-control-label-size);
-  /* the full-contrast border (var(--cg-fg), not the muted --cg-line
-     every other outline control uses) is what marks this one as
-     serious now - the label itself uses the same shared weight as
-     every other button so "louder" comes from one deliberate signal,
-     not from also being the one button with its own font-weight */
-  font-weight: var(--cg-control-label-weight);
+  /* Two signals on purpose, and this is the only control on the route
+     that gets a second one. The full-contrast border (var(--cg-fg), not
+     the muted --cg-line every other outline control uses) separates it
+     from its own Cancel sibling 8px away; the heavier label is what
+     makes it read as consequential rather than as just another button
+     in a row.
+
+     Everywhere else, one signal is the rule and a per-control
+     font-weight would be exactly the drift the control system exists to
+     stop. Here the action is irreversible and destroys hand-typed
+     prose, so being unmistakable outranks being uniform. If a third
+     control ever wants its own weight, that is drift and this comment
+     is not a precedent for it. */
+  font-weight: 600;
   cursor: pointer;
   transition: background var(--dur-hover) var(--ease-quint),
     transform var(--dur-state) var(--ease-quint);
