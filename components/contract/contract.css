@@ -2210,6 +2210,17 @@
      a recovery control, and the button keeps its aria-label either way. */
   .cgBar__resetLabel { display: none; }
   .cgBar__reset { padding-left: 9px; padding-right: 9px; }
+
+  /* The footer is pinned on desktop, where the panel is tall and a
+     signature reading as fixed furniture is right. On a phone it was
+     73px of an 844px screen permanently spent on a credit line, on top
+     of the chrome above. Let it scroll away with the fields instead:
+     the credit and the socials are still there, just at the end of the
+     form rather than sitting on it. */
+  .cgFoot {
+    position: static;
+    z-index: auto;
+  }
   .cgBar__title { display: none; }
 }
 
