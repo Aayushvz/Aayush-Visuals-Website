@@ -82,11 +82,10 @@ export const EXPERIMENTS: Experiment[] = [
     index: "04",
     title: "Invoice Generator",
     kind: "Freelance tool",
-    /* Absolute, unlike every other entry here. This one is its own
-       deployment rather than a route in this app, so the shelf cannot
-       reach it with a path. If it ever moves into this repo, this becomes
-       "/invoice" and nothing else changes. */
-    href: "https://invoice.aayushvisuals.com",
+    /* A path, like every other entry, even though this tool is its own
+       deployment: next.config.ts rewrites /invoice-generator to it, so as
+       far as the shelf and the browser are concerned it is on this site. */
+    href: "/invoice-generator",
     cta: "Bill a client",
     meta: "Free · no signup, nothing leaves your browser",
     cover: InvoiceCover,
