@@ -105,6 +105,27 @@ The panel eyebrow stays **11px / 700** and is deliberately outside this
 scale. It is the anchor everything else is read against; shrinking it
 with the rest preserves a flat hierarchy at a smaller size.
 
+### Icons
+
+Hand-rolled in a local `icons.tsx`, never an icon library. `/contract`
+ships around twenty for zero added dependencies, and nothing unused.
+
+```
+24px viewBox · 1.5px stroke · fill="none" · stroke="currentColor"
+round linecap and linejoin · aria-hidden · focusable="false"
+```
+
+Sized with a shared CSS class, not `width`/`height` attributes, and
+`currentColor` so they theme for free. They are decorative: the control
+they sit in already carries the accessible name.
+
+**Brand marks are the exception and are filled**, because a real wordmark
+(Behance's, for instance) has no honest outline form and an approximated
+one stops reading as the brand. The rule that matters: whatever you
+choose, **every mark in the same row shares it**. One filled logo beside
+two hairline outlines reads as two different families, which is exactly
+how `/contract`'s footer looked until the other two were filled to match.
+
 ### Layout
 
 ```css
