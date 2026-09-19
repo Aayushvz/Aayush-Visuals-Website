@@ -720,7 +720,10 @@
 }
 
 /* switches: 44px tall so the whole row is the touch target */
+/* relative for the same reason .cgLogo is: it anchors the hidden input
+   below so a focused clause toggle cannot scroll the app. */
 .cgSwitch {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -729,8 +732,13 @@
   cursor: pointer;
 }
 
+/* anchored to .cgSwitch - see .cgLogo__file for what an unanchored
+   visually-hidden input does to a scrolling panel. These sit lower in
+   .cgSide than the logo field ever did. */
 .cgSwitch input {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px; height: 1px;
   opacity: 0;
 }
@@ -2070,10 +2078,26 @@
    input stays in the tab order and Enter/Space opens the file dialog
    even though the native control itself is never shown ---- */
 
-.cgLogo { display: flex; flex-direction: column; gap: 10px; }
+/* position: relative is load-bearing, not decoration. See .cgLogo__file. */
+.cgLogo { position: relative; display: flex; flex-direction: column; gap: 10px; }
 
+/* the native file input: never shown, but it must stay focusable because
+   the label activates it.
+
+   The offsets are the fix for a real bug. Absolutely positioned with no
+   offsets AND no positioned ancestor, its containing block was the
+   initial containing block, so it stopped travelling with .cgSide's
+   scroll and kept the static position it would have had in the
+   unscrolled column - around y=1077 on an 860px window, well below the
+   fold. Clicking the label focused it, the browser scrolled an
+   off-screen focused element into view, and the whole shell slid up
+   leaving the page background showing underneath it. Anchoring it to
+   .cgLogo keeps it where the user is actually looking, so focusing it
+   scrolls nothing. */
 .cgLogo__file {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px;
   height: 1px;
   opacity: 0;
@@ -2560,6 +2584,7 @@
   }
 
   .cgMobileTabs__tab {
+    position: relative; /* anchors .cgMobileTabs__pct, see below */
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -2625,6 +2650,8 @@
      own text used at phone width before this bar existed */
   .cgMobileTabs__pct {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 1px;
     height: 1px;
     overflow: hidden;

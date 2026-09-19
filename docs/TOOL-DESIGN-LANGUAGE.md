@@ -52,6 +52,18 @@ route.
 mode changes what is primary, the fill moves rather than multiplying:
 in edit mode `Save` is filled and `Export` drops to ghost. Never two.
 
+**Anchor anything you hide with `position: absolute`.** A visually
+hidden but still focusable control (a file input behind a label, a
+checkbox behind a switch) needs an offset of its own AND a positioned
+parent. With neither, its containing block is the initial containing
+block: it stops travelling with the panel's scroll and keeps the static
+position it would have had in the unscrolled column, which for a block
+low in a long panel is below the fold. Focusing it, which is what
+clicking the label does, makes the browser scroll an off-screen focused
+element into view, and the whole shell slides up with the page
+background showing underneath. `/contract` shipped this on its logo
+field and had it twice more in the same stylesheet.
+
 **No em dashes anywhere,** including code comments and generated document
 prose. Hyphens, commas, or restructure.
 
