@@ -151,9 +151,16 @@
      needs the lighter step to clear 4.5:1 */
   --cg-accent: #a78bfa;
   --cg-accent-fg: #17141f;
-  --cg-paper: #1e1e1e;
-  --cg-paper-fg: #ece8e1;
-  --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
+  /* the document is paper in both themes. The toggle dresses the chrome
+     around it; the artifact is the thing being printed, and a contract
+     that previews dark and prints white is a preview that lies. A user
+     who wants a dark sheet sets Background and Text in the Colors group,
+     which override these. Mirrored by PAPER_DEFAULT in SidePanel.tsx. */
+  --cg-paper: #ffffff;
+  --cg-paper-fg: #1f1f1f;
+  /* a white sheet on a near-black ground needs the heavier halo to sit on
+     the surface rather than glow off it */
+  --cg-paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 22px 52px rgba(0, 0, 0, 0.6);
   /* same role as light's --cg-dot, flipped to the light ink base (matching
      --cg-fg's rgb) since the surface behind the sheet is now near-black */
   --cg-dot: rgba(244, 241, 234, 0.07);
@@ -1410,6 +1417,18 @@
   font-family: var(--cg-doc-body, var(--font-primary));
   font-size: 14.5px;
   line-height: 1.6;
+}
+
+/* the document sets its own selection colours instead of inheriting the
+   UA's. color-scheme is "only dark" on the dark shell, which is right for
+   the chrome, but the sheet inside it stays paper-white, so a UA dark
+   highlight would land light-on-white and swallow the text being
+   selected. Derived from the document's own colours so a user-picked
+   Background/Text pair carries through. */
+.cgShell .cgDoc::selection,
+.cgShell .cgDoc *::selection {
+  background: color-mix(in srgb, var(--cg-doc-accent, var(--cg-accent)) 28%, transparent);
+  color: var(--cg-doc-fg, var(--cg-paper-fg));
 }
 
 /* above the title, never dominating the page: capped well under the

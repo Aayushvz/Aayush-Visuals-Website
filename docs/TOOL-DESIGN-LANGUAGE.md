@@ -154,6 +154,20 @@ from the chrome around it. Also set `color-scheme: only light` / `only
 dark` per theme block, or native inputs, scrollbars and autofill follow
 the OS instead of your toggle.
 
+**On its own axis means the artifact does not follow the toggle.**
+`/contract` defaults to dark chrome and its document is paper-white in
+both themes, because the artifact is the thing being printed and a
+contract that previews dark then prints white is a preview that lies. The
+toggle dresses the working surface; a user who wants a dark sheet sets the
+document's own Background and Text.
+
+Two consequences. `color-scheme: only dark` is right for the chrome but
+the sheet inside it is light, so give the artifact an explicit
+`::selection` or the UA picks a dark-mode highlight and drops it on white.
+And any constant mirroring the paper tokens in JS (a contrast readout's
+baseline, say) stops being keyed by theme: collapse it rather than leaving
+two identical branches and a now-dead `theme` prop feeding them.
+
 ---
 
 ## 3. Layout shape

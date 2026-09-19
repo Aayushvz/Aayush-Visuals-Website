@@ -49,7 +49,7 @@ export default function ContractGenerator() {
   };
   /* first paint is always light, then the toggle owns it. Deliberately not
      persisted: leaving the route is the way back from any choice here. */
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [skin, setSkin] = useState<Skin>("studio");
   /* "design" is the third stop, added for the phone-width bottom tab bar
      (see MobileTabBar.tsx): it shows the side panel as the tab's whole
@@ -232,7 +232,6 @@ export default function ContractGenerator() {
           setToggle={setToggle}
           skin={skin}
           onSkin={setSkin}
-          theme={theme}
           style={style}
           setStyleField={setStyleField}
           logo={logo}

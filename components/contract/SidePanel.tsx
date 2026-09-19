@@ -65,30 +65,23 @@ const FONT_OPTIONS: { value: string; label: string }[] = [
   { value: 'ui-monospace, "SF Mono", monospace', label: "System Mono" },
 ];
 
-/* mirrors --cg-paper/--cg-paper-fg's light and dark values in
-   contract.css exactly. Used only as the contrast readout's baseline
-   for whichever colour the user has NOT set (see effectiveColor below)
-   - never applied to the document itself, which gets its actual default
-   from the CSS fallback chain (var(--cg-doc-bg, var(--cg-paper))), not
-   from this constant. Keeping the two in sync is a comment's job, not
-   code's: there is no way to read a CSS custom property's value out of
+/* mirrors --cg-paper/--cg-paper-fg in contract.css exactly. Not keyed by
+   theme, because the document is paper-white in both: the light/dark
+   toggle dresses the chrome, not the artifact. Used only as the contrast
+   readout's baseline for whichever colour the user has NOT set - never
+   applied to the document itself, which gets its actual default from the
+   CSS fallback chain (var(--cg-doc-bg, var(--cg-paper))), not from this
+   constant. Keeping the two in sync is a comment's job, not code's:
+   there is no way to read a CSS custom property's value out of
    contract.css from here without a DOM round trip, and this is a
    readout, not the styling mechanism itself. */
-const PAPER_DEFAULT: Record<"light" | "dark", { bg: string; fg: string }> = {
-  light: { bg: "#ffffff", fg: "#1f1f1f" },
-  dark: { bg: "#1e1e1e", fg: "#ece8e1" },
-};
+const PAPER_DEFAULT = { bg: "#ffffff", fg: "#1f1f1f" };
 
 type Props = {
   draft: Draft;
   setToggle: (name: keyof Toggles, value: boolean) => void;
   skin: Skin;
   onSkin: (s: Skin) => void;
-  /* the screen theme, needed only for the contrast readout's baseline
-     (see PAPER_DEFAULT above) - never written back to the document,
-     which stays on its own axis per the "app chrome tokens stay on
-     .cgShell[data-cg-theme=...]" rule */
-  theme: "light" | "dark";
   style: DocStyle;
   setStyleField: <K extends keyof DocStyle>(name: K, value: DocStyle[K]) => void;
   logo: string | null;
@@ -156,7 +149,7 @@ function useIsMobileNav(): boolean {
 }
 
 export default function SidePanel({
-  draft, setToggle, skin, onSkin, theme, style, setStyleField, logo, logoMessage, onLogoFile,
+  draft, setToggle, skin, onSkin, style, setStyleField, logo, logoMessage, onLogoFile,
   onRemoveLogo, onPrint, onWord, onMarkdown, open, onClose,
   collapsed, onToggleCollapse, mobileActive, onReset,
 }: Props) {
@@ -207,14 +200,13 @@ export default function SidePanel({
 
   /* what the contrast readout scores: the user's own pick where they
      made one, otherwise the same baseline the CSS fallback chain itself
-     lands on for the active theme (see PAPER_DEFAULT above and .cgDoc's
+     lands on (see PAPER_DEFAULT above and .cgDoc's
      var(--cg-doc-bg, var(--cg-paper)) in contract.css) - heading with no
      explicit colour inherits the text colour in the real document
      (color: var(--cg-doc-heading-color, inherit)), so its effective
-     value here does the same rather than assuming the theme default. */
-  const paperDefault = PAPER_DEFAULT[theme];
-  const effectiveBg = style.background || paperDefault.bg;
-  const effectiveText = style.text || paperDefault.fg;
+     value here does the same rather than assuming the paper default. */
+  const effectiveBg = style.background || PAPER_DEFAULT.bg;
+  const effectiveText = style.text || PAPER_DEFAULT.fg;
   const effectiveHeading = style.heading || effectiveText;
   const bodyRatio = contrastRatio(effectiveText, effectiveBg);
   const headingRatio = contrastRatio(effectiveHeading, effectiveBg);
@@ -306,6 +298,11 @@ export default function SidePanel({
         </div>
 
         <div className="cgSide__block">
+          <p className="cgSide__eyebrow">Logo</p>
+          <LogoField logo={logo} message={logoMessage} onFile={onLogoFile} onRemove={onRemoveLogo} />
+        </div>
+
+        <div className="cgSide__block">
           <p className="cgSide__eyebrow">Colors</p>
           <ColorField
             id="cg-style-accent"
@@ -368,11 +365,6 @@ export default function SidePanel({
             value={style.bodyFont}
             onChange={(v) => setStyleField("bodyFont", v)}
           />
-        </div>
-
-        <div className="cgSide__block">
-          <p className="cgSide__eyebrow">Logo</p>
-          <LogoField logo={logo} message={logoMessage} onFile={onLogoFile} onRemove={onRemoveLogo} />
         </div>
 
         <div className="cgSide__block">
