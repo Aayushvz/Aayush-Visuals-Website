@@ -320,21 +320,35 @@ export function BehanceIcon({ className }: IconProps) {
 }
 
 export function InstagramIcon({ className }: IconProps) {
+  /* Filled, not stroked. The same geometry this glyph always had (rounded
+     body, lens, corner dot), inverted: the body is filled and the lens
+     and dot are knocked out of it with evenodd. Filled because Behance
+     below is a real wordmark that cannot be expressed as an outline, and
+     one filled mark beside two 1.5px outlines makes the footer row read
+     as three different families. At 18px a fill also survives better
+     than a hairline. */
   return (
-    <svg className={iconClass(className)} {...svgProps}>
-      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <path d="M17 7v.01" />
+    <svg className={iconClass(className)} {...svgProps} fill="currentColor" stroke="none">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.5 3.25h7A5.25 5.25 0 0 1 20.75 8.5v7a5.25 5.25 0 0 1-5.25 5.25h-7A5.25 5.25 0 0 1 3.25 15.5v-7A5.25 5.25 0 0 1 8.5 3.25Zm3.5 4.9a3.85 3.85 0 1 0 0 7.7 3.85 3.85 0 0 0 0-7.7Zm5-1.25a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"
+      />
     </svg>
   );
 }
 
 export function LinkedInIcon({ className }: IconProps) {
+  /* Filled for the same reason as Instagram above: same geometry as the
+     stroked version it replaces, with the "in" knocked out of the body
+     rather than drawn on top of it. */
   return (
-    <svg className={iconClass(className)} {...svgProps}>
-      <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
-      <path d="M8 10.5v6M8 7.5v.01" />
-      <path d="M12 16.5v-6M12 12.7a2.3 2.3 0 0 1 4.5 0v3.8" />
+    <svg className={iconClass(className)} {...svgProps} fill="currentColor" stroke="none">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M7.5 3.25h9a4.25 4.25 0 0 1 4.25 4.25v9a4.25 4.25 0 0 1-4.25 4.25h-9A4.25 4.25 0 0 1 3.25 16.5v-9A4.25 4.25 0 0 1 7.5 3.25ZM6.9 10.2h2.2v6.6H6.9v-6.6Zm1.1-3.3a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm3 3.3h2.1v.9a2.9 2.9 0 0 1 2.3-1.05c1.7 0 2.8 1.1 2.8 3.15v3.6h-2.2v-3.3c0-1-.4-1.55-1.25-1.55-.8 0-1.35.55-1.35 1.55v3.3H11v-6.6Z"
+      />
     </svg>
   );
 }
