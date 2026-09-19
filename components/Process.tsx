@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import ExtCta from "./ExtCta";
 
 /*
-  How a product gets made, as a dial.
+  How I build better products, as a dial.
 
   What this replaced: one horizontal dimension line with three stations hung
   off it — Discover / Design / Deliver as three columns of body copy. It was
@@ -275,7 +275,7 @@ export default function Process() {
                 </span>
 
                 <h2 className="process__heading" id="process-heading">
-                  How a product gets made.
+                  How I build better products.
                 </h2>
 
                 <div className="procHalo__cta">
