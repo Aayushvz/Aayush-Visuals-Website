@@ -217,6 +217,15 @@ hierarchy.
 
 ## 8. Standing conventions
 
+> **Building a tool?** Full-screen working surfaces with panels, controls
+> and a live artifact (`/contract` is the reference) have their own
+> layer on top of this document:
+> [`docs/TOOL-DESIGN-LANGUAGE.md`](docs/TOOL-DESIGN-LANGUAGE.md). It
+> covers the control and panel token scales, the route-scoped theme
+> exception, layout and breakpoint derivation, and the output rules for
+> tools that generate a document. This file still governs everything
+> underneath it.
+
 - **No em dashes** in any visible copy — use hyphens, commas, or restructure.
 - **Minimal / thin-outline default** — prefer restrained, outline, semi-bold
   (≤600) over heavy/filled. No gradient text, no side-stripe accents, no
