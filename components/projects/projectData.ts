@@ -5197,8 +5197,10 @@ const SELECTED_IDS = [
   "layover",
   "elevation-capital",
   "cpgrams",
-  "riviera",
-  "yantra",
+  /* the website Gravitas, not "gravitas-showcase", which is the identity
+     piece built on the same fest */
+  "gravitas",
+  "posterfolio",
 ];
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {

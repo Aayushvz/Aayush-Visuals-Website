@@ -1104,7 +1104,12 @@ html.has-cursor .cursorRing {
   position: relative;
   z-index: 5;
   margin-top: -100vh;
-  background-color: #fffdfa;
+  /* --cream, like every other light section. About used to sit a shade
+     brighter (#fffdfa) than the rest of the page, which made it the one
+     light surface that did not match its neighbours. The stage, the panel
+     and the stepped bands are one surface and have to move together, or
+     the steps rise in a colour the panel behind them is not. */
+  background-color: var(--cream);
 }
 
 /* the choreography spacer must be CONTENT (not padding) — a sticky child
@@ -1127,7 +1132,7 @@ html.has-cursor .cursorRing {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: #fffdfa;
+  background: var(--cream);
   /* sharp corners — the live-site transition language is flat, square-edged
      stepped surfaces; the top stays visible so .about__steps can rise
      above it, and everything below is clipped by .about__inner instead. */
@@ -1167,7 +1172,9 @@ html.has-cursor .cursorRing {
 .about__step {
   position: absolute;
   bottom: 0;
-  background: #fffdfa;
+  /* the bands are the panel's own top edge arriving early, so they are the
+     panel's colour by definition */
+  background: var(--cream);
 }
 
 .about__step--l2 {

@@ -41,11 +41,16 @@ be handled on its own, which is a second layout to maintain for a single tile.
 | --- | --- | --- | --- |
 | 0 | 1.52 / 1 | Mike Tyson Invitational | Layover |
 | 1 | 1 / 1.52 | CPGRAMS | Elevation Capital |
-| 2 | 1.52 / 1 | Riviera | Yantra |
+| 2 | 1.52 / 1 | Gravitas | Posterfolio |
 
-Posterfolio came out of `SELECTED_IDS` to make the count even. It is untouched
-in `PROJECTS`, so it still renders on `/work` and keeps its case study; the
-archive count on the closing panel picks it up automatically.
+Riviera and Yantra came out of `SELECTED_IDS`. They are untouched in
+`PROJECTS`, so they still render on `/work` and keep their case studies; the
+archive count on the closing panel picks them up automatically.
+
+Gravitas here is the website (`"gravitas"`), not `"gravitas-showcase"`, which
+is the identity piece built on the same fest. Both cover crops are tighter
+than the rest of the reel: Gravitas is a 4:3 source and Posterfolio is 1.28:1,
+so a 3:2 frame trims roughly 11% and 15% off their heights respectively.
 
 `SelectedWorks.tsx` throws at module scope if the row plan does not cover
 `SELECTED_PROJECTS`, so a seventh project added to `SELECTED_IDS` with no row
@@ -112,6 +117,15 @@ header owns the one primary button in this view). It stops being the ledger's
 eighth line and takes the collage's geometry: a full-width outlined panel at
 the cards' radius, name left, archive count right, the cards' own badge at the
 end. Fills purple on hover, and the badge inverts to cream inside it.
+
+## Section background
+
+The About surface moved from `#fffdfa` to `--cream`, the colour every other
+light section on the page already used. It was the one light surface that did
+not match its neighbours. The stage, the panel and the stepped bands that
+rise above its top edge are one surface and all three moved together; leaving
+any behind would have had the steps arrive in a colour the panel behind them
+is not.
 
 ## Side rails
 
