@@ -48,22 +48,24 @@ export default function ProjectsSection() {
       </div>
       <SelectedWorks />
       {/*
-        The closing CTA used to be the ledger's eighth line, sharing the
-        rows' three columns so that after counting 01 to 07 the numeral
-        column resolved into an arrow. Those columns went with the rows, so
-        it takes the collage's geometry instead: a full-width panel at the
-        cards' own radius, ending on the same badge the cards carry in
-        their corners. The section still finishes by pointing somewhere.
+        The closing action is the reel's seventh caption, not a button.
+
+        It was a full-width outlined panel at the cards' radius, which drew
+        a box around a line of text and a great deal of nothing. The line
+        was never the problem, so the box went: this now sits on the same
+        two anchors every card caption uses, label at the left edge and
+        muted meta at the right, and the space above it is what separates
+        it rather than a border.
       */}
       <PageLink href="/work" className="selWorks__endCta" data-reveal>
-        <span className="selWorks__endCtaText">
-          <span className="selWorks__endCtaName">View all projects</span>
-          <span className="selWorks__endCtaNote">
-            {archived} more in the archive
+        <span className="selWorks__endCtaName">
+          View all projects
+          <span className="selWorks__endCtaIcon" aria-hidden>
+            <ArrowUpRight />
           </span>
         </span>
-        <span className="selWorks__endCtaIcon" aria-hidden>
-          <ArrowUpRight />
+        <span className="selWorks__endCtaNote">
+          {archived} more in the archive
         </span>
       </PageLink>
     </section>

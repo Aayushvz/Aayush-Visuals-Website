@@ -214,10 +214,12 @@ Use it for the single most important action in a section. Props: `href`,
 a route change plays the page-transition wipe; omit for in-page hashes).
 
 Do not reach for it twice in one view. Selected Works deliberately pairs it
-with `.selWorks__endCta`, which is an outlined panel belonging to the project
-reel rather than a button. It takes the cards' own radius and badge, sits
-flat until hover, and only then fills. Two primary buttons there would
-flatten the section's hierarchy.
+with `.selWorks__endCta`, which is not a button at all: it is the reel's
+seventh caption, on the same two anchors and in the same faces the card
+captions use, label left and muted count right. Two primary buttons there
+would flatten the section's hierarchy. It was briefly an outlined panel at
+the cards' radius, which drew a border around one line of text and a lot of
+empty; the line was never the problem, so the box went.
 
 ---
 

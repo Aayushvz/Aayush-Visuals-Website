@@ -3795,6 +3795,12 @@ html.has-cursor .cursorRing {
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.15;
+  /* the longest name in the reel runs out of room on a 288px card at 320px
+     wide, which is the one width where this line cannot stay a line. It
+     wraps rather than hiding the category, and balance keeps the wrap from
+     dropping a single orphan word under a full one (DESIGN.md section 3
+     asks for this on h1-h3, and this is an h3) */
+  text-wrap: balance;
   color: var(--ink);
   transition: color 0.25s ease-out;
 }
@@ -3838,6 +3844,27 @@ html.has-cursor .cursorRing {
   }
 }
 
+/*
+  A touch screen has no hover to reveal it with, so the badge stands.
+
+  This is the same decision the pointer version makes and not a different
+  one: the badge is there to say the card opens something. On a pointer
+  the cursor already says that while hovering, so the badge can wait for
+  the hover and arrive as part of it. On a phone nothing says it at all,
+  so leaving the badge behind a state that device cannot enter would just
+  delete the affordance.
+
+  Keyed on `hover: none` rather than a width, because the thing that
+  decides this is whether the device can hover, not how wide it is. A
+  touch laptop at 1400px has the same problem as a phone at 390.
+*/
+@media (hover: none) {
+  .selWork__badge {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 /* The keyboard gets the pointer's whole resolution, plus a ring the
    pointer has no use for. Deliberately outside the hover query: a
    touch-screen laptop with a keyboard matches neither `hover: hover` nor
@@ -3860,47 +3887,39 @@ html.has-cursor .cursorRing {
   scale: 1;
 }
 
-/* -------- closing CTA: the reel's last panel --------
+/* -------- closing action: the reel's seventh caption --------
 
-   Geometry comes from the collage rather than from the ledger it used to
-   close: full width at the cards' own radius, ending on the same badge the
-   cards carry in their corners.
+   Not a button, and no longer a panel either. It was a full-width outlined
+   box at the cards' radius, which is a lot of border drawn around one line
+   of text and a great deal of empty. The line was never the problem, so
+   the box went.
 
-   Still not a second .extCta. The header owns the one primary button in
-   this view (DESIGN.md §7), so this is an outlined panel at rest and only
-   fills on hover, the same event arriving as a surface instead of as a
-   shape that was already solid. */
+   What is left sits on the same two anchors every card caption uses, label
+   at the left edge and muted meta at the right, in the same faces and
+   sizes. So it reads as the caption after the last card rather than as a
+   control that wandered in, and the space above it does the separating a
+   border was doing badly.
+
+   Still not a second .extCta: the header owns the one primary button in
+   this view (DESIGN.md section 7). */
 .selWorks__endCta {
-  display: flex;
-  align-items: center;
-  gap: clamp(16px, 2.4vw, 40px);
-  margin-top: var(--selw-rowGap);
-  padding: clamp(24px, 3vw, 40px) clamp(20px, 2.2vw, 34px);
-  border: 1px solid var(--selw-line);
-  border-radius: var(--selw-radius);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  /* the fill is the event, so it gets the longer, softer curve and the
-     colour changes ride along underneath it */
-  transition: background-color 0.4s var(--ease-quint),
-    border-color 0.3s ease-out;
-}
-
-/* one row on the desktop line, a stack once the panel narrows */
-.selWorks__endCtaText {
-  flex: 1 1 auto;
-  min-width: 0;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: clamp(14px, 2vw, 34px);
+  margin-top: clamp(30px, 4vw, 62px);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* set a step above the cards' captions: this is the line that ends the
-   section, so it carries more weight than the seven it closes */
+/* the card name's face and weight, one step up in size because this is the
+   line that ends the section */
 .selWorks__endCtaName {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45em;
   font-family: var(--font-primary);
-  font-size: clamp(15.5px, 1.55vw, 22px);
+  font-size: clamp(15.5px, 1.4vw, 21px);
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.15;
@@ -3908,8 +3927,7 @@ html.has-cursor .cursorRing {
   transition: color 0.25s ease-out;
 }
 
-/* lands on the cards' own right-hand slot, where their category and year
-   sit, so the panel reads as one more caption line */
+/* lands where the cards put their category and year */
 .selWorks__endCtaNote {
   flex: 0 0 auto;
   font-family: var(--font-primary);
@@ -3921,77 +3939,54 @@ html.has-cursor .cursorRing {
   transition: color 0.25s ease-out;
 }
 
-/* the cards' badge, at the end of a line instead of in a corner. Same
-   size, same glyph, so the two resolve as one object */
+/* a glyph on the baseline, not the cards' disc: the disc is the object a
+   card wears, and this is a line of type */
 .selWorks__endCtaIcon {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: clamp(38px, 3.4vw, 58px);
-  height: clamp(38px, 3.4vw, 58px);
-  border-radius: 50%;
-  border: 1px solid var(--selw-line);
-  color: var(--ink);
-  transition: background-color 0.32s var(--ease-quint),
-    border-color 0.32s var(--ease-quint), color 0.32s var(--ease-quint);
-}
-
-.selWorks__endCtaIcon svg {
-  width: 42%;
-  height: 42%;
+  display: inline-block;
+  width: 0.78em;
+  height: 0.78em;
+  /* em sizing puts it on the label's own scale; this nudge sits it on the
+     cap height rather than the baseline it would otherwise ride */
+  transform: translateY(0.02em);
   transition: transform 0.42s var(--ease-quint);
 }
 
-/*
-  The whole panel fills, and the badge inverts inside it: on the cards the
-  disc is cream on photography, so on a purple panel it is cream on purple,
-  which is the same relationship and not a new one.
-
-  Each piece of text is on its own step of the ink (100%, then 66%), and
-  both of those are ratios against cream, not against purple. So they
-  resolve out of white rather than being carried across unchanged; the note
-  in particular would be near-invisible left as it was on a saturated fill.
-*/
-.selWorks__endCta:hover,
-.selWorks__endCta:focus-visible {
-  background: var(--purple);
-  border-color: var(--purple);
+.selWorks__endCtaIcon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.75;
 }
+
 .selWorks__endCta:hover .selWorks__endCtaName,
 .selWorks__endCta:focus-visible .selWorks__endCtaName {
-  color: #fff;
-}
-/* 85% and not lower: on this purple that is 4.54:1, which clears the 4.5
-   bar. 78% looked right but measured 4.08:1. */
-.selWorks__endCta:hover .selWorks__endCtaNote,
-.selWorks__endCta:focus-visible .selWorks__endCtaNote {
-  color: rgba(255, 255, 255, 0.85);
-}
-.selWorks__endCta:hover .selWorks__endCtaIcon,
-.selWorks__endCta:focus-visible .selWorks__endCtaIcon {
-  background: var(--cream);
-  border-color: var(--cream);
   color: var(--purple);
 }
-.selWorks__endCta:hover .selWorks__endCtaIcon svg,
-.selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
-  transform: translate(3px, -3px);
+
+.selWorks__endCta:hover .selWorks__endCtaNote,
+.selWorks__endCta:focus-visible .selWorks__endCtaNote {
+  color: rgba(31, 31, 31, 0.82);
+}
+
+.selWorks__endCta:hover .selWorks__endCtaIcon,
+.selWorks__endCta:focus-visible .selWorks__endCtaIcon {
+  transform: translate(3px, calc(0.02em - 3px));
 }
 
 .selWorks__endCta:focus-visible {
   outline: 2px solid var(--purple);
-  outline-offset: 3px;
+  outline-offset: 4px;
+  border-radius: 3px;
 }
 
-/* Every hover here resolves as colour as well as travel, so taking the
-   travel away still leaves the state legible. */
 /* The badge still appears, because it IS the hover state and removing it
    would leave the card with nothing to say it was hovered. What goes is
    the travel: the cover stops zooming, the badge stops growing in, and the
    closing panel's arrow stops moving. */
 @media (prefers-reduced-motion: reduce) {
-  .selWork__img,
-  .selWorks__endCtaIcon svg {
+  .selWork__img {
+    transition: none;
+  }
+  .selWorks__endCtaIcon {
     transition: none;
   }
   .selWork__badge {
@@ -4000,9 +3995,9 @@ html.has-cursor .cursorRing {
   }
   .selWork:hover .selWork__img,
   .selWork:focus-visible .selWork__img,
-  .selWorks__endCta:hover .selWorks__endCtaIcon svg,
-  .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
-    transform: none;
+  .selWorks__endCta:hover .selWorks__endCtaIcon,
+  .selWorks__endCta:focus-visible .selWorks__endCtaIcon {
+    transform: translateY(0.02em);
   }
 }
 
@@ -4042,13 +4037,9 @@ html.has-cursor .cursorRing {
     grid-template-columns: 1fr;
     gap: var(--selw-rowGap);
   }
+  /* the label and the count stop competing for one line and stack, which
+     is what a card caption would do if it had two things to say */
   .selWorks__endCta {
-    gap: 16px;
-    padding: 22px 18px;
-  }
-  /* the name and the note stop competing for one line and stack, which is
-     also how the cards' captions would go if they had two things to say */
-  .selWorks__endCtaText {
     flex-direction: column;
     align-items: flex-start;
     gap: 7px;
@@ -10823,7 +10814,6 @@ html.dpl-page .preloader {
    transition here would clobber its box-shadow one. */
 .ctaPill,
 .footer__contactCta,
-.selWorks__endCta,
 .seaFooter__topBtn,
 .contactPage__submit,
 .hc__submit,
@@ -10836,7 +10826,6 @@ html.dpl-page .preloader {
 
 .ctaPill:active,
 .footer__contactCta:active,
-.selWorks__endCta:active,
 .seaFooter__topBtn:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
@@ -10854,9 +10843,11 @@ html.dpl-page .preloader {
   transition-duration: var(--dur-press);
 }
 
-/* Nav links are text, not buttons: they dim on press instead of moving. */
+/* Nav links are text, not buttons: they dim on press instead of moving.
+   The reel's closing action is a line of type too, so it joins them. */
 .navbar__links a,
-.mobileNavCard__link {
+.mobileNavCard__link,
+.selWorks__endCta {
   transition: opacity var(--dur-press) var(--ease-quint);
 }
 
@@ -10888,7 +10879,8 @@ html.dpl-page .preloader {
 }
 
 .navbar__links a:active,
-.mobileNavCard__link:active {
+.mobileNavCard__link:active,
+.selWorks__endCta:active {
   opacity: 0.6;
 }
 
@@ -10899,7 +10891,6 @@ html.dpl-page .preloader {
 @media (prefers-reduced-motion: reduce) {
   .ctaPill:active,
 .footer__contactCta:active,
-.selWorks__endCta:active,
 .seaFooter__topBtn:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,

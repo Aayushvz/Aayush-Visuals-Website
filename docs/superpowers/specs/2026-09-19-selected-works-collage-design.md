@@ -110,13 +110,38 @@ full-width hairlines spanned the frame behind it: rules out to the rail, text
 in to the content column. With the rules gone the indent had nothing to explain
 it, so header, cards and closing panel now share the 72px rail edge.
 
-## Closing CTA
+## Closing action
 
 Still `.selWorks__endCta`, still not a second `.extCta` (DESIGN.md §7: the
-header owns the one primary button in this view). It stops being the ledger's
-eighth line and takes the collage's geometry: a full-width outlined panel at
-the cards' radius, name left, archive count right, the cards' own badge at the
-end. Fills purple on hover, and the badge inverts to cream inside it.
+header owns the one primary button in this view), and no longer a panel
+either. It shipped once as a full-width outlined box at the cards' radius,
+which is a lot of border drawn around one line of text and a great deal of
+empty: 131px tall to carry 23px of type.
+
+It is now the reel's seventh caption. Same two anchors every card caption
+uses, label at the grid's left edge and muted count at the right, same faces,
+same baseline. Measured at 1440: 23px tall, the count's right edge at 1353px,
+which is exactly the last card's right edge and the last caption's right
+edge. The arrow is an inline glyph at `0.78em` on the label's own scale
+rather than the cards' disc, because the disc is the object a card wears and
+this is a line of type. Hover takes the label to purple and travels the
+arrow; press dims rather than scales, so it also moved out of the
+scale-on-press list in the micro-interaction layer and into the text-link
+one.
+
+## Touch
+
+The badge lives in `@media (hover: hover)`, so on a phone it would never
+appear: there is no hover to reveal it with, and the cursor pill that carries
+the affordance on a pointer does not exist either. `@media (hover: none)`
+stands it permanently. Keyed on hover capability rather than width, because
+what decides it is whether the device can hover, not how wide it is; a touch
+laptop at 1400px has the same problem as a phone at 390.
+
+At 375 the badge lands at 11.8% of the card, against 11.4% in the reference.
+At 320 the longest name wraps to two lines, which is the one width where this
+caption cannot stay a line; it wraps rather than hiding the category, and
+`text-wrap: balance` keeps the wrap from orphaning a word.
 
 ## Section background
 
