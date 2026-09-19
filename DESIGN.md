@@ -100,9 +100,10 @@ cap body line length ~65–75ch.
 
 ## 4. Spacing & layout
 
-- **Rulers:** the fixed side rails sit at `--page-rail-inset:
-  clamp(14px, 5vw, 78px)`. Content stays clear of them at
-  `--page-content-inset: clamp(44px, 9vw, 132px)`.
+- **Insets:** `--page-rail-inset: clamp(14px, 5vw, 78px)` is where a
+  full-bleed element starts; `--page-content-inset: clamp(44px, 9vw, 132px)`
+  is where text sits inside that. Both are still the page's left and right
+  edges even though the homepage no longer draws a line on them.
 - **Grid:** `--grid-size: 20.28px` for the dotted background grid.
 - **Rhythm:** vary vertical spacing for rhythm (generous section separation,
   tight groupings). Section vertical padding is typically `clamp(48px, 8vh, …)`.
@@ -182,8 +183,12 @@ The homepage is a scroll narrative. Two patterns recur:
    previous one (which carries a higher `z-index`) so the previous panel slides
    away to reveal it (Process → Skills).
 
-Side **rails** (`.rails`, `.capRails`, `.aboutRulers`) are the connective visual
-language — thin vertical lines at `--page-rail-inset`.
+Side **rails** are thin vertical lines at `--page-rail-inset`. The homepage
+does not draw them: the fixed pair came off with the Selected Works ledger,
+since the reel was the section they framed. They survive where a section
+composes with them deliberately, `.aboutRulers` on /about and the
+section-scoped `.statement__rail` and `.process__rails`, rather than as a
+page-wide frame.
 
 ---
 

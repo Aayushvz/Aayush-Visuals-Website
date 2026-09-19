@@ -342,13 +342,32 @@ html.has-cursor .cursorRing {
   }
 }
 
-/* ---------- side rails (light sections below the hero) ---------- */
+/* ---------- side rails (light sections below the hero) ----------
+
+   On the homepage they run to The Skills Deck and stop; everything from
+   there down sets its own edges (see components/RailsEnd.tsx, which owns
+   the boundary and the `past-rails` flag). They are fixed, so they cannot
+   simply end at a point in the document: they fade instead, over the
+   length of the panel arriving underneath them.
+
+   /about renders .rails too and never sets the flag, so its pair is
+   untouched. */
 
 .rails {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 40;
+  transition: opacity 0.5s var(--ease-quint);
+}
+
+.past-rails .rails {
+  opacity: 0;
+}
+
+/* zero-height marker at the boundary, not a drawn thing */
+.railsEnd {
+  height: 0;
 }
 
 .rails::before,
@@ -1842,30 +1861,6 @@ html.has-cursor .cursorRing {
   flex-direction: column;
 }
 
-.process__rails {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 4;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.process--active .process__rails {
-  opacity: 1;
-}
-
-.process__rail {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(31, 31, 31, 0.08);
-}
-
-.process__rail--left { left: var(--page-rail-inset); }
-.process__rail--right { right: var(--page-rail-inset); }
-
 .process__inner {
   /* the pane is a 100vh sticky; the composition is radial, so it centres in
      whatever height is left under the torn edge rather than sitting on a
@@ -2784,11 +2779,6 @@ html.has-cursor .cursorRing {
     width: 17px;
     height: 17px;
   }
-
-  .process__rail--left,
-.process__rail--right {
-    display: none;
-  }
 }
 
 /* Narrow phones. The fan runs out of width first, so the pivot slides left
@@ -3592,8 +3582,8 @@ html.has-cursor .cursorRing {
 /* ============================================================
    Selected works: a staggered collage
 
-   Two cards to a row, top-aligned, every frame 3:2, and a column split
-   that alternates 1.52fr/1fr then 1fr/1.52fr. One ratio over two unequal
+   Six projects in three pairs, top-aligned, every frame 3:2, and a column
+   split that alternates 1.52fr/1fr then 1fr/1.52fr. One ratio over two unequal
    widths is the whole mechanic: the wide card resolves taller than the
    narrow one beside it, so no two captions in a row land on the same
    baseline. Nothing is hand-offset, and reordering the reel cannot break
@@ -3682,7 +3672,7 @@ html.has-cursor .cursorRing {
   gap: var(--selw-rowGap);
 }
 
-.selWorks__row--pair {
+.selWorks__row {
   display: grid;
   grid-template-columns: var(--selw-split);
   gap: var(--selw-gap);
@@ -3710,13 +3700,11 @@ html.has-cursor .cursorRing {
   border-radius: var(--selw-radius);
   aspect-ratio: 3 / 2;
   background: #e7e1d7;
-}
-
-/* The opener is alone on its row, and it runs 16/9 rather than the reel's
-   3/2: three-by-two across the full content width is over 850px tall,
-   which is a section, not a card. */
-.selWorks__row--solo .selWork__frame {
-  aspect-ratio: 16 / 9;
+  /* so the badge can be sized as a share of THIS card rather than of the
+     viewport: the reel's two widths differ by half again, and a badge in
+     viewport units reads correct on the wide card and oversized on the
+     narrow one */
+  container-type: inline-size;
 }
 
 .selWork__img {
@@ -3729,40 +3717,42 @@ html.has-cursor .cursorRing {
 }
 
 /*
-  The badge is permanent, not a hover reveal.
+  The badge arrives on hover and is not there otherwise.
 
-  The global cursor (components/Cursor.tsx) already morphs into a "View
-  project" pill over these tiles, so a badge that faded in on hover would
-  announce the same thing twice, a beat apart. Standing there instead, it
-  is the card's corner furniture, and it spends its hover state resolving
-  rather than arriving.
+  It is the hover state rather than an object with one, so it does not also
+  change colour or travel on arrival: it grows in from 0.86 and that is the
+  whole event. Two things moving at once here would read as a flinch.
 
-  It is a filled cream disc rather than the hairline ring the rest of the
-  site reaches for, because it sits on arbitrary photography: an outline in
-  ink vanishes on a dark cover and an outline in white vanishes on a pale
-  one. A disc is legible over every cover in the reel, and over whichever
-  covers replace them.
+  A filled disc, not the hairline ring the rest of the site reaches for,
+  because it lands on arbitrary photography where an ink outline vanishes
+  on a dark cover and a white one vanishes on a pale cover. --card-hover is
+  the site's cream-lifted-off-the-page token, which is exactly the job.
+
+  Sized in cqw against the frame, so it holds the same share of a 759px
+  card and a 499px one.
 */
 .selWork__badge {
   position: absolute;
-  top: clamp(11px, 1.1vw, 20px);
-  right: clamp(11px, 1.1vw, 20px);
+  top: clamp(11px, 1.6cqw, 22px);
+  right: clamp(11px, 1.6cqw, 22px);
   display: grid;
   place-items: center;
-  width: clamp(38px, 3.4vw, 58px);
-  height: clamp(38px, 3.4vw, 58px);
+  width: clamp(40px, 9cqw, 76px);
+  height: clamp(40px, 9cqw, 76px);
   border-radius: 50%;
-  border: 1px solid rgba(31, 31, 31, 0.1);
-  background: var(--cream);
+  border: 1px solid rgba(31, 31, 31, 0.08);
+  background: var(--card-hover);
   color: var(--ink);
-  transition: background-color 0.32s var(--ease-quint),
-    border-color 0.32s var(--ease-quint), color 0.32s var(--ease-quint);
+  opacity: 0;
+  scale: 0.86;
+  /* the pointer is never meant to land on it; the whole card is the link */
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease-quint), scale 0.4s var(--ease-quint);
 }
 
 .selWork__badge svg {
-  width: 42%;
-  height: 42%;
-  transition: transform 0.42s var(--ease-quint);
+  width: 38%;
+  height: 38%;
 }
 
 /*
@@ -3782,13 +3772,21 @@ html.has-cursor .cursorRing {
   margin-top: clamp(13px, 1.1vw, 19px);
 }
 
+/* General Sans, not the mono the ledger captioned in: the mono was doing a
+   ledger's job, lining year and numeral into columns, and this line has no
+   columns left to keep.
+
+   Set as written rather than uppercased. A project's name is the name it
+   was given, and title case carries the shape of the words, which is most
+   of how a name is recognised at a glance. Tracking sits at zero for the
+   same reason it was positive before: caps need air between them, mixed
+   case already has descenders and x-height doing that work. */
 .selWork__name {
   margin: 0;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(14px, 1.25vw, 19px);
+  font-family: var(--font-primary);
+  font-size: clamp(14.5px, 1.3vw, 20px);
   font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   line-height: 1.15;
   color: var(--ink);
   transition: color 0.25s ease-out;
@@ -3799,10 +3797,12 @@ html.has-cursor .cursorRing {
   display: inline-flex;
   align-items: baseline;
   gap: clamp(10px, 1.1vw, 20px);
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11px, 0.92vw, 13.5px);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  /* one line, one face, one case: leaving these in mono, or in caps beside
+     a title-case name, would read as a mistake rather than as a hierarchy */
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: clamp(11.5px, 0.95vw, 14px);
+  letter-spacing: 0.005em;
   line-height: 1.15;
 }
 
@@ -3826,12 +3826,8 @@ html.has-cursor .cursorRing {
     color: var(--purple);
   }
   .selWork:hover .selWork__badge {
-    background: var(--purple);
-    border-color: var(--purple);
-    color: #fff;
-  }
-  .selWork:hover .selWork__badge svg {
-    transform: translate(3px, -3px);
+    opacity: 1;
+    scale: 1;
   }
 }
 
@@ -3853,12 +3849,8 @@ html.has-cursor .cursorRing {
   color: var(--purple);
 }
 .selWork:focus-visible .selWork__badge {
-  background: var(--purple);
-  border-color: var(--purple);
-  color: #fff;
-}
-.selWork:focus-visible .selWork__badge svg {
-  transform: translate(3px, -3px);
+  opacity: 1;
+  scale: 1;
 }
 
 /* -------- closing CTA: the reel's last panel --------
@@ -3900,11 +3892,10 @@ html.has-cursor .cursorRing {
 /* set a step above the cards' captions: this is the line that ends the
    section, so it carries more weight than the seven it closes */
 .selWorks__endCtaName {
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(15px, 1.5vw, 21px);
+  font-family: var(--font-primary);
+  font-size: clamp(15.5px, 1.55vw, 22px);
   font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   line-height: 1.15;
   color: var(--ink);
   transition: color 0.25s ease-out;
@@ -3914,10 +3905,10 @@ html.has-cursor .cursorRing {
    sit, so the panel reads as one more caption line */
 .selWorks__endCtaNote {
   flex: 0 0 auto;
-  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
-  font-size: clamp(11px, 0.92vw, 13.5px);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: clamp(11.5px, 0.95vw, 14px);
+  letter-spacing: 0.005em;
   line-height: 1.15;
   color: rgba(31, 31, 31, 0.66);
   transition: color 0.25s ease-out;
@@ -3987,16 +3978,21 @@ html.has-cursor .cursorRing {
 
 /* Every hover here resolves as colour as well as travel, so taking the
    travel away still leaves the state legible. */
+/* The badge still appears, because it IS the hover state and removing it
+   would leave the card with nothing to say it was hovered. What goes is
+   the travel: the cover stops zooming, the badge stops growing in, and the
+   closing panel's arrow stops moving. */
 @media (prefers-reduced-motion: reduce) {
   .selWork__img,
-  .selWork__badge svg,
   .selWorks__endCtaIcon svg {
     transition: none;
   }
+  .selWork__badge {
+    scale: 1;
+    transition: opacity 0.3s var(--ease-quint);
+  }
   .selWork:hover .selWork__img,
   .selWork:focus-visible .selWork__img,
-  .selWork:hover .selWork__badge svg,
-  .selWork:focus-visible .selWork__badge svg,
   .selWorks__endCta:hover .selWorks__endCtaIcon svg,
   .selWorks__endCta:focus-visible .selWorks__endCtaIcon svg {
     transform: none;
@@ -4034,16 +4030,10 @@ html.has-cursor .cursorRing {
     text-align: left;
     max-width: 100%;
   }
-  /* One column, so there is no wide slot to be wide against and every card
-     takes the reel's ratio, including the opener, which is first here
-     rather than large. */
-  .selWorks__row--pair,
-  .selWorks__row--flip {
+  /* one column, so there is no wide slot left to be wide against */
+  .selWorks__row {
     grid-template-columns: 1fr;
     gap: var(--selw-rowGap);
-  }
-  .selWorks__row--solo .selWork__frame {
-    aspect-ratio: 3 / 2;
   }
   .selWorks__endCta {
     gap: 16px;
@@ -9360,8 +9350,6 @@ html.contact-page-active body {
 .heroRuler__rail,
 .heroRuler,
 .statement__rail,
-.process__rails,
-.process__rail,
 .process__top::before,
 .process__top::after,
 .capRails,

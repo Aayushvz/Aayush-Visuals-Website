@@ -5181,10 +5181,12 @@ export const PROJECTS: Project[] = [
   order of the array above. PROJECTS keeps its own order, so /work is
   unaffected.
 
-  Positions 1, 4 and 7 are the full-width rows (see the ROWS rhythm in
-  SelectedWorks.tsx), so those three slots carry the most weight — worth
-  knowing before reordering, since moving a project between a full row and
-  a paired one changes how large it renders, not just where it sits.
+  Six, in three pairs, and the pairs alternate which side is wide (see the
+  ROWS rhythm in SelectedWorks.tsx). Positions 1, 4 and 5 land in the wide
+  slot and render about half again as large as the three beside them, so
+  reordering changes how big a project is, not only where it sits. Adding
+  a seventh would leave it with no row: SelectedWorks throws rather than
+  dropping it silently.
 
   Named by id rather than by position: the reel used to index into PROJECTS
   directly, which meant inserting a project anywhere near the top silently
@@ -5197,7 +5199,6 @@ const SELECTED_IDS = [
   "cpgrams",
   "riviera",
   "yantra",
-  "posterfolio",
 ];
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {

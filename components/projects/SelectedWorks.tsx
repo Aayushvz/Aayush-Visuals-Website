@@ -18,24 +18,22 @@ import ArrowUpRight from "./ArrowUpRight";
   projects, so reordering SELECTED_IDS cannot break the rhythm and no card
   carries a hand-placed offset.
 
-  The opener sits alone. Seven is an odd number, so one card has to, and the
-  reel's first project is the one worth the full width.
+  Six projects, three pairs, every row full. An odd reel would leave one
+  card to be handled on its own, which is a second layout to keep honest
+  for the sake of a single tile.
 
   Clicking any work opens its case study at /work/[id].
 */
 
-type Row =
-  | { kind: "solo"; items: [number] }
-  /* flip leads the row with the narrow slot instead of the wide one */
-  | { kind: "pair"; items: [number, number]; flip?: boolean };
+/* flip leads the row with the narrow slot instead of the wide one */
+type Row = { items: [number, number]; flip?: boolean };
 
 /* Positions in SELECTED_PROJECTS, whose running order is set in
    projectData. This file owns the layout, not the lineup. */
 const ROWS: Row[] = [
-  { kind: "solo", items: [0] },
-  { kind: "pair", items: [1, 2] },
-  { kind: "pair", items: [3, 4], flip: true },
-  { kind: "pair", items: [5, 6] },
+  { items: [0, 1] },
+  { items: [2, 3], flip: true },
+  { items: [4, 5] },
 ];
 
 /*
@@ -100,13 +98,9 @@ export default function SelectedWorks() {
       {ROWS.map((row, ri) => (
         <div
           key={ri}
-          className={[
-            "selWorks__row",
-            `selWorks__row--${row.kind}`,
-            row.kind === "pair" && row.flip ? "selWorks__row--flip" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          className={
+            row.flip ? "selWorks__row selWorks__row--flip" : "selWorks__row"
+          }
         >
           {row.items.map((i) => (
             <Work key={SELECTED_PROJECTS[i].id} index={i} />

@@ -19,7 +19,7 @@ import ExtCta from "./ExtCta";
   The dial keeps the section inside the site's own language rather than
   importing a halo diagram wholesale. It is a measuring instrument — minor
   ticks every 5 degrees, accent ticks where a stage begins — which is the
-  same drawn-annotation vocabulary as the fixed page rails and the About
+  same drawn-annotation vocabulary as the About
   page's rulers. It fades out to the left rather than being drawn as a
   partial arc, so the geometry underneath stays a full circle and the
   satellites are all placed against the same complete field.
@@ -227,11 +227,6 @@ export default function Process() {
       aria-labelledby="process-heading"
     >
       <div className="process__sticky">
-        <div className="process__rails" aria-hidden>
-          <span className="process__rail process__rail--left" />
-          <span className="process__rail process__rail--right" />
-        </div>
-
         <div className="process__inner">
           <div className="procHalo">
             {/*

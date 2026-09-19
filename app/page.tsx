@@ -9,6 +9,7 @@ import Process from "@/components/Process";
 import ProjectsSection from "@/components/ProjectsSection";
 import HomeContact from "@/components/HomeContact";
 import Reveals from "@/components/Reveals";
+import RailsEnd from "@/components/RailsEnd";
 /* heavy, below the fold, and held until approach - see HomeDeferred */
 import {
   DeferredServices,
@@ -24,6 +25,10 @@ export default function Home() {
       <Cursor />
 
       <Reveals />
+      {/* The rails run to the Skills Deck and stop; RailsEnd, further down,
+          is the marker that turns them off. They stay a direct child here,
+          outside .hpParallax, because they are position: fixed and a
+          transformed ancestor would quietly make them scroll. */}
       <div className="rails" aria-hidden />
       {/* The footer sits OUTSIDE main, which is what forces this shape.
 
@@ -52,6 +57,8 @@ export default function Home() {
             <About />
           </div>
           <Statement />
+          {/* the rails belong to the framed half of the page above */}
+          <RailsEnd />
           <DeferredServices />
           <ProjectsSection />
           <div className="processStage">
