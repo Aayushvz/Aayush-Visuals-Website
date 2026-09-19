@@ -169,7 +169,11 @@ export default function Toolbar({
         onClick={onReset}
         aria-label="Reset all fields and hand-edited text to their defaults"
       >
-        <RotateCcwIcon /> Reset
+        <RotateCcwIcon />
+        {/* the label is dropped below 420px so Export still fits: see the
+            .cgBar__resetLabel rule. The button keeps its aria-label, so it
+            is never reduced to an unnamed icon for a screen reader. */}
+        <span className="cgBar__resetLabel">Reset</span>
       </button>
 
       <button

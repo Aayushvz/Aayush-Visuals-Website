@@ -2188,9 +2188,28 @@
 
   .cgShell[data-cg-tab="preview"] .cgCol--form { display: none; }
 
-  /* the mobile nav is a fixed 58px pill on every page; the toolbar has
-     to sit clear of it rather than underneath */
-  .cgBar { padding-top: var(--mnav-clear); height: auto; }
+  /* This used to reserve var(--mnav-clear), 86px, for the site's fixed
+     mobile nav pill. That pill is not rendered on this route: /contract
+     is a full-screen tool and neither .navbar nor .mobileNav is in its
+     DOM (checked at runtime, and elementsFromPoint in that band returns
+     only .cgBar itself). So the clearance was 86px of dead space at the
+     top of every phone screen, which with the 45px tab strip put 168px
+     of chrome above the first field on an 844px viewport.
+
+     The safe-area inset stays: that clears a device notch, which is a
+     different concern from the nav pill and still applies here. */
+  .cgBar {
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
+    height: auto;
+  }
+
+  /* At 360px the row needs 388px: back 110, ring 24, Reset 77, theme 30,
+     Export 91, plus gaps and padding. Export was landing 11px past the
+     body edge. Dropping Reset to its icon frees about 50px and is the
+     right thing to lose: Export is the reason the tool exists, Reset is
+     a recovery control, and the button keeps its aria-label either way. */
+  .cgBar__resetLabel { display: none; }
+  .cgBar__reset { padding-left: 9px; padding-right: 9px; }
   .cgBar__title { display: none; }
 }
 
