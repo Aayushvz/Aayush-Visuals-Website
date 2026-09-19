@@ -197,7 +197,23 @@ export default function FormPanel({
       })}
 
       <div className="cgFoot">
-        <p className="cgFoot__credit">Made by {PERSON_NAME}</p>
+        {/* the same 112px avatar the About page's greeting uses
+            (components/About.tsx), not a second copy of the same photo:
+            it is already sized and encoded for exactly this, and one file
+            means one thing to swap when the photo changes. Decorative,
+            so alt is empty - the credit beside it already says whose
+            face this is. Raw <img> rather than next/image: at 22px the
+            optimiser has nothing to do on a 5KB asset. */}
+        <span className="cgFoot__by">
+          <img
+            className="cgFoot__face"
+            src="/about/avatar.webp"
+            alt=""
+            width={112}
+            height={112}
+          />
+          <p className="cgFoot__credit">Made by {PERSON_NAME}</p>
+        </span>
         {SOCIAL_LINKS.length > 0 && (
           <div className="cgFoot__socials" role="group" aria-label="Elsewhere">
             {SOCIAL_LINKS.map((s) => (

@@ -1036,6 +1036,27 @@
   background: var(--cg-panel);
 }
 
+.cgFoot__by {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 22px, so it reads as a signature beside 11px text rather than an
+   avatar with a caption. The ring is --cg-line rather than a hard edge
+   so it separates the photo from the panel in both themes without
+   drawing a second border weight into a footer that is meant to be
+   quiet. */
+.cgFoot__face {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border-radius: var(--cg-round);
+  box-shadow: 0 0 0 1px var(--cg-line);
+  object-fit: cover;
+}
+
 .cgFoot__credit {
   margin: 0;
   color: var(--cg-fg-2);
