@@ -248,7 +248,6 @@ export default function ContractGenerator() {
           onToggleCollapse={() => setSideCollapsed((c) => !c)}
           mobileActive={tab === "design"}
           onReset={handleResetAll}
-          onTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
         />
       </div>
       <MobileTabBar tab={tab} onTab={setTab} pct={pct} />

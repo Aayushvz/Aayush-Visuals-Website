@@ -2424,23 +2424,30 @@
      The safe-area inset stays: that clears a device notch, which is a
      different concern from the nav pill and still applies here. */
   .cgBar {
+    /* symmetric, so the row sits centred in the bar. It used to be
+       padding-top only, with nothing underneath, which left the logo and
+       Export hanging against the bottom edge. The inset still clears a
+       device notch and only ever grows the top. */
     padding-top: max(12px, env(safe-area-inset-top, 12px));
+    padding-bottom: 12px;
     height: auto;
   }
 
-  /* Reset and the theme toggle move into the Design tab's own content
-     (see SidePanel's mobile controls block, which reuses these same two
-     classes on its own copies of the buttons - the selectors below are
-     scoped to `.cgBar` specifically so they hide only the toolbar's pair,
-     not SidePanel's) and the completion ring moves next to the Form tab
-     in .cgMobileTabs, where it is actually informative rather than a
-     number nobody is looking at. None of the three has anything left to
-     do in the bar itself, which leaves exactly two controls - the back
-     link and Export - comfortably inside 360px without the squeeze
-     (icon-only Reset, tightened gap) the three of them used to need. */
+  /* Reset moves into the Design tab's own content (see SidePanel's
+     mobile controls block, which reuses this same class on its own copy
+     of the button - the selector below is scoped to `.cgBar` so it hides
+     only the toolbar's), and the completion ring moves next to the Form
+     tab in .cgMobileTabs, where it is actually informative rather than a
+     number nobody is looking at.
+
+     The theme toggle STAYS here. It was hidden with the other two when
+     the row still had to fit five controls, but switching light and dark
+     is a thing you reach for while reading the document, not while
+     configuring it, so burying it two taps deep in a tab was wrong. The
+     row now holds three: back link 94, toggle 36, Export 91, plus gaps
+     and padding is about 285 of 360 at the narrowest phone. */
   .cgBar .cgRing,
-  .cgBar .cgBar__reset,
-  .cgBar .cgBar__theme {
+  .cgBar .cgBar__reset {
     display: none;
   }
 

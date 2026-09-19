@@ -7,11 +7,9 @@ import Select from "./Select";
 import {
   DownloadIcon,
   FileTextIcon,
-  MoonIcon,
   PanelCollapseRightIcon,
   PrinterIcon,
   RotateCcwIcon,
-  SunIcon,
   XIcon,
 } from "./icons";
 
@@ -117,12 +115,11 @@ type Props = {
      split useIsDocked already keeps: ContractGenerator owns state, this
      component owns which width that state actually matters at. */
   mobileActive: boolean;
-  /* Reset and the theme toggle, needed only for the small block rendered
+  /* Reset, needed only for the small block rendered
      inside the Design tab below 1100px (see useIsMobileNav) - at every
      other width these stay solely in Toolbar and this component never
      reads them */
   onReset: () => void;
-  onTheme: () => void;
 };
 
 /* whether the panel is currently docked as its own grid column (>=1400px)
@@ -161,7 +158,7 @@ function useIsMobileNav(): boolean {
 export default function SidePanel({
   draft, setToggle, skin, onSkin, theme, style, setStyleField, logo, logoMessage, onLogoFile,
   onRemoveLogo, onPrint, onWord, onMarkdown, open, onClose,
-  collapsed, onToggleCollapse, mobileActive, onReset, onTheme,
+  collapsed, onToggleCollapse, mobileActive, onReset,
 }: Props) {
   const docked = useIsDocked();
   const mobileNav = useIsMobileNav();
@@ -416,18 +413,23 @@ export default function SidePanel({
           </div>
         </div>
 
-        {/* Reset and the theme toggle: moved here from the toolbar below
-            1100px (see Toolbar.tsx's .cgBar__reset/.cgBar__theme, hidden
-            at that width in contract.css) because the top bar only has
-            room left for the back link and Export there. Both stay
-            infrequent, low-stakes controls - last in the Design tab
-            rather than first, the same "don't compete with the primary
-            action" reasoning that already keeps Reset out of the way in
-            the toolbar itself. Reuses .cgBar__reset/.cgGhost as-is rather
-            than inventing a third visual for the same two actions. */}
+        {/* Reset moves here from the toolbar below 1100px (see
+            Toolbar.tsx's .cgBar__reset, hidden at that width in
+            contract.css) because the top bar has room left for the back
+            link, the theme toggle and Export, and Reset is the one of the
+            three you reach for least. Last in the Design tab rather than
+            first, the same "don't compete with the primary action"
+            reasoning that keeps it out of the way in the toolbar itself.
+            Reuses .cgBar__reset as-is rather than inventing a second
+            visual for the same action.
+
+            The theme toggle is deliberately NOT duplicated here: it
+            stayed in the phone toolbar, because switching light and dark
+            is something you do while reading the document, not while
+            configuring it, and two copies of one control drift. */}
         {mobileNav && (
           <div className="cgSide__block">
-            <p className="cgSide__eyebrow">Reset &amp; theme</p>
+            <p className="cgSide__eyebrow">Reset</p>
             <div className="cgSide__mobileControls">
               <button
                 type="button"
@@ -437,14 +439,6 @@ export default function SidePanel({
               >
                 <RotateCcwIcon />
                 <span>Reset</span>
-              </button>
-              <button
-                type="button"
-                className="cgGhost"
-                onClick={onTheme}
-                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-              >
-                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
               </button>
             </div>
           </div>
