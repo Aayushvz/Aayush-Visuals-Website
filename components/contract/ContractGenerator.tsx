@@ -7,6 +7,7 @@ import FormPanel from "./FormPanel";
 import DocPaper from "./DocPaper";
 import SidePanel from "./SidePanel";
 import EditBar from "./EditBar";
+import MobileTabBar from "./MobileTabBar";
 import { useContractDraft } from "./useContractDraft";
 import { useDocStyle } from "./useDocStyle";
 import { useDocLogo } from "./useDocLogo";
@@ -50,7 +51,15 @@ export default function ContractGenerator() {
      persisted: leaving the route is the way back from any choice here. */
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [skin, setSkin] = useState<Skin>("studio");
-  const [tab, setTab] = useState<"form" | "preview">("form");
+  /* "design" is the third stop, added for the phone-width bottom tab bar
+     (see MobileTabBar.tsx): it shows the side panel as the tab's whole
+     content, which is the only way Skin/Colors/Typography/Logo/Clauses/
+     Export are reachable at all below 1100px (see SidePanel's own
+     useIsMobileNav and contract.css's matching @media block). "form" and
+     "preview" keep their original string values on purpose - the
+     data-cg-tab CSS that already keys off them, and the >=1100px form/
+     preview switching it drives, is untouched by this addition. */
+  const [tab, setTab] = useState<"form" | "preview" | "design">("form");
   /* the side panel overlay, only meaningful below 1536px (see SidePanel
      and .cgSide in contract.css); harmless to leave set at wider widths
      since CSS docks the panel and ignores this attribute there */
@@ -190,21 +199,6 @@ export default function ContractGenerator() {
         onMarkdown={() => downloadMarkdown(draft, overrides, Boolean(logo))}
         editMode={editMode}
       />
-      <div className="cgTabs" role="tablist" aria-label="Panel">
-        {(["form", "preview"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            className="cgSeg__btn"
-            aria-selected={tab === t}
-            aria-pressed={tab === t}
-            onClick={() => setTab(t)}
-          >
-            {t === "form" ? "Agreement Details" : "Preview"}
-          </button>
-        ))}
-      </div>
       <div className="cgGrid">
         <div className="cgCol cgCol--form">
           <FormPanel
@@ -252,8 +246,12 @@ export default function ContractGenerator() {
           onClose={() => setSideOpen(false)}
           collapsed={sideCollapsed}
           onToggleCollapse={() => setSideCollapsed((c) => !c)}
+          mobileActive={tab === "design"}
+          onReset={handleResetAll}
+          onTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
         />
       </div>
+      <MobileTabBar tab={tab} onTab={setTab} pct={pct} />
     </div>
   );
 }

@@ -7,8 +7,11 @@ import Select from "./Select";
 import {
   DownloadIcon,
   FileTextIcon,
+  MoonIcon,
   PanelCollapseRightIcon,
   PrinterIcon,
+  RotateCcwIcon,
+  SunIcon,
   XIcon,
 } from "./icons";
 
@@ -108,6 +111,18 @@ type Props = {
      this or renders the control that would set it */
   collapsed: boolean;
   onToggleCollapse: () => void;
+  /* whether the phone-width Design tab (see MobileTabBar.tsx) is the
+     current tab - just the tab-derived signal, no width knowledge. This
+     component combines it with its own useIsMobileNav below, the same
+     split useIsDocked already keeps: ContractGenerator owns state, this
+     component owns which width that state actually matters at. */
+  mobileActive: boolean;
+  /* Reset and the theme toggle, needed only for the small block rendered
+     inside the Design tab below 1100px (see useIsMobileNav) - at every
+     other width these stay solely in Toolbar and this component never
+     reads them */
+  onReset: () => void;
+  onTheme: () => void;
 };
 
 /* whether the panel is currently docked as its own grid column (>=1536px)
@@ -126,14 +141,41 @@ function useIsDocked(): boolean {
   return docked;
 }
 
+/* the other end of the range useIsDocked watches: below 1100px the panel
+   is neither a docked column nor an overlay, it is the Design tab's whole
+   content (see contract.css's matching @media block and MobileTabBar.tsx).
+   Same start-false-then-correct-on-mount shape as useIsDocked, for the
+   same reason - server and first client paint have to agree. */
+function useIsMobileNav(): boolean {
+  const [mobileNav, setMobileNav] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1099px)");
+    const update = () => setMobileNav(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return mobileNav;
+}
+
 export default function SidePanel({
   draft, setToggle, skin, onSkin, theme, style, setStyleField, logo, logoMessage, onLogoFile,
   onRemoveLogo, onPrint, onWord, onMarkdown, open, onClose,
-  collapsed, onToggleCollapse,
+  collapsed, onToggleCollapse, mobileActive, onReset, onTheme,
 }: Props) {
   const docked = useIsDocked();
+  const mobileNav = useIsMobileNav();
   const panelRef = useRef<HTMLDivElement>(null);
-  const overlayVisible = !docked && open;
+  /* visible: whether the panel is actually on screen right now, regardless
+     of how - docked (always), the 1100-1535px overlay (open), or the
+     Design tab below 1100px (mobileActive). Drives `inert` below, which
+     must never leave a visually-shown panel non-interactive.
+     overlayVisible narrows that to just the overlay case, since the
+     backdrop and Escape-to-close only make sense there - below 1100px
+     there is nothing to "close" to, only another tab to switch to, and
+     CSS hides the backdrop at that width regardless (see contract.css). */
+  const visible = docked || (mobileNav ? mobileActive : open);
+  const overlayVisible = !docked && !mobileNav && open;
 
   /* closing hands focus back to the toolbar toggle that opened the
      overlay, the same return-focus contract Toolbar's own Export menu
@@ -217,9 +259,9 @@ export default function SidePanel({
         ref={panelRef}
         tabIndex={-1}
         aria-label="Document panel"
-        inert={!docked && !open ? true : undefined}
+        inert={!visible ? true : undefined}
       >
-        {!docked && (
+        {!docked && !mobileNav && (
           <div className="cgSide__header">
             <p className="cgSide__title">Panel</p>
             <button
@@ -373,6 +415,40 @@ export default function SidePanel({
             ))}
           </div>
         </div>
+
+        {/* Reset and the theme toggle: moved here from the toolbar below
+            1100px (see Toolbar.tsx's .cgBar__reset/.cgBar__theme, hidden
+            at that width in contract.css) because the top bar only has
+            room left for the back link and Export there. Both stay
+            infrequent, low-stakes controls - last in the Design tab
+            rather than first, the same "don't compete with the primary
+            action" reasoning that already keeps Reset out of the way in
+            the toolbar itself. Reuses .cgBar__reset/.cgGhost as-is rather
+            than inventing a third visual for the same two actions. */}
+        {mobileNav && (
+          <div className="cgSide__block">
+            <p className="cgSide__eyebrow">Reset &amp; theme</p>
+            <div className="cgSide__mobileControls">
+              <button
+                type="button"
+                className="cgBar__reset"
+                onClick={onReset}
+                aria-label="Reset all fields and hand-edited text to their defaults"
+              >
+                <RotateCcwIcon />
+                <span>Reset</span>
+              </button>
+              <button
+                type="button"
+                className="cgGhost"
+                onClick={onTheme}
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              >
+                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {overlayVisible && (

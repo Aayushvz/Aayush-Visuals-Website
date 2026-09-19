@@ -176,9 +176,14 @@ export default function Toolbar({
         <span className="cgBar__resetLabel">Reset</span>
       </button>
 
+      {/* .cgBar__theme carries no styling of its own - it exists only so
+          the phone-width block in contract.css can hide this exact button
+          (the toggle moves into the Design tab's content there) without a
+          fragile positional selector, the same reasoning .cgBar__reset
+          already gets its own class for */}
       <button
         type="button"
-        className="cgGhost"
+        className="cgGhost cgBar__theme"
         onClick={onTheme}
         aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       >

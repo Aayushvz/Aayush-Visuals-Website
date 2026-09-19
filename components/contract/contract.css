@@ -22,18 +22,21 @@
   --cg-bar-h: 56px;
 
   /* a flex column that is exactly the viewport tall, not a min-height: the
-     shell is a fixed-height dashboard and its two chrome rows (.cgBar,
-     .cgTabs) are meant to give up whatever they grow to and let .cgGrid
-     take the rest, rather than the page growing to fit them and scrolling.
-     This used to be done by hand: .cgGrid subtracted a hardcoded
-     --cg-bar-h from 100vh, which only accounted for .cgBar's own height
-     and never the .cgTabs row that appears at <= 1099px, or .cgBar's own
-     growth at that width from the mobile nav clearance padding. Both grew
-     silently and the sum was never re-subtracted, which is what produced
-     111px of page overflow below that breakpoint. Flex removes the
-     bookkeeping entirely: whatever the chrome rows measure, .cgGrid gets
-     what is left. 100dvh over 100vh so mobile browser chrome (the address
-     bar showing/hiding) does not leave a sliver of the page scrollable. */
+     shell is a fixed-height dashboard and its chrome rows (.cgBar always,
+     .cgMobileTabs at <= 1099px - see the responsive section) are meant to
+     give up whatever they grow to and let .cgGrid take the rest, rather
+     than the page growing to fit them and scrolling. This used to be done
+     by hand: .cgGrid subtracted a hardcoded --cg-bar-h from 100vh, which
+     only accounted for .cgBar's own height and never the top tab strip
+     that used to appear at <= 1099px (removed in favour of .cgMobileTabs,
+     a bottom bar rather than a second top row), or .cgBar's own growth at
+     that width from the mobile nav clearance padding. Both grew silently
+     and the sum was never re-subtracted, which is what produced 111px of
+     page overflow below that breakpoint. Flex removes the bookkeeping
+     entirely: whatever the chrome rows measure, .cgGrid gets what is
+     left, regardless of which rows exist at the current width. 100dvh
+     over 100vh so mobile browser chrome (the address bar showing/hiding)
+     does not leave a sliver of the page scrollable. */
   display: flex;
   flex-direction: column;
   height: 100dvh;
@@ -93,8 +96,9 @@
 .cgGrid {
   display: grid;
   grid-template-columns: var(--cg-form-w) 1fr;
-  /* takes whatever height .cgShell's flex column has left after .cgBar and
-     .cgTabs; min-height: 0 is required for a flex item's height to shrink
+  /* takes whatever height .cgShell's flex column has left after .cgBar and,
+     at <= 1099px, .cgMobileTabs; min-height: 0 is required for a flex
+     item's height to shrink
      below its content's intrinsic size, otherwise the grid (and the page)
      grows to fit .cgCol's content instead of clipping it for .cgCol's own
      overflow-y: auto to scroll internally */
@@ -289,24 +293,6 @@
 }
 
 /* ---------- controls ---------- */
-
-.cgSeg__btn {
-  padding: 5px 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--cg-fg-2);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background var(--dur-hover) var(--ease-quint),
-    color var(--dur-hover) var(--ease-quint);
-}
-
-.cgSeg__btn[aria-pressed="true"] {
-  background: var(--cg-line-2);
-  color: var(--cg-fg);
-}
 
 .cgGhost {
   display: inline-flex;
@@ -976,7 +962,6 @@
    listed here. */
 .cgPrimary,
 .cgGhost,
-.cgSeg__btn,
 .cgAcc__head,
 .cgList__add,
 .cgList__rm,
@@ -991,7 +976,6 @@
 .cgGhostLabel:active,
 .cgEditBar__toggle:active,
 .cgConfirm__danger:active,
-.cgSeg__btn:active,
 .cgAcc__head:active,
 .cgList__add:active,
 .cgList__rm:active,
@@ -1018,7 +1002,6 @@
   .cgGhostLabel:active,
   .cgEditBar__toggle:active,
   .cgConfirm__danger:active,
-  .cgSeg__btn:active,
   .cgAcc__head:active,
   .cgList__add:active,
   .cgList__rm:active,
@@ -1946,6 +1929,7 @@
   .cgSide,
   .cgSide__backdrop,
   .cgTabs,
+  .cgMobileTabs,
   /* Task 2/3: the edit bar, its confirm dialog and backdrop, and the
      edited mark are all screen-only chrome; the document underneath
      already renders whatever they'd otherwise let a reader change */
@@ -2122,7 +2106,9 @@
 
 /* ---------- responsive ---------- */
 
-.cgTabs { display: none; }
+/* hidden by default like .cgTabs used to be - the @media (max-width:
+   1099px) block below is what brings it back, and only there */
+.cgMobileTabs { display: none; }
 
 /* the panel gets a real third grid track once there is room for it
    alongside the form at its full width; below this the form keeps its
@@ -2152,22 +2138,26 @@
   }
 }
 
-/* the toggle only exists to reveal the panel where it is an overlay and
-   the tab strip is not already the way to reach it; at 1536 and up the
-   panel is a permanent column and this button has nothing to do */
+/* the toggle only exists to reveal the panel where it is an overlay and no
+   tab-driven control already reaches it; at 1536 and up the panel is a
+   permanent column and this button has nothing to do */
 @media (min-width: 1100px) and (max-width: 1535px) {
   .cgBar__sideToggle { display: inline-flex; }
 }
 
 @media (max-width: 1099px) {
-  /* below the width the tab strip takes over form/preview switching, the
-     panel is not offered at all: no toggle, no overlay, no grid track.
-     .cgPanelToggle (the form's own collapse button) has nothing to do
-     here either: the tab strip already owns showing the whole form, and
-     FormPanel's own docked check keeps the collapsed rail from ever
-     rendering at this width, so hide the control rather than leave a
-     button that visibly does nothing when pressed. */
-  .cgSide,
+  /* below the width the bottom tab bar (.cgMobileTabs, see
+     MobileTabBar.tsx) takes over Form/Document/Design switching, so the
+     overlay toggle and the docked panels' own collapse rail have nothing
+     to do: no toggle, no overlay open/close, no rail. .cgPanelToggle (the
+     form's own collapse button) is the same case - the tab bar already
+     owns showing the whole form, and FormPanel's own docked check keeps
+     the collapsed rail from ever rendering at this width anyway, so hide
+     the control rather than leave a button that visibly does nothing
+     when pressed. .cgSide is deliberately NOT in this list: unlike these
+     three it still has a way to be shown at this width (the Design tab,
+     below), so it cannot be blanket-!important-hidden the way a control
+     with no job left here can. */
   .cgSide__backdrop,
   .cgBar__sideToggle,
   .cgPanelToggle {
@@ -2176,25 +2166,48 @@
 
   .cgGrid { grid-template-columns: 1fr; }
 
-  .cgTabs {
-    display: flex;
-    gap: 4px;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--cg-line);
-    background: var(--cg-panel);
-  }
-
   .cgShell[data-cg-tab="form"] .cgCol--paper { display: none; }
 
   .cgShell[data-cg-tab="preview"] .cgCol--form { display: none; }
+
+  /* Design: the side panel becomes the tab's whole content instead of a
+     docked column or an overlay above one - the only way Skin/Colors/
+     Typography/Logo/Clauses/Export are reachable at all below 1100px.
+     .cgSide is display:none by default at this width (next rule); this
+     attribute selector is what brings it back, and its higher
+     specificity is what wins over both that bare rule and the
+     `@media (max-width: 1535px)` overlay block above (position/width/
+     transform), which are the same or lower specificity, so nothing is
+     left to fight the cascade regardless of source order. See
+     SidePanel.tsx's own useIsMobileNav for the matching JS-side switch:
+     the overlay's header/close button and backdrop have no business
+     existing at this width, and `inert` has to track real visibility
+     here rather than the `open` prop the overlay case uses. */
+  .cgSide { display: none; }
+
+  .cgShell[data-cg-tab="design"] .cgSide {
+    display: flex;
+    position: static;
+    width: 100%;
+    border-left: 0;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .cgShell[data-cg-tab="design"] .cgCol--form,
+  .cgShell[data-cg-tab="design"] .cgCol--paper {
+    display: none;
+  }
 
   /* This used to reserve var(--mnav-clear), 86px, for the site's fixed
      mobile nav pill. That pill is not rendered on this route: /contract
      is a full-screen tool and neither .navbar nor .mobileNav is in its
      DOM (checked at runtime, and elementsFromPoint in that band returns
      only .cgBar itself). So the clearance was 86px of dead space at the
-     top of every phone screen, which with the 45px tab strip put 168px
-     of chrome above the first field on an 844px viewport.
+     top of every phone screen, which with the old top tab strip put
+     168px of chrome above the first field on an 844px viewport. That
+     strip is gone now (see .cgMobileTabs below, a bottom bar instead of
+     a second top row), so what is left above the content is .cgBar alone.
 
      The safe-area inset stays: that clears a device notch, which is a
      different concern from the nav pill and still applies here. */
@@ -2203,13 +2216,21 @@
     height: auto;
   }
 
-  /* At 360px the row needs 388px: back 110, ring 24, Reset 77, theme 30,
-     Export 91, plus gaps and padding. Export was landing 11px past the
-     body edge. Dropping Reset to its icon frees about 50px and is the
-     right thing to lose: Export is the reason the tool exists, Reset is
-     a recovery control, and the button keeps its aria-label either way. */
-  .cgBar__resetLabel { display: none; }
-  .cgBar__reset { padding-left: 9px; padding-right: 9px; }
+  /* Reset and the theme toggle move into the Design tab's own content
+     (see SidePanel's mobile controls block, which reuses these same two
+     classes on its own copies of the buttons - the selectors below are
+     scoped to `.cgBar` specifically so they hide only the toolbar's pair,
+     not SidePanel's) and the completion ring moves next to the Form tab
+     in .cgMobileTabs, where it is actually informative rather than a
+     number nobody is looking at. None of the three has anything left to
+     do in the bar itself, which leaves exactly two controls - the back
+     link and Export - comfortably inside 360px without the squeeze
+     (icon-only Reset, tightened gap) the three of them used to need. */
+  .cgBar .cgRing,
+  .cgBar .cgBar__reset,
+  .cgBar .cgBar__theme {
+    display: none;
+  }
 
   /* The footer is pinned on desktop, where the panel is tall and a
      signature reading as fixed furniture is right. On a phone it was
@@ -2222,6 +2243,118 @@
     z-index: auto;
   }
   .cgBar__title { display: none; }
+
+  /* the Design tab's own Reset + theme row (see SidePanel.tsx): a plain
+     flex row, .cgBar__reset and .cgGhost already carry their own visuals
+     so there is nothing to style on the buttons themselves here */
+  .cgSide__mobileControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ---- bottom tab bar (MobileTabBar.tsx): Form / Document / Design ----
+     A genuine flex sibling of .cgBar and .cgGrid in .cgShell's own flex
+     column (see the comment at the top of this file), not a
+     position: fixed overlay - the same reasoning that keeps .cgFoot on
+     position: sticky rather than fixed elsewhere in this route. As a
+     layout sibling it can never cover the last field or the footer
+     credit by construction, and .cgGrid's own `flex: 1; min-height: 0`
+     already gives it exactly the height left over once this bar and
+     .cgBar are accounted for, with nothing to keep in sync by hand. */
+  .cgMobileTabs {
+    display: flex;
+    border-top: 1px solid var(--cg-line);
+    background: var(--cg-panel);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .cgMobileTabs__tab {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    /* matches --cg-bar-h so the two bars read as one family of furniture,
+       and comfortably clears the 44px touch-target minimum */
+    min-height: var(--cg-bar-h);
+    padding: 6px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--cg-fg-2);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  /* the icon (or the Form tab's ring) sits in its own quiet pill on
+     selection - the same --cg-line-2 wash .cgAcc__head's own pressed
+     state and the old segmented control both already used elsewhere in
+     this route, never a heavy fill, per the thin-outline default */
+  .cgMobileTabs__iconWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 26px;
+    border-radius: 999px;
+    color: inherit;
+    transition: background var(--dur-hover) var(--ease-quint);
+  }
+
+  .cgMobileTabs__tab[aria-selected="true"] {
+    color: var(--cg-fg);
+  }
+
+  .cgMobileTabs__tab[aria-selected="true"] .cgMobileTabs__iconWrap {
+    background: var(--cg-line-2);
+  }
+
+  .cgMobileTabs__icon,
+  .cgMobileTabs__ring {
+    width: 20px;
+    height: 20px;
+  }
+
+  .cgMobileTabs__label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  /* the live percentage text: present for the aria-live announcement and
+     the tab's own accessible name (see MobileTabBar.tsx), but there is
+     no room to show it - the same visually-hidden technique the ring's
+     own text used at phone width before this bar existed */
+  .cgMobileTabs__pct {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .cgMobileTabs__tab {
+    transition: transform var(--dur-state) var(--ease-quint);
+  }
+
+  .cgMobileTabs__tab:active {
+    transform: scale(0.97);
+    transition-duration: var(--dur-press);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cgMobileTabs__tab,
+    .cgMobileTabs__iconWrap {
+      transition: none;
+    }
+
+    .cgMobileTabs__tab:active {
+      transform: none;
+      opacity: 0.7;
+    }
+  }
 }
 
 @media (max-width: 640px) {
@@ -2233,20 +2366,5 @@
     font-size: 13px;
   }
 
-  /* at phone width the bar cannot fit back link + ring + theme toggle +
-     Export without pushing Export off screen; the panel toggle is
-     already gone below 1100px (see above), so just tighten the gap.
-     Export, the one primary action, is never touched. */
-  .cgBar { gap: 8px; }
-
-  /* the percentage is an aria-live region: shrink it out of sight rather
-     than display:none, which would drop it from the a11y tree entirely */
-  .cgRing__text {
-    position: absolute;
-    width: 1px; height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
   .cgField[data-half="true"] { flex: 1 1 100%; }
 }

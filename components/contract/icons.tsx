@@ -208,6 +208,23 @@ export function PanelCollapseRightIcon({ className }: IconProps) {
   );
 }
 
+/* the Design tab in MobileTabBar (phone width only): an artist's palette,
+   since that tab is where Skin/Colors/Typography/Logo/Clauses/Export all
+   live once the side panel stops being a docked column or an overlay and
+   becomes a tab's whole content instead (see SidePanel's useIsMobileNav).
+   The three paint wells are the same round-linecap dot technique
+   BuildingIcon's window dots already use below, not filled circles - a
+   filled dot would be this route's one departure from the outline-only
+   set for no reason beyond looking like a paint blob. */
+export function PaletteIcon({ className }: IconProps) {
+  return (
+    <svg className={iconClass(className)} {...svgProps}>
+      <path d="M12 3.5c-4.7 0-8.5 3.6-8.5 8 0 3 2.1 4.5 4 4.5.9 0 1.3-.5 1.3-1.1 0-.6-.4-1-.4-1.7 0-.9.8-1.6 1.8-1.6h2.3c2.8 0 5-2 5-4.6 0-2.2-2.3-4.5-5.5-4.5Z" />
+      <path d="M8.2 10.5h.01M11.4 7.8h.01M14.8 9h.01" />
+    </svg>
+  );
+}
+
 /*
   One icon per accordion group in FormPanel, mapped by group id rather
   than by array position (see GROUP_ICONS there). Fees & Payment gets a
