@@ -216,11 +216,29 @@ export function PanelCollapseRightIcon({ className }: IconProps) {
    BuildingIcon's window dots already use below, not filled circles - a
    filled dot would be this route's one departure from the outline-only
    set for no reason beyond looking like a paint blob. */
+/*
+  The one icon in this set drawn for a specific size rather than the 24px
+  grid alone: it is only ever used at 20px, in the phone tab bar.
+
+  The first version had no thumb notch, so the silhouette read as a comma
+  rather than a palette, and its paint wells were zero-length `h.01`
+  segments relying on the round linecap. At 20px those render about 1.25px
+  across and disappear, which left the mark as a bare curl with nothing to
+  identify it.
+
+  The wells are real circles now, and filled rather than stroked: a 1.5px
+  ring around a 1px well is mush at this size. This is the same exception
+  the brand marks take, for the same reason - an outline that stops being
+  legible is not worth keeping for consistency's sake.
+*/
 export function PaletteIcon({ className }: IconProps) {
   return (
     <svg className={iconClass(className)} {...svgProps}>
-      <path d="M12 3.5c-4.7 0-8.5 3.6-8.5 8 0 3 2.1 4.5 4 4.5.9 0 1.3-.5 1.3-1.1 0-.6-.4-1-.4-1.7 0-.9.8-1.6 1.8-1.6h2.3c2.8 0 5-2 5-4.6 0-2.2-2.3-4.5-5.5-4.5Z" />
-      <path d="M8.2 10.5h.01M11.4 7.8h.01M14.8 9h.01" />
+      <path d="M12 3a9 9 0 1 0 0 18h1.3a1.7 1.7 0 0 0 1.7-1.7c0-.45-.18-.86-.48-1.16a1.7 1.7 0 0 1 1.2-2.9H18a3 3 0 0 0 3-3C21 6.9 16.97 3 12 3Z" />
+      <circle cx="8.3" cy="8.4" r="1.05" fill="currentColor" stroke="none" />
+      <circle cx="12.4" cy="6.9" r="1.05" fill="currentColor" stroke="none" />
+      <circle cx="16.2" cy="9.4" r="1.05" fill="currentColor" stroke="none" />
+      <circle cx="6.9" cy="12.7" r="1.05" fill="currentColor" stroke="none" />
     </svg>
   );
 }

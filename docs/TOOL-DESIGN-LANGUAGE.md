@@ -131,6 +131,14 @@ Sized with a shared CSS class, not `width`/`height` attributes, and
 `currentColor` so they theme for free. They are decorative: the control
 they sit in already carries the accessible name.
 
+**Draw for the size the icon is actually used at, not for the 24px
+grid.** Interior detail that survives at 24 can vanish at 20. The phone
+tab bar's palette carried its paint wells as zero-length `h.01` segments
+relying on the round linecap; at 20px those render about 1.25px across
+and disappear, leaving a silhouette with nothing in it to identify. Wells
+that small want to be filled circles, because a 1.5px ring around a 1px
+hole is mush. Check a new icon at its real size before believing it.
+
 **Brand marks are the exception and are filled**, because a real wordmark
 (Behance's, for instance) has no honest outline form and an approximated
 one stops reading as the brand. The rule that matters: whatever you
