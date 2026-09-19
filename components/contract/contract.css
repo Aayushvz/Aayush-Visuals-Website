@@ -2494,7 +2494,26 @@
     position: static;
     z-index: auto;
   }
-  .cgBar__title { display: none; }
+  /* The title comes back and the wordmark goes, rather than both. At 360
+     the row cannot hold them together: back arrow 24, wordmark 70,
+     "Contract Generator" about 120, theme 36, Export 91, plus three gaps
+     and 32 of padding is well past the width. Naming the tool is worth
+     more here than repeating the site's mark, since the logo already
+     sits on every other page and a phone visitor arriving on this route
+     needs to know what it is. The back link keeps its arrow and its
+     aria-label, so it still says where it goes. */
+  .cgBar__logo { display: none; }
+  .cgBar__title {
+    display: block;
+    /* one line, always. The row is tight enough at 360 that the title
+       will wrap to two the moment it is allowed to, which doubles the
+       bar's height and shunts everything beside it off centre. */
+    white-space: nowrap;
+  }
+
+  /* 10 rather than 16: with the title back in the row, the three gaps
+     were what pushed it past the width at 360 and forced the wrap. */
+  .cgBar { gap: 10px; }
 
   /* the Design tab's own Reset + theme row (see SidePanel.tsx): a plain
      flex row, .cgBar__reset and .cgGhost already carry their own visuals
