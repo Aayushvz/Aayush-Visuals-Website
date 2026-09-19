@@ -71,9 +71,21 @@
      rather than a leftover. */
   --cg-control-radius: 8px;
   --cg-control-h: 36px;
-  --cg-field-h: 42px;
+  --cg-field-h: 38px;
   --cg-control-label-size: 13px;
   --cg-control-label-weight: 500;
+
+  /* Panel type scale. The two side panels are dense instrument surfaces,
+     not reading columns, and they were running a step large: group names
+     at 14.5, inputs at 15, switch labels at 14, hints at 12. Comfortable
+     in isolation, oversized once six groups, four colour rows and five
+     toggles stack in a 360px column. One step down across the board,
+     declared here so the panels stay in proportion to each other rather
+     than drifting apart again. */
+  --cg-panel-title: 13px;      /* group names, switch labels, skin names */
+  --cg-panel-input: 13.5px;    /* text the user typed */
+  --cg-panel-hint: 11px;       /* secondary lines under a title */
+  --cg-panel-label: 10.5px;    /* the mono uppercase field labels */
   --cg-control-pad-x: 14px;
   --cg-round: 999px;
 
@@ -584,7 +596,7 @@
 .cgAcc__label {
   flex: 1;
   color: var(--cg-fg-2);
-  font-size: 14.5px;
+  font-size: var(--cg-panel-title);
   font-weight: 500;
 }
 
@@ -621,7 +633,7 @@
 .cgField__label {
   color: var(--cg-fg-2);
   font-family: ui-monospace, "SF Mono", monospace;
-  font-size: 11px;
+  font-size: var(--cg-panel-label);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -630,13 +642,13 @@
 
 .cgInput {
   width: 100%;
-  padding: 9px 10px;
+  padding: 8px 10px;
   border: 1px solid var(--cg-line);
   border-radius: var(--cg-control-radius);
   background: var(--cg-field);
   color: var(--cg-fg);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--cg-panel-input);
   transition: border-color var(--dur-hover) var(--ease-quint);
 }
 
@@ -742,12 +754,12 @@
   outline-offset: 2px;
 }
 
-.cgSwitch__text { font-size: 14px; }
+.cgSwitch__text { font-size: var(--cg-panel-title); }
 
 .cgSwitch__hint {
   display: block;
   color: var(--cg-fg-2);
-  font-size: 12px;
+  font-size: var(--cg-panel-hint);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1006,7 +1018,7 @@
 .cgFoot__credit {
   margin: 0;
   color: var(--cg-fg-2);
-  font-size: 12px;
+  font-size: var(--cg-panel-hint);
 }
 
 .cgFoot__socials {
@@ -1825,7 +1837,7 @@
 
 .cgSide__skinHint {
   color: var(--cg-fg-2);
-  font-size: 12px;
+  font-size: var(--cg-panel-hint);
 }
 
 /* ---- export rows: the panel's explanatory second surface, never a
