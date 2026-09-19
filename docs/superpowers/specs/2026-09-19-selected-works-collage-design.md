@@ -112,22 +112,40 @@ it, so header, cards and closing panel now share the 72px rail edge.
 
 ## Closing action
 
-Still `.selWorks__endCta`, still not a second `.extCta` (DESIGN.md §7: the
-header owns the one primary button in this view), and no longer a panel
-either. It shipped once as a full-width outlined box at the cards' radius,
-which is a lot of border drawn around one line of text and a great deal of
-empty: 131px tall to carry 23px of type.
+`.selWorks__endCta`, still not a second `.extCta` (DESIGN.md §7: the header
+owns the one primary button in this view). A compact outlined pill at the
+grid's left edge, split into two compartments by a full-height hairline:
+label, then count and arrow. Measured at 1440: 230x49px, left edge at 72px
+which is the grid's own, 999px radius, hairline border, no fill. At 375 it is
+207x46 and stays a row.
 
-It is now the reel's seventh caption. Same two anchors every card caption
-uses, label at the grid's left edge and muted count at the right, same faces,
-same baseline. Measured at 1440: 23px tall, the count's right edge at 1353px,
-which is exactly the last card's right edge and the last caption's right
-edge. The arrow is an inline glyph at `0.78em` on the label's own scale
-rather than the cards' disc, because the disc is the object a card wears and
-this is a line of type. Hover takes the label to purple and travels the
-arrow; press dims rather than scales, so it also moved out of the
-scale-on-press list in the micro-interaction layer and into the text-link
-one.
+`width: fit-content` rather than `display: inline-flex`, because an inline
+box sits on a text line and collects its descender space underneath.
+
+The visible count is `aria-hidden` and restated as a phrase in an `srOnly`
+span, the way `ExtCta` handles its own badge, so the accessible name resolves
+to "View all projects, 12 more in the archive" rather than
+"View all projects12". Verified by walking the subtree and skipping
+aria-hidden.
+
+### The two shapes it replaced
+
+Worth keeping, because both failures were informative.
+
+It shipped first as a **full-width outlined panel** at the cards' radius:
+131px tall to carry 23px of type, a border drawn around one line and a great
+deal of empty.
+
+The correction was a **bare full-width line** on the card captions' two
+anchors, label at the grid's left edge and muted count at the right. That
+measured beautifully (23px tall, the count's right edge landing exactly on
+the last card's) and read badly: at 1280px wide the two ends are nine hundred
+pixels apart, so they scan as two unrelated fragments, and a line of bold
+text does not say it can be clicked.
+
+The lesson is the same in both directions. A control needs an edge you can
+point at, and that edge has to be close to the label rather than at the far
+side of the page. Width should come from the content, not from the container.
 
 ## Touch
 

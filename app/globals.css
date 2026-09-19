@@ -3887,74 +3887,89 @@ html.has-cursor .cursorRing {
   scale: 1;
 }
 
-/* -------- closing action: the reel's seventh caption --------
+/* -------- closing action: a compact pill --------
 
-   Not a button, and no longer a panel either. It was a full-width outlined
-   box at the cards' radius, which is a lot of border drawn around one line
-   of text and a great deal of empty. The line was never the problem, so
-   the box went.
+   Third shape for this. It was a full-width outlined panel, which drew a
+   border around one line of type and a great deal of empty; stripping it
+   to a bare full-width line overcorrected, putting the label at one edge
+   and the count at the other with nine hundred pixels of nothing between
+   them, so they read as two fragments rather than one control.
 
-   What is left sits on the same two anchors every card caption uses, label
-   at the left edge and muted meta at the right, in the same faces and
-   sizes. So it reads as the caption after the last card rather than as a
-   control that wandered in, and the space above it does the separating a
-   border was doing badly.
+   What both versions were missing is that a control needs an edge you can
+   point at, and that edge has to be near the label rather than at the far
+   side of the page. So: shrink-to-fit at the grid's left edge, split into
+   two compartments by a hairline, outline and no fill. The outline is what
+   keeps it a step under the header's solid .extCta instead of competing
+   with it (DESIGN.md section 7).
 
-   Still not a second .extCta: the header owns the one primary button in
-   this view (DESIGN.md section 7). */
+   width: fit-content rather than display: inline-flex, because an inline
+   box would sit on a text line and collect its descender space underneath. */
 .selWorks__endCta {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: clamp(14px, 2vw, 34px);
+  width: fit-content;
+  align-items: stretch;
   margin-top: clamp(30px, 4vw, 62px);
+  height: clamp(44px, 3.4vw, 54px);
+  border: 1px solid var(--selw-line);
+  border-radius: 999px;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.28s var(--ease-quint),
+    background-color 0.28s var(--ease-quint);
 }
 
-/* the card name's face and weight, one step up in size because this is the
-   line that ends the section */
+/* 600, not the captions' 700: this is a UI label rather than a piece of
+   the editorial voice (DESIGN.md section 3) */
 .selWorks__endCtaName {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.45em;
+  display: flex;
+  align-items: center;
+  padding-inline: clamp(18px, 1.5vw, 26px);
   font-family: var(--font-primary);
-  font-size: clamp(15.5px, 1.4vw, 21px);
-  font-weight: 700;
+  font-size: clamp(14px, 1.05vw, 16px);
+  font-weight: 600;
   letter-spacing: 0;
-  line-height: 1.15;
+  line-height: 1;
   color: var(--ink);
   transition: color 0.25s ease-out;
 }
 
-/* lands where the cards put their category and year */
+/* the second compartment: count and arrow behind a hairline that runs the
+   pill's full height, so the divider is the pill's own structure rather
+   than a rule floating inside it */
 .selWorks__endCtaNote {
-  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.62em;
+  padding-inline: clamp(13px, 1.1vw, 18px);
+  border-left: 1px solid var(--selw-line);
   font-family: var(--font-primary);
+  font-size: clamp(12.5px, 0.95vw, 14px);
   font-weight: 500;
-  font-size: clamp(11.5px, 0.95vw, 14px);
-  letter-spacing: 0.005em;
-  line-height: 1.15;
+  line-height: 1;
   color: rgba(31, 31, 31, 0.66);
-  transition: color 0.25s ease-out;
+  transition: border-color 0.28s var(--ease-quint), color 0.25s ease-out;
 }
 
-/* a glyph on the baseline, not the cards' disc: the disc is the object a
-   card wears, and this is a line of type */
 .selWorks__endCtaIcon {
-  display: inline-block;
-  width: 0.78em;
-  height: 0.78em;
-  /* em sizing puts it on the label's own scale; this nudge sits it on the
-     cap height rather than the baseline it would otherwise ride */
-  transform: translateY(0.02em);
+  display: block;
+  width: 1.05em;
+  height: 1.05em;
   transition: transform 0.42s var(--ease-quint);
 }
 
 .selWorks__endCtaIcon svg {
   width: 100%;
   height: 100%;
-  stroke-width: 1.75;
+  stroke-width: 1.7;
+}
+
+/* the border is the object, so the border is what the hover moves; the
+   wash behind it is only there to stop the fill reading as a colour change
+   on the page rather than on the control */
+.selWorks__endCta:hover,
+.selWorks__endCta:focus-visible {
+  border-color: var(--purple);
+  background-color: rgba(124, 58, 237, 0.05);
 }
 
 .selWorks__endCta:hover .selWorks__endCtaName,
@@ -3964,18 +3979,18 @@ html.has-cursor .cursorRing {
 
 .selWorks__endCta:hover .selWorks__endCtaNote,
 .selWorks__endCta:focus-visible .selWorks__endCtaNote {
-  color: rgba(31, 31, 31, 0.82);
+  border-left-color: var(--purple);
+  color: var(--purple);
 }
 
 .selWorks__endCta:hover .selWorks__endCtaIcon,
 .selWorks__endCta:focus-visible .selWorks__endCtaIcon {
-  transform: translate(3px, calc(0.02em - 3px));
+  transform: translate(3px, -3px);
 }
 
 .selWorks__endCta:focus-visible {
   outline: 2px solid var(--purple);
-  outline-offset: 4px;
-  border-radius: 3px;
+  outline-offset: 3px;
 }
 
 /* The badge still appears, because it IS the hover state and removing it
@@ -3997,7 +4012,7 @@ html.has-cursor .cursorRing {
   .selWork:focus-visible .selWork__img,
   .selWorks__endCta:hover .selWorks__endCtaIcon,
   .selWorks__endCta:focus-visible .selWorks__endCtaIcon {
-    transform: translateY(0.02em);
+    transform: none;
   }
 }
 
@@ -4037,12 +4052,15 @@ html.has-cursor .cursorRing {
     grid-template-columns: 1fr;
     gap: var(--selw-rowGap);
   }
-  /* the label and the count stop competing for one line and stack, which
-     is what a card caption would do if it had two things to say */
+  /* a pill has nothing to stack, so it only tightens */
   .selWorks__endCta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 7px;
+    height: 46px;
+  }
+  .selWorks__endCtaName {
+    padding-inline: 18px;
+  }
+  .selWorks__endCtaNote {
+    padding-inline: 14px;
   }
 }
 
@@ -10814,6 +10832,7 @@ html.dpl-page .preloader {
    transition here would clobber its box-shadow one. */
 .ctaPill,
 .footer__contactCta,
+.selWorks__endCta,
 .seaFooter__topBtn,
 .contactPage__submit,
 .hc__submit,
@@ -10826,6 +10845,7 @@ html.dpl-page .preloader {
 
 .ctaPill:active,
 .footer__contactCta:active,
+.selWorks__endCta:active,
 .seaFooter__topBtn:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
@@ -10843,11 +10863,9 @@ html.dpl-page .preloader {
   transition-duration: var(--dur-press);
 }
 
-/* Nav links are text, not buttons: they dim on press instead of moving.
-   The reel's closing action is a line of type too, so it joins them. */
+/* Nav links are text, not buttons: they dim on press instead of moving. */
 .navbar__links a,
-.mobileNavCard__link,
-.selWorks__endCta {
+.mobileNavCard__link {
   transition: opacity var(--dur-press) var(--ease-quint);
 }
 
@@ -10879,8 +10897,7 @@ html.dpl-page .preloader {
 }
 
 .navbar__links a:active,
-.mobileNavCard__link:active,
-.selWorks__endCta:active {
+.mobileNavCard__link:active {
   opacity: 0.6;
 }
 
@@ -10891,6 +10908,7 @@ html.dpl-page .preloader {
 @media (prefers-reduced-motion: reduce) {
   .ctaPill:active,
 .footer__contactCta:active,
+.selWorks__endCta:active,
 .seaFooter__topBtn:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,

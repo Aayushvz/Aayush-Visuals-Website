@@ -214,12 +214,19 @@ Use it for the single most important action in a section. Props: `href`,
 a route change plays the page-transition wipe; omit for in-page hashes).
 
 Do not reach for it twice in one view. Selected Works deliberately pairs it
-with `.selWorks__endCta`, which is not a button at all: it is the reel's
-seventh caption, on the same two anchors and in the same faces the card
-captions use, label left and muted count right. Two primary buttons there
-would flatten the section's hierarchy. It was briefly an outlined panel at
-the cards' radius, which drew a border around one line of text and a lot of
-empty; the line was never the problem, so the box went.
+with `.selWorks__endCta`, a compact outlined pill at the grid's left edge:
+label, a hairline divider, the count, the arrow. Outline and no fill is what
+keeps it a step below the solid primary rather than beside it; two primary
+buttons there would flatten the section's hierarchy.
+
+That pill is the third shape it took, and the two it replaced are the useful
+part. A full-width outlined panel drew a border around one line of type and
+a great deal of empty. Stripping it to a bare full-width line overcorrected:
+the label sat at one edge and the count at the other, nine hundred pixels
+apart, reading as two fragments rather than one control. **A control needs an
+edge you can point at, and that edge has to be near the label, not at the far
+side of the page.** Shrink-to-fit, not full-bleed, for anything that is meant
+to be clicked.
 
 ---
 

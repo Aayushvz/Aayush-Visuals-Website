@@ -48,24 +48,36 @@ export default function ProjectsSection() {
       </div>
       <SelectedWorks />
       {/*
-        The closing action is the reel's seventh caption, not a button.
+        The closing action, third time.
 
-        It was a full-width outlined panel at the cards' radius, which drew
-        a box around a line of text and a great deal of nothing. The line
-        was never the problem, so the box went: this now sits on the same
-        two anchors every card caption uses, label at the left edge and
-        muted meta at the right, and the space above it is what separates
-        it rather than a border.
+        It was a full-width outlined panel first, which drew a border round
+        one line of type and a great deal of empty. Stripping it to a bare
+        full-width line overcorrected: the label ended up at one edge and
+        the count at the other with nine hundred pixels between them, so
+        they read as two unrelated fragments and nothing about them said
+        they could be clicked.
+
+        A control needs an edge you can point at, and that edge should be
+        close to the label rather than at the far side of the page. So it
+        is a compact pill at the grid's left edge: label, a hairline
+        divider, the count and the arrow. Outline and no fill, which is
+        what keeps it under the header's solid .extCta rather than beside
+        it (DESIGN.md section 7).
       */}
       <PageLink href="/work" className="selWorks__endCta" data-reveal>
-        <span className="selWorks__endCtaName">
-          View all projects
+        <span className="selWorks__endCtaName">View all projects</span>
+        <span className="selWorks__endCtaNote">
+          {/* The bare numeral reads as "View all projects12" aloud, with
+              nothing between the label and the count. The visible one is
+              hidden from the accessibility tree and the same value is
+              restated as a phrase, the way ExtCta handles its own badge. */}
+          <span className="selWorks__endCtaCount" aria-hidden>
+            {archived}
+          </span>
+          <span className="srOnly">, {archived} more in the archive</span>
           <span className="selWorks__endCtaIcon" aria-hidden>
             <ArrowUpRight />
           </span>
-        </span>
-        <span className="selWorks__endCtaNote">
-          {archived} more in the archive
         </span>
       </PageLink>
     </section>
