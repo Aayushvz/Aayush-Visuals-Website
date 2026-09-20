@@ -163,7 +163,38 @@ function MagneticDotField() {
   return <canvas className="contactPage__dots" ref={canvasRef} aria-hidden />;
 }
 
+/*
+  Desktop only, and NOT by hiding it.
+
+  `display: none` would have been one line, and it would have left cobe
+  running: the canvas still initialises WebGL, still holds its buffers, and
+  still ticks a requestAnimationFrame loop for every frame the contact page is
+  open - drawing a globe nobody can see, on the device least able to afford
+  it. Not mounting it is the difference between a hidden cost and no cost.
+
+  Gated on a media query read after mount rather than on a width read during
+  render, because the server has no viewport: reading one during render makes
+  the first client render disagree with the HTML and React discards the tree.
+  `null` until the effect runs means desktop paints the globe one frame late,
+  which a WebGL canvas that has to compile shaders was going to do anyway.
+*/
+const GLOBE_MIN_WIDTH = "(min-width: 901px)";
+
 function InteractiveGlobe() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(GLOBE_MIN_WIDTH);
+    const sync = () => setShow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return show ? <GlobeCanvas /> : null;
+}
+
+function GlobeCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<number | null>(null);
   const pointerInteractionMovement = useRef(0);

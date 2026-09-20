@@ -2,6 +2,19 @@
 
 import { useMemo } from "react";
 import PageLink from "./PageLink";
+import { PERSON_NAME } from "@/lib/site";
+
+/*
+  Written down rather than computed.
+
+  `new Date().getFullYear()` looks like the careful answer and is the wrong
+  one here: every page on this site is statically prerendered, so the call
+  runs at BUILD time and then freezes. A site built in December and left alone
+  would keep claiming the old year all through the next one, and it would do
+  it silently. A literal is honest about being a literal - it is wrong in
+  exactly the same way, but visibly, in a file someone edits.
+*/
+const FOOTER_YEAR = "2026";
 
 /*
   Sea of Stars Inspired Footer Component
@@ -11,7 +24,7 @@ import PageLink from "./PageLink";
   - Intricate SVG pixel-art cliff campfire scene on left with characters & glowing fire
   - Right jungle foliage framing the night ocean
   - Center glowing Sea of Stars typography, crown-skull emblem, and copyright
-  - Bottom dock with the back-to-top control and corner flourishes
+  - Bottom dock carrying the colophon line
 */
 
 interface Star {
@@ -264,41 +277,24 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ==================== BOTTOM OST AUDIO & SOCIALS DOCK ==================== */}
+      {/*
+        The colophon.
+
+        This dock used to hold a back-to-top button between two decorative
+        corner brackets. All three are gone: the brackets framed nothing (the
+        dock is a full-bleed bar, so they read as two loose marks at the far
+        edges of an empty strip), and the button duplicated a gesture every
+        phone and every browser already has, in the one place on the page a
+        reader has finished with.
+
+        What a footer bar is actually for is the line below - who made it and
+        when - which the page did not say anywhere.
+      */}
       <div className="seaFooter__dockWrapper">
         <div className="seaFooter__dock">
-          {/* Left Decorative Corner Flourish */}
-          <div className="seaFooter__flourish seaFooter__flourish--left" aria-hidden>
-            <svg viewBox="0 0 40 40" fill="none">
-              <path d="M4 36V12C4 7.5 7.5 4 12 4H36" stroke="#a78bfa" strokeWidth="2" strokeOpacity="0.6" />
-              <path d="M8 32V16C8 11.5 11.5 8 16 8H32" stroke="#8b5cf6" strokeWidth="1.5" strokeOpacity="0.4" />
-              <circle cx="12" cy="12" r="2.5" fill="#a78bfa" />
-            </svg>
-          </div>
-
-          {/* Right Side: Back to Top */}
-          <div className="seaFooter__actions">
-            <button
-              type="button"
-              className="seaFooter__topBtn"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              aria-label="scroll back to top"
-              title="back to top"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Right Decorative Corner Flourish */}
-          <div className="seaFooter__flourish seaFooter__flourish--right" aria-hidden>
-            <svg viewBox="0 0 40 40" fill="none">
-              <path d="M36 36V12C36 7.5 32.5 4 28 4H4" stroke="#a78bfa" strokeWidth="2" strokeOpacity="0.6" />
-              <path d="M32 32V16C32 11.5 28.5 8 24 8H8" stroke="#8b5cf6" strokeWidth="1.5" strokeOpacity="0.4" />
-              <circle cx="28" cy="12" r="2.5" fill="#a78bfa" />
-            </svg>
-          </div>
+          <p className="seaFooter__colophon">
+            Designed By {PERSON_NAME} <span aria-hidden>&middot;</span> {FOOTER_YEAR}
+          </p>
         </div>
       </div>
     </footer>
