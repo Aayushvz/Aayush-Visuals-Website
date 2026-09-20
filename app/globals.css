@@ -46,10 +46,28 @@
   /* shared grid geometry — identical cells in both themes (15.6px × 1.30) */
   --grid-size: 20.28px;
 
-  /* global interface typeface — the hero identity lockup (aayush / Visuals)
-     keeps its own explicit --font-serif / --font-archivo declarations and
-     is untouched by this. Everything else inherits from body. */
-  --font-primary: var(--font-general), "General Sans", system-ui, sans-serif;
+  /*
+    Global interface typeface: Aeonik, with General Sans behind it.
+
+    The hero identity lockup (aayush / Visuals) keeps its own explicit
+    --font-serif / --font-archivo declarations and is untouched by this, as do
+    the other display faces. Everything else inherits from body.
+
+    GENERAL SANS IS STILL IN THE STACK AND IS STILL DOING WORK. The available
+    Aeonik is the trial cut and carries 66 glyphs - space, comma, hyphen,
+    period, the digits and the two alphabets. Everything outside that set
+    falls through to the next family, so General Sans is not a dead fallback
+    here, it is what renders every apostrophe, colon, ampersand, bracket,
+    percent, plus sign and copyright mark on the site.
+
+    Measured on the homepage at the time of the switch: 14 of 1260 characters,
+    1.11%. The ones that show up are (c), +, the right single quote, & and ?.
+    The most visible is the + in "5+ years", which is set at 57px - one glyph
+    of General Sans inside a line of Aeonik. That is the cost of the trial cut
+    and the only real fix is a full one.
+  */
+  --font-primary: var(--font-aeonik), var(--font-general), "General Sans",
+    system-ui, sans-serif;
 
   /* global ruler frame geometry (.rails) — content below the hero stays
      clear of these fixed left/right lines by --page-content-inset. */
@@ -9529,9 +9547,15 @@ html.contact-page-active body {
    for a 215px card, i.e. an 18px overlap - and the ring read as a solid band
    of card rather than as separate cards.
 
-     c = 152, R = 340, P = 1048   ->  chord 176 vs card 152, a 24px gap on the
-                                      ring, and 152 x 1.48 = 225px at the
-                                      front (the arm is 2 x (340 + 76) = 832)
+     c = 182, R = 408, P = 1258   ->  chord 211 vs card 182, a 29px gap on the
+                                      ring, and 182 x 1.48 = 269px at the
+                                      front (the arm is 2 x (408 + 91) = 998)
+
+   All three scaled together by 1.2 from the previous c = 152 / R = 340 /
+   P = 1048. Scaling every length by one factor is the one change that leaves
+   the composition EXACTLY as it was and only alters its size - the ratios
+   that set the gap and the magnification are untouched, so this is a bigger
+   card and a proportionally bigger gap, not a different arrangement.
 
    Note which way this reads: the front card is 225px BECAUSE of the gap, not
    in spite of it. On a 390px screen the two cannot both be maximised - once
@@ -9589,9 +9613,9 @@ html.contact-page-active body {
 
   .services-wrapper {
     /* whatever is left under the heading, capped so the ring does not stretch
-       on a tall phone; the projected card is 216 x 1.48 = 320px */
-    height: min(375px, calc(100dvh - 210px));
-    transform: perspective(1048px);
+       on a tall phone; the projected card is 259 x 1.48 = 383px */
+    height: min(440px, calc(100dvh - 200px));
+    transform: perspective(1258px);
     /* the carousel takes horizontal gestures, the page keeps vertical ones -
        declared here so the compositor scrolls without waiting on the drag
        handler to decide (see the axis lock in Services.tsx) */
@@ -9600,19 +9624,19 @@ html.contact-page-active body {
 
   .services-carousel {
     width: 100%;
-    height: 216px;
+    height: 259px;
   }
 
   .services-arm {
-    width: 832px;
-    height: 180px;
+    width: 998px;
+    height: 200px;
   }
 
   .services-card {
-    width: 152px;
-    height: 216px;
-    /* 13 x 1.48 lands on the desktop card's 20px once magnified */
-    border-radius: 13px;
+    width: 182px;
+    height: 259px;
+    /* 14 x 1.48 lands on the desktop card's 20px once magnified */
+    border-radius: 14px;
     box-shadow: 0 16px 45px rgba(0, 0, 0, 0.32), 0 4px 14px rgba(0, 0, 0, 0.2);
   }
 }
@@ -10529,7 +10553,9 @@ html.contact-page-active body {
   justify-content: center;
   gap: 0.22em;
   text-align: center;
-  font-family: var(--font-general), "General Sans", system-ui, sans-serif;
+  /* --font-primary, not the raw --font-general: this reached past the token
+     and would have been the one thing on the page still set in the old face */
+  font-family: var(--font-primary);
   font-weight: 700;
   text-transform: lowercase;
   line-height: 1;

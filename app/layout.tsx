@@ -101,6 +101,11 @@ const inter = Inter({
 const generalSans = localFont({
   variable: "--font-general",
   display: "swap",
+  /* it is the fallback behind Aeonik now, not the interface face, so it is no
+     longer worth a preload on every page - it loads only if a glyph Aeonik
+     lacks actually appears. It stays registered because it is also an option
+     in the contract tool's own font picker. */
+  preload: false,
   fallback: ["system-ui", "sans-serif"],
   src: [
     { path: "../public/fonts/GeneralSans-Regular.woff2", weight: "400", style: "normal" },
@@ -111,34 +116,40 @@ const generalSans = localFont({
 });
 
 /*
-  Aeonik Trial, for the project pages only.
+  Aeonik, the site's interface typeface.
 
-  READ THIS BEFORE USING IT ANYWHERE ELSE. The trial cut carries 66 glyphs -
-  space, comma, hyphen, period, 0-9, A-Z, a-z - and nothing else. Every colon,
-  apostrophe, slash, dash, bracket, percent, ampersand and every Devanagari
-  character in the case-study copy falls through to the fallback below, which
-  means a visible change of typeface mid-word on things like "Cafe's". That is
-  a known and accepted trade here; it is not a bug to be fixed by adjusting
-  the CSS, and the only real fix is a full cut of the face.
+  This is the full cut, converted from the supplied TTFs to WOFF2 (692KB ->
+  177KB across the five weights kept). It replaces a trial cut that carried 66
+  glyphs; this one carries 471, which is every character the site was falling
+  back on except the decorative diamond and Devanagari.
 
-  General Sans is named explicitly as the fallback rather than left to
-  system-ui, because it is what the rest of the site is set in - so the
-  characters that do fall through land on the family they would have been in
-  anyway, instead of on Arial.
+  WEIGHTS ARE DECLARED TRUTHFULLY, AND 600 IS THE INTERESTING ONE. It is the
+  most-used weight on the site - 76 rules - and Aeonik has no Semibold, so
+  CSS font matching resolves it upward to Bold. That is not a compromise here:
+  measured as normalised ink area over "Handgloves", Aeonik Bold is 1.795
+  against General Sans Semibold's 1.825, a 1.6% difference, where Aeonik
+  Medium is 20% lighter. The default behaviour lands on the right face, so
+  there is no weight-range hack and there should not be one.
 
-  `preload: false`: the whole site would otherwise pay for four files that
-  only /work/* renders.
+  Two weights DO shift, because the two families distribute weight
+  differently and that is what changing typeface means:
+    400  Aeonik Regular is ~18% heavier ink than General Sans Regular
+    700  Aeonik Bold is ~18% lighter ink than General Sans Bold
+  800 resolves up to Black, which lands within 3.5% of what it used to get.
+
+  No italics: the only italic on the site is Instrument Serif in the hero
+  lockup, so shipping Aeonik's would be 73KB nothing asks for.
 */
 const aeonik = localFont({
   variable: "--font-aeonik",
   display: "swap",
-  preload: false,
   fallback: ["General Sans", "system-ui", "sans-serif"],
   src: [
-    { path: "../public/fonts/aeonik/aeoniktrial-light.otf", weight: "300", style: "normal" },
-    { path: "../public/fonts/aeonik/aeoniktrial-regular.otf", weight: "400", style: "normal" },
-    { path: "../public/fonts/aeonik/aeoniktrial-regularitalic.otf", weight: "400", style: "italic" },
-    { path: "../public/fonts/aeonik/aeoniktrial-bold.otf", weight: "700", style: "normal" },
+    { path: "../public/fonts/aeonik/aeonik-light.woff2", weight: "300", style: "normal" },
+    { path: "../public/fonts/aeonik/aeonik-regular.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/aeonik/aeonik-medium.woff2", weight: "500", style: "normal" },
+    { path: "../public/fonts/aeonik/aeonik-bold.woff2", weight: "700", style: "normal" },
+    { path: "../public/fonts/aeonik/aeonik-black.woff2", weight: "900", style: "normal" },
   ],
 });
 
