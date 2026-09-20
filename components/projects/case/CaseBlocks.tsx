@@ -6,6 +6,7 @@ import {
   type Project,
   type ProjectShot,
 } from "@/components/projects/projectData";
+import { mediaSrc } from "@/lib/mediaSrc";
 
 /*
   What a project page says, and how little of it.
@@ -979,7 +980,8 @@ function Img({
     return wrap(
       <video
         className={className}
-        src={src}
+        /* video may live off the deployment; see lib/mediaSrc */
+        src={mediaSrc(src)}
         style={inner}
         width={box?.[0]}
         height={box?.[1]}

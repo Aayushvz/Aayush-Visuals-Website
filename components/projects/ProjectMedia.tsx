@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { mediaSrc } from "@/lib/mediaSrc";
 
 /*
   One card face, whether the project ships a still or a loop.
@@ -75,7 +76,8 @@ export default function ProjectMedia({
       <video
         ref={videoRef}
         className={className}
-        src={src}
+        /* video may live off the deployment; see lib/mediaSrc */
+        src={mediaSrc(src)}
         poster={poster}
         /* eager cards are the ones already on screen, so those keep autoplay */
         autoPlay={eager}
