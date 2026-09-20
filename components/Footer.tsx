@@ -4,17 +4,6 @@ import { useMemo } from "react";
 import PageLink from "./PageLink";
 import { PERSON_NAME } from "@/lib/site";
 
-/*
-  Written down rather than computed.
-
-  `new Date().getFullYear()` looks like the careful answer and is the wrong
-  one here: every page on this site is statically prerendered, so the call
-  runs at BUILD time and then freezes. A site built in December and left alone
-  would keep claiming the old year all through the next one, and it would do
-  it silently. A literal is honest about being a literal - it is wrong in
-  exactly the same way, but visibly, in a file someone edits.
-*/
-const FOOTER_YEAR = "2026";
 
 /*
   Sea of Stars Inspired Footer Component
@@ -293,7 +282,7 @@ export default function Footer() {
       <div className="seaFooter__dockWrapper">
         <div className="seaFooter__dock">
           <p className="seaFooter__colophon">
-            Designed By {PERSON_NAME} <span aria-hidden>&middot;</span> {FOOTER_YEAR}
+            Designed by {PERSON_NAME}
           </p>
         </div>
       </div>

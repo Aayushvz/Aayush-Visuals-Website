@@ -10803,6 +10803,16 @@ html.contact-page-active body {
 /* the colophon: the quiet kind of line a footer bar carries, set well back
    from the scene above it so it reads as a signature rather than as content */
 .seaFooter__colophon {
+  /*
+    Opting out of the footer's blanket lowercase.
+
+    `.seaFooter` sets `text-transform: lowercase` on the whole scene, and the
+    property inherits, so this line rendered as "designed by aayush raj" even
+    though the markup spells it with capitals. The lowercase is the footer's
+    voice for its own game-scene lettering; a signature is a name and takes
+    the capitals a name has.
+  */
+  text-transform: none;
   margin: 0;
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -10812,12 +10822,6 @@ html.contact-page-active body {
      which is what the palette keeps it for. */
   color: var(--purple-soft);
   text-align: center;
-}
-
-.seaFooter__colophon span {
-  /* the separator is punctuation between two facts, not one of them */
-  margin-inline: 0.5em;
-  opacity: 0.5;
 }
 
 /* --- Tablet & Mobile Responsiveness --- */
