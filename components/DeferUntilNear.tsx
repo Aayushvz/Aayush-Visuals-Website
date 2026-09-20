@@ -3,6 +3,54 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /*
+  Images the deferred sections are about to need, fetched before the section
+  itself arrives.
+
+  A section held behind `next/dynamic` + this wrapper pays for its pictures in
+  a strict chain, one link at a time: the observer fires, THEN the chunk is
+  fetched over the network, THEN React mounts and the <img> tags finally
+  exist, THEN the browser can start asking for the files. The markup is not in
+  the HTML at all, so the preload scanner - the thing that normally has images
+  in flight before the parser has even reached them - never sees these URLs.
+  The result is a section that arrives structurally complete and visually
+  empty: card backgrounds with nothing in them, filling in one by one.
+
+  Warming them at a wider margin collapses that chain into two parallel legs.
+  The chunk and the pictures travel at the same time, and by the time the
+  component mounts the <img> resolves out of cache on its first frame.
+
+  The loader is held only until it reports back, then let go. An Image with no
+  live reference can have its decoded bitmap evicted, but next.config.ts gives
+  these folders a day of freshness, so the worst case after that is a re-decode
+  from bytes already on disk - no network, and a fraction of the memory that
+  pinning fourteen full-size bitmaps for the life of the page would cost.
+*/
+const warmed = new Set<string>();
+/* held across the fetch, and only across the fetch */
+const inFlight = new Set<HTMLImageElement>();
+
+function warm(urls: readonly string[]) {
+  /* someone metering their data did not ask for a section they may never
+     scroll to; the ordinary lazy path still works for them */
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } })
+    .connection;
+  if (conn?.saveData) return;
+
+  for (const url of urls) {
+    if (warmed.has(url)) continue;
+    warmed.add(url);
+    const img = new Image();
+    img.decoding = "async";
+    const done = () => inFlight.delete(img);
+    img.addEventListener("load", done, { once: true });
+    /* a warm-up that 404s must not pin the element forever either */
+    img.addEventListener("error", done, { once: true });
+    inFlight.add(img);
+    img.src = url;
+  }
+}
+
+/*
   Mounts its children only once they are close to the viewport.
 
   The homepage hydrates every section at load, and the heavy ones below the
@@ -49,6 +97,8 @@ export default function DeferUntilNear({
   rootMargin = "150% 0px",
   className,
   flowAnchor = false,
+  prefetch,
+  prefetchRootMargin = "400% 0px",
 }: {
   children: ReactNode;
   minHeight: string;
@@ -77,6 +127,19 @@ export default function DeferUntilNear({
     it arrives when the section is genuinely about to be uncovered.
   */
   flowAnchor?: boolean;
+  /*
+    URLs to start fetching BEFORE this wrapper mounts its children - see the
+    note on `warm` above. Pass them from a plain data module, never by
+    importing the deferred component, or the chunk this file exists to split
+    off comes straight back into the main bundle.
+  */
+  prefetch?: readonly string[];
+  /*
+    Deliberately wider than `rootMargin`. The pictures have to leave ahead of
+    the chunk for the two to land together; matching the margins would just
+    restore the queue.
+  */
+  prefetchRootMargin?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -105,6 +168,23 @@ export default function DeferUntilNear({
     io.observe(el);
     return () => io.disconnect();
   }, [rootMargin]);
+
+  useEffect(() => {
+    if (!prefetch?.length) return;
+    const el = anchorRef.current ?? ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        warm(prefetch);
+      },
+      { rootMargin: prefetchRootMargin }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [prefetch, prefetchRootMargin]);
 
   useEffect(() => {
     if (!shown || filled) return;

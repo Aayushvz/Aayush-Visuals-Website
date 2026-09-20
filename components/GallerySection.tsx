@@ -176,7 +176,7 @@ export default function GallerySection() {
 
         <div className="gallery__viewport">
           <ul className="gallery__track" ref={trackRef}>
-            {GALLERY.map((item) => (
+            {GALLERY.map((item, i) => (
               <li
                 className="galleryItem"
                 key={item.src}
@@ -193,7 +193,19 @@ export default function GallerySection() {
                     className="galleryItem__img"
                     src={item.src}
                     alt={item.alt}
-                    loading="lazy"
+                    /*
+                      The row is revealed by a transform, not by scrolling the
+                      viewport, and the lazy heuristic is a poor fit for that:
+                      a card three screens to the right starts fetching only
+                      as it slides in, so the photograph arrives after its
+                      frame does. The homepage already warms all eight on
+                      approach (see HomeDeferred), which turns these into
+                      cache hits - but the first three are on screen the
+                      moment the section is, and there is nothing left to
+                      defer for them.
+                    */
+                    loading={i < 3 ? "eager" : "lazy"}
+                    fetchPriority={i < 3 ? "high" : "auto"}
                     decoding="async"
                     draggable={false}
                   />

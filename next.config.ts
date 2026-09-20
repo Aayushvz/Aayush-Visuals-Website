@@ -19,6 +19,34 @@ const nextConfig: NextConfig = {
     missing the rules are simply not added, which fails as a 404 on the
     path rather than as a broken build.
   */
+  /*
+    Static images in /public are served `max-age=0` by default, which means
+    every reference to one costs a conditional request even when the bytes are
+    already sitting in the browser. That is invisible most of the time and
+    very visible here: the homepage warms the deck and gallery photographs
+    ahead of their sections (see components/HomeDeferred.tsx), and with
+    max-age=0 the <img> that mounts a moment later still has to go back to the
+    server to be told nothing changed - re-serialising the very round trip the
+    warm-up existed to remove.
+
+    A day of freshness plus a week of stale-while-revalidate. Not `immutable`:
+    these filenames are not content-hashed, so a replaced photograph has to be
+    able to reach people who have already seen the old one.
+  */
+  async headers() {
+    return [
+      {
+        source: "/:dir(gallery|services|projects|logos|hero|footer|about)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
+  },
+
   async rewrites() {
     const origin = process.env.INVOICE_APP_ORIGIN;
     if (!origin) return [];

@@ -2,6 +2,9 @@
 
 import dynamic from "next/dynamic";
 import DeferUntilNear from "./DeferUntilNear";
+/* data modules, not the components - see the note on `prefetch` below */
+import { SERVICE_IMAGES } from "./services.data";
+import { GALLERY } from "./gallery.data";
 
 /*
   The homepage's below-the-fold sections, held back until they are needed.
@@ -36,13 +39,30 @@ import DeferUntilNear from "./DeferUntilNear";
   viewports it settles at, so the page does not grow underneath the reader.
 */
 
+/*
+  WHY THESE SECTIONS ALSO PREFETCH THEIR PICTURES
+
+  Splitting a section off buys main-thread time, but it takes something back:
+  the browser cannot see an image URL that is not in the document. Everything
+  here is `ssr: false`, so the preload scanner has nothing to scan, and the
+  fetch cannot begin until the chunk has landed AND React has mounted. That is
+  two serial round trips in front of every picture, which is why the deck used
+  to arrive as six empty cards and the gallery filled in one frame at a time.
+
+  Handing the URLs to DeferUntilNear starts them at a wider margin, in
+  parallel with the chunk rather than behind it. They are imported from the
+  data modules, never from the components, so nothing heavy is pulled back
+  into the main bundle - a few strings are all that ships.
+*/
+const GALLERY_IMAGES: readonly string[] = GALLERY.map((g) => g.src);
+
 const Services = dynamic(() => import("./Services"), { ssr: false });
 const GallerySection = dynamic(() => import("./GallerySection"), { ssr: false });
 const Footer = dynamic(() => import("./Footer"), { ssr: false });
 
 export function DeferredServices() {
   return (
-    <DeferUntilNear minHeight="300vh">
+    <DeferUntilNear minHeight="300vh" prefetch={SERVICE_IMAGES}>
       <Services />
     </DeferUntilNear>
   );
@@ -50,7 +70,7 @@ export function DeferredServices() {
 
 export function DeferredGallery() {
   return (
-    <DeferUntilNear minHeight="355vh">
+    <DeferUntilNear minHeight="355vh" prefetch={GALLERY_IMAGES}>
       <GallerySection />
     </DeferUntilNear>
   );

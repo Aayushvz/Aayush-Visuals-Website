@@ -6,6 +6,12 @@ import path from "path";
   One-off asset optimizer. Resizes oversized rasters to display-appropriate
   dimensions and re-encodes to WebP (alpha preserved). Prints a rename map
   (old -> new) so code/CSS references can be updated. Run: node scripts/optimize-images.mjs
+
+  An optional path prefix limits the run to one folder, which is what you want
+  when adding a batch to an already-optimised tree - re-encoding a lossy WebP a
+  second time costs quality and buys nothing:
+
+    node scripts/optimize-images.mjs public/gallery
 */
 
 // per-path policy: width = max width (never upscales), q = webp quality,
@@ -37,6 +43,24 @@ const JOBS = [
   // textures / backgrounds
   { file: "public/purple_ice_background.png", width: 700, q: 74, out: "public/purple_ice_background.webp" },
   { file: "public/projects/mike-tyson-bg.webp", width: 1920, q: 74, inPlace: true },
+  /*
+    Off-the-clock gallery. These arrived after the first pass and were never
+    sized down: every one of them was shipping roughly twice the pixels its
+    card can show. Width here is the card's CSS width from gallery.data.ts
+    doubled, which is what a 2x screen actually samples - anything above that
+    is bytes the decoder throws away. They are photographs with no text, so
+    q78 matches the project covers above.
+  */
+  { file: "public/gallery/riviera-group.webp", width: 920, q: 78, inPlace: true },
+  { file: "public/gallery/grass-selfie.webp", width: 520, q: 78, inPlace: true },
+  { file: "public/gallery/campus-lawn.webp", width: 920, q: 78, inPlace: true },
+  { file: "public/gallery/riviera-badge.webp", width: 520, q: 78, inPlace: true },
+  { file: "public/gallery/hills-profile.webp", width: 680, q: 78, inPlace: true },
+  { file: "public/gallery/crowd-pink.webp", width: 920, q: 78, inPlace: true },
+  { file: "public/gallery/riviera-portrait.webp", width: 600, q: 78, inPlace: true },
+  /* already 407px wide, under its own 2x target - listed so the set is
+     complete, and withoutEnlargement keeps it from being stretched */
+  { file: "public/gallery/suit-campus.webp", width: 560, q: 82, inPlace: true },
 ];
 
 function expand(job) {
@@ -54,7 +78,15 @@ const rename = [];
 let before = 0,
   after = 0;
 
-for (const raw of JOBS.flatMap(expand)) {
+/* optional path prefix: node scripts/optimize-images.mjs public/gallery */
+const only = process.argv[2] ? process.argv[2].split("\\").join("/") : null;
+const jobs = JOBS.flatMap(expand).filter(
+  (j) => !only || j.src.split("\\").join("/").startsWith(only)
+);
+if (only) console.log(`Limiting to ${only}: ${jobs.length} file(s)
+`);
+
+for (const raw of jobs) {
   const src = raw.src;
   if (!fs.existsSync(src)) {
     console.log("SKIP (missing):", src);

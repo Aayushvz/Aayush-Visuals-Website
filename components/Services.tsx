@@ -3,16 +3,7 @@
 import { useEffect, useRef } from "react";
 import ExtCta from "./ExtCta";
 import TornEdge from "./TornEdge";
-
-// Exact sequence of 6 unique service card images
-const services = [
-  { id: "uiux", title: "UI/UX Design", image: "/services/ui-ux.webp" },
-  { id: "graphic", title: "Graphic Design", image: "/services/graphic-design.webp" },
-  { id: "brand", title: "Brand Building", image: "/services/brand-building.webp" },
-  { id: "video", title: "Video Production", image: "/services/video-production.webp" },
-  { id: "website", title: "Website Development", image: "/services/website-development.webp" },
-  { id: "product", title: "Product Design", image: "/services/product-design.webp" },
-];
+import { SERVICES as services } from "./services.data";
 
 const allCards = [...services, ...services]; // 12 cards total across 6 arms
 
@@ -289,7 +280,16 @@ export default function Services() {
                     src={allCards[i].image}
                     alt={allCards[i].title}
                     className="services-card__img"
-                    loading="lazy"
+                    /* NOT lazy. This section is already held back twice over
+                       - `ssr: false` keeps it out of the HTML and
+                       DeferUntilNear keeps it unmounted until it is a
+                       viewport and a half away - so by the time these tags
+                       exist the card is nearly on screen. A third gate here
+                       only delays six files totalling ~200KB, and it delays
+                       them worst on the desktop carousel, where the cards
+                       stand at rotateY(90deg) with backface-visibility
+                       hidden and the lazy heuristic has almost no projected
+                       area to decide on. */
                     decoding="async"
                     draggable={false}
                   />
@@ -300,7 +300,16 @@ export default function Services() {
                     src={allCards[i + 6].image}
                     alt={allCards[i + 6].title}
                     className="services-card__img"
-                    loading="lazy"
+                    /* NOT lazy. This section is already held back twice over
+                       - `ssr: false` keeps it out of the HTML and
+                       DeferUntilNear keeps it unmounted until it is a
+                       viewport and a half away - so by the time these tags
+                       exist the card is nearly on screen. A third gate here
+                       only delays six files totalling ~200KB, and it delays
+                       them worst on the desktop carousel, where the cards
+                       stand at rotateY(90deg) with backface-visibility
+                       hidden and the lazy heuristic has almost no projected
+                       area to decide on. */
                     decoding="async"
                     draggable={false}
                   />
@@ -338,7 +347,8 @@ export default function Services() {
                 src={service.image}
                 alt={service.title}
                 className="services-card__img"
-                loading="lazy"
+                /* see the note on the carousel cards above - same six files,
+                   already warmed, nothing left to defer */
                 decoding="async"
                 draggable={false}
               />
