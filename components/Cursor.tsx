@@ -148,6 +148,20 @@ export default function Cursor() {
         shownTitle = "";
       }
       ring.classList.toggle("cursorRing--work", !!work);
+      /*
+        The dot stands down while the named card is under the pointer.
+
+        That state already draws the project's name and discipline in a panel
+        at the hotspot, and the dot's own artwork - the purple hand or arrow -
+        sits right behind it. Two cursors in one place, one of them obscuring
+        the label the other exists to show.
+
+        Only this state. The plain "View project" pill on the case studies is
+        a small mark that the dot reads as the pointer FOR, and the dot is the
+        pointer everywhere else on the site, so it is hidden here and nowhere
+        else.
+      */
+      dot.classList.toggle("cursorDot--muted", !!work);
 
       /* a card is never both, and checking work first means a reel tile
          cannot also light the generic pill behind it */

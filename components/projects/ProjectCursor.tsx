@@ -10,20 +10,21 @@
 export const PROJECT_CURSOR_LABEL = "View project";
 
 /* The plain variant: a cream pill reading "View project". Used by the
-   /work index and by the case-study pages, where the reader already has
-   the project's name in front of them in the page itself. */
+   case-study pages, where the reader already has the project's name in
+   front of them in the page itself. The /work index used this too until the
+   named variant below was extended to it. */
 export const projectCursorProps = {
   "data-cursor": "project",
 } as const;
 
 /*
-  The named variant, used only by the homepage reel.
+  The named variant, used by the homepage reel and the /work grid.
 
-  There the cover is the whole tile and the caption sits below it, so a
-  pointer resting on the artwork is not currently reading the name. This
-  carries it: the cursor names what is under it and what kind of work it
-  is, instead of repeating a generic label the reader has already seen six
-  times down the page.
+  On the homepage the cover is the whole tile and the caption sits below it,
+  so a pointer resting on the artwork is not currently reading the name. On
+  /work the card's header does carry the title - but not the discipline, so
+  the cursor still adds something rather than echoing the card. Either way it
+  beats a generic label the reader has already seen six times down the page.
 
   The values ride on the element rather than being looked up by the cursor,
   because the cursor has no idea which project it is over and should not

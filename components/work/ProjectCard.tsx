@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import PageLink from "@/components/PageLink";
-import { projectCursorProps } from "@/components/projects/ProjectCursor";
+import { workCursorProps } from "@/components/projects/ProjectCursor";
 import { saveOrigin } from "@/lib/navOrigin";
 import type { WorkItem } from "./worksData";
 import ProjectMedia from "@/components/projects/ProjectMedia";
@@ -37,7 +37,10 @@ export default function ProjectCard({ item, index }: Props) {
         /* remember this spot so the project's back control returns to the
            grid rather than replaying the hero above it */
         onClick={() => saveOrigin("/work")}
-        {...projectCursorProps}
+        /* the named cursor, the same one the homepage reel uses. The card's
+           header already carries the title, but not what KIND of work it is -
+           so the cursor is not repeating the card, it is completing it. */
+        {...workCursorProps(item.title, item.category)}
       >
         <div className="workCard__header">
           <span className="workCard__label">

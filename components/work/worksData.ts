@@ -28,6 +28,16 @@ export type WorkItem = {
   year: string;
   /** every filter category this project belongs to (drives the chips) */
   categories: string[];
+  /*
+    The project's own single discipline, for the hover cursor.
+
+    NOT `categories[0]`: that array is the filter taxonomy, it can be several
+    entries long and "Case Studies" is prepended to it for deep dives - so the
+    first element is often the word "Case Studies" rather than what the work
+    IS. This is the same `category` string the homepage reel passes to the
+    same cursor, so a project reads identically in both places.
+  */
+  category: string;
   /** extra free-text terms the search should match beyond title/category */
   tags: string[];
   thumbnail: string;
@@ -160,6 +170,7 @@ const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
   id: p.id,
   title: p.title,
   year: p.year,
+  category: p.category,
   categories: [
     ...(isDeepDive(p) ? ["Case Studies"] : []),
     ...(TAXONOMY[p.id]?.categories ?? [p.category]),
