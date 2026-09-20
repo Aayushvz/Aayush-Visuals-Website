@@ -539,7 +539,12 @@
      there is not, without naming a breakpoint */
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 30ch), 1fr));
   gap: var(--cs-md) var(--cs-lg);
-  margin-top: var(--cs-lg);
+  /* --cs-md, matching the gap the brief takes above it, so the three steps
+     down the hero - paragraph to button, button to Services, Services to
+     Challenge - are one interval rather than two sizes. --cs-lg here made the
+     last gap nearly twice the one before it and read as a section break in
+     the middle of a block that is all one thing. */
+  margin-top: var(--cs-md);
 }
 
 .csHero__colBody {

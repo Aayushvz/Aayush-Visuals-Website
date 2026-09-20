@@ -315,7 +315,8 @@
 }
 
 .abBody {
-  font-size: clamp(14.5px, 1.05vw, 16.5px);
+  /* the page's one body size - see --j-body above */
+  font-size: 16px;
   line-height: 1.72;
   color: var(--ab-ink-2);
   text-wrap: pretty;
@@ -445,7 +446,12 @@
 */
 .abJourney {
   --j-lead: clamp(21px, 1.669vw, 34px);
-  --j-body: clamp(13.5px, 0.886vw, 18px);
+  /* Flat 16, not a clamp. The journey copy is the longest continuous reading
+     on the site and it was ranging 13.5 to 18px depending on window width -
+     13.5 at 1024, which is below the size the rest of the page reads at, and
+     18 on a wide monitor, which is larger than anything else on it. A reading
+     size should not be a function of how wide the window happens to be. */
+  --j-body: 16px;
   --j-label: clamp(11px, 0.782vw, 15px);
 
   list-style: none;
@@ -532,7 +538,9 @@
 .abMile__copy {
   margin: 0;
   font-size: var(--j-body);
-  line-height: 1.42;
+  /* 1.42 was set against 13.5px text; at 16 it closes the lines up. 1.6 is
+     the leading the other prose on this page already reads at. */
+  line-height: 1.6;
   color: var(--ab-ink);
   max-width: 46ch;
   text-wrap: pretty;
@@ -662,7 +670,7 @@
 
 .abCraft__copy {
   margin: 0;
-  font-size: clamp(14px, 1vw, 15.5px);
+  font-size: 16px;
   /* same: 85ch at 1920, 82 at 1440 */
   max-width: 68ch;
   line-height: 1.72;
