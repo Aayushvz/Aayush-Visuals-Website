@@ -160,6 +160,31 @@ export default function CaseStudyPage({ project }: { project: Project }) {
   const shots =
     story.gallery.length || story.highlights.length ? undefined : project.shots;
 
+  /*
+    The disciplines this project was, as tags.
+
+    `tools` is Figma and Framer - what the work was made WITH, which is a
+    different question from what it was. Nothing in the data answered the
+    second one, so `services` is read first and the category stands in for it
+    otherwise: every project has one, it is already written in the language of
+    a discipline ("Website Design", "Brand Identity"), and it means the row
+    renders on all twenty projects today rather than on the ones that get the
+    new field authored.
+  */
+  const services = project.services?.length
+    ? project.services
+    : project.category
+      ? [project.category]
+      : [];
+
+  /*
+    The Challenge column takes the first authored paragraph and no more: this
+    is the top of the page, opposite a one-line Role, and the full array runs
+    to several paragraphs further down in Details. Projects with no `challenge`
+    show Role alone rather than borrowing prose from elsewhere.
+  */
+  const challenge = project.challenge?.[0];
+
   /* generated from position, so dropping a beat can never leave a stale (03) */
   let no = 0;
 
@@ -188,27 +213,42 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 word, doing the job it looked like it was doing.
               */}
               <div className="csHero__meta" data-rise>
-                <Link className="cs__eyebrow csBack" href="/work">
-                  {/* drawn rather than the &larr; glyph, which is a
-                      different weight in every font that has it and sits
-                      off-centre in a circle */}
+                <Link className="csBack" href="/work">
+                  {/* A bare chevron, drawn rather than the &lsaquo; glyph -
+                      which is a different weight in every font that has one,
+                      and is missing outright from the trial cut this page is
+                      set in. The shaft is gone with the circle that used to
+                      hold it: at this size an arrow with a tail reads as an
+                      icon, and a chevron reads as punctuation, which is what
+                      it is doing in a line of text. */}
                   <span className="csBack__mark" aria-hidden>
                     <svg
-                      width="14"
-                      height="14"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="1.8"
+                      strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                      <path d="M15 18 9 12l6-6" />
                     </svg>
                   </span>
                   <span className="csBack__label">Projects</span>
                 </Link>
-                <p className="cs__eyebrow csHero__cat">{project.category}</p>
+                {/*
+                  The trail, not just the way back. "Projects" alone said where
+                  the reader had been; naming the project after it says where
+                  they are, which is what a reader arriving from a shared link
+                  has no other way to confirm.
+
+                  The separator is its own element rather than a character in
+                  the label because it is not part of either name - it is
+                  punctuation between them, and it is dimmed accordingly.
+                */}
+                <span className="csBack__sep" aria-hidden>/</span>
+                <span className="csBack__here">{project.title}</span>
               </div>
 
               {/*
@@ -224,69 +264,80 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 The headline still does its job, one step down: it is the
                 first sentence after the name, which is where a hook belongs.
               */}
-              <h1
-                className="csHero__title"
-                data-rise
-                style={{ "--i": 1 } as CSSProperties}
-              >
-                {project.title}
-              </h1>
+              {/*
+                Name on the left, classification on the right, on one line.
 
-              {project.headline ? (
-                <p
-                  className="csHero__hook"
-                  data-rise
-                  style={{ "--i": 2 } as CSSProperties}
-                >
-                  {project.headline}
-                </p>
-              ) : null}
+                The category used to sit in the breadcrumb row as a second
+                eyebrow, which put the two smallest pieces of text on the page
+                beside each other and left the title with nothing opposite it.
+                Set against the title instead, it reads as a stamp on a cover
+                sheet - what this is, and when - and gives the headline a right
+                edge to be measured against.
+              */}
+              <div className="csHero__top" data-rise style={{ "--i": 1 } as CSSProperties}>
+                <div className="csHero__id">
+                  {/*
+                    The name IS the mark here.
+
+                    A logo chip used to sit above this line. It is gone by
+                    request - and it was always working against the page: every
+                    one of those assets is pure white, drawn for the dark tiles
+                    on the works grid, so on this paper they needed a dark chip
+                    built underneath them just to be visible at all. The project
+                    name set large does the same job with none of that.
+                  */}
+                  <h1 className="csHero__title">{project.title}</h1>
+                </div>
+                <div className="csHero__stamp">
+                  {/* every discipline, not just the category: a project that
+                      was product design AND visual branding said only the
+                      first, which is the half that undersells it */}
+                  <p className="csHero__cat">{services.join(" | ")}</p>
+                  <p className="csHero__year">{project.year}</p>
+                </div>
+              </div>
+
+              {/*
+                The headline does not appear here.
+
+                It used to sit between the name and the paragraph at 16px,
+                which was fine against a 19px lead and became a caption the
+                moment the lead went to 24px - a line of type smaller than the
+                body beneath it, which is hierarchy upside down. The structure
+                this page follows is name, then paragraph. `headline` is still
+                authored and still used for metadata; it is just not a third
+                thing competing at the top of the page.
+              */}
 
               <div
                 className="csHero__intro"
                 data-rise
                 style={{ "--i": 2 } as CSSProperties}
               >
-                {story.intro.map((p, i) => (
-                  <p className="cs__body" key={i}>
-                    {marked(p)}
-                  </p>
-                ))}
+                {/* the authored lead wins: it is written to say what the
+                    project is and who it is for, in the three lines this
+                    layout is built around. story.intro is the first two
+                    sentences of `description` and is what shows where no lead
+                    has been written. */}
+                {project.lead ? (
+                  <p className="cs__body">{marked(project.lead)}</p>
+                ) : (
+                  story.intro.map((p, i) => (
+                    <p className="cs__body" key={i}>
+                      {marked(p)}
+                    </p>
+                  ))
+                )}
               </div>
 
-              {/* the three facts a hiring manager checks first, in the order
-                they check them */}
-              <ul className="csHero__facts">
-                <li
-                  className="csHero__fact"
-                  data-rise
-                  style={{ "--i": 3 } as CSSProperties}
-                >
-                  <span className="csHero__factKey">Role</span>
-                  <span className="csHero__factVal">{project.role}</span>
-                </li>
-                <li
-                  className="csHero__fact"
-                  data-rise
-                  style={{ "--i": 4 } as CSSProperties}
-                >
-                  <span className="csHero__factKey">Year</span>
-                  <span className="csHero__factVal">{project.year}</span>
-                </li>
-                {project.tools?.length ? (
-                  <li
-                    className="csHero__fact"
-                    data-rise
-                    style={{ "--i": 5 } as CSSProperties}
-                  >
-                    <span className="csHero__factKey">Tools</span>
-                    <span className="csHero__factVal">
-                      {project.tools.slice(0, 3).join(", ")}
-                    </span>
-                  </li>
-                ) : null}
-              </ul>
+              {/* Directly under the paragraph, ahead of the brief.
 
+                  It used to sit below Challenge and Role, which put the one
+                  thing on this page a reader can ACT on at the bottom of a
+                  block of reading - and below the fold on a laptop. The
+                  sentence above it is what makes someone want to look at the
+                  live site; the button belongs at the end of that sentence,
+                  not four hundred words later. Its own design is untouched. */}
               {live ? (
                 <div
                   className="csHero__cta"
@@ -298,6 +349,68 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                   </ExtCta>
                 </div>
               ) : null}
+
+              {/*
+                The facts, as a brief rather than as a list of pairs.
+
+                Role, Year and Tools used to run as three key/value rows under
+                the intro. Year has moved to the stamp beside the title, where
+                it is read with the category it belongs to, and what is left is
+                laid out the way a brief is: the disciplines as tags, then the
+                problem and the part played in it, side by side.
+
+                The labels carry their colons, which the trial cut of Aeonik
+                has no glyph for - each one renders in General Sans. That was
+                weighed and kept: the colons are in the reference, and at 24px
+                Bold a single fallback punctuation mark is a far smaller cost
+                than it was going to be at 12px. See app/layout.tsx.
+              */}
+              {services.length ? (
+                <div
+                  className="csHero__brief"
+                  data-rise
+                  style={{ "--i": 7 } as CSSProperties}
+                >
+                  <h2 className="csHero__label">Services:</h2>
+                  <ul className="csHero__tags">
+                    {services.map((name) => (
+                      <li className="csHero__tag" key={name}>
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {/* Tools had a row here and does not any more: this block is
+                  the brief, and Figma is not a service anyone bought. The
+                  field is still authored and still read further down. */}
+
+              {/* the problem and the part played in it, read across rather
+                  than down - they are one thought, not two sections */}
+              <div
+                className="csHero__cols"
+                data-rise
+                style={{ "--i": 9 } as CSSProperties}
+              >
+                {challenge ? (
+                  <div className="csHero__col">
+                    <h2 className="csHero__label">Challenge:</h2>
+                    <p className="csHero__colBody">{marked(challenge)}</p>
+                  </div>
+                ) : null}
+                <div className="csHero__col">
+                  <h2 className="csHero__label">Role:</h2>
+                  {/* `role` is a job title - "Web Designer" - and this column
+                      is sized for the three lines of scope the reference puts
+                      here. `roleNote` carries that sentence where it has been
+                      written; the title stands alone where it has not, rather
+                      than being padded out into a claim nobody made. */}
+                  <p className="csHero__colBody">
+                    {project.roleNote ? marked(project.roleNote) : project.role}
+                  </p>
+                </div>
+              </div>
 
               {project.cover ? (
                 <div className="csHero__cover">

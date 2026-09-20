@@ -565,6 +565,40 @@ export type Project = {
     and it should be editable without going hunting through nested blocks.
     When present it wins over anything the renderer would have assembled.
   */
+  /*
+    The disciplines the project was, shown as tags at the top of the case
+    study. Distinct from `tools`, which is what it was made with - a reader
+    scanning for "can this person do brand work" is not asking about Figma.
+    Optional: `category` stands in where it is not authored.
+  */
+  services?: string[];
+  /*
+    What the part actually WAS, in a sentence, for the Role column at the top
+    of the case study.
+
+    `role` above is a job title and stays one - it is the label on the works
+    grid and in the page's metadata. This is the three lines of scope beside
+    it: what was owned, from where to where. Optional, and deliberately not
+    derived from anything: a sentence about responsibility is a claim, and the
+    renderer falls back to the bare title rather than inventing one.
+  */
+  roleNote?: string;
+  /*
+    The opening paragraph: what the project is, and who it is for.
+
+    `description` cannot do this job any more. It is the works-grid summary
+    AND the meta description AND the source the About section reads, and the
+    hero used to show its first two sentences - which ran to 434 characters on
+    Layover, nine lines of 24px type where the reference sets three. Trimming
+    `description` to fit would have cut the search snippet and the grid blurb
+    with it.
+
+    Written to one shape, deliberately: NAME is a WHAT for WHOM, then a second
+    sentence on what it was designed to do. Roughly 270-340 characters, which
+    is the three lines the layout is built around. `**bold**` marks the name
+    and the one qualifier worth stopping on.
+  */
+  lead?: string;
   challenge?: string[];
   solution?: string[];
   /*
@@ -738,6 +772,9 @@ export type Project = {
 export const PROJECTS: Project[] = [
   {
     id: "mike-tyson-invitational",
+    lead:
+      "**Mike Tyson Invitational** is the marketing site for a first-year boxing event in **Las Vegas**, built for the four audiences it had to reach at once - ticket buyers, fighters, sponsors and donors. Ten pages were designed to carry a name everyone in boxing recognises without ever reading as a student project.",
+    services: ["Website design", "Visual branding"],
     headline:
       "Ten pages, four audiences, and two moods that hate each other: the first Mike Tyson Invitational",
     challenge: [
@@ -1435,6 +1472,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "elevation-capital",
+    lead:
+      "**Elevation Capital** is a research report on how Indian startups are using AI, rebuilt as a site for the **founders and investors** who were never going to finish the PDF. The numbers were made the interface, so the findings get read where they used to get downloaded and forgotten.",
+    services: ["Website development", "Interaction design"],
     headline:
       "Turning a PDF nobody finishes into a report you scroll",
     challenge: [
@@ -1491,6 +1531,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "riviera",
+    lead:
+      "**Riviera** is the website for one of the country's largest student fests, built for the **thousands of students** deciding what to attend across a full week. It had to make the scale of the whole event land and still let one person find the single thing they actually came for.",
+    services: ["Website design", "Visual branding"],
     headline:
       "Carrying a week-long fest without letting the homepage become a directory",
     challenge: [
@@ -1544,6 +1587,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "fuzion",
+    lead:
+      "**Fuzion** is a vintage-modern streetwear brand for a wearer who reads **classic Americana, 90s hip-hop and old-school workwear** as one thing. The identity puts that contradiction inside the wordmark itself, roman and italic in one word, and carries it through a burnt-sienna palette and the line Wear The Legacy.",
+    services: ["Visual branding", "Graphic design"],
     headline:
       "A wordmark that fuses roman and italic inside one six-letter word, for a brand whose whole premise is old and new at once",
     challenge: [
@@ -1626,6 +1672,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "cpgrams",
+    lead:
+      "**CPGRAMS** is how you complain to the **Government of India**, and this is the chatbot designed for the citizens its fifteen-field form leaves out. It takes a grievance in whichever of the 22 official languages you actually think in and files it for you, against ninety-plus ministries handling twenty lakh complaints a year.",
+    services: ["Product design", "Conversational UX"],
     headline:
       "Filing a government grievance by speaking, in any of 22 languages",
     /* a shipped government product and a full deep dive, so it belongs in both */
@@ -2606,6 +2655,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "layover",
+    lead:
+      "**Layover** turns dead time in an airport into something usable for the **traveller who has already paid for it** - enter a terminal or a PNR and see what is open right now, order a meal to the gate, book a lounge seat. Designed from zero across four surfaces, from the site people land on to the console the platform runs on.",
+    services: ["Product design", "Visual branding"],
     headline:
       "Turning dead airport time into something you can actually use, across four interfaces",
     /* a shipped product and a full deep dive, so it belongs in both lists */
@@ -3272,6 +3324,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "yantra",
+    lead:
+      "**Yantra** is the front door for a week of technical events, workshops and hackathons at **VIT**, built for students who until now had nowhere single to see what was on or sign up. A page that only lists things reads like a timetable, so it was designed as a 3D environment you walk into instead.",
+    services: ["Website design", "Interaction design"],
     headline:
       "A 3D front door for a fest that otherwise reads like a timetable",
     challenge: [
@@ -3325,6 +3380,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "dropby",
+    lead:
+      "**DropBy** is an app for **people who want to see other people without performing it**, rewarding you for showing up rather than for posting. The rebuild takes the product's own radar ping and makes it the thing the entire identity is built out of, so the brand finally says what the app does.",
+    services: ["Brand identity", "Visual branding"],
     headline:
       "Rebuilding a shy brand around the radar ping that gets people off the sofa",
     /* a brand system with a full deep dive behind it, so it belongs in both */
@@ -3658,6 +3716,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "futurepreneurs",
+    lead:
+      "**Futurepreneurs 10.0** is the site for **E-Cell VIT Vellore's** flagship business simulation, read once, fast, on a phone, by somebody deciding whether to bother. Everything on the page competed with the one fact that changes their mind, so it was designed with the countdown leading and the copy following it.",
+    services: ["Website design", "Graphic design"],
     headline:
       "The tenth edition, led with the deadline, because that is the only fact anyone acts on",
     challenge: [
@@ -3892,6 +3953,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "posterfolio",
+    lead:
+      "**Posterfolio** is a volume of **forty-one posters** - startup teardowns, product launches, editorial covers, merch and title cards - every one of them held to a 4:5 frame. Fixing the format meant nothing could be solved by changing the shape of the page, leaving composition, type and contrast as the only variables.",
+    services: ["Graphic design", "Poster design"],
     headline:
       "Forty-one posters on one 4:5 canvas, where the only thing allowed to change is the thinking",
     challenge: [
@@ -4179,6 +4243,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "gravitas",
+    lead:
+      "**Gravitas** is the website for **VIT Vellore's** flagship techno-management fest, where thousands of students find and register for a catalogue of more than 200 events. The previous site had grown into a wall of text, so this is a rebuild around a retro-tech system that turns browsing into booking.",
+    services: ["Website design", "Visual branding"],
     headline:
       "Turning a 200-event wall of text into a catalogue a student can book from",
     /* a shipped site and a full deep dive, so it belongs in both lists */
@@ -4522,6 +4589,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "meal-maestro",
+    lead:
+      "**Meal Maestro** is a meal-planning app for people who said, across **twelve interviews**, that the hard part is not the cooking but the deciding. It takes what you like, what you avoid and what is already in your kitchen, and returns a week of recipes with the single grocery list that covers all of them.",
+    services: ["UI design", "Product design"],
     headline:
       "Planning a week of food without making a single decision",
     challenge: [
@@ -4640,6 +4710,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "aiu",
+    lead:
+      "**The Association of Indian Universities** has brought Indian universities together **since 1925**, and this is a redesign of its seal for every place it now has to appear. The same architecture and symbolism, given the weight to survive as a favicon as well as a stamp, with a stated minimum size and a palette where every value means something.",
+    services: ["Visual branding", "Graphic design"],
     headline:
       "Redrawing the seal of a body that has represented every university in India since 1925",
     challenge: [
@@ -4715,6 +4788,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "moon-store",
+    lead:
+      "**Moon Store** is an online platform for high-end fashion aimed at a **Gen-Z shopper** - a lunar-inspired storefront where the homepage does the selling and seven category routes keep a wide catalogue navigable. LunarLook lets a customer specify the fabric, quality and style of a garment before they buy it.",
+    services: ["UI design", "Interaction design"],
     headline:
       "A Gen-Z clothing store built around one photograph of the moon, where the thing you buy is the thing you configure",
     challenge: [
@@ -4788,6 +4864,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "ip-tt-cell",
+    lead:
+      "**VIT's Intellectual Property and Technology Transfer Cell** protects what the university invents and gets it into **industry**, and this is the identity built for that audience. A single pillar constructed from the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
+    services: ["Brand identity", "Graphic design"],
     headline:
       "One pillar that spells I, P and TT, for the cell that turns university research into patents",
     challenge: [
@@ -4862,6 +4941,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "solo-leveling",
+    lead:
+      "**Solo Leveling** is a self-directed UI concept for **fans of the series** - one site carrying the episodes, the manga, the news and the merch. It was designed with a video player, a full shop flow and a rating row that routes viewers to where the series actually streams rather than pretending to host it.",
+    services: ["UI design", "Interaction design"],
     headline:
       "One place to watch it, read it and buy the shirt, for a fandom currently sent to three",
     challenge: [
@@ -4937,6 +5019,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "gravitas-showcase",
+    lead:
+      "**graVITas '25** is **VIT's** techno-management fest - 250+ events, 30,000+ attendees, participants from across the globe - and this is the identity built to carry it. Logo, website, merchandise, ID cards, brochures, flyers, hoardings, certificates and the entrance gate, held together by one dark ground and a single cyan.",
+    services: ["Visual branding", "Graphic design"],
     headline:
       "One identity stretched across a website, a gate, an ID card and a t-shirt, for a fest with 250 events and 30,000 people",
     challenge: [
@@ -5009,6 +5094,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "posterfolio-vol2",
+    lead:
+      "**Posterfolio Vol. 2** is a volume of **six typographic posters** on distance, silence and the kinds of hurt that do not announce themselves. Each one carries its own short piece of writing, and the whole set was designed to run on one red, one near-black and a single grey.",
+    services: ["Graphic design", "Poster design"],
     headline:
       "Six posters about the same quiet subject, each one written down as carefully as it was drawn",
     kind: "case-study",

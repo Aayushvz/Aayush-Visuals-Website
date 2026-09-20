@@ -24,9 +24,37 @@
    ========================================================================== */
 
 .cs {
+  /*
+    Aeonik across the case study, General Sans behind it.
+
+    The available cut is the trial, which carries 66 glyphs: space, comma,
+    hyphen, period, digits and the two alphabets. Everything else - colons,
+    apostrophes, slashes, dashes, brackets, percent, ampersand, Devanagari -
+    renders in the fallback, which means a change of typeface inside words
+    like "Cafe's". That is known and accepted. The markup avoids the ones it
+    can (labels carry no colon, see CaseStudyPage.tsx) and prose keeps the
+    apostrophes it needs, because rewriting copy around a trial font's
+    character set is the tail wagging the dog.
+
+    General Sans rather than system-ui as the fallback: it is what the rest of
+    the site is set in, so the characters that do fall through land somewhere
+    deliberate instead of on Arial.
+  */
   /* ---- ink ---- */
-  --cs-bg: #fff;
+  /* the site's own paper, not white. --cream is defined once in globals.css
+     and is what every light surface on the homepage is painted in, so taking
+     the token rather than copying #f2ede6 means the two cannot drift.
+
+     This is the page's paper in every sense: the five places that read
+     --cs-bg all want "whatever this page is painted on", including the two
+     that use it as INK on a dark hover state, where cream on near-black is
+     the same pairing the rest of the site uses. */
+  --cs-bg: var(--cream);
   --cs-ink: #101010;
+  /* the hero's measured ink. Softer than --cs-ink, which stays the near-black
+     the rest of the page titles in - the opening block is set a shade back
+     from it so the display type above still reads as the darkest thing here */
+  --cs-ink-body: #242424;
   --cs-mute: #6b6b6b;
   --cs-dark: #141414;
   /*
@@ -94,7 +122,27 @@
 
   background: var(--cs-bg);
   color: var(--cs-ink);
-  font-family: var(--font-general), "General Sans", system-ui, sans-serif;
+  /*
+    Aeonik across the case study, General Sans behind it.
+
+    The available cut is the trial, which carries 66 glyphs: space, comma,
+    hyphen, period, the digits and the two alphabets. Everything else -
+    colons, apostrophes, slashes, dashes, brackets, percent, ampersand,
+    Devanagari - renders in the fallback, so the typeface changes inside words
+    like "Cafe's". That is known and accepted, not a bug to chase in CSS; the
+    only real fix is a full cut of the face. The markup avoids the ones it can
+    (labels carry no colon, see CaseStudyPage.tsx) while prose keeps the
+    apostrophes it needs, because rewriting copy around a trial font's
+    character set is the tail wagging the dog.
+
+    General Sans rather than system-ui behind it: it is what the rest of the
+    site is set in, so what falls through lands somewhere deliberate.
+
+    NOTE this is the block's ONLY font-family. An earlier attempt added a
+    second one at the top of `.cs` and spent a while looking like the variable
+    was broken - two declarations in one rule, and the later one silently won.
+  */
+  font-family: var(--font-aeonik), var(--font-general), "General Sans", system-ui, sans-serif;
 
   /*
     Nothing here may push the page sideways.
@@ -116,8 +164,10 @@
 /*
   When the page is also the parallax stage it inherits .hpParallax__stage,
   which paints cream so the purple footer cannot bleed through it. A case
-  study is white, so the more specific selector wins it back. The stage still
-  does its job: the surface is opaque either way.
+  study is now painted in that same cream, so this selector no longer changes
+  the colour - it is kept because it restates the z-index below, and because
+  --cs-bg is what .csSec--invert flips to go dark. The stage still does its
+  job either way: the surface is opaque.
 */
 .cs.hpParallax__stage {
   background: var(--cs-bg);
@@ -175,7 +225,15 @@
 /* ---------- hero ---------- */
 
 .csHero {
-  padding-top: clamp(72px, 8vw, 150px);
+  /* was clamp(72px, 8vw, 150px), which put the trail a long way down a page
+     whose first screen is the part that has to work.
+
+     6.9vw, not the 5.5 tried first: the nav pill is floating and ends at 81px
+     on a 1512 window, and 5.5vw landed the trail's box at 83 - a two pixel
+     gap, which reads as the breadcrumb hanging off the bar. This clears it by
+     about 30 and still arrives ~17px higher than before. Phones take their
+     own value further down, measured off --mnav-clear. */
+  padding-top: clamp(56px, 6.9vw, 120px);
 }
 
 .csHero__meta {
@@ -185,9 +243,31 @@
   gap: var(--cs-sm);
 }
 
-.csHero__cat {
-  color: var(--cs-accent-ink);
-  text-align: right;
+.csHero__meta {
+  /* the trail reads left to right now rather than being pushed to both ends,
+     because the category that used to sit on the right has moved up beside
+     the title */
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: var(--cs-2xs);
+}
+
+.csBack__sep,
+.csBack__here {
+  font-size: clamp(15px, 1.15vw, 17px);
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.2;
+}
+
+.csBack__sep {
+  color: var(--cs-mute);
+  opacity: 0.55;
+}
+
+.csBack__here {
+  color: var(--cs-ink);
+  font-weight: 700;
 }
 
 /*
@@ -204,15 +284,32 @@
   ink on hover. Up in the corner, left at the top: the two ways out of a leaf
   page, drawn the same way, so learning one teaches the other.
 */
+/*
+  A line of text, not a control.
+
+  This was a circled arrow followed by a micro eyebrow in caps - a bordered
+  object sitting directly above the largest type on the page, so the first
+  thing seen was a piece of chrome. The circle is gone and the caps with it:
+  it now reads "Projects / Name" at body size, the way a trail is written.
+
+  The link keeps its 44px target even though nothing in it is 44 tall any
+  more, because the visible height of a text link is not the size of the thing
+  a thumb has to hit.
+*/
 .csBack {
   display: inline-flex;
   align-items: center;
-  gap: 0.85em;
-  /* the mark inside is 32px, which made the whole link 32 tall. The padding
-     carries it to 44 without moving the mark, and the negative inline start
-     keeps the mark optically on the page margin where it was. */
+  gap: 0.3em;
   min-height: 44px;
   padding-block: 6px;
+  /* the negative start pulls the chevron's own side bearing off the margin,
+     so the WORD lines up with the title below rather than the glyph */
+  margin-inline-start: -0.15em;
+  font-size: clamp(15px, 1.15vw, 17px);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.2;
   color: var(--cs-mute);
   text-decoration: none;
   white-space: nowrap;
@@ -222,17 +319,9 @@
 .csBack__mark {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
   flex: none;
-  border: 1px solid var(--cs-line);
-  border-radius: 50%;
-  color: var(--cs-ink);
-  transition:
-    background-color var(--dur-hover) var(--ease-quint),
-    border-color var(--dur-hover) var(--ease-quint),
-    color var(--dur-hover) var(--ease-quint),
-    transform var(--dur-state) var(--ease-quint);
+  color: currentColor;
+  transition: transform var(--dur-state) var(--ease-quint);
 }
 
 /*
@@ -269,15 +358,9 @@
   transform: none;
 }
 
-/* ink rather than the project's colour: the accent is a light mint on one
-   project and a pale gold on another, and an arrow has to stay readable on
-   whatever fills the circle behind it */
+/* nothing to fill any more - the chevron just leans the way it points */
 .csBack:hover .csBack__mark,
 .csBack:focus-visible .csBack__mark {
-  background: var(--cs-ink);
-  border-color: var(--cs-ink);
-  color: var(--cs-bg);
-  /* it points left, so it leaves to the left */
   transform: translateX(-3px);
 }
 
@@ -300,52 +383,180 @@
 }
 
 /* the one place a single long word is most likely to beat the column */
+.csHero__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--cs-md);
+  margin-top: var(--cs-sm);
+}
+
+.csHero__id {
+  display: grid;
+  gap: var(--cs-xs);
+  min-width: 0;
+}
+
+/* what this is, and when - set against the title's right edge */
+.csHero__cat {
+  /* a step up from the micro eyebrow it used to be: it now carries two or
+     three disciplines rather than one word, and at 13px that ran as a thin
+     grey string nobody would finish reading */
+  font-size: clamp(13px, 1.1vw, 17px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.25;
+  color: var(--cs-ink-body);
+  margin: 0;
+  max-width: 34ch;
+}
+
+.csHero__stamp {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  flex: 0 0 auto;
+  /* optical, not mechanical: flex-start would line this up with the top of
+     the title's BOX, which sits well above the cap height of the letters */
+  padding-top: 10px;
+}
+
+.csHero__year {
+  font-size: clamp(12px, 0.95vw, 15px);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--cs-mute);
+  margin: 0;
+}
+
 .csHero__title {
   hyphens: auto;
-  font-size: var(--cs-t-display);
+  /* NOT --cs-t-display, which tops out at 76px. The reference sets the name
+     at about 54px on a 1700px window - large, but a name rather than a
+     headline, which is the whole point of it no longer being the hook. */
+  font-size: clamp(34px, 3.6vw, 56px);
   font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1;
-  margin: var(--cs-sm) 0 0;
+  /* the row owns the space above it now */
+  margin: 0;
   color: var(--cs-ink);
   text-wrap: balance;
 }
 
 .csHero__intro {
   margin-top: var(--cs-md);
-  max-width: 62ch;
+  /*
+    No measure cap. 62ch held this to roughly half the page and turned a
+    three-line paragraph into eight, which is the one thing the opening was
+    not allowed to do - it is the first thing read and it has to land as a
+    single look, not a column.
+
+    Long measures are normally a readability problem, and the answer here is
+    length rather than width: the lead is authored to ~270-340 characters (see
+    `lead` in projectData), so at this size it runs three lines full-width
+    instead of eight lines half-width. The page's own padding is the only
+    thing bounding it.
+  */
+  max-width: none;
 }
 
+/*
+  The hero's three type sizes are FIXED, not fluid.
+
+  Everything else on this page is set from clamp() tokens that breathe with
+  the viewport. These three were measured off a reference and are reproduced
+  at those exact values - 24/34 for the lead, 24/24 for the labels, 16/24 for
+  the column body - because "follow these" means the numbers, and a clamp
+  would only hit them at one window width. Line heights are written as px for
+  the same reason: 34/24 is not a ratio anyone would have picked.
+*/
 .csHero__intro .cs__body {
-  font-size: var(--cs-t-lead);
-  line-height: 1.5;
+  font-size: 24px;
+  line-height: 34px;
+  font-weight: 400;
+  color: var(--cs-ink-body);
+  /* .cs__body carries its own 68ch, which at 24px is 1007px - so lifting the
+     cap off the wrapper alone still left the paragraph stopping two-thirds of
+     the way across. Both have to go. */
+  max-width: none;
 }
 
-.csHero__facts {
+/*
+  The brief: labelled rows of tags, then a two-column Challenge / Role.
+
+  This replaces the key/value list the facts used to run as. A pair like
+  "Role  Web Designer" is fine for one fact and reads as a spreadsheet by the
+  third, and it could not hold the Challenge paragraph at all - which is the
+  one thing at the top of a case study a reader actually weighs.
+*/
+.csHero__brief {
+  margin-top: var(--cs-md);
+}
+
+.csHero__label {
+  font-size: 24px;
+  line-height: 24px;
+  font-weight: 700;
+  /* the micro-eyebrow treatment is gone: at 24px Bold these are headings, and
+     uppercase + 0.14em tracking on a heading that size reads as shouting */
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--cs-ink-body);
+  margin: 0 0 var(--cs-xs);
+}
+
+.csHero__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--cs-2xs) var(--cs-lg);
-  margin-top: var(--cs-md);
+  gap: var(--cs-2xs);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.csHero__fact {
-  display: grid;
-  gap: 4px;
-}
-
-.csHero__factKey {
-  font-size: var(--cs-t-micro);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--cs-mute);
-}
-
-.csHero__factVal {
+.csHero__tag {
+  /* the same hairline pill the rest of the page uses for a non-interactive
+     label - deliberately NOT the CTA's shape, which is a button and has to
+     stay the only thing that looks like one */
   font-size: var(--cs-t-label);
-  font-weight: 500;
+  line-height: 1;
   color: var(--cs-ink);
+  border: 1px solid color-mix(in srgb, var(--cs-ink) 18%, transparent);
+  border-radius: 999px;
+  padding: 0.62em 1.05em;
+}
+
+.csHero__tag--quiet {
+  color: var(--cs-mute);
+  border-color: color-mix(in srgb, var(--cs-ink) 11%, transparent);
+}
+
+.csHero__cols {
+  display: grid;
+  /* two columns where there is room for two readable measures and one where
+     there is not, without naming a breakpoint */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 30ch), 1fr));
+  gap: var(--cs-md) var(--cs-lg);
+  margin-top: var(--cs-lg);
+}
+
+.csHero__colBody {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  /* measured at the same ink as the lead - these columns used to be --cs-mute
+     grey, which read as a caption under a heading twice their size */
+  color: var(--cs-ink-body);
+  margin: 0;
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+.csHero__colBody b {
+  color: var(--cs-ink);
+  font-weight: 600;
 }
 
 .csHero__cta {
@@ -1825,11 +2036,22 @@
     already plays a full page-transition wipe on the way in. That IS the
     entrance; arriving to the title already set is the calmer answer anyway.
 
-    Hero elements still carry data-rise and still match the timeline rule
-    above. They simply sit past the end of their own entry range at scroll
-    zero, so the timeline resolves them to their resting state on the first
-    frame, with nothing to wait for.
+    Hero elements still carry data-rise. They used to be left to the timeline
+    rule above on the theory that they sit past the end of their own entry
+    range at scroll zero - true while the hero was tall, and false the moment
+    it was pulled up and the logo and hook came out of it. On a 867px window
+    the Challenge and Role block now starts inside its entry range, so the
+    bottom of the FIRST SCREEN rendered as a pale wash: partial opacity over
+    cream, which is the haze this file has already had to remove once from
+    the pictures.
+
+    So it is stated rather than relied on. Nothing in the hero animates on
+    scroll; the page-transition wipe is the entrance, and the opening screen
+    is simply there.
   */
+  .cs .csHero [data-rise]:not([data-rise="shot"]) {
+    animation: none;
+  }
 }
 
 /* ---------- a section on ink instead of paper ---------- */

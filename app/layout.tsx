@@ -110,6 +110,38 @@ const generalSans = localFont({
   ],
 });
 
+/*
+  Aeonik Trial, for the project pages only.
+
+  READ THIS BEFORE USING IT ANYWHERE ELSE. The trial cut carries 66 glyphs -
+  space, comma, hyphen, period, 0-9, A-Z, a-z - and nothing else. Every colon,
+  apostrophe, slash, dash, bracket, percent, ampersand and every Devanagari
+  character in the case-study copy falls through to the fallback below, which
+  means a visible change of typeface mid-word on things like "Cafe's". That is
+  a known and accepted trade here; it is not a bug to be fixed by adjusting
+  the CSS, and the only real fix is a full cut of the face.
+
+  General Sans is named explicitly as the fallback rather than left to
+  system-ui, because it is what the rest of the site is set in - so the
+  characters that do fall through land on the family they would have been in
+  anyway, instead of on Arial.
+
+  `preload: false`: the whole site would otherwise pay for four files that
+  only /work/* renders.
+*/
+const aeonik = localFont({
+  variable: "--font-aeonik",
+  display: "swap",
+  preload: false,
+  fallback: ["General Sans", "system-ui", "sans-serif"],
+  src: [
+    { path: "../public/fonts/aeonik/aeoniktrial-light.otf", weight: "300", style: "normal" },
+    { path: "../public/fonts/aeonik/aeoniktrial-regular.otf", weight: "400", style: "normal" },
+    { path: "../public/fonts/aeonik/aeoniktrial-regularitalic.otf", weight: "400", style: "italic" },
+    { path: "../public/fonts/aeonik/aeoniktrial-bold.otf", weight: "700", style: "normal" },
+  ],
+});
+
 export const metadata: Metadata = {
   /* metadataBase is what turns every relative image/canonical path below into
      the absolute URL that crawlers and link unfurlers require. Without it
@@ -230,7 +262,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${generalSans.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable} ${inter.variable} ${caveat.variable} ${permanentMarker.variable} ${grenzeGotisch.variable}`}
+      className={`${generalSans.variable} ${aeonik.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable} ${inter.variable} ${caveat.variable} ${permanentMarker.variable} ${grenzeGotisch.variable}`}
       suppressHydrationWarning
     >
       <body>
