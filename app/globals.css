@@ -300,6 +300,7 @@ html.has-cursor .cursorRing {
   height: 0;
 }
 
+
 .cursorDot__art {
   position: absolute;
   display: block;
@@ -342,6 +343,26 @@ html.has-cursor .cursorRing {
 
 .cursorDot--hand .cursorDot__hand {
   opacity: 1;
+}
+
+/*
+  Hidden while a named project card is under the pointer.
+
+  Those cards morph the ring into a panel carrying the project's name and
+  discipline, drawn at the same hotspot this dot occupies - so the purple
+  pointer artwork ends up sitting on top of the label it was meant to lead the
+  reader to. Set from Cursor.tsx, and only for that state: the plain "View
+  project" pill on a case study is small enough that the pointer still reads
+  as the pointer for it, and everywhere else on the site this dot IS the
+  cursor.
+
+  IT HAS TO SIT AFTER THE --hand RULES ABOVE. Both are single-class-plus-class
+  selectors, so specificity cannot separate them and source order decides -
+  and a project card is a link, so `--hand` is always on when this is. Placed
+  before them, this rule lost every time and did nothing at all.
+*/
+.cursorDot--muted .cursorDot__art {
+  opacity: 0;
 }
 
 .cursorRing {
@@ -3484,11 +3505,11 @@ html.has-cursor .cursorRing {
 /* -------- phones: pinned canvas — 2x3 card grid above the bottom wallet
    (extra specificity: a later base rule re-centers the canvas) -------- */
 @media (max-width: 640px) {
-  /* the same rhythm on shorter strides, where a swipe covers less ground
-     than a wheel: 80vh dwell + 80vh gap + 140vh tail + 100vh pin base.
+  /* one screen per beat, so "one scroll" means one screen:
+     100vh pin base + 100vh dwell + 100vh gap + 50vh tail.
      MUST match TIMELINE_MOBILE.total in components/Capabilities.tsx. */
   .capabilities--pinned {
-    min-height: 400vh;
+    min-height: 350vh;
   }
 
   .capabilities .capabilities__canvas {
@@ -9302,6 +9323,8 @@ html.contact-page-active body {
     padding-bottom: 36px;
   }
 
+  /* the globe does not mount below 901px (see ContactPageClient) - this rule
+     is kept only so the wrapper behaves if that gate is ever removed */
   .contactPage__globe {
     width: min(260px, 70vw);
     align-self: center;
@@ -9361,19 +9384,21 @@ html.contact-page-active body {
 }
 
 /*
-  The pin is unconditional now.
+  Two mechanisms, gated by width.
 
-  A phone used to get something else entirely here - six cards stacking into a
-  pile - while the rotating ring was desktop-only. That is backwards: most of
-  the traffic is on a phone, so the section's one memorable idea was the one
-  most people never saw. Both widths now run the same carousel; what changes
-  below 768px is the geometry it is drawn at, not the mechanism.
+  A phone runs the stacking deck (.services-mobile-deck, restored by request);
+  everything above 768px runs the rotating ring on this pin. The ring did run
+  at both widths for a while, and its phone geometry survives below the gate,
+  fully tuned - card 182, radius 408, perspective 1258 - so putting it back is
+  a display rule, not a re-derivation.
 */
 .services-section {
   min-height: 300vh;
 }
 
 .services-pin {
+  /* the carousel stage; a phone hides this and runs .services-mobile-deck
+     instead - see the gate at the end of the ring block below */
   position: sticky;
   top: 0;
   height: 100vh;
@@ -9519,6 +9544,98 @@ html.contact-page-active body {
   -webkit-user-drag: none;
 }
 
+/* Mobile On-Scroll Stacking Cards System */
+.services-mobile-deck {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .services-viewport--desktop {
+    display: none !important;
+  }
+
+  .services-mobile-deck {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: 100%;
+    overflow: hidden;
+    /* 8vh landed at 65px on a normal phone while the pill's bottom edge sits
+       at 74px, so the heading was starting underneath it. --mnav-clear is the
+       pill's own top + height + gap, so this tracks the bar instead of
+       guessing at it. */
+    padding-top: calc(var(--mnav-clear) + 18px);
+  }
+
+  .services-header--mobile {
+    margin-top: 0;
+    margin-bottom: 0;
+    z-index: 20;
+    position: relative;
+  }
+
+  .services-header--mobile .services-heading {
+    font-size: clamp(28px, 6.5vw, 38px);
+    line-height: 1.1;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .services-header--mobile .services-desc {
+    font-size: 13.5px;
+    line-height: 1.4;
+    max-width: 320px;
+    margin-bottom: 12px;
+  }
+
+  /* Scoped to the phone deck's own header, so the pinned desktop carousel
+     keeps its CTA. On a phone the deck is the section - the button was
+     spending a third of the space above the cards on a link that the menu
+     and the contact section both already offer. */
+  .services-header--mobile .extCta {
+    display: none;
+  }
+
+  .services-deck-stage {
+    position: relative;
+    width: 100%;
+    /* the CTA above is hidden on phones, so the deck takes back its height
+       instead of leaving a gap where the button used to be */
+    height: calc(100vh - 196px);
+    height: calc(100dvh - 196px);
+    margin-top: 10px;
+  }
+
+  .services-deck-card {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    /* smaller, at the same 0.66 aspect: the card was 290x440 on a 375px
+       screen, which left the section with almost nothing but card */
+    width: min(240px, 68vw);
+    height: min(364px, 103vw);
+    border-radius: 22px;
+    overflow: hidden;
+    background-color: #1e1e1e;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.32), 0 4px 14px rgba(0, 0, 0, 0.2);
+    will-change: transform, opacity;
+    transform: translate3d(-50%, -50%, 0);
+  }
+
+  .services-mobile-deck .services-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+}
+
 /* ==========================================================================
    THE RING ON A PHONE
 
@@ -9571,10 +9688,17 @@ html.contact-page-active body {
    at, scaled to a screen a quarter the width.
    ========================================================================== */
 @media (max-width: 768px) {
+  /*
+    THE GATE. The deck is the phone mechanism; the ring's pin stands down.
+    Everything below this line is the ring's phone geometry, kept and dormant.
+  */
+  .services-pin {
+    display: none !important;
+  }
+
   .services-section {
-    /* a little more travel than the desktop's 300vh: the same 150 degrees of
-       rotation over a taller page is a slower, steadier ring, which is what
-       you want when the gesture driving it is a thumb */
+    /* the deck drives this now, not the ring; both want roughly the same
+       travel, so the number did not need to change */
     min-height: 340vh;
   }
 
@@ -10657,15 +10781,13 @@ html.contact-page-active body {
   border-top: 1px solid rgba(167, 139, 250, 0.28);
   box-shadow: 0 -18px 45px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-/* The bar holds one control between two corner flourishes.
+/* The bar holds the colophon, and nothing else.
 
-   It used to hold several - an audio player and a row of socials - and
-   space-between spread them across it. Those are gone, and the flourishes
-   are absolutely positioned, so the back-to-top button became the only item
-   in flow: space-between then parked it hard against the left edge, on top
-   of the left flourish, with the rest of the bar empty. Centred is what the
-   arrangement actually is now - one control, framed by a corner at each
-   end. */
+   It has been emptied twice. First an audio player and a row of socials went,
+   leaving a back-to-top button between two absolutely-positioned corner
+   flourishes; now those have gone too - the brackets framed an empty strip
+   and the button duplicated a gesture the browser already has. What is left
+   is one line of centred type, which is what the bar was always shaped like. */
 .seaFooter__dock {
   max-width: 1560px;
   margin: 0 auto;
@@ -10678,56 +10800,24 @@ html.contact-page-active body {
   position: relative;
 }
 
-.seaFooter__flourish {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  opacity: 0.88;
-}
-.seaFooter__flourish--left { left: 10px; }
-.seaFooter__flourish--right { right: 10px; }
-
-@keyframes seaAudioBar {
-  0% { transform: scaleY(0.25); }
-  100% { transform: scaleY(1); }
+/* the colophon: the quiet kind of line a footer bar carries, set well back
+   from the scene above it so it reads as a signature rather than as content */
+.seaFooter__colophon {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  /* --purple-soft, not --purple. The dock is #05020c and the brand purple
+     (#7c3aed) measures about 3.2:1 on it - under the 4.5 this needs at 13px.
+     The soft variant is the same hue two steps up and clears it at ~7:1,
+     which is what the palette keeps it for. */
+  color: var(--purple-soft);
+  text-align: center;
 }
 
-.seaFooter__actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  z-index: 2;
-}
-
-.seaFooter__topBtn {
-  /* 44, not 42: it is a single icon with nothing beside it to catch a miss */
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: rgba(138, 92, 246, 0.22);
-  border: 1px solid rgba(138, 92, 246, 0.45);
-  color: #c4b5fd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.seaFooter__topBtn svg {
-  width: 20px;
-  height: 20px;
-}
-.seaFooter__topBtn:hover {
-  background: #8b5cf6;
-  color: #fff;
-  border-color: #8b5cf6;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 22px rgba(138, 92, 246, 0.45);
+.seaFooter__colophon span {
+  /* the separator is punctuation between two facts, not one of them */
+  margin-inline: 0.5em;
+  opacity: 0.5;
 }
 
 /* --- Tablet & Mobile Responsiveness --- */
@@ -10741,23 +10831,9 @@ html.contact-page-active body {
     min-height: 64px;
   }
 
-  .seaFooter__actions {
-    display: flex;
-    justify-content: center;
-    width: auto;
-    margin-top: 0;
-    flex-shrink: 0;
+  .seaFooter__colophon {
+    font-size: 12px;
   }
-  /* no shrink to 38 here, for the reason the socials above it are not
-     shrunk either: this is the touch context, not the forgiving one */
-  .seaFooter__topBtn {
-    border-radius: 50%;
-  }
-  .seaFooter__topBtn svg {
-    width: 16px;
-    height: 16px;
-  }
-  .seaFooter__flourish { display: none; }
 }
 
 @media (max-width: 768px) {
@@ -11119,7 +11195,6 @@ html.dpl-page .preloader {
 .ctaPill,
 .footer__contactCta,
 .selWorks__endCta,
-.seaFooter__topBtn,
 .contactPage__submit,
 .hc__submit,
 .wallet__actionBtn,
@@ -11132,7 +11207,6 @@ html.dpl-page .preloader {
 .ctaPill:active,
 .footer__contactCta:active,
 .selWorks__endCta:active,
-.seaFooter__topBtn:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
 .projTile__mobileCta:active,
@@ -11170,10 +11244,15 @@ html.dpl-page .preloader {
      because its sheet was light */
   background: #f4f1ea;
   color: #1a1a1a;
-  font-size: 12px;
+  /* sentence case. At 12px with 0.1em tracking and uppercase this was a
+     micro-label, which is the wrong register for the sheet's one action: the
+     rows above it are set in lowercase sentence case at 20px, so the button
+     was the only thing in the panel shouting. Size comes up with the case -
+     a 12px button in a list of 20px links reads as a footnote. */
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   text-decoration: none;
   transition: background-color 0.2s ease;
 }
@@ -11195,7 +11274,6 @@ html.dpl-page .preloader {
   .ctaPill:active,
 .footer__contactCta:active,
 .selWorks__endCta:active,
-.seaFooter__topBtn:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
 .projTile__mobileCta:active,

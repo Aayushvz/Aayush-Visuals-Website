@@ -108,8 +108,30 @@ const CLOSED = [
   total = pin + dwell + gap + tail.
 */
 const TIMELINE_DESKTOP = { total: 450, pin: 100, dwell: 100, gap: 100, tail: 150 };
-/* same rhythm, shorter strides - a swipe covers less ground than a wheel */
-const TIMELINE_MOBILE = { total: 400, pin: 100, dwell: 80, gap: 80, tail: 140 };
+/*
+  The phone beats are one screen of scrolling each, deliberately.
+
+  Desktop keeps its own rhythm; this one is written to a spoken description of
+  what the section should do on a thumb, and each beat is a whole viewport so
+  that "one scroll" means one screen rather than some fraction nobody can feel:
+
+    dwell 100  the section is pinned and whole; nothing has dealt yet
+    gap   100  ONE scroll -> the first three cards scatter
+               ONE more   -> the second three scatter
+    tail   50  half a scroll of hold, then the section slides away
+
+  The tail was 140. That is nearly three times what was asked for, and it is
+  the difference between a beat and a stall: it held a finished scene for a
+  screen and a half after the last card landed, which on a phone reads as the
+  page having stopped responding. 50 is the shortest it can be and still let
+  the second deal settle - both deals fire on a spring with a per-card
+  stagger, so the cards keep moving for roughly half a second after the
+  trigger, and the tail is measured from the trigger, not from the landing.
+
+  `total` MUST match `min-height` on `.capabilities--pinned` in the
+  max-width: 640px block of globals.css. total = pin + dwell + gap + tail.
+*/
+const TIMELINE_MOBILE = { total: 350, pin: 100, dwell: 100, gap: 100, tail: 50 };
 
 type Timeline = typeof TIMELINE_DESKTOP;
 

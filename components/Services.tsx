@@ -10,20 +10,21 @@ const allCards = [...services, ...services]; // 12 cards total across 6 arms
 export default function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const deckCardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   /*
     3D scroll physics and drag, on every screen.
 
-    There used to be a second, phone-only mechanism here - six cards stacking
-    into a pile as you scrolled - and a matching block of markup for it. It is
-    gone. The carousel is the section's idea, and a phone is where most people
-    meet it; showing them a different, smaller idea meant the one thing worth
-    seeing was the one thing they never saw.
+    The phone runs the stacking deck instead, restored by request - six cards
+    rising into a pile as you scroll, in the effect below. The carousel is the
+    desktop mechanism and the deck is the phone one; they are gated in CSS
+    (.services-pin vs .services-mobile-deck), which is why nothing here has to
+    branch on width beyond the drag handler's own axis lock.
 
-    Nothing about the physics is width-dependent any more. What differs on a
-    phone is geometry, and geometry lives in CSS: a tighter radius and a larger
-    card, so the front of the ring fills the screen instead of eight cards
-    sharing it. See the carousel's mobile block in globals.css.
+    The carousel's phone geometry was tuned at length while it ran on both -
+    card 182, radius 408, perspective 1258 - and that block stays in
+    globals.css behind the same gate, so switching back is one display rule
+    rather than a re-derivation.
   */
   useEffect(() => {
     const section = sectionRef.current;
@@ -225,6 +226,87 @@ export default function Services() {
     };
   }, []);
 
+  // 2. ISOLATED Mobile-Only On-Scroll Sequential Card Deck Stacking
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const cards = deckCardRefs.current;
+    const N = services.length;
+
+    const handleScroll = () => {
+      if (window.innerWidth > 768) return;
+
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const totalScrollable = section.offsetHeight - vh;
+
+      if (totalScrollable <= 0) return;
+
+      const scrolled = -rect.top;
+      const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
+
+      // Card 0 (UI/UX) is the initial base card visible at start
+      // Cards 1..5 (Graphic, Brand, Video, Website, Product) rise sequentially from below
+      for (let i = 0; i < N; i++) {
+        const card = cards[i];
+        if (!card) continue;
+
+        if (i === 0) {
+          const depth = Math.max(0, (progress - 0.1) / 0.9);
+          const stackScale = Math.max(0.86, 1 - depth * 0.1);
+          const stackY = -depth * 18;
+          card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale})`;
+          card.style.opacity = "1";
+        } else {
+          const segStart = ((i - 1) / 5) * 0.80;
+          const segEnd = segStart + 0.16;
+
+          if (progress < segStart) {
+            // Positioned below viewport waiting to rise
+            card.style.transform = `translate3d(-50%, calc(-50% + 110vh), 0) scale(0.92)`;
+            card.style.opacity = "0";
+          } else if (progress >= segStart && progress <= segEnd) {
+            // Rising smoothly upward onto the deck on scroll
+            const p = (progress - segStart) / (segEnd - segStart);
+            const yOffset = (1 - p) * 110;
+            const scale = 0.92 + p * 0.08;
+            const rot = (1 - p) * (i % 2 === 0 ? 4 : -4);
+            card.style.transform = `translate3d(-50%, calc(-50% + ${yOffset}vh), 0) scale(${scale}) rotate(${rot}deg)`;
+            card.style.opacity = `${p}`;
+          } else {
+            // Stacked in the deck; stays pinned while newer cards stack over it
+            const depth = progress - segEnd;
+            const stackScale = Math.max(0.86, 1 - depth * 0.08);
+            const stackY = -depth * 18;
+            const rot = (i % 2 === 0 ? 1 : -1) * Math.min(2, depth * 5);
+            card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale}) rotate(${rot}deg)`;
+            card.style.opacity = "1";
+          }
+        }
+      }
+    };
+
+    /* rAF-throttled: handleScroll reads layout and then writes transforms
+       for six cards, so running it per scroll event (which can fire many
+       times between frames) was pure duplicated work */
+    let raf = 0;
+    const onScroll = () => {
+      if (!raf)
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          handleScroll();
+        });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <section className="services-section" id="services" ref={sectionRef}>
       {/* Services follows the dark Statement panel now, so it inherits the
@@ -285,6 +367,43 @@ export default function Services() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ISOLATED Mobile Sticky On-Scroll Card Deck Stacking Stage */}
+      <div className="services-mobile-deck">
+        <div className="services-header services-header--mobile">
+          <h2 className="services-heading">
+            The Skills Deck<span className="services-heading__dot">.</span>
+          </h2>
+          <p className="services-desc">
+            Product, UI/UX, branding, web, motion and everything in between.
+          </p>
+
+          <ExtCta href="#contact">Work with me</ExtCta>
+        </div>
+
+        <div className="services-deck-stage">
+          {services.map((service, index) => (
+            <div
+              key={service.id}
+              ref={(el) => {
+                deckCardRefs.current[index] = el;
+              }}
+              className="services-deck-card"
+              style={{ zIndex: index + 1 }}
+            >
+              <img
+                src={service.image}
+                alt={service.title}
+                className="services-card__img"
+                /* see the note on the carousel cards above - same six files,
+                   already warmed, nothing left to defer */
+                decoding="async"
+                draggable={false}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </section>
