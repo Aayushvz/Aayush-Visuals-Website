@@ -21,9 +21,16 @@ import { useEffect, useRef, useState } from "react";
   than half-completing during the rise.
 */
 
-const WORDS: { t: string; strong?: boolean; br?: boolean; isDot?: boolean }[] = [
+/*
+  `br` breaks the line on a desktop-width screen; `brPhone` breaks it only on
+  a phone. They are separate flags because the two compositions break in
+  different places: the wide one splits the sentence into three balanced
+  lines, the phone one puts "5+ years" alone on the first line and lets the
+  rest wrap naturally under it.
+*/
+const WORDS: { t: string; strong?: boolean; br?: boolean; brPhone?: boolean; isDot?: boolean }[] = [
   { t: "5+", strong: true },
-  { t: "years", strong: true },
+  { t: "years", strong: true, brPhone: true },
   { t: "of" },
   { t: "turning", br: true },
   { t: "complex" },
@@ -151,6 +158,10 @@ export default function Statement() {
     );
     io.observe(section);
 
+    /* read per frame in the loop - `matches` is a cached boolean, unlike
+       window.innerWidth, which is a layout read */
+    const phoneMq = window.matchMedia("(max-width: 640px)");
+
     let lastTp = "";
     let lastLp = "";
     const lastTileT: string[] = [];
@@ -168,10 +179,26 @@ export default function Statement() {
         setRevealed(true);
       }
 
-      // DELAYED reveal window: begin at 60% visibility (r.top = 0.4 * vh).
-      // Pin/hold continues for 140vh scroll distance (r.top = -1.0 * vh).
-      const startTrigger = 0.4 * vh;
-      const endTrigger = -1.0 * vh;
+      /*
+        DELAYED reveal window, measured in viewport travel rather than in
+        fractions of the section: it begins at 60% visibility (r.top = 0.4vh)
+        and completes once the panel has pushed a further screen past the top.
+
+        Because it is viewport travel, the section has to be TALL ENOUGH for
+        r.top to reach the end trigger while the sticky child is still pinned
+        - the child unpins at r.top = -(height - vh), so a 1.0vh end trigger
+        needs at least 200svh. That coupling is the whole reason the phone
+        window is shorter rather than the phone section simply being cut: at
+        150svh against the desktop triggers, r.top bottoms out at -0.5vh, `p`
+        peaks at 0.64, and the last third of the sentence never brightens and
+        the period never pops.
+
+        The phone window is 0.75vh of travel against the desktop's 1.4vh, so
+        the same sequence plays out in a little over half the scrolling.
+      */
+      const phone = phoneMq.matches;
+      const startTrigger = (phone ? 0.3 : 0.4) * vh;
+      const endTrigger = (phone ? -0.45 : -1.0) * vh;
       const p = Math.min(1, Math.max(0, (startTrigger - r.top) / (startTrigger - endTrigger)));
 
       /* --tp and --lineP are read by every word span's calc(), so each write
@@ -239,11 +266,20 @@ export default function Statement() {
       className={`statement${revealed ? " statement--revealed" : ""}`}
       id="statement"
       ref={sectionRef}
+      /*
+        No minHeight here.
+
+        It used to be 250svh, inline, which beats any stylesheet - so the
+        phone rule that tried to shorten this section had never once applied
+        and a phone was scrolling two and a half screens to read one
+        sentence. The height is the section's scroll budget (everything here
+        is scrubbed from progress through it), so it belongs with the rest of
+        the composition in globals.css, where a phone can be given less of it.
+      */
       style={{
         display: "block",
         padding: 0,
         overflow: "visible",
-        minHeight: "250svh",
       }}
     >
       <div 
@@ -277,10 +313,12 @@ export default function Statement() {
           }
           @media (min-width: 641px) {
             .statement__br--desktop { display: block; }
+            .statement__br--phone { display: none; }
             .statement__text { text-wrap: unset !important; }
           }
           @media (max-width: 640px) {
             .statement__br--desktop { display: none; }
+            .statement__br--phone { display: block; }
           }
         `}</style>
 
@@ -319,6 +357,7 @@ export default function Statement() {
                 </span>
                 {i < WORDS.length - 1 && !WORDS[i + 1]?.isDot ? " " : ""}
                 {w.br ? <br className="statement__br--desktop" /> : null}
+                {w.brPhone ? <br className="statement__br--phone" /> : null}
               </span>
             ))}
           </h2>

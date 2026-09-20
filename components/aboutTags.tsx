@@ -26,12 +26,20 @@ import type { ReactNode } from "react";
   own phone coordinates instead, spread down the band rather than packed into
   the same three rows.
 
-  They all keep one now. Thinning the set was right while the tags sat where
-  they were placed and overlapped each other; once they fall into a pile the
-  overlap resolves itself, and nine pills stack into something worth looking
-  at where five left the bottom of the screen bare. Anything without a phone
-  position would still be dropped at that width, which keeps the mechanism
-  for a tag that genuinely does not fit.
+  Four of them keep one, plus the About link.
+
+  This number has moved twice, in both directions, and the band is the reason.
+  Thinning was right while the tags sat where they were placed and overlapped
+  each other; once they fall into a pile the overlap resolves itself, so the
+  set was widened again. Six pills was one too many for the pile to read AS a
+  pile - "shipping it" and "user research" landed sixteen points apart on
+  opposite sides, which draws a horizontal line across the band, and a line is
+  the one thing a pile must not have. They lose their phone position here and
+  the remaining four spread into the space, alternating sides roughly every
+  twenty-five points down the band.
+
+  Both still appear at full width, where the stage is three times as wide and
+  has the room for them. That is what a missing phone position is for.
 */
 type Phone = { x: number; y: number; rot: number };
 
@@ -124,12 +132,12 @@ export const PILLS: Pill[] = [
   { label: "Motion design", icon: Move, x: 58, y: 51, rot: -13, bg: "#a6d7f4" },
   { label: "Making it pop", icon: Spark, x: 92, y: 53, rot: -11, bg: "#fb8b3c" },
   { label: "Thinking systems", icon: Globe, x: 74, y: 66, rot: -5, bg: "#f9c5d7" },
-  { label: "Improving UX", icon: Smile, x: 43, y: 73, rot: -8, bg: "#f7c32b", phone: { x: 68, y: 30, rot: -8 } },
+  { label: "Improving UX", icon: Smile, x: 43, y: 73, rot: -8, bg: "#f7c32b", phone: { x: 68, y: 40, rot: -8 } },
   { label: "Brand identity", icon: Layers, x: 22, y: 12, rot: -10, bg: "#f9c5d7" },
   { label: "UI design", icon: Corner, x: 64, y: 22, rot: -7, bg: "#cbb8f8" },
-  { label: "Wireframing", icon: Hash, x: 88, y: 85, rot: -9, bg: "#a6d7f4", phone: { x: 32, y: 14, rot: -7 } },
-  { label: "Shipping it", icon: Bolt, x: 26, y: 62, rot: 6, bg: "#bfe36d", phone: { x: 28, y: 48, rot: 6 } },
-  { label: "User research", icon: Pencil, x: 72, y: 96, rot: -8, bg: "#cbb8f8", phone: { x: 66, y: 64, rot: -9 } },
+  { label: "Wireframing", icon: Hash, x: 88, y: 85, rot: -9, bg: "#a6d7f4", phone: { x: 32, y: 16, rot: -7 } },
+  { label: "Shipping it", icon: Bolt, x: 26, y: 62, rot: 6, bg: "#bfe36d" },
+  { label: "User research", icon: Pencil, x: 72, y: 96, rot: -8, bg: "#cbb8f8" },
   /*
     The bottom row sits lower than the reference reads it, and is meant to be
     half cut off by the fold. On a short wide window the 42vh cap flattens
@@ -137,7 +145,7 @@ export const PILLS: Pill[] = [
     into "improving ux"; dropping it past the edge separates them without
     moving it sideways out of the composition.
   */
-  { label: "Reframing problems", icon: Hash, x: 41, y: 95, rot: -8, bg: "#54cf99", phone: { x: 40, y: 80, rot: -7 } },
+  { label: "Reframing problems", icon: Hash, x: 41, y: 95, rot: -8, bg: "#54cf99", phone: { x: 40, y: 68, rot: -7 } },
   /*
     The one pill that goes somewhere, and the only one not painted in a
     pastel: white on a violet reads as the actionable object in a field of
@@ -149,7 +157,7 @@ export const PILLS: Pill[] = [
     phone position unconditionally: the others are decoration and can be
     dropped at that width, this one is the route to /about.
   */
-  { label: "About me", icon: Arrow, x: 13, y: 80, rot: 7, bg: "#7c3aed", href: "/about", phone: { x: 72, y: 94, rot: 7 } },
+  { label: "About me", icon: Arrow, x: 13, y: 80, rot: 7, bg: "#7c3aed", href: "/about", phone: { x: 72, y: 92, rot: 7 } },
 ];
 
 export const CHIPS: Chip[] = [

@@ -10,9 +10,21 @@ const allCards = [...services, ...services]; // 12 cards total across 6 arms
 export default function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const deckCardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // 1. Desktop 3D Scroll Physics & Bi-directional Drag Interaction (UNTOUCHED DESKTOP LOGIC)
+  /*
+    3D scroll physics and drag, on every screen.
+
+    There used to be a second, phone-only mechanism here - six cards stacking
+    into a pile as you scrolled - and a matching block of markup for it. It is
+    gone. The carousel is the section's idea, and a phone is where most people
+    meet it; showing them a different, smaller idea meant the one thing worth
+    seeing was the one thing they never saw.
+
+    Nothing about the physics is width-dependent any more. What differs on a
+    phone is geometry, and geometry lives in CSS: a tighter radius and a larger
+    card, so the front of the ring fills the screen instead of eight cards
+    sharing it. See the carousel's mobile block in globals.css.
+  */
   useEffect(() => {
     const section = sectionRef.current;
     const carousel = carouselRef.current;
@@ -73,7 +85,7 @@ export default function Services() {
       lastTime = now;
 
       let scrollRotation = 0;
-      if (section && window.innerWidth > 768) {
+      if (section) {
         const rect = section.getBoundingClientRect();
         const vh = window.innerHeight || 1;
         const totalScrollable = section.offsetHeight - vh;
@@ -103,7 +115,7 @@ export default function Services() {
         }
       }
 
-      if (carousel && window.innerWidth > 768) {
+      if (carousel) {
         carousel.style.transform = `rotateY(${current}deg)`;
       }
 
@@ -111,29 +123,76 @@ export default function Services() {
     }
     wake();
 
-    function pointerX(e: MouseEvent | TouchEvent) {
-      return "touches" in e && e.touches.length > 0 ? e.touches[0].clientX : (e as MouseEvent).clientX;
+    function point(e: MouseEvent | TouchEvent) {
+      const t = "touches" in e && e.touches.length > 0 ? e.touches[0] : null;
+      return t
+        ? { x: t.clientX, y: t.clientY }
+        : { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
     }
 
+    /*
+      A finger on this carousel is ambiguous in a way a mouse never is: the
+      same gesture that spins the ring is also the one that scrolls the page
+      past it. Dragging unconditionally on touch traps the reader inside the
+      section - the old code sidestepped that by refusing to drag below 768px
+      at all, which is no longer an option now that the phone HAS the carousel.
+
+      So the axis is decided once, on the first few pixels of movement, and
+      then held for the rest of the gesture. Past the threshold it is a spin
+      and we take the event; below it, or if the finger went vertical, we never
+      call preventDefault and the page scrolls exactly as it would have.
+      `touch-action: pan-y` on the wrapper tells the compositor the same thing,
+      so vertical scrolling stays on the fast path instead of waiting to learn
+      what this handler intends.
+    */
+    const AXIS_LOCK_PX = 8;
+    let axis: "x" | "y" | null = null;
+    let dragStartY = 0;
+
     function startDrag(e: MouseEvent | TouchEvent) {
-      if (window.innerWidth <= 768) return;
+      const p = point(e);
       isDragging = true;
-      carousel?.classList.add("dragging");
-      dragStartX = pointerX(e);
+      /* a mouse press on a grab cursor is already a commitment; only touch
+         has to prove which way it is going */
+      axis = "touches" in e ? null : "x";
+      if (axis === "x") carousel?.classList.add("dragging");
+      dragStartX = p.x;
+      dragStartY = p.y;
       initialDragOffset = dragOffset;
     }
 
     function drag(e: MouseEvent | TouchEvent) {
-      if (!isDragging || window.innerWidth <= 768) return;
+      if (!isDragging) return;
+      const p = point(e);
+      const dx = p.x - dragStartX;
+
+      if (axis === null) {
+        const dy = p.y - dragStartY;
+        if (Math.abs(dx) < AXIS_LOCK_PX && Math.abs(dy) < AXIS_LOCK_PX) return;
+        axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if (axis === "y") {
+          /* hand the gesture back to the page and stay out of the way until
+             the finger lifts */
+          isDragging = false;
+          return;
+        }
+        carousel?.classList.add("dragging");
+        /* the lock threshold is slack, not travel - counting it would make
+           the ring jump by 8px the moment it engages */
+        dragStartX = p.x;
+        initialDragOffset = dragOffset;
+        return;
+      }
+
       if (e.cancelable) e.preventDefault();
-      const dx = pointerX(e) - dragStartX;
       dragOffset = initialDragOffset + dx * (SENSITIVITY / 10);
       wake();
     }
 
     function endDrag() {
-      if (!isDragging) return;
+      if (!isDragging && axis !== "y") return;
       isDragging = false;
+      axis = null;
       carousel?.classList.remove("dragging");
     }
 
@@ -166,87 +225,6 @@ export default function Services() {
     };
   }, []);
 
-  // 2. ISOLATED Mobile-Only On-Scroll Sequential Card Deck Stacking
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const cards = deckCardRefs.current;
-    const N = services.length;
-
-    const handleScroll = () => {
-      if (window.innerWidth > 768) return;
-
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight || 1;
-      const totalScrollable = section.offsetHeight - vh;
-
-      if (totalScrollable <= 0) return;
-
-      const scrolled = -rect.top;
-      const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
-
-      // Card 0 (UI/UX) is the initial base card visible at start
-      // Cards 1..5 (Graphic, Brand, Video, Website, Product) rise sequentially from below
-      for (let i = 0; i < N; i++) {
-        const card = cards[i];
-        if (!card) continue;
-
-        if (i === 0) {
-          const depth = Math.max(0, (progress - 0.1) / 0.9);
-          const stackScale = Math.max(0.86, 1 - depth * 0.1);
-          const stackY = -depth * 18;
-          card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale})`;
-          card.style.opacity = "1";
-        } else {
-          const segStart = ((i - 1) / 5) * 0.80;
-          const segEnd = segStart + 0.16;
-
-          if (progress < segStart) {
-            // Positioned below viewport waiting to rise
-            card.style.transform = `translate3d(-50%, calc(-50% + 110vh), 0) scale(0.92)`;
-            card.style.opacity = "0";
-          } else if (progress >= segStart && progress <= segEnd) {
-            // Rising smoothly upward onto the deck on scroll
-            const p = (progress - segStart) / (segEnd - segStart);
-            const yOffset = (1 - p) * 110;
-            const scale = 0.92 + p * 0.08;
-            const rot = (1 - p) * (i % 2 === 0 ? 4 : -4);
-            card.style.transform = `translate3d(-50%, calc(-50% + ${yOffset}vh), 0) scale(${scale}) rotate(${rot}deg)`;
-            card.style.opacity = `${p}`;
-          } else {
-            // Stacked in the deck; stays pinned while newer cards stack over it
-            const depth = progress - segEnd;
-            const stackScale = Math.max(0.86, 1 - depth * 0.08);
-            const stackY = -depth * 18;
-            const rot = (i % 2 === 0 ? 1 : -1) * Math.min(2, depth * 5);
-            card.style.transform = `translate3d(-50%, calc(-50% + ${stackY}px), 0) scale(${stackScale}) rotate(${rot}deg)`;
-            card.style.opacity = "1";
-          }
-        }
-      }
-    };
-
-    /* rAF-throttled: handleScroll reads layout and then writes transforms
-       for six cards, so running it per scroll event (which can fire many
-       times between frames) was pure duplicated work */
-    let raf = 0;
-    const onScroll = () => {
-      if (!raf)
-        raf = requestAnimationFrame(() => {
-          raf = 0;
-          handleScroll();
-        });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
   return (
     <section className="services-section" id="services" ref={sectionRef}>
       {/* Services follows the dark Statement panel now, so it inherits the
@@ -254,7 +232,7 @@ export default function Services() {
           this cream one, dot grid and all. */}
       <TornEdge fill="#1a1a1a" dots />
 
-      {/* Desktop Sticky 3D Carousel Stage (PROTECTED UNTOUCHED DESKTOP) */}
+      {/* The sticky 3D carousel stage, on every screen */}
       <div className="services-pin">
         <div className="services-header" data-reveal>
           <h2 className="services-heading">
@@ -280,16 +258,15 @@ export default function Services() {
                     src={allCards[i].image}
                     alt={allCards[i].title}
                     className="services-card__img"
-                    /* NOT lazy. This section is already held back twice over
-                       - `ssr: false` keeps it out of the HTML and
+                    /* NOT lazy. This section is already held back twice
+                       over - `ssr: false` keeps it out of the HTML and
                        DeferUntilNear keeps it unmounted until it is a
                        viewport and a half away - so by the time these tags
-                       exist the card is nearly on screen. A third gate here
-                       only delays six files totalling ~200KB, and it delays
-                       them worst on the desktop carousel, where the cards
-                       stand at rotateY(90deg) with backface-visibility
-                       hidden and the lazy heuristic has almost no projected
-                       area to decide on. */
+                       exist the card is nearly on screen. A third gate only
+                       delays six files totalling ~200KB, and it delays them
+                       worst right here, where the cards stand at
+                       rotateY(90deg) with backface-visibility hidden and the
+                       lazy heuristic has almost no projected area to judge. */
                     decoding="async"
                     draggable={false}
                   />
@@ -300,16 +277,7 @@ export default function Services() {
                     src={allCards[i + 6].image}
                     alt={allCards[i + 6].title}
                     className="services-card__img"
-                    /* NOT lazy. This section is already held back twice over
-                       - `ssr: false` keeps it out of the HTML and
-                       DeferUntilNear keeps it unmounted until it is a
-                       viewport and a half away - so by the time these tags
-                       exist the card is nearly on screen. A third gate here
-                       only delays six files totalling ~200KB, and it delays
-                       them worst on the desktop carousel, where the cards
-                       stand at rotateY(90deg) with backface-visibility
-                       hidden and the lazy heuristic has almost no projected
-                       area to decide on. */
+                    /* not lazy - see the note on the card above */
                     decoding="async"
                     draggable={false}
                   />
@@ -317,43 +285,6 @@ export default function Services() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* ISOLATED Mobile Sticky On-Scroll Card Deck Stacking Stage */}
-      <div className="services-mobile-deck">
-        <div className="services-header services-header--mobile">
-          <h2 className="services-heading">
-            The Skills Deck<span className="services-heading__dot">.</span>
-          </h2>
-          <p className="services-desc">
-            Product, UI/UX, branding, web, motion and everything in between.
-          </p>
-
-          <ExtCta href="#contact">Work with me</ExtCta>
-        </div>
-
-        <div className="services-deck-stage">
-          {services.map((service, index) => (
-            <div
-              key={service.id}
-              ref={(el) => {
-                deckCardRefs.current[index] = el;
-              }}
-              className="services-deck-card"
-              style={{ zIndex: index + 1 }}
-            >
-              <img
-                src={service.image}
-                alt={service.title}
-                className="services-card__img"
-                /* see the note on the carousel cards above - same six files,
-                   already warmed, nothing left to defer */
-                decoding="async"
-                draggable={false}
-              />
-            </div>
-          ))}
         </div>
       </div>
     </section>

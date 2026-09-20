@@ -1654,7 +1654,13 @@ html.has-cursor .cursorRing {
   position: relative;
   z-index: 6;
   margin-top: -100vh;
-  min-height: 100svh;
+  /* The section's height IS its scroll budget: the word reveal, the ruler and
+     the wavy line are all scrubbed from progress through it, and the sticky
+     child is what you actually look at. This number used to be set inline on
+     the element as 250svh, which beat every stylesheet - including the phone
+     rule that tried to shorten it, so a phone spent two and a half screens on
+     one sentence. It lives here now so the phone block can have its own. */
+  min-height: 250svh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5815,12 +5821,40 @@ html.has-cursor .cursorRing {
     height: 100%;
   }
 
+  /*
+    "5+ years" leads the sentence; it does not leave it.
+
+    This used to be clamp(48px, 13.5vw, 72px) against a 29.3px body - a 1.8x
+    jump inside one sentence - with its own line-height and tracking on top.
+    Two sets of metrics in one block of text is why the leading went uneven
+    where the big words wrapped: a taller inline box drags its whole line box
+    with it, so the gap under "5+ years" never matched the gaps between the
+    lines below it.
+
+    1.35x instead, and line-height and letter-spacing are left to the parent
+    so every line in the sentence is measured the same way. The emphasis is
+    now carried by size AND weight rather than by a change of typographic
+    voice.
+  */
   .statement__word--strong {
-    font-size: clamp(48px, 13.5vw, 72px);
+    font-size: clamp(48px, 14.7vw, 64px);
     display: inline;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    /* 600. The reference's lead looked like a full Bold and 700 was the first
+       reading of it, but at 57px against a 37px Regular the size difference is
+       already carrying the emphasis - the extra weight on top of it closed up
+       the counters in "5+" and read as heavier than the reference does. Back
+       to the same Semibold the desktop panel uses; only the size differs now. */
     font-weight: 600;
+    /*
+      This sets the first line's box, and with it the space down to the body.
+      Swept from 0.85 to 1.15 and measured: the gap floors at 62px (1.51x the
+      body leading) anywhere at or below 1, because General Sans's own
+      ascent + descent at 57px IS 62px and a line box cannot be shorter than
+      the glyphs in it. The reference reads at roughly 1.3x, so 1.51 is the
+      closest this gets without pulling the body up by a negative margin -
+      which would be a worse trade than the 8px it would buy.
+    */
+    line-height: 1;
   }
   
   /* Make the Figma, Claude, Framer, and Adobe Suite logos truly floating on mobile without the tile box */
@@ -5868,7 +5902,18 @@ html.has-cursor .cursorRing {
   }
 
   .statement {
-    min-height: 110vh;
+    /*
+      160svh against the desktop's 250, which is 0.6 screens of scrolling
+      instead of 1.5.
+
+      The floor is set by Statement.tsx, not by taste: the sticky child is
+      100svh and unpins at r.top = -(height - vh), so this height decides how
+      far r.top can travel while the panel is still pinned - 0.6vh here. The
+      phone reveal window ends at -0.45vh, so it lands with 0.15vh to spare.
+      Shorten this any further and the sentence stops mid-reveal; the two
+      numbers have to move together.
+    */
+    min-height: 160svh;
     padding: 76px 24px calc(100px + env(safe-area-inset-bottom));
     align-items: center;
   }
@@ -5886,14 +5931,41 @@ html.has-cursor .cursorRing {
   .statement__inner {
     width: 100%;
     padding-bottom: 0;
+    /* the sticky's own inline padding is 5vw; this is the remainder of the
+       reference's 8.9vw left inset, and it is mirrored on the right so a long
+       word still has somewhere to wrap to */
+    padding-left: 4vw;
+    padding-right: 4vw;
   }
 
-  /* ~4 lines on a 390px screen — dominant but not cramped */
+  /*
+    The phone composition is set to a supplied reference rather than being a
+    shrunk version of the desktop one, and the two differ in kind, not just in
+    size: the reference is LEFT-ALIGNED and ragged, with "5+ years" alone on
+    the first line, where the desktop panel is centred and balanced.
+
+    Spec read off the reference as fractions of its own width, so it holds at
+    any phone size:
+
+      lead   14.7vw, weight 700, on its own line
+      body    9.4vw, weight 400, natural wrap
+      inset   8.9vw from the left edge
+      leading 1.12
+
+    At 390px that is a 57px lead over a 37px body. `text-wrap` goes back to
+    normal because `balance` is the opposite of what the reference does - it
+    evens the lines out, and the reference's right edge is deliberately ragged.
+  */
   .statement__text {
-    font-size: clamp(26px, 7.5vw, 36px);
-    line-height: 1.1;
+    font-size: clamp(30px, 9.4vw, 40px);
+    line-height: 1.12;
     letter-spacing: -0.02em;
     font-weight: 400;
+    text-align: left;
+    /* `wrap`, not `normal` - `normal` is not a value `text-wrap` accepts, so
+       the declaration was dropped and the base rule's `balance` stayed in
+       force, evening out exactly the ragged right edge this is undoing */
+    text-wrap: wrap;
   }
 
   /* tool tiles: slightly smaller, well clear of the statement text */
@@ -5911,14 +5983,24 @@ html.has-cursor .cursorRing {
     display: none; /* no room for labels on phone */
   }
 
+  /*
+    Anchored to the nav pill, not to a percentage of the panel.
+
+    14% and 11% of a 100svh sticky put these at 118px and 93px, and the
+    floating pill's bottom edge is at 74px with --mnav-clear (its top + height
+    + gap) at 86px - so the higher of the two was arriving with the pill on top
+    of it, and on a shorter phone both were. A percentage cannot know where the
+    pill ends; --mnav-clear is the pill's own measurement, so this holds at any
+    height and follows the safe-area inset on a notched phone.
+  */
   .toolTile--figma {
     left: 14%;
-    top: 14%;
+    top: calc(var(--mnav-clear) + 34px);
   }
 
   .toolTile--claude {
     right: 12%;
-    top: 11%;
+    top: calc(var(--mnav-clear) + 12px);
   }
 
   /* removed framer */
@@ -9260,40 +9342,36 @@ html.contact-page-active body {
   width: 100%;
 }
 
-@media (min-width: 769px) {
-  .services-section {
-    min-height: 300vh;
-  }
+/*
+  The pin is unconditional now.
 
-  .services-pin {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding-top: clamp(16px, 3vh, 40px);
-  }
-
-  .services-pin .services-header {
-    transform: translateY(65px);
-  }
-
-  .services-mobile-deck {
-    display: none !important;
-  }
+  A phone used to get something else entirely here - six cards stacking into a
+  pile - while the rotating ring was desktop-only. That is backwards: most of
+  the traffic is on a phone, so the section's one memorable idea was the one
+  most people never saw. Both widths now run the same carousel; what changes
+  below 768px is the geometry it is drawn at, not the mechanism.
+*/
+.services-section {
+  min-height: 300vh;
 }
 
-@media (max-width: 768px) {
-  .services-section {
-    min-height: 380vh;
-  }
+.services-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  /* the small-viewport unit matters only on a phone, where the URL bar moves;
+     on a desktop it resolves to the same number as the line above */
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: clamp(16px, 3vh, 40px);
+}
 
-  .services-pin {
-    display: none !important;
-  }
+.services-pin .services-header {
+  transform: translateY(65px);
 }
 
 /* Short desktop viewports */
@@ -9423,95 +9501,119 @@ html.contact-page-active body {
   -webkit-user-drag: none;
 }
 
-/* Mobile On-Scroll Stacking Cards System */
-.services-mobile-deck {
-  display: none;
-}
+/* ==========================================================================
+   THE RING ON A PHONE
 
+   Same twelve cards on the same cylinder, drawn at a different size. Three
+   numbers set the whole composition and they are not independent, so they are
+   derived here rather than guessed at:
+
+     R  the ring's radius. It is NOT a property you can set - it falls out of
+        the arm, whose two cards sit at its ends: R = (arm - card) / 2.
+     P  the perspective distance on .services-wrapper.
+     c  the card's own width.
+
+   A card at the front of the ring sits at z = +R, so it is drawn at
+   P / (P - R) times its own size. That magnification is the only lever that
+   makes the front card big, and it is why simply scaling the desktop values
+   down does not work: scaling every length by the same factor reproduces the
+   desktop picture exactly, eight cards wide, on a screen a fifth the width.
+
+   There is a fourth constraint, and it is the one that sets R: the cards must
+   not touch. Twelve cards 30 degrees apart sit a chord apart on the ring,
+
+     chord = 2 R sin(15deg) = 0.5176 R
+
+   so a gap at all needs R > 1.932 c, and a comfortable one needs more. The
+   first pass ignored this - R = 380 against c = 215 put the chord at 197px
+   for a 215px card, i.e. an 18px overlap - and the ring read as a solid band
+   of card rather than as separate cards.
+
+     c = 152, R = 340, P = 1048   ->  chord 176 vs card 152, a 24px gap on the
+                                      ring, and 152 x 1.48 = 225px at the
+                                      front (the arm is 2 x (340 + 76) = 832)
+
+   Note which way this reads: the front card is 225px BECAUSE of the gap, not
+   in spite of it. On a 390px screen the two cannot both be maximised - once
+   the gap is positive the neighbour 30 degrees round sits at least a full
+   card-width off centre by definition, so every pixel of spacing walks it
+   toward the edge of the frame.
+
+   An earlier pass ran c = 186 / R = 420 / P = 1430, which bought a 263px card
+   and a 50px gap by pushing the neighbour so far out that only 13px of it
+   stayed on screen - one card at a time, with slivers. These numbers pull
+   both back: a smaller card and a tighter gap leave the neighbour showing
+   ~50px at each edge, which is the proportion the desktop composition reads
+   at, scaled to a screen a quarter the width.
+   ========================================================================== */
 @media (max-width: 768px) {
-  .services-viewport--desktop {
-    display: none !important;
+  .services-section {
+    /* a little more travel than the desktop's 300vh: the same 150 degrees of
+       rotation over a taller page is a slower, steadier ring, which is what
+       you want when the gesture driving it is a thumb */
+    min-height: 340vh;
   }
 
-  .services-mobile-deck {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .services-pin {
+    /* the heading sits under the floating nav pill rather than being centred
+       against it - --mnav-clear is the pill's own top + height + gap */
     justify-content: flex-start;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
-    width: 100%;
-    overflow: hidden;
-    /* 8vh landed at 65px on a normal phone while the pill's bottom edge sits
-       at 74px, so the heading was starting underneath it. --mnav-clear is the
-       pill's own top + height + gap, so this tracks the bar instead of
-       guessing at it. */
     padding-top: calc(var(--mnav-clear) + 18px);
   }
 
-  .services-header--mobile {
+  .services-pin .services-header {
+    transform: none;
     margin-top: 0;
     margin-bottom: 0;
-    z-index: 20;
-    position: relative;
   }
 
-  .services-header--mobile .services-heading {
+  .services-pin .services-heading {
     font-size: clamp(28px, 6.5vw, 38px);
     line-height: 1.1;
     margin-bottom: 8px;
-    font-weight: 600;
   }
 
-  .services-header--mobile .services-desc {
+  .services-pin .services-desc {
     font-size: 13.5px;
     line-height: 1.4;
     max-width: 320px;
     margin-bottom: 12px;
   }
 
-  /* Scoped to the phone deck's own header, so the pinned desktop carousel
-     keeps its CTA. On a phone the deck is the section - the button was
-     spending a third of the space above the cards on a link that the menu
-     and the contact section both already offer. */
-  .services-header--mobile .extCta {
+  /* The card is the section on a phone. The button was spending a third of
+     the space above it on a link the menu and the contact section both
+     already offer - this is the same call the stacking deck made before it. */
+  .services-pin .extCta {
     display: none;
   }
 
-  .services-deck-stage {
-    position: relative;
-    width: 100%;
-    /* the CTA above is hidden on phones, so the deck takes back its height
-       instead of leaving a gap where the button used to be */
-    height: calc(100vh - 196px);
-    height: calc(100dvh - 196px);
-    margin-top: 10px;
+  .services-wrapper {
+    /* whatever is left under the heading, capped so the ring does not stretch
+       on a tall phone; the projected card is 216 x 1.48 = 320px */
+    height: min(375px, calc(100dvh - 210px));
+    transform: perspective(1048px);
+    /* the carousel takes horizontal gestures, the page keeps vertical ones -
+       declared here so the compositor scrolls without waiting on the drag
+       handler to decide (see the axis lock in Services.tsx) */
+    touch-action: pan-y;
   }
 
-  .services-deck-card {
-    position: absolute;
-    top: 48%;
-    left: 50%;
-    /* smaller, at the same 0.66 aspect: the card was 290x440 on a 375px
-       screen, which left the section with almost nothing but card */
-    width: min(240px, 68vw);
-    height: min(364px, 103vw);
-    border-radius: 22px;
-    overflow: hidden;
-    background-color: #1e1e1e;
+  .services-carousel {
+    width: 100%;
+    height: 216px;
+  }
+
+  .services-arm {
+    width: 832px;
+    height: 180px;
+  }
+
+  .services-card {
+    width: 152px;
+    height: 216px;
+    /* 13 x 1.48 lands on the desktop card's 20px once magnified */
+    border-radius: 13px;
     box-shadow: 0 16px 45px rgba(0, 0, 0, 0.32), 0 4px 14px rgba(0, 0, 0, 0.2);
-    will-change: transform, opacity;
-    transform: translate3d(-50%, -50%, 0);
-  }
-
-  .services-mobile-deck .services-card__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    display: block;
   }
 }
 
