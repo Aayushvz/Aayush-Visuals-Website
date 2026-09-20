@@ -27,18 +27,15 @@
   /*
     Aeonik across the case study, General Sans behind it.
 
-    The available cut is the trial, which carries 66 glyphs: space, comma,
-    hyphen, period, digits and the two alphabets. Everything else - colons,
-    apostrophes, slashes, dashes, brackets, percent, ampersand, Devanagari -
-    renders in the fallback, which means a change of typeface inside words
-    like "Cafe's". That is known and accepted. The markup avoids the ones it
-    can (labels carry no colon, see CaseStudyPage.tsx) and prose keeps the
-    apostrophes it needs, because rewriting copy around a trial font's
-    character set is the tail wagging the dog.
+    The full cut is loaded now - 471 glyphs - so nothing in the case-study
+    copy falls through: the colons in the labels, the apostrophes in the
+    prose and the pipes in the discipline string all render in Aeonik. An
+    earlier trial cut carried 66 glyphs and this file used to describe the
+    fallback behaviour at length; that constraint is gone.
 
-    General Sans rather than system-ui as the fallback: it is what the rest of
-    the site is set in, so the characters that do fall through land somewhere
-    deliberate instead of on Arial.
+    General Sans stays named as the fallback rather than system-ui, for the
+    decorative diamond and the Devanagari the full cut still lacks: those
+    land somewhere deliberate instead of on Arial.
   */
   /* ---- ink ---- */
   /* the site's own paper, not white. --cream is defined once in globals.css
@@ -125,18 +122,15 @@
   /*
     Aeonik across the case study, General Sans behind it.
 
-    The available cut is the trial, which carries 66 glyphs: space, comma,
-    hyphen, period, the digits and the two alphabets. Everything else -
-    colons, apostrophes, slashes, dashes, brackets, percent, ampersand,
-    Devanagari - renders in the fallback, so the typeface changes inside words
-    like "Cafe's". That is known and accepted, not a bug to chase in CSS; the
-    only real fix is a full cut of the face. The markup avoids the ones it can
-    (labels carry no colon, see CaseStudyPage.tsx) while prose keeps the
-    apostrophes it needs, because rewriting copy around a trial font's
-    character set is the tail wagging the dog.
+    This is the full cut, 471 glyphs, so the case-study copy no longer falls
+    through anywhere: colons, apostrophes, slashes, dashes, brackets, percent
+    and ampersand are all in the face. It replaced a 66-glyph trial cut that
+    changed typeface inside words like "Cafe's", which is why this block used
+    to carry a long warning about it.
 
-    General Sans rather than system-ui behind it: it is what the rest of the
-    site is set in, so what falls through lands somewhere deliberate.
+    General Sans rather than system-ui behind it: it still covers the
+    decorative diamond and the Devanagari Aeonik lacks, and it is what the
+    rest of the site is set in, so what does fall through lands deliberately.
 
     NOTE this is the block's ONLY font-family. An earlier attempt added a
     second one at the top of `.cs` and spent a while looking like the variable
@@ -570,6 +564,196 @@
 
 .csHero__cover {
   margin-top: var(--cs-lg);
+}
+
+/* ==========================================================================
+   THE HERO ON A PHONE
+
+   Until now this file set NO typography below 768px - not one font-size,
+   line-height, weight or tracking, across any of its media blocks. The phone
+   was rendering a frozen desktop specimen: every clamp sat on its floor and
+   the three hero sizes taken from a supplied reference (lead 24/34, labels
+   24/24, body 16/24) did not scale at all. Two things followed.
+
+   THE LADDER COLLAPSED. The title's clamp bottoms out at 34px while the
+   labels stayed pinned at 24, so h1 and field label ended up 1.4x apart at
+   the SAME rendered weight - Aeonik has no 600, so every `font-weight: 600`
+   on this site resolves up to Bold and sits level with every 700. Seven
+   objects in this hero were Bold and none were Medium, so the page had two
+   voices where it needed four.
+
+   THE LABELS OUTRANKED THEIR OWN CONTENT. "Services:" at 24/700 was heavier
+   than the lead it followed and half again the body it labelled. This file
+   already records hitting that inversion from the other side: the headline
+   "became a caption the moment the lead went to 24px". The 24 was the cause
+   both times.
+
+   The scale below is anchored on the one hero value that was already right -
+   16px body - stepping 1.25 either way, at a 390px design width where the
+   measure is 350px.
+
+     32  display   1.05  600      -0.02em   title
+     16  body      1.5   400       0        intro paragraph, column body
+     16  mark      1.25  700       0        Services / Challenge / Role
+     13  meta      1.3   400/500   varies   trail, stamp, pills
+
+   Ratios 32/16 = 2.0, 16/13 = 1.23. The last is 0.02 under the 1.25 the
+   design system asks for; the exact value is 12.8px and a fractional pixel is
+   the worse trade, so it is named here rather than hidden.
+
+   THREE STEPS, NOT FOUR. The lead sits at body size rather than one step
+   above it. That is deliberate - see the note on .csHero__intro below - and
+   it is what takes the lead's measure from ~29ch to ~44ch, which is as close
+   to the system's 65-75ch rule as a 350px measure can physically get. The
+   paragraph goes from eleven lines to seven, returning roughly 140px of
+   vertical, which is what puts the CTA back above the fold on an 844px
+   viewport.
+   ========================================================================== */
+@media (max-width: 768px) {
+  /*
+    The title and the stamp stop sharing a row.
+
+    .csHero__top is a flex row with `space-between` at every width, and the
+    stamp is `flex: 0 0 auto`, so it takes its content width out of 350px and
+    leaves the h1 the remainder. Measured before this change: the stamp
+    overlapped the title by 15px on "Layover" and 55px on "Mike Tyson
+    Invitational" - a real collision on every project page, not a near miss.
+    The title also carries `hyphens: auto`, so the next thing past a collision
+    is a hyphenated project name at the top of a case study.
+  */
+  .csHero__top {
+    flex-direction: column;
+    align-items: flex-start;
+    /*
+      The spacing here has to nest, and at --cs-xs (10px) it did not.
+
+      Measured at 390px the hero ran 16 / 10 / 4 / 24 / 24 / 24 - so the
+      TIGHTEST gap on the page was the one place two different type roles
+      meet, a 32px headline against a 13px uppercase label, while every
+      gap below it was 24. The title's line-height is 1.05, tighter than
+      the font's own ascent + descent, so its box hugs the glyphs and 10px
+      of box read as about 6px of air: the second line of a wrapped title
+      and the category underneath it looked joined.
+
+      Three intervals now, each clearly a different size, so the structure
+      is legible from the spacing alone:
+
+        4px   inside a pair   category / year
+        16px  inside a block  title / stamp
+        24px  between blocks  everything else
+
+      --cs-sm rather than a literal, so it stays on the same scale as the
+      24px steps below it.
+    */
+    gap: var(--cs-sm);
+    /* and the trail is not part of this block, so it gets a block-sized
+       interval rather than sharing the title's internal one */
+    margin-top: var(--cs-md);
+  }
+
+  .csHero__stamp {
+    text-align: left;
+    /* the 10px was an optical nudge measured against a 56px cap height; there
+       is no cap to align to once this sits under the title */
+    padding-top: 0;
+  }
+
+  .csHero__title {
+    font-size: 32px;
+    /* 1.0 leaves a two-line title's descenders touching the line below */
+    line-height: 1.05;
+    /* optical tracking scales with size: -0.035em was measured at 56px and is
+       over-tight at 32. Still inside the -0.04em floor either way. */
+    letter-spacing: -0.02em;
+  }
+
+  .csHero__intro .cs__body {
+    /*
+      16, matching the body it introduces, not a step above it.
+
+      20px was the ladder's answer - one 1.25 step over body is what a lead
+      IS - and 16 is the reader's. It is the better call on a phone: the
+      measure goes ~35ch -> ~44ch, which is the top of the honest phone range
+      (45ch inside 350px needs type at or below 15.6px, so 44 is as close to
+      the system's 65-75ch rule as this viewport can physically get), and the
+      paragraph drops from nine lines to seven.
+
+      The cost is named: lead and column body are now the same size, so the
+      ladder on a phone is 32 / 16 / 13 and the lead is no longer a distinct
+      step. It does not need to be. Every lead is authored to open with a
+      bolded subject ("**Mike Tyson Invitational** is the marketing site
+      for...") and that inline 700 carries the entrance, which is why this
+      reads as a lead at body size instead of as just another paragraph.
+    */
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .csHero__label {
+    /* 24 -> 16. The label now sits BELOW the lead and level with the body it
+       names, winning on weight and ink rather than on size, which is the right
+       relationship for a run-in field name. It also makes 700 legal here for
+       the first time: at 24px these were headings set in the weight the system
+       reserves for small bold marks; at 16px they are small bold marks. */
+    font-size: 16px;
+    /* 1.0 gave "Challenge:" no room for its descender */
+    line-height: 1.25;
+  }
+
+  /*
+    The meta tier: one size, differentiated by weight, case, ink and tracking
+    rather than by four variables doing the work of one. 13px is the system's
+    small/meta floor.
+  */
+  .csBack,
+  .csBack__sep,
+  .csBack__here {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .csBack__here {
+    /* 700 -> 500. This was the only Bold sitting ABOVE the title, competing
+       with it from 15px of chrome. The ink change already carries the
+       distinction from "Projects"; the weight only reinforces it. */
+    font-weight: 500;
+  }
+
+  .csBack__sep {
+    /* 0.55 composited to ~2.0:1 and read as a gap rather than a separator */
+    opacity: 0.7;
+  }
+
+  .csHero__cat {
+    font-size: 13px;
+    line-height: 1.3;
+    /* 700 -> 500, which finally puts the system's "500 UI labels" tier into
+       this hero. A taxonomy string is a UI label, not a bold mark. */
+    font-weight: 500;
+    /* uppercase at 13px needs more aperture than 0.04em gives it */
+    letter-spacing: 0.08em;
+  }
+
+  .csHero__year {
+    /* 12 -> 13, which removes a 1.08 pseudo-step. Paired with the category at
+       one size now, differing by case, weight and ink - a pairing rather than
+       a collision. */
+    font-size: 13px;
+    line-height: 1.3;
+    /* 0.04em was borrowed from the uppercase rule above it; lining figures do
+       not need that much */
+    letter-spacing: 0.02em;
+  }
+
+  .csHero__tag {
+    /* 1.0 centred the em-box rather than the cap height, so the label sat
+       optically low in its pill */
+    line-height: 1.15;
+    /* a chip label is a UI label; 500 is what stops it reading as loose body
+       text inside a border */
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
 }
 
 /* ---------- section head ---------- */
@@ -3364,6 +3548,73 @@
 .csSwatch__use {
   font-size: var(--cs-t-micro);
   color: var(--cs-mute);
+}
+
+/*
+  The palette as rows on a phone.
+
+  The desktop swatch is a 3:2 tile with its name and use stacked underneath -
+  a thumbnail, sized to sit beside the screenshots in the same section. At
+  390px `auto-fit, minmax(140px, 200px)` resolves to a single column, so that
+  thumbnail becomes a 200x133 block and each colour costs about 230px of
+  height. A six-colour palette is then roughly 1400px of scrolling to read six
+  names, which is a swatch book, not a section of a case study.
+
+  Turned on its side it is a list: a chip, then the name and what it is for,
+  one colour per row. About 76px each, so the same six fit in a screen and a
+  half instead of four screens.
+
+  The hex stays INSIDE the chip. It is the one thing here worth keeping from
+  the desktop treatment - the value and the colour it names never separate,
+  which is why the plate exists - so the chip is sized to hold it (100x56)
+  rather than shrunk to a square with the value floated off somewhere else.
+
+  640px, not the 768px the hero block uses: this is the width where the
+  desktop grid stops fitting two columns, and a tablet reading it two-up is
+  still reading a palette rather than a list.
+*/
+@media (max-width: 640px) {
+  .csPalette {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .csSwatch {
+    grid-template-columns: auto minmax(0, 1fr);
+    /* chip spans both text rows; name over use */
+    grid-template-areas:
+      "chip name"
+      "chip use";
+    align-items: center;
+    column-gap: var(--cs-sm);
+    row-gap: 2px;
+    padding-block: var(--cs-xs);
+  }
+
+  /* a rule between rows, not around each one: the list reads as one object */
+  .csSwatch + .csSwatch {
+    border-top: 1px solid var(--cs-line);
+  }
+
+  .csSwatch__chip {
+    grid-area: chip;
+    /* the aspect-ratio is what made this a thumbnail; a fixed box is what
+       makes it a chip */
+    aspect-ratio: auto;
+    width: 100px;
+    height: 56px;
+    padding: 6px;
+  }
+
+  .csSwatch__name {
+    grid-area: name;
+    align-self: end;
+  }
+
+  .csSwatch__use {
+    grid-area: use;
+    align-self: start;
+  }
 }
 
 /* ---------- typefaces, set in themselves ---------- */

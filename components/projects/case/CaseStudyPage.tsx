@@ -359,11 +359,11 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                 laid out the way a brief is: the disciplines as tags, then the
                 problem and the part played in it, side by side.
 
-                The labels carry their colons, which the trial cut of Aeonik
-                has no glyph for - each one renders in General Sans. That was
-                weighed and kept: the colons are in the reference, and at 24px
-                Bold a single fallback punctuation mark is a far smaller cost
-                than it was going to be at 12px. See app/layout.tsx.
+                The labels carry their colons. They were once a real cost -
+                the trial cut of Aeonik had no colon glyph, so each one
+                rendered in General Sans mid-word - and were kept anyway
+                because the reference has them. The full cut has since landed
+                and the cost is gone; the colons simply render.
               */}
               {services.length ? (
                 <div
