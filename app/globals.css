@@ -5660,9 +5660,20 @@ html.has-cursor .cursorRing {
     --spread: 0.5;
   }
 
-  /* -------- dedicated mobile art direction (matches first screenshot):
-     four smaller edge-cropped cards frame the identity, sized in vw with the
-     artwork's own aspect ratios. !important overrides inline desktop sizes. */
+  /* -------- dedicated mobile art direction (traced from the phone reference):
+     four LARGE cards pinned to the four corners, each one roughly half off
+     the screen so only the inner half reads. The bleed is the composition -
+     cards that sit fully inside the viewport read as four small stickers, and
+     that is the version this replaces.
+
+     Numbers are measured off the reference at 360x704: for every card the
+     comment gives the edge that has to land on a screen coordinate, because
+     that inner edge is the only part of the geometry a viewer can see.
+
+     Width/height stay in vw so each card keeps its aspect on any phone; the
+     vertical position stays in svh so the top pair hugs the top of the hero
+     and the bottom pair hugs its floor regardless of screen height.
+     !important overrides inline desktop sizes. */
   .heroCard {
     scale: none;
   }
@@ -5672,36 +5683,39 @@ html.has-cursor .cursorRing {
     display: none;
   }
 
-  /* top-left poster: partial left/top crop — card peeks into view */
+  /* top-left poster: ~45% hangs off the left edge; inner edge at x ≈ 27vw,
+     top edge just under the logo strip */
   .heroCard--c0 {
-    width: 33vw !important;
-    height: 49vw !important;
-    translate: calc(-50% - 30vw) calc(-50% - 41svh) !important;
-    rotate: -4deg !important;
+    width: 49vw !important;
+    height: 44vw !important;
+    translate: calc(-50% - 47vw) calc(-50% - 31svh) !important;
+    rotate: -3.5deg !important;
   }
 
-  /* top-right car: partial right crop */
+  /* top-right car: ~43% hangs off the right edge, and it sits higher than the
+     poster - the two top cards are deliberately not level */
   .heroCard--c2 {
-    width: 32vw !important;
-    height: 48vw !important;
-    translate: calc(-50% + 33vw) calc(-50% - 41svh) !important;
-    rotate: -3deg !important;
+    width: 49vw !important;
+    height: 43.5vw !important;
+    translate: calc(-50% + 47.5vw) calc(-50% - 34.5svh) !important;
+    rotate: -2deg !important;
   }
 
-  /* lower-left E-Summit laptop (landscape) */
+  /* lower-left landscape mockup: ~38% off the left, inner edge at x ≈ 33vw */
   .heroCard--c6 {
-    width: 46vw !important;
-    height: 32vw !important;
-    translate: calc(-50% - 32vw) calc(-50% + 36svh) !important;
-    rotate: -3deg !important;
+    width: 53vw !important;
+    height: 33.5vw !important;
+    translate: calc(-50% - 43.5vw) calc(-50% + 35.5svh) !important;
+    rotate: 1.5deg !important;
   }
 
-  /* lower-right fuzion: corner crop */
+  /* lower-right fuzion: the double crop - ~46% off the right AND its bottom
+     runs past the floor of the hero, so it is cut on two sides at once */
   .heroCard--c7 {
-    width: 35vw !important;
-    height: 46vw !important;
-    translate: calc(-50% + 30vw) calc(-50% + 36svh) !important;
-    rotate: -5deg !important;
+    width: 47vw !important;
+    height: 44.5vw !important;
+    translate: calc(-50% + 50vw) calc(-50% + 47svh) !important;
+    rotate: -6deg !important;
   }
 
   /* horizontal finger drags move the card; vertical swipes keep scrolling */
