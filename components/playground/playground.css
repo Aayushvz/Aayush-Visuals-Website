@@ -827,6 +827,79 @@
   text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
 }
 
+/* ---- Cat Operator Cover ---- */
+
+.catCover {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0d;
+}
+
+.catCover__ground,
+.catCover__glow,
+.catCover__art,
+.catCover__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.catCover__ground {
+  background: linear-gradient(180deg, #0b0b10 0%, #17161d 58%, #09090c 100%);
+}
+
+.catCover__glow {
+  background: radial-gradient(
+    46% 30% at 50% 64%,
+    color-mix(in srgb, #f9c606 40%, transparent),
+    transparent 74%
+  );
+  opacity: 0.55;
+}
+
+.catCover__art {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.catCover__terminal {
+  transform: rotate(1deg);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.5));
+}
+
+.catCover__scrim {
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(8, 8, 11, 0.94) 0%,
+    rgba(8, 8, 11, 0.82) 20%,
+    rgba(8, 8, 11, 0) 34%
+  );
+}
+
+.catCover__lock {
+  position: absolute;
+  z-index: 4;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.catCover__name {
+  display: block;
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f6f2fb;
+  text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
+}
+
 /* ---- the vacant cover ---- */
 
 .slotCover {

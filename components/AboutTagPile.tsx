@@ -307,14 +307,22 @@ export default function AboutTagPile() {
         speed of the last pointer move. The pointer's own delta is the
         velocity - matter's step is a frame, so the two are the same unit.
       */
-      type Drag = { l: Live; px: number; py: number; vx: number; vy: number; moved: number };
+      type Drag = {
+        l: Live;
+        id: number;
+        px: number;
+        py: number;
+        vx: number;
+        vy: number;
+        moved: number;
+        caught: boolean;
+      };
       let drag: Drag | null = null;
 
       const onDown = (l: Live) => (e: PointerEvent) => {
         if (e.button !== 0 || !released) return;
-        drag = { l, px: e.clientX, py: e.clientY, vx: 0, vy: 0, moved: 0 };
+        drag = { l, id: e.pointerId, px: e.clientX, py: e.clientY, vx: 0, vy: 0, moved: 0, caught: false };
         Body.setStatic(l.body, true);
-        l.el.setPointerCapture(e.pointerId);
         l.el.classList.add("aboutTags__held");
       };
 
@@ -327,6 +335,30 @@ export default function AboutTagPile() {
         drag.moved += Math.abs(dx) + Math.abs(dy);
         drag.vx = dx;
         drag.vy = dy;
+        /*
+          Capture is taken HERE, once the pointer has actually travelled,
+          and never on pointerdown. That is the whole reason the About Me
+          pill navigates.
+
+          While an element holds the pointer, the click that follows is
+          fired AT THE CAPTURING ELEMENT - and the capturing element is the
+          pill <span>, whose <a> is a child, not an ancestor. A click on the
+          span therefore runs no anchor activation and no React onClick on
+          the link, so the pill swallowed every tap in silence: no error, no
+          navigation, nothing to see. Capturing on pointerdown meant that
+          happened on every single tap, drag or not.
+
+          Nothing else needs the capture that early: pointermove and
+          pointerup are bound to the window, so a drag is tracked with or
+          without it. It earns its place only once a drag is real, where it
+          keeps a pointer that leaves the window from stranding the tag.
+        */
+        if (!drag.caught && drag.moved > CLICK_SLOP) {
+          drag.caught = true;
+          try {
+            drag.l.el.setPointerCapture(drag.id);
+          } catch {}
+        }
         Body.setPosition(drag.l.body, {
           x: drag.l.body.position.x + dx,
           y: drag.l.body.position.y + dy,
@@ -338,9 +370,11 @@ export default function AboutTagPile() {
         const d = drag;
         drag = null;
         d.l.el.classList.remove("aboutTags__held");
-        try {
-          d.l.el.releasePointerCapture(e.pointerId);
-        } catch {}
+        if (d.caught) {
+          try {
+            d.l.el.releasePointerCapture(e.pointerId);
+          } catch {}
+        }
         Body.setStatic(d.l.body, false);
         const clamp = (v: number) => Math.max(-MAX_THROW, Math.min(MAX_THROW, v));
         Body.setVelocity(d.l.body, { x: clamp(d.vx), y: clamp(d.vy) });

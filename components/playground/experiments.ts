@@ -19,7 +19,7 @@
 */
 
 import type { ComponentType } from "react";
-import { ContractCover, DplCover, InvoiceCover, PondCover } from "./covers";
+import { ContractCover, DplCover, InvoiceCover, PondCover, CatOperatorCover } from "./covers";
 
 export type Experiment = {
   id: string;
@@ -51,8 +51,20 @@ export const EXPERIMENTS: Experiment[] = [
     status: "live",
   },
   {
-    id: "pond",
+    id: "cat",
     index: "02",
+    title: "CAT Operator Assistant",
+    kind: "Dashboard UI",
+    href: "https://aayushvz.github.io/cat-operator-assistant",
+    cta: "View dashboard",
+    flag: "New",
+    meta: "Case Study",
+    cover: CatOperatorCover,
+    status: "live",
+  },
+  {
+    id: "pond",
+    index: "03",
     title: "Lotus Pond",
     kind: "Pixel diorama",
     href: "/frog",
@@ -65,7 +77,7 @@ export const EXPERIMENTS: Experiment[] = [
   },
   {
     id: "contract",
-    index: "03",
+    index: "04",
     title: "Contract Generator Tool",
     kind: "Freelance tool",
     href: "/contract",
@@ -79,7 +91,7 @@ export const EXPERIMENTS: Experiment[] = [
   },
   {
     id: "invoice",
-    index: "04",
+    index: "05",
     title: "Invoice Generator",
     kind: "Freelance tool",
     /* A path, like every other entry, even though this tool is its own
@@ -98,6 +110,6 @@ export const EXPERIMENTS: Experiment[] = [
    so the live trio plus this fills the top row of the grid rather than
    leaving a gap after the last real card. */
 export const SOON: { index: string; hint: string; kind: string }[] = [
-  { index: "05", hint: "Sketched, not built", kind: "Canvas sketch" },
+  { index: "06", hint: "Sketched, not built", kind: "Canvas sketch" },
 ];
 

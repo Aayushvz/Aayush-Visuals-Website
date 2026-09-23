@@ -515,6 +515,43 @@ export function InvoiceCover() {
   );
 }
 
+export function CatOperatorCover() {
+  return (
+    <div className="catCover">
+      {/* Background Image */}
+      <Image
+        src="/cat-dashboard/excavator.jpg"
+        alt="CAT Excavator at night"
+        fill
+        sizes="(max-width: 640px) 44vw, (max-width: 1100px) 30vw, 300px"
+        style={{ objectFit: "cover" }}
+      />
+      
+      {/* CAT Logo */}
+      <div style={{ position: "absolute", top: 16, right: 16, width: 64, height: 40 }}>
+        <Image
+          src="/cat-dashboard/logo-white.png"
+          alt="CAT Logo"
+          fill
+          style={{ objectFit: "contain" }}
+        />
+      </div>
+
+      <div className="catCover__scrim" />
+
+      <div className="catCover__lock">
+        <span className="catCover__name">
+          CAT
+          <br />
+          Operator
+          <br />
+          Assistant
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /*
   The vacant cover.
 
