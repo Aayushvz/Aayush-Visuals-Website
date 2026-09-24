@@ -148,122 +148,16 @@
   color: var(--pg-mute);
 }
 
-/* ---- search + availability filters ---- */
+/* ---- the list ----
 
-/* Two rows: the field, then the tags under it. /work gets that shape for
-   free because nine chips cannot fit beside the search box and wrap - with
-   three they would sit on the same line, so the row break is declared here
-   rather than left to depend on how many filters happen to exist. */
-.pgControls {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: clamp(48px, 7vh, 84px);
-}
-
-.pgSearch {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  flex: 0 0 auto;
-  width: clamp(240px, 26vw, 320px);
-  height: 52px;
-  padding: 0 18px;
-  border-radius: 14px;
-  background: #fff;
-  border: 1px solid rgba(31, 31, 31, 0.07);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.pgSearch:focus-within {
-  border-color: color-mix(in srgb, var(--pg-accent) 50%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pg-accent) 12%, transparent);
-}
-
-.pgSearch svg {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  color: var(--pg-faint);
-}
-
-.pgSearch__input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: none;
-  font: inherit;
-  font-size: 15px;
-  color: var(--pg-fg);
-}
-
-.pgSearch__input::placeholder {
-  color: var(--pg-faint);
-}
-
-.pgFilters {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  min-width: 0;
-}
-
-.pgChip {
-  flex: 0 0 auto;
-  height: 52px;
-  padding: 0 18px;
-  border-radius: 14px;
-  background: #fff;
-  border: 1px solid rgba(31, 31, 31, 0.07);
-  color: var(--pg-mute);
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color 0.22s ease, color 0.22s ease,
-    border-color 0.22s ease;
-}
-
-/* scoped off the active chip deliberately - unscoped, this out-specifies
-   .pgChip--active and repaints the selected label in the same colour as its
-   own background, so hovering the current filter blanks its text */
-.pgChip:not(.pgChip--active):hover {
-  color: var(--pg-fg);
-  border-color: rgba(31, 31, 31, 0.16);
-}
-
-.pgChip--active {
-  background: var(--pg-fg);
-  border-color: var(--pg-fg);
-  color: #fff;
-}
-
-.pgChip--active:hover {
-  background: #333333;
-  border-color: #333333;
-  color: #fff;
-}
-
-.pgChip:focus-visible {
-  outline: 2px solid var(--pg-accent);
-  outline-offset: 3px;
-}
-
-.pgEmpty {
-  padding: clamp(40px, 8vh, 90px) 0;
-  font-size: 17px;
-  color: var(--pg-faint);
-}
-
-/* ---- the grid ---- */
+   One experiment per row: the rig on the left as the artwork, then the
+   name, a line that sells it, two that explain it and the button in. No
+   rules between rows; the rigs are heavy enough to separate themselves. */
 
 .pgGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(24px, 3vw, 44px) clamp(14px, 1.7vw, 26px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.2vw, 18px);
   list-style: none;
   margin: 0;
   padding: clamp(26px, 3.2vw, 44px) 0 0;
@@ -273,181 +167,389 @@
   min-width: 0;
 }
 
-.pgCard__link {
-  display: block;
-  color: inherit;
-}
-
-.pgCard__art {
+/* Each row is a white card. The rig column is capped by the viewport's
+   height as well as its width, so two rows always fit on one screen:
+   rig height is 0.636 x its width, and 56vh of width keeps a row under
+   ~42% of the screen with its padding. */
+.pgCard__link,
+.pgCard__row {
   position: relative;
-  aspect-ratio: 3 / 4;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #12101c;
-  /* the cover art scales off the card, not the viewport, so a 4-up row and
-     a 2-up row get the same lockup proportions rather than the same pixels */
-  container-type: inline-size;
-  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.06),
-    0 2px 4px rgba(31, 31, 31, 0.06), 0 14px 30px rgba(31, 31, 31, 0.13);
-  transition: transform var(--dur-panel) var(--ease-quint),
-    box-shadow var(--dur-panel) var(--ease-quint);
+  /* one measure for the space either side of the copy: rig to title on
+     the left, button to the card's edge on the right */
+  --row-gap: clamp(24px, 4vw, 72px);
+  display: grid;
+  grid-template-columns: minmax(0, min(560px, 42vw, 56vh)) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--row-gap);
+  padding: clamp(12px, 1.1vw, 18px) var(--row-gap) clamp(12px, 1.1vw, 18px) clamp(12px, 1.1vw, 18px);
+  color: inherit;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.05), 0 1px 2px rgba(31, 31, 31, 0.04);
+  transition: background-color 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* the slot number, stamped on the art the way a catalogue number is */
-.pgCard__index {
-  position: absolute;
-  z-index: 6;
-  top: 11px;
-  left: 12px;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  color: rgba(244, 241, 234, 0.55);
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+/* the rig leans toward the pointer; --rx/--ry are written by the shelf */
+.pgCard__art {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  min-width: 0;
+  transform: perspective(1400px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* the play affordance, held back until a pointer arrives. It carries no
-   information of its own, so it is free to be hover-only. */
-.pgCard__play {
-  position: absolute;
-  z-index: 5;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.pgCard__art .rig {
+  box-shadow: 0 1px 2px rgba(31, 31, 31, 0.06), 0 10px 26px rgba(40, 20, 80, 0.1);
+  border-radius: 14px;
+  transition: box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pgCard__copy {
+  min-width: 0;
+}
+
+.pgCard__head {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 40px 13px 13px;
-  background: linear-gradient(
-    to top,
-    rgba(8, 5, 18, 0.96) 0%,
-    rgba(8, 5, 18, 0.82) 46%,
-    rgba(8, 5, 18, 0) 100%
-  );
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: #fff;
-  transform: translateY(16px);
-  opacity: 0;
-  transition: transform var(--dur-panel) var(--ease-quint),
-    opacity var(--dur-state) var(--ease-quint);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
 }
 
-.pgCard__playArrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--purple);
-  flex-shrink: 0;
-}
-
-.pgCard__playArrow svg {
-  width: 12px;
-  height: 12px;
-}
-
-.pgCard__meta {
-  padding-top: 13px;
-}
-
-.pgCard__kind {
-  display: block;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  color: var(--pg-faint);
+/* the running text keeps a readable measure; only the head row runs to
+   the card's edge */
+.pgCard__tagline,
+.pgCard__blurb {
+  max-width: 540px;
 }
 
 .pgCard__title {
-  margin: 4px 0 0;
-  font-size: clamp(14px, 1.1vw, 15.5px);
+  margin: 0;
+  font-size: clamp(22px, 1.9vw, 30px);
   font-weight: 500;
-  letter-spacing: -0.012em;
-  line-height: 1.28;
+  line-height: 1.12;
+  letter-spacing: -0.022em;
+  color: var(--pg-fg);
   transition: color var(--dur-state) var(--ease-quint);
 }
 
-.pgCard__status {
+.pgCard__tagline {
+  margin: 12px 0 0;
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--pg-fg) 78%, transparent);
+  transition: color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pgCard__blurb {
+  margin: 10px 0 0;
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.65;
+  color: var(--pg-mute);
+  transition: color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- tags ---- */
+
+.pgTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pgTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 13px 0 4px;
+  border-radius: 999px;
+  /* the page's own cream, so a tag reads as a patch of the shelf showing
+     through the white card */
+  background: var(--cream);
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.05);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  color: color-mix(in srgb, var(--pg-fg) 78%, transparent);
+  white-space: nowrap;
+  transition: background-color 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* a flat, soft tint of the row's colour with the icon drawn in the colour
+   itself: quiet enough to sit under the copy without competing with the
+   rig or the button */
+.pgTag__badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--t-accent, #7c3aed) 13%, white);
+  /* pulled toward the ink so a light theme (the CAT yellow) still reads */
+  color: color-mix(in srgb, var(--t-accent, #7c3aed) 62%, #1f1f1f);
+  transition: background-color 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pgTag__badge svg {
+  width: 13px;
+  height: 13px;
+}
+
+.pgCard--soon .pgTag__badge {
+  filter: saturate(0);
+}
+
+/* ---- the open button: a small piece of the rig ---- */
+
+.pgBtn {
+  --btn-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 14px;
+  background: linear-gradient(to bottom, #2e3031, #1b1c1d);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(40, 20, 80, 0.12),
+    0 6px 14px rgba(40, 20, 80, 0.14);
+  transition: transform 0.5s var(--btn-ease), box-shadow 0.5s var(--btn-ease);
+}
+
+.pgBtn__face {
+  position: relative;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 7px 10px;
-  margin-top: 9px;
+  height: 44px;
+  padding: 0 4px 0 18px;
+  border-radius: 10px;
+  overflow: hidden;
+  /* the band's slats, turned right down so they read as texture, not stripes */
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.06) 0 1px,
+      transparent 1px 7px,
+      color-mix(in srgb, var(--t-accent, #7c3aed) 60%, rgba(0, 0, 0, 0.14)) 7px 8px
+    ),
+    /* the row's theme colour, the same one that fills its rig's band */
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--t-accent, #7c3aed) 84%, white),
+      var(--t-accent, #7c3aed) 55%,
+      color-mix(in srgb, var(--t-accent, #7c3aed) 84%, black)
+    );
+  color: var(--t-on-accent, #f6f1ff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
-.pgCard__flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px 3px 6px;
-  border: 1px solid color-mix(in srgb, var(--pg-accent) 22%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--pg-accent) 9%, transparent);
-  font-size: 10px;
+/* a soft band of light that drifts across once on hover */
+.pgBtn__face::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 55%;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.16) 50%, transparent 80%);
+  transform: translateX(-120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pgBtn__label {
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--purple-mid);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: transform 0.5s var(--btn-ease);
 }
 
-.pgCard__flagIcon {
-  display: inline-flex;
+.pgBtn__key {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-left: 20px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #232425, #141516);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 2px rgba(0, 0, 0, 0.35);
+  color: #e9e3ff;
+  transition: background-color 0.4s var(--btn-ease);
 }
 
-.pgCard__flagIcon svg {
-  width: 10px;
-  height: 10px;
+/* one arrow. --ax/--ay is the way it points, so the hover loop sends it
+   out along its own direction: right for a page here, up-right for a
+   site that opens in a new tab */
+.pgBtn__icon {
+  --ax: 1;
+  --ay: 0;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
 }
 
-.pgCard__price {
-  font-size: 12px;
-  color: var(--pg-mute);
+.pgBtn__icon--out {
+  --ay: -1;
 }
 
-/* ---- hover: one coordinated move ---- */
+.pgBtn__icon svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 1.6;
+}
 
-@media (hover: hover) {
-  .pgCard__link:hover .pgCard__art {
-    transform: translateY(-6px);
-    box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.08),
-      0 4px 8px rgba(31, 31, 31, 0.08), 0 26px 48px rgba(31, 31, 31, 0.22);
+.pgBtn--off .pgBtn__face {
+  padding-right: 18px;
+  background: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.04) 0 1px,
+      transparent 1px 7px,
+      rgba(0, 0, 0, 0.2) 7px 8px
+    ),
+    #3a3b3c;
+  color: rgba(214, 220, 216, 0.6);
+}
+
+/* ---- hover: the whole row switches on ---- */
+
+@keyframes pgSweep {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
   }
-
-  .pgCard__link:hover .pgCard__play {
-    transform: translateY(0);
+  30% {
     opacity: 1;
   }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
 
+@keyframes pgArrowLoop {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.3);
+  }
+  42% {
+    transform: translate(calc(var(--ax) * 115%), calc(var(--ay) * 115%));
+    opacity: 0;
+  }
+  43% {
+    transform: translate(calc(var(--ax) * -115%), calc(var(--ay) * -115%));
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) {
+  /* the card goes black, the same black as the rig's housing, so the
+     rig reads as mounted in it and the purple does the lighting */
+  .pgCard__link:hover {
+    transform: translateY(-2px);
+    background: #141315;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--t-accent, #7c3aed) 45%, transparent),
+      0 4px 8px rgba(20, 10, 40, 0.12),
+      0 24px 52px rgba(40, 20, 80, 0.28);
+  }
+
+  .pgCard__link:hover .pgCard__tagline {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .pgCard__link:hover .pgCard__blurb {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .pgCard__link:hover .pgTag {
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .pgCard__link:hover .pgTag__badge {
+    background: color-mix(in srgb, var(--t-accent, #7c3aed) 22%, transparent);
+    color: color-mix(in srgb, var(--t-accent, #7c3aed) 55%, white);
+  }
+
+
+  /* on black the button's own dark housing would vanish; a lit rim keeps
+     its edge */
+  .pgCard__link:hover .pgBtn {
+    outline: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .pgCard__link:hover .pgCard__art .rig {
+    box-shadow: 0 2px 4px rgba(31, 31, 31, 0.06), 0 26px 50px rgba(40, 20, 80, 0.22);
+  }
+
+  /* the theme's light tone, which is the one that holds up on black */
   .pgCard__link:hover .pgCard__title {
-    color: var(--purple-mid);
+    color: var(--t-glow, #a78bfa);
+  }
+
+  .pgCard__link:hover .pgBtn {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+      0 2px 4px rgba(40, 20, 80, 0.12),
+      0 12px 26px color-mix(in srgb, var(--t-accent, #7c3aed) 30%, transparent);
+  }
+
+  .pgCard__link:hover .pgBtn__face::after {
+    animation: pgSweep 1.2s cubic-bezier(0.45, 0, 0.2, 1) 0.05s both;
+  }
+
+  /* the label gives the key a little room as it comes forward */
+  .pgCard__link:hover .pgBtn__label {
+    transform: translateX(-2px);
+  }
+
+  .pgCard__link:hover .pgBtn__key {
+    background-color: #1b1c1d;
+  }
+
+  /* the arrow runs out along its own direction and comes back in from the
+     opposite side, once, and lands where it started. An animation rather
+     than a transition, so leaving the row never plays it in reverse */
+  .pgCard__link:hover .pgBtn__icon {
+    animation: pgArrowLoop 0.62s both;
+  }
+
+  /* pressing the row presses the button */
+  .pgCard__link:active .pgBtn {
+    transform: translateY(0) scale(0.985);
+    transition-duration: 0.15s;
   }
 }
 
 .pgCard__link:focus-visible {
   outline: 2px solid var(--pg-accent);
-  outline-offset: 5px;
-  border-radius: 10px;
+  outline-offset: 2px;
 }
 
-.pgCard__link:focus-visible .pgCard__play {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-/* ---- a vacant slot ---- */
-
-.pgCard--soon .pgCard__art {
-  box-shadow: inset 0 0 0 1px var(--pg-hair);
-  background: color-mix(in srgb, var(--ink) 4%, var(--cream));
-}
-
-.pgCard--soon .pgCard__title {
-  font-weight: 400;
+.pgCard--soon .pgCard__title,
+.pgCard--soon .pgCard__tagline {
   color: var(--pg-mute);
 }
 
@@ -957,15 +1059,110 @@
    Responsive
    ========================================================== */
 
-@media (max-width: 1180px) {
-  .pgGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+/* the copy drops under the rig once the two stop fitting side by side;
+   the arrow rides along at the end of the title's row */
+@media (max-width: 900px) {
+  .pgCard__link,
+  .pgCard__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 10px 10px 20px;
   }
-}
 
-@media (max-width: 860px) {
-  .pgGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /*
+    Stacked, the copy runs as one column in reading order: name, the line
+    that sells it, the explanation, the tags, then the way in last. The
+    head row dissolves (display: contents) so the button can drop to the
+    end instead of wedging itself between the title and the tagline.
+  */
+  .pgCard__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 6px;
+  }
+
+  .pgCard__head {
+    display: contents;
+  }
+
+  .pgCard__title {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  .pgCard__tagline {
+    margin-top: 6px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .pgCard__blurb {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .pgCard__tagline,
+  .pgCard__blurb {
+    max-width: none;
+  }
+
+  .pgTags {
+    order: 1;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .pgTag {
+    gap: 6px;
+    height: 28px;
+    padding: 0 11px 0 3px;
+    font-size: 12px;
+  }
+
+  .pgTag__badge {
+    width: 22px;
+    height: 22px;
+  }
+
+  .pgTag__badge svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* a smaller button, last in the column */
+  .pgBtn {
+    order: 2;
+    margin-top: 18px;
+    padding: 3px;
+    border-radius: 12px;
+  }
+
+  .pgBtn__face {
+    height: 38px;
+    padding: 0 3px 0 14px;
+    border-radius: 9px;
+  }
+
+  .pgBtn__label {
+    font-size: 14px;
+  }
+
+  .pgBtn__key {
+    width: 32px;
+    height: 32px;
+    margin-left: 14px;
+    border-radius: 6px;
+  }
+
+  .pgBtn__icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .pgBtn--off .pgBtn__face {
+    padding-right: 14px;
   }
 }
 
@@ -1002,43 +1199,7 @@
     max-width: 520px;
   }
 
-  .pgControls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-  }
 
-  .pgSearch {
-    width: 100%;
-    height: 50px;
-  }
-
-  /* the chips scroll sideways instead of wrapping into a tall block that
-     pushes the first cover off the screen */
-  .pgFilters {
-    flex-wrap: nowrap;
-    max-width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
-  }
-
-  .pgFilters::-webkit-scrollbar {
-    display: none;
-  }
-
-  .pgChip {
-    height: 46px;
-    font-size: 14px;
-  }
-
-  /* nothing to hover with, and the strip says nothing the label below does
-     not already say, so it just goes */
-  .pgCard__play {
-    display: none;
-  }
 }
 
 /* on the narrowest phones the two bottom labels stop fitting on one line
@@ -1049,17 +1210,28 @@
    ========================================================== */
 
 @media (prefers-reduced-motion: reduce) {
+  .pgCard__link,
   .pgCard__art,
-  .pgCard__title,
-  .pgCard__play,
-  .pgChip,
-  .pgSearch {
+  .pgCard__art .rig,
+  .pgBtn,
+  .pgBtn__label,
+  .pgBtn__key,
+  .pgBtn__icon,
+  .pgCard__title {
     transition: none !important;
   }
 
   @media (hover: hover) {
-    .pgCard__link:hover .pgCard__art {
+    .pgCard__link:hover,
+    .pgCard__link:hover .pgBtn,
+    .pgCard__link:hover .pgBtn__label {
       transform: none;
+    }
+
+    /* no loop: the arrow simply stays */
+    .pgCard__link:hover .pgBtn__icon,
+    .pgCard__link:hover .pgBtn__face::after {
+      animation: none;
     }
   }
 }
