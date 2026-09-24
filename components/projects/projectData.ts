@@ -2656,8 +2656,8 @@ export const PROJECTS: Project[] = [
   {
     id: "cat-operator-assistant",
     lead:
-      "**CAT Operator Assistant** is a cab tablet app for excavator operators and the fleet managers above them, built for a hackathon judged by **Caterpillar**. It turns the machine's own telemetry and the operator's task list into five screens an operator actually needs mid-shift, plus a read-only Fleet view for the manager.",
-    services: ["Product design", "Front-end build"],
+      "**CAT Operator Assistant** is a cab tablet app for excavator operators and the fleet managers above them, designed as a concept for **Caterpillar**. It turns the machine's own telemetry and the operator's task list into five screens an operator actually needs mid-shift, plus a read-only Fleet view for the manager.",
+    services: ["Concept", "Product design", "Front-end build"],
     headline:
       "A cab tablet that tells a CAT operator what the machine already knows",
     title: "CAT Operator Assistant Dashboard",
@@ -2674,9 +2674,9 @@ export const PROJECTS: Project[] = [
     role: "Product Designer · Front-end",
     tools: ["HTML", "CSS", "JavaScript", "Three.js"],
     description:
-      "CAT Operator Assistant is a cab tablet app for excavator operators, built for a hackathon judged by Caterpillar. It turns the machine's telemetry and the operator's own task list into five screens: today's jobs, safety, training, machine health, and a home view built around a live 3D read of the excavator, with a read-only Fleet view for the manager.",
+      "CAT Operator Assistant is a concept cab tablet app for Caterpillar excavator operators. It turns the machine's telemetry and the operator's own task list into five screens: today's jobs, safety, training, machine health, and a home view built around a live 3D read of the excavator, with a read-only Fleet view for the manager.",
     extraFacts: [
-      ["Type", "Hackathon build, judged by Caterpillar"],
+      ["Type", "Conceptual project for Caterpillar"],
       ["Stack", "Vanilla HTML, CSS and JS, procedural Three.js (r128)"],
       ["3D", "Excavator built in code, no downloaded assets"],
       ["Repo", "github.com/Aayushvz/cat-operator-assistant"],
@@ -2693,16 +2693,16 @@ export const PROJECTS: Project[] = [
     solution: [
       "**Start from the operator, not the fleet manager.** Most smart machinery dashboards are built backwards: a chart-heavy admin panel with a thin operator view bolted on. This one starts from the question an operator asks dozens of times a shift, am I on pace, is the machine safe, what's next, and answers it on one screen with a live 3D read of the excavator instead of a table of sensor values.",
       "The manager's Fleet view is the same telemetry, read-only and rolled up across every machine on site. Building it added no second data model, only a second lens on the first one.",
-      "And every number says where it came from. The brief supplied four telemetry rows and five completed tasks, and those are used exactly as given. Part health scores, proximity events and weekly habit trends are sample data, generated to be plausible and never presented as live sensor output.",
+      "And every number says where it came from. Four real telemetry rows and five completed tasks anchor the data, and those are used exactly as given. Part health scores, proximity events and weekly habit trends are sample data, generated to be plausible and never presented as live sensor output.",
     ],
     detailMedia: [
       {
-        src: "/projects/cat-operator-assistant/home-both-panels.webp",
-        alt: "The operator's home screen: the 3D excavator with its boom flagged red, a boom and hydraulics fault card, the live seatbelt card, today's shift timeline and the telemetry panel.",
+        src: "/projects/cat-operator-assistant/home-fault.webp",
+        alt: "The home screen with the boom and hydraulics fault open: leaking boom cylinder, low pump pressure, hot hydraulic oil and a call-the-mechanic instruction.",
       },
       {
-        src: "/projects/cat-operator-assistant/home-show-parts.webp",
-        alt: "The home screen with Show parts on: every part of the excavator labelled with its condition, the boom in red and the tracks in amber.",
+        src: "/projects/cat-operator-assistant/tasks-accuracy.webp",
+        alt: "How close were the guesses: the flat plan at 13.2% average error against the estimator at 2.4%, with plan and real time for each of the five tasks.",
       },
       {
         src: "/projects/cat-operator-assistant/loader-splash.webp",
@@ -2723,7 +2723,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "CAT Operator Assistant is a cab tablet interface built for a Caterpillar-judged hackathon brief: a Smart Operator Assistant covering a daily task dashboard, safety, training, unusual behavior detection and task-time estimation. It had to do all of that without adding any new hardware to the machine.",
+              "CAT Operator Assistant is a conceptual Smart Operator Assistant for Caterpillar: a cab tablet interface covering a daily task dashboard, safety, training, unusual behavior detection and task-time estimation. It had to do all of that without adding any new hardware to the machine.",
               "It runs as a static site, vanilla HTML, CSS and JS with no framework and no build step, so it ships straight to GitHub Pages and still boots instantly on a tablet with a weak connection. The excavator is built in code with Three.js, so there is no model file to download either.",
             ],
           },
@@ -2745,7 +2745,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The brief asked for safety. The strongest version of that is a shift that cannot start unsafely, so the sign-in is also the interlock.",
+              "Safety came first. The strongest version of that is a shift that cannot start unsafely, so the sign-in is also the interlock.",
             ],
           },
           {
@@ -2758,7 +2758,7 @@ export const PROJECTS: Project[] = [
               },
               {
                 src: "/projects/cat-operator-assistant/signin-pin.webp",
-                alt: "Start of shift, step two: the operator enters a PIN on a large glove-friendly keypad.",
+                alt: "Start of shift, step two: a four-digit PIN on a large keypad, with a badge scan as the alternative.",
               },
             ],
             body: [
@@ -2771,16 +2771,16 @@ export const PROJECTS: Project[] = [
             title: "Belt on, or the engine stays locked",
             items: [
               {
-                src: "/projects/cat-operator-assistant/signin-belt-off.webp",
-                alt: "Start of shift, step three with the seatbelt off: the engine is shown as locked.",
+                src: "/projects/cat-operator-assistant/signin-belt.webp",
+                alt: "Start of shift, step three: belt on, start the engine, with an optional walk-around check of mirrors, oil and cameras.",
               },
               {
-                src: "/projects/cat-operator-assistant/signin-belt-on.webp",
-                alt: "Start of shift, step three with the seatbelt on: the engine unlocks and the shift can begin.",
+                src: "/projects/cat-operator-assistant/home-wait.webp",
+                alt: "Mid-shift during a wait: the belt has come off, the screen warns to put it back on before starting again, and offers a while-you-wait training video.",
               },
             ],
             body: [
-              "The engine stays mechanically locked until the seatbelt is on, and a blocked start attempt is logged as a safety event in its own right.",
+              "The engine stays mechanically locked until the seatbelt is on, and a blocked start attempt is logged as a safety event in its own right. The belt stays watched all shift: take it off during a wait and the screen says so before the machine moves again.",
               "A contractor gets a hard guarantee that no shift starts unbelted, not a policy that depends on the operator remembering.",
             ],
           },
@@ -2801,8 +2801,8 @@ export const PROJECTS: Project[] = [
             title: "A 3D machine instead of a sensor table",
             items: [
               {
-                src: "/projects/cat-operator-assistant/home-parked.webp",
-                alt: "The home screen: the 3D excavator with its tappable hotspots, the bucket's detail card, the live seatbelt card and today's shift timeline along the bottom.",
+                src: "/projects/cat-operator-assistant/home-telemetry.webp",
+                alt: "The operator's home screen: the 3D excavator with its boom flagged red, a boom and hydraulics fault card, the live seatbelt card, today's shift timeline and the telemetry panel.",
               },
             ],
             body: [
@@ -2819,7 +2819,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The daily task dashboard from the brief, built to keep up with a day that never goes to plan.",
+              "A daily task dashboard built to keep up with a day that never goes to plan.",
             ],
           },
           {
@@ -2828,11 +2828,11 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cat-operator-assistant/tasks-today.webp",
-                alt: "My tasks: today's jobs in order, with now, next and time left in the shift, and weather tags on each slot.",
+                alt: "My tasks: now, next and shift-left tiles, a demolition job moved to tomorrow for wind, and the day's job list.",
               },
               {
                 src: "/projects/cat-operator-assistant/tasks-jobtime.webp",
-                alt: "The job time tab, estimating how long a task should take for this operator's level and today's conditions.",
+                alt: "The job time tab: job type, weather, operator level and machine age in, an expected time range out.",
               },
             ],
             body: [
@@ -2857,12 +2857,12 @@ export const PROJECTS: Project[] = [
             title: "A radar that tightens in the rain, and reports that survive a dead zone",
             items: [
               {
-                src: "/projects/cat-operator-assistant/safety-safety.webp",
-                alt: "The safety screen with a top-down proximity radar around the excavator and its stop and slow distances.",
+                src: "/projects/cat-operator-assistant/safety.webp",
+                alt: "Safety: the site warning flag, the proximity radar with logged zone crossings, site conditions and the SOS control.",
               },
               {
-                src: "/projects/cat-operator-assistant/safety-reports.webp",
-                alt: "The reports screen listing filed incidents, each with a machine snapshot attached.",
+                src: "/projects/cat-operator-assistant/sos-sent.webp",
+                alt: "SOS sent: the machine stopped, the supervisor told, the site medic on the way, the location sent and the machine data saved.",
               },
             ],
             body: [
@@ -2873,7 +2873,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             title: "A locked screen while the machine moves",
-            items: [],
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/moving-lock.webp",
+                alt: "The moving lock: the screen dimmed to a compact strip with the current job, minutes left, belt state, Report and SOS.",
+              },
+            ],
             body: [
               "While the machine travels, the screen locks to a compact strip: the current job, minutes left, live belt state, and one-tap Report and SOS. In the demo a Parked and Moving switch stands in for real travel and joystick telemetry.",
             ],
@@ -2896,7 +2901,7 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cat-operator-assistant/learn-controls.webp",
-                alt: "Learn: a top-down view of the cab with ten numbered controls.",
+                alt: "Learn: a top-down view of the cab with ten numbered controls, the chosen control explained and its CAT videos beside it.",
               },
             ],
             body: [
@@ -2909,11 +2914,11 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cat-operator-assistant/learn-videos-a.webp",
-                alt: "Learn: the CAT training videos, with the one matched to this operator first.",
+                alt: "Learn videos: the operator's licence progress and the videos to watch first, picked from their own shifts.",
               },
               {
                 src: "/projects/cat-operator-assistant/learn-videos-b.webp",
-                alt: "Learn: the rest of the seven CAT training videos, each tagged with the controls it covers.",
+                alt: "Learn videos, continued: the CAT video library, a senior operator to learn from and a practice exercise.",
               },
             ],
             body: [
@@ -2927,11 +2932,11 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cat-operator-assistant/learn-habits-a.webp",
-                alt: "Your habits: this operator's last five shifts compared with their own baseline.",
+                alt: "Your habits: waiting time, fuel per load, belt-offs and time per load against the operator's own usual numbers.",
               },
               {
                 src: "/projects/cat-operator-assistant/learn-habits-b.webp",
-                alt: "Your habits, continued: trend lines for waiting time, fuel per load and belt-off frequency.",
+                alt: "Your habits, in detail: fuel per load, time spent waiting, each load step by step and engine hours per load.",
               },
             ],
             body: [
@@ -2947,7 +2952,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The unusual behavior detection from the brief, shown as a machine that says what it needs before it breaks.",
+              "Unusual behavior detection, shown as a machine that says what it needs before it breaks.",
             ],
           },
           {
@@ -2955,12 +2960,12 @@ export const PROJECTS: Project[] = [
             title: "Every part, scored and charted",
             items: [
               {
-                src: "/projects/cat-operator-assistant/machine-3d-a.webp",
-                alt: "Machine: the 3D excavator colored by condition, with fix now, check soon and fine groups.",
+                src: "/projects/cat-operator-assistant/machine-health.webp",
+                alt: "Machine health: the 3D excavator colored by condition, with fix now, check soon and fine groups and a call-the-mechanic button.",
               },
               {
-                src: "/projects/cat-operator-assistant/machine-3d-b.webp",
-                alt: "Machine, part by part: a health score gauge and reading charts over the last ten shifts with a dashed limit line.",
+                src: "/projects/cat-operator-assistant/machine-parts.webp",
+                alt: "Part by part: a health score gauge for each part, reading charts over ten shifts against their limits, and the next service in 70 hours.",
               },
             ],
             body: [
@@ -2986,11 +2991,11 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cat-operator-assistant/fleet-a.webp",
-                alt: "Fleet view: filters, a review queue and charts across every operator and machine.",
+                alt: "Fleet view: filters, machines working, open reports, a review list of habit changes and waiting time per operator.",
               },
               {
                 src: "/projects/cat-operator-assistant/fleet-b.webp",
-                alt: "Fleet view: waiting time trends, fuel per load and the full incident log.",
+                alt: "Fleet view, continued: reports per day, fuel per load per machine, plan versus real job time and the full log.",
               },
             ],
             body: [
@@ -3016,11 +3021,11 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 src: "/projects/cat-operator-assistant/profile.webp",
-                alt: "Profile: the operator's licence progress and warning points.",
+                alt: "Profile: the operator's jobs, belt-on record, licence progress, warning points, licences and training.",
               },
               {
                 src: "/projects/cat-operator-assistant/settings.webp",
-                alt: "Settings: alert volume and screen brightness for this cab.",
+                alt: "Settings: language, spoken warnings, screen mode, warning volume and sign-in options.",
               },
             ],
             body: [
@@ -3030,7 +3035,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "step",
             title: "Night, Hindi, gloves and no signal",
-            items: [],
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/night-mode.webp",
+                alt: "Night mode: the home screen in a layered dark palette, with the engine off and the shift paused for lunch.",
+              },
+            ],
             body: [
               "A full night mode built as a layered dark palette rather than inverted colors, and an English and Hindi language toggle. Custom dropdowns, and a phone layout with a bottom tab bar, drawers and touch targets sized for gloves.",
               "Everything saves locally first and syncs when signal returns, with a Saved indicator that only appears when it's actually needed.",

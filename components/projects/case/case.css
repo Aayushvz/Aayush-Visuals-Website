@@ -3919,3 +3919,8 @@
 .cs[data-project="cat-operator-assistant"] .csFeature__name {
   color: var(--cs-ink);
 }
+
+/* the section intros are one-line leads, not paragraphs to hold to 68ch */
+.cs[data-project="cat-operator-assistant"] .csChapter__lead .cs__body {
+  max-width: none;
+}

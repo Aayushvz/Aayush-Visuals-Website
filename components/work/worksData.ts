@@ -92,7 +92,7 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
   },
   "cat-operator-assistant": {
     categories: ["Product Design", "UI/UX"],
-    tags: ["dashboard", "tablet", "caterpillar", "construction", "safety", "3d", "three.js", "hackathon", "telemetry"],
+    tags: ["dashboard", "tablet", "caterpillar", "construction", "safety", "3d", "three.js", "concept", "telemetry"],
   },
   layover: {
     categories: ["Product Design", "UI/UX"],
