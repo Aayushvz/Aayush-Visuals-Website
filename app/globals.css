@@ -314,12 +314,15 @@ html.has-cursor .cursorRing {
   user-select: none;
 }
 
-/* tip at (1, 1) of 67x103 */
+/* tip at (1, 1) of 67x103. The arrow runs a size above the hand; its
+   artwork is drawn for this exact size (one sprite pixel per device pixel
+   at 2x), so change the two together or it goes soft. */
 .cursorDot__arrow {
-  width: calc(67px * var(--cur-s));
-  height: calc(103px * var(--cur-s));
-  left: calc(-1px * var(--cur-s));
-  top: calc(-1px * var(--cur-s));
+  --cur-arrow: 1.35;
+  width: calc(67px * var(--cur-s) * var(--cur-arrow));
+  height: calc(103px * var(--cur-s) * var(--cur-arrow));
+  left: calc(-1px * var(--cur-s) * var(--cur-arrow));
+  top: calc(-1px * var(--cur-s) * var(--cur-arrow));
 }
 
 /* fingertip at (31.6, 1) of 89x114 */
