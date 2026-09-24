@@ -3920,6 +3920,16 @@
   color: var(--cs-ink);
 }
 
+/* Caterpillar yellow on the live-demo button; white on yellow fails contrast,
+   so the glyph and the arrow march go near-black */
+.cs[data-project="cat-operator-assistant"] .extCta {
+  --ext-accent: #ffcd11;
+}
+.cs[data-project="cat-operator-assistant"] .extCta__tile,
+.cs[data-project="cat-operator-assistant"] .extCta__march {
+  color: #141414;
+}
+
 /* the section intros are one-line leads, not paragraphs to hold to 68ch */
 .cs[data-project="cat-operator-assistant"] .csChapter__lead .cs__body {
   max-width: none;

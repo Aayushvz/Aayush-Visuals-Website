@@ -39,7 +39,6 @@ const JOBS = [
   ["105432", "signin-who.webp"],
   ["105441", "signin-pin.webp"],
   ["105456", "signin-belt.webp"],
-  ["105510", "loader-splash.webp"],
 ];
 
 const COVER_SRC = "C:\\Users\\aayus\\Downloads\\cat dashboard cover image.png";

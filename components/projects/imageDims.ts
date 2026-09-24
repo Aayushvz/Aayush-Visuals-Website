@@ -28,7 +28,6 @@ export const IMAGE_DIMS: Record<string, [number, number]> = {
   "/projects/cat-operator-assistant/learn-habits-b.webp": [1600, 758],
   "/projects/cat-operator-assistant/learn-videos-a.webp": [1600, 758],
   "/projects/cat-operator-assistant/learn-videos-b.webp": [1600, 758],
-  "/projects/cat-operator-assistant/loader-splash.webp": [1600, 758],
   "/projects/cat-operator-assistant/machine-health.webp": [1600, 758],
   "/projects/cat-operator-assistant/machine-parts.webp": [1600, 758],
   "/projects/cat-operator-assistant/moving-lock.webp": [1600, 758],
