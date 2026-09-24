@@ -18,6 +18,31 @@ import { useEffect, useRef, useState } from "react";
 export default function BackToTop() {
   const [shown, setShown] = useState(false);
   const shownRef = useRef(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  /* the ring is reading progress: one CSS variable written straight to the
+     element, at most once a frame, so scrolling never re-renders React */
+  useEffect(() => {
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      const max =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      buttonRef.current?.style.setProperty("--csTop-p", p.toFixed(4));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+    paint();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   /*
     Visible after a screenful, and stood down again at the very end.
@@ -65,6 +90,7 @@ export default function BackToTop() {
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       className="csTop"
       data-shown={visible}
@@ -77,15 +103,24 @@ export default function BackToTop() {
       aria-label="Back to top"
       title="Back to top"
     >
-      {/* the label lives in aria-label now, so the control still has a name
-          without printing one */}
+      <svg className="csTop__ring" viewBox="0 0 48 48" aria-hidden>
+        <circle className="csTop__track" cx="24" cy="24" r="20" />
+        <circle
+          className="csTop__progress"
+          cx="24"
+          cy="24"
+          r="20"
+          pathLength={1}
+        />
+      </svg>
       <svg
-        width="15"
-        height="15"
+        className="csTop__arrow"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden

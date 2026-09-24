@@ -4090,121 +4090,17 @@ html.has-cursor .cursorRing {
   scale: 1;
 }
 
-/* -------- closing action: a compact pill --------
-
-   Third shape for this. It was a full-width outlined panel, which drew a
-   border around one line of type and a great deal of empty; stripping it
-   to a bare full-width line overcorrected, putting the label at one edge
-   and the count at the other with nine hundred pixels of nothing between
-   them, so they read as two fragments rather than one control.
-
-   What both versions were missing is that a control needs an edge you can
-   point at, and that edge has to be near the label rather than at the far
-   side of the page. So: shrink-to-fit at the grid's left edge, split into
-   two compartments by a hairline, outline and no fill. The outline is what
-   keeps it a step under the header's solid .extCta instead of competing
-   with it (DESIGN.md section 7).
-
-   width: fit-content rather than display: inline-flex, because an inline
-   box would sit on a text line and collect its descender space underneath. */
-.selWorks__endCta {
+/* the closing button sits at the grid's left edge, a beat below the last row */
+.selWorks__foot {
   display: flex;
-  width: fit-content;
-  align-items: stretch;
   margin-top: clamp(30px, 4vw, 62px);
-  height: clamp(44px, 3.4vw, 54px);
-  border: 1px solid var(--selw-line);
-  border-radius: 999px;
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: border-color 0.28s var(--ease-quint),
-    background-color 0.28s var(--ease-quint);
-}
-
-/* 600, not the captions' 700: this is a UI label rather than a piece of
-   the editorial voice (DESIGN.md section 3) */
-.selWorks__endCtaName {
-  display: flex;
-  align-items: center;
-  padding-inline: clamp(18px, 1.5vw, 26px);
-  font-family: var(--font-primary);
-  font-size: clamp(14px, 1.05vw, 16px);
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1;
-  color: var(--ink);
-  transition: color 0.25s ease-out;
-}
-
-/* the second compartment: count and arrow behind a hairline that runs the
-   pill's full height, so the divider is the pill's own structure rather
-   than a rule floating inside it */
-.selWorks__endCtaNote {
-  display: flex;
-  align-items: center;
-  gap: 0.62em;
-  padding-inline: clamp(13px, 1.1vw, 18px);
-  border-left: 1px solid var(--selw-line);
-  font-family: var(--font-primary);
-  font-size: clamp(12.5px, 0.95vw, 14px);
-  font-weight: 500;
-  line-height: 1;
-  color: rgba(31, 31, 31, 0.66);
-  transition: border-color 0.28s var(--ease-quint), color 0.25s ease-out;
-}
-
-.selWorks__endCtaIcon {
-  display: block;
-  width: 1.05em;
-  height: 1.05em;
-  transition: transform 0.42s var(--ease-quint);
-}
-
-.selWorks__endCtaIcon svg {
-  width: 100%;
-  height: 100%;
-  stroke-width: 1.7;
-}
-
-/* the border is the object, so the border is what the hover moves; the
-   wash behind it is only there to stop the fill reading as a colour change
-   on the page rather than on the control */
-.selWorks__endCta:hover,
-.selWorks__endCta:focus-visible {
-  border-color: var(--purple);
-  background-color: rgba(124, 58, 237, 0.05);
-}
-
-.selWorks__endCta:hover .selWorks__endCtaName,
-.selWorks__endCta:focus-visible .selWorks__endCtaName {
-  color: var(--purple);
-}
-
-.selWorks__endCta:hover .selWorks__endCtaNote,
-.selWorks__endCta:focus-visible .selWorks__endCtaNote {
-  border-left-color: var(--purple);
-  color: var(--purple);
-}
-
-.selWorks__endCta:hover .selWorks__endCtaIcon,
-.selWorks__endCta:focus-visible .selWorks__endCtaIcon {
-  transform: translate(3px, -3px);
-}
-
-.selWorks__endCta:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 3px;
 }
 
 /* The badge still appears, because it IS the hover state and removing it
    would leave the card with nothing to say it was hovered. What goes is
-   the travel: the cover stops zooming, the badge stops growing in, and the
-   closing panel's arrow stops moving. */
+   the travel: the cover stops zooming and the badge stops growing in. */
 @media (prefers-reduced-motion: reduce) {
   .selWork__img {
-    transition: none;
-  }
-  .selWorks__endCtaIcon {
     transition: none;
   }
   .selWork__badge {
@@ -4212,9 +4108,7 @@ html.has-cursor .cursorRing {
     transition: opacity 0.3s var(--ease-quint);
   }
   .selWork:hover .selWork__img,
-  .selWork:focus-visible .selWork__img,
-  .selWorks__endCta:hover .selWorks__endCtaIcon,
-  .selWorks__endCta:focus-visible .selWorks__endCtaIcon {
+  .selWork:focus-visible .selWork__img {
     transform: none;
   }
 }
@@ -4254,16 +4148,6 @@ html.has-cursor .cursorRing {
   .selWorks__row {
     grid-template-columns: 1fr;
     gap: var(--selw-rowGap);
-  }
-  /* a pill has nothing to stack, so it only tightens */
-  .selWorks__endCta {
-    height: 46px;
-  }
-  .selWorks__endCtaName {
-    padding-inline: 18px;
-  }
-  .selWorks__endCtaNote {
-    padding-inline: 14px;
   }
 }
 
@@ -11212,7 +11096,6 @@ html.dpl-page .preloader {
    transition here would clobber its box-shadow one. */
 .ctaPill,
 .footer__contactCta,
-.selWorks__endCta,
 .contactPage__submit,
 .hc__submit,
 .wallet__actionBtn,
@@ -11224,7 +11107,6 @@ html.dpl-page .preloader {
 
 .ctaPill:active,
 .footer__contactCta:active,
-.selWorks__endCta:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
 .projTile__mobileCta:active,
@@ -11291,7 +11173,6 @@ html.dpl-page .preloader {
 @media (prefers-reduced-motion: reduce) {
   .ctaPill:active,
 .footer__contactCta:active,
-.selWorks__endCta:active,
 .wallet__actionBtn:active,
 .mobileNav__menuBtn:active,
 .projTile__mobileCta:active,

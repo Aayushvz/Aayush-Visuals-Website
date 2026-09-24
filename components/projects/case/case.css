@@ -403,7 +403,7 @@
   line-height: 1.25;
   color: var(--cs-ink-body);
   margin: 0;
-  max-width: 34ch;
+  white-space: nowrap;
 }
 
 .csHero__stamp {
@@ -1864,30 +1864,67 @@
   The label survives too, as the accessible name, so a screen reader still
   hears "back to top" rather than a bare glyph.
 */
+/* a solid disc; the inner ring is reading progress: --csTop-p (0 to 1) is
+   written by BackToTop on scroll and drawn as an arc over a faint track */
 .csTop {
+  --csTop-p: 0;
   position: fixed;
   right: clamp(16px, 3vw, 40px);
   bottom: clamp(16px, 3vw, 40px);
   z-index: 60;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   padding: 0;
-  border: 1px solid var(--cs-line);
+  border: 0;
   border-radius: 50%;
-  background: var(--cs-bg);
-  color: var(--cs-ink);
+  background: #fff;
+  color: var(--cs-ink, #101010);
+  box-shadow:
+    0 0 0 1px rgba(16, 16, 16, 0.06),
+    0 1px 2px rgba(16, 16, 16, 0.08),
+    0 8px 24px rgba(16, 16, 16, 0.12);
   cursor: pointer;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px) scale(0.92);
   pointer-events: none;
   transition:
     opacity var(--dur-state, 260ms) var(--ease-quint),
     transform var(--dur-state, 260ms) var(--ease-quint),
     background-color var(--dur-hover, 200ms) var(--ease-quint),
-    color var(--dur-hover, 200ms) var(--ease-quint),
-    border-color var(--dur-hover, 200ms) var(--ease-quint);
+    color var(--dur-hover, 200ms) var(--ease-quint);
+}
+
+.csTop > svg {
+  grid-area: 1 / 1;
+}
+
+.csTop__ring {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  /* start the arc at twelve o'clock */
+  transform: rotate(-90deg);
+  fill: none;
+}
+
+.csTop__track {
+  stroke: rgba(16, 16, 16, 0.1);
+  stroke-width: 2;
+}
+
+.csTop__progress {
+  stroke: var(--cs-ink, #101010);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--csTop-p));
+  transition: stroke var(--dur-hover, 200ms) var(--ease-quint);
+}
+
+.csTop__arrow {
+  transition: transform var(--dur-hover, 200ms) var(--ease-quint);
 }
 
 .csTop[data-shown="true"] {
@@ -1896,11 +1933,28 @@
   pointer-events: auto;
 }
 
-.csTop:hover,
 .csTop:focus-visible {
-  background: var(--cs-ink);
-  border-color: var(--cs-ink);
-  color: var(--cs-bg);
+  outline: 2px solid var(--cs-ink, #101010);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .csTop:hover {
+    background: var(--cs-accent, #7c3aed);
+    color: var(--cs-on-accent, #fff);
+  }
+
+  .csTop:hover .csTop__track {
+    stroke: rgba(255, 255, 255, 0.25);
+  }
+
+  .csTop:hover .csTop__progress {
+    stroke: currentColor;
+  }
+
+  .csTop:hover .csTop__arrow {
+    transform: translateY(-2px);
+  }
 }
 
 .csTop:active {
@@ -3929,8 +3983,23 @@
 .cs[data-project="cat-operator-assistant"] .extCta__march {
   color: #141414;
 }
+@media (hover: hover) {
+  :root:has(.cs[data-project="cat-operator-assistant"]) .csTop:hover {
+    background: #ffcd11;
+    color: #141414;
+  }
+}
 
 /* the section intros are one-line leads, not paragraphs to hold to 68ch */
 .cs[data-project="cat-operator-assistant"] .csChapter__lead .cs__body {
   max-width: none;
+}
+
+/* the hero stamp never wraps, so the narrowest phones get a tighter setting
+   to keep the longest two-service pair inside the gutter */
+@media (max-width: 380px) {
+  .csHero__cat {
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+  }
 }

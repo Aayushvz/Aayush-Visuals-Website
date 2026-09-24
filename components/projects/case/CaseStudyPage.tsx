@@ -293,10 +293,9 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                   <h1 className="csHero__title">{project.title}</h1>
                 </div>
                 <div className="csHero__stamp">
-                  {/* every discipline, not just the category: a project that
-                      was product design AND visual branding said only the
-                      first, which is the half that undersells it */}
-                  <p className="csHero__cat">{services.join(" | ")}</p>
+                  {/* the two lead disciplines only, so the stamp always holds
+                      one line; the full list is in the Services row below */}
+                  <p className="csHero__cat">{services.slice(0, 2).join(" | ")}</p>
                   <p className="csHero__year">{project.year}</p>
                 </div>
               </div>

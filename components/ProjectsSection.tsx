@@ -1,8 +1,6 @@
 import SelectedWorks from "./projects/SelectedWorks";
 import PrefetchWorkMedia from "./projects/PrefetchWorkMedia";
-import PageLink from "./PageLink";
 import ExtCta from "./ExtCta";
-import ArrowUpRight from "./projects/ArrowUpRight";
 import { PROJECTS, SELECTED_PROJECTS } from "./projects/projectData";
 
 export default function ProjectsSection() {
@@ -24,7 +22,6 @@ export default function ProjectsSection() {
   /* both numbers are derived, so neither can quietly go stale the next time
      a project is added or the reel is reordered */
   const total = String(PROJECTS.length).padStart(2, "0");
-  const archived = PROJECTS.length - SELECTED_PROJECTS.length;
 
   return (
     <section className="selWorks" id="work">
@@ -47,39 +44,13 @@ export default function ProjectsSection() {
         </div>
       </div>
       <SelectedWorks />
-      {/*
-        The closing action, third time.
-
-        It was a full-width outlined panel first, which drew a border round
-        one line of type and a great deal of empty. Stripping it to a bare
-        full-width line overcorrected: the label ended up at one edge and
-        the count at the other with nine hundred pixels between them, so
-        they read as two unrelated fragments and nothing about them said
-        they could be clicked.
-
-        A control needs an edge you can point at, and that edge should be
-        close to the label rather than at the far side of the page. So it
-        is a compact pill at the grid's left edge: label, a hairline
-        divider, the count and the arrow. Outline and no fill, which is
-        what keeps it under the header's solid .extCta rather than beside
-        it (DESIGN.md section 7).
-      */}
-      <PageLink href="/work" className="selWorks__endCta" data-reveal>
-        <span className="selWorks__endCtaName">View all projects</span>
-        <span className="selWorks__endCtaNote">
-          {/* The bare numeral reads as "View all projects12" aloud, with
-              nothing between the label and the count. The visible one is
-              hidden from the accessibility tree and the same value is
-              restated as a phrase, the way ExtCta handles its own badge. */}
-          <span className="selWorks__endCtaCount" aria-hidden>
-            {archived}
-          </span>
-          <span className="srOnly">, {archived} more in the archive</span>
-          <span className="selWorks__endCtaIcon" aria-hidden>
-            <ArrowUpRight />
-          </span>
-        </span>
-      </PageLink>
+      {/* the closing action is the same primary button as the header, so
+          the section speaks one button language top and bottom */}
+      <div className="selWorks__foot">
+        <ExtCta href="/work" route count={total} data-reveal>
+          View all projects
+        </ExtCta>
+      </div>
     </section>
   );
 }

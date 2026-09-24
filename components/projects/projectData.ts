@@ -2657,7 +2657,7 @@ export const PROJECTS: Project[] = [
     id: "cat-operator-assistant",
     lead:
       "**CAT Operator Assistant** is a concept cab tablet app for **Caterpillar** excavator operators and their fleet managers. It turns machine telematics, the data the excavator already records, and the day's job list into five glanceable screens, so an operator can check pace, safety and machine health without leaving the seat.",
-    services: ["Concept", "Product design", "Dashboard design", "Front-end build"],
+    services: ["Product design", "Dashboard design", "Concept", "Front-end build"],
     headline:
       "A cab tablet that turns excavator data into answers an operator can read at a glance",
     title: "CAT Operator Assistant Dashboard",
@@ -5771,11 +5771,11 @@ const SELECTED_IDS = [
   "mike-tyson-invitational",
   "layover",
   "elevation-capital",
+  "cat-operator-assistant",
   "cpgrams",
   /* the website Gravitas, not "gravitas-showcase", which is the identity
      piece built on the same fest */
   "gravitas",
-  "posterfolio",
 ];
 
 export const SELECTED_PROJECTS: Project[] = SELECTED_IDS.map((id) => {
