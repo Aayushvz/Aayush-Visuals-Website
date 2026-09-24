@@ -199,7 +199,11 @@ export default function CaseStudyPage({ project }: { project: Project }) {
           The footer stays OUTSIDE main so it keeps its contentinfo landmark,
           which is why main is the stage rather than wrapping it. */}
       <div className="hpParallax">
-        <main className="cs hpParallax__stage" style={accentVars(project)}>
+        <main
+          className="cs hpParallax__stage"
+          data-project={project.id}
+          style={accentVars(project)}
+        >
           <div className="cs__inner">
             <header className="csHero">
               {/*

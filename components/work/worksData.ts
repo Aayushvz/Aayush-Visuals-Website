@@ -90,6 +90,10 @@ const TAXONOMY: Record<string, { categories: string[]; tags: string[] }> = {
       "mascot",
     ],
   },
+  "cat-operator-assistant": {
+    categories: ["Product Design", "UI/UX"],
+    tags: ["dashboard", "tablet", "caterpillar", "construction", "safety", "3d", "three.js", "hackathon", "telemetry"],
+  },
   layover: {
     categories: ["Product Design", "UI/UX"],
     tags: ["app", "booking", "travel", "mobile", "prototyping", "airport", "identity"],
@@ -194,6 +198,7 @@ const toWorkItem = (p: (typeof PROJECTS)[number]): WorkItem => ({
 const PROJECT_ORDER = [
   "mike-tyson-invitational",
   "cpgrams",
+  "cat-operator-assistant",
   "layover",
   "gravitas",
   "gravitas-showcase",

@@ -3914,3 +3914,8 @@
     row-gap: var(--cs-sm);
   }
 }
+
+/* per-project override, keyed on the page's data-project */
+.cs[data-project="cat-operator-assistant"] .csFeature__name {
+  color: var(--cs-ink);
+}

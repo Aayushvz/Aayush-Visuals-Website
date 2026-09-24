@@ -2654,6 +2654,503 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "cat-operator-assistant",
+    lead:
+      "**CAT Operator Assistant** is a cab tablet app for excavator operators and the fleet managers above them, built for a hackathon judged by **Caterpillar**. It turns the machine's own telemetry and the operator's task list into five screens an operator actually needs mid-shift, plus a read-only Fleet view for the manager.",
+    services: ["Product design", "Front-end build"],
+    headline:
+      "A cab tablet that tells a CAT operator what the machine already knows",
+    title: "CAT Operator Assistant Dashboard",
+    logoText: "CAT OA",
+    category: "Product Design",
+    year: "2026",
+    cover: "/projects/cat-operator-assistant-cover.webp",
+    preview: {
+      kind: "website",
+      href: "https://aayushvz.github.io/cat-operator-assistant/",
+      image: "/projects/cat-operator-assistant-cover.webp",
+    },
+    cta: "Open Live Demo",
+    role: "Product Designer · Front-end",
+    tools: ["HTML", "CSS", "JavaScript", "Three.js"],
+    description:
+      "CAT Operator Assistant is a cab tablet app for excavator operators, built for a hackathon judged by Caterpillar. It turns the machine's telemetry and the operator's own task list into five screens: today's jobs, safety, training, machine health, and a home view built around a live 3D read of the excavator, with a read-only Fleet view for the manager.",
+    extraFacts: [
+      ["Type", "Hackathon build, judged by Caterpillar"],
+      ["Stack", "Vanilla HTML, CSS and JS, procedural Three.js (r128)"],
+      ["3D", "Excavator built in code, no downloaded assets"],
+      ["Repo", "github.com/Aayushvz/cat-operator-assistant"],
+    ],
+    highlights: [
+      "Engine stays locked until the operator is identified and belted in",
+      "Part-by-part 3D health read of the excavator on the home screen",
+      "Incident reports saved to the tablet first, synced when signal returns",
+    ],
+    challenge: [
+      "A CAT excavator operator works off fragments. Today's jobs live in one head, the machine's actual condition lives in gauges nobody checks until something fails, and training happens whenever a supervisor remembers to schedule it. Nothing on the machine tells a beginner operator whether they are running behind, running safely, or running the machine into a service call.",
+      "The fleet manager has it worse: a seatbelt violation, a near miss, or a job that quietly slipped two hours only reaches them after the shift ends, as a paper report or a phone call, by which point the pattern behind it is gone.",
+    ],
+    solution: [
+      "**Start from the operator, not the fleet manager.** Most smart machinery dashboards are built backwards: a chart-heavy admin panel with a thin operator view bolted on. This one starts from the question an operator asks dozens of times a shift, am I on pace, is the machine safe, what's next, and answers it on one screen with a live 3D read of the excavator instead of a table of sensor values.",
+      "The manager's Fleet view is the same telemetry, read-only and rolled up across every machine on site. Building it added no second data model, only a second lens on the first one.",
+      "And every number says where it came from. The brief supplied four telemetry rows and five completed tasks, and those are used exactly as given. Part health scores, proximity events and weekly habit trends are sample data, generated to be plausible and never presented as live sensor output.",
+    ],
+    detailMedia: [
+      {
+        src: "/projects/cat-operator-assistant/home-both-panels.webp",
+        alt: "The operator's home screen: the 3D excavator with its boom flagged red, a boom and hydraulics fault card, the live seatbelt card, today's shift timeline and the telemetry panel.",
+      },
+      {
+        src: "/projects/cat-operator-assistant/home-show-parts.webp",
+        alt: "The home screen with Show parts on: every part of the excavator labelled with its condition, the boom in red and the tracks in amber.",
+      },
+      {
+        src: "/projects/cat-operator-assistant/loader-splash.webp",
+        alt: "The loading screen: a drawn CAT excavator on Caterpillar yellow.",
+      },
+    ],
+    /* one numbered section per feature area, each with its own screens */
+    caseChapters: true,
+    caseLimits: { highlights: 30, images: 60 },
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          {
+            kind: "statement",
+            text: "A CAT excavator operator works off fragments, and nothing on the machine tells them whether they are running behind, running safely, or running it into a service call.",
+          },
+          {
+            kind: "prose",
+            body: [
+              "CAT Operator Assistant is a cab tablet interface built for a Caterpillar-judged hackathon brief: a Smart Operator Assistant covering a daily task dashboard, safety, training, unusual behavior detection and task-time estimation. It had to do all of that without adding any new hardware to the machine.",
+              "It runs as a static site, vanilla HTML, CSS and JS with no framework and no build step, so it ships straight to GitHub Pages and still boots instantly on a tablet with a weak connection. The excavator is built in code with Three.js, so there is no model file to download either.",
+            ],
+          },
+          {
+            kind: "results",
+            items: [
+              { value: "2.4%", label: "Average job-time error, trained estimator" },
+              { value: "13.2%", label: "Average job-time error, the flat plan" },
+            ],
+            caption:
+              "Fitted on the same five tasks it is judged against, and the app says so on screen.",
+          },
+        ],
+      },
+      {
+        name: "start of shift",
+        heading: "Start of shift",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The brief asked for safety. The strongest version of that is a shift that cannot start unsafely, so the sign-in is also the interlock.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Who is driving, and are they who they say",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/signin-who.webp",
+                alt: "Start of shift, step one: choose who is driving from three operator cards, with a separate entry for the fleet manager.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/signin-pin.webp",
+                alt: "Start of shift, step two: the operator enters a PIN on a large glove-friendly keypad.",
+              },
+            ],
+            body: [
+              "Three steps before the engine. Pick an operator from three preset skill levels, beginner to expert, then enter a PIN or scan a badge.",
+              "The skill level is not decoration: it sets how long every job estimate for the day should take.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Belt on, or the engine stays locked",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/signin-belt-off.webp",
+                alt: "Start of shift, step three with the seatbelt off: the engine is shown as locked.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/signin-belt-on.webp",
+                alt: "Start of shift, step three with the seatbelt on: the engine unlocks and the shift can begin.",
+              },
+            ],
+            body: [
+              "The engine stays mechanically locked until the seatbelt is on, and a blocked start attempt is logged as a safety event in its own right.",
+              "A contractor gets a hard guarantee that no shift starts unbelted, not a policy that depends on the operator remembering.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "home",
+        heading: "Home",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Home answers the three questions an operator keeps asking, am I on pace, is the machine safe, what's next, in one glance and without a second screen.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "A 3D machine instead of a sensor table",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/home-parked.webp",
+                alt: "The home screen: the 3D excavator with its tappable hotspots, the bucket's detail card, the live seatbelt card and today's shift timeline along the bottom.",
+              },
+            ],
+            body: [
+              "The excavator is built procedurally in Three.js, with no downloaded model, and every part is tagged so it can be colored live by condition: red for a fault, amber for check soon, green for the part currently selected. Six tappable hotspots open that part's detail card directly.",
+              "Around it, Your pace compares the current job against the operator's own personal best, a live seatbelt card shows the belt, and a replay timeline of the shift runs along the bottom. After three minutes of idle time a short training video surfaces on its own.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "my tasks",
+        heading: "My tasks",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The daily task dashboard from the brief, built to keep up with a day that never goes to plan.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "A day that replans itself",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/tasks-today.webp",
+                alt: "My tasks: today's jobs in order, with now, next and time left in the shift, and weather tags on each slot.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/tasks-jobtime.webp",
+                alt: "The job time tab, estimating how long a task should take for this operator's level and today's conditions.",
+              },
+            ],
+            body: [
+              "Now, Next and Shift-left tiles sit above the full job list, with a one-tap Mark done and a Running late, +15 min shortcut. The plan also watches the forecast: a wind-sensitive job like demolition moves to tomorrow automatically when the weather turns against it.",
+              "The Job time tab is an interactive estimator: job type, weather, operator skill and machine age in, expected time out as a range rather than a single promise, beside an open comparison of how accurate the plan and the model have been.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "safety and reports",
+        heading: "Safety and reports",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Safety has to work at the worst moment, which on a site is often also the moment with no signal.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "A radar that tightens in the rain, and reports that survive a dead zone",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/safety-safety.webp",
+                alt: "The safety screen with a top-down proximity radar around the excavator and its stop and slow distances.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/safety-reports.webp",
+                alt: "The reports screen listing filed incidents, each with a machine snapshot attached.",
+              },
+            ],
+            body: [
+              "Site warning flags light the edges of the whole screen. A top-down proximity radar logs every zone crossing, and rain automatically tightens the stop and slow distances and shortens the idle-to-lock timer. Emergency SOS is a 1.5 second hold that stops the machine, calls the supervisor and saves the last 60 seconds of machine data.",
+              "An incident report is a hold gesture and two taps, what happened and how bad, with a snapshot of the machine attached. It saves to the tablet first and syncs when signal returns, so a paper trail exists the moment something happens.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "A locked screen while the machine moves",
+            items: [],
+            body: [
+              "While the machine travels, the screen locks to a compact strip: the current job, minutes left, live belt state, and one-tap Report and SOS. In the demo a Parked and Moving switch stands in for real travel and joystick telemetry.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "learn",
+        heading: "Learn",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Training that responds to this operator's own shifts, instead of the same module for everyone.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "The cab, control by control",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/learn-controls.webp",
+                alt: "Learn: a top-down view of the cab with ten numbered controls.",
+              },
+            ],
+            body: [
+              "An interactive top-down cab diagram numbers ten controls, including the emergency stop and the horn, and links each one to a real CAT training video.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Seven real videos, ranked for this operator",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/learn-videos-a.webp",
+                alt: "Learn: the CAT training videos, with the one matched to this operator first.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/learn-videos-b.webp",
+                alt: "Learn: the rest of the seven CAT training videos, each tagged with the controls it covers.",
+              },
+            ],
+            body: [
+              "Seven videos from the official CAT Products YouTube channel, ranked by what this operator's recent shifts show they're weakest at, like long waits or starting without a belt.",
+              "A fleet owner spends less on blanket training and gets operators who close their specific gaps faster.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Habits against their own baseline",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/learn-habits-a.webp",
+                alt: "Your habits: this operator's last five shifts compared with their own baseline.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/learn-habits-b.webp",
+                alt: "Your habits, continued: trend lines for waiting time, fuel per load and belt-off frequency.",
+              },
+            ],
+            body: [
+              "Your habits shows five-shift trend lines for waiting time, fuel per load and how often the belt comes off, each compared against the operator's own usual numbers rather than against anyone else.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "machine",
+        heading: "Machine",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The unusual behavior detection from the brief, shown as a machine that says what it needs before it breaks.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Every part, scored and charted",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/machine-3d-a.webp",
+                alt: "Machine: the 3D excavator colored by condition, with fix now, check soon and fine groups.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/machine-3d-b.webp",
+                alt: "Machine, part by part: a health score gauge and reading charts over the last ten shifts with a dashed limit line.",
+              },
+            ],
+            body: [
+              "The 3D machine is colored by condition and every issue is sorted into Fix now, Check soon or Fine, with a one-tap Call the mechanic on the most urgent fault and a countdown to the next service in engine hours.",
+              "Boom, tracks, bucket, engine, cooling and cab each get a 0 to 100 score, a semicircular gauge and two reading charts against a normal-range band over the last ten shifts. That turns \"call the mechanic today\" into a decision backed by a number.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "fleet",
+        heading: "Fleet view",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The manager's lens on the same telemetry, read-only, so nobody has to file a report for the manager to see what happened.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Who needs attention today",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/fleet-a.webp",
+                alt: "Fleet view: filters, a review queue and charts across every operator and machine.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/fleet-b.webp",
+                alt: "Fleet view: waiting time trends, fuel per load and the full incident log.",
+              },
+            ],
+            body: [
+              "Filter by operator, machine and date range. A review queue lists flagged habit changes per operator, each with a one-tap Talk to operator or Dismiss.",
+              "Below it sit waiting-time trends per operator, fuel per load per machine, plan versus real job time accuracy, and the full incident log.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "platform",
+        heading: "Across every screen",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The details that make it usable in a real cab, on every screen at once.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Built around one operator",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/profile.webp",
+                alt: "Profile: the operator's licence progress and warning points.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/settings.webp",
+                alt: "Settings: alert volume and screen brightness for this cab.",
+              },
+            ],
+            body: [
+              "Profile tracks this operator's own licence progress and warning points. Settings tunes alert volume and screen brightness for their own cab, without touching anyone else's.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Night, Hindi, gloves and no signal",
+            items: [],
+            body: [
+              "A full night mode built as a layered dark palette rather than inverted colors, and an English and Hindi language toggle. Custom dropdowns, and a phone layout with a bottom tab bar, drawers and touch targets sized for gloves.",
+              "Everything saves locally first and syncs when signal returns, with a Saved indicator that only appears when it's actually needed.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "hard parts",
+        heading: "What was hard to build",
+        blocks: [
+          {
+            kind: "prose",
+            body: ["Four problems ate most of the build time."],
+          },
+          {
+            kind: "step",
+            title: "A 3D machine with no model file",
+            items: [],
+            body: [
+              "No downloaded model, so the excavator is a procedural Three.js scene whose parts are tagged individually, and a boom fault or a worn track can color just that part red or amber in real time.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "An estimator that's honest about itself",
+            items: [],
+            body: [
+              "It had to beat a flat plan honestly, which meant admitting its 2.4% error was fitted on the same five tasks it was tested against, rather than dressing up a lucky number.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "An interface that isn't a dashboard",
+            items: [],
+            body: [
+              "Every screen had to read like something a glove-handed operator would actually tap on site, which meant throwing out the first few drafts that looked like a generic AI dashboard, tinted cards and all.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Safety with no signal",
+            items: [],
+            body: [
+              "Reports save to the tablet first and sync later, and the seatbelt interlock has to agree with the engine lock state at the exact moment a report is filed, not a second later.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "next",
+        heading: "What's next",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "Ideas for where it could go from here. Product thinking, not a committed roadmap.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Works from a cold start with no signal",
+            items: [],
+            body: [
+              "An installable PWA with a real service worker, so the whole shift screen works with zero signal, not just individual reports.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Real motion instead of a switch",
+            items: [],
+            body: [
+              "Replace the demo Moving and Parked switch with device motion and gyroscope input, so the lock responds to a tablet actually mounted in the cab.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Live fleet sync",
+            items: [],
+            body: [
+              "WebSockets instead of polling, so the manager's Fleet view updates the moment a belt comes off, not on the next refresh.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Voice-first reports",
+            items: [],
+            body: [
+              "An operator mid-task has gloves on and a joystick in each hand. \"Hey CAT, report a near miss\" is a more honest interaction than tapping a screen.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Part health on the machine itself",
+            items: [],
+            body: [
+              "An AR overlay through a phone camera that projects the Machine tab's part health onto the physical excavator during a walk-around check.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "An estimator trained on a real fleet",
+            items: [],
+            body: [
+              "Grow the estimator from five bootstrap tasks to a real fleet's history, and show a confidence range on screen so operators learn to read the model's uncertainty, not just its output.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "A component library for the next build",
+            items: [],
+            body: [
+              "Pull the buttons, cards, gauges, the radar and the seatbelt icon into a small documented library, so the next CAT-style build starts from tokens instead of from scratch.",
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "layover",
     lead:
       "**Layover** turns dead time in an airport into something usable for the **traveller who has already paid for it** - enter a terminal or a PNR and see what is open right now, order a meal to the gate, book a lounge seat. Designed from zero across four surfaces, from the site people land on to the console the platform runs on.",
