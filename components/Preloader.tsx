@@ -101,7 +101,7 @@ function capsuleProfile(w: number, h: number, deg: number) {
 /* one fall: gravity, a lossy bounce or two, sampled at 60fps */
 function simulateFall(fromY: number, toY: number, vh: number) {
   const g = 2.8 * vh; // px/s^2, scaled to the screen so every size feels alike
-  const restitution = 0.3;
+  const restitution = 0.38;
   const dt = 1 / 60;
   const ys: number[] = [];
   let y = fromY;
@@ -257,7 +257,7 @@ export default function Preloader() {
           const post = impactAt > 0 && k > impactAt ? (k - impactAt) / 60 : 0;
           /* spin eases out into the landing, then a small damped rock */
           const ease = 1 - Math.pow(1 - pre, 3);
-          const rock = post > 0 ? Math.sign(spin) * 5 * Math.exp(-7 * post) * Math.cos(20 * post) : 0;
+          const rock = post > 0 ? Math.sign(spin) * 7 * Math.exp(-6 * post) * Math.cos(20 * post) : 0;
           const a = rot + spin * (1 - ease) + rock;
           const x = cx + drift * (1 - ease);
           return { transform: place(x, y, a), offset: k / n };
