@@ -76,8 +76,19 @@ export const EXPERIMENTS: Experiment[] = [
     status: "live",
   },
   {
-    id: "contract",
+    id: "invoice",
     index: "04",
+    title: "Invoice Generator",
+    kind: "Freelance tool",
+    href: "https://invoice-generator-teal-pi.vercel.app/invoice-generator/en",
+    cta: "Bill a client",
+    meta: "Free · no signup, nothing leaves your browser",
+    cover: InvoiceCover,
+    status: "live",
+  },
+  {
+    id: "contract",
+    index: "05",
     title: "Contract Generator Tool",
     kind: "Freelance tool",
     href: "/contract",
@@ -87,20 +98,6 @@ export const EXPERIMENTS: Experiment[] = [
        what this answers rather than inventing a challenge to beat */
     meta: "Free · no signup, nothing leaves your browser",
     cover: ContractCover,
-    status: "live",
-  },
-  {
-    id: "invoice",
-    index: "05",
-    title: "Invoice Generator",
-    kind: "Freelance tool",
-    /* A path, like every other entry, even though this tool is its own
-       deployment: next.config.ts rewrites /invoice-generator to it, so as
-       far as the shelf and the browser are concerned it is on this site. */
-    href: "/invoice-generator",
-    cta: "Bill a client",
-    meta: "Free · no signup, nothing leaves your browser",
-    cover: InvoiceCover,
     status: "live",
   },
 ];
