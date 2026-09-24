@@ -10790,12 +10790,9 @@ html.contact-page-active body {
 
 /* ============================================================
    ENTRANCE PRELOADER (components/Preloader.tsx)
-   Phase 1: a retro system-initialization interface (.bootLoader) runs
-   over the flat brand-color background. Phase 2: once it dissolves, two
-   brand panels — already meeting at the exact vertical center — reveal
-   the logo/wordmark, hold, then split apart (top up / bottom down) on
-   var(--ease-inout) (same easing as the page-leave transition
-   above), revealing the homepage that is already rendered underneath.
+   A giant wordmark on the brand purple, with the role pills dropping
+   onto it; the whole sheet then lifts away on var(--ease-inout),
+   revealing the homepage already rendered underneath.
    ============================================================ */
 
 .preloader {
@@ -10842,236 +10839,106 @@ html.dpl-page .preloader {
   display: none !important;
 }
 
-.preloader__panel {
+/* ---------- the loader itself ----------
+   Purple ground, light type. The wordmark rises out of the bottom edge and
+   is cut by it; the role pills are positioned entirely by the WAAPI track
+   Preloader builds, so at rest they wait far above the screen. Their fill is
+   the ground colour, which is what lets one pill read as lying on top of
+   another where they overlap. */
+.ldr {
+  background: var(--purple);
+  color: #fff;
+  font-family: var(--font-primary);
+}
+
+.ldr__top {
+  position: absolute;
+  top: clamp(20px, 3.2vw, 44px);
+  left: clamp(20px, 4vw, 60px);
+  right: clamp(20px, 4vw, 60px);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: clamp(13px, 1.15vw, 18px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ldr__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.ldr__word {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  /* centred, and pushed down so the bottom edge of the screen cuts it */
+  translate: -50% 17%;
+  font-size: 30vw;
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  color: var(--cream);
+  /* the rise animation brings it in; measured while invisible */
+  opacity: 0;
+}
+
+.ldr__base {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: baseline;
+}
+
+.ldr__pill {
   position: absolute;
   left: 0;
-  right: 0;
-  height: 50%;
-  display: flex;
-  justify-content: center;
-  /* fixed brand purple, not the theme-toggling --hero-brand — the
-     preloader background should read as one consistent color regardless
-     of light/dark mode */
-  background: #6a1eed;
-  will-change: transform;
-  transition: transform 0.7s var(--ease-inout);
-}
-
-.preloader__panel--top {
   top: 0;
-  align-items: flex-end;
-  padding-bottom: calc(clamp(8px, 1.4vh, 16px) - 6px);
+  transform: translateY(-200vh);
+  padding: 0.42em 1.05em 0.48em;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: var(--purple);
+  color: #fff;
+  font-size: clamp(13px, 1.85vw, 30px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  will-change: transform;
 }
 
-.preloader__panel--bottom {
-  bottom: 0;
-  align-items: flex-start;
-  padding-top: clamp(8px, 1.4vh, 16px);
-}
-
-.preloader--split .preloader__panel--top {
-  transform: translateY(-100%);
-}
-
-.preloader--split .preloader__panel--bottom {
-  transform: translateY(100%);
-}
-
-.preloader--fade {
-  transition: opacity 0.26s ease;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.preloader__logo,
-.preloader__word {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.3s var(--ease-quint),
-    transform 0.3s var(--ease-quint);
-}
-
-.preloader__brand--visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.preloader__logo {
-  width: clamp(44px, 5.6vw, 76px);
-  height: auto;
-  display: block;
-  user-select: none;
-  /* the source PNG's visible mark sits ~2.3% left of the file's own
-     bounding-box center (asymmetric transparent margin), so nudge right
-     to optically center it under the wordmark */
-  transform: translateY(8px) translateX(2.3%);
-}
-
-.preloader__logo.preloader__brand--visible {
-  transform: translateY(0) translateX(2.3%);
-}
-
-.preloader__word {
-  font-family: var(--font-primary);
-  font-weight: 600;
-  font-size: clamp(14px, 1.6vw, 20px);
-  letter-spacing: 0;
-  color: var(--cream);
-}
-
-.preloader__word.preloader__brand--visible {
-  opacity: 0.92;
-}
-
-/* ---------- phase 1: system-initialization boot screen ----------
-   Three zones on one invisible grid (no cards, no borders): commands
-   left, percentage dead-center (guaranteed by the two equal 1fr tracks
-   regardless of side content width), secondary note right. Reuses the
-   site's existing mono stack (see .hero__hint) and rail inset so it
-   aligns with the rest of the page's measurement system. */
-.bootLoader {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding-inline: var(--page-content-inset);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.bootLoader--visible {
+/* reduced motion: no drop, no rise; the pile is simply there, then fades */
+.ldr--static .ldr__word {
   opacity: 1;
 }
 
-.bootLoader--exit {
+.ldr--fade {
   opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.bootLoader__commands {
-  grid-column: 1;
-  justify-self: start;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.4vh, 15px);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(10px, 0.85vw, 12px);
-  letter-spacing: 0.02em;
-  color: var(--cream);
-}
-
-.bootLoader__cmd {
-  padding: 2px 6px;
-  margin: -2px -6px;
-  white-space: nowrap;
-  transform: translateX(0);
-  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
-}
-
-.bootLoader__cmd--active {
-  background: var(--cream);
-  color: var(--hero-brand);
-  transform: translateX(3px);
-}
-
-.bootLoader__percent {
-  grid-column: 2;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(14px, 1.6vw, 18px);
-  letter-spacing: 0.04em;
-  color: var(--cream);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.bootLoader__aside {
-  grid-column: 3;
-  justify-self: end;
-  max-width: 230px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(9px, 0.75vw, 11px);
-  line-height: 1.6;
-  letter-spacing: 0.02em;
-  color: var(--cream);
-  opacity: 0.72;
-}
-
-.bootLoader__aside p {
-  margin: 0;
-}
-
-.bootLoader__cursor {
-  display: inline-block;
-  margin-left: 1px;
-  animation: bootCursorBlink 1s steps(1, end) infinite;
-}
-
-@keyframes bootCursorBlink {
-  0%,
-49% {
-    opacity: 1;
-  }
-  50%,
-100% {
-    opacity: 0;
-  }
+  transition: opacity 300ms ease;
 }
 
 @media (max-width: 640px) {
-  .bootLoader {
-    display: block;
-    padding-inline: 0;
-  }
-
-  .bootLoader__commands {
-    position: absolute;
-    top: clamp(56px, 15vh, 100px);
-    left: var(--page-content-inset);
-    right: var(--page-content-inset);
-    font-size: 10px;
-  }
-
-  .bootLoader__cmd {
-    white-space: normal;
-  }
-
-  .bootLoader__percent {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-  }
-
-  .bootLoader__aside {
+  .ldr__pill--wide {
     display: none;
   }
 
-  /* +25% over the desktop-clamp's mobile floor (44px / 14px) */
-  .preloader__logo {
-    width: 55px;
+  /* cut by the bottom edge like desktop, a weight heavier so the smaller
+     word still carries the screen */
+  .ldr__word {
+    /* the letters' ink runs edge to edge. Both values are measured, and hold
+       at any width because ink scales linearly with the font size: the size
+       sets the ink to the screen width, and the extra 0.75vw centres the ink
+       rather than the box, since the a and the h carry unequal sidebearings */
+    translate: calc(-50% - 0.75vw) 3%;
+    font-size: 31.75vw;
+    font-weight: 900;
   }
 
-  .preloader__word {
-    font-size: 17.5px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .preloader__panel {
-    transition-duration: 0.001s;
-  }
-
-  .preloader__logo,
-.preloader__word {
-    transition-duration: 0.2s;
-    transform: none;
-  }
-
-  .bootLoader__cursor {
-    animation: none;
+  .ldr__pill {
+    font-size: 13px;
   }
 }
 

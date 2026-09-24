@@ -1,249 +1,387 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { lockScroll } from "@/lib/scrollLock";
 
 /*
-  Full-screen entrance preloader — mounted once in the root layout, so it
-  runs on every fresh document load/reload but never remounts during
-  in-app navigation (app/template.tsx only swaps the route's <main>).
+  Full-screen entrance preloader, mounted once in the root layout so it runs
+  on every fresh document load and never on in-app navigation.
 
-  Two phases, one continuous animation:
-  PHASE 1 — a retro system-initialization interface (cycling status
-  commands on the left, a center percentage counter, a secondary note on
-  the right) runs over the flat brand-color background.
-  PHASE 2 — once the counter reaches 100%, the terminal UI dissolves and
-  the logo + wordmark reveal in its place (the two panels already meet at
-  the exact vertical center, sharing the same brand color — no seam is
-  visible until they move). After a brief hold, the panels physically
-  split apart — top up, bottom down — on cubic-bezier(0.76,0,0.24,1),
-  revealing the homepage that has been rendered underneath the whole time.
+  A giant "aayush" rises from the bottom edge, then the role pills drop from
+  above and land on the tops of the letters and on each other. Nothing here
+  is a physics engine: each pill's resting place is solved once from the real
+  glyph outlines (a height map built from canvas text metrics), its fall is
+  simulated once with gravity and a lossy bounce, and the result is played as
+  a WAAPI keyframe track, so the motion runs on the compositor while the page
+  underneath is still busy hydrating.
 */
 
-type Stage =
-  | "bootClosed"
-  | "boot"
-  | "bootExit"
-  | "brandEnter"
-  | "brandHold"
-  | "split"
-  | "done";
+type Role = {
+  label: string;
+  /* landing point across the wordmark, 0 = left edge, 1 = right edge */
+  x: number;
+  /* resting angle, degrees clockwise */
+  rot: number;
+  /* dropped on narrow screens, where eight pills bury a small wordmark */
+  wide?: boolean;
+  /* a phone's own landing spot: its pills are wide against a small word,
+     so the desktop spots stack them into a staircase instead of a pile */
+  nx?: number;
+  nrot?: number;
+};
 
-const WORD = "aayush visuals";
-
-const COMMANDS = [
-  "// LOADING VISUAL SYSTEMS...",
-  "// SYNCING CREATIVE ARCHIVE...",
-  "// FETCHING SELECTED WORKS...",
-  "// CALIBRATING INTERACTIONS...",
-  "// INITIALIZING AAYUSH VISUALS...",
-  "// READY TO CREATE...",
+/* fall order: the ones that land on letters first, the stackers after */
+const ROLES: Role[] = [
+  { label: "Product Designer", x: 0.13, rot: -7, nx: 0.27, nrot: -5 },
+  { label: "UI/UX", x: 0.34, rot: 9, nx: 0.93, nrot: -12 },
+  { label: "Dashboard Design", x: 0.52, rot: -21, nx: 0.66, nrot: 7 },
+  { label: "Design Systems", x: 0.7, rot: 13, wide: true },
+  { label: "Brand Identity", x: 0.88, rot: -31, nx: 0.7, nrot: -13 },
+  { label: "Interaction Design", x: 0.24, rot: 176, wide: true },
+  { label: "Design Engineer", x: 0.62, rot: -5, nx: 0.34, nrot: 176 },
+  { label: "Motion Design", x: 0.43, rot: 11, wide: true },
 ];
 
-function indexForPercent(p: number) {
-  if (p < 15) return 0;
-  if (p < 30) return 1;
-  if (p < 50) return 2;
-  if (p < 68) return 3;
-  if (p < 88) return 4;
-  return 5;
-}
+/* matches the stylesheet's phone breakpoint */
+const NARROW = "(max-width: 640px)";
 
-// Irregular progression on purpose — reads like a real init process
-// ticking along, not a linear CSS counter. Each tuple is [percent, delay
-// in ms since the previous step].
-const PERCENT_STEPS: Array<[percent: number, delay: number]> = [
-  [0, 100],
-  [4, 150],
-  [9, 140],
-  [16, 170],
-  [24, 160],
-  [37, 200],
-  [49, 180],
-  [63, 210],
-  [74, 170],
-  [86, 190],
-  [94, 150],
-  [98, 120],
-  [100, 110],
-];
+const WORD = "aayush";
 
-const BOOT_ENTER = 100; // terminal begins appearing
-const BOOT_HOLD_MS = 150; // hold on 100% before the terminal dissolves
-const BOOT_EXIT_MS = 250; // terminal fades away
-const BRAND_ENTER_MS = 300; // logo + wordmark fade in
-const BRAND_HOLD_MS = 450; // calm brand moment before the split
-const SPLIT_MS = 700; // must match the transform transition-duration in CSS
-const REDUCED_HOLD_MS = 260;
-const REDUCED_FADE_MS = 260;
+/* timing, ms */
+const WORD_RISE = 900;
+const FIRST_DROP = 520;
+const DROP_STAGGER = 105;
+const HOLD_AFTER_SETTLE = 480;
+const EXIT = 850;
+const REDUCED_HOLD = 900;
+const REDUCED_FADE = 300;
+
+/* the strong ease-out and the site's own in-out */
+const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+const EASE_INOUT = "cubic-bezier(0.76, 0, 0.24, 1)";
+
+/* Routes that own their own opening; see the /cricket note in globals.css */
+const SILENT_ROUTES = ["/cricket"];
+
+const COL = 3; // height-map column width, px
 
 /*
-  Routes that own their own opening and must never see this one.
-
-  /cricket is a full-bleed dark scene with a broadcast cold open of its
-  own, so this one is redundant there — the visitor sits through two
-  intros to reach the same screen.
-
-  It was already meant to be skipped: stages.css hid `.preloader` under
-  `html.dpl-page`. But that rule can only win once both the class (added
-  on mount) and the route chunk carrying it are in place, so on a cold
-  load a z-index 9999 overlay is over the pitch until hydration catches
-  up. Not rendering at all closes that window rather than racing it; the
-  CSS rule stays as the belt to this braces.
+  A pill is a capsule: a segment of length len with radius r, rotated by a.
+  bottom(dx) / top(dx) give the lowest / highest point of its outline at a
+  horizontal offset dx from its centre, or null where it has no outline.
 */
-const SILENT_ROUTES = ["/cricket"];
+function capsuleProfile(w: number, h: number, deg: number) {
+  const r = h / 2;
+  const len = Math.max(0, w - h);
+  const a = (deg * Math.PI) / 180;
+  const ca = Math.cos(a);
+  const sa = Math.sin(a);
+  const steps = 24;
+  const reach = (len / 2) * Math.abs(ca) + r;
+  const probe = (dx: number, dir: 1 | -1): number | null => {
+    let best: number | null = null;
+    for (let i = 0; i <= steps; i++) {
+      const t = -len / 2 + (len * i) / steps;
+      const px = t * ca;
+      const d = dx - px;
+      if (Math.abs(d) > r) continue;
+      const y = t * sa + dir * Math.sqrt(r * r - d * d);
+      if (best === null || (dir === 1 ? y > best : y < best)) best = y;
+    }
+    return best;
+  };
+  return {
+    reach,
+    bottom: (dx: number) => probe(dx, 1),
+    top: (dx: number) => probe(dx, -1),
+  };
+}
+
+/* one fall: gravity, a lossy bounce or two, sampled at 60fps */
+function simulateFall(fromY: number, toY: number, vh: number) {
+  const g = 2.8 * vh; // px/s^2, scaled to the screen so every size feels alike
+  const restitution = 0.3;
+  const dt = 1 / 60;
+  const ys: number[] = [];
+  let y = fromY;
+  let v = 0;
+  let impactAt = -1;
+  for (let i = 0; i < 240; i++) {
+    ys.push(y);
+    v += g * dt;
+    y += v * dt;
+    if (y >= toY) {
+      y = toY;
+      if (impactAt < 0) impactAt = ys.length;
+      v = -v * restitution;
+      if (Math.abs(v) < 0.09 * vh) {
+        ys.push(toY);
+        break;
+      }
+    }
+  }
+  return { ys, impactAt };
+}
 
 export default function Preloader() {
   const pathname = usePathname();
-  const [stage, setStage] = useState<Stage>("bootClosed");
-  const [percent, setPercent] = useState(0);
+  const [done, setDone] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const wordRef = useRef<HTMLDivElement>(null);
+  const baseRef = useRef<HTMLSpanElement>(null);
+  const countRef = useRef<HTMLSpanElement>(null);
+  const pillRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
-  /*
-    Read once, on first mount, and never again.
-
-    This is the ENTRANCE preloader: it belongs to the document load, and
-    the component is mounted in the root layout precisely so that in-app
-    navigation cannot restart it. Deriving `silent` from the live pathname
-    quietly broke that for one route — arriving on /cricket left the flag
-    true and the effect skipped, so the first navigation away flipped it
-    to false and ran the whole opening sequence, four seconds of terminal
-    boot over a page the visitor had already asked for, with the scroll
-    locked underneath it the entire time.
-
-    Freezing the value at mount means /cricket simply never arms the
-    preloader for that document, which is what "this route owns its own
-    opening" was always supposed to mean.
-  */
+  /* frozen at mount: this belongs to the document load, not the route */
   const [silent] = useState(() =>
-    SILENT_ROUTES.some((r) => pathname === r || pathname?.startsWith(`${r}/`))
+    SILENT_ROUTES.some((r) => pathname === r || pathname?.startsWith(`${r}/`)),
   );
 
   useEffect(() => {
     if (silent) return;
-    const timers: number[] = [];
-    const schedule = (fn: () => void, ms: number) => {
-      timers.push(window.setTimeout(fn, ms));
-    };
-    const clearAll = () => timers.forEach(clearTimeout);
+    const root = rootRef.current;
+    const word = wordRef.current;
+    const base = baseRef.current;
+    if (!root || !word || !base) return;
 
-    /* Shared, reference-counted lock (lib/scrollLock) — see the note in
-       that file for why this must not read and write body.style itself. */
     const unlockScroll = lockScroll();
+    const timers: number[] = [];
+    const anims: Animation[] = [];
+    let raf = 0;
+    let finished = false;
 
     const finish = () => {
-      setStage("done");
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
       unlockScroll();
-      clearAll();
+      setDone(true);
     };
+    /* the site must never stay locked behind this overlay */
+    timers.push(window.setTimeout(finish, 7000));
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (reduced) {
-      // Skip the terminal sequence entirely — straight to a quick,
-      // static brand moment, then a plain fade instead of a split.
-      schedule(() => setStage("brandHold"), BOOT_ENTER);
-      schedule(() => setStage("split"), BOOT_ENTER + REDUCED_HOLD_MS);
-      schedule(finish, BOOT_ENTER + REDUCED_HOLD_MS + REDUCED_FADE_MS);
-    } else {
-      schedule(() => setStage("boot"), BOOT_ENTER);
+    const run = () => {
+      const vw = window.innerWidth;
+      /* floored: gravity scales with this, and a zero-height frame would
+         leave every pill hanging in the air until the failsafe */
+      const vh = Math.max(window.innerHeight, 400);
+      const rootBox = root.getBoundingClientRect();
+      const baseline = base.getBoundingClientRect().top - rootBox.top;
 
-      let t = BOOT_ENTER;
-      for (const [p, delay] of PERCENT_STEPS) {
-        t += delay;
-        schedule(() => setPercent(p), t);
+      /* the letters' tops, from real glyph metrics in the loaded face */
+      const ctx = document.createElement("canvas").getContext("2d");
+      const cols = Math.ceil(vw / COL) + 1;
+      const surface = new Float64Array(cols).fill(Infinity);
+      if (ctx) {
+        const cs = getComputedStyle(word);
+        ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        word.querySelectorAll<HTMLSpanElement>(".ldr__char").forEach((span) => {
+          const m = ctx.measureText(span.textContent ?? "");
+          const left = span.getBoundingClientRect().left - rootBox.left;
+          const inkL = left - m.actualBoundingBoxLeft;
+          const inkR = left + m.actualBoundingBoxRight;
+          const top = baseline - m.actualBoundingBoxAscent;
+          /* round shoulders: pills settle a touch into a bowl's curve */
+          const inset = (inkR - inkL) * 0.07;
+          for (let x = inkL + inset; x <= inkR - inset; x += COL) {
+            const c = Math.round(x / COL);
+            if (c >= 0 && c < cols) surface[c] = Math.min(surface[c], top);
+          }
+        });
+      }
+      /* anywhere without a letter, the floor is the bottom of the screen */
+      for (let c = 0; c < cols; c++) if (!isFinite(surface[c])) surface[c] = vh;
+
+      const wordBox = word.getBoundingClientRect();
+      const span = {
+        left: wordBox.left - rootBox.left,
+        width: wordBox.width,
+      };
+
+      let lastSettle = 0;
+      const pills = pillRefs.current;
+      const narrow = window.matchMedia(NARROW).matches;
+      ROLES.forEach((role, i) => {
+        const el = pills[i];
+        if (!el || el.offsetParent === null) return; // hidden on this width
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const rot = narrow ? (role.nrot ?? role.rot) : role.rot;
+        const fx = narrow ? (role.nx ?? role.x) : role.x;
+        const prof = capsuleProfile(w, h, rot);
+        /* never let a pill hang off the screen edge */
+        const edge = 12 + prof.reach;
+        const cx = Math.min(vw - edge, Math.max(edge, span.left + span.width * fx));
+
+        /* rest where the capsule's underside first touches anything */
+        let restY = Infinity;
+        const c0 = Math.floor((cx - prof.reach) / COL);
+        const c1 = Math.ceil((cx + prof.reach) / COL);
+        for (let c = c0; c <= c1; c++) {
+          if (c < 0 || c >= cols) continue;
+          const b = prof.bottom(c * COL - cx);
+          if (b === null) continue;
+          restY = Math.min(restY, surface[c] - b);
+        }
+        if (!isFinite(restY)) restY = vh - h;
+        /* it becomes part of the floor for the pills that follow */
+        for (let c = c0; c <= c1; c++) {
+          if (c < 0 || c >= cols) continue;
+          const t = prof.top(c * COL - cx);
+          if (t !== null) surface[c] = Math.min(surface[c], restY + t);
+        }
+
+        const delay = FIRST_DROP + i * DROP_STAGGER;
+        const place = (x: number, y: number, a: number) =>
+          `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) rotate(${a.toFixed(2)}deg)`;
+
+        if (reduced) {
+          el.style.transform = place(cx, restY, rot);
+          return;
+        }
+
+        /* seeded per pill so every load looks the same */
+        const seed = Math.sin((i + 1) * 12.9898) * 43758.5453;
+        const rnd = seed - Math.floor(seed);
+        const fromY = -h - 40 - rnd * vh * 0.25;
+        const drift = (rnd - 0.5) * 60;
+        const spin = (i % 2 ? 1 : -1) * (35 + rnd * 45);
+        const { ys, impactAt } = simulateFall(fromY, restY, vh);
+        const n = ys.length - 1;
+        const frames = ys.map((y, k) => {
+          const pre = Math.min(1, k / Math.max(1, impactAt));
+          const post = impactAt > 0 && k > impactAt ? (k - impactAt) / 60 : 0;
+          /* spin eases out into the landing, then a small damped rock */
+          const ease = 1 - Math.pow(1 - pre, 3);
+          const rock = post > 0 ? Math.sign(spin) * 5 * Math.exp(-7 * post) * Math.cos(20 * post) : 0;
+          const a = rot + spin * (1 - ease) + rock;
+          const x = cx + drift * (1 - ease);
+          return { transform: place(x, y, a), offset: k / n };
+        });
+        const duration = (n / 60) * 1000;
+        const anim = el.animate(frames, {
+          duration,
+          delay,
+          fill: "both",
+          easing: "linear",
+        });
+        anims.push(anim);
+        lastSettle = Math.max(lastSettle, delay + duration);
+      });
+
+      if (reduced) {
+        root.classList.add("ldr--static");
+        timers.push(
+          window.setTimeout(() => root.classList.add("ldr--fade"), REDUCED_HOLD),
+          window.setTimeout(finish, REDUCED_HOLD + REDUCED_FADE),
+        );
+        if (countRef.current) countRef.current.textContent = "100";
+        return;
       }
 
-      const bootExitAt = t + BOOT_HOLD_MS;
-      const brandEnterAt = bootExitAt + BOOT_EXIT_MS;
-      const brandHoldAt = brandEnterAt + BRAND_ENTER_MS;
-      const splitAt = brandHoldAt + BRAND_HOLD_MS;
-      const finishAt = splitAt + SPLIT_MS;
+      anims.push(
+        word.animate(
+          [
+            { transform: "translateY(55%)", opacity: 0 },
+            { transform: "translateY(0)", opacity: 1 },
+          ],
+          { duration: WORD_RISE, easing: EASE_OUT, fill: "both" },
+        ),
+      );
 
-      schedule(() => setStage("bootExit"), bootExitAt);
-      schedule(() => setStage("brandEnter"), brandEnterAt);
-      schedule(() => setStage("brandHold"), brandHoldAt);
-      schedule(() => setStage("split"), splitAt);
-      schedule(finish, finishAt);
-    }
-    // failsafe — the site must never stay locked behind this overlay,
-    // no matter what else goes wrong above.
-    schedule(finish, reduced ? 1600 : 6000);
+      /* the counter tracks the whole sequence, and lands on 100 as the last
+         pill does */
+      const start = performance.now();
+      const total = Math.max(lastSettle, WORD_RISE);
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - start) / total);
+        if (countRef.current) countRef.current.textContent = String(Math.round(p * 100));
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+
+      timers.push(
+        window.setTimeout(() => {
+          const out = root.animate(
+            [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }],
+            { duration: EXIT, easing: EASE_INOUT, fill: "forwards" },
+          );
+          out.onfinish = finish;
+          /* a background tab can stall the animation clock; the timer can't be */
+          timers.push(window.setTimeout(finish, EXIT + 60));
+        }, total + HOLD_AFTER_SETTLE),
+      );
+    };
+
+    /* measure only once the real face is in: fallback metrics would land
+       every pill at the wrong height */
+    let started = false;
+    const go = () => {
+      if (started || finished) return;
+      started = true;
+      run();
+    };
+    /* fonts.ready alone can resolve before a face that is not yet in use has
+       even started loading, so ask for the two faces this screen measures */
+    const face = (el: Element) => {
+      const cs = getComputedStyle(el);
+      return `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    };
+    const firstPill = pillRefs.current.find(Boolean);
+    Promise.all([
+      document.fonts.load(face(word), WORD),
+      firstPill ? document.fonts.load(face(firstPill), "Product Designer") : null,
+    ])
+      .then(() => document.fonts.ready)
+      .then(go, go);
+    timers.push(window.setTimeout(go, 1200));
 
     return () => {
-      clearAll();
+      finished = true;
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      anims.forEach((a) => a.cancel());
       unlockScroll();
     };
   }, [silent]);
 
-  if (silent || stage === "done") return null;
-
-  const reducedMotion =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const className = [
-    "preloader",
-    stage === "split" && !reducedMotion ? "preloader--split" : "",
-    stage === "split" && reducedMotion ? "preloader--fade" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const showBoot = stage === "bootClosed" || stage === "boot" || stage === "bootExit";
-  const bootClass = [
-    stage !== "bootClosed" ? " bootLoader--visible" : "",
-    stage === "bootExit" ? " bootLoader--exit" : "",
-  ].join("");
-
-  const brandedClass =
-    stage === "brandEnter" || stage === "brandHold" || stage === "split"
-      ? " preloader__brand--visible"
-      : "";
-
-  const activeIndex = indexForPercent(percent);
-  const percentLabel = `( ${String(percent).padStart(2, "0")}% )`;
+  if (silent || done) return null;
 
   return (
-    <div className={className} aria-hidden role="presentation">
-      {showBoot && (
-        <div className={`bootLoader${bootClass}`}>
-          <div className="bootLoader__commands">
-            {COMMANDS.map((cmd, i) => (
-              <div
-                key={cmd}
-                className={`bootLoader__cmd${i === activeIndex ? " bootLoader__cmd--active" : ""}`}
-              >
-                {cmd}
-              </div>
-            ))}
-          </div>
-          <div className="bootLoader__percent">{percentLabel}</div>
-          <div className="bootLoader__aside">
-            <p>// LOADING THE PIXELS.</p>
-            <p>// THE GOOD ONES TAKE</p>
-            <p>
-              // A LITTLE LONGER
-              <span className="bootLoader__cursor" aria-hidden>
-                _
-              </span>
-            </p>
-          </div>
-        </div>
-      )}
+    <div ref={rootRef} className="preloader ldr" aria-hidden role="presentation">
+      <div className="ldr__top">
+        <span>&copy;2026 Aayush Visuals</span>
+        <span className="ldr__count">
+          Loading <span ref={countRef}>0</span>%
+        </span>
+      </div>
 
-      <div className="preloader__panel preloader__panel--top">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logos/av-logo.webp"
-          alt="Aayush Visuals"
-          draggable={false}
-          className={`preloader__logo${brandedClass}`}
-        />
+      <div ref={wordRef} className="ldr__word">
+        {WORD.split("").map((ch, i) => (
+          <span className="ldr__char" key={i}>
+            {ch}
+          </span>
+        ))}
+        {/* a zero-height inline box sits on the baseline, which is the one
+            line of the wordmark the DOM will not measure for us */}
+        <span ref={baseRef} className="ldr__base" />
       </div>
-      <div className="preloader__panel preloader__panel--bottom">
-        <div className={`preloader__word${brandedClass}`}>{WORD}</div>
-      </div>
+
+      {ROLES.map((role, i) => (
+        <span
+          key={role.label}
+          ref={(el) => {
+            pillRefs.current[i] = el;
+          }}
+          className={`ldr__pill${role.wide ? " ldr__pill--wide" : ""}`}
+        >
+          {role.label}
+        </span>
+      ))}
     </div>
   );
 }
