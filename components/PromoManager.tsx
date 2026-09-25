@@ -91,6 +91,11 @@ function writeSeen(seen: Set<string>) {
 
 type Current = { promo: Promo; phase: "shown" | "leaving" | "fading" };
 
+/* is the visitor below the hero right now? */
+function pastHero() {
+  return window.scrollY >= window.innerHeight * HERO_SCREENS;
+}
+
 export default function PromoManager({ promos }: { promos: Promo[] }) {
   const pathname = usePathname() || "/";
   const [phone, setPhone] = useState(false);
@@ -117,6 +122,11 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
     lastActivityAt: 0,
     /* false until the visitor has started reading; nothing shows before */
     started: false,
+    /* the homepage opens with a card over its hero on purpose */
+    homeLike: false,
+    /* the last moment the visitor themselves moved the page (wheel, touch,
+       keys, a press on the scrollbar), as opposed to a scripted jump */
+    inputAt: 0,
   });
 
   const pickNext = useCallback((): Promo | undefined => {
@@ -129,6 +139,11 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
 
   const show = useCallback((promo: Promo | undefined, counted = true) => {
     if (!promo || currentRef.current) return;
+    /* Never over a hero. Checked at the moment of showing, against where
+       the visitor actually is, not how far the page has moved: a route
+       change jumps the scroll back to the top, and that jump must not read
+       as someone reading on. */
+    if (!page.current.homeLike && !pastHero()) return;
     const pg = page.current;
     if (counted && pg.count >= CAP) return;
     if (counted) pg.count += 1;
@@ -171,6 +186,8 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
       lastScrollAt: 0,
       lastActivityAt: now,
       started: kind === "home",
+      homeLike: kind === "home",
+      inputAt: 0,
     };
     if (!kind) return;
 
@@ -189,9 +206,9 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
 
     /* the homepage opens with a card on its own; any other page waits
        for the visitor to start reading before it says anything */
-    const startY = window.scrollY;
     const onFirstScroll = () => {
-      if (Math.abs(window.scrollY - startY) < window.innerHeight * HERO_SCREENS) return;
+      /* below the hero, and brought there by the visitor's own scrolling */
+      if (!pastHero() || performance.now() - page.current.inputAt > 1000) return;
       window.removeEventListener("scroll", onFirstScroll);
       const pg = page.current;
       pg.started = true;
@@ -239,6 +256,10 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
 
     const activity = () => {
       page.current.lastActivityAt = performance.now();
+    };
+    const input = () => {
+      page.current.inputAt = performance.now();
+      activity();
     };
 
     const onScroll = () => {
@@ -297,17 +318,21 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
     const opts = { passive: true } as const;
     window.addEventListener("scroll", onScroll, opts);
     window.addEventListener("pointermove", activity, opts);
-    window.addEventListener("pointerdown", activity, opts);
-    window.addEventListener("keydown", activity);
-    window.addEventListener("touchstart", activity, opts);
+    window.addEventListener("pointerdown", input, opts);
+    window.addEventListener("keydown", input);
+    window.addEventListener("touchstart", input, opts);
+    window.addEventListener("touchmove", input, opts);
+    window.addEventListener("wheel", input, opts);
     return () => {
       window.clearInterval(tick);
       window.clearTimeout(heroTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", activity);
-      window.removeEventListener("pointerdown", activity);
-      window.removeEventListener("keydown", activity);
-      window.removeEventListener("touchstart", activity);
+      window.removeEventListener("pointerdown", input);
+      window.removeEventListener("keydown", input);
+      window.removeEventListener("touchstart", input);
+      window.removeEventListener("touchmove", input);
+      window.removeEventListener("wheel", input);
     };
   }, [kind, promos, show, pickNext]);
 
