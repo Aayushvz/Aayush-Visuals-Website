@@ -1,0 +1,1096 @@
+/*
+  Shotsu: the orb, its chat panel, and the notification cards it speaks.
+  Same design language as the cards: white surfaces, the site purple as the
+  one colour, a purple band naming the thing, dashed inner cards.
+*/
+
+.shotsu {
+  --orb: 58px;
+  --orb-gap: 24px;
+  /* extra room when the page has its own fixed bar along the bottom */
+  --orb-lift: 0px;
+  --orb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: var(--font-primary);
+}
+
+/* ==========================================================
+   The orb
+   ========================================================== */
+
+.shotsuOrb {
+  --look-x: 0px;
+  --look-y: 0px;
+  position: fixed;
+  z-index: 85;
+  right: var(--orb-gap);
+  bottom: calc(var(--orb-gap) + var(--orb-lift));
+  width: var(--orb);
+  height: var(--orb);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.5s var(--orb-ease);
+  animation: shotsuFloat 5.5s ease-in-out infinite;
+}
+
+/* the about page's status bar is fixed to the bottom edge: sit above it */
+body:has(.aboutPage__bar) .shotsu {
+  --orb-lift: 46px;
+}
+
+@keyframes shotsuFloat {
+  0%,
+  100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
+}
+
+/* the soft violet aura it casts; breathes outward while a card is up */
+.shotsuOrb::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.55) 35%, rgba(124, 58, 237, 0) 70%);
+  filter: blur(8px);
+  opacity: 0.9;
+  transition: opacity 0.4s ease, transform 0.6s var(--orb-ease);
+}
+
+/* the glowing rim: a blurred white light around the edge, its outline
+   slowly wobbling so the orb feels alive rather than cut out */
+.shotsuOrb__glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 48% 52% 50% 50% / 51% 48% 52% 49%;
+  box-shadow:
+    0 0 0 1.5px rgba(243, 236, 255, 0.9),
+    0 0 6px 2px rgba(221, 205, 255, 0.75),
+    0 0 16px 4px rgba(167, 139, 250, 0.5),
+    inset 0 0 7px 2px rgba(237, 228, 255, 0.55);
+  filter: blur(0.8px);
+  animation: shotsuRim 7s ease-in-out infinite;
+  transition: transform 0.6s var(--orb-ease);
+}
+
+@keyframes shotsuRim {
+  0%, 100% { border-radius: 48% 52% 50% 50% / 51% 48% 52% 49%; }
+  33% { border-radius: 52% 48% 47% 53% / 48% 53% 47% 52%; }
+  66% { border-radius: 50% 50% 53% 47% / 53% 49% 51% 47%; }
+}
+
+/* The sphere: a soft gradient body in the site purple, an orchid light
+   upper left and a periwinkle glow lower right. No dark edge: the rim above lights
+   it from outside and a white inner glow feathers it from inside. */
+.shotsuOrb__ball {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: var(--orb);
+  background:
+    radial-gradient(circle at 30% 26%, rgba(214, 140, 255, 0.9), rgba(214, 140, 255, 0) 52%),
+    radial-gradient(circle at 74% 80%, rgba(118, 128, 255, 0.85), rgba(118, 128, 255, 0) 55%),
+    radial-gradient(circle at 50% 50%, #7c3aed, #6d31e0 70%, #8b67f5 100%);
+  box-shadow:
+    inset 0 0 6px 2px rgba(237, 228, 255, 0.5),
+    inset 0 0 16px 4px rgba(255, 255, 255, 0.18),
+    0 10px 24px rgba(109, 40, 217, 0.3);
+}
+
+/* a faint environment reflection across the upper half of the glass */
+.shotsuOrb__glass {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 38%);
+}
+
+/* a slow iridescent swirl under the glass */
+.shotsuOrb__swirl {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0) 0deg,
+    rgba(196, 181, 253, 0.55) 70deg,
+    rgba(255, 255, 255, 0) 140deg,
+    rgba(236, 72, 153, 0.28) 220deg,
+    rgba(255, 255, 255, 0) 300deg
+  );
+  mix-blend-mode: soft-light;
+  animation: shotsuSwirl 9s linear infinite;
+}
+
+@keyframes shotsuSwirl {
+  to { rotate: 360deg; }
+}
+
+/* the glass highlight, fixed while everything under it moves */
+.shotsuOrb__shine {
+  position: absolute;
+  left: 18%;
+  top: 10%;
+  width: 40%;
+  height: 22%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%);
+  filter: blur(1px);
+  transform: rotate(-22deg);
+}
+
+/* its reflection on the floor, as in the reference */
+.shotsuOrb__floor {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: -9px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(76, 29, 149, 0.32), rgba(139, 92, 246, 0.1) 60%, transparent);
+  filter: blur(1.5px);
+  animation: shotsuFloor 5.5s ease-in-out infinite;
+}
+
+@keyframes shotsuFloor {
+  0%,
+  100% { opacity: 0.9; transform: scaleX(1); }
+  50% { opacity: 0.55; transform: scaleX(0.85); }
+}
+
+/* the name, offered on hover */
+.shotsuOrb__label {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #141315;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(20, 19, 21, 0.2);
+  opacity: 0;
+  transform: translate(6px, -50%);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.4s var(--orb-ease);
+}
+
+@media (hover: hover) {
+  .shotsuOrb:hover {
+    transform: scale(1.07);
+  }
+
+  .shotsuOrb:hover::before {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  .shotsuOrb:hover .shotsuOrb__glow {
+    transform: scale(1.04);
+  }
+
+  .shotsuOrb:not(.shotsuOrb--open):hover .shotsuOrb__label {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+.shotsuOrb:active {
+  transform: scale(0.95);
+}
+
+.shotsuOrb:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 5px;
+}
+
+/* speaking: while a card is up, the orb breathes a ring outward */
+.shotsuOrb--talking::before {
+  animation: shotsuPulse 1.8s ease-out infinite;
+}
+
+@keyframes shotsuPulse {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ==========================================================
+   The face (shared by the orb and its pocket version)
+
+   Two glowing pill eyes and nothing else: attentive, calm, a little
+   techy. They drift toward the pointer, blink now and then, narrow as if
+   focusing on hover, and look up at the panel while the chat is open.
+   ========================================================== */
+
+.shotsuFace {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  display: flex;
+  gap: 0.14em;
+  transform: translate(calc(-50% + var(--look-x, 0px)), calc(-50% + var(--look-y, 0px)));
+  transition: transform 0.35s var(--orb-ease, ease);
+}
+
+.shotsuFace__eye {
+  width: 0.085em;
+  height: 0.19em;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, #fff, #efe8ff);
+  box-shadow:
+    0 0 0.06em rgba(255, 255, 255, 0.85),
+    0 0 0.14em rgba(196, 181, 253, 0.6);
+  transform-origin: 50% 60%;
+  animation: shotsuBlink 5.2s ease-in-out infinite;
+  transition: transform 0.3s var(--orb-ease, ease);
+}
+
+@keyframes shotsuBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* hovered: the eyes narrow slightly, as if focusing on you */
+@media (hover: hover) {
+  .shotsuOrb:hover .shotsuFace__eye {
+    transform: scaleY(0.72);
+    animation: none;
+  }
+}
+
+/* listening: with the chat open it looks up at the panel */
+.shotsuOrb--open .shotsuFace {
+  transform: translate(-50%, calc(-50% - 0.05em));
+}
+
+/* ==========================================================
+   Cards, spoken from the orb
+   ========================================================== */
+
+.shotsu .recentToast {
+  right: var(--orb-gap);
+  bottom: calc(var(--orb-gap) + var(--orb-lift) + var(--orb) + 16px);
+  transform-origin: calc(100% - 29px) calc(100% + 16px);
+}
+
+/* the tail, pointing down at the orb's centre */
+.shotsu .recentToast::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #fff;
+  transform: rotate(45deg);
+  box-shadow: 3px 3px 5px rgba(31, 31, 31, 0.06);
+}
+
+/* ==========================================================
+   The chat panel
+
+   After three references: a health assistant (a warm gradient washing
+   down from the top, a big two-line greeting with one accent word, and
+   "things you can do" cards with coloured icon tiles), a dot-matrix stat
+   card, and the task card behind the notification cards. Violet instead
+   of orange: the wash runs from the site purple to white, two soft glows
+   drift in it, and every surface below is white or glass.
+   ========================================================== */
+
+.shotsuChat {
+  position: fixed;
+  z-index: 86;
+  right: var(--orb-gap);
+  bottom: calc(var(--orb-gap) + var(--orb-lift) + var(--orb) + 16px);
+  display: flex;
+  flex-direction: column;
+  width: min(340px, calc(100vw - 32px));
+  height: min(560px, calc(100svh - 140px));
+  border-radius: 22px;
+  background: #fbfaff;
+  box-shadow:
+    0 0 0 1px rgba(76, 29, 149, 0.08),
+    0 2px 6px rgba(40, 20, 80, 0.06),
+    0 30px 70px rgba(40, 20, 80, 0.28);
+  color: #1c1a24;
+  transform-origin: calc(100% - 29px) calc(100% + 16px);
+  animation: shotsuChatIn 0.55s var(--orb-ease) both;
+}
+
+@keyframes shotsuChatIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* before the first question the panel is only as tall as its greeting
+   and cards; once talking it takes the full height for the thread */
+.shotsuChat--empty {
+  height: auto;
+  max-height: min(560px, calc(100svh - 140px));
+}
+
+/* tail to the orb */
+.shotsuChat::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #fbfaff;
+  transform: rotate(45deg);
+  box-shadow: 3px 3px 5px rgba(40, 20, 80, 0.08);
+}
+
+/* the wash: violet at the top, melting into the panel. Taller while the
+   chat is empty so the greeting sits in it; a band once talking starts */
+.shotsuChat__wash {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 260px;
+  overflow: hidden;
+  border-radius: 22px 22px 0 0;
+  background: linear-gradient(
+    to bottom,
+    #7c3aed 0%,
+    #9061f9 26%,
+    #c4b1fb 56%,
+    rgba(251, 250, 255, 0) 100%
+  );
+  pointer-events: none;
+  transform-origin: top;
+  transition: transform 0.6s var(--orb-ease);
+}
+
+.shotsuChat:not(.shotsuChat--empty) .shotsuChat__wash {
+  transform: scaleY(0.5);
+}
+
+.shotsuChat__wash i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(34px);
+  opacity: 0.75;
+  animation: shotsuDrift 12s ease-in-out infinite alternate;
+}
+
+.shotsuChat__wash i:nth-child(1) {
+  left: -40px;
+  top: -30px;
+  width: 200px;
+  height: 160px;
+  background: #ec4899;
+  opacity: 0.35;
+}
+
+.shotsuChat__wash i:nth-child(2) {
+  right: -50px;
+  top: 30px;
+  width: 220px;
+  height: 180px;
+  background: #60a5fa;
+  opacity: 0.35;
+  animation-duration: 15s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes shotsuDrift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(40px, 24px) scale(1.15); }
+}
+
+/* ---- header ---- */
+
+.shotsuChat__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 8px 14px;
+  color: #fff;
+}
+
+.shotsuChat__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shotsuChat__name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.shotsuChat__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.shotsuChat__live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+  animation: shotsuLive 2.2s ease-out infinite;
+}
+
+@keyframes shotsuLive {
+  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); }
+  100% { box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); }
+}
+
+.shotsuChat__close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.3s var(--orb-ease);
+}
+
+.shotsuChat__close svg {
+  width: 12px;
+  height: 12px;
+}
+
+.shotsuChat__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* back to the start screen, shown once a chat has begun */
+.shotsuChat__back {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin-right: -2px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  color: #fff;
+  cursor: pointer;
+  animation: shotsuRise 0.4s var(--orb-ease) both;
+  transition: background-color 0.25s ease;
+}
+
+.shotsuChat__back svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.3s var(--orb-ease);
+}
+
+.shotsuChat__back:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.shotsuChat__back:hover svg {
+  transform: translateX(-2px);
+}
+
+/* the reference's progress line, running under the header while thinking */
+.shotsuChat__progress {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: shotsuProgress 1.1s ease-in-out infinite;
+}
+
+@keyframes shotsuProgress {
+  from { background-position: -40% 0; }
+  to { background-position: 140% 0; }
+}
+
+/* ---- the mini orb (avatar) ---- */
+
+.shotsuMini {
+  position: relative;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(214, 140, 255, 0.9), rgba(214, 140, 255, 0) 52%),
+    radial-gradient(circle at 74% 80%, rgba(118, 128, 255, 0.85), rgba(118, 128, 255, 0) 55%),
+    radial-gradient(circle at 50% 50%, #7c3aed, #6d31e0 70%, #8b67f5 100%);
+  box-shadow:
+    inset 0 0 4px 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1.5px rgba(255, 255, 255, 0.55),
+    0 0 10px 2px rgba(255, 255, 255, 0.45),
+    0 4px 12px rgba(40, 10, 90, 0.25);
+}
+
+.shotsuMini--sm {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  box-shadow:
+    inset 0 0 3px 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 6px 1px rgba(196, 181, 253, 0.6);
+}
+
+.shotsuMini__swirl {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(196, 181, 253, 0.6) 80deg,
+    transparent 160deg,
+    rgba(236, 72, 153, 0.3) 240deg,
+    transparent 320deg
+  );
+  mix-blend-mode: soft-light;
+  animation: shotsuSwirl 9s linear infinite;
+}
+
+.shotsuMini__shine {
+  position: absolute;
+  left: 16%;
+  top: 9%;
+  width: 48%;
+  height: 30%;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
+  transform: rotate(-18deg);
+}
+
+/* ---- the scrolling body ---- */
+
+.shotsuChat__list {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 6px 14px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 58, 237, 0.25) transparent;
+}
+
+/* the greeting, big, with one word lit in a gradient */
+.shotsuChat__hello {
+  margin: 8px 4px 26px;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-wrap: balance;
+  animation: shotsuRise 0.6s var(--orb-ease) 0.05s both;
+}
+
+/* the one lit word, like the reference's accent: a warm solid against
+   the violet */
+.shotsuChat__hello em {
+  font-style: normal;
+  color: #fde68a;
+}
+
+@keyframes shotsuRise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.shotsuChat__kicker {
+  margin: 0 4px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(28, 26, 36, 0.5);
+}
+
+/* ---- "things you can ask" ---- */
+
+.shotsuChat__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shotsuAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px 8px 8px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(76, 29, 149, 0.06),
+    0 2px 8px rgba(40, 20, 80, 0.05);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  animation: shotsuRise 0.5s var(--orb-ease) both;
+  animation-delay: calc(0.2s + var(--d, 0ms));
+  transition: transform 0.35s var(--orb-ease), box-shadow 0.35s var(--orb-ease);
+}
+
+.shotsuAction:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.22),
+    0 10px 22px rgba(40, 20, 80, 0.12);
+}
+
+/* the glossy icon tile, one tint per card */
+.shotsuAction__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 10px var(--tint-shadow);
+}
+
+.shotsuAction__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.shotsuAction--violet .shotsuAction__icon {
+  --tint-shadow: rgba(124, 58, 237, 0.35);
+  background: linear-gradient(145deg, #a78bfa, #7c3aed);
+}
+
+.shotsuAction--blue .shotsuAction__icon {
+  --tint-shadow: rgba(59, 130, 246, 0.35);
+  background: linear-gradient(145deg, #93c5fd, #3b82f6);
+}
+
+.shotsuAction--green .shotsuAction__icon {
+  --tint-shadow: rgba(16, 185, 129, 0.35);
+  background: linear-gradient(145deg, #6ee7b7, #10b981);
+}
+
+.shotsuAction--amber .shotsuAction__icon {
+  --tint-shadow: rgba(245, 158, 11, 0.35);
+  background: linear-gradient(145deg, #fcd34d, #f59e0b);
+}
+
+.shotsuAction__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shotsuAction__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.shotsuAction__sub {
+  font-size: 11.5px;
+  color: rgba(28, 26, 36, 0.5);
+}
+
+.shotsuAction__go {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #f3effd;
+  color: #7c3aed;
+  transition: transform 0.35s var(--orb-ease), background-color 0.25s ease;
+}
+
+.shotsuAction__go svg {
+  width: 11px;
+  height: 11px;
+}
+
+.shotsuAction:hover .shotsuAction__go {
+  transform: translateX(2px);
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* ---- messages ---- */
+
+.shotsuMsg {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  animation: shotsuMsgIn 0.4s var(--orb-ease) both;
+}
+
+@keyframes shotsuMsgIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.shotsuMsg--user {
+  align-self: flex-end;
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 6px 18px;
+  background: linear-gradient(135deg, #9061f9, #6d28d9);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(109, 40, 217, 0.28);
+  white-space: pre-wrap;
+}
+
+.shotsuMsg--bot {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  align-self: flex-start;
+  max-width: 92%;
+}
+
+.shotsuMsg__bubble {
+  padding: 11px 14px;
+  border-radius: 18px 18px 18px 6px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(76, 29, 149, 0.07),
+    0 4px 14px rgba(40, 20, 80, 0.07);
+  color: rgba(28, 26, 36, 0.86);
+  white-space: pre-wrap;
+}
+
+.shotsu__link {
+  color: #6d28d9;
+  font-weight: 600;
+  text-decoration: none;
+  background-image: linear-gradient(90deg, #a78bfa, #7c3aed);
+  background-size: 100% 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: color 0.2s ease;
+}
+
+.shotsu__link:hover {
+  color: #4c1d95;
+}
+
+.shotsuMsg__typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.shotsuMsg__typing i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+  animation: shotsuDot 1.1s ease-in-out infinite;
+}
+
+.shotsuMsg__typing i:nth-child(2) { animation-delay: 0.15s; }
+.shotsuMsg__typing i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes shotsuDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ---- the foot: follow-ups, the field, the note ---- */
+
+.shotsuChat__foot {
+  position: relative;
+  z-index: 1;
+  padding: 8px 12px 0;
+  background: linear-gradient(to bottom, rgba(251, 250, 255, 0), #fbfaff 30%);
+  border-radius: 0 0 22px 22px;
+}
+
+.shotsuChat__follow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.shotsuChat__follow::-webkit-scrollbar {
+  display: none;
+}
+
+.shotsuChat__chip {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #f1ebff;
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.14);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: #5b21b6;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.shotsuChat__chip:hover {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.shotsuChat__form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(76, 29, 149, 0.1),
+    0 6px 18px rgba(40, 20, 80, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.shotsuChat__form:focus-within {
+  box-shadow:
+    0 0 0 1.5px rgba(124, 58, 237, 0.6),
+    0 0 0 5px rgba(124, 58, 237, 0.1),
+    0 6px 18px rgba(40, 20, 80, 0.1);
+}
+
+.shotsuChat__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  outline: none;
+}
+
+.shotsuChat__input::placeholder {
+  color: rgba(28, 26, 36, 0.4);
+}
+
+.shotsuChat__send {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #a57bff, #6d28d9);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 14px rgba(109, 40, 217, 0.35);
+  cursor: pointer;
+  transition: transform 0.3s var(--orb-ease), opacity 0.25s ease, box-shadow 0.3s ease;
+}
+
+.shotsuChat__send svg {
+  width: 15px;
+  height: 15px;
+}
+
+.shotsuChat__send:not(:disabled):hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 20px rgba(109, 40, 217, 0.45);
+}
+
+.shotsuChat__send:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+  cursor: default;
+}
+
+.shotsuChat__note {
+  margin: 0;
+  padding: 8px 4px 12px;
+  font-size: 10px;
+  text-align: center;
+  color: rgba(28, 26, 36, 0.38);
+}
+
+.shotsuAction:focus-visible,
+.shotsuChat__chip:focus-visible,
+.shotsuChat__close:focus-visible,
+.shotsuChat__back:focus-visible,
+.shotsuChat__send:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   Phone
+   ========================================================== */
+
+@media (max-width: 760px) {
+  .shotsu {
+    --orb: 50px;
+    --orb-gap: 14px;
+  }
+
+  /* a compact card anchored to the orb, not a full-width sheet; its
+     height stops short of the floating navbar (~96px from the top) */
+  .shotsuChat {
+    width: min(310px, calc(100vw - 28px));
+    height: min(500px, calc(100svh - var(--orb) - var(--orb-gap) - var(--orb-lift) - 16px - 96px));
+    border-radius: 20px;
+  }
+
+  .shotsuChat--empty {
+    height: auto;
+    max-height: min(500px, calc(100svh - var(--orb) - var(--orb-gap) - var(--orb-lift) - 16px - 96px));
+  }
+
+  .shotsuChat__wash {
+    height: 220px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .shotsuChat__foot {
+    border-radius: 0 0 20px 20px;
+  }
+
+  .shotsuChat__head {
+    padding: 10px 10px 6px 12px;
+  }
+
+  .shotsuChat__list {
+    gap: 10px;
+    padding: 4px 10px 10px;
+  }
+
+  .shotsuChat__hello {
+    margin: 4px 2px 18px;
+    font-size: 18px;
+  }
+
+  .shotsuChat__kicker {
+    margin-bottom: 8px;
+  }
+
+  .shotsuChat__actions {
+    gap: 6px;
+  }
+
+  .shotsuAction {
+    gap: 10px;
+    padding: 7px 9px 7px 7px;
+    border-radius: 12px;
+  }
+
+  .shotsuAction__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .shotsuAction__icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .shotsuAction__title {
+    font-size: 12.5px;
+  }
+
+  .shotsuAction__sub {
+    font-size: 11px;
+  }
+
+  .shotsuChat__foot {
+    padding: 6px 10px 0;
+  }
+
+  .shotsuChat__form {
+    padding: 4px 4px 4px 14px;
+  }
+
+  /* iOS zooms the page into any field under 16px, so the field stays 16px
+     and is scaled to read as 13px; the negative margin lets the box grow
+     by the width the scale takes away, so the text still runs to the
+     send button */
+  .shotsuChat__input {
+    font-size: 16px;
+    margin-right: -54px;
+    transform: scale(0.8125);
+    transform-origin: left center;
+  }
+
+  .shotsuChat__send {
+    width: 30px;
+    height: 30px;
+  }
+
+  .shotsuChat__note {
+    padding: 6px 4px 10px;
+  }
+
+  .shotsuOrb__label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shotsuOrb,
+  .shotsuOrb__swirl,
+  .shotsuFace__eye,
+  .shotsuOrb__floor,
+  .shotsuOrb__glow,
+  .shotsuOrb--talking::before,
+  .shotsuChat,
+  .shotsuMsg,
+  .shotsuChat__progress,
+  .shotsuChat__wash i,
+  .shotsuChat__live,
+  .shotsuChat__hello,
+  .shotsuAction,
+  .shotsuMini__swirl {
+    animation: none;
+  }
+}

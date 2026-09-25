@@ -50,10 +50,7 @@ export default function PromoToast({
     </svg>
   );
 
-  /* the square action. Rendered in two places - at the end of the chip
-     row, and inside the card beside the status on a phone, where the chip
-     row is dropped to keep the card small. Only one is ever displayed, so
-     it is never announced or tabbed to twice. */
+  /* the square action at the end of the chip row */
   const go = (extra = "") =>
     external ? (
       <a
@@ -127,7 +124,6 @@ export default function PromoToast({
             >
               {promo.status}
             </span>
-            {go(" recentToast__go--inline")}
           </div>
         </div>
 

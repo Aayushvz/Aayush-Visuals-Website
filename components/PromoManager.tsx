@@ -31,8 +31,7 @@ import PromoToast, { type Promo } from "@/components/PromoToast";
 
   It only runs on the pages where a nudge makes sense: home, about, work
   and the playground. The games, tools and contact page are left alone.
-  On a phone, where a card covers far more of the screen, it narrows
-  further to the about page and the case studies only.
+  Never on a phone: a card there covers too much of a small screen.
 */
 
 const ENTRY_DELAY_MS = 2000;
@@ -66,8 +65,7 @@ const ENTRY: Record<Kind, string> = {
   playground: "contact",
 };
 
-/* on a phone, only these pages get cards at all */
-const PHONE_KINDS = new Set<Kind>(["about", "case"]);
+/* no cards at all at phone widths */
 const PHONE_QUERY = "(max-width: 760px)";
 
 /* the pages where a reader scrolling on gets further cards */
@@ -96,7 +94,17 @@ function pastHero() {
   return window.scrollY >= window.innerHeight * HERO_SCREENS;
 }
 
-export default function PromoManager({ promos }: { promos: Promo[] }) {
+export default function PromoManager({
+  promos,
+  paused = false,
+  onActive,
+}: {
+  promos: Promo[];
+  /* true while the Shotsu chat is open: no card shows over a conversation */
+  paused?: boolean;
+  /* tells the orb a card is up, so it can look like it is speaking */
+  onActive?: (active: boolean) => void;
+}) {
   const pathname = usePathname() || "/";
   const [phone, setPhone] = useState(false);
   useEffect(() => {
@@ -107,12 +115,18 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
     return () => mq.removeEventListener("change", sync);
   }, []);
   const pageKind = kindOf(pathname);
-  const kind = pageKind && (!phone || PHONE_KINDS.has(pageKind)) ? pageKind : null;
+  const kind = phone ? null : pageKind;
   const [current, setCurrent] = useState<Current | null>(null);
 
   /* live values the timers read without re-subscribing */
   const currentRef = useRef<Current | null>(null);
   currentRef.current = current;
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+
+  useEffect(() => {
+    onActive?.(!!current && current.phase === "shown");
+  }, [current, onActive]);
   const page = useRef({
     count: 0,
     shown: new Set<string>(),
@@ -138,7 +152,7 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
   }, [promos, pathname]);
 
   const show = useCallback((promo: Promo | undefined, counted = true) => {
-    if (!promo || currentRef.current) return;
+    if (!promo || currentRef.current || pausedRef.current) return;
     /* Never over a hero. Checked at the moment of showing, against where
        the visitor actually is, not how far the page has moved: a route
        change jumps the scroll back to the top, and that jump must not read
@@ -157,6 +171,11 @@ export default function PromoManager({ promos }: { promos: Promo[] }) {
   const dismiss = useCallback((phase: "leaving" | "fading") => {
     setCurrent((c) => (c && c.phase === "shown" ? { ...c, phase } : c));
   }, []);
+
+  /* the chat opening sends any card away */
+  useEffect(() => {
+    if (paused) setCurrent((c) => (c && c.phase === "shown" ? { ...c, phase: "leaving" } : c));
+  }, [paused]);
 
   /* once it has played its exit, take it off and start the quiet period */
   useEffect(() => {

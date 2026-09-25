@@ -1868,8 +1868,9 @@
    written by BackToTop on scroll and drawn as an arc over a faint track */
 .csTop {
   --csTop-p: 0;
+  /* bottom left: the bottom right corner belongs to the Shotsu orb */
   position: fixed;
-  right: clamp(16px, 3vw, 40px);
+  left: clamp(16px, 3vw, 40px);
   bottom: clamp(16px, 3vw, 40px);
   z-index: 60;
   display: grid;

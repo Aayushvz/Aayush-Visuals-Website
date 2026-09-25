@@ -9,6 +9,7 @@
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"components/contract/**/*.test.ts\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@types/matter-js": "^0.20.2",
     "framer-motion": "^12.42.2",
     "matter-js": "^0.20.0",

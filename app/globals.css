@@ -12771,32 +12771,38 @@ html.dpl-page .preloader {
   }
 }
 
+/* the close sits inside the card, on the right of the purple band */
 .recentToast__close {
   position: absolute;
   z-index: 2;
-  top: -10px;
-  right: -10px;
+  /* 16px, centred on the band label's line (6px pad + 15.75px line), so
+     it sits in the middle of the purple strip with even room above and
+     below instead of touching the dashed card */
+  top: 5px;
+  right: 9px;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--ink);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(31, 31, 31, 0.25);
   transition: transform 0.25s ease, background-color 0.25s ease;
 }
 
 .recentToast__close svg {
-  width: 13px;
-  height: 13px;
+  display: block;
+  width: 9px;
+  height: 9px;
 }
 
 .recentToast__close:hover {
   transform: rotate(90deg);
-  background: var(--purple);
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .recentToast__close:focus-visible,
@@ -12835,7 +12841,13 @@ html.dpl-page .preloader {
   padding: 12px 12px 10px;
   border: 1px dashed rgba(31, 31, 31, 0.2);
   border-radius: 12px;
-  background: #f7f6f4;
+  /* a faint echo of Shotsu's chat wash: violet from the band above,
+     a hint of pink and blue glowing in the corners */
+  background:
+    radial-gradient(120% 70% at 0% 0%, rgba(236, 72, 153, 0.07), rgba(236, 72, 153, 0) 60%),
+    radial-gradient(110% 80% at 100% 0%, rgba(96, 165, 250, 0.08), rgba(96, 165, 250, 0) 60%),
+    linear-gradient(to bottom, rgba(124, 58, 237, 0.07), rgba(124, 58, 237, 0) 70%),
+    #f8f7fb;
 }
 
 .recentToast__row {
@@ -12981,120 +12993,6 @@ html.dpl-page .preloader {
 .recentToast__go:hover {
   background: var(--purple);
   transform: translate(1px, -1px);
-}
-
-/* the in-card copy of the action is for phones only */
-.recentToast__go--inline {
-  display: none;
-}
-
-@media (max-width: 760px) {
-  /* a phone: a small card tucked into the bottom-right corner. Only the
-     name, the date, the marks and the status survive, with the arrow alone
-     on the last row, so it covers a corner and nothing more */
-  .recentToast {
-    right: 10px;
-    bottom: 10px;
-    width: min(232px, calc(100vw - 72px));
-  }
-
-  .recentToast__card {
-    border-radius: 12px;
-  }
-
-  .recentToast__band {
-    padding: 4px 0 12px;
-    margin-bottom: -9px;
-    font-size: 8.5px;
-    letter-spacing: 0.12em;
-  }
-
-  .recentToast__body {
-    margin: 0 5px;
-    padding: 8px 9px 8px;
-    border-radius: 9px;
-  }
-
-  .recentToast__title {
-    font-size: 12.5px;
-  }
-
-  .recentToast__date {
-    font-size: 9.5px;
-  }
-
-  .recentToast__text {
-    display: none;
-  }
-
-  .recentToast__row--foot {
-    margin-top: 7px;
-  }
-
-  .recentToast__stack > * {
-    width: 20px;
-    height: 20px;
-  }
-
-  .recentToast__stack > * + * {
-    margin-left: -7px;
-  }
-
-  .recentToast__stackBadge svg {
-    width: 10px;
-    height: 10px;
-  }
-
-  .recentToast__stackBadge img {
-    width: 12px;
-  }
-
-  .recentToast__status {
-    padding: 2px 7px;
-    border-radius: 6px;
-    font-size: 9.5px;
-  }
-
-  /* no chip row on a phone: the action moves inside, beside the status */
-  .recentToast__chips {
-    display: none;
-  }
-
-  .recentToast__card {
-    padding-bottom: 5px;
-  }
-
-  .recentToast__go--inline {
-    display: grid;
-    margin-left: 6px;
-  }
-
-  .recentToast__status {
-    margin-left: auto;
-  }
-
-  .recentToast__go {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-  }
-
-  .recentToast__go svg {
-    width: 11px;
-    height: 11px;
-  }
-
-  .recentToast__close {
-    top: -8px;
-    right: -8px;
-    width: 20px;
-    height: 20px;
-  }
-
-  .recentToast__close svg {
-    width: 10px;
-    height: 10px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
