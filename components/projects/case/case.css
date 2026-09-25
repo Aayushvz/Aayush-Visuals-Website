@@ -1897,6 +1897,14 @@
     color var(--dur-hover, 200ms) var(--ease-quint);
 }
 
+/* phones have no Shotsu orb, so the corner is free again */
+@media (max-width: 760px) {
+  .csTop {
+    left: auto;
+    right: clamp(16px, 3vw, 40px);
+  }
+}
+
 .csTop > svg {
   grid-area: 1 / 1;
 }

@@ -28,7 +28,7 @@
   height: var(--orb);
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -47,77 +47,119 @@ body:has(.aboutPage__bar) .shotsu {
   50% { translate: 0 -4px; }
 }
 
-/* the soft violet aura it casts; breathes outward while a card is up */
+/* The orb is a gummy: a soft dome of milky, translucent jelly, pale at
+   the top where light passes through it and glowing violet and pink at the
+   base, where the colour pools like light inside a sweet. The shape is a
+   little wider than tall and flatter underneath, and it squishes slowly. */
+.shotsuOrb {
+  --jelly: 50% 50% 46% 46% / 58% 58% 42% 42%;
+}
+
+/* the soft coloured light it throws around itself; breathes outward while
+   a card is up */
 .shotsuOrb::before {
   content: "";
   position: absolute;
-  inset: -12px;
+  inset: -12px -14px -10px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.55) 35%, rgba(124, 58, 237, 0) 70%);
-  filter: blur(8px);
+  background: radial-gradient(ellipse at 50% 60%, rgba(124, 58, 237, 0.6) 30%, rgba(124, 58, 237, 0) 70%);
+  filter: blur(9px);
   opacity: 0.9;
   transition: opacity 0.4s ease, transform 0.6s var(--orb-ease);
 }
 
-/* the glowing rim: a blurred white light around the edge, its outline
-   slowly wobbling so the orb feels alive rather than cut out */
+/* ear, glow and ball squish together from the base */
+.shotsuOrb__body {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  animation: shotsuSquish 4.4s ease-in-out infinite;
+}
+
+/* the little tuft on top, tucked behind the body so the jelly covers its
+   base; it perks up on hover and while a card is up */
+.shotsuOrb__ear {
+  position: absolute;
+  left: 50%;
+  top: -13%;
+  width: 34%;
+  height: auto;
+  overflow: visible;
+  /* same soft skin as the body: a tight lilac glow, no outline */
+  filter: drop-shadow(0 0 2px rgba(196, 170, 255, 0.85));
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+  transition: transform 0.45s var(--orb-ease);
+}
+
+/* the glow hugging the jelly's edge: a thin frosted-white skin and a
+   tight halo in its own colour, squishing with it */
 .shotsuOrb__glow {
   position: absolute;
-  inset: -2px;
-  border-radius: 48% 52% 50% 50% / 51% 48% 52% 49%;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--jelly);
+  transform-origin: 50% 100%;
   box-shadow:
-    0 0 0 1.5px rgba(243, 236, 255, 0.9),
-    0 0 6px 2px rgba(221, 205, 255, 0.75),
-    0 0 16px 4px rgba(167, 139, 250, 0.5),
-    inset 0 0 7px 2px rgba(237, 228, 255, 0.55);
-  filter: blur(0.8px);
-  animation: shotsuRim 7s ease-in-out infinite;
+    inset 0 0 0 1.5px rgba(245, 238, 255, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 0 8px 2px rgba(196, 170, 255, 0.7),
+    0 0 18px 5px rgba(139, 92, 246, 0.45);
   transition: transform 0.6s var(--orb-ease);
 }
 
-@keyframes shotsuRim {
-  0%, 100% { border-radius: 48% 52% 50% 50% / 51% 48% 52% 49%; }
-  33% { border-radius: 52% 48% 47% 53% / 48% 53% 47% 52%; }
-  66% { border-radius: 50% 50% 53% 47% / 53% 49% 51% 47%; }
-}
-
-/* The sphere: a soft gradient body in the site purple, an orchid light
-   upper left and a periwinkle glow lower right. No dark edge: the rim above lights
-   it from outside and a white inner glow feathers it from inside. */
+/* the jelly body */
 .shotsuOrb__ball {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 50%;
+  border-radius: var(--jelly);
+  /* a hard clip as well: Chrome lets the blended swirl leak past a
+     rounded overflow clip while the body is transformed */
+  clip-path: inset(0 round 50% 50% 46% 46% / 58% 58% 42% 42%);
+  isolation: isolate;
   font-size: var(--orb);
   background:
-    radial-gradient(circle at 30% 26%, rgba(214, 140, 255, 0.9), rgba(214, 140, 255, 0) 52%),
-    radial-gradient(circle at 74% 80%, rgba(118, 128, 255, 0.85), rgba(118, 128, 255, 0) 55%),
-    radial-gradient(circle at 50% 50%, #7c3aed, #6d31e0 70%, #8b67f5 100%);
+    /* the colour glowing up from the base */
+    radial-gradient(ellipse 75% 45% at 50% 100%, rgba(192, 38, 211, 0.6), rgba(192, 38, 211, 0) 75%),
+    radial-gradient(ellipse 100% 70% at 50% 95%, rgba(109, 40, 217, 0.95), rgba(109, 40, 217, 0) 75%),
+    /* the milky body, clear at the top */
+    linear-gradient(to bottom, #ece3ff 0%, #c9b2ff 30%, #9f78fa 62%, #7c3aed 100%);
   box-shadow:
-    inset 0 0 6px 2px rgba(237, 228, 255, 0.5),
-    inset 0 0 16px 4px rgba(255, 255, 255, 0.18),
-    0 10px 24px rgba(109, 40, 217, 0.3);
+    /* frosted skin and light caught inside the top */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 5px 8px rgba(255, 255, 255, 0.85),
+    /* colour concentrating at the bottom edge, like depth in the jelly */
+    inset 0 -6px 12px rgba(91, 33, 182, 0.55),
+    0 8px 20px rgba(124, 58, 237, 0.35);
 }
 
-/* a faint environment reflection across the upper half of the glass */
+/* the slow squish: a touch wider and lower, then back, from the base */
+@keyframes shotsuSquish {
+  0%, 100% { transform: scale(1, 1); }
+  45% { transform: scale(1.035, 0.965); }
+  70% { transform: scale(0.985, 1.015); }
+}
+
+/* a soft sheen over the top of the jelly */
 .shotsuOrb__glass {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(170deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 38%);
+  border-radius: inherit;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 40%);
 }
 
-/* a slow iridescent swirl under the glass */
+/* colour moving slowly inside the jelly */
 .shotsuOrb__swirl {
   position: absolute;
   inset: -30%;
   background: conic-gradient(
     from 0deg,
     rgba(255, 255, 255, 0) 0deg,
-    rgba(196, 181, 253, 0.55) 70deg,
+    rgba(96, 165, 250, 0.35) 70deg,
     rgba(255, 255, 255, 0) 140deg,
-    rgba(236, 72, 153, 0.28) 220deg,
+    rgba(236, 72, 153, 0.35) 220deg,
     rgba(255, 255, 255, 0) 300deg
   );
   mix-blend-mode: soft-light;
@@ -128,29 +170,28 @@ body:has(.aboutPage__bar) .shotsu {
   to { rotate: 360deg; }
 }
 
-/* the glass highlight, fixed while everything under it moves */
+/* the wide soft highlight across the crown */
 .shotsuOrb__shine {
   position: absolute;
-  left: 18%;
-  top: 10%;
-  width: 40%;
-  height: 22%;
+  left: 20%;
+  top: 6%;
+  width: 60%;
+  height: 26%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%);
-  filter: blur(1px);
-  transform: rotate(-22deg);
+  background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 70%);
+  filter: blur(1.5px);
 }
 
-/* its reflection on the floor, as in the reference */
+/* the coloured light it spills on the floor */
 .shotsuOrb__floor {
   position: absolute;
-  left: 20%;
-  right: 20%;
-  bottom: -9px;
-  height: 7px;
+  left: 12%;
+  right: 12%;
+  bottom: -8px;
+  height: 8px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(76, 29, 149, 0.32), rgba(139, 92, 246, 0.1) 60%, transparent);
-  filter: blur(1.5px);
+  background: radial-gradient(closest-side, rgba(124, 58, 237, 0.45), rgba(139, 92, 246, 0.15) 60%, transparent);
+  filter: blur(2px);
   animation: shotsuFloor 5.5s ease-in-out infinite;
 }
 
@@ -193,6 +234,10 @@ body:has(.aboutPage__bar) .shotsu {
     transform: scale(1.04);
   }
 
+  .shotsuOrb:hover .shotsuOrb__ear {
+    transform: translate(-50%, -8%) scale(1.12);
+  }
+
   .shotsuOrb:not(.shotsuOrb--open):hover .shotsuOrb__label {
     opacity: 1;
     transform: translate(0, -50%);
@@ -208,6 +253,15 @@ body:has(.aboutPage__bar) .shotsu {
   outline-offset: 5px;
 }
 
+.shotsuOrb--talking .shotsuOrb__ear {
+  animation: shotsuPerk 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes shotsuPerk {
+  from { transform: translateX(-50%) rotate(-6deg); }
+  to { transform: translateX(-50%) rotate(6deg); }
+}
+
 /* speaking: while a card is up, the orb breathes a ring outward */
 .shotsuOrb--talking::before {
   animation: shotsuPulse 1.8s ease-out infinite;
@@ -221,32 +275,40 @@ body:has(.aboutPage__bar) .shotsu {
 /* ==========================================================
    The face (shared by the orb and its pocket version)
 
-   Two glowing pill eyes and nothing else: attentive, calm, a little
-   techy. They drift toward the pointer, blink now and then, narrow as if
-   focusing on hover, and look up at the panel while the chat is open.
+   Pill eyes that drift toward the pointer and blink, and a mouth that
+   only appears for some moods. The orb's data-mood picks the look: it
+   drifts through these while idle, is happy while a card is up, and
+   hovering it gets the happy face too.
    ========================================================== */
 
 .shotsuFace {
+  --ink: #2e1065;
   position: absolute;
   left: 50%;
-  top: 52%;
+  top: 46%;
   display: flex;
+  align-items: center;
   gap: 0.14em;
+  height: 0.19em;
   transform: translate(calc(-50% + var(--look-x, 0px)), calc(-50% + var(--look-y, 0px)));
   transition: transform 0.35s var(--orb-ease, ease);
 }
 
 .shotsuFace__eye {
-  width: 0.085em;
+  box-sizing: border-box;
+  width: 0.075em;
   height: 0.19em;
+  border: 0 solid var(--ink);
   border-radius: 999px;
-  background: linear-gradient(to bottom, #fff, #efe8ff);
-  box-shadow:
-    0 0 0.06em rgba(255, 255, 255, 0.85),
-    0 0 0.14em rgba(196, 181, 253, 0.6);
+  background: var(--ink);
   transform-origin: 50% 60%;
   animation: shotsuBlink 5.2s ease-in-out infinite;
-  transition: transform 0.3s var(--orb-ease, ease);
+  transition:
+    width 0.25s var(--orb-ease, ease),
+    height 0.25s var(--orb-ease, ease),
+    border-radius 0.25s ease,
+    background-color 0.2s ease,
+    transform 0.3s var(--orb-ease, ease);
 }
 
 @keyframes shotsuBlink {
@@ -254,11 +316,101 @@ body:has(.aboutPage__bar) .shotsu {
   95% { transform: scaleY(0.1); }
 }
 
-/* hovered: the eyes narrow slightly, as if focusing on you */
+.shotsuFace__mouth {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.05em);
+  box-sizing: border-box;
+  width: 0.1em;
+  height: 0.05em;
+  border: 0.024em solid var(--ink);
+  border-top: 0;
+  border-radius: 0 0 0.08em 0.08em;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.4);
+  transition: opacity 0.2s ease, transform 0.3s var(--orb-ease, ease), width 0.25s ease, height 0.25s ease,
+    border-radius 0.25s ease;
+}
+
+/* an eye closed into a happy arch */
+.shotsuOrb[data-mood="happy"] .shotsuFace__eye,
+.shotsuOrb[data-mood="wink"] .shotsuFace__eye--r {
+  width: 0.12em;
+  height: 0.07em;
+  border-width: 0.032em 0.032em 0;
+  border-radius: 0.07em 0.07em 0 0;
+  background-color: transparent;
+  animation: none;
+}
+
+/* happy and wink smile */
+.shotsuOrb[data-mood="happy"] .shotsuFace__mouth,
+.shotsuOrb[data-mood="wink"] .shotsuFace__mouth {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+
+/* sleepy: eyes shut to lines, face sinking a little */
+.shotsuOrb[data-mood="sleepy"] .shotsuFace {
+  transform: translate(-50%, calc(-50% + 0.03em));
+}
+
+.shotsuOrb[data-mood="sleepy"] .shotsuFace__eye {
+  width: 0.11em;
+  height: 0.026em;
+  animation: none;
+}
+
+/* surprised: round eyes and a small o */
+.shotsuOrb[data-mood="surprised"] .shotsuFace__eye {
+  width: 0.1em;
+  height: 0.12em;
+  border-radius: 50%;
+  animation: none;
+}
+
+.shotsuOrb[data-mood="surprised"] .shotsuFace__mouth {
+  width: 0.06em;
+  height: 0.07em;
+  border-top: 0.024em solid var(--ink);
+  border-radius: 50%;
+  opacity: 1;
+  transform: translateX(-50%);
+}
+
+/* curious: head tilted, glancing to one side, the far eye a touch
+   smaller as if turned */
+.shotsuOrb[data-mood="curious"] .shotsuFace {
+  transform: translate(calc(-50% + 0.07em), calc(-50% - 0.02em)) rotate(-7deg);
+}
+
+.shotsuOrb[data-mood="curious"] .shotsuFace__eye--l {
+  height: 0.15em;
+  animation: none;
+}
+
+/* hovered: the happy face */
 @media (hover: hover) {
   .shotsuOrb:hover .shotsuFace__eye {
-    transform: scaleY(0.72);
+    width: 0.12em;
+    height: 0.07em;
+    border-width: 0.032em 0.032em 0;
+    border-radius: 0.07em 0.07em 0 0;
+    background-color: transparent;
     animation: none;
+  }
+
+  .shotsuOrb:hover .shotsuFace__mouth {
+    width: 0.12em;
+    height: 0.06em;
+    border-top: 0;
+    border-radius: 0 0 0.08em 0.08em;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+
+  .shotsuOrb:hover .shotsuFace {
+    transform: translate(calc(-50% + var(--look-x, 0px)), calc(-50% + var(--look-y, 0px)));
   }
 }
 
@@ -365,8 +517,8 @@ body:has(.aboutPage__bar) .shotsu {
   background: linear-gradient(
     to bottom,
     #7c3aed 0%,
-    #9061f9 26%,
-    #c4b1fb 56%,
+    #8f5cf2 26%,
+    #bba3fa 58%,
     rgba(251, 250, 255, 0) 100%
   );
   pointer-events: none;
@@ -391,8 +543,8 @@ body:has(.aboutPage__bar) .shotsu {
   top: -30px;
   width: 200px;
   height: 160px;
-  background: #ec4899;
-  opacity: 0.35;
+  background: #c026d3;
+  opacity: 0.16;
 }
 
 .shotsuChat__wash i:nth-child(2) {
@@ -400,8 +552,8 @@ body:has(.aboutPage__bar) .shotsu {
   top: 30px;
   width: 220px;
   height: 180px;
-  background: #60a5fa;
-  opacity: 0.35;
+  background: #4c1d95;
+  opacity: 0.28;
   animation-duration: 15s;
   animation-direction: alternate-reverse;
 }
@@ -547,11 +699,13 @@ body:has(.aboutPage__bar) .shotsu {
   height: 32px;
   font-size: 32px;
   overflow: hidden;
-  border-radius: 50%;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
+  clip-path: inset(0 round 50% 50% 46% 46% / 58% 58% 42% 42%);
+  isolation: isolate;
   background:
-    radial-gradient(circle at 30% 26%, rgba(214, 140, 255, 0.9), rgba(214, 140, 255, 0) 52%),
-    radial-gradient(circle at 74% 80%, rgba(118, 128, 255, 0.85), rgba(118, 128, 255, 0) 55%),
-    radial-gradient(circle at 50% 50%, #7c3aed, #6d31e0 70%, #8b67f5 100%);
+    radial-gradient(ellipse 75% 45% at 50% 100%, rgba(192, 38, 211, 0.6), rgba(192, 38, 211, 0) 75%),
+    radial-gradient(ellipse 100% 70% at 50% 95%, rgba(109, 40, 217, 0.95), rgba(109, 40, 217, 0) 75%),
+    linear-gradient(to bottom, #ece3ff 0%, #c9b2ff 30%, #9f78fa 62%, #7c3aed 100%);
   box-shadow:
     inset 0 0 4px 1px rgba(255, 255, 255, 0.6),
     0 0 0 1.5px rgba(255, 255, 255, 0.55),
@@ -680,15 +834,45 @@ body:has(.aboutPage__bar) .shotsu {
 }
 
 /* the glossy icon tile, one tint per card */
+/* the icon tile: a small mesh of two or three colours, a glossy sheen
+   over the top half, a hairline of light around the edge, and a glow in
+   its own colour underneath */
 .shotsuAction__icon {
+  position: relative;
   display: grid;
   place-items: center;
   flex-shrink: 0;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  overflow: hidden;
+  border-radius: 11px;
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 10px var(--tint-shadow);
+  background:
+    radial-gradient(circle at 20% 15%, var(--mesh-a), transparent 60%),
+    radial-gradient(circle at 85% 90%, var(--mesh-c), transparent 65%),
+    var(--mesh-b);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.06),
+    0 6px 14px -4px var(--tint-shadow);
+  transition: transform 0.35s var(--orb-ease);
+}
+
+.shotsuAction__icon::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 50%;
+  border-radius: 11px 11px 40% 40% / 11px 11px 8px 8px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.02));
+}
+
+.shotsuAction__icon svg {
+  position: relative;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+.shotsuAction:hover .shotsuAction__icon {
+  transform: rotate(-6deg) scale(1.06);
 }
 
 .shotsuAction__icon svg {
@@ -697,23 +881,31 @@ body:has(.aboutPage__bar) .shotsu {
 }
 
 .shotsuAction--violet .shotsuAction__icon {
-  --tint-shadow: rgba(124, 58, 237, 0.35);
-  background: linear-gradient(145deg, #a78bfa, #7c3aed);
+  --mesh-a: #e9d5ff;
+  --mesh-b: #a78bfa;
+  --mesh-c: #818cf8;
+  --tint-shadow: rgba(124, 58, 237, 0.3);
 }
 
 .shotsuAction--blue .shotsuAction__icon {
-  --tint-shadow: rgba(59, 130, 246, 0.35);
-  background: linear-gradient(145deg, #93c5fd, #3b82f6);
+  --mesh-a: #cffafe;
+  --mesh-b: #7dabf8;
+  --mesh-c: #a5b4fc;
+  --tint-shadow: rgba(59, 130, 246, 0.28);
 }
 
 .shotsuAction--green .shotsuAction__icon {
-  --tint-shadow: rgba(16, 185, 129, 0.35);
-  background: linear-gradient(145deg, #6ee7b7, #10b981);
+  --mesh-a: #ecfccb;
+  --mesh-b: #5fd3a8;
+  --mesh-c: #67c7d6;
+  --tint-shadow: rgba(16, 185, 129, 0.28);
 }
 
 .shotsuAction--amber .shotsuAction__icon {
-  --tint-shadow: rgba(245, 158, 11, 0.35);
-  background: linear-gradient(145deg, #fcd34d, #f59e0b);
+  --mesh-a: #fef3c7;
+  --mesh-b: #f8c263;
+  --mesh-c: #f9a8c9;
+  --tint-shadow: rgba(245, 158, 11, 0.28);
 }
 
 .shotsuAction__text {
@@ -947,12 +1139,9 @@ body:has(.aboutPage__bar) .shotsu {
   cursor: default;
 }
 
-.shotsuChat__note {
-  margin: 0;
-  padding: 8px 4px 12px;
-  font-size: 10px;
-  text-align: center;
-  color: rgba(28, 26, 36, 0.38);
+/* room under the field, now that the note is gone */
+.shotsuChat__form {
+  margin-bottom: 12px;
 }
 
 .shotsuAction:focus-visible,
@@ -965,113 +1154,12 @@ body:has(.aboutPage__bar) .shotsu {
 }
 
 /* ==========================================================
-   Phone
+   Phone: no Shotsu at all (the orb, its chat and its cards are desktop
+   only, matching the popups, which were already off on phone)
    ========================================================== */
 
 @media (max-width: 760px) {
   .shotsu {
-    --orb: 50px;
-    --orb-gap: 14px;
-  }
-
-  /* a compact card anchored to the orb, not a full-width sheet; its
-     height stops short of the floating navbar (~96px from the top) */
-  .shotsuChat {
-    width: min(310px, calc(100vw - 28px));
-    height: min(500px, calc(100svh - var(--orb) - var(--orb-gap) - var(--orb-lift) - 16px - 96px));
-    border-radius: 20px;
-  }
-
-  .shotsuChat--empty {
-    height: auto;
-    max-height: min(500px, calc(100svh - var(--orb) - var(--orb-gap) - var(--orb-lift) - 16px - 96px));
-  }
-
-  .shotsuChat__wash {
-    height: 220px;
-    border-radius: 20px 20px 0 0;
-  }
-
-  .shotsuChat__foot {
-    border-radius: 0 0 20px 20px;
-  }
-
-  .shotsuChat__head {
-    padding: 10px 10px 6px 12px;
-  }
-
-  .shotsuChat__list {
-    gap: 10px;
-    padding: 4px 10px 10px;
-  }
-
-  .shotsuChat__hello {
-    margin: 4px 2px 18px;
-    font-size: 18px;
-  }
-
-  .shotsuChat__kicker {
-    margin-bottom: 8px;
-  }
-
-  .shotsuChat__actions {
-    gap: 6px;
-  }
-
-  .shotsuAction {
-    gap: 10px;
-    padding: 7px 9px 7px 7px;
-    border-radius: 12px;
-  }
-
-  .shotsuAction__icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-  }
-
-  .shotsuAction__icon svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .shotsuAction__title {
-    font-size: 12.5px;
-  }
-
-  .shotsuAction__sub {
-    font-size: 11px;
-  }
-
-  .shotsuChat__foot {
-    padding: 6px 10px 0;
-  }
-
-  .shotsuChat__form {
-    padding: 4px 4px 4px 14px;
-  }
-
-  /* iOS zooms the page into any field under 16px, so the field stays 16px
-     and is scaled to read as 13px; the negative margin lets the box grow
-     by the width the scale takes away, so the text still runs to the
-     send button */
-  .shotsuChat__input {
-    font-size: 16px;
-    margin-right: -54px;
-    transform: scale(0.8125);
-    transform-origin: left center;
-  }
-
-  .shotsuChat__send {
-    width: 30px;
-    height: 30px;
-  }
-
-  .shotsuChat__note {
-    padding: 6px 4px 10px;
-  }
-
-  .shotsuOrb__label {
     display: none;
   }
 }
@@ -1081,7 +1169,8 @@ body:has(.aboutPage__bar) .shotsu {
   .shotsuOrb__swirl,
   .shotsuFace__eye,
   .shotsuOrb__floor,
-  .shotsuOrb__glow,
+  .shotsuOrb__body,
+  .shotsuOrb--talking .shotsuOrb__ear,
   .shotsuOrb--talking::before,
   .shotsuChat,
   .shotsuMsg,

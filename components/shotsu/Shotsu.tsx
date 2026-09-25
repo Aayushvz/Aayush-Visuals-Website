@@ -72,18 +72,23 @@ const FOLLOW_UPS = [
   "How to contact him?",
 ];
 
-/* Shotsu's face: two glowing pill eyes that follow the pointer (the
-   --look vars) and blink. Deliberately just the eyes - enough to feel
-   attentive, not a mascot. Sized in em off the orb's font-size, so the
-   same face fits the big orb and the pocket one */
+/* Shotsu's face: two pill eyes that follow the pointer (the --look vars)
+   and blink, and a small mouth that only shows for some moods. The orb's
+   data-mood reshapes both in CSS. Sized in em off the orb's font-size, so
+   the same face fits the big orb and the pocket one */
 function Face() {
   return (
     <span className="shotsuFace">
       <span className="shotsuFace__eye shotsuFace__eye--l" />
       <span className="shotsuFace__eye shotsuFace__eye--r" />
+      <span className="shotsuFace__mouth" />
     </span>
   );
 }
+
+/* the moods it drifts through while idle, each held for a moment */
+const MOODS = ["happy", "wink", "curious", "sleepy", "surprised"] as const;
+type Mood = "idle" | (typeof MOODS)[number];
 
 /* a pocket version of the orb, used as Shotsu's avatar in the panel */
 function MiniOrb({ size = "md" }: { size?: "sm" | "md" }) {
@@ -152,6 +157,30 @@ function Orb({
   onClick: () => void;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
+  const [mood, setMood] = useState<Mood>("idle");
+
+  /* every few seconds it pulls a face, then settles back. Not while the
+     chat is open or a card is up (those have their own looks), and not at
+     all for visitors who prefer reduced motion */
+  useEffect(() => {
+    if (open || talking) {
+      setMood("idle");
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let last: Mood = "idle";
+    let back = 0;
+    const tick = window.setInterval(() => {
+      const pool = MOODS.filter((m) => m !== last);
+      last = pool[Math.floor(Math.random() * pool.length)];
+      setMood(last);
+      back = window.setTimeout(() => setMood("idle"), 1900);
+    }, 6500);
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(back);
+    };
+  }, [open, talking]);
 
   /* the eyes look toward the pointer, a couple of pixels at most */
   useEffect(() => {
@@ -185,14 +214,32 @@ function Orb({
       className={`shotsuOrb${open ? " shotsuOrb--open" : ""}${talking ? " shotsuOrb--talking" : ""}`}
       aria-label={open ? "Close Shotsu" : "Ask Shotsu, Aayush's assistant"}
       aria-expanded={open}
+      data-mood={talking ? "happy" : mood}
       onClick={onClick}
     >
-      <span className="shotsuOrb__glow" aria-hidden />
-      <span className="shotsuOrb__ball" aria-hidden>
-        <span className="shotsuOrb__swirl" />
-        <span className="shotsuOrb__glass" />
-        <Face />
-        <span className="shotsuOrb__shine" />
+      {/* ear, glow and body squish together as one */}
+      <span className="shotsuOrb__body" aria-hidden>
+        <svg className="shotsuOrb__ear" viewBox="0 0 36 20">
+          <defs>
+            <linearGradient id="shotsuEar" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#c9b2ff" />
+              <stop offset="0.6" stopColor="#e6dbff" />
+              <stop offset="1" stopColor="#efe8ff" />
+            </linearGradient>
+          </defs>
+          {/* two soft points with a dip between, like the reference */}
+          <path
+            d="M3 20C3.5 13 5.5 6.5 9.5 2.5c.8-.8 2-.7 2.6.2C14 5.6 15.6 8.3 18 9c2.4-.7 4-3.4 5.9-6.3.6-.9 1.8-1 2.6-.2 4 4 6 10.5 6.5 17.5Z"
+            fill="url(#shotsuEar)"
+          />
+        </svg>
+        <span className="shotsuOrb__glow" />
+        <span className="shotsuOrb__ball">
+          <span className="shotsuOrb__swirl" />
+          <span className="shotsuOrb__glass" />
+          <Face />
+          <span className="shotsuOrb__shine" />
+        </span>
       </span>
       <span className="shotsuOrb__floor" aria-hidden />
       <span className="shotsuOrb__label" aria-hidden>
@@ -450,7 +497,6 @@ export default function Shotsu({ promos }: { promos: Promo[] }) {
                 </svg>
               </button>
             </form>
-            <p className="shotsuChat__note">Answers come from Aayush&apos;s resume and can miss things.</p>
           </div>
         </section>
       ) : null}
