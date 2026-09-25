@@ -11703,19 +11703,38 @@ html.dpl-page .preloader {
   --stepX: calc(var(--tile) + var(--gap));
   --stepY: calc(var(--tile) + var(--gap));
   position: relative;
+  /* two screens: the content is pinned for the first, so the page holds
+     here for one scroll before moving on */
+  height: 200svh;
+  /* a clear break after the experiments row above */
+  margin-top: clamp(64px, 12vh, 140px);
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.gallery__pin {
+  position: sticky;
+  top: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 100svh;
+  height: 100svh;
   box-sizing: border-box;
-  /* a clear break after the experiments row above */
-  margin-top: clamp(64px, 12vh, 140px);
   /* the top clears the floating nav; the heading sits in the bottom left
      corner, over the faded edge of the field */
   padding: clamp(88px, 11vh, 116px) 16px clamp(20px, 3vh, 36px);
-  background: var(--cream);
-  color: var(--ink);
+}
+
+/* reduced motion: no hold, just the section */
+.gallery[data-static="true"] {
+  height: auto;
+}
+
+.gallery[data-static="true"] .gallery__pin {
+  position: relative;
+  min-height: 100svh;
+  height: auto;
 }
 
 /* bottom left, on the page's rail, clear of the photographs */
@@ -11824,8 +11843,10 @@ html.dpl-page .preloader {
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.05);
-  transition: filter 0.45s ease;
+  /* grey until the scroll through the section reaches this photo: each
+     one turns over 40% of the scroll, starting in order from the logo */
+  filter: grayscale(calc(1 - clamp(0, (var(--p, 0) - var(--k, 0) * 0.6) / 0.4, 1))) contrast(1.05);
+  transition: filter 0.3s ease;
 }
 
 @media (hover: hover) {
@@ -11840,13 +11861,6 @@ html.dpl-page .preloader {
   }
 
   .galleryTile:hover .galleryTile__img {
-    filter: none;
-  }
-}
-
-/* phones cannot hover, so the pictures stay in colour there */
-@media (hover: none) {
-  .galleryTile__img {
     filter: none;
   }
 }
@@ -12047,11 +12061,13 @@ html.dpl-page .preloader {
      photo tiles make the middle row, so the tile is a sixth of the screen */
   .gallery {
     --tile: calc((100vw - 32px) / 5.75);
-    min-height: 0;
-    /* heading first, from the top, not centred in the section */
-    justify-content: flex-start;
     margin-top: 0;
-    padding: 40px 16px 56px;
+  }
+
+  /* heading first, from the top under the nav, not centred */
+  .gallery__pin {
+    justify-content: flex-start;
+    padding: 96px 16px 40px;
   }
 
   /* on a phone there is no corner to spare: the heading goes back above

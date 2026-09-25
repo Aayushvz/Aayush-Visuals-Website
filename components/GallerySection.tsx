@@ -50,6 +50,19 @@ const GHOST_CELLS: Cell[] = (() => {
   return out;
 })();
 
+/* each photo's place in the colour reveal, 0 (nearest the logo) to 1
+   (farthest), so colour spreads outward from the centre */
+const REVEAL_ORDER: number[] = (() => {
+  const byDist = PHOTO_CELLS.map((c, i) => ({ i, d: Math.hypot(c.col, c.row * 1.05) })).sort(
+    (a, b) => a.d - b.d || a.i - b.i
+  );
+  const k = new Array<number>(PHOTO_CELLS.length);
+  byDist.forEach(({ i }, rank) => {
+    k[i] = rank / (PHOTO_CELLS.length - 1);
+  });
+  return k;
+})();
+
 const at = (c: Cell) =>
   ({ "--col": c.col, "--row": c.row }) as React.CSSProperties;
 
@@ -74,6 +87,42 @@ export default function GallerySection() {
     );
     io.observe(el);
     return () => io.disconnect();
+  }, []);
+
+  /* The section is two screens tall and its content is pinned for the
+     first, so the page holds here for one scroll. That scroll is not dead
+     time: its progress, --p, brings the photographs from grey into colour,
+     from the logo outward. */
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.dataset.static = "true";
+      el.style.setProperty("--p", "1");
+      return;
+    }
+    let raf = 0;
+    let last = -1;
+    const update = () => {
+      raf = 0;
+      const span = el.offsetHeight - window.innerHeight;
+      if (span <= 0) return;
+      const p = Math.min(1, Math.max(0, -el.getBoundingClientRect().top / span));
+      if (Math.abs(p - last) < 0.002) return;
+      last = p;
+      el.style.setProperty("--p", p.toFixed(3));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   const step = useCallback(
@@ -107,60 +156,69 @@ export default function GallerySection() {
       ref={sectionRef}
       aria-labelledby="gallery-heading"
     >
-      <div className="gallery__head">
-        <h2 className="gallery__title" id="gallery-heading">
-          Off the clock<span className="gallery__dot">.</span>
-        </h2>
-        <p className="gallery__sub">Concerts, campus and the afternoons in between.</p>
-      </div>
-
-      <div className="gallery__hive">
-        <div className="gallery__field" aria-hidden>
-          {GHOST_CELLS.map((c) => (
-            <span key={`${c.col},${c.row}`} className="galleryGhost" style={at(c)} />
-          ))}
+      {/* the screen that holds while the section scrolls past */}
+      <div className="gallery__pin">
+        <div className="gallery__head">
+          <h2 className="gallery__title" id="gallery-heading">
+            Off the clock<span className="gallery__dot">.</span>
+          </h2>
+          <p className="gallery__sub">Concerts, campus and the afternoons in between.</p>
         </div>
 
-        {/* the logo at the centre */}
-        <span className="galleryTile galleryTile--logo" style={at({ col: 0, row: 0 })} aria-hidden>
-          <span className="galleryTile__mark" />
-        </span>
+        <div className="gallery__hive">
+          <div className="gallery__field" aria-hidden>
+            {GHOST_CELLS.map((c) => (
+              <span key={`${c.col},${c.row}`} className="galleryGhost" style={at(c)} />
+            ))}
+          </div>
 
-        {GALLERY.map((item, i) => {
-          const cell = PHOTO_CELLS[i];
-          return (
-            <button
-              key={item.src}
-              type="button"
-              className="galleryTile"
-              style={{ ...at(cell), "--d": `${80 + Math.hypot(cell.col, cell.row) * 90}ms` } as React.CSSProperties}
-              onClick={() => setOpen(i)}
-              aria-label={`Open photo: ${item.alt}`}
-            >
-              <img
-                className="galleryTile__img"
-                src={item.src}
-                alt=""
-                style={{ objectPosition: item.focus }}
-                /* eight small files, already warmed by HomeDeferred */
-                loading="eager"
-                decoding="async"
-                draggable={false}
-              />
-              {item.label ? (
-                <span
-                  className={`galleryTag ${cell.col < 0 ? "galleryTag--left" : "galleryTag--right"}`}
-                  aria-hidden
-                >
-                  <svg className="galleryTag__cursor" viewBox="0 0 24 24">
-                    <path d="M4 3l16 7-7 2.2L10.8 20z" />
-                  </svg>
-                  <span className="galleryTag__pill">{item.label}</span>
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
+          {/* the logo at the centre */}
+          <span className="galleryTile galleryTile--logo" style={at({ col: 0, row: 0 })} aria-hidden>
+            <span className="galleryTile__mark" />
+          </span>
+
+          {GALLERY.map((item, i) => {
+            const cell = PHOTO_CELLS[i];
+            return (
+              <button
+                key={item.src}
+                type="button"
+                className="galleryTile"
+                style={
+                  {
+                    ...at(cell),
+                    "--d": `${80 + Math.hypot(cell.col, cell.row) * 90}ms`,
+                    "--k": REVEAL_ORDER[i].toFixed(3),
+                  } as React.CSSProperties
+                }
+                onClick={() => setOpen(i)}
+                aria-label={`Open photo: ${item.alt}`}
+              >
+                <img
+                  className="galleryTile__img"
+                  src={item.src}
+                  alt=""
+                  style={{ objectPosition: item.focus }}
+                  /* eight small files, already warmed by HomeDeferred */
+                  loading="eager"
+                  decoding="async"
+                  draggable={false}
+                />
+                {item.label ? (
+                  <span
+                    className={`galleryTag ${cell.col < 0 ? "galleryTag--left" : "galleryTag--right"}`}
+                    aria-hidden
+                  >
+                    <svg className="galleryTag__cursor" viewBox="0 0 24 24">
+                      <path d="M4 3l16 7-7 2.2L10.8 20z" />
+                    </svg>
+                    <span className="galleryTag__pill">{item.label}</span>
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* in a portal on the body: the homepage's parallax wrapper is
