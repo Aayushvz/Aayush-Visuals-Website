@@ -12713,3 +12713,394 @@ html.dpl-page .preloader {
     transform: translate(-110%, 110%);
   }
 }
+
+/* ==========================================================
+   Most recent project (homepage popup)
+
+   A white card: a purple band naming the state, a dashed inner card
+   with the name, date, two lines of context, the project's marks and a
+   status pill, then a row of chips and a square action. It rises in at
+   the bottom right a few seconds after the site is ready.
+   ========================================================== */
+
+.recentToast {
+  position: fixed;
+  z-index: 80;
+  right: 24px;
+  bottom: 24px;
+  width: min(324px, calc(100vw - 24px));
+  font-family: var(--font-primary);
+  color: var(--ink);
+  animation: recentToastIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.recentToast--leaving {
+  animation: recentToastOut 0.36s cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+@keyframes recentToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes recentToastOut {
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+
+/* dismissed by scrolling: slower and quieter than a click-close, a fade
+   with a short drift and a touch of blur, so it recedes rather than
+   leaves */
+.recentToast--fading {
+  animation: recentToastFade 0.65s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes recentToastFade {
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(3px);
+  }
+}
+
+.recentToast__close {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(31, 31, 31, 0.25);
+  transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+.recentToast__close svg {
+  width: 13px;
+  height: 13px;
+}
+
+.recentToast__close:hover {
+  transform: rotate(90deg);
+  background: var(--purple);
+}
+
+.recentToast__close:focus-visible,
+.recentToast__go:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+
+/* the white card, its top edge the site purple */
+.recentToast__card {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(31, 31, 31, 0.06),
+    0 2px 6px rgba(31, 31, 31, 0.06),
+    0 16px 40px rgba(31, 31, 31, 0.16);
+}
+
+.recentToast__band {
+  padding: 6px 0 16px;
+  margin-bottom: -11px;
+  background: linear-gradient(to bottom, #8a50f4, var(--purple) 55%, #9a6cf5);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* the dashed inner card */
+.recentToast__body {
+  position: relative;
+  margin: 0 7px;
+  padding: 12px 12px 10px;
+  border: 1px dashed rgba(31, 31, 31, 0.2);
+  border-radius: 12px;
+  background: #f7f6f4;
+}
+
+.recentToast__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recentToast__title {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.recentToast__date {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: rgba(31, 31, 31, 0.45);
+}
+
+.recentToast__text {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(31, 31, 31, 0.55);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.recentToast__row--foot {
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* the reference's overlapping faces, as the project's own marks */
+.recentToast__stack {
+  display: flex;
+  align-items: center;
+}
+
+.recentToast__stack > * {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #f7f6f4;
+}
+
+.recentToast__stack img:first-child {
+  object-fit: cover;
+}
+
+.recentToast__stack > * + * {
+  margin-left: -9px;
+}
+
+.recentToast__stack img {
+  object-fit: cover;
+}
+
+/* a solid disc holding a logo mark or a small image */
+.recentToast__stackBadge {
+  display: grid;
+  place-items: center;
+}
+
+.recentToast__stackBadge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.recentToast__stackBadge img {
+  width: 19px;
+  height: auto;
+  box-shadow: none;
+}
+
+.recentToast__status--purple {
+  background: #ede5fe !important;
+  color: var(--purple-mid) !important;
+}
+
+.recentToast__status {
+  padding: 4px 9px;
+  border-radius: 7px;
+  background: #dcf3e2;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #237a3d;
+}
+
+/* the chip row and the action */
+.recentToast__chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 7px 7px;
+}
+
+.recentToast__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.1), 0 1px 2px rgba(31, 31, 31, 0.06);
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: rgba(31, 31, 31, 0.72);
+}
+
+.recentToast__chip svg {
+  width: 12px;
+  height: 12px;
+  color: rgba(31, 31, 31, 0.55);
+}
+
+.recentToast__go {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.recentToast__go svg {
+  width: 13px;
+  height: 13px;
+}
+
+.recentToast__go:hover {
+  background: var(--purple);
+  transform: translate(1px, -1px);
+}
+
+/* the in-card copy of the action is for phones only */
+.recentToast__go--inline {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  /* a phone: a small card tucked into the bottom-right corner. Only the
+     name, the date, the marks and the status survive, with the arrow alone
+     on the last row, so it covers a corner and nothing more */
+  .recentToast {
+    right: 10px;
+    bottom: 10px;
+    width: min(232px, calc(100vw - 72px));
+  }
+
+  .recentToast__card {
+    border-radius: 12px;
+  }
+
+  .recentToast__band {
+    padding: 4px 0 12px;
+    margin-bottom: -9px;
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+  }
+
+  .recentToast__body {
+    margin: 0 5px;
+    padding: 8px 9px 8px;
+    border-radius: 9px;
+  }
+
+  .recentToast__title {
+    font-size: 12.5px;
+  }
+
+  .recentToast__date {
+    font-size: 9.5px;
+  }
+
+  .recentToast__text {
+    display: none;
+  }
+
+  .recentToast__row--foot {
+    margin-top: 7px;
+  }
+
+  .recentToast__stack > * {
+    width: 20px;
+    height: 20px;
+  }
+
+  .recentToast__stack > * + * {
+    margin-left: -7px;
+  }
+
+  .recentToast__stackBadge svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .recentToast__stackBadge img {
+    width: 12px;
+  }
+
+  .recentToast__status {
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 9.5px;
+  }
+
+  /* no chip row on a phone: the action moves inside, beside the status */
+  .recentToast__chips {
+    display: none;
+  }
+
+  .recentToast__card {
+    padding-bottom: 5px;
+  }
+
+  .recentToast__go--inline {
+    display: grid;
+    margin-left: 6px;
+  }
+
+  .recentToast__status {
+    margin-left: auto;
+  }
+
+  .recentToast__go {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
+
+  .recentToast__go svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .recentToast__close {
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .recentToast__close svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recentToast,
+  .recentToast--leaving,
+  .recentToast--fading {
+    animation-duration: 0.01ms;
+  }
+}

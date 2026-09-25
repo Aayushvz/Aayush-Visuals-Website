@@ -158,6 +158,10 @@ export default function Preloader() {
       timers.forEach(clearTimeout);
       unlockScroll();
       setDone(true);
+      /* anything timed from the moment the site becomes usable (the recent
+         project popup on the homepage) listens for this */
+      (window as Window & { __preloaderDone?: boolean }).__preloaderDone = true;
+      window.dispatchEvent(new Event("preloader:done"));
     };
     /* the site must never stay locked behind this overlay */
     timers.push(window.setTimeout(finish, 7000));

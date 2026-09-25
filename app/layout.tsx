@@ -11,6 +11,8 @@ import {
 } from "next/font/google";
 import localFont from "next/font/local";
 import Preloader from "@/components/Preloader";
+import PromoManager from "@/components/PromoManager";
+import { buildPromos } from "@/components/promos";
 import PageTransition from "@/components/PageTransition";
 import AnimationBudget from "@/components/AnimationBudget";
 import ScrollRestore from "@/components/ScrollRestore";
@@ -292,6 +294,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Preloader />
+        {/* the notification cards: which one, and when, is decided per page */}
+        <PromoManager promos={buildPromos()} />
         <PageTransition />
         <AnimationBudget />
         <ScrollRestore />
