@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import createGlobe from "cobe";
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
@@ -164,170 +163,113 @@ function MagneticDotField() {
 }
 
 /*
-  Desktop only, and NOT by hiding it.
+  The status card, in the globe's old place: who this is, the time in
+  India, availability, and the two things someone on a contact page
+  actually wants to do - start the form or take the address away.
 
-  `display: none` would have been one line, and it would have left cobe
-  running: the canvas still initialises WebGL, still holds its buffers, and
-  still ticks a requestAnimationFrame loop for every frame the contact page is
-  open - drawing a globe nobody can see, on the device least able to afford
-  it. Not mounting it is the difference between a hidden cost and no cost.
-
-  Gated on a media query read after mount rather than on a width read during
-  render, because the server has no viewport: reading one during render makes
-  the first client render disagree with the HTML and React discards the tree.
-  `null` until the effect runs means desktop paints the globe one frame late,
-  which a WebGL canvas that has to compile shaders was going to do anyway.
+  The clock is India time, read on the client and refreshed on the minute,
+  so it shows the time on this side rather than the visitor's. It
+  renders empty on the server, since the server has no business guessing.
 */
-const GLOBE_MIN_WIDTH = "(min-width: 901px)";
+const CONTACT_EMAIL = "aayushvisuals@gmail.com";
 
-function InteractiveGlobe() {
-  const [show, setShow] = useState(false);
+function useIndiaTime() {
+  const [time, setTime] = useState("");
 
   useEffect(() => {
-    const mq = window.matchMedia(GLOBE_MIN_WIDTH);
-    const sync = () => setShow(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      setTime(fmt.format(new Date()).replace(" ", ""));
+      /* wake at the top of the next minute rather than polling */
+      timer = setTimeout(tick, 60_000 - (Date.now() % 60_000) + 50);
+    };
+    tick();
+    return () => clearTimeout(timer);
   }, []);
 
-  return show ? <GlobeCanvas /> : null;
+  return time;
 }
 
-function GlobeCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const pointerInteracting = useRef<number | null>(null);
-  const pointerInteractionMovement = useRef(0);
-  const phiRef = useRef(0);
+function StatusCard({ onHire }: { onHire: () => void }) {
+  const time = useIndiaTime();
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    let width = 0;
-    const onResize = () => {
-      width = canvas.offsetWidth;
-    };
-    window.addEventListener("resize", onResize);
-    onResize();
-
-    /*
-      A dark globe on a bright page.
-
-      Worth keeping the mechanic written down, because it is not obvious and
-      it has caught me twice: in cobe the land dots are not a separate
-      colour, they are `baseColor` multiplied by `mapBrightness`. Which
-      direction the continents resolve in therefore depends on whether that
-      product lands above or below the base. Lit dark, the base is a deep
-      violet and the brightness is well above 1, so land comes UP out of the
-      sphere and glows; the light version had to do the exact opposite.
-
-      `dark: 1` also restores the terminator, so the sphere has a lit side
-      and a shadowed one. That is most of what makes it read as a ball
-      rather than a circle, and it is the thing the flat light version was
-      missing even after the continents were fixed.
-
-      The warmth stays. Everything else on this page is one cool hue, so the
-      marker, the rim and the arcs are the site's own secondary orange, the
-      only warm colour in the system and one it otherwise almost never
-      spends. A warm limb around a cold planet is also just what a sunrise
-      looks like from orbit.
-    */
-    const globeTheme = {
-      dark: 1 as number,
-      diffuse: 1.35,
-      /* well ABOVE 1, so land resolves up out of the sphere and lights up */
-      mapBrightness: 4.4,
-      mapBaseBrightness: 0.05,
-      baseColor: [0.26, 0.11, 0.48] as [number, number, number],
-      markerColor: [0.96, 0.62, 0.36] as [number, number, number],
-      glowColor: [0.62, 0.3, 0.52] as [number, number, number],
-    };
-    /*
-      Arcs, purely as motion and colour.
-
-      They carry no claim: nothing in the interface names a destination, and
-      the only place on this page that states a fact about location is the
-      "based in" line. They are here because a still globe on a still page
-      was the dullest object on it.
-    */
-    const ARCS = [
-      { from: [28.6139, 77.209], to: [51.5072, -0.1276] },
-      { from: [28.6139, 77.209], to: [40.7128, -74.006] },
-      { from: [28.6139, 77.209], to: [1.3521, 103.8198] },
-      { from: [28.6139, 77.209], to: [-33.8688, 151.2093] },
-    ].map((a) => ({
-      from: a.from as [number, number],
-      to: a.to as [number, number],
-    }));
-
-    const globe = createGlobe(canvas, {
-      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-      width: width * 2,
-      height: width * 2,
-      phi: 1.2,
-      theta: 0.25,
-      mapSamples: 16000,
-      markers: [{ location: [28.6139, 77.209], size: 0.1 }],
-      arcs: ARCS,
-      arcColor: [0.91, 0.51, 0.29] as [number, number, number],
-      arcWidth: 0.35,
-      arcHeight: 0.32,
-      ...globeTheme,
-    });
-
-    let raf: number;
-    function animate() {
-      if (pointerInteracting.current === null) {
-        phiRef.current += 0.003;
-      }
-      globe.update({
-        phi: phiRef.current + pointerInteractionMovement.current,
-        width: width * 2,
-        height: width * 2,
-      });
-      raf = requestAnimationFrame(animate);
-    }
-    raf = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      globe.destroy();
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    pointerInteracting.current = e.clientX;
-    if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
-  }, []);
-
-  const onPointerUp = useCallback(() => {
-    pointerInteracting.current = null;
-    if (canvasRef.current) canvasRef.current.style.cursor = "grab";
-  }, []);
-
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (pointerInteracting.current !== null) {
-      const delta = e.clientX - pointerInteracting.current;
-      pointerInteractionMovement.current += delta / 200;
-      pointerInteracting.current = e.clientX;
+  const copyEmail = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(CONTACT_EMAIL);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* no clipboard (insecure context, denied): fall back to the mail app */
+      window.location.href = `mailto:${CONTACT_EMAIL}`;
     }
   }, []);
 
   return (
-    <div className="contactPage__globe">
-      <canvas
-        ref={canvasRef}
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerOut={onPointerUp}
-        onPointerMove={onPointerMove}
-        style={{ width: "100%", height: "100%", cursor: "grab", contain: "layout paint size" }}
-      />
-      <div className="contactPage__globeLabel">
-        <span className="contactPage__globePulse" aria-hidden />
-        India
+    <div className="statusCard">
+      <div className="statusCard__panel">
+        <div className="statusCard__top">
+          <span className="statusCard__role">Product Designer</span>
+          <span className="statusCard__time" aria-label={time ? `${time} in India` : undefined}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="13" r="7.5" />
+              <path d="M12 9.5V13l2.2 1.6M5 4.5 3 6.5M19 4.5l2 2" />
+            </svg>
+            <span suppressHydrationWarning>{time || "--:--"}</span>
+          </span>
+        </div>
+
+        <div className="statusCard__who">
+          <img
+            className="statusCard__avatar"
+            src="/about/avatar.webp"
+            alt=""
+            width={64}
+            height={64}
+          />
+          <div>
+            <p className="statusCard__name">Aayush Raj</p>
+            <p className="statusCard__avail">
+              <span className="statusCard__availDot" aria-hidden />
+              Available for work
+            </p>
+          </div>
+        </div>
+
+        <div className="statusCard__actions">
+          <button type="button" className="statusCard__btn" onClick={onHire}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 8.5v7M8.5 12h7" />
+            </svg>
+            Hire Me
+          </button>
+          <button type="button" className="statusCard__btn" onClick={copyEmail}>
+            {copied ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M5 12.5 10 17 19 7.5" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden>
+                <rect x="8.5" y="8.5" width="11" height="11" rx="1.5" />
+                <path d="M15.5 8.5V5.5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3" />
+              </svg>
+            )}
+            <span aria-live="polite">{copied ? "Copied" : "Copy Email"}</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="statusCard__strap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden>
+          <path d="M13.5 2.5 5 13.5h6l-1 8 8.5-11h-6z" />
+        </svg>
+        Currently high on creativity
       </div>
     </div>
   );
@@ -341,6 +283,14 @@ export default function ContactPageClient() {
   const [message, setMessage] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
+
+  /* "Hire Me" starts the form: bring it into view and put the cursor in
+     the first field */
+  const startHire = useCallback(() => {
+    const first = formRef.current?.querySelector<HTMLInputElement>("#c-name");
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => first?.focus({ preventScroll: true }), 450);
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.add("contact-page-active");
@@ -401,7 +351,7 @@ export default function ContactPageClient() {
               Drop me a message and I will get back to you soon.
             </p>
           </div>
-          <InteractiveGlobe />
+          <StatusCard onHire={startHire} />
         </div>
 
         <div className="contactPage__body">
@@ -497,8 +447,8 @@ export default function ContactPageClient() {
           <aside className="contactPage__aside">
             <div className="contactPage__infoBlock">
               <h3 className="contactPage__infoTitle">Get in touch</h3>
-              <a href="mailto:aayushvisuals@gmail.com" className="contactPage__emailLink">
-                aayushvisuals@gmail.com
+              <a href={`mailto:${CONTACT_EMAIL}`} className="contactPage__emailLink">
+                {CONTACT_EMAIL}
               </a>
             </div>
 

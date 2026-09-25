@@ -8827,42 +8827,173 @@ html.contact-page-active body {
   flex-shrink: 0;
 }
 
-.contactPage__globe {
+/* ---- the status card (replaced the globe) ----
+
+   A dark panel sitting on a lime strap, after a profile-widget reference.
+   The page is saturated violet, so the panel is near-black to lift off it
+   and the strap is the one lime on the site: a status light, nothing else
+   gets it. */
+.statusCard {
+  --sc-panel: #161617;
+  --sc-lime: #a6f05c;
   position: relative;
-  width: clamp(280px, 28vw, 420px);
-  aspect-ratio: 1;
+  flex-shrink: 0;
+  width: clamp(320px, 32vw, 460px);
+  padding-bottom: 42px;
+  border-radius: 30px;
+  background: linear-gradient(to bottom, #b4f56f, var(--sc-lime));
+  box-shadow:
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+    0 18px 40px rgba(20, 6, 60, 0.28),
+    0 0 36px rgba(166, 240, 92, 0.22);
+  font-family: var(--font-primary);
+}
+
+.statusCard__panel {
+  position: relative;
+  z-index: 1;
+  padding: 24px 22px 22px;
+  border-radius: 30px;
+  background:
+    radial-gradient(120% 90% at 70% 0%, #242425, transparent 60%),
+    var(--sc-panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 10px 24px rgba(0, 0, 0, 0.3);
+  color: #f4f4f2;
+}
+
+.statusCard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  color: rgba(244, 244, 242, 0.5);
+}
+
+.statusCard__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.statusCard__time svg {
+  width: 18px;
+  height: 18px;
+}
+
+.statusCard__who {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.statusCard__avatar {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #d9d9d6;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.statusCard__name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.statusCard__avail {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: rgba(244, 244, 242, 0.5);
+}
+
+.statusCard__availDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sc-lime);
+  box-shadow: 0 0 0 0 rgba(166, 240, 92, 0.6);
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% { box-shadow: 0 0 0 0 rgba(166, 240, 92, 0.55); }
+  50% { box-shadow: 0 0 0 5px rgba(166, 240, 92, 0); }
+}
+
+.statusCard__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.statusCard__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(to bottom, #3b3b3d, #2d2d2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 2px rgba(0, 0, 0, 0.4);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #f4f4f2;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.statusCard__btn svg {
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
-.contactPage__globeLabel {
+.statusCard__btn:hover {
+  background: linear-gradient(to bottom, #464649, #37373a);
+}
+
+.statusCard__btn:active {
+  transform: scale(0.98);
+}
+
+.statusCard__btn:focus-visible {
+  outline: 2px solid var(--sc-lime);
+  outline-offset: 2px;
+}
+
+.statusCard__strap {
   position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--cp-fg-muted);
-  white-space: nowrap;
+  color: #1a2410;
 }
 
-.contactPage__globePulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--cp-accent);
-  box-shadow: 0 0 8px var(--cp-accent);
-  animation: contactGlobePulse 2s ease-in-out infinite;
-}
-
-@keyframes contactGlobePulse {
-  0%,
-100% { opacity: 1; box-shadow: 0 0 0 0 rgba(196, 181, 253, 0.6); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(196, 181, 253, 0); }
+.statusCard__strap svg {
+  width: 18px;
+  height: 18px;
 }
 
 .contactPage__kicker {
@@ -9224,11 +9355,9 @@ html.contact-page-active body {
     padding-bottom: 36px;
   }
 
-  /* the globe does not mount below 901px (see ContactPageClient) - this rule
-     is kept only so the wrapper behaves if that gate is ever removed */
-  .contactPage__globe {
-    width: min(260px, 70vw);
-    align-self: center;
+  .statusCard {
+    width: 100%;
+    max-width: 440px;
   }
 
   .contactPage__title {
@@ -11070,7 +11199,7 @@ html.dpl-page .preloader {
 .capCurtain--b,
 .capStar,
 .contactPage__availDot,
-.contactPage__globePulse,
+.statusCard__availDot,
 .footer__dude,
 .footer__glow,
 .footer__hero:hover .footer__dude,
