@@ -11688,210 +11688,454 @@ html.dpl-page .preloader {
 /* ============================================================
    GALLERY  (.gallery - components/GallerySection.tsx)
 
-   Horizontal row driven by vertical scroll. The section is 100svh plus the
-   track's own travel, and the pinned child is exactly one screen; the
-   difference is the distance the row moves. That makes the mapping
-   one-to-one - a pixel down is a pixel across - so it never feels geared.
-
-   GallerySection measures --gal-travel and publishes --p; everything below
-   is composed from those two numbers.
+   A honeycomb of square tiles around the logo: photographs packed round
+   the centre, then empty dashed tiles fading outward. Every tile is placed
+   from --col / --row (in tile steps from the centre) against --tile and
+   --gap, so the whole cluster scales from those two numbers.
    ============================================================ */
 
 .gallery {
+  /* up to 122px, and held down on a short screen so the cluster fits
+     under the floating nav: the stage is 4.2 rows tall (the outer ghost
+     rows are half cut) and a row is 1.13 tiles, hence 4.75 */
+  --tile: clamp(58px, min(15vw, calc((100svh - 120px) / 4.75)), 122px);
+  --gap: calc(var(--tile) * 0.13);
+  --stepX: calc(var(--tile) + var(--gap));
+  --stepY: calc(var(--tile) + var(--gap));
   position: relative;
-  background: var(--cream);
-  color: var(--ink);
-  height: calc(100svh + var(--gal-travel, 0px));
-  /* the row is held inside the page's rulers AND stood off them, so the
-     pictures never sit right on the rule; one value so the heading, the
-     window and the lead-in cannot drift apart */
-  --gal-inset: calc(var(--page-rail-inset) + clamp(14px, 1.8vw, 34px));
-  /* How far the dissolve reaches in from each end. Deliberately short: this
-     is an edge treatment, not an effect - past about 40px it stops reading
-     as a soft edge and starts reading as a gradient laid on the picture. */
-  --gal-fade: clamp(18px, 2.2vw, 40px);
-  /*
-    The curve is weighted hard toward the outside: opacity is already near
-    half a fifth of the way in and all but resolved by two thirds, so the
-    transition sits against the edge and the card is clean well before its
-    middle. A curve centred in the fade would put the softest part over the
-    picture, which is the thing that looked like a smudge.
-  */
-  --gal-mask: linear-gradient(
-    to right,
-    transparent 0,
-    rgba(0, 0, 0, 0.16) calc(var(--gal-fade) * 0.2),
-    rgba(0, 0, 0, 0.54) calc(var(--gal-fade) * 0.4),
-    rgba(0, 0, 0, 0.84) calc(var(--gal-fade) * 0.62),
-    rgba(0, 0, 0, 0.96) calc(var(--gal-fade) * 0.82),
-    #000 var(--gal-fade),
-    #000 calc(100% - var(--gal-fade)),
-    rgba(0, 0, 0, 0.96) calc(100% - var(--gal-fade) * 0.82),
-    rgba(0, 0, 0, 0.84) calc(100% - var(--gal-fade) * 0.62),
-    rgba(0, 0, 0, 0.54) calc(100% - var(--gal-fade) * 0.4),
-    rgba(0, 0, 0, 0.16) calc(100% - var(--gal-fade) * 0.2),
-    transparent 100%
-  );
-}
-
-.gallery__pin {
-  position: sticky;
-  top: 0;
-  height: 100svh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: 100svh;
+  box-sizing: border-box;
+  /* a clear break after the experiments row above */
+  margin-top: clamp(64px, 12vh, 140px);
+  /* the top clears the floating nav; the heading sits in the bottom left
+     corner, over the faded edge of the field */
+  padding: clamp(88px, 11vh, 116px) 16px clamp(20px, 3vh, 36px);
+  background: var(--cream);
+  color: var(--ink);
 }
 
-/* title and standfirst move as one block, so only the wrapper carries the
-   gap down to the row and the two can never drift apart */
+/* bottom left, on the page's rail, clear of the photographs */
 .gallery__head {
-  padding-left: var(--gal-inset);
-  margin-bottom: clamp(22px, 3.4vh, 40px);
+  position: absolute;
+  z-index: 6;
+  left: var(--page-rail-inset, 48px);
+  bottom: clamp(36px, 7vh, 72px);
+  text-align: left;
 }
 
 .gallery__title {
   margin: 0;
-  /* smaller than the index-page titles on purpose: this section is the row,
-     not the heading, and at 96px the type was competing with the pictures */
-  font-size: clamp(28px, 3.8vw, 56px);
+  font-size: clamp(32px, 3.6vw, 56px);
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 0.95;
-}
-
-/* the line the per-card labels used to carry: said once, quietly, instead of
-   repeated eight times over the pictures */
-.gallery__sub {
-  margin: 10px 0 0;
-  max-width: 46ch;
-  font-size: clamp(13.5px, 1.05vw, 16px);
-  line-height: 1.5;
-  color: rgba(31, 31, 31, 0.52);
 }
 
 .gallery__dot {
   color: var(--purple);
 }
 
-/* The window onto the row, held inside the page's side rulers and stood off
-   them. The clip lives here rather than on the pin so the row is bounded by
-   the page's own frame instead of the screen edges.
-
-   The mask is what stops that boundary reading as a cut: pictures dissolve
-   over --gal-fade at each end rather than being sliced off mid-frame as they
-   travel. overflow: clip still does the real containment - the mask only
-   softens what the clip would otherwise end abruptly. */
-.gallery__viewport {
-  position: relative;
-  margin: 0 var(--gal-inset);
-  overflow: clip;
-  /*
-    An EASED falloff, not a straight ramp.
-
-    A linear alpha ramp spreads the transition evenly across its width, which
-    over a photograph reads as a grey band laid on the picture - the thing
-    that looks cheap. These stops approximate a smoothstep: the picture holds
-    near full opacity for most of the distance and gives way quickly in the
-    last stretch, so the eye reads an edge softening rather than a gradient
-    painted over the image.
-  */
-  -webkit-mask-image: var(--gal-mask);
-  mask-image: var(--gal-mask);
+.gallery__sub {
+  margin: 12px 0 0;
+  max-width: 28ch;
+  font-size: clamp(13.5px, 1.05vw, 16px);
+  line-height: 1.5;
+  color: rgba(31, 31, 31, 0.56);
 }
 
-.gallery__track {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: clamp(18px, 2.2vw, 40px);
-  width: max-content;
-  /* The first picture still opens at 40% of the SCREEN; the inset is
-     subtracted because the track starts at the window's edge, not the
-     screen's. The trailing air is the window's own margin. */
-  padding-left: calc(40vw - var(--gal-inset));
-  transform: translate3d(
-    calc(var(--p, 0) * -1 * var(--gal-travel, 0px)),
-    0,
-    0
+/* wide enough that one line clears the photographs */
+@media (min-width: 1100px) {
+  .gallery__sub {
+    max-width: none;
+    white-space: nowrap;
+  }
+}
+
+/* the stage: nine tiles wide, and 4.2 rows tall so the outer rows of
+   empty tiles are cut through the middle and fade off */
+.gallery__hive {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(var(--stepX) * 9);
+  max-width: 100%;
+  height: calc(var(--stepY) * 4.2);
+  margin: 0 auto;
+}
+
+/* the empty field, fading out from the middle */
+.gallery__field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(closest-side, #000 50%, rgba(0, 0, 0, 0.5) 78%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 50%, rgba(0, 0, 0, 0.5) 78%, transparent 100%);
+}
+
+.galleryGhost,
+.galleryTile {
+  position: absolute;
+  left: calc(50% + var(--col) * var(--stepX) - var(--tile) / 2);
+  top: calc(50% + var(--row) * var(--stepY) - var(--tile) / 2);
+  width: var(--tile);
+  height: var(--tile);
+  border-radius: 24%;
+}
+
+.galleryGhost {
+  border: 1.5px dashed rgba(31, 31, 31, 0.22);
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(31, 31, 31, 0.07) 0 1px,
+    transparent 1px 7px
   );
 }
 
-/* Granted only while the section is in play - see the IntersectionObserver in
-   GallerySection.tsx. The track is a very wide strip of large photographs;
-   promoting it for the life of the page costs real memory for a section most
-   visitors are nowhere near. */
-.gallery[data-near="true"] .gallery__track {
-  will-change: transform;
+/* a photograph: a white rim like a mounted print, greyscale until it is
+   looked at */
+.galleryTile {
+  padding: 0;
+  border: 0;
+  background: #fff;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 4px rgba(31, 31, 31, 0.06),
+    0 10px 24px -8px rgba(31, 31, 31, 0.35);
+  cursor: zoom-in;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.5s var(--ease-quint) var(--d, 0ms),
+    transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0ms),
+    box-shadow 0.3s ease;
 }
 
-.galleryItem {
-  flex: 0 0 auto;
-  width: min(var(--w), 72vw);
-  /* --drop is a fraction of the row rather than a fixed offset, so the
-     stagger scales instead of collapsing on a narrow screen */
-  margin-top: calc(var(--drop, 0) * clamp(40px, 7vw, 128px));
+.gallery--shown .galleryTile {
+  opacity: 1;
+  transform: none;
 }
 
-.galleryItem__frame {
-  margin: 0;
-  aspect-ratio: var(--ratio, 4 / 5);
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(31, 31, 31, 0.06);
-}
-
-.galleryItem__img {
+.galleryTile__img {
   display: block;
   width: 100%;
   height: 100%;
+  border-radius: inherit;
   object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  transition: filter 0.45s ease;
 }
 
-/*
-  Reduced motion, and the fallback if the script never runs: no pin, no
-  scroll-driven travel. The row becomes an ordinary side-scroller, which is
-  the honest version of this section for someone who asked for less movement.
-*/
-.gallery[data-static="true"] {
-  height: auto;
-  padding: clamp(72px, 11vh, 132px) 0 clamp(80px, 12vh, 148px);
-}
-
-.gallery[data-static="true"] .gallery__pin {
-  position: static;
-  height: auto;
-  overflow: visible;
-}
-
-.gallery[data-static="true"] .gallery__viewport {
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.gallery[data-static="true"] .gallery__viewport::-webkit-scrollbar {
-  display: none;
-}
-
-.gallery[data-static="true"] .gallery__track {
-  transform: none;
-  padding-left: var(--gal-inset);
-}
-
-@media (max-width: 640px) {
-  .gallery__track {
-    /* 40vw of a phone is barely a thumb's width of lead-in and costs a third
-       of the screen; the row starts closer to the rule here */
-    padding-left: max(0px, calc(22vw - var(--gal-inset)));
+@media (hover: hover) {
+  .gallery--shown .galleryTile:not(.galleryTile--logo):hover {
+    z-index: 3;
+    transform: translateY(-4px) scale(1.06);
+    transition-delay: 0ms;
+    box-shadow:
+      0 0 0 3px #fff,
+      0 0 0 4px rgba(124, 58, 237, 0.35),
+      0 18px 32px -10px rgba(31, 31, 31, 0.4);
   }
 
-  /* the stagger is a wide-screen idea: on a phone it only pushes cards off
-     the bottom of a row that is already moving sideways */
-  .galleryItem {
+  .galleryTile:hover .galleryTile__img {
+    filter: none;
+  }
+}
+
+/* phones cannot hover, so the pictures stay in colour there */
+@media (hover: none) {
+  .galleryTile__img {
+    filter: none;
+  }
+}
+
+.galleryTile:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 6px;
+}
+
+.galleryTile:focus-visible .galleryTile__img {
+  filter: none;
+}
+
+/* the logo tile: pale glass, the mark in ink */
+.galleryTile--logo {
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #ffffff, #efebe4);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 4px rgba(31, 31, 31, 0.08),
+    inset 0 -6px 12px rgba(31, 31, 31, 0.05),
+    0 12px 28px -8px rgba(31, 31, 31, 0.3);
+  cursor: default;
+  --d: 0ms;
+}
+
+.galleryTile__mark {
+  width: 52%;
+  height: 52%;
+  background: var(--ink);
+  -webkit-mask: url("/logos/av-logo.webp") center / contain no-repeat;
+  mask: url("/logos/av-logo.webp") center / contain no-repeat;
+}
+
+/* a cursor label pointing at a tile: the arrow's tip at the photo's
+   corner, the pill hanging off below it, like a collaborator's cursor */
+.galleryTag {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease 0.9s;
+  animation: galleryTagFloat 4.5s ease-in-out infinite;
+}
+
+.gallery--shown .galleryTag {
+  opacity: 1;
+}
+
+/* upper left: the arrow points up and right, at the tile's left edge */
+.galleryTag--left {
+  right: calc(100% + 2px);
+  top: 18%;
+  align-items: flex-end;
+}
+
+/* lower right: the arrow points up and left, at the tile's corner */
+.galleryTag--right {
+  left: calc(100% - 4px);
+  top: 84%;
+  align-items: flex-start;
+  animation-delay: -2.2s;
+}
+
+.galleryTag__cursor {
+  display: block;
+  flex-shrink: 0;
+  width: clamp(16px, 1.5vw, 21px);
+  height: clamp(16px, 1.5vw, 21px);
+  fill: #3a3a3a;
+  filter: drop-shadow(0 2px 3px rgba(31, 31, 31, 0.25));
+}
+
+.galleryTag--left .galleryTag__cursor {
+  transform: scaleX(-1);
+}
+
+.galleryTag__pill {
+  margin-top: 2px;
+  padding: 0.5em 0.95em;
+  border-radius: 999px;
+  background: #3a3a3a;
+  color: #fff;
+  font-size: clamp(11px, 1vw, 15px);
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px -6px rgba(31, 31, 31, 0.45);
+}
+
+.galleryTag--left .galleryTag__pill {
+  margin-right: clamp(10px, 1.2vw, 18px);
+}
+
+.galleryTag--right .galleryTag__pill {
+  margin-left: clamp(10px, 1.2vw, 18px);
+}
+
+@keyframes galleryTagFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+/* ---- the lightbox ---- */
+
+.galleryBox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 64px 72px;
+  background: rgba(18, 17, 19, 0.88);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: galleryBoxIn 0.3s ease both;
+}
+
+@keyframes galleryBoxIn {
+  from { opacity: 0; }
+}
+
+.galleryBox__figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.galleryBox__img {
+  display: block;
+  max-width: min(1100px, 100%);
+  max-height: calc(100svh - 180px);
+  border-radius: 14px;
+  object-fit: contain;
+  animation: galleryImgIn 0.4s var(--ease-quint) both;
+}
+
+@keyframes galleryImgIn {
+  from { opacity: 0; transform: scale(0.96); }
+}
+
+.galleryBox__cap {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  font-size: 14px;
+  color: rgba(244, 242, 238, 0.8);
+}
+
+.galleryBox__count {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  color: rgba(244, 242, 238, 0.5);
+}
+
+.galleryBox__btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.galleryBox__btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.galleryBox__btn:hover {
+  background: var(--purple);
+}
+
+.galleryBox__btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.galleryBox__btn--close { top: 18px; right: 18px; }
+.galleryBox__btn--prev { left: 18px; top: 50%; translate: 0 -50%; }
+.galleryBox__btn--next { right: 18px; top: 50%; translate: 0 -50%; }
+
+@media (max-width: 640px) {
+  /* a phone: sized by width alone, and only as tall as its content. Five
+     photo tiles make the middle row, so the tile is a sixth of the screen */
+  .gallery {
+    --tile: calc((100vw - 32px) / 5.75);
+    min-height: 0;
+    /* heading first, from the top, not centred in the section */
+    justify-content: flex-start;
     margin-top: 0;
+    padding: 40px 16px 56px;
+  }
+
+  /* on a phone there is no corner to spare: the heading goes back above
+     the cluster, centred */
+  .gallery__head {
+    position: static;
+    max-width: none;
+    margin-bottom: 36px;
+    text-align: center;
+  }
+
+  .gallery__sub {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .gallery__title {
+    font-size: 34px;
+  }
+
+  .gallery__sub {
+    margin-top: 8px;
+    font-size: 13.5px;
+  }
+
+  /* the labels come in closer and smaller so they stay on screen */
+  .galleryTag__pill {
+    padding: 0.45em 0.8em;
+    font-size: 11px;
+  }
+
+  .galleryTag--left .galleryTag__pill {
+    margin-right: 4px;
+  }
+
+  .galleryTag--right .galleryTag__pill {
+    margin-left: 4px;
+  }
+
+  /* the white rim thins with the tile */
+  .galleryTile {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 3px rgba(31, 31, 31, 0.06),
+      0 8px 18px -8px rgba(31, 31, 31, 0.35);
+  }
+
+  .galleryTile--logo {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 3px rgba(31, 31, 31, 0.08),
+      0 8px 20px -8px rgba(31, 31, 31, 0.3);
+  }
+
+  .galleryBox {
+    padding: 64px 12px 96px;
+  }
+
+  .galleryBox__btn--prev,
+  .galleryBox__btn--next {
+    top: auto;
+    bottom: 24px;
+    translate: none;
+  }
+
+  .galleryBox__btn--prev { left: calc(50% - 56px); }
+  .galleryBox__btn--next { right: calc(50% - 56px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .galleryTile {
+    opacity: 1;
+    transform: none;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .galleryTag {
+    opacity: 1;
+    animation: none;
+  }
+
+  .galleryBox,
+  .galleryBox__img {
+    animation: none;
   }
 }
 

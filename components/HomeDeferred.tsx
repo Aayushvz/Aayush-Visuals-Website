@@ -34,9 +34,8 @@ import { GALLERY } from "./gallery.data";
 
   The heights below are measured, not guessed - they are what each section
   currently occupies at a 900px viewport, expressed in vh so they hold at any
-  size. The gallery's own height is 100svh plus its track travel, which is not
-  known until it measures itself; its placeholder reserves the full 3.55
-  viewports it settles at, so the page does not grow underneath the reader.
+  size. The gallery is an ordinary section about one viewport tall (a heading
+  over a honeycomb of tiles), so its placeholder reserves one viewport.
 */
 
 /*
@@ -70,7 +69,7 @@ export function DeferredServices() {
 
 export function DeferredGallery() {
   return (
-    <DeferUntilNear minHeight="355vh" prefetch={GALLERY_IMAGES}>
+    <DeferUntilNear minHeight="100vh" prefetch={GALLERY_IMAGES}>
       <GallerySection />
     </DeferUntilNear>
   );
