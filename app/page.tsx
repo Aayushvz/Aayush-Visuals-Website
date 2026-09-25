@@ -8,6 +8,7 @@ import Statement from "@/components/Statement";
 import Process from "@/components/Process";
 import ProjectsSection from "@/components/ProjectsSection";
 import HomeContact from "@/components/HomeContact";
+import HomeLab from "@/components/HomeLab";
 import Reveals from "@/components/Reveals";
 import RailsEnd from "@/components/RailsEnd";
 /* heavy, below the fold, and held until approach - see HomeDeferred */
@@ -64,6 +65,9 @@ export default function Home() {
           <div className="processStage">
             <Process />
           </div>
+          {/* the side projects: every live playground experiment, as a
+              sideways row of cards */}
+          <HomeLab />
           <DeferredGallery />
           <HomeContact />
         </main>

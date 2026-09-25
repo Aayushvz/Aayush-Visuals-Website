@@ -1,0 +1,649 @@
+/*
+  Cover art for the experiments.
+
+  Imported by covers.tsx itself, so it ships wherever a cover renders - the
+  /playground shelf and the homepage's experiments row - and nowhere else.
+
+  The covers draw from four ink tokens and one accent. The shelf defines
+  them for its own room; here they are also set on each cover's root, with
+  the same values, so a cover renders correctly on any page.
+*/
+.dplCover,
+.pondCover,
+.contractCover,
+.catCover,
+.invoiceCover,
+.slotCover {
+  --pg-fg: var(--ink);
+  --pg-mute: rgba(31, 31, 31, 0.56);
+  --pg-faint: rgba(31, 31, 31, 0.36);
+  --pg-hair: var(--ink-soft);
+  --pg-grid-line: rgba(31, 31, 31, 0.075);
+  --pg-accent: var(--purple);
+}
+
+/* ==========================================================
+   Cover art
+   ========================================================== */
+
+/*
+  A floodlit night, drawn in layers: the sky, two light cones, a masked dot
+  field standing in for a crowd, the bloom the lights throw onto the square,
+  the pool of light on the ground, the shot leaving the bat, the batter, and
+  a scrim under the title so the lockup has something to sit on.
+
+  Drawn rather than photographed so it is sharp at any card size, ships no
+  extra image beyond the one sprite the game already loads, and stays fixed
+  while the page around it follows the theme - box art does not have a light
+  mode.
+*/
+.dplCover {
+  position: absolute;
+  inset: 0;
+}
+
+.dplCover__sky,
+.dplCover__crowd,
+.dplCover__bloom,
+.dplCover__pitch,
+.dplCover__arc,
+.dplCover__scrim {
+  position: absolute;
+  pointer-events: none;
+}
+
+.dplCover__sky {
+  inset: 0;
+  background:
+    radial-gradient(118% 62% at 50% 4%, #3d2176 0%, rgba(61, 33, 118, 0) 64%),
+    linear-gradient(180deg, #0a0614 0%, #150d2b 36%, #251549 68%, #0d0720 100%);
+}
+
+/* two cones, opening downward and offset, so the cover agrees with the balls
+   above it about where the light in this room is coming from */
+.dplCover__beam {
+  position: absolute;
+  top: -8%;
+  width: 62%;
+  height: 82%;
+  background: linear-gradient(
+    to bottom,
+    rgba(216, 206, 255, 0.26),
+    rgba(216, 206, 255, 0) 78%
+  );
+  clip-path: polygon(40% 0, 54% 0, 96% 100%, 4% 100%);
+  pointer-events: none;
+}
+
+.dplCover__beam--l {
+  left: -20%;
+  transform: rotate(-7deg);
+  opacity: 0.9;
+}
+
+.dplCover__beam--r {
+  right: -20%;
+  transform: rotate(7deg) scaleX(-1);
+  opacity: 0.62;
+}
+
+.dplCover__crowd {
+  left: -12%;
+  right: -12%;
+  top: 22%;
+  height: 24%;
+  background-image: radial-gradient(
+    circle,
+    rgba(196, 184, 246, 0.6) 0.9px,
+    transparent 1.5px
+  );
+  background-size: 8px 7px;
+  opacity: 0.42;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 32%,
+    #000 62%,
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, transparent, #000 32%, #000 62%, transparent);
+}
+
+.dplCover__bloom {
+  inset: 0;
+  background: radial-gradient(
+    44% 32% at 50% 56%,
+    rgba(167, 139, 250, 0.46),
+    rgba(167, 139, 250, 0) 74%
+  );
+}
+
+.dplCover__pitch {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  background:
+    radial-gradient(
+      56% 44% at 50% 98%,
+      rgba(206, 190, 255, 0.32),
+      rgba(206, 190, 255, 0) 76%
+    ),
+    linear-gradient(to top, rgba(9, 5, 20, 0.62), rgba(9, 5, 20, 0) 84%);
+}
+
+/* the boundary rope, one hairline, so the ground has a far edge */
+.dplCover__pitch::before {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 16%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(203, 189, 255, 0.32) 30%,
+    rgba(203, 189, 255, 0.32) 70%,
+    transparent
+  );
+}
+
+.dplCover__arc {
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+}
+
+.dplCover__figure {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 12%;
+  width: auto;
+  height: 62%;
+  transform: translateX(-54%);
+  object-fit: contain;
+  filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 26px rgba(139, 92, 246, 0.28));
+}
+
+.dplCover__scrim {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  height: 54%;
+  background: linear-gradient(
+    to top,
+    rgba(7, 4, 16, 0.95) 0%,
+    rgba(7, 4, 16, 0.74) 36%,
+    rgba(7, 4, 16, 0) 100%
+  );
+}
+
+.dplCover__lock {
+  position: absolute;
+  z-index: 5;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.dplCover__name {
+  display: block;
+  /* the vw clamp is the fallback for engines without container units; the
+     cqw rule below is the one that should win everywhere current */
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f7f3ff;
+  text-shadow: 0 2px 20px rgba(6, 3, 14, 0.7);
+}
+
+/* ---- Lotus Pond's cover ---- */
+
+/*
+  Pixel art, so the cover is scaled with nearest-neighbour and the SVG is
+  drawn on a 60x80 grid with crispEdges. Anything smoothing here would sand
+  the pixels off and make the card promise a different game to the one behind
+  it.
+*/
+.pondCover {
+  position: absolute;
+  inset: 0;
+  background: #0b1022;
+}
+
+.pondCover__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.pondCover__scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: 46%;
+  background: linear-gradient(
+    to top,
+    rgba(6, 10, 22, 0.94) 0%,
+    rgba(6, 10, 22, 0.66) 40%,
+    rgba(6, 10, 22, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.pondCover__lock {
+  position: absolute;
+  z-index: 3;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.pondCover__name {
+  display: block;
+  /* the vw clamp is the fallback for engines without container units */
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #eaf5f2;
+  text-shadow: 0 2px 20px rgba(4, 8, 18, 0.75);
+}
+
+/* ---- Contract Generator's cover ---- */
+
+/*
+  A page standing on a dark ground rather than a scene, because the product
+  behind this card is a page. The ground and its glow are the only hardcoded
+  colour in the block - box art still does not follow the site's theme - but
+  the page itself draws from the shelf's own ink tokens (`--pg-fg` through
+  `--pg-hair`) and the one violet mark uses `--pg-accent`, the same token the
+  rest of the shelf already spends on its one accent colour.
+*/
+.contractCover {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0d;
+}
+
+.contractCover__ground,
+.contractCover__glow,
+.contractCover__sheet,
+.contractCover__scrim,
+.contractCover__markLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.contractCover__ground {
+  background: linear-gradient(180deg, #0b0b10 0%, #17161d 58%, #09090c 100%);
+}
+
+/* a low, slightly warm light behind the page, the way a real cover throws
+   one soft source at its subject rather than lighting the whole room */
+.contractCover__glow {
+  background: radial-gradient(
+    46% 30% at 50% 64%,
+    color-mix(in srgb, var(--pg-accent) 40%, transparent),
+    transparent 74%
+  );
+  opacity: 0.55;
+}
+
+.contractCover__sheet {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.contractCover__page {
+  transform: rotate(-1.1deg);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.5));
+}
+
+.contractCover__paper {
+  fill: var(--cream);
+  stroke: var(--pg-hair);
+  stroke-width: 1.2;
+}
+
+.contractCover__rule--head {
+  fill: var(--pg-fg);
+}
+
+.contractCover__rule--body {
+  fill: var(--pg-faint);
+}
+
+.contractCover__rule--sig {
+  fill: var(--pg-hair);
+}
+
+/* the signature: the one mark on the page that is not a rule standing in
+   for text, drawn the way a pen would, not a bar */
+.contractCover__mark {
+  stroke: var(--pg-accent);
+}
+
+/*
+  Steep on purpose. The lockup only needs solid backing through roughly the
+  bottom fifth of the frame it sits in - unlike DplCover's and PondCover's
+  scrims, which back a much bigger subject and so run most of the card's
+  height, this one is holding up two lines of text over ground that is
+  already dark. Running it further up would dim the clause rules and the
+  signature baseline above it for no reason the lockup needs served, so it
+  is tuned to be fully spent well before either.
+*/
+.contractCover__scrim {
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(8, 8, 11, 0.94) 0%,
+    rgba(8, 8, 11, 0.82) 20%,
+    rgba(8, 8, 11, 0) 34%
+  );
+}
+
+/*
+  The signature mark's own layer, stacked above the scrim the same way the
+  title lockup already is. The scrim has a job (the lockup); the mark is not
+  it, and it is the one accent colour on the cover, so it is painted after
+  the scrim rather than dimmed by a layer that exists for something else.
+  Same viewBox as the page group below it, and the same rotation, so it
+  still sits exactly on the baseline it belongs to.
+*/
+.contractCover__markLayer {
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  transform: rotate(-1.1deg);
+  transform-origin: 50% 48%;
+}
+
+.contractCover__lock {
+  position: absolute;
+  z-index: 4;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.contractCover__name {
+  display: block;
+  /* the vw clamp is the fallback for engines without container units */
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f6f2fb;
+  text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
+}
+
+/* ---- Cat Operator Cover ---- */
+
+.catCover {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0d;
+}
+
+.catCover__ground,
+.catCover__glow,
+.catCover__art,
+.catCover__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.catCover__ground {
+  background: linear-gradient(180deg, #0b0b10 0%, #17161d 58%, #09090c 100%);
+}
+
+.catCover__glow {
+  background: radial-gradient(
+    46% 30% at 50% 64%,
+    color-mix(in srgb, #f9c606 40%, transparent),
+    transparent 74%
+  );
+  opacity: 0.55;
+}
+
+.catCover__art {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.catCover__terminal {
+  transform: rotate(1deg);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.5));
+}
+
+.catCover__scrim {
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(8, 8, 11, 0.94) 0%,
+    rgba(8, 8, 11, 0.82) 20%,
+    rgba(8, 8, 11, 0) 34%
+  );
+}
+
+.catCover__lock {
+  position: absolute;
+  z-index: 4;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.catCover__name {
+  display: block;
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f6f2fb;
+  text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
+}
+
+/* ---- the vacant cover ---- */
+
+.slotCover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ink) 4%, var(--cream));
+}
+
+.slotCover::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px dashed var(--pg-hair);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.slotCover__grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--pg-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pg-grid-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(72% 60% at 50% 50%, #000, transparent);
+  mask-image: radial-gradient(72% 60% at 50% 50%, #000, transparent);
+}
+
+.slotCover__index {
+  position: absolute;
+  top: 14px;
+  left: 15px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--pg-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.slotCover__plus {
+  display: block;
+  width: 13cqw;
+  min-width: 20px;
+  color: var(--pg-faint);
+}
+
+.slotCover__plus svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+
+/* ---- the invoice cover ----
+
+   Built on the same bones as .contractCover: a lit sheet on a dark ground,
+   the title lockup over a steep scrim. What differs is what the page is
+   doing. The contract cover is ragged-right prose with a signature; an
+   invoice is a table, so this one is ruled columns with amounts hanging
+   off a right edge, and the one accent is the total rather than a
+   signature - because the total is what an invoice is for.
+*/
+
+.invoiceCover {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0d;
+}
+
+.invoiceCover__ground,
+.invoiceCover__glow,
+.invoiceCover__sheet,
+.invoiceCover__scrim,
+.invoiceCover__markLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.invoiceCover__ground {
+  background: linear-gradient(180deg, #0b0b10 0%, #17161d 58%, #09090c 100%);
+}
+
+.invoiceCover__glow {
+  background: radial-gradient(
+    46% 30% at 50% 64%,
+    color-mix(in srgb, var(--pg-accent) 40%, transparent),
+    transparent 74%
+  );
+  opacity: 0.55;
+}
+
+.invoiceCover__sheet {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* tilted the opposite way from the contract's sheet, so the two cards do
+   not read as the same photograph twice on one shelf */
+.invoiceCover__page {
+  transform: rotate(1.2deg);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.5));
+}
+
+.invoiceCover__paper {
+  fill: var(--cream);
+  stroke: var(--pg-hair);
+  stroke-width: 1.2;
+}
+
+.invoiceCover__rule--head {
+  fill: var(--pg-fg);
+}
+
+.invoiceCover__rule--body {
+  fill: var(--pg-faint);
+}
+
+/* the amount column: the same weight as body text, because on a real
+   invoice the figures are not louder than the lines they belong to - only
+   the total is */
+.invoiceCover__rule--amount {
+  fill: var(--pg-faint);
+}
+
+.invoiceCover__rule--divider {
+  fill: var(--pg-hair);
+}
+
+.invoiceCover__scrim {
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(8, 8, 11, 0.94) 0%,
+    rgba(8, 8, 11, 0.82) 20%,
+    rgba(8, 8, 11, 0) 34%
+  );
+}
+
+.invoiceCover__markLayer {
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  transform: rotate(1.2deg);
+  transform-origin: 50% 48%;
+}
+
+/* the total. The one accent on the cover, painted above the scrim for the
+   same reason the contract's signature is: it is the thing the tool makes. */
+.invoiceCover__total {
+  fill: var(--pg-accent);
+}
+
+.invoiceCover__lock {
+  position: absolute;
+  z-index: 4;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+
+.invoiceCover__name {
+  display: block;
+  font-size: clamp(13px, 2.6vw, 30px);
+  font-size: 11cqw;
+  font-weight: 600;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: #f6f2fb;
+  text-shadow: 0 2px 20px rgba(5, 3, 12, 0.75);
+}

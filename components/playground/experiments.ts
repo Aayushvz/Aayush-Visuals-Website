@@ -160,8 +160,41 @@ export const EXPERIMENTS: Experiment[] = [
     status: "live",
   },
   {
-    id: "pond",
+    id: "invoice",
     index: "03",
+    title: "Invoice Generator",
+    tags: [
+      { label: "Freelance tool", icon: "receipt" },
+      { label: "No signup", icon: "nosignup" },
+      { label: "Stays in your browser", icon: "lock" },
+    ],
+    tagline: "Bill a client in under a minute.",
+    blurb:
+      "Build a clean invoice with line items, taxes and your details, then export it. No signup, and nothing leaves your browser.",
+    kind: "Freelance tool",
+    href: "https://invoice-generator-teal-pi.vercel.app/invoice-generator/en",
+    cta: "Bill a client",
+    meta: "Free · no signup, nothing leaves your browser",
+    cover: InvoiceCover,
+    /* a ledger blue */
+    theme: {
+      wall: "#d3deef",
+      ink: "#0f1a33",
+      accent: "#2563eb",
+      onAccent: "#f2f6ff",
+      glow: "#7aa7ff",
+      light: "#d6e4ff",
+    },
+    shipped: "09.19.2026",
+    stats: [
+      { value: "0", label: "Signups" },
+      { value: "0", label: "Uploads" },
+    ],
+    status: "live",
+  },
+  {
+    id: "pond",
+    index: "04",
     title: "Lotus Pond",
     tags: [
       { label: "Pixel art", icon: "pixel" },
@@ -191,39 +224,6 @@ export const EXPERIMENTS: Experiment[] = [
     stats: [
       { value: "1", label: "Frog" },
       { value: "0", label: "Timers" },
-    ],
-    status: "live",
-  },
-  {
-    id: "invoice",
-    index: "04",
-    title: "Invoice Generator",
-    tags: [
-      { label: "Freelance tool", icon: "receipt" },
-      { label: "No signup", icon: "nosignup" },
-      { label: "Stays in your browser", icon: "lock" },
-    ],
-    tagline: "Bill a client in under a minute.",
-    blurb:
-      "Build a clean invoice with line items, taxes and your details, then export it. No signup, and nothing leaves your browser.",
-    kind: "Freelance tool",
-    href: "https://invoice-generator-teal-pi.vercel.app/invoice-generator/en",
-    cta: "Bill a client",
-    meta: "Free · no signup, nothing leaves your browser",
-    cover: InvoiceCover,
-    /* a ledger blue */
-    theme: {
-      wall: "#d3deef",
-      ink: "#0f1a33",
-      accent: "#2563eb",
-      onAccent: "#f2f6ff",
-      glow: "#7aa7ff",
-      light: "#d6e4ff",
-    },
-    shipped: "09.19.2026",
-    stats: [
-      { value: "0", label: "Signups" },
-      { value: "0", label: "Uploads" },
     ],
     status: "live",
   },

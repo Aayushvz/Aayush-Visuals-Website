@@ -1,4 +1,5 @@
 import Image from "next/image";
+import "./covers.css";
 
 /*
   Cover art.
@@ -410,7 +411,10 @@ export function CatOperatorCover() {
       />
       
       {/* CAT Logo */}
-      <div style={{ position: "absolute", top: 16, right: 16, width: 64, height: 40 }}>
+      <div
+        className="catCover__logo"
+        style={{ position: "absolute", top: 16, right: 16, width: 64, height: 40 }}
+      >
         <Image
           src="/cat-dashboard/logo-white.png"
           alt="CAT Logo"

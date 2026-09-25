@@ -8829,142 +8829,144 @@ html.contact-page-active body {
 
 /* ---- the status card (replaced the globe) ----
 
-   A dark panel sitting on a lime strap, after a profile-widget reference.
-   The page is saturated violet, so the panel is near-black to lift off it
-   and the strap is the one lime on the site: a status light, nothing else
-   gets it. */
+   A dark panel sitting on a coloured strap, after a profile-widget
+   reference. Both colours come from the page itself rather than the
+   reference's lime, which fought the violet: the panel is the violet
+   pushed almost to black, so it reads as a hole in the page rather than a
+   grey slab on it, and the strap is the page's own lilac accent. */
 .statusCard {
-  --sc-panel: #161617;
-  --sc-lime: #a6f05c;
+  --sc-panel: #170a33;
+  --sc-strap: var(--cp-accent, #ddd6fe);
+  --sc-fg: #f4f1ea;
+  --sc-mute: rgba(244, 241, 234, 0.58);
   position: relative;
   flex-shrink: 0;
-  width: clamp(320px, 32vw, 460px);
-  padding-bottom: 42px;
-  border-radius: 30px;
-  background: linear-gradient(to bottom, #b4f56f, var(--sc-lime));
-  box-shadow:
-    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
-    0 18px 40px rgba(20, 6, 60, 0.28),
-    0 0 36px rgba(166, 240, 92, 0.22);
+  width: clamp(300px, 25vw, 380px);
+  padding-bottom: 36px;
+  border-radius: 24px;
+  background: var(--sc-strap);
+  box-shadow: 0 16px 40px rgba(20, 4, 60, 0.35);
   font-family: var(--font-primary);
 }
 
 .statusCard__panel {
   position: relative;
   z-index: 1;
-  padding: 24px 22px 22px;
-  border-radius: 30px;
+  padding: 18px 18px 18px;
+  border-radius: 24px;
   background:
-    radial-gradient(120% 90% at 70% 0%, #242425, transparent 60%),
+    radial-gradient(120% 90% at 80% 0%, rgba(124, 58, 237, 0.28), transparent 60%),
     var(--sc-panel);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 10px 24px rgba(0, 0, 0, 0.3);
-  color: #f4f4f2;
+    inset 0 0 0 1px rgba(244, 241, 234, 0.08),
+    0 8px 18px rgba(10, 2, 30, 0.35);
+  color: var(--sc-fg);
 }
 
 .statusCard__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 15px;
-  color: rgba(244, 244, 242, 0.5);
+  font-size: 13px;
+  color: var(--sc-mute);
 }
 
 .statusCard__time {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-variant-numeric: tabular-nums;
 }
 
 .statusCard__time svg {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .statusCard__who {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 22px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .statusCard__avatar {
   flex-shrink: 0;
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  background: #d9d9d6;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+  background: #2a1d4d;
+  box-shadow: 0 0 0 2px rgba(244, 241, 234, 0.12);
 }
 
 .statusCard__name {
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 500;
+  line-height: 1.2;
   letter-spacing: -0.01em;
-  color: #fff;
+  color: var(--sc-fg);
 }
 
 .statusCard__avail {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin: 4px 0 0;
-  font-size: 15px;
-  color: rgba(244, 244, 242, 0.5);
+  gap: 6px;
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--sc-mute);
 }
 
 .statusCard__availDot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--sc-lime);
-  box-shadow: 0 0 0 0 rgba(166, 240, 92, 0.6);
+  background: #7ee08a;
+  box-shadow: 0 0 0 0 rgba(126, 224, 138, 0.55);
   animation: statusPulse 2.4s ease-in-out infinite;
 }
 
 @keyframes statusPulse {
   0%,
-  100% { box-shadow: 0 0 0 0 rgba(166, 240, 92, 0.55); }
-  50% { box-shadow: 0 0 0 5px rgba(166, 240, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(126, 224, 138, 0.5); }
+  50% { box-shadow: 0 0 0 4px rgba(126, 224, 138, 0); }
 }
 
 .statusCard__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 8px;
+  margin-top: 18px;
 }
 
 .statusCard__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 52px;
+  gap: 7px;
+  height: 42px;
   border: 0;
-  border-radius: 14px;
-  background: linear-gradient(to bottom, #3b3b3d, #2d2d2f);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 2px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  background: rgba(244, 241, 234, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(244, 241, 234, 0.1);
   font: inherit;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  color: #f4f4f2;
+  color: var(--sc-fg);
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
 }
 
 .statusCard__btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
 }
 
 .statusCard__btn:hover {
-  background: linear-gradient(to bottom, #464649, #37373a);
+  background: rgba(244, 241, 234, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(244, 241, 234, 0.18);
 }
 
 .statusCard__btn:active {
@@ -8972,7 +8974,7 @@ html.contact-page-active body {
 }
 
 .statusCard__btn:focus-visible {
-  outline: 2px solid var(--sc-lime);
+  outline: 2px solid var(--sc-strap);
   outline-offset: 2px;
 }
 
@@ -8981,19 +8983,19 @@ html.contact-page-active body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 42px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: 7px;
+  font-size: 13px;
   font-weight: 500;
-  color: #1a2410;
+  color: #2a1260;
 }
 
 .statusCard__strap svg {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .contactPage__kicker {
@@ -9357,7 +9359,7 @@ html.contact-page-active body {
 
   .statusCard {
     width: 100%;
-    max-width: 440px;
+    max-width: 380px;
   }
 
   .contactPage__title {
@@ -11890,5 +11892,824 @@ html.dpl-page .preloader {
      the bottom of a row that is already moving sideways */
   .galleryItem {
     margin-top: 0;
+  }
+}
+
+/* ==========================================================
+   Experiments row (homepage, after Process)
+
+   Program-style cards after a tennis-academy reference: a coloured panel
+   with pills, a badge, a big name and a line of context, over the
+   experiment's cover with a frosted call to action on the art. The row
+   scrolls sideways and bleeds off the right edge; the arrows step it one
+   card at a time.
+   ========================================================== */
+
+.lab {
+  --lab-card-w: clamp(280px, 24vw, 350px);
+  --lab-gap: clamp(14px, 1.3vw, 22px);
+  position: relative;
+  z-index: 2;
+  background: var(--cream);
+  padding: 12vh 0 10vh;
+  color: var(--ink);
+}
+
+.lab__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+  padding: 0 var(--page-rail-inset);
+  margin-bottom: clamp(48px, 8vh, 88px);
+}
+
+.lab__kicker {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.5);
+}
+
+.lab__title {
+  margin: 0;
+  font-size: clamp(34px, 4.2vw, 62px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.lab__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.lab__arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.25s ease, opacity 0.25s ease, transform 0.2s ease;
+}
+
+.lab__arrow svg {
+  width: 17px;
+  height: 17px;
+}
+
+.lab__arrow:hover:not(:disabled) {
+  background: var(--purple);
+}
+
+.lab__arrow:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.lab__arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.lab__arrow:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+/*
+  Pinned (desktop). The section is made taller than the screen by JS (one
+  screen plus the row's overflow) and the stage inside it is sticky, so the
+  stage locks while that extra height scrolls past and the row slides
+  sideways under it. The stage centres the heading and row in the space
+  under the floating nav, and the card width is derived from the screen
+  height so the whole row fits with room to spare at the bottom.
+*/
+.lab--pinned {
+  padding: 0;
+  /* wide cards with a short 16:10 cover. Card height is roughly 190px of
+     panel plus 0.625 x width of cover, and the heading block above it
+     about 430px with the nav clearance, so the width is solved from the
+     screen height (and capped by its width) to leave room under the row */
+  --lab-card-w: clamp(300px, min(28vw, calc((100svh - 620px) * 1.6)), 440px);
+}
+
+.lab--pinned .lab__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 96px 0 max(28px, 4vh);
+  overflow: hidden;
+}
+
+.lab--pinned .lab__head {
+  margin-bottom: clamp(32px, 5.5vh, 64px);
+}
+
+/* pinned, the row does not scroll itself - it is moved by transform */
+.lab--pinned .lab__track {
+  overflow: visible;
+  scroll-snap-type: none;
+  will-change: transform;
+}
+
+/* the row: starts at the content inset, runs off the right edge */
+.lab__track {
+  display: flex;
+  gap: var(--lab-gap);
+  margin: 0;
+  padding: 8px var(--page-rail-inset) 24px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--page-rail-inset);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lab__track::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- a card ---- */
+
+.labCard {
+  flex: 0 0 var(--lab-card-w);
+  scroll-snap-align: start;
+}
+
+.labCard__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.05);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.labCard__panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px 20px;
+}
+
+.labCard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.labCard__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.labCard__pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--cream);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+/* the experiment's logo, solid, on its own theme colour */
+.labCard__badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--t-accent, var(--purple));
+  color: var(--t-on-accent, #fff);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.labCard__badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.labCard__title {
+  margin: 0;
+  font-size: clamp(21px, 1.65vw, 26px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.labCard__text {
+  margin: 10px 0 0;
+  max-width: 28ch;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(31, 31, 31, 0.58);
+}
+
+/* the cover: a rounded plate at the foot of the card, the panel colour
+   showing behind its top corners */
+.labCard__art {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #12101c;
+}
+
+/* covers are drawn 3:4 in cqw of their own box; centred on this square
+   plate, so the subject in the middle of each is what shows */
+.labCard__cover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  aspect-ratio: 3 / 4;
+  transform: translateY(-50%);
+  container-type: inline-size;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lab--pinned .labCard__art {
+  aspect-ratio: 16 / 10;
+}
+
+/* The card names the experiment already, so the art carries no words: the
+   covers' own title lockups, the shade laid under them for legibility, and
+   the CAT wordmark are all taken off here. The playground shows them. */
+.labCard__cover [class$="Cover__lock"],
+.labCard__cover [class$="Cover__scrim"],
+.labCard__cover .catCover__logo {
+  display: none;
+}
+
+/* a soft floor of shade so the frosted button reads on any cover */
+.labCard__art::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36%;
+  background: linear-gradient(to top, rgba(10, 8, 18, 0.5), transparent);
+  pointer-events: none;
+}
+
+/* the frosted call to action, sitting on the art */
+.labCard__cta {
+  position: absolute;
+  z-index: 5;
+  left: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 4px 0 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.labCard__ctaKey {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  color: var(--ink);
+}
+
+.labCard__ctaKey svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* the featured card: the highlight colour, like the reference's first card */
+.labCard--featured .labCard__link {
+  background: var(--t-accent, var(--purple));
+  color: var(--t-on-accent, #fff);
+}
+
+.labCard--featured .labCard__pill {
+  background: #fff;
+}
+
+.labCard--featured .labCard__badge {
+  background: var(--ink);
+  color: #fff;
+}
+
+.labCard--featured .labCard__text {
+  color: color-mix(in srgb, var(--t-on-accent, #fff) 78%, transparent);
+}
+
+.labCard__link:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .labCard__link:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.04), 0 22px 44px rgba(40, 20, 80, 0.14);
+  }
+
+  /* each quiet card picks up its own experiment's tint */
+  .labCard:not(.labCard--featured) .labCard__link:hover {
+    background: var(--t-light, #fff);
+  }
+
+  .labCard:not(.labCard--featured) .labCard__link:hover .labCard__pill {
+    background: #fff;
+  }
+
+  .labCard__link:hover .labCard__badge {
+    transform: rotate(-12deg) scale(1.08);
+  }
+
+  .labCard__link:hover .labCard__cover {
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .labCard__link:hover .labCard__ctaKey svg {
+    transform: translateX(3px);
+  }
+}
+
+@media (max-width: 760px) {
+  /* a phone: one card and a clear peek of the next, so the row reads as
+     something to swipe; the heading block sits close over it */
+  .lab {
+    --lab-card-w: min(80vw, 300px);
+    --lab-gap: 12px;
+    padding: 72px 0 56px;
+  }
+
+  .lab__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  /* hidden on a phone but still holding its space, so the heading and
+     the cards below stay exactly where they were */
+  .lab__kicker {
+    margin-bottom: 12px;
+    font-size: 11px;
+    visibility: hidden;
+  }
+
+  .lab__title {
+    font-size: clamp(30px, 8.6vw, 38px);
+    line-height: 1.02;
+  }
+
+  /* no arrows on a phone: the locked scroll is the control */
+  .lab__nav {
+    display: none;
+  }
+
+  .lab__arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lab__arrow svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .lab__track {
+    padding-top: 4px;
+    padding-bottom: 8px;
+  }
+
+  .labCard__panel {
+    padding: 14px 16px 18px;
+  }
+
+  .labCard__top {
+    margin-bottom: 14px;
+  }
+
+  .labCard__title {
+    font-size: 22px;
+  }
+
+  .labCard__text {
+    margin-top: 8px;
+  }
+
+  .labCard__cta {
+    left: 12px;
+    bottom: 12px;
+    height: 36px;
+    font-size: 12.5px;
+  }
+
+  .labMore__count {
+    font-size: 64px;
+  }
+
+  .labMore__title {
+    font-size: 20px;
+  }
+
+  /* Pinned on a phone. A compact card: 72vw wide so a clear slice of the
+     next one shows, a tight text panel of fixed height (title up to two
+     lines, tagline up to two) so every card has the same shape with no
+     empty band, and a 4:3 cover that carries most of the card. The row
+     sits centred between the heading and the bottom edge. */
+  .lab.lab--pinned {
+    --lab-card-w: min(72vw, 300px);
+    --lab-gap: 12px;
+    padding: 0;
+  }
+
+  .lab--pinned .lab__stage {
+    justify-content: flex-start;
+    padding: 80px 0 32px;
+  }
+
+  .lab--pinned .lab__head {
+    margin-bottom: 28px;
+  }
+
+  .lab--pinned .lab__track {
+    align-items: flex-start;
+    padding-bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .lab--pinned .labCard__panel {
+    flex: 0 0 auto;
+    padding: 14px 14px 16px;
+  }
+
+  .lab--pinned .labCard__top {
+    margin-bottom: 12px;
+  }
+
+  .lab--pinned .labCard__pill {
+    height: 22px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .lab--pinned .labCard__badge {
+    width: 26px;
+    height: 26px;
+  }
+
+  .lab--pinned .labCard__badge svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* fixed two-line boxes for the title and the tagline, so short and long
+     names give the same card */
+  .lab--pinned .labCard__title {
+    font-size: 20px;
+    line-height: 1.08;
+    min-height: 2.16em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lab--pinned .labCard__text {
+    margin-top: 6px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    min-height: 2.8em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* One card height for the whole row, from the screen's height, and the
+     cover fills everything under the text panel. Letting cards size
+     themselves left the shorter ones stretched to the tallest, with a
+     blank strip under the cover; now every card ends on its image. */
+  .lab--pinned .labCard__link {
+    height: clamp(300px, calc(100svh - 360px), 400px);
+    border-radius: 22px;
+  }
+
+  .lab--pinned .labCard__art {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: auto;
+    max-height: none;
+    border-radius: 18px;
+  }
+
+  .lab--pinned .labCard__cta {
+    left: 10px;
+    bottom: 10px;
+    height: 34px;
+    padding: 0 3px 0 13px;
+    font-size: 12px;
+  }
+
+  .lab--pinned .labCard__ctaKey {
+    width: 28px;
+    height: 28px;
+  }
+
+  .lab--pinned .labMore__screen {
+    min-height: 0;
+  }
+
+  .lab--pinned .labMore__count {
+    font-size: 54px;
+  }
+
+  .lab--pinned .labMore__label {
+    top: 14px;
+    left: 16px;
+    font-size: 12px;
+  }
+
+  .lab--pinned .labMore__title {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labCard__link,
+  .labCard__cover,
+  .labCard__badge,
+  .labCard__ctaKey svg {
+    transition: none;
+  }
+
+  .labCard__link:hover,
+  .labCard__link:hover .labCard__badge,
+  .labCard__link:hover .labCard__ctaKey svg {
+    transform: none;
+  }
+
+  .labCard__link:hover .labCard__cover {
+    transform: translateY(-50%);
+  }
+}
+
+/* ---- the last card: through to the playground ---- */
+
+.labMore.labCard__link {
+  padding: 8px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.05);
+}
+
+/* the dark LED screen: grows to fill whatever height the row gives it */
+.labMore__screen {
+  position: relative;
+  flex: 1;
+  min-height: 200px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #121113;
+  color: #f4f2ee;
+}
+
+.labMore__dots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.labMore__dim {
+  fill: rgba(255, 255, 255, 0.07);
+}
+
+.labMore__lit {
+  fill: var(--purple);
+  transition: transform 0.6s steps(3, end), fill 0.4s ease;
+}
+
+.labMore__label {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(244, 242, 238, 0.9);
+}
+
+.labMore__count {
+  position: absolute;
+  top: 34px;
+  left: 16px;
+  font-size: clamp(64px, 6vw, 96px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: #f4f2ee;
+  font-variant-numeric: tabular-nums;
+}
+
+.labMore__foot {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+/* the accent tile, the reference's "Aa" square: a faint dot texture, four
+   corner ticks, and a ringed ink disc holding the arrow dead centre */
+.labMore__tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 0 1px, transparent 1.5px) center / 9px 9px,
+    radial-gradient(120% 120% at 30% 20%, #8f55f5, var(--purple) 55%, var(--purple-mid));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* registration ticks in each corner, drawn as four short L-shapes */
+.labMore__ticks {
+  position: absolute;
+  inset: 11px;
+  --tk: rgba(255, 255, 255, 0.55);
+  background:
+    linear-gradient(var(--tk), var(--tk)) top left / 10px 1.5px,
+    linear-gradient(var(--tk), var(--tk)) top left / 1.5px 10px,
+    linear-gradient(var(--tk), var(--tk)) top right / 10px 1.5px,
+    linear-gradient(var(--tk), var(--tk)) top right / 1.5px 10px,
+    linear-gradient(var(--tk), var(--tk)) bottom left / 10px 1.5px,
+    linear-gradient(var(--tk), var(--tk)) bottom left / 1.5px 10px,
+    linear-gradient(var(--tk), var(--tk)) bottom right / 10px 1.5px,
+    linear-gradient(var(--tk), var(--tk)) bottom right / 1.5px 10px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.labMore__disc {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #141315;
+  color: #fff;
+  box-shadow:
+    0 0 0 6px rgba(255, 255, 255, 0.14),
+    0 0 0 7px rgba(255, 255, 255, 0.3),
+    0 8px 18px rgba(30, 8, 70, 0.45);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.labMore__arrow {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.labMore__arrow svg {
+  width: 44%;
+  height: 44%;
+}
+
+/* the second arrow waits off the lower-left edge of the disc */
+.labMore__arrow--next {
+  transform: translate(-110%, 110%);
+}
+
+.labMore__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 10px 6px 6px 0;
+}
+
+.labMore__src {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(31, 31, 31, 0.5);
+}
+
+.labMore__src::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.labMore__title {
+  margin-top: 8px;
+  font-size: clamp(20px, 1.7vw, 26px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.labMore__meta {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: rgba(31, 31, 31, 0.6);
+}
+
+@media (hover: hover) {
+  /* the bars jump a row, stepped, like a meter taking a reading */
+  .labMore:hover .labMore__lit {
+    transform: translateY(-1px);
+    fill: #9b6bff;
+  }
+
+  .labMore:hover .labMore__disc {
+    transform: scale(1.06);
+  }
+
+  /* out along its own diagonal, the next one in behind it */
+  .labMore:hover .labMore__arrow {
+    transform: translate(110%, -110%);
+  }
+
+  .labMore:hover .labMore__arrow--next {
+    transform: translate(0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labMore__lit,
+  .labMore__disc,
+  .labMore__arrow {
+    transition: none;
+  }
+
+  .labMore:hover .labMore__lit,
+  .labMore:hover .labMore__disc,
+  .labMore:hover .labMore__arrow {
+    transform: none;
+  }
+
+  .labMore:hover .labMore__arrow--next {
+    transform: translate(-110%, 110%);
   }
 }
