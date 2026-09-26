@@ -12,7 +12,7 @@ import { PERSON_NAME } from "@/lib/site";
   - Shimmering pixelated ocean with animated horizon glow and wave layers
   - Intricate SVG pixel-art cliff campfire scene on left with characters & glowing fire
   - Right jungle foliage framing the night ocean
-  - Center glowing Sea of Stars typography, crown-skull emblem, and copyright
+  - Center glowing Sea of Stars typography, Shotsu emblem, and copyright
   - Bottom dock carrying the colophon line
 */
 
@@ -225,26 +225,16 @@ export default function Footer() {
             <span className="seaFooter__titleLine2">visuals</span>
           </h2>
 
-          {/* Floating Pixel Crown-Skull Emblem */}
+          {/* Floating Shotsu emblem */}
           <div className="seaFooter__emblem" aria-hidden>
-            <svg viewBox="0 0 64 64" fill="none" className="seaFooter__skullSvg">
-              {/* Tilted Floating Crown */}
-              <path d="M20 12L24 22L32 14L40 22L44 12L48 24H16L20 12Z" fill="#a78bfa" className="seaFooter__crown" />
-              {/* Pixel Skull Head */}
-              <rect x="18" y="27" width="28" height="22" rx="8" fill="#1e1333" stroke="#a78bfa" strokeWidth="2.5" />
-              {/* Eye Sockets with Purple Glow */}
-              <circle cx="26" cy="36" r="4.5" fill="#6d28d9" />
-              <circle cx="26" cy="36" r="2" fill="#a78bfa" />
-              <circle cx="38" cy="36" r="4.5" fill="#6d28d9" />
-              <circle cx="38" cy="36" r="2" fill="#a78bfa" />
-              {/* Nose Cavity */}
-              <path d="M32 40L29 44H35L32 40Z" fill="#a78bfa" />
-              {/* Teeth / Jaw */}
-              <rect x="22" y="49" width="4" height="6" rx="1.5" fill="#a78bfa" />
-              <rect x="28" y="49" width="4" height="6" rx="1.5" fill="#a78bfa" />
-              <rect x="34" y="49" width="4" height="6" rx="1.5" fill="#a78bfa" />
-              <rect x="40" y="49" width="4" height="6" rx="1.5" fill="#a78bfa" />
-            </svg>
+            <div className="cbMascot seaFooter__shotsu">
+              <span className="cbMascot__ears" />
+              <span className="cbMascot__body">
+                <span className="cbMascot__eye cbMascot__eye--l" />
+                <span className="cbMascot__eye cbMascot__eye--r" />
+                <span className="cbMascot__shine" />
+              </span>
+            </div>
           </div>
 
           {/* Relocated Social Buttons in Center Scene */}

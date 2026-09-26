@@ -10737,10 +10737,35 @@ html.contact-page-active body {
   margin: 6px 0 20px;
   animation: seaFloat 4.2s infinite ease-in-out;
 }
-.seaFooter__skullSvg {
-  width: clamp(52px, 6vw, 72px);
-  height: clamp(52px, 6vw, 72px);
-  filter: drop-shadow(0 0 15px rgba(170, 146, 240, 0.75));
+/* Shotsu drawn at 118x104, shown small and toned to the night sky; the
+   emblem wrapper does the floating */
+.seaFooter__emblem {
+  width: 56px;
+  height: 50px;
+}
+.cbMascot.seaFooter__shotsu {
+  animation: none;
+  transform: scale(0.475);
+  transform-origin: top left;
+  filter: drop-shadow(0 0 18px rgba(170, 146, 240, 0.35));
+}
+.seaFooter__shotsu .cbMascot__ears {
+  background: linear-gradient(to bottom, #c7b3f7, #8f6fe0);
+}
+.seaFooter__shotsu .cbMascot__body {
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 95%, rgba(59, 26, 128, 0.9), transparent 75%),
+    linear-gradient(to bottom, #c9b5f6 0%, #a88ded 34%, #7d5cd4 66%, #4f2c9e 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(210, 196, 255, 0.35),
+    inset 0 8px 14px rgba(230, 220, 255, 0.45),
+    inset 0 -12px 20px rgba(35, 14, 80, 0.6);
+}
+.seaFooter__shotsu .cbMascot__eye {
+  background: #140726;
+}
+.seaFooter__shotsu .cbMascot__shine {
+  opacity: 0.55;
 }
 @keyframes seaFloat {
   0%,
@@ -11823,7 +11848,7 @@ html.dpl-page .preloader {
     0 0 0 3px #fff,
     0 0 0 4px rgba(31, 31, 31, 0.06),
     0 10px 24px -8px rgba(31, 31, 31, 0.35);
-  cursor: zoom-in;
+  cursor: default;
   opacity: 0;
   transform: scale(0.6);
   transition:
@@ -11967,95 +11992,6 @@ html.dpl-page .preloader {
   50% { translate: 0 -5px; }
 }
 
-/* ---- the lightbox ---- */
-
-.galleryBox {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: grid;
-  place-items: center;
-  padding: 64px 72px;
-  background: rgba(18, 17, 19, 0.88);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  animation: galleryBoxIn 0.3s ease both;
-}
-
-@keyframes galleryBoxIn {
-  from { opacity: 0; }
-}
-
-.galleryBox__figure {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.galleryBox__img {
-  display: block;
-  max-width: min(1100px, 100%);
-  max-height: calc(100svh - 180px);
-  border-radius: 14px;
-  object-fit: contain;
-  animation: galleryImgIn 0.4s var(--ease-quint) both;
-}
-
-@keyframes galleryImgIn {
-  from { opacity: 0; transform: scale(0.96); }
-}
-
-.galleryBox__cap {
-  display: flex;
-  gap: 14px;
-  align-items: baseline;
-  font-size: 14px;
-  color: rgba(244, 242, 238, 0.8);
-}
-
-.galleryBox__count {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 12px;
-  color: rgba(244, 242, 238, 0.5);
-}
-
-.galleryBox__btn {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.galleryBox__btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-.galleryBox__btn:hover {
-  background: var(--purple);
-}
-
-.galleryBox__btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-}
-
-.galleryBox__btn--close { top: 18px; right: 18px; }
-.galleryBox__btn--prev { left: 18px; top: 50%; translate: 0 -50%; }
-.galleryBox__btn--next { right: 18px; top: 50%; translate: 0 -50%; }
-
 @media (max-width: 640px) {
   /* a phone: sized by width alone, and only as tall as its content. Five
      photo tiles make the middle row, so the tile is a sixth of the screen */
@@ -12122,19 +12058,6 @@ html.dpl-page .preloader {
       0 8px 20px -8px rgba(31, 31, 31, 0.3);
   }
 
-  .galleryBox {
-    padding: 64px 12px 96px;
-  }
-
-  .galleryBox__btn--prev,
-  .galleryBox__btn--next {
-    top: auto;
-    bottom: 24px;
-    translate: none;
-  }
-
-  .galleryBox__btn--prev { left: calc(50% - 56px); }
-  .galleryBox__btn--next { right: calc(50% - 56px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -12146,11 +12069,6 @@ html.dpl-page .preloader {
 
   .galleryTag {
     opacity: 1;
-    animation: none;
-  }
-
-  .galleryBox,
-  .galleryBox__img {
     animation: none;
   }
 }
@@ -13260,5 +13178,354 @@ html.dpl-page .preloader {
   .recentToast--leaving,
   .recentToast--fading {
     animation-duration: 0.01ms;
+  }
+}
+
+/* ============================================================
+   Contact section (HomeContact)
+
+   Simple: the ask and the ways in on the left, one light form card on the
+   right, on the site purple. The one playful moment is Shotsu, drawn in CSS
+   as a 3D jelly, peeking over the top edge of the card.
+   ============================================================ */
+
+.hc.hcs {
+  padding: clamp(80px, 12vh, 130px) var(--page-content-inset) clamp(80px, 12vh, 130px);
+  background:
+    radial-gradient(70% 90% at 90% 10%, rgba(255, 255, 255, 0.14), transparent 60%),
+    var(--purple);
+  border-top: 0;
+  color: #fff;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+}
+
+.hcs__inner {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(40px, 7vw, 110px);
+  align-items: center;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.hcs__heading {
+  margin: 0;
+  font-size: clamp(44px, 6vw, 84px);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: #fff;
+}
+
+.hcs__tagline {
+  margin: 20px 0 0;
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+/* the address as the one obvious action on the left */
+.hcs__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 8px 8px 8px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  font: inherit;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.hcs__copy:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.hcs__copyMail {
+  font-size: clamp(15px, 1.2vw, 18px);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.hcs__copyTag {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--purple);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hcs__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hcs__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.hcs__links svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.25s var(--ease-quint);
+}
+
+.hcs__links a:hover {
+  color: #fff;
+}
+
+.hcs__links a:hover svg {
+  transform: translate(2px, -2px);
+}
+
+/* ---- the card, with Shotsu on its edge ---- */
+
+.hcs__right {
+  position: relative;
+  padding-top: 64px;
+}
+
+.cbMascot.hcs__mascot {
+  position: absolute;
+  top: 0;
+  right: 44px;
+  z-index: 0;
+}
+
+/* two paws resting on the card's top edge, in front of it */
+.hcs__paw {
+  position: absolute;
+  top: 57px;
+  z-index: 2;
+  width: 24px;
+  height: 15px;
+  border-radius: 999px 999px 9px 9px;
+  background: linear-gradient(to bottom, #efe6ff, #b99dfb);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -2px 3px rgba(109, 40, 217, 0.35),
+    0 3px 5px rgba(76, 29, 149, 0.28);
+}
+
+.hcs__paw--l { right: 118px; }
+.hcs__paw--r { right: 66px; }
+
+.hcs__form {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  padding: clamp(22px, 2.2vw, 30px);
+  border-radius: 24px;
+  background: #f6f3ee;
+  box-shadow: 0 24px 60px -24px rgba(23, 8, 56, 0.55);
+  color: #141414;
+}
+
+.hcs__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.hcs__input {
+  width: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #ebe6de;
+  box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.05);
+  font: inherit;
+  font-size: 15px;
+  color: #141414;
+  outline: none;
+  resize: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hcs__input::placeholder {
+  color: rgba(20, 20, 20, 0.45);
+}
+
+.hcs__input:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--purple), 0 0 0 3px rgba(124, 58, 237, 0.18);
+}
+
+.hcs__textarea {
+  min-height: 140px;
+}
+
+.hcs__send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: #141414;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.hcs__send svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s var(--ease-quint);
+}
+
+.hcs__send:hover:not(:disabled) {
+  background: var(--purple);
+}
+
+.hcs__send:hover:not(:disabled) svg {
+  transform: translateX(3px);
+}
+
+.hcs__send:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.hcs__copy:focus-visible,
+.hcs__links a:focus-visible,
+.hcs__send:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* ---- Shotsu, the 3D jelly ---- */
+
+.cbMascot {
+  position: relative;
+  width: 118px;
+  height: 104px;
+  animation: cbFloat 4.6s ease-in-out infinite;
+}
+
+.cbMascot__ears {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 52px;
+  height: 30px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, #f1e8ff, #c4b1fb);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 20'%3E%3Cpath d='M3 20C3.5 13 5.5 6.5 9.5 2.5c.8-.8 2-.7 2.6.2C14 5.6 15.6 8.3 18 9c2.4-.7 4-3.4 5.9-6.3.6-.9 1.8-1 2.6-.2 4 4 6 10.5 6.5 17.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 20'%3E%3Cpath d='M3 20C3.5 13 5.5 6.5 9.5 2.5c.8-.8 2-.7 2.6.2C14 5.6 15.6 8.3 18 9c2.4-.7 4-3.4 5.9-6.3.6-.9 1.8-1 2.6-.2 4 4 6 10.5 6.5 17.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.cbMascot__body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  height: 90px;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
+  background:
+    radial-gradient(ellipse 75% 45% at 50% 100%, rgba(192, 38, 211, 0.55), transparent 75%),
+    radial-gradient(ellipse 100% 70% at 50% 95%, rgba(109, 40, 217, 0.95), transparent 75%),
+    linear-gradient(to bottom, #f3ecff 0%, #cdb6ff 34%, #9f78fa 66%, #7c3aed 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.55),
+    inset 0 8px 14px rgba(255, 255, 255, 0.75),
+    inset 0 -12px 20px rgba(76, 29, 149, 0.55),
+    0 0 26px 6px rgba(221, 214, 254, 0.45);
+  transform-origin: 50% 100%;
+  animation: cbSquish 4.6s ease-in-out infinite;
+}
+
+.cbMascot__eye {
+  position: absolute;
+  top: 34%;
+  width: 10px;
+  height: 22px;
+  border-radius: 999px;
+  background: #1d0c35;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.35);
+  animation: cbBlink 5s ease-in-out infinite;
+}
+
+.cbMascot__eye--l { left: 36%; }
+.cbMascot__eye--r { right: 36%; }
+
+.cbMascot__shine {
+  position: absolute;
+  left: 22%;
+  top: 8%;
+  width: 56%;
+  height: 22%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.9), transparent 70%);
+}
+
+@keyframes cbFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+@keyframes cbSquish {
+  0%, 100% { transform: scale(1, 1); }
+  45% { transform: scale(1.03, 0.97); }
+}
+
+@keyframes cbBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@media (max-width: 860px) {
+  .hcs__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .hcs__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hcs__copyMail {
+    font-size: 14px;
+  }
+
+  .cbMascot.hcs__mascot {
+    right: 24px;
+  }
+
+  .hcs__paw--l { right: 98px; }
+  .hcs__paw--r { right: 46px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cbMascot,
+  .cbMascot__body,
+  .cbMascot__eye {
+    animation: none;
   }
 }

@@ -695,20 +695,9 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                       More work
                     </h2>
                   </div>
-                  <Link className="csMore__all" href="/work">
+                  <ExtCta href="/work" route count={PROJECTS.length}>
                     All projects
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden
-                    >
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </Link>
+                  </ExtCta>
                 </div>
                 <div className="csNext">
                   {next.map((p, i) => (

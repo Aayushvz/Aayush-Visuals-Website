@@ -5014,7 +5014,9 @@
 /* ---------- More work, as its own band above contact ---------- */
 
 .csMore {
-  margin-top: var(--cs-2xl);
+  /* flush against whatever section ends the case study: a margin here was
+     a strip of page colour between it and the band */
+  margin-top: 0;
   padding: clamp(64px, 9vh, 110px) 0 clamp(80px, 11vh, 130px);
   background: #ebe4d9;
 }
@@ -5048,46 +5050,43 @@
   color: var(--cs-ink);
 }
 
-.csMore__all {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 20px;
-  border-radius: 999px;
-  background: var(--cs-ink);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color var(--dur-hover, 200ms) var(--ease-quint), color var(--dur-hover, 200ms) var(--ease-quint);
-}
-
-.csMore__all svg {
-  width: 16px;
-  height: 16px;
-  transition: transform var(--dur-state, 260ms) var(--ease-quint);
-}
-
-@media (hover: hover) {
-  .csMore__all:hover {
-    background: var(--cs-accent);
-    color: var(--cs-on-accent, #fff);
-  }
-
-  .csMore__all:hover svg {
-    transform: translateX(3px);
-  }
-}
-
-.csMore__all:focus-visible {
-  outline: 2px solid var(--cs-accent);
-  outline-offset: 3px;
-}
-
 @media (max-width: 640px) {
   .csMore__head {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ---------- the tiny Shotsu, with ears ---------- */
+
+/*
+  The first version was a dome with two dots low in the middle, which read as
+  a snout. This one is cut from Shotsu's own silhouette: the dome and the
+  two-point ear tuft as one mask, the eyes set higher and wider apart as the
+  tall pills the mascot has, and a soft highlight across the crown.
+*/
+.csDetails__dot,
+.csContext__key::before,
+.csNext__kicker::before,
+.csMore__kicker::before {
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M11 11.5C11.6 8 12.8 5 14.6 3.4c.5-.4 1.2-.3 1.5.2L18 7.2l1.9-3.6c.3-.5 1-.6 1.5-.2C23.2 5 24.4 8 25 11.5Z'/%3E%3Cpath d='M2 22.5C2 14.6 9.2 9 18 9s16 5.6 16 13.5c0 6.3-5.8 10.5-16 10.5S2 28.8 2 22.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M11 11.5C11.6 8 12.8 5 14.6 3.4c.5-.4 1.2-.3 1.5.2L18 7.2l1.9-3.6c.3-.5 1-.6 1.5-.2C23.2 5 24.4 8 25 11.5Z'/%3E%3Cpath d='M2 22.5C2 14.6 9.2 9 18 9s16 5.6 16 13.5c0 6.3-5.8 10.5-16 10.5S2 28.8 2 22.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  background:
+    /* the eyes: tall pills, wide apart, a touch above the middle of the dome */
+    radial-gradient(ellipse 1.35px 2.5px at 36% 62%, #1d0c35 92%, transparent 100%),
+    radial-gradient(ellipse 1.35px 2.5px at 64% 62%, #1d0c35 92%, transparent 100%),
+    /* the glossy crown */
+    radial-gradient(ellipse 34% 14% at 50% 36%, rgba(255, 255, 255, 0.7), transparent 100%),
+    /* light pooling at the base, like the orb */
+    radial-gradient(ellipse 60% 26% at 50% 92%, color-mix(in srgb, var(--cs-accent) 60%, #000 25%), transparent 100%),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--cs-accent) 45%, #fff),
+      var(--cs-accent) 75%
+    );
+  box-shadow: none;
+  filter: drop-shadow(0 1.5px 2px color-mix(in srgb, var(--cs-accent) 45%, transparent));
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useRef, useState } from "react";
 import { GALLERY } from "./gallery.data";
 
 /*
@@ -13,9 +12,7 @@ import { GALLERY } from "./gallery.data";
   cluster reads as the lit part of a larger field. Two cursor labels point
   at tiles, the way collaborators' cursors do in a shared canvas.
 
-  The photographs sit in greyscale and come into colour on hover. A click
-  opens the full picture, uncropped, in a lightbox that steps with the
-  arrow keys.
+  The photographs sit in greyscale and come into colour on hover.
 
   Everything is laid out on one grid: a tile's place is (col, row) in tile
   steps from the centre, and odd rows sit half a step over.
@@ -69,7 +66,6 @@ const at = (c: Cell) =>
 export default function GallerySection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [shown, setShown] = useState(false);
-  const [open, setOpen] = useState<number | null>(null);
 
   /* the tiles pop in, from the logo outward, the first time the section
      comes into view */
@@ -125,30 +121,6 @@ export default function GallerySection() {
     };
   }, []);
 
-  const step = useCallback(
-    (d: number) => setOpen((i) => (i === null ? i : (i + d + GALLERY.length) % GALLERY.length)),
-    []
-  );
-
-  /* lightbox keys, and the page held still behind it */
-  useEffect(() => {
-    if (open === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null);
-      else if (e.key === "ArrowRight") step(1);
-      else if (e.key === "ArrowLeft") step(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [open, step]);
-
-  const current = open === null ? null : GALLERY[open];
-
   return (
     <section
       className={`gallery${shown ? " gallery--shown" : ""}`}
@@ -180,9 +152,8 @@ export default function GallerySection() {
           {GALLERY.map((item, i) => {
             const cell = PHOTO_CELLS[i];
             return (
-              <button
+              <div
                 key={item.src}
-                type="button"
                 className="galleryTile"
                 style={
                   {
@@ -191,13 +162,11 @@ export default function GallerySection() {
                     "--k": REVEAL_ORDER[i].toFixed(3),
                   } as React.CSSProperties
                 }
-                onClick={() => setOpen(i)}
-                aria-label={`Open photo: ${item.alt}`}
               >
                 <img
                   className="galleryTile__img"
                   src={item.src}
-                  alt=""
+                  alt={item.alt}
                   style={{ objectPosition: item.focus }}
                   /* eight small files, already warmed by HomeDeferred */
                   loading="eager"
@@ -215,70 +184,12 @@ export default function GallerySection() {
                     <span className="galleryTag__pill">{item.label}</span>
                   </span>
                 ) : null}
-              </button>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* in a portal on the body: the homepage's parallax wrapper is
-          transformed, which would pin a fixed overlay to it, not the screen */}
-      {current && typeof document !== "undefined" ? createPortal(
-        <div
-          className="galleryBox"
-          role="dialog"
-          aria-modal="true"
-          aria-label={current.alt}
-          onClick={() => setOpen(null)}
-        >
-          <figure className="galleryBox__figure" onClick={(e) => e.stopPropagation()}>
-            <img className="galleryBox__img" src={current.src} alt={current.alt} />
-            <figcaption className="galleryBox__cap">
-              {current.alt}
-              <span className="galleryBox__count">
-                {(open ?? 0) + 1} / {GALLERY.length}
-              </span>
-            </figcaption>
-          </figure>
-          <button
-            type="button"
-            className="galleryBox__btn galleryBox__btn--close"
-            aria-label="Close"
-            onClick={() => setOpen(null)}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6 6 18" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="galleryBox__btn galleryBox__btn--prev"
-            aria-label="Previous photo"
-            onClick={(e) => {
-              e.stopPropagation();
-              step(-1);
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 5.5 8.5 12l6.5 6.5" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="galleryBox__btn galleryBox__btn--next"
-            aria-label="Next photo"
-            onClick={(e) => {
-              e.stopPropagation();
-              step(1);
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 5.5 15.5 12 9 18.5" />
-            </svg>
-          </button>
-        </div>,
-        document.body
-      ) : null}
     </section>
   );
 }

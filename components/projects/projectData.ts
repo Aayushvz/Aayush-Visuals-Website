@@ -2506,6 +2506,18 @@ export const PROJECTS: Project[] = [
     },
     cta: "Open Live Demo",
     role: "Product Designer · Front-end",
+    /* Caterpillar yellow. White does not read on it, so anything filled
+       yellow takes near-black ink, and text set in the accent on the light
+       page drops to a deep gold that clears 4.5:1 */
+    accent: {
+      dark: "#FFCD11",
+      light: "#8A6800",
+      solid: "#FFCD11",
+      bright: "#FFCD11",
+      ink: "#141414",
+      fill: "#FFCD11",
+      fillInk: "#141414",
+    },
     roleNote:
       "Product design and front end, end to end: the interaction model, every screen, the procedural 3D excavator and the job-time estimator.",
     tools: ["HTML", "CSS", "JavaScript", "Three.js"],
