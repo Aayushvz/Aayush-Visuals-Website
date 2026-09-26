@@ -230,8 +230,16 @@ function detailPairs(project: Project): Pair[] {
      precisely because the assembly could not do the job for this project */
   if (project.challenge?.length || project.solution?.length) {
     const out: Pair[] = [];
+    /* the hero's Challenge column already shows the first line, so Details
+       picks up from the second rather than printing it twice in one screen */
     if (project.challenge?.length)
-      out.push({ label: "Challenge", body: project.challenge });
+      out.push({
+        label: "Challenge",
+        body:
+          project.challenge.length > 1
+            ? project.challenge.slice(1)
+            : project.challenge,
+      });
     if (project.solution?.length)
       out.push({ label: "Solution", body: project.solution });
     return out;
@@ -834,13 +842,17 @@ export function buildStory(project: Project): Story {
     decisions, no figures) is allowed twice the room.
   */
   const visualOnly = !named.length && !results;
-  const gallery = pickMedia(
-    project,
-    usedMedia,
-    limits?.gallery ?? (visualOnly ? 24 : 14),
-    family,
-    perFamily,
-  );
+  const gallery = project.noGallery
+    ? []
+    : project.galleryMedia?.length
+    ? project.galleryMedia
+    : pickMedia(
+        project,
+        usedMedia,
+        limits?.gallery ?? (visualOnly ? 24 : 14),
+        family,
+        perFamily,
+      );
 
   return {
     statement,
@@ -1381,10 +1393,26 @@ export function PageRow({ media }: { media: Media[] }) {
 export function MediaRows({
   media,
   frame,
+  oneRow,
 }: {
   media: Media[];
   frame?: boolean;
+  /* an authored set, shown as one row however many it holds */
+  oneRow?: boolean;
 }) {
+  if (oneRow) {
+    return (
+      <div className="csRows">
+        <div
+          className="csShapes csShapes--wall"
+          style={{ "--cs-shot-cols": media.length } as CSSProperties}
+        >
+          <MediaRow media={media} cols={media.length} frame={frame} />
+        </div>
+      </div>
+    );
+  }
+
   /*
     Pages come out first, and consecutive ones stay together.
 
@@ -1511,7 +1539,10 @@ export function Details({
             style={{ "--i": i } as CSSProperties}
             key={i}
           >
-            <p className="csDetails__label">({pair.label})</p>
+            <p className="csDetails__label">
+              <span className="csDetails__dot" aria-hidden />
+              {pair.label}
+            </p>
             <div className="csDetails__text">
               {pair.body.map((para, k) => (
                 <p className="cs__body" key={k}>
@@ -1598,7 +1629,15 @@ export function FeatureBlock({
   ) : null;
 
   return (
-    <div className={dense ? "csFeature csFeature--dense" : "csFeature"}>
+    <div
+      className={
+        dense
+          ? /* a feature with two or more screens takes the whole row and shows
+               them side by side; single screens pair up around it */
+            `csFeature csFeature--dense${item.media.length > 1 ? " csFeature--wide" : ""}`
+          : "csFeature"
+      }
+    >
       {dense ? media : null}
       <div className="csFeature__head" data-rise>
         <p className="csFeature__name">{item.name}</p>
@@ -1624,22 +1663,26 @@ export function ResultRows({
 }) {
   return (
     <div className="csResults">
-      {items.map((it, i) => (
-        <div
-          className="csResults__row"
-          data-rise
-          style={{ "--i": i } as CSSProperties}
-          key={i}
-        >
-          <span className="csResults__label">{marked(it.label)}</span>
-          <span className="csResults__value">
-            {it.value}
-            {it.projected ? " (projected)" : ""}
-          </span>
-        </div>
-      ))}
+      {/* the figures lead, set large, in the same tiled card as the facts */}
+      <div className="csResults__grid">
+        {items.map((it, i) => (
+          <div className="csResults__row" key={i}>
+            <span className="csResults__value">
+              {it.value}
+              {/* on the number itself, so a target can never pass for a result */}
+              {it.projected ? (
+                <span className="csResults__tag">Projected</span>
+              ) : null}
+            </span>
+            <span className="csResults__label">{marked(it.label)}</span>
+            {it.note ? (
+              <span className="csResults__itemNote">{marked(it.note)}</span>
+            ) : null}
+          </div>
+        ))}
+      </div>
       {note ? (
-        <p className="csResults__note" data-rise>
+        <p className="csResults__note">
           {note}
         </p>
       ) : null}

@@ -28,6 +28,21 @@ import type { CaseBlock } from "@/components/projects/projectData";
 const rise = (i?: number) =>
   ({ "data-rise": "", style: i === undefined ? undefined : ({ "--i": i } as CSSProperties) });
 
+/* a hex's RGB triplet, and whether dark ink reads on it (relative luminance) */
+function swatchInfo(hex: string): { rgb: string; light: boolean } {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.replace(/(.)/g, "$1$1") : h, 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const lin = (v: number) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  const lum = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  return { rgb: `${r}, ${g}, ${b}`, light: lum > 0.4 };
+}
+
 /*
   A vector specimen, drawn as a mask rather than an <img>.
 
@@ -327,26 +342,30 @@ export function Block({ block }: { block: CaseBlock }) {
     /* ---------- research, tied to the decisions it drove ---------- */
 
     case "bars":
+      /*
+        Each figure is its own panel: the number set large, what it measures
+        under it, and a meter of twenty cells lit to the value (one cell per
+        5%). Cells rather than a bar because a count of squares reads as
+        people, which is what these percentages are.
+      */
       return (
         <figure className="csFig">
-          <dl className="csBars">
-            {block.items.map((b, i) => (
-              <div className={`csBar csBar--${b.tone ?? "bad"}`} key={b.label} {...rise(i)}>
-                <dt className="csBar__label">{b.label}</dt>
-                <dd className="csBar__row">
-                  {/* the track is the remaining share, so the eye reads the
-                      gap as much as the fill */}
-                  <span className="csBar__track">
-                    <span
-                      className="csBar__fill"
-                      style={{ width: `${b.value}%` }}
-                    />
+          <div className="csStats">
+            {block.items.map((b) => {
+              const lit = Math.round(b.value / 5);
+              return (
+                <div className={`csStat csStat--${b.tone ?? "bad"}`} key={b.label}>
+                  <span className="csStat__value">{b.display}</span>
+                  <span className="csStat__label">{b.label}</span>
+                  <span className="csStat__meter" role="img" aria-label={`${b.display}: ${b.label}`}>
+                    {Array.from({ length: 20 }, (_, k) => (
+                      <span className={`csStat__cell${k < lit ? " is-on" : ""}`} key={k} />
+                    ))}
                   </span>
-                  <span className="csBar__value">{b.display}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
+                </div>
+              );
+            })}
+          </div>
           {block.caption ? (
             <figcaption className="csFig__cap">{marked(block.caption)}</figcaption>
           ) : null}
@@ -355,7 +374,7 @@ export function Block({ block }: { block: CaseBlock }) {
 
     case "coverage":
       return (
-        <figure className="csFig csCoverage" {...rise()}>
+        <figure className="csFig csCoverage">
           <div
             className="csCoverage__grid"
             role="img"
@@ -427,20 +446,40 @@ export function Block({ block }: { block: CaseBlock }) {
     /* ---------- the UI system ---------- */
 
     case "palette":
+      /*
+        A brand board rather than a row of chips: the lead colour as one big
+        tile, the rest around it, each carrying its name, what it is for,
+        and its HEX and RGB. The ink on each tile is chosen from the tile's
+        own luminance, so a cream and a black are both labelled legibly.
+      */
       return (
         <figure className="csFig">
-          <div className="csPalette">
-            {block.items.map((c, i) => (
-              <div className="csSwatch" key={c.hex} {...rise(i)}>
-                {/* the colour itself is the tile and the hex rides inside it,
-                    so the value and the thing it names never separate */}
-                <span className="csSwatch__chip" style={{ background: c.hex }}>
-                  <span className="csSwatch__hex">{c.hex}</span>
-                </span>
-                <span className="csSwatch__name">{c.name}</span>
-                <span className="csSwatch__use">{c.use}</span>
-              </div>
-            ))}
+          <div className="csBento">
+            {block.items.map((c) => {
+              const { rgb, light } = swatchInfo(c.hex);
+              return (
+                <div
+                  className={`csTile${light ? " csTile--light" : ""}`}
+                  style={{ background: c.hex }}
+                  key={c.hex}
+                >
+                  <span className="csTile__head">
+                    <span className="csTile__name">{c.name}</span>
+                    <span className="csTile__use">{c.use}</span>
+                  </span>
+                  <span className="csTile__codes">
+                    <span className="csTile__code">
+                      <span className="csTile__k">HEX</span>
+                      {c.hex.toUpperCase()}
+                    </span>
+                    <span className="csTile__code">
+                      <span className="csTile__k">RGB</span>
+                      {rgb}
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
           {block.caption ? (
             <figcaption className="csFig__cap">{marked(block.caption)}</figcaption>

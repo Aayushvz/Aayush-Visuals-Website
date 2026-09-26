@@ -616,6 +616,14 @@ export type Project = {
   */
   detailMedia?: { src: string; alt: string }[];
   /*
+    The Gallery beat, chosen rather than left over. When present it replaces
+    whatever the picker would have gathered, and the set is shown as a single
+    row, sized to fit, in the order written here.
+  */
+  galleryMedia?: { src: string; alt: string }[];
+  /* no Gallery beat at all: the highlights already show everything worth seeing */
+  noGallery?: true;
+  /*
     How much room this project's case study is allowed.
 
     The defaults are sized for a project with one flow in it. A product with
@@ -773,19 +781,19 @@ export const PROJECTS: Project[] = [
   {
     id: "mike-tyson-invitational",
     lead:
-      "**Mike Tyson Invitational** is the marketing site for a first-year boxing event in **Las Vegas**, built for the four audiences it had to reach at once - ticket buyers, fighters, sponsors and donors. Ten pages were designed to carry a name everyone in boxing recognises without ever reading as a student project.",
+      "**Mike Tyson Invitational** is a first-year amateur boxing event in **Las Vegas**. I designed and built its ten-page site for four audiences at once, ticket buyers, fighters, sponsors and donors, and made a first edition look like it had been running for years.",
     services: ["Website design", "Visual branding"],
     headline:
       "Ten pages, four audiences, and two moods that hate each other: the first Mike Tyson Invitational",
     challenge: [
-      "Forge wants texture, heat and grit. Tech wants cold, flat and exact. Turn both up and you get a mess with a fire filter over it.",
-      "Four different people then land on the same homepage: a spectator buying a ticket, an amateur fighter applying to compete, a brand with a marketing budget, and a donor. Each of them wants a different site, and none of them should have to hunt for it.",
-      "And this is edition one. There is no last year to borrow credibility from, so it has to look like the tenth.",
+      "Two moods that hate each other, and four audiences on one homepage.",
+      "The concept was **Iron Forge meets modern tech**. Forge wants texture, heat and grit; tech wants cold, flat and exact. Turn both up and you get a mess with a fire filter over it.",
+      "Then a spectator, an amateur fighter, a sponsor and a donor all land on the same page, each wanting a different site. And this was edition one, with no last year to borrow credibility from.",
     ],
     solution: [
-      "**Ration one side instead of blending both.** Once the split was written down as a number, a screen could be checked against it rather than argued about, and the forge stopped fighting the technology.",
-      "Then a sitemap that gives every audience its own route off the homepage. Tickets, fighter registration, sponsorship and donations each land somewhere built for that one job, and four of the ten surfaces hand off to software somebody else owns.",
-      "Texture stays inside artwork and headline fills. Buttons, forms and body copy stay flat, so the heat reads as something sitting on a technical surface rather than as a filter over the whole page.",
+      "**I rationed one side instead of blending both**: 65% near black, 25% smelting orange, never more than 10% cold teal. Once the split was a number, I could check a screen against it instead of arguing about it.",
+      "Texture lives only in artwork and headline fills. Buttons, forms and body copy stay flat, so the heat sits on a technical surface rather than as a filter over the page.",
+      "A sitemap gives each audience its own route off the homepage: tickets, registration, sponsorship and donations each land somewhere built for that one job.",
     ],
     title: "Mike Tyson Invitational",
     /* the only case study whose screens really are a browser: every frame in
@@ -820,6 +828,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Live Website",
     role: "Designer & Developer",
+    roleNote:
+      "I led the design end to end: the Iron Forge direction, the design system and all ten pages, built in Webflow, working with engineering, marketing and brand to a fixed launch date.",
     tools: ["Webflow", "Figma", "Motion"],
     /*
       The Smelting palette, straight off the design system.
@@ -900,7 +910,8 @@ export const PROJECTS: Project[] = [
         alt: "Three date cards for March 12, 13 and 14 with sale status labels",
       },
     ],
-    caseLimits: { highlights: 18, images: 40 },
+    caseLimits: { highlights: 6, images: 40 },
+    noGallery: true,
     sections: [
       {
         name: "Overview",
@@ -930,15 +941,15 @@ export const PROJECTS: Project[] = [
           },
           {
             kind: "statement",
-            text: "Heat and precision do not blend, so they were rationed instead: 65% near black, 25% smelting orange, never more than 10% cold teal.",
+            text: "The work was never about layout, it was about holding heat and precision in one place without either going quiet.",
           },
           /* Written for the About beat: the two paragraphs that sit under the
              statement band and say what that one line assumes. */
           {
             kind: "prose",
             body: [
-              "Tyson's name on a poster does most of the selling. It also sets a bar. Anything carrying it has to look like it belongs in Las Vegas on fight night, not like a campus event with a famous guest.",
-              "So the work was never really about layout. It was about holding two opposite moods in one place, heat and precision, without letting either of them go quiet.",
+              "Tyson's name on a poster does most of the selling. It also sets a bar: anything carrying it has to look like fight night in Las Vegas, not a campus event with a famous guest.",
+              "Ten pages had to sell tickets, register fighters, court sponsors and take donations, and four of them hand off to software someone else owns.",
             ],
           },
         ],
@@ -951,7 +962,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Before any of that, four boards to find out how far the forge could go before it stopped looking like a sport and started looking like a filter.",
+              "I made four boards to find how far the forge could go before it stopped looking like a sport and started looking like a filter.",
             ],
           },
           {
@@ -1025,30 +1036,6 @@ export const PROJECTS: Project[] = [
             ],
           },
           {
-            kind: "typetrial",
-            variant: "pairing",
-            items: [
-              {
-                face: "Oxanium",
-                bodyStack: "var(--font-oxanium), sans-serif",
-                note: "Two opinionated faces arguing. The headline stopped winning.",
-              },
-              {
-                face: "Chakra Petch",
-                bodyStack: "var(--font-chakra), sans-serif",
-                note: "Right voice, wrong job. Great on numbers, tiring across a paragraph.",
-              },
-              {
-                face: "IBM Plex Sans",
-                bodyStack: "var(--font-plex), sans-serif",
-                chosen: true,
-                note: "Disappears under Legend and stays comfortable at length.",
-              },
-            ],
-            caption:
-              "Legend and OneTwoHours are drawn as vector outlines from the design file, since neither has a webfont. The rest is live type.",
-          },
-          {
             kind: "decisions",
             items: [
               {
@@ -1068,7 +1055,7 @@ export const PROJECTS: Project[] = [
 
       {
         name: "Design System",
-        heading: "Three palettes and a ratio",
+        heading: "One palette, rationed",
         blocks: [
           {
             kind: "prose",
@@ -1079,84 +1066,14 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              {
-                name: "Onyx Black",
-                hex: "#060708",
-                use: "Backgrounds, canvas, nav, footer",
-              },
-              {
-                name: "Parchment",
-                hex: "#F5F1EA",
-                use: "Body text, outlines, dividers",
-              },
-            ],
-            caption:
-              "**Foundation, 65 to 70%.** Authority and depth. Most of the site is these two, quietly.",
-          },
-          {
-            kind: "palette",
-            items: [
-              { name: "Ember", hex: "#450503", use: "Filled surfaces" },
-              {
-                name: "Smelting Red",
-                hex: "#F72C25",
-                use: "Primary CTAs, active states",
-              },
+              { name: "Smelting Red", hex: "#F72C25", use: "Primary actions, active states" },
+              { name: "Onyx Black", hex: "#060708", use: "Canvas, nav, footer" },
+              { name: "Parchment", hex: "#F5F1EA", use: "Body text, outlines" },
               { name: "Heated Steel", hex: "#FF8D3C", use: "Highlights, glow" },
-              {
-                name: "Spark",
-                hex: "#FFF893",
-                use: "Rare accents, the hottest point",
-              },
+              { name: "Cold Steel", hex: "#3D6D67", use: "Numerals and data, capped at 10%" },
             ],
             caption:
-              "**Accent, 20 to 25%.** The ramp runs in the order metal actually heats.",
-          },
-          {
-            kind: "palette",
-            items: [
-              { name: "Gunmetal", hex: "#0F1317", use: "Background elements" },
-              { name: "Slate", hex: "#162529", use: "Panels" },
-              { name: "Patina", hex: "#294341", use: "Data labels" },
-              {
-                name: "Cold Steel",
-                hex: "#3D6D67",
-                use: "Numerals, timers, metallic tint",
-              },
-            ],
-            caption:
-              "**Cool tint, 5 to 10%.** The smallest budget, and the easiest one to overspend. Capping the teal here is the only reason the site reads as a forge with technology in it rather than a tech site in an orange coat.",
-          },
-          {
-            kind: "specs",
-            items: [
-              {
-                name: "Primary button",
-                value: "Notched corners, solid fill",
-                note: "Tickets, Register, Donate",
-                swatch: "#F72C25",
-              },
-              {
-                name: "Secondary button",
-                value: "Outline, parchment",
-                swatch: "#F5F1EA",
-              },
-              {
-                name: "Input height",
-                value: "48px",
-                note: "Dark fill, explicit focus state",
-              },
-              {
-                name: "Field labels",
-                value: "Above the input",
-                note: "Never placeholder only",
-              },
-              {
-                name: "Tags and status",
-                value: "Chakra Petch, letter spaced",
-                swatch: "#3D6D67",
-              },
-            ],
+              "**65 / 25 / 10.** Near black and parchment carry most of the site, the red and orange ramp does the accents, and cold teal never passes a tenth.",
           },
         ],
       },
@@ -1223,14 +1140,15 @@ export const PROJECTS: Project[] = [
                 poster: "/projects/mike-tyson/homepage-poster.webp",
                 url: "miketysoninvitational.com",
                 step: "01",
-                title: "One scroll, six jobs",
-                body: "Sell a ticket, explain a format nobody has seen, register fighters, court sponsors, take donations, announce a date. It resolves as a descent: heat at the top, information in the middle, invitation at the bottom.",
+                title: "One homepage, four audiences",
+                body: "A spectator, a fighter, a sponsor and a donor land on the same page. I built it as a descent: heat at the top to sell the night, information in the middle, and four clear exits at the bottom so nobody hunts for their route.",
                 alt: "Screen recording scrolling the homepage from hero to footer",
               },
             ],
           },
           {
             kind: "step",
+            title: "Tech as a behaviour, not a colour",
             items: [
               {
                 src: "/projects/mike-tyson/home-hero.webp",
@@ -1244,12 +1162,13 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The hero is the whole thesis: near black, headline in smelting red, one ember of heat carrying the right side. The cursor is a crosshair that glows, which is where the tech half stops being a colour and becomes a behaviour.",
-              "The date gets a full screen, filled with brushed metal and framed in corner brackets. Forge for the texture, HUD for the frame. It is the frame I am happiest with.",
+              "The hero is the whole thesis: near black, a headline in smelting red, one ember of heat on the right. I kept the tech half out of the palette and put it into the interaction instead, so the cursor is a glowing crosshair.",
+              "The date reveal is where the two meet: brushed metal for the forge, corner brackets for the HUD. It is the frame I am happiest with.",
             ],
           },
           {
             kind: "step",
+            title: "Teal only where the copy is about technology",
             items: [
               {
                 src: "/projects/mike-tyson/home-about.webp",
@@ -1263,8 +1182,8 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The one place cold teal runs: the section about AI broadcast and real time power measurement. The tech palette appears where the copy is about technology and nowhere else.",
-              "Eight destinations with no obvious ranking between Buy Tickets and Registration, so a horizontal bar would have had to invent one. The portal sets all eight at a size that says each matters.",
+              "Cold teal runs in one place: the section on AI broadcast and real-time power measurement. Keeping it there means the palette itself tells you the subject changed.",
+              "The navigation became a full-screen portal because Buy Tickets and Registration have no natural ranking, and a horizontal bar would have had to invent one.",
             ],
           },
         ],
@@ -1284,7 +1203,7 @@ export const PROJECTS: Project[] = [
                 url: "miketysoninvitational.com/about",
                 step: "02",
                 title: "Legacy without the highlight reel",
-                body: "The easy version is a montage of famous knockouts. That is someone else's story and it does not explain why an amateur invitational exists. This runs on one line instead: legacy did not end in the ring, it continued through transformation.",
+                body: "A montage of famous knockouts is someone else's story, and it does not explain why an amateur invitational exists. The page runs on one line instead: legacy did not end in the ring, it continued through transformation.",
                 alt: "Screen recording scrolling the About page",
               },
             ],
@@ -1322,8 +1241,8 @@ export const PROJECTS: Project[] = [
                 poster: "/projects/mike-tyson/tickets-poster.webp",
                 url: "miketysoninvitational.com/events",
                 step: "03",
-                title: "Three nights, three states",
-                body: "Ticketing runs through TicketTailor, so the design job ends at the handoff. Sale status sits on the pages before the jump, so nobody reaches an external checkout to discover the thing they wanted is not purchasable yet.",
+                title: "Sale status before the handoff",
+                body: "Ticketing belongs to TicketTailor, so my job ended at the handoff. I put each night's sale status on the page before the jump, so nobody reaches an external checkout to find their night is not on sale yet.",
                 alt: "Screen recording of the tickets page showing the three nights and their sale states",
               },
             ],
@@ -1362,8 +1281,8 @@ export const PROJECTS: Project[] = [
                 poster: "/projects/mike-tyson/sponsorship-poster.webp",
                 url: "miketysoninvitational.com/sponsorships",
                 step: "04",
-                title: "A different reader entirely",
-                body: "Every other page talks to someone who wants to watch a fight. This one talks to someone with a marketing budget, who needs structure and numbers rather than atmosphere. It is the most restrained page on the site, and the restraint is the pitch.",
+                title: "The most restrained page is the pitch",
+                body: "Every other page talks to someone who wants to watch a fight. This one talks to someone with a marketing budget, so I traded the atmosphere for structure and numbers.",
                 alt: "Screen recording of the sponsorship page scrolling through the tiers",
               },
             ],
@@ -1454,15 +1373,11 @@ export const PROJECTS: Project[] = [
             items: [
               {
                 title: "A ratio is a design decision",
-                body: "Writing **65 / 25 / 10** next to the palettes did more than any single colour choice. Two clashing directions stop clashing once one is rationed, and a written number let me tell whether a screen was wrong instead of just feeling it.",
+                body: "Writing 65 / 25 / 10 beside the palettes did more than any single colour choice. Once one direction was rationed the two stopped clashing, and a written number let me tell a screen was wrong instead of just feeling it.",
               },
               {
                 title: "Scope integrations before designing around them",
                 body: "The pages that went smoothly were the ones where I knew the checkout belonged to someone else. The ones that hurt were where I had already drawn one.",
-              },
-              {
-                title: "Nervous is not unprepared",
-                body: "The anxiety was about the name on the door, not the work. Exploration, palette ratios and the sitemap were all settled before a page was designed, and that is what carried it.",
               },
             ],
           },
@@ -1473,19 +1388,17 @@ export const PROJECTS: Project[] = [
   {
     id: "elevation-capital",
     lead:
-      "**Elevation Capital** is a research report on how Indian startups are using AI, rebuilt as a site for the **founders and investors** who were never going to finish the PDF. The numbers were made the interface, so the findings get read where they used to get downloaded and forgotten.",
+      "**Elevation Capital** published research on how Indian startups use AI, as a PDF almost nobody finishes. I rebuilt it as a site where the numbers are the interface, for the **founders and investors** reading on a phone between meetings.",
     services: ["Website development", "Interaction design"],
     headline:
       "Turning a PDF nobody finishes into a report you scroll",
     challenge: [
-      "**The State of AI Adoption in Indian Startups** is research worth reading, and research usually ships as a PDF that almost nobody finishes.",
-      "The findings are the whole point. **86% of founders** plan to increase AI spending, **85% of engineering teams** have already moved AI into production, and productivity has become the proving ground. Buried in a forty-page document, none of that lands.",
-      "The people it is written for read on a phone between meetings. A report asks them for a sitting they are never going to give it.",
+      "Research worth reading, shipped in the format nobody finishes.",
+      "**86% of founders** plan to increase AI spending and **85% of engineering teams** already run AI in production. Buried in a forty-page document, none of that lands.",
     ],
     solution: [
-      "Rebuild the report as a site, so the numbers **are** the interface rather than illustrations sitting inside it. Each finding gets its own moment on screen, and the reader arrives at the conclusion by moving through it.",
-      "Built natively in Framer with live data visualisations and motion, which keeps every chart readable on a phone.",
-      "And keeps it current. The team can publish an update themselves, so the research stays a live document instead of going stale two months after launch.",
+      "**I rebuilt the report as a site where each finding gets its own moment on screen**, so the reader reaches the conclusion by moving through it rather than skimming past it.",
+      "I built it natively in Framer, with live data visualisations and motion that stay readable on a phone, and set it up so the team can publish updates themselves. The research stays live instead of going stale two months after launch.",
     ],
     title: "Elevation Capital",
     logoText: "ELEVATION",
@@ -1500,6 +1413,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Live Website",
     role: "Design Engineer",
+    roleNote:
+      "Design engineer: I designed and built the site natively in Framer, including the data visualisations and motion.",
     tools: ["Framer", "Figma", "AI"],
     description:
       "Elevation Capital had genuinely useful findings about how Indian startups are using AI, and a PDF almost nobody was going to finish. The report was rebuilt as a site where the numbers are the interface, so the research gets read instead of downloaded.",
@@ -1521,8 +1436,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "A fund publishes research to be quoted. The people who do the quoting are founders and operators reading on a phone between two meetings, and a PDF is a format that assumes a desk and a free hour.",
-              "So the findings were treated as the product rather than as the contents of one. Nothing here is a chart dropped into a page; the page is the chart, and the argument is the thing you scroll through.",
+              "A fund publishes research to be quoted, and a PDF assumes a desk and a free hour that the people doing the quoting never have.",
+              "So I treated the findings as the product rather than the contents of one. Nothing is a chart dropped into a page; the page is the chart, and the argument is what you scroll through.",
             ],
           },
         ],
@@ -1532,18 +1447,17 @@ export const PROJECTS: Project[] = [
   {
     id: "riviera",
     lead:
-      "**Riviera** is the website for one of the country's largest student fests, built for the **thousands of students** deciding what to attend across a full week. It had to make the scale of the whole event land and still let one person find the single thing they actually came for.",
+      "**Riviera** is VIT Vellore's week-long festival and one of the country's largest student fests. I led the design of its website, which had to make the scale of a whole week land and still let one student find the one event they came for.",
     services: ["Website design", "Visual branding"],
     headline:
       "Carrying a week-long fest without letting the homepage become a directory",
     challenge: [
-      "Riviera is **one of the country's largest student fests**, with dozens of events and sub-brands sitting underneath the one name.",
-      "Put them all on the homepage and it becomes a directory. Hide them and the fest looks smaller than it is.",
-      "The two people arriving want opposite things. One heard a single event named once and wants the date, the price and the sign-up link. The other has never heard of any of it and needs a reason to care about a whole week.",
+      "Dozens of events under one name, and two readers who want opposite things.",
+      "Put every event and sub-brand on the homepage and it becomes a directory. Hide them and the fest looks smaller than it is.",
     ],
     solution: [
-      "A **motion-forward homepage** carries the energy and signals the scale, so the first impression is the event itself rather than a list of its parts. That answers the second reader before they have scrolled.",
-      "Underneath it, a content architecture built to hold dozens of events and sub-brands. The depth is there the moment somebody goes looking for it, and the front page never has to carry all of it at once.",
+      "**I split the jobs.** A motion-forward homepage carries the energy and signals the scale, so the first impression is the event itself rather than a list of its parts.",
+      "Underneath, a content architecture built to hold dozens of events and sub-brands, so the depth is there the moment someone goes looking and the front page never has to carry it all at once.",
     ],
     title: "Riviera",
     logoText: "RIVIERA",
@@ -1558,6 +1472,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Live Website",
     role: "Web Designer",
+    roleNote:
+      "Design Manager for Riviera: I led a 100+ person team across UI/UX, brand and web, and shipped the festival platform UI.",
     tools: ["Framer", "Figma", "Motion"],
     description:
       "Riviera is one of the largest student fests in the country, and its website has to do two things that pull against each other. It has to make the scale of a whole week land, and still let one student find the one event they actually came for.",
@@ -1572,7 +1488,7 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "statement",
-            text: "Show everything and it becomes a directory, hide it and the fest looks smaller than it is.",
+            text: "The homepage sells the week, and everything underneath it helps one student find one event.",
           },
           {
             kind: "prose",
@@ -1583,19 +1499,29 @@ export const PROJECTS: Project[] = [
           },
         ],
       },
+      {
+        name: "outcome",
+        blocks: [
+          {
+            kind: "results",
+            items: [
+              { value: "500K+", label: "visits across the festival" },
+              { value: "0", label: "critical UX failures" },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
     id: "fuzion",
     lead:
-      "**Fuzion** is a vintage-modern streetwear brand for a wearer who reads **classic Americana, 90s hip-hop and old-school workwear** as one thing. The identity puts that contradiction inside the wordmark itself, roman and italic in one word, and carries it through a burnt-sienna palette and the line Wear The Legacy.",
+      "**Fuzion** is a vintage-modern streetwear brand for a wearer who reads classic Americana, 90s hip-hop and old-school workwear as one thing. I built the identity around that contradiction, putting roman and italic inside a single wordmark.",
     services: ["Visual branding", "Graphic design"],
     headline:
       "A wordmark that fuses roman and italic inside one six-letter word, for a brand whose whole premise is old and new at once",
     challenge: [
-      "**Vintage-modern is a contradiction you have to hold in a single mark.** Lean retro and it reads as a throwback label; lean contemporary and the heritage claim quietly disappears.",
-      "Streetwear is judged on its applications, not on a logo sheet. The same mark has to hold on **a tote, a hangtag, a letterhead and a billboard four storeys up**, at every one of those sizes.",
-      "And the name gives you nothing to hide behind: one word, six letters, no symbol, no monogram.",
+      "Lean retro and it reads as a throwback. Lean modern and the heritage claim disappears.",
     ],
     solution: [
       "**The fusion is inside the word.** `fuz` stays roman, `ion` turns italic - one typeface, one weight, one word. The premise is stated by the letterforms before a line of copy is read, which is why the mark needs no symbol.",
@@ -1661,6 +1587,22 @@ export const PROJECTS: Project[] = [
       upscaled. The hoodie still (s08) is the outlier at 673px wide and is
       the one piece that will look soft at full bleed.
     */
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "Vintage-modern is a contradiction, so I put it inside the wordmark instead of choosing a side." },
+          {
+            kind: "prose",
+            body: [
+              "Roman and italic sit in one word, so the mark itself is old and new at once.",
+              "Zodiak and Switzer carry the rest, a four-value palette led by burnt sienna gives it warmth, and the line Wear The Legacy says the idea out loud.",
+            ],
+          },
+        ],
+      },
+    ],
     caseBoard: {
       pieces: Array.from(
         { length: 12 },
@@ -1673,7 +1615,7 @@ export const PROJECTS: Project[] = [
   {
     id: "cpgrams",
     lead:
-      "**CPGRAMS** is how you complain to the **Government of India**, and this is the chatbot designed for the citizens its fifteen-field form leaves out. It takes a grievance in whichever of the 22 official languages you actually think in and files it for you, against ninety-plus ministries handling twenty lakh complaints a year.",
+      "**CPGRAMS** is how citizens complain to the **Government of India**: twenty lakh grievances a year, 90+ ministries, one fifteen-field form. I designed the chatbot that sits on top of it, so you say what went wrong in any of **22 languages** and it files the grievance for you.",
     services: ["Product design", "Conversational UX"],
     headline:
       "Filing a government grievance by speaking, in any of 22 languages",
@@ -1713,6 +1655,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Live Chatbot",
     role: "Product Designer · Conversational UX",
+    roleNote:
+      "Product Design Intern at KPMG India (GovTech). I owned the conversational experience end to end: the journeys, voice intake, the review step, the 22-language UI and the Samadhan Didi mascot.",
     tools: ["Figma", "Conversational UX", "Prototyping"],
     description:
       "CPGRAMS is how you complain to the Government of India: twenty lakh grievances a year, more than ninety ministries, and a fifteen-field form that in practice only works if you read English or Hindi. I designed the chatbot that sits on top of it, so you can say what went wrong in whichever of the 22 official languages you actually think in, and it files the grievance for you.",
@@ -1739,14 +1683,13 @@ export const PROJECTS: Project[] = [
       to sit in a section with the right name.
     */
     challenge: [
-      "The system works. The door does not. Anyone can lodge a complaint against any central department, an officer is legally obliged to answer it, and 93% of the twenty lakh filed each year get closed. That machinery is real.",
-      "Getting to it is the problem. There is a 15-field form, and its second question asks which of 90+ ministries owns what happened to you. That is a filing decision, demanded before you have described anything. Add English or Hindi only, a desktop-shaped layout, a CAPTCHA and a session that quietly expires, and **six in ten people who start the form never finish it**.",
-      "Which means the people the system exists for are the ones least able to reach it. A quarter of the country cannot read or write. More than 550 million citizens think in a language the portal does not speak.",
+      "The system works. The door does not.",
+      "An officer is legally obliged to answer every grievance, and 93% get closed. Reaching one is the hard part: a 15-field form whose second question asks which of **90+ ministries** owns your problem, in English or Hindi only, behind a CAPTCHA and a session that quietly expires. **Six in ten people who start it never finish.**",
+      "So the people the system exists for are the least able to reach it. A quarter of the country cannot read or write, and more than 550 million people think in a language the portal does not speak.",
     ],
     solution: [
-      "**Work out the ministry instead of asking for it. Listen for the language instead of offering a list. And show the person what you understood before anything is filed.**",
-      "That turned the job from redesigning the portal into building a translation layer over it. Same ministries, same categories, same 30 to 60 day clock. The complexity does not disappear, it moves off the citizen and into the software, which already knows how government is organised.",
-      "Voice carries it. Press one button, talk, and the interface switches to whatever language it heard. Everything the form used to demand gets pulled out of that one answer and handed back as a summary you check before it goes.",
+      "I stopped redesigning the form and designed a **translation layer** over it. Same ministries, same categories, same 30 to 60 day clock. The complexity does not disappear, it moves off the citizen and into software that already knows how government is organised.",
+      "**The system works out the ministry instead of asking for it, listens for the language instead of offering a list, and shows you what it understood before anything is filed.** Voice carries all three: press once, talk, and the fifteen fields are pulled out of that one answer.",
     ],
     /*
       The four screens the argument above is actually about. Left to the
@@ -1776,7 +1719,16 @@ export const PROJECTS: Project[] = [
       default of four named screens is right for work whose argument is three
       decisions; here the argument IS the sequence.
     */
-    caseLimits: { highlights: 14, images: 200, gallery: 30 },
+    caseLimits: { highlights: 6, images: 200, gallery: 30 },
+    /* the phone flow, in one row: tutorial, voice from rest to review, and a typed grievance */
+    galleryMedia: [
+      { src: "/projects/cpgrams/m-demo-4.webp", alt: "The phone tutorial spotlighting the microphone button, with Samadhan Didi reduced to a corner presence so she does not cover it." },
+      { src: "/projects/cpgrams/m-voice-1.webp", alt: "CPGRAMS voice flow resting state on a phone." },
+      { src: "/projects/cpgrams/m-voice-3.webp", alt: "CPGRAMS voice recording on a phone with a live waveform." },
+      { src: "/projects/cpgrams/m-voice-7.webp", alt: "CPGRAMS phone screen with a spoken response player." },
+      { src: "/projects/cpgrams/m-voice-9.webp", alt: "CPGRAMS review screen on a phone before submission." },
+      { src: "/projects/cpgrams/m-text-3.webp", alt: "A typed grievance on a phone screen." },
+    ],
     sections: [
       {
         name: "overview",
@@ -1833,8 +1785,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "CPGRAMS is a promise the state makes to everyone. Lodge a grievance against any central department and an officer has to answer it inside 30 to 60 days. **90+ ministries**, **20 lakh grievances a year**, **93%** of them closed.",
-              "The promise holds. The door does not. To reach it you fill a **15-field form**, and its second field asks which ministry and category your problem belongs to. You are being asked to file the complaint before you are allowed to describe it.",
+              "Lodge a grievance against any central department and an officer has to answer within 30 to 60 days. This is what it took to get that far.",
             ],
           },
           {
@@ -1939,13 +1890,6 @@ export const PROJECTS: Project[] = [
               "**Six in ten people who start a grievance never finish it.** The state simply never hears from them.",
           },
           {
-            kind: "coverage",
-            total: 22,
-            filled: 2,
-            label: "scheduled Indian languages supported by the portal",
-            note: "Every dark cell is a language the Constitution recognises and the interface does not.",
-          },
-          {
             kind: "statement",
             text: "A channel built for **1.4 billion people**, used in practice by the **top 15%**.",
           },
@@ -1962,7 +1906,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Once I wrote that down the brief changed. I was not designing a better portal, I was designing a **translation layer** over the one that already works. Same ministries, same categories, same statutory clock. The hard part does not vanish, it moves from the person complaining to the system that already understands how it is filed.",
+              "People were not failing to file grievances, they were failing to **fill in a form**, and only one of those is the citizen's problem. So I stopped designing a better portal and started designing a **translation layer** over the one that already works.",
             ],
           },
           {
@@ -2002,7 +1946,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Two things were fixed before I started. The government's **taxonomy could not change**, and I could not assume the person filing **could read**. Between them they kill the obvious answer, because a tidier form is still a reading test with a filing test stapled to it.",
+              "Two things were fixed before I started: the government's **taxonomy could not change**, and I could not assume the person filing **could read**. Together they rule out the obvious answer, because a tidier form is still a reading test.",
             ],
           },
           {
@@ -2066,33 +2010,6 @@ export const PROJECTS: Project[] = [
               "You cannot wireframe a chatbot the way you wireframe a page. There is no fixed layout, only a **sequence of states** and what each one is allowed to ask for. Four greyboxes settled it.",
             ],
           },
-          {
-            kind: "wireframes",
-            items: [
-              {
-                layout: "entry",
-                label: "01 Entry",
-                note: "**One primary action**, centred. The history rail stays because **returning users recognise it** from the portal.",
-              },
-              {
-                layout: "listen",
-                label: "02 Capture",
-                note: "**Live feedback** while recording. A static indicator does not reassure someone doing this for the first time.",
-              },
-              {
-                layout: "chat",
-                label: "03 Thread",
-                note: "Alternating turns, input pinned. **Every message persists**, so a dropped session is not a lost grievance.",
-              },
-              {
-                layout: "review",
-                label: "04 Review",
-                note: "Interpretation, detected tag, primary and secondary action. The **consent surface**.",
-              },
-            ],
-            caption:
-              "Low fidelity on purpose. Greyboxes keep the argument about **structure**, which was the only thing these had to decide.",
-          },
         ],
       },
       {
@@ -2141,34 +2058,6 @@ export const PROJECTS: Project[] = [
             body: [
               "A chat window is still an interface, and to someone who has never used one it is still an exam. So the product has a face. **Didi means elder sister**, the person you already ask for help with a form. She is a government worker in a saree with a departmental lanyard, and she is **lip-synced** to whatever the system says out loud.",
             ],
-          },
-          {
-            kind: "gallery",
-            compact: true,
-            items: [
-              {
-                src: "/projects/cpgrams/mascot-v1.webp",
-                label: "Direction 1",
-                alt: "An early mascot exploration for CPGRAMS.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-v2.webp",
-                label: "Direction 2",
-                alt: "A second early mascot exploration for CPGRAMS.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-v3.webp",
-                label: "Direction 3",
-                alt: "A third early mascot exploration for CPGRAMS.",
-              },
-              {
-                src: "/projects/cpgrams/mascot-v4.webp",
-                label: "Direction 4",
-                alt: "A fourth early mascot exploration for CPGRAMS.",
-              },
-            ],
-            caption:
-              "Four directions before she settled. The test each one had to pass: does a first-time filer read her as **staff who works here**, or as a brand character?",
           },
         ],
       },
@@ -2239,51 +2128,51 @@ export const PROJECTS: Project[] = [
               {
                 src: "/projects/cpgrams/voice-01.webp",
                 step: "Voice 01",
-                title: "It opens with a person, not a form",
+                title: "A person first, not a form",
                 alt: "The CPGRAMS Chatbot title screen on saffron with the departmental masthead and Samadhan Didi greeting with folded hands.",
-                body: "The first thing on screen is Samadhan Didi and the name of the department, on the state's own saffron. That is deliberate. What this product has to overwrite is whatever happened the last time this person opened a government website, and being greeted by someone who looks like staff does more for that than any amount of layout.",
+                body: "The first screen is Samadhan Didi on the state's own saffron. The product has to overwrite whatever happened the last time someone opened a government website, and a face that looks like staff does more for that than any layout could.",
               },
               {
                 src: "/projects/cpgrams/voice-03.webp",
                 step: "Voice 02",
-                title: "It listens before it asks you anything",
+                title: "No language picker, no category dropdown",
                 alt: "The CPGRAMS voice flow recording, with a reactive orb replacing the microphone and the line Detecting Language, Please continue to speak.",
-                body: "No language picker and no category dropdown, because both ask you to decide something before you have said a word. The orb reacts while you talk, on the exact control you just pressed, so there is never a doubt that it is on. One press starts and stops it: press-and-hold fails for tremor and arthritis, and the over-60s file more grievances here than anybody else.",
+                body: "Both make you decide something before you have said a word. You press one button and talk, and the interface switches to the language it heard. One press starts and stops it, because press-and-hold fails for tremor and arthritis, and the over-60s file more grievances than anyone.",
               },
               {
                 src: "/projects/cpgrams/voice-04.webp",
                 step: "Voice 03",
-                title: "It says what it is waiting for",
+                title: "Never a silent wait",
                 alt: "The CPGRAMS recording panel open with a placeholder transcript line and an instruction to click the microphone to stop recording.",
-                body: "A silent pause during a wait reads as failure, especially on a connection where failure is normal. So the panel opens the moment recording starts, asks you to keep speaking while it works the language out, and says in plain words how to stop. Nothing hides behind a spinner.",
+                body: "On a connection where failure is normal, a pause reads as failure. So the panel opens the moment recording starts, asks you to keep talking while it detects the language, and says in plain words how to stop.",
               },
               {
                 src: "/projects/cpgrams/voice-05.webp",
                 step: "Voice 04",
-                title: "Your words come back while you are still talking",
+                title: "Catch the mistake while it is cheap",
                 alt: "The CPGRAMS voice flow showing a live transcript building underneath the detected language and an elapsed recording time.",
-                body: "The transcript builds live, with the detected language above it and the elapsed time beside it. This is the cheapest place in the whole product to catch a mistake. A misheard road name costs nothing here, and costs a wrongly routed grievance if it gets through.",
+                body: "The transcript builds live, with the detected language above it. A misheard road name costs nothing here and a wrongly routed grievance later, so this is where I put the product's first checkpoint.",
               },
               {
                 src: "/projects/cpgrams/voice-06.webp",
                 step: "Voice 05",
-                title: "You get to fix it before it goes anywhere",
+                title: "Nothing files until you have checked it",
                 alt: "The CPGRAMS editable transcript with Samadhan Didi pointing at it and a note saying mistakes can be edited here, beside a submit control.",
-                body: "Didi points at the text and says, in as few words as possible, that you can edit it. Corrections go back in by voice or by keyboard, so fixing an error never demands the skill the person arrived without. Nothing moves until Submit.",
-              },
-              {
-                src: "/projects/cpgrams/voice-07.webp",
-                step: "Voice 06",
-                title: "The recording stays in the conversation",
-                alt: "The CPGRAMS chat thread with the citizen's voice message and waveform player kept above a card reading Identifying Relevant Ministry.",
-                body: "The audio is not thrown away once it has been transcribed. It is the one thing on this page the software cannot have got wrong, so it stays in the thread as a playable message. Underneath, the system names the step it is on rather than showing a bar: identifying the relevant ministry.",
+                body: "Didi points at the text and says it can be edited, by voice or keyboard, so fixing an error never needs the skill the person arrived without. Letting the AI file silently would have been easier. For a legal complaint with someone's name on it, it would also have been worse.",
               },
               {
                 src: "/projects/cpgrams/voice-10.webp",
+                step: "Voice 06",
+                title: "The whole conversation, in one thread",
+                alt: "The full CPGRAMS chat a few messages in: the history rail on the left, the citizen's answer Road name NH 45, and Samadhan Didi's reply with the detected language, an audio player and the Grievance Information card, above the input bar.",
+                body: "A few messages in, it is still one thread. The citizen's short answer, Road name NH 45, sits under the question that asked for it, and Didi's reply carries the detected language, its spoken version and the Grievance Information card the system has built so far. Every missing detail is one question and one answer, with the input pinned at the bottom for the next, so nothing ever turns back into a form.",
+              },
+              {
+                src: "/projects/cpgrams/voice-07.webp",
                 step: "Voice 07",
-                title: "It asks for what is missing, one thing at a time",
-                alt: "The CPGRAMS thread with a short answer chip reading Road name NH 45 above a Grievance Information card holding a summary and classification.",
-                body: "The road name is the sort of detail the portal buried in a field called Location. Here it is one question with one answer under it. Everything gathered so far then folds into a Grievance Information card: a plain-language summary, the ministry, the category, all of it worked out from what was said instead of chosen from a dropdown.",
+                title: "The recording stays in the conversation",
+                alt: "The CPGRAMS chat thread with the citizen's voice message and waveform player kept above a card reading Identifying Relevant Ministry.",
+                body: "The audio is not thrown away once it has been transcribed. It is the one thing on this page the software cannot have got wrong, so it stays in the thread as a playable message. Underneath, the system names the step it is on rather than showing a bar: identifying the relevant ministry.",
               },
               {
                 src: "/projects/cpgrams/voice-11.webp",
@@ -2481,31 +2370,14 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              {
-                name: "Saffron",
-                hex: "#FE6700",
-                use: "Primary action and government identity",
-              },
-              {
-                name: "Deep",
-                hex: "#9F2D00",
-                use: "Pressed states and emphasis",
-              },
-              {
-                name: "Warm",
-                hex: "#FFC196",
-                use: "Surfaces and the citizen's own bubbles",
-              },
-              { name: "Cream", hex: "#FFFBEF", use: "The chat canvas itself" },
+              { name: "Saffron", hex: "#FE6700", use: "Every primary action, and the state's own colour" },
+              { name: "Deep", hex: "#9F2D00", use: "Pressed states and emphasis" },
+              { name: "Warm", hex: "#FFC196", use: "The citizen's own bubbles" },
+              { name: "Cream", hex: "#FFFBEF", use: "The chat canvas" },
               { name: "Ink", hex: "#333333", use: "Body copy" },
-              {
-                name: "Slate",
-                hex: "#4A505B",
-                use: "Secondary text and labels",
-              },
             ],
             caption:
-              "Only one of the six is loud. **Saffron carries every primary action**, which is what lets somebody who cannot read the label still find the button.",
+              "Only one of the five is loud. **Saffron carries every primary action**, which is what lets somebody who cannot read the label still find the button.",
           },
           {
             kind: "typeset",
@@ -2562,34 +2434,6 @@ export const PROJECTS: Project[] = [
             ],
           },
           {
-            kind: "compare",
-            lanes: [
-              {
-                label: "What filing used to require",
-                tone: "before",
-                note: "A qualification test, sat before you were allowed to complain.",
-                steps: [
-                  "Reading English or Hindi",
-                  "Knowing which of 90+ ministries owns your problem",
-                  "Knowing the right category inside it",
-                  "A desktop, or a phone used like one",
-                  "Finishing before the session expired",
-                ],
-              },
-              {
-                label: "What it requires now",
-                tone: "after",
-                note: "Everything else moved into the software that already knew it.",
-                steps: [
-                  "Being able to speak",
-                  "Checking the system got it right",
-                ],
-              },
-            ],
-            caption:
-              "The service did not change. The **qualification required to reach it** did, and that is the outcome.",
-          },
-          {
             kind: "prose",
             body: [
               "For **DARPG** the win is on the other side of the desk: grievances now arrive **pre-categorised and correctly routed**, work that used to land on an officer before the statutory clock even started.",
@@ -2630,22 +2474,12 @@ export const PROJECTS: Project[] = [
             kind: "lessons",
             items: [
               {
-                title:
-                  "I started out treating voice as a feature. It was the whole product.",
-                body: "For a while I designed it as one of two input options. Then I tried removing it on paper, and what was left was the form again, just friendlier. If a quarter of your users cannot read or write, everything else you do is decoration. Once I accepted that, the rest of the decisions got easier: **detect the language instead of asking for it, speak every reply, never put a dropdown in the way**.",
+                title: "Voice was not a feature. It was the product.",
+                body: "I first designed it as one of two inputs. Removing it on paper left the form again, just friendlier. Once I accepted that a quarter of my users cannot read, every other decision got easier: detect the language, speak every reply, never put a dropdown in the way.",
               },
               {
-                title:
-                  "Letting the AI do everything quietly would have been the wrong kind of easy.",
-                body: "My first instinct was to hide the whole process, since the form was the problem. But this is a **legal complaint with somebody's name on it**. If the system picked the wrong department and nobody saw it, that is worse than the form ever was. So the summary screen exists, and it is the plainest thing in the design. It is also the part I would defend first.",
-              },
-              {
-                title: "Small design mistakes stop being small at this scale.",
-                body: "A confusing dropdown is a minor usability issue in most products. Here it is **millions of people who never get heard by their own government**. It made me slower and more careful about the kind of detail I would normally ship and fix later.",
-              },
-              {
-                title: "Familiar worked better than clever.",
-                body: "I wanted to design something cleaner than a government portal. What actually worked was **keeping the shape people already recognised**, the left rail, the account corner, the input at the bottom, and spending the effort on the one thing that had to change. Novelty here would have cost trust I had no way to earn back.",
+                title: "Familiar beat clever.",
+                body: "I wanted something cleaner than a government portal. What worked was keeping the shape people already recognised, the left rail, the account corner, the input at the bottom, and spending the effort on the one thing that had to change.",
               },
             ],
           },
@@ -2656,7 +2490,7 @@ export const PROJECTS: Project[] = [
   {
     id: "cat-operator-assistant",
     lead:
-      "**CAT Operator Assistant** is a concept cab tablet app for **Caterpillar** excavator operators and their fleet managers. It turns machine telematics, the data the excavator already records, and the day's job list into five glanceable screens, so an operator can check pace, safety and machine health without leaving the seat.",
+      "**CAT Operator Assistant** is a concept cab tablet for **Caterpillar** excavator operators and their fleet managers, built at a hackathon. It turns data the machine already records into five glanceable screens, so an operator can check pace, safety and machine health without leaving the seat.",
     services: ["Product design", "Dashboard design", "Concept", "Front-end build"],
     headline:
       "A cab tablet that turns excavator data into answers an operator can read at a glance",
@@ -2672,6 +2506,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Open Live Demo",
     role: "Product Designer · Front-end",
+    roleNote:
+      "Product design and front end, end to end: the interaction model, every screen, the procedural 3D excavator and the job-time estimator.",
     tools: ["HTML", "CSS", "JavaScript", "Three.js"],
     description:
       "CAT Operator Assistant is a concept cab tablet app for Caterpillar excavator operators. It turns machine telematics and the day's job list into five screens: today's jobs, safety, training, machine health and a live 3D home view, plus a read-only fleet view for managers.",
@@ -2687,15 +2523,13 @@ export const PROJECTS: Project[] = [
       "Offline-first incident reports that sync when signal returns",
     ],
     challenge: [
-      "An excavator operator makes dozens of small decisions an hour with very little information. The day's jobs live in their head. The machine's real condition sits in gauges and fault codes nobody reads until something breaks. Training happens when a supervisor finds the time.",
-      "So a new operator can't tell whether they are behind schedule, working safely, or pushing the machine toward a breakdown.",
-      "The fleet manager sees even less. A seatbelt violation, a near miss or a job running two hours late reaches them after the shift, on paper or by phone. By then the pattern behind it is gone.",
+      "An operator makes dozens of decisions an hour with almost nothing to go on.",
+      "The day's jobs live in their head, the machine's real condition sits in gauges nobody reads until something breaks, and training happens when a supervisor finds the time. A new operator cannot tell if they are behind, working safely or wearing the machine out.",
+      "The fleet manager sees even less. A seatbelt violation or a job running two hours late reaches them after the shift, when the pattern behind it is gone.",
     ],
     solution: [
-      "**Design for the operator first, then the manager.** Most machine dashboards start as a chart-heavy admin panel with a small operator view added later. This one starts in the cab, with three questions an operator asks all shift: am I on pace, is the machine safe, and what's next?",
-      "Each screen answers one question at a glance. Status uses a simple red, amber and green scale, the most important number is always the largest thing on screen, and every button is sized for a gloved hand.",
-      "The fleet view reads the same data, read-only and across every machine on site. One data model, two ways to look at it.",
-      "Every number is honest about its source. The four telemetry rows and five completed tasks in the dataset are used exactly as given. Part health scores, proximity events and habit trends are labeled sample data, never shown as live sensor readings.",
+      "**I designed for the cab first and the office second.** Each screen answers one question an operator asks all shift: am I on pace, is the machine safe, what is next. Status runs on red, amber and green, the most important number is always the largest thing on screen, and every target is sized for a gloved hand.",
+      "The fleet view reads the same data model, read-only, across every machine on site. And every number says where it came from: the real telemetry is used as given, and anything simulated is labelled sample data, never passed off as a live sensor.",
     ],
     detailMedia: [
       {
@@ -2713,20 +2547,20 @@ export const PROJECTS: Project[] = [
     ],
     /* one numbered section per feature area, each with its own screens */
     caseChapters: true,
-    caseLimits: { highlights: 30, images: 60 },
+    caseLimits: { highlights: 6, images: 60 },
     sections: [
       {
         name: "overview",
         blocks: [
           {
             kind: "statement",
-            text: "An excavator operator works with scattered information, and nothing in the cab says whether they are behind, working safely, or wearing out the machine.",
+            text: "Most machine dashboards are built for the office and squeezed into the cab, so I started from the seat and worked outward.",
           },
           {
             kind: "prose",
             body: [
-              "CAT Operator Assistant is a concept operator assistant for Caterpillar excavators. It covers a daily task dashboard, safety, training, abnormal behavior detection and task-time estimation. It does all of this without adding any new hardware to the machine.",
-              "It is a static web app in plain HTML, CSS and JavaScript with no framework, so it loads fast even on a weak site connection. The excavator is a 3D model generated in code with Three.js, so there is no heavy model file to download.",
+              "I built this at a hackathon as a concept for Caterpillar: a tablet in the cab that turns data the excavator already records into five screens, plus a read-only view for the fleet manager. No new hardware on the machine.",
+              "It runs as a static web app in plain HTML, CSS and JavaScript so it loads on a weak site connection, and the excavator is generated in code with Three.js rather than downloaded as a model.",
             ],
           },
           {
@@ -2747,12 +2581,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The sign-in doubles as a pre-start safety check, so a shift cannot begin in an unsafe state.",
+              "I made the sign-in double as a pre-start safety check, so a shift cannot begin in an unsafe state.",
             ],
           },
           {
             kind: "step",
-            title: "Operator sign-in in three steps",
+            title: "Skill level sets the day's estimates",
             items: [
               {
                 src: "/projects/cat-operator-assistant/signin-who.webp",
@@ -2764,13 +2598,12 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The operator picks their profile from three skill levels, beginner to expert, then confirms with a PIN or a badge scan.",
-              "The skill level matters. It sets the expected time for every job that day, so estimates match the person in the seat.",
+              "The operator picks a profile, beginner to expert, and confirms with a PIN or a badge. The level is not decoration: it sets the expected time for every job that day, so the estimates match the person in the seat.",
             ],
           },
           {
             kind: "step",
-            title: "Seatbelt interlock",
+            title: "The engine stays locked until the belt is on",
             items: [
               {
                 src: "/projects/cat-operator-assistant/signin-belt.webp",
@@ -2782,8 +2615,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The engine stays locked until the seatbelt is on, and a blocked start is logged as a safety event. An optional walk-around checklist covers mirrors, fluids and cameras before the engine starts.",
-              "The belt is monitored all shift. If it comes off during a wait, the screen warns the operator before the machine moves again, so the fleet owner gets a guarantee rather than a policy.",
+              "A blocked start is logged as a safety event, and the belt is watched all shift. If it comes off during a wait, the screen warns the operator before the machine moves again, so the fleet owner gets a guarantee rather than a policy.",
             ],
           },
         ],
@@ -2795,12 +2627,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The home screen answers three questions at a glance: am I on pace, is the machine safe, and what's next?",
+              "Home is built to be read in a glance between loads.",
             ],
           },
           {
             kind: "step",
-            title: "A 3D machine view instead of a sensor table",
+            title: "A 3D machine instead of a sensor table",
             items: [
               {
                 src: "/projects/cat-operator-assistant/home-telemetry.webp",
@@ -2808,8 +2640,8 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The excavator is drawn live in 3D and color-coded by condition: red for a fault, amber for check soon, green for the part you selected. Six tappable hotspots open each part's detail card.",
-              "Around it sit the operator's pace against their own best time, a live seatbelt card and a timeline of the whole shift. After three minutes of idle time, a short training video appears.",
+              "I drew the excavator live in 3D and coloured it by condition, red for a fault and amber for check soon, with six tappable parts. An operator reads a red boom faster than a fault code.",
+              "Pace is measured against the operator's own best time, not anyone else's.",
             ],
           },
         ],
@@ -2821,12 +2653,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "A daily task board that replans itself when the day changes.",
+              "Plans change on site, so the job list replans itself.",
             ],
           },
           {
             kind: "step",
-            title: "A job list that replans itself",
+            title: "A plan that replans itself",
             items: [
               {
                 src: "/projects/cat-operator-assistant/tasks-today.webp",
@@ -2838,8 +2670,8 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "Now, Next and Shift-left tiles sit above the job list, with one-tap Mark done and Running late (+15 min) buttons. The plan also checks the forecast and moves wind-sensitive work, like demolition, to another day.",
-              "The Job time tab estimates how long a job should take from the job type, weather, operator skill and machine age. It shows a time range instead of one number, next to how accurate past estimates were.",
+              "Now, Next and Shift-left sit above the list, with one-tap Mark done and Running late. The plan checks the forecast and moves wind-sensitive work like demolition to another day.",
+              "The job-time estimate is a range, shown beside how accurate past estimates were, rather than one confident number an operator learns to ignore.",
             ],
           },
         ],
@@ -2851,12 +2683,12 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Safety features built for the worst moment on site, including when there is no signal.",
+              "Safety is designed for the worst moment on site, including the one with no signal.",
             ],
           },
           {
             kind: "step",
-            title: "Proximity alerts and one-hold SOS",
+            title: "One hold for SOS, even offline",
             items: [
               {
                 src: "/projects/cat-operator-assistant/safety.webp",
@@ -2868,8 +2700,37 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "Site warnings light the edges of the whole screen. A top-down proximity radar shows people and vehicles near the machine and logs every zone crossing. In rain, the stop zone grows from 6 m to 7.5 m and the slow zone from 10 m to 12.5 m.",
-              "Holding SOS for 1.5 seconds stops the machine, alerts the supervisor and saves the last 60 seconds of machine data. An incident report takes a hold and two taps, and saves to the tablet with a machine snapshot until signal returns.",
+              "Holding SOS for 1.5 seconds stops the machine, alerts the supervisor and saves the last 60 seconds of machine data. An incident report takes a hold and two taps.",
+              "Proximity zones grow in rain, and every report saves to the tablet with a machine snapshot until signal returns.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "fleet",
+        heading: "Fleet view",
+        blocks: [
+          {
+            kind: "prose",
+            body: [
+              "The manager's view reads the same data the cab tablets send, read-only.",
+            ],
+          },
+          {
+            kind: "step",
+            title: "Who needs attention today",
+            items: [
+              {
+                src: "/projects/cat-operator-assistant/fleet-a.webp",
+                alt: "Fleet view: filters, machines working, open reports, a review list of habit changes and waiting time per operator.",
+              },
+              {
+                src: "/projects/cat-operator-assistant/fleet-b.webp",
+                alt: "Fleet view, continued: reports per day, fuel per load per machine, plan versus real job time and the full log.",
+              },
+            ],
+            body: [
+              "Managers filter by operator, machine and date, and a review list flags each operator's habit changes with one-tap Talk to operator or Dismiss. Habits are measured against that operator's own baseline, so the conversation is about their week, not a leaderboard.",
             ],
           },
         ],
@@ -2947,36 +2808,6 @@ export const PROJECTS: Project[] = [
             body: [
               "Every issue is sorted into Fix now, Check soon or Fine, with a one-tap Call the mechanic for the most urgent fault and a countdown to the next service in engine hours.",
               "Boom, tracks, bucket, engine, cooling and cab each get a 0 to 100 health score and two sensor charts over the last ten shifts, drawn against a normal range and a limit line. A repair call becomes a decision backed by data.",
-            ],
-          },
-        ],
-      },
-      {
-        name: "fleet",
-        heading: "Fleet view",
-        blocks: [
-          {
-            kind: "prose",
-            body: [
-              "A read-only view for fleet managers, built on the same data the cab tablets send.",
-            ],
-          },
-          {
-            kind: "step",
-            title: "Who needs attention today",
-            items: [
-              {
-                src: "/projects/cat-operator-assistant/fleet-a.webp",
-                alt: "Fleet view: filters, machines working, open reports, a review list of habit changes and waiting time per operator.",
-              },
-              {
-                src: "/projects/cat-operator-assistant/fleet-b.webp",
-                alt: "Fleet view, continued: reports per day, fuel per load per machine, plan versus real job time and the full log.",
-              },
-            ],
-            body: [
-              "Managers filter by operator, machine and date. A review list flags habit changes for each operator, with one-tap Talk to operator or Dismiss.",
-              "Below that sit waiting-time trends per operator, fuel per load per machine, planned versus actual job times, and the full incident log.",
             ],
           },
         ],
@@ -3138,12 +2969,31 @@ export const PROJECTS: Project[] = [
           },
         ],
       },
+      {
+        name: "reflection",
+        heading: "What I learned",
+        blocks: [
+          {
+            kind: "lessons",
+            items: [
+              {
+                title: "My first drafts were a dashboard, not a cab.",
+                body: "They looked like a generic AI dashboard with tinted cards, so I threw them out. A gloved hand in a cab needs fewer, bigger and louder things, and every screen had to pass that test before it looked finished.",
+              },
+              {
+                title: "An estimate is only useful if it is honest about itself.",
+                body: "The estimator's 2.4% error was measured on the same five tasks it learned from. I put that on screen instead of hiding it, because an operator who catches a model overselling itself stops trusting the rest of the tablet too.",
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
     id: "layover",
     lead:
-      "**Layover** turns dead time in an airport into something usable for the **traveller who has already paid for it** - enter a terminal or a PNR and see what is open right now, order a meal to the gate, book a lounge seat. Designed from zero across four surfaces, from the site people land on to the console the platform runs on.",
+      "**Layover** turns dead time in an airport into something usable: enter a terminal or a PNR and see what is open now, order a meal to the gate, book a lounge seat. I took it from zero to one across **four surfaces**, from the site travellers land on to the console the platform runs on.",
     services: ["Product design", "Visual branding"],
     headline:
       "Turning dead airport time into something you can actually use, across four interfaces",
@@ -3212,6 +3062,8 @@ export const PROJECTS: Project[] = [
       hover: "#7C6A46",
     },
     role: "Lead Product Designer",
+    roleNote:
+      "Lead product designer, zero to one: research, competitive analysis, information architecture and 20+ screens through to engineering handoff.",
     tools: ["Figma", "Prototyping"],
     description:
       "A layover is dead time you have already paid for, and Layover turns it into something usable: put in your airport or your PNR and it shows what is open in your terminal right now, so you can order a meal to your gate or book a lounge seat. I joined at zero and took it to four surfaces: the site people land on, the app they order from, the portal a restaurant runs its kitchen on, and the console the whole platform is operated from.",
@@ -3237,7 +3089,7 @@ export const PROJECTS: Project[] = [
       that is only about one of them.
     */
     challenge: [
-      "You are standing in a building full of food and lounges with no way to know what is open, how far away it is, or whether you have time to get there and back before boarding. That is the traveller's half of it.",
+      "An airport full of food and lounges, and no way to know what is open, how far it is, or whether you will make it back before boarding.",
       "The outlet's half is the mirror image: a counter, a paper queue, and no idea how many people are about to walk up. Terminal restaurants had **no listing, no live menu and no way to take an order ahead**. Lounge access was a guess you confirmed at the desk, in front of a line.",
       "The category is not short on supply either. The dominant player already holds the bank, airline and lounge partnerships. What it does not have is a product anyone wants to open twice, and it sits at **two stars**. Nobody had built the layer between the two sides.",
     ],
@@ -3812,19 +3664,17 @@ export const PROJECTS: Project[] = [
   {
     id: "yantra",
     lead:
-      "**Yantra** is the front door for a week of technical events, workshops and hackathons at **VIT**, built for students who until now had nowhere single to see what was on or sign up. A page that only lists things reads like a timetable, so it was designed as a 3D environment you walk into instead.",
+      "**Yantra** is VIT's week of technical events, workshops and hackathons, and until this site there was nowhere single to see what was on or sign up. I led the team that built its front door as a **3D environment** you walk into, with one sign-up portal underneath.",
     services: ["Website design", "Interaction design"],
     headline:
       "A 3D front door for a fest that otherwise reads like a timetable",
     challenge: [
-      "Yantra runs a week of technical events, workshops and hackathons, spread across formats and audiences. There was no single place for a student to see what was on and sign up for it.",
-      "The information problem is only half of it. A page that lists everything accurately still reads like a timetable, and **a timetable is not a reason to turn up.**",
-      "Everything on it is competing with a week a student has already filled: lectures, deadlines, and every other club running something on the same seven days.",
+      "A week of events, nowhere to see them together, and a format that reads like a timetable.",
+      "Technical events, workshops and hackathons were spread across formats and audiences. And a page that lists everything accurately still reads like a timetable, which is not a reason to turn up.",
     ],
     solution: [
-      "A **3D interactive environment** as the front door, so the fest is something you walk into rather than something you scroll past. The experience does the persuading.",
-      "Behind it, a unified portal covering technical events, workshops and hackathons in one place, so the moment somebody is convinced, signing up takes seconds.",
-      "The spectacle is at the front and the work is underneath it, which is the only arrangement where neither one gets in the other's way.",
+      "**I made the front door a 3D environment you walk into**, so the fest is somewhere you arrive rather than something you scroll past, and the experience does the persuading.",
+      "Behind it sits one portal for technical events, workshops and hackathons, so once someone is convinced, signing up takes seconds.",
     ],
     title: "Yantra",
     logoText: "Yantra",
@@ -3838,6 +3688,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Live Website",
     role: "Web Designer",
+    roleNote:
+      "Manager for Yantra: I led a 30+ member team to design and ship a performance-optimised 3D web experience.",
     tools: ["3D", "Web Design"],
     description:
       "Yantra is a week of technical events, workshops and hackathons at VIT, and until this there was no single place to see what was on or sign up for any of it. A page that only lists things reads like a timetable, so the front door was built as a 3D environment you walk into instead.",
@@ -3852,13 +3704,24 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "statement",
-            text: "A timetable tells you what is happening, it does not give you a reason to turn up.",
+            text: "I put the spectacle at the front and the work underneath, so neither gets in the other's way.",
           },
           {
             kind: "prose",
             body: [
-              "A technical fest is competing for a week of a student's life against lectures, deadlines and every other club running something on the same days. Accuracy is the easy half of that argument.",
-              "The harder half is making a week look worth clearing a calendar for, and nothing about a table of dates has ever done that. So the listing stayed underneath, and the front of the site became somewhere you arrive.",
+              "A technical fest competes for a week of a student's life against lectures, deadlines and every other club running something on the same days. Accuracy is the easy half of that argument.",
+              "It also had to load. A 3D front door is worthless if it stalls on hostel Wi-Fi, so the scene was built for low-end devices and weak networks.",
+            ],
+          },
+        ],
+      },
+      {
+        name: "outcome",
+        blocks: [
+          {
+            kind: "results",
+            items: [
+              { value: "100K+", label: "visits" },
             ],
           },
         ],
@@ -3868,21 +3731,20 @@ export const PROJECTS: Project[] = [
   {
     id: "dropby",
     lead:
-      "**DropBy** is an app for **people who want to see other people without performing it**, rewarding you for showing up rather than for posting. The rebuild takes the product's own radar ping and makes it the thing the entire identity is built out of, so the brand finally says what the app does.",
+      "**DropBy** is an app for people who want to see other people without performing it, and it rewards you for showing up rather than posting. I rebuilt its identity around the product's own **radar ping**, so the brand finally says what the app does.",
     services: ["Brand identity", "Visual branding"],
     headline:
       "Rebuilding a shy brand around the radar ping that gets people off the sofa",
     /* a brand system with a full deep dive behind it, so it belongs in both */
     alsoCaseStudy: true,
     challenge: [
-      "DropBy rewards you for **showing up**, not for posting. That is the entire product, and the old identity said none of it.",
-      "There was **no cohesion, no typographic clarity and no colour strategy**, so every touchpoint looked like it had come from a different app. Nothing in the writing sounded like a person either.",
+      "A product about showing up, and an identity that said none of it.",
+      "There was no cohesion, no typographic clarity and no colour strategy, so every touchpoint looked like a different app, and nothing in the writing sounded like a person.",
       "A brand whose one job is to get somebody off the sofa cannot be the quietest thing on the screen.",
     ],
     solution: [
-      "**Build the brand out of the product.** The radar ping, the app's own drop mechanic, becomes the repeating element: the mark, the layouts and the campaign are all the same gesture at different sizes.",
-      "One loud blue carries the system, with warm accents to break it before it goes cold, and a bolder sans so a headline can hold a wall on its own.",
-      "Then a voice written the way somebody would actually say it, out loud, to a friend who is already comfortable at home. **Just Drop By.**",
+      "**I built the brand out of the product.** The radar ping, the app's own drop mechanic, became the repeating element: the mark, the layouts and the campaign are the same gesture at different sizes.",
+      "One loud blue carries the system, warm accents break it before it goes cold, and a bolder sans lets a headline hold a wall on its own. The voice is written the way you would say it to a friend already comfortable at home: **Just Drop By.**",
     ],
     title: "DropBy",
     logoText: "dropby.",
@@ -3915,6 +3777,8 @@ export const PROJECTS: Project[] = [
       fill: "#006FFF",
     },
     role: "Brand Designer",
+    roleNote:
+      "Brand designer with Crestic Era: identity, logo, colour, the design system and the launch campaign.",
     tools: ["Figma", "Illustrator", "Photoshop"],
     description:
       "DropBy is for people who want to see other people without performing it: the app rewards you for showing up, not for posting. The old brand said none of that, so this rebuild takes the app's own radar ping and makes it the thing the whole identity is built out of.",
@@ -3965,7 +3829,7 @@ export const PROJECTS: Project[] = [
           },
           {
             kind: "statement",
-            text: "An app about turning up was being advertised by a brand that looked like it would rather stay in.",
+            text: "The identity was already inside the product, in the radar ping every user sees when they drop by.",
           },
           /* the About beat: the two paragraphs that sit under that line */
           {
@@ -4076,33 +3940,11 @@ export const PROJECTS: Project[] = [
           {
             kind: "palette",
             items: [
-              {
-                name: "Bandis Blue",
-                hex: "#006FFF",
-                use: "The primary, and the only colour allowed to shout",
-              },
-              {
-                name: "Rich Black",
-                hex: "#0D0F1E",
-                use: "Canvas for the night-side of the brand",
-              },
+              { name: "Bandis Blue", hex: "#006FFF", use: "The primary, and the only colour that shouts" },
+              { name: "Rich Black", hex: "#0D0F1E", use: "The night side of the brand" },
               { name: "Alice Blue", hex: "#F5F8FE", use: "The light canvas" },
-              {
-                name: "Munsell",
-                hex: "#EF013D",
-                use: "Accent, and the hot end of the gradient",
-              },
+              { name: "Munsell", hex: "#EF013D", use: "Accent, the hot end of the gradient" },
               { name: "Tomato", hex: "#FF4A2C", use: "Warm accent for energy" },
-              {
-                name: "Cleste",
-                hex: "#97F2FF",
-                use: "Cool accent, the cold end of the sweep",
-              },
-              {
-                name: "Vanilla",
-                hex: "#FFECB3",
-                use: "Softener, used sparingly",
-              },
             ],
             caption:
               "The accents are what keep it human. A blue-only system would have been **calm**, and calm is the wrong instruction for an app asking you to go and meet somebody.",
@@ -4145,6 +3987,7 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "step",
+            title: "A campaign you finish by reading the set",
             items: [
               {
                 src: "/projects/dropby/posters-street.webp",
@@ -4158,8 +4001,8 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The lines are written as **half-sentences that finish across panels**, so the arc carries your eye from one to the next and the campaign only completes if you read the set. It is the radar doing the work again, this time as a connector between two strangers on two different posters.",
-              "The copy stays in **spoken register**: didn't plan to meet, but glad I dropped by. Nothing there sounds like a platform describing its features.",
+              "The lines are **half-sentences that finish across panels**, so the radar arc carries your eye from one poster to the next and the campaign only completes if you read the set.",
+              "The copy stays spoken: didn't plan to meet, but glad I dropped by. Nothing in it sounds like a platform describing its features.",
             ],
           },
           {
@@ -4204,19 +4047,18 @@ export const PROJECTS: Project[] = [
   {
     id: "futurepreneurs",
     lead:
-      "**Futurepreneurs 10.0** is the site for **E-Cell VIT Vellore's** flagship business simulation, read once, fast, on a phone, by somebody deciding whether to bother. Everything on the page competed with the one fact that changes their mind, so it was designed with the countdown leading and the copy following it.",
+      "**Futurepreneurs 10.0** is E-Cell VIT Vellore's flagship business simulation. I designed its site around the one fact a student scanning on a phone actually leaves with: whether they have missed the deadline yet.",
     services: ["Website design", "Graphic design"],
     headline:
       "The tenth edition, led with the deadline, because that is the only fact anyone acts on",
     challenge: [
-      "A campus event site is read once, fast, on a phone, usually while somebody is deciding whether to bother. Everything on it competes with **the one thing that matters: the deadline.**",
-      "A tenth edition also has to look like one. The easy version is fest-poster maximalism, which is exactly what makes a student event look like a student event.",
-      "And it had to be run by students. A multi-week campaign means the content changes constantly, with no developer on call to ship any of it.",
+      "Read once, fast, on a phone, by someone deciding whether to bother.",
+      "Everything on the page competes with the one fact that matters, the deadline. And a multi-week campaign means the content changes constantly, with no developer on call to ship any of it.",
     ],
     solution: [
-      "**Lead with the countdown, not the copy.** The clock is the first thing on the page, and from anywhere else on it the deadline is never more than a scroll away.",
-      "Five dates get their own visual system, so the timeline reads as a sequence rather than a list, and **one accent colour** carries the whole page where a fest poster would have used ten.",
-      "Built in Framer, so the team could run the entire campaign themselves and keep changing the site right up to the morning of the event.",
+      "**I led with the countdown, not the copy.** The clock is the first thing on the page, and from anywhere else on it the deadline is never more than a scroll away.",
+      "Five dates get their own visual system so the timeline reads as a sequence, and one accent colour carries the page where a fest poster would have used ten.",
+      "I designed it in Framer so the team could run the campaign themselves and keep changing the site right up to the morning of the event.",
     ],
     kind: "case-study",
     title: "Futurepreneurs",
@@ -4232,6 +4074,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "Visit Live Website",
     role: "Web Designer",
+    roleNote:
+      "Web designer for E-Cell VIT: I designed the site in Framer so the team could run the whole campaign themselves.",
     tools: ["Framer", "Figma"],
     /* Figma frame 2008:331, exported whole at 2x and brought down to the
        1600px this project's other captures use. See
@@ -4287,8 +4131,8 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "Nobody reads an event site. They scan it on a phone, between two other things, and they leave with a single fact: whether they have missed it yet.",
-              "So the page is built around that one fact rather than around the event. Everything else on it, the format, the prizes, the story of nine previous editions, is there for the person the clock has already convinced.",
+              "Nobody reads an event site. They scan it on a phone, between two other things, and leave with a single fact: whether they have missed it yet.",
+              "So I built the page around that fact rather than around the event. The format, the prizes and the story of nine previous editions are there for the person the clock has already convinced.",
             ],
           },
         ],
@@ -4441,19 +4285,17 @@ export const PROJECTS: Project[] = [
   {
     id: "posterfolio",
     lead:
-      "**Posterfolio** is a volume of **forty-one posters** - startup teardowns, product launches, editorial covers, merch and title cards - every one of them held to a 4:5 frame. Fixing the format meant nothing could be solved by changing the shape of the page, leaving composition, type and contrast as the only variables.",
+      "**Posterfolio** is forty-one posters, from startup teardowns and product launches to editorial covers, merch and title cards, every one held to a **4:5 frame**. Fixing the format left composition, type and contrast as the only variables, which was the point.",
     services: ["Graphic design", "Poster design"],
     headline:
       "Forty-one posters on one 4:5 canvas, where the only thing allowed to change is the thinking",
     challenge: [
-      "**One canvas, 4:5.** Every poster gets the same rectangle, so nothing can be solved by changing the shape of the page. Composition, type and contrast are the only variables left.",
-      "Most of these are seen at **thumbnail scale first**, in a feed or on a contact sheet. A layout has to survive being small before it earns being large.",
-      "And the subjects refuse to sit still. A startup teardown, a title card and a streetwear drop want completely different energy out of the same rectangle.",
+      "One rectangle, forty-one subjects.",
+      "A startup teardown, a title card and a streetwear drop want completely different energy, and all of them have to come out of the same 4:5 frame.",
     ],
     solution: [
-      "Judge every poster small before judging it large. If the idea does not survive the thumbnail, the composition changes rather than the type getting bigger.",
-      "Running one format across **41 subjects** is what turns a set of posters into a practice. The constraint never moves, so the thinking is the only thing that can.",
-      "What that buys is range. The same rectangle has to carry a teardown, an editorial cover, a title card and a merch drop, and getting it to change temperature without changing shape is the part worth repeating.",
+      "**I judged every poster small before judging it large.** If the idea did not survive the thumbnail, I rebuilt the composition rather than making the type bigger.",
+      "Holding one format across 41 subjects turned a set of posters into a practice, and the range is the proof: the same rectangle changes temperature without changing shape.",
     ],
     /* deliberately NOT kind: "case-study" — a wall of posters is a body of
        work, not an argument about one, and the works page splits the two on
@@ -4527,7 +4369,7 @@ export const PROJECTS: Project[] = [
             kind: "prose",
             body: [
               "Almost nobody sees a poster at poster size any more. They see it small, in a feed or a grid, next to forty other things competing for the same second.",
-              "So each of these is judged at thumbnail scale before it is judged at any other. If the idea does not survive being small, the composition gets rebuilt rather than the type getting bigger, which is a harder fix and the only one that works.",
+              "The fixed frame is the useful part. Every improvement has to come from composition, type or contrast, and there is nowhere to hide a weak idea.",
             ],
           },
         ],
@@ -4731,7 +4573,7 @@ export const PROJECTS: Project[] = [
   {
     id: "gravitas",
     lead:
-      "**Gravitas** is the website for **VIT Vellore's** flagship techno-management fest, where thousands of students find and register for a catalogue of more than 200 events. The previous site had grown into a wall of text, so this is a rebuild around a retro-tech system that turns browsing into booking.",
+      "**Gravitas** is VIT Vellore's techno-management fest, and its website is how thousands of students find their way through **200+ events** in three days. I redesigned it from a wall of text into a catalogue you can cut down to the handful of events that apply to you.",
     services: ["Website design", "Visual branding"],
     headline:
       "Turning a 200-event wall of text into a catalogue a student can book from",
@@ -4740,14 +4582,13 @@ export const PROJECTS: Project[] = [
     /* Written rather than assembled, so the Details beat argues the same
        thing the page does instead of quoting two brief labels at each other. */
     challenge: [
-      "Gravitas runs **200+ events over three days**, and the site is how almost everybody finds out any of them exist. It had scaled into **content saturation**: the same wall of text, in the same order, for everyone, with no way to narrow it.",
-      "A first-year looking for a beginner workshop and a final-year hunting a hackathon were handed identical pages. Neither of them was the audience for it.",
-      "And there was nowhere to put a maybe. An event you liked but were not ready to pay for had **no place to go**, so coming back meant starting the search over.",
+      "Two hundred events, one wall of text, and the same page for everyone.",
+      "The site had scaled into **content saturation**. A first-year looking for a beginner workshop and a final-year hunting a hackathon got identical pages, in the same order, with no way to narrow them.",
+      "And a maybe had nowhere to go. An event you liked but were not ready to pay for could not be saved, so coming back meant starting the search over.",
     ],
     solution: [
-      "**Ask who you are before asking what you want.** Role-based entry filters the catalogue the moment somebody signs in, so the page starts narrow instead of starting with everything.",
-      "A **retro-tech system** gives the density somewhere to live. A hard grid, pixel display type and high-contrast panels make scale read as organisation rather than as noise.",
-      "Then filters by category, price and team size, and a **wishlist that sits ahead of the receipt**, so a maybe finally has somewhere to go and coming back is not a fresh start.",
+      "**I asked who you are before asking what you want.** Role-based sign-in filters the catalogue the moment you arrive, so the page starts narrow instead of starting with everything.",
+      "Then filters for category, price and team size, and a **wishlist ahead of the receipts**, so a maybe has somewhere to go. A retro-tech system of hard grid, pixel type and high-contrast panels makes the density read as organisation rather than noise.",
     ],
     title: "Gravitas",
     logoText: "GRAVITAS·25",
@@ -4782,6 +4623,8 @@ export const PROJECTS: Project[] = [
       fillInk: "#06231E",
     },
     role: "Web Designer",
+    roleNote:
+      "Web designer, with the Gravitas'25 Design and Print team: sign-in, the event catalogue, filters and the profile.",
     tools: ["Figma", "Illustrator"],
     description:
       "Gravitas is VIT Vellore's flagship techno-management fest, and its website is where thousands of students find and register for a catalogue of more than 200 events. The old one had grown into a wall of text that everybody saw the same way, so this is a rebuild around a retro-tech system that turns browsing into booking.",
@@ -4838,7 +4681,7 @@ export const PROJECTS: Project[] = [
             kind: "prose",
             body: [
               "A fest site gets about ten seconds from a student who already half knows what they want. Gravitas had the opposite problem to most sites: nothing was missing, everything was there at once.",
-              "Two hundred events is a good problem to have and a terrible page to read. Most of the rebuild is about giving a student permission to ignore nearly all of it.",
+              "Two hundred events is a good problem to have and a terrible page to read. Most of my rebuild is about giving a student permission to ignore nearly all of it.",
             ],
           },
         ],
@@ -4887,7 +4730,7 @@ export const PROJECTS: Project[] = [
           {
             kind: "prose",
             body: [
-              "The rebuild treats the site as a **system that responds to who is using it** rather than a board that displays everything to everyone. The retro-tech direction does real work here: a hard grid, pixel display type and high-contrast panels give a dense catalogue **visible structure**, so scale reads as organisation instead of noise.",
+              "I treated the site as a system that responds to who is using it, not a board that shows everything to everyone.",
             ],
           },
           {
@@ -4955,6 +4798,7 @@ export const PROJECTS: Project[] = [
           },
           {
             kind: "step",
+            title: "One tap removes every irrelevant field",
             items: [
               {
                 src: "/projects/gravitas/auth-affiliation.webp",
@@ -4968,8 +4812,8 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "Picking **VIT student or external participant** first means the form that follows only asks what that person can answer. A student never sees organisation and designation fields, and an external participant is never asked for a registration number they do not have. **The branch costs one tap and removes every irrelevant field after it**, which is cheaper than one long form that makes everybody skip past half of it.",
-              "It also sets up everything downstream. Once the system knows the affiliation, the catalogue, the pricing and the eligible events can differ **without the user filtering for any of it**.",
+              "Picking **VIT student or external participant** first means the form only asks what that person can answer. A student never sees organisation fields, and an external participant is never asked for a registration number.",
+              "It also lets the catalogue, pricing and eligible events change **without the user filtering for any of it**.",
             ],
           },
           {
@@ -4989,6 +4833,7 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "step",
+            title: "Filters that stay open",
             items: [
               {
                 src: "/projects/gravitas/events-filters.webp",
@@ -5002,8 +4847,8 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "Filters sit in a **persistent left rail** rather than behind a button, because a catalogue this size is used by narrowing repeatedly, and a filter you have to reopen each time gets used once. **Category, price and team size** are the three questions a student actually arrives with, so they are the three that get controls.",
-              "Every card carries **time, date, team size and price on its face**. Those are the details that decide whether an event is even possible for you, and putting them behind a click turns a shortlist into a tab-opening exercise. **Only show available events** is on by default, since a full event you cannot join is just another row to read past.",
+              "A catalogue this size is used by narrowing again and again, so the filters live in a **persistent rail** instead of behind a button. Category, price and team size are the three questions students actually arrive with.",
+              "Every card carries **time, date, team size and price on its face**, because those decide whether an event is even possible for you.",
             ],
           },
           {
@@ -5023,6 +4868,7 @@ export const PROJECTS: Project[] = [
         blocks: [
           {
             kind: "step",
+            title: "A wishlist before the receipts",
             items: [
               {
                 src: "/projects/gravitas/profile-wishlist.webp",
@@ -5036,8 +4882,7 @@ export const PROJECTS: Project[] = [
               },
             ],
             body: [
-              "The profile used to be a receipt list. Here the **wishlist is the first tab**, ahead of purchased merch and purchased events, because a profile organised around what you already bought is a record, and one organised around **what you meant to do next** is a way back in.",
-              "It also matches how these decisions actually get made. Students shortlist events, check them against friends and a timetable, then book. Without somewhere to hold a maybe, **that gap between interest and registration is where the visit ended**.",
+              "Students shortlist events, check them with friends and a timetable, then book. So the **wishlist is the first tab** in the profile, ahead of purchases: a profile organised around what you meant to do next is a way back in.",
             ],
           },
         ],
@@ -5072,23 +4917,42 @@ export const PROJECTS: Project[] = [
           },
         ],
       },
+      {
+        name: "reflection",
+        heading: "What I learned",
+        blocks: [
+          {
+            kind: "lessons",
+            items: [
+              {
+                title: "Filtering starts before the filters.",
+                body: "The biggest cut to the catalogue did not come from the filter rail. It came from one question at sign-in, answered once, that quietly removed everything a student could never attend.",
+              },
+              {
+                title: "Intent needs somewhere to wait.",
+                body: "Shortlisting is how these decisions actually get made. Without a wishlist, every maybe was lost the moment the tab closed.",
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
     id: "meal-maestro",
     lead:
-      "**Meal Maestro** is a meal-planning app for people who said, across **twelve interviews**, that the hard part is not the cooking but the deciding. It takes what you like, what you avoid and what is already in your kitchen, and returns a week of recipes with the single grocery list that covers all of them.",
+      "**Meal Maestro** is a meal-planning app built on one finding: for busy professionals, the hard part is not cooking, it is deciding. It takes what you like, what you avoid and what is in your kitchen, and returns a week of recipes with the one grocery list that covers them.",
     services: ["UI design", "Product design"],
     headline:
       "Planning a week of food without making a single decision",
     challenge: [
-      "Meal planning fails in the same place every time, and it is not the cooking. Working professionals aged 28 to 45 said it plainly: “I plan on Sunday and I’ve quit by Wednesday”, and “by the time I’m home, I’ve got no decisions left in me.”",
-      "Twelve interviews and 140 survey responses pointed at the same cause. People do not lack motivation, they lack **time and cognitive space**, and the apps they had already tried were widening the gap rather than closing it: “every app gives me recipes, none give me a plan.”",
-      "Which makes most of the category the wrong shape. An app that hands you more options at seven in the evening is adding to the exact thing that broke the week.",
+      "Every app gives you recipes. None gives you a plan.",
+      "Working professionals aged 28 to 45 said it plainly: “by the time I’m home, I’ve got no decisions left in me.” Twelve interviews and 140 survey responses pointed at the same cause: not motivation, but time and cognitive space.",
+      "Most apps answer with more options at seven in the evening, which adds to the exact thing that broke the week.",
     ],
     solution: [
-      "**Automation over education.** The app does the planning instead of teaching someone to plan. It takes what you like, what you avoid and what is already in your kitchen, and returns a week of recipes with the one grocery list that covers them.",
-      "Planning and groceries stay a single flow, because the research was blunt that disconnected tools create friction people refuse to tolerate. **Personalisation is the retention mechanism**, not a settings screen: generic recommendations were dismissed immediately. A tracker keeps progress visible, so a good week reads as one.",
+      "**Automation over education.** The app does the planning instead of teaching someone to plan, and returns a week of recipes with the one grocery list that covers them.",
+      "Planning and groceries stay one flow, because the research was blunt that disconnected tools are friction people refuse to tolerate. Personalisation is the retention mechanism, not a settings screen, and a tracker keeps progress visible so a good week reads as one.",
     ],
     kind: "case-study",
     title: "Meal Maestro",
@@ -5103,6 +4967,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "View on Behance",
     role: "UI Designer",
+    roleNote:
+      "UI and product designer across research, synthesis, the design system and the core flows.",
     tools: ["Figma"],
     description:
       "Meal Maestro is a meal-planning app built on the one thing twelve interviews kept saying: the hard part is not the cooking, it is the deciding. It takes what you like, what you avoid and what is already in your kitchen, and hands back a week of recipes with the single grocery list that covers all of them.",
@@ -5198,19 +5064,18 @@ export const PROJECTS: Project[] = [
   {
     id: "aiu",
     lead:
-      "**The Association of Indian Universities** has brought Indian universities together **since 1925**, and this is a redesign of its seal for every place it now has to appear. The same architecture and symbolism, given the weight to survive as a favicon as well as a stamp, with a stated minimum size and a palette where every value means something.",
+      "The **Association of Indian Universities** has brought Indian universities together since 1925. I redesigned its seal for everywhere it now has to appear, keeping the architecture and symbolism and giving it the weight to survive as a favicon as well as a stamp.",
     services: ["Visual branding", "Graphic design"],
     headline:
       "Redrawing the seal of a body that has represented every university in India since 1925",
     challenge: [
-      "The existing mark is a **line-drawn seal**: fine strokes, a full circle of type, and detail that only survives at the size it was drawn. A century-old institution cannot simply be handed something fashionable instead.",
-      "It has to work as a **stamp and as a favicon**. On a degree certificate, a letterhead, a keychain and a 25px avatar, and the old mark loses its centre well before the smallest of those.",
-      "And the symbolism is not optional. The tricolour, the open book, the graduation cap and the Sanskrit motto all have to stay, and all have to stay legible.",
+      "A century-old seal that only works at the size it was drawn.",
+      "It has to hold on a degree certificate, a letterhead, a keychain and a 25px avatar, without losing any of the symbolism that makes it the AIU's own.",
     ],
     solution: [
-      "**Weight, not simplification.** The seal keeps its architecture - the ring of type, the building, the open book - and gains the mass it needs to hold together small, or printed in one colour.",
-      "**A stated floor, measured rather than asserted.** The mark is set out at 100px, 50px, 30px and 25px, with 25px named as the minimum: below 35px it starts losing its identity, so the guidance is to stay above that rather than to hope.",
-      "**Six values, each carrying meaning.** Deep blue for wisdom, stability and trust; the orange, white and green of the tricolour beneath the open book for the national heritage; and a motto, *एकता विद्या शक्ति*, that the system is built to support rather than decorate.",
+      "**Weight, not simplification.** The seal keeps its ring of type, the building and the open book, and gains the mass to hold together small or printed in one colour.",
+      "**A floor I measured rather than asserted.** I set the mark out at 100, 50, 30 and 25px and named 25px as the minimum; below 35px it starts losing its identity, so the guidance says to stay above that.",
+      "Six values, each carrying meaning: deep blue for wisdom, stability and trust, and the tricolour's orange, white and green beneath the open book, supporting the motto, एकता विद्या शक्ति, rather than decorating it.",
     ],
     kind: "case-study",
     title: "Association of Indian Universities",
@@ -5264,6 +5129,22 @@ export const PROJECTS: Project[] = [
       order - see scripts/board-slides.mjs. 5120px wide, written at 2400 for
       1000kb total.
     */
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "A century-old seal cannot be swapped for something fashionable, so I kept everything and changed its weight." },
+          {
+            kind: "prose",
+            body: [
+              "The existing mark is a line drawing: fine strokes, a full circle of type and detail that only survives at the size it was drawn. On a small avatar it loses its centre entirely.",
+              "The tricolour, the open book, the graduation cap and the Sanskrit motto all had to stay, and all had to stay legible.",
+            ],
+          },
+        ],
+      },
+    ],
     caseBoard: {
       pieces: Array.from(
         { length: 9 },
@@ -5276,19 +5157,18 @@ export const PROJECTS: Project[] = [
   {
     id: "moon-store",
     lead:
-      "**Moon Store** is an online platform for high-end fashion aimed at a **Gen-Z shopper** - a lunar-inspired storefront where the homepage does the selling and seven category routes keep a wide catalogue navigable. LunarLook lets a customer specify the fabric, quality and style of a garment before they buy it.",
+      "**Moon Store** is a high-end fashion storefront for a Gen-Z shopper, with a configurator, **LunarLook**, that lets you choose a garment's fabric, quality and style before you buy. I designed the web and mobile UI around a single photograph of the moon.",
     services: ["UI design", "Interaction design"],
     headline:
       "A Gen-Z clothing store built around one photograph of the moon, where the thing you buy is the thing you configure",
     challenge: [
-      "Gen-Z fashion storefronts all resolve to the same page: a grid of products on white. The brief wanted **luxury and exclusivity** out of a label with none of a luxury house's budget, which rules out buying the look.",
-      "Fashion retail lives or dies on browse. Men, women, sneakers, oversized tees, retro flannels, hoodies and sweatshirts are **seven routes into one catalogue**, and a shopper who cannot find their aisle in the first screen leaves.",
-      "And the differentiator is customisation, which is the hardest thing to fit inside a shopping flow. Fabric, GSM and manufacture are **factory questions asked of somebody who just wants a t-shirt.**",
+      "Luxury on a label with no luxury budget, and a factory inside a shopping flow.",
+      "Seven routes, men, women, sneakers, oversized tees, retro flannels, hoodies and sweatshirts, lead into one catalogue, and a shopper who cannot find their aisle on the first screen leaves.",
     ],
     solution: [
-      "**One photograph carries the whole brand.** The moon sits behind the login, the bag, the payment screen and the shipping form, on near-black, at the same scale every time. The palette is three values, so the product photography is the only colour in the room and the clothes read as the expensive thing.",
-      "**LunarLook is a form, not a factory.** The configurator asks five questions on one screen - fabric, manufacture, quality, GSM, style - and then hands off to a separate Customise step for artwork, colour and size. The manufacturing decisions are contained, so they never interrupt the buy.",
-      "**Two typefaces doing opposite jobs.** Krona One is wide and mechanical and used only for section titles; Sora carries everything a shopper actually reads. The contrast is what makes a three-colour page feel designed rather than unfinished.",
+      "**One photograph carries the whole brand.** The moon sits behind login, bag, payment and shipping, on near-black at the same scale every time, and a three-value palette leaves the product photography as the only colour in the room.",
+      "**LunarLook is a form, not a factory.** Five questions on one screen, fabric, manufacture, quality, GSM and style, then a separate Customise step for artwork, colour and size, so manufacturing decisions never interrupt the buy.",
+      "Krona One sets only section titles and Sora carries everything a shopper reads. That contrast is what makes a three-colour page feel designed rather than unfinished.",
     ],
     kind: "case-study",
     title: "Moon Store",
@@ -5340,6 +5220,22 @@ export const PROJECTS: Project[] = [
       tall frame - see scripts/board-slides.mjs. 7680px wide and about 50MB
       of PNG between them, written at 2400 for 1115kb total.
     */
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "Luxury the brand could not buy had to come from restraint, so one photograph of the moon carries the whole store." },
+          {
+            kind: "prose",
+            body: [
+              "Gen-Z fashion storefronts all resolve to the same page, a grid of products on white. The brief wanted luxury and exclusivity from a label with none of a luxury house's budget.",
+              "And the differentiator was customisation, the hardest thing to fit inside a shopping flow: fabric, GSM and manufacture are factory questions asked of somebody who just wants a t-shirt.",
+            ],
+          },
+        ],
+      },
+    ],
     caseBoard: {
       pieces: Array.from(
         { length: 12 },
@@ -5352,19 +5248,18 @@ export const PROJECTS: Project[] = [
   {
     id: "ip-tt-cell",
     lead:
-      "**VIT's Intellectual Property and Technology Transfer Cell** protects what the university invents and gets it into **industry**, and this is the identity built for that audience. A single pillar constructed from the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
+      "VIT's **Intellectual Property and Technology Transfer Cell** protects what the university invents and moves it into industry. I designed a first-round identity for it: a single pillar, a **Sthambh**, built from the letters I, P and TT.",
     services: ["Brand identity", "Graphic design"],
     headline:
       "One pillar that spells I, P and TT, for the cell that turns university research into patents",
     challenge: [
-      "The name is the problem. **Intellectual Property and Technology Transfer Cell** is five words nobody reads twice, and whatever replaces them has to hold at the size of a favicon and at the size of a building sign.",
-      "It faces two audiences who trust different things: **researchers inside the university** and **industry outside it**. A mark that reads as a student society to one, or as a law firm to the other, loses the half it was meant to convince.",
-      "And it was a first round against a deadline, so the form had to be settled before the detail was. A mark that is only right once it is finished cannot be reviewed.",
+      "Five words nobody reads twice.",
+      "Whatever replaced the name had to hold at the size of a favicon and the size of a building sign, and read as credible to researchers inside the university and industry outside it.",
     ],
     solution: [
-      "**One monolithic form, not a monogram.** I, P and TT are merged into a single Sthambh - a pillar - so the acronym is the shape rather than four letters standing next to each other. The vertical, structured mass is where the authority comes from.",
-      "**The IP cycle is built into the letterform.** The I is the core pillar, with structural slabs and outward notches for expansion. The P gains a square for ideas and research and a circle for application and commercialisation. The TT resolves as twin pillars joined by cuts: technology transfer, and the two-way flow between academia and industry.",
-      "**Proved as a solid before it was a lockup.** Drawn on a construction grid, then set on black, light grey, mid blue and the brand navy, so versatility was tested rather than assumed. The lockups came last.",
+      "**One monolithic form, not a monogram.** I merged I, P and TT into a single Sthambh, a pillar, so the acronym is the shape rather than letters standing side by side. The vertical mass is where the authority comes from.",
+      "The IP cycle is built into the letterform: the I is the core pillar, the P carries a square for research and a circle for commercialisation, and the TT resolves as twin pillars for the two-way flow between academia and industry.",
+      "I proved it as a solid before it was a lockup, on a construction grid and on four grounds, so versatility was tested rather than assumed.",
     ],
     kind: "case-study",
     title: "IP-TT Cell",
@@ -5378,6 +5273,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "See the Identity",
     role: "Brand Designer",
+    roleNote:
+      "Brand designer: logo and identity direction, first round for selection.",
     tools: ["Figma"],
     description:
       "VIT's Intellectual Property and Technology Transfer Cell protects what the university invents and gets it into industry. The identity is a single pillar built out of the letters I, P and TT - a Sthambh, for the strength and foundation the Cell exists to give research.",
@@ -5417,6 +5314,22 @@ export const PROJECTS: Project[] = [
       by walking it for rows with no edge along them; all seven landed in a
       gap with none forced through content.
     */
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "I turned the acronym into a shape, a pillar you remember instead of five words you skip." },
+          {
+            kind: "prose",
+            body: [
+              "The Cell sits between researchers inside the university and industry outside it, and each trusts different things. A mark that reads as a student society to one, or as a law firm to the other, loses the half it was meant to convince.",
+              "It was a first round against a deadline, so I settled the form before the detail. A mark that is only right once it is finished cannot be reviewed.",
+            ],
+          },
+        ],
+      },
+    ],
     caseBoard: {
       pieces: Array.from(
         { length: 7 },
@@ -5429,20 +5342,19 @@ export const PROJECTS: Project[] = [
   {
     id: "solo-leveling",
     lead:
-      "**Solo Leveling** is a self-directed UI concept for **fans of the series** - one site carrying the episodes, the manga, the news and the merch. It was designed with a video player, a full shop flow and a rating row that routes viewers to where the series actually streams rather than pretending to host it.",
+      "**Solo Leveling** is a self-directed UI concept for fans of the series: one site for the episodes, the manga, the news and the merch. I designed it to route fans to where the series actually streams rather than pretend to host it.",
     services: ["UI design", "Interaction design"],
     headline:
       "One place to watch it, read it and buy the shirt, for a fandom currently sent to three",
     challenge: [
-      "A fan of a series like this gets handed around. **The episodes are on a streamer, the source is on a manga reader, the merch is on a third site**, and nothing owns the whole relationship with the person who cares most.",
-      "The art is both the draw and the problem. Solo Leveling's key art is dense, high-contrast and already purple, and **an interface laid over it disappears into it.**",
-      "And it has to be a shop as well as a library. A hoodie needs sizes, a quantity, a wishlist, a bag and a payment route, inside what is otherwise a reading and watching experience.",
+      "Everything a fan cares about lives on a different site.",
+      "Nobody owns the relationship with the person who cares most, so the fan does all the joining up between sites.",
     ],
     solution: [
-      "**One nav, six routes.** Store, Merch, Updates, News, Ongoing and Upcoming, so the series and the shop sit under the same roof rather than behind different front doors.",
-      "**Three values and nothing else.** #FFFFFF, #130423 and #2B1445. The key art supplies every other colour on the page, and the interface stays out of its way - Sora carries all of the reading, at one weight.",
-      "**It points outward instead of pretending.** The Rating, Stream and Manga row names where the thing actually lives: IMDb and popularity, Prime and Crunchyroll, Mangareader and Solomanga. A fan site that claims to host everything is lying; this one routes.",
-      "**Commerce as a real flow, not a button.** Merch grid, product page with size and quantity, wishlist, bag, shipping address and four payment routes, all in the same dark.",
+      "**One nav, six routes**: Store, Merch, Updates, News, Ongoing and Upcoming, so the series and the shop sit under one roof.",
+      "**Three values and nothing else**, #FFFFFF, #130423 and #2B1445, so the key art supplies every other colour and the interface stays out of its way.",
+      "**It points outward instead of pretending.** The Rating, Stream and Manga row names where the series actually lives, IMDb, Prime, Crunchyroll and Mangareader, because a fan site that claims to host everything is lying.",
+      "Commerce is a real flow, not a button: product page, size and quantity, wishlist, bag, shipping and four payment routes, all in the same dark.",
     ],
     kind: "case-study",
     title: "Solo Leveling",
@@ -5495,6 +5407,22 @@ export const PROJECTS: Project[] = [
       stem, which is why that script checks its prefix for presence rather
       than for truth.
     */
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "Fans get handed between a streamer, a manga reader and a merch shop, so I designed the one place that holds all of it." },
+          {
+            kind: "prose",
+            body: [
+              "The art is both the draw and the problem. Solo Leveling's key art is dense, high-contrast and already purple, and an interface laid over it disappears into it.",
+              "It also had to be a shop as well as a library, with sizes, a bag and payment inside what is otherwise a watching and reading experience.",
+            ],
+          },
+        ],
+      },
+    ],
     caseBoard: {
       pieces: Array.from(
         { length: 14 },
@@ -5507,19 +5435,18 @@ export const PROJECTS: Project[] = [
   {
     id: "gravitas-showcase",
     lead:
-      "**graVITas '25** is **VIT's** techno-management fest - 250+ events, 30,000+ attendees, participants from across the globe - and this is the identity built to carry it. Logo, website, merchandise, ID cards, brochures, flyers, hoardings, certificates and the entrance gate, held together by one dark ground and a single cyan.",
+      "**graVITas '25** is VIT's techno-management fest: 250+ events, 30,000+ attendees and participants from around the world. As design coordinator I held its identity together across the logo, website, merchandise, ID cards, print, hoardings and the entrance gate, with one dark ground and a single cyan.",
     services: ["Visual branding", "Graphic design"],
     headline:
       "One identity stretched across a website, a gate, an ID card and a t-shirt, for a fest with 250 events and 30,000 people",
     challenge: [
-      "graVITas is not one thing to design. It is **250+ events, 30,000+ attendees** and participants from around the world, and every one of those needs something printed, worn, worn on a lanyard or walked through.",
-      "The pieces get made by different people at different times under different deadlines. Without one system, a fest's identity **drifts between the poster and the pass** and stops reading as a single event.",
-      "And the physical and the digital have opposite constraints. A hoarding is read at fifty metres, an ID card at fifty centimetres, and a website by somebody deciding in three seconds whether to register.",
+      "One fest, hundreds of pieces, many hands.",
+      "The same system had to hold on hoardings, lanyards, certificates, merchandise, a gate and a registration page, each made to its own deadline.",
     ],
     solution: [
-      "**The mark carries the name inside it.** graVITas sets VIT in the middle of its own word, with an orbital ring drawn around it - one form that is a wordmark, a monogram and the fest's whole idea at once.",
-      "**One dark ground, one cyan.** Everything - site, brochure, flyer, hoarding, pass, certificate - sits on near-black with a single electric cyan doing all the signalling, so a piece is recognisable before any of it is read.",
-      "**The system is proved on the hardest surfaces, not the easiest.** Six ID card variants from Chief Patron to Volunteer, a gate taken from sketch to a built structure people walk through, certificates, merchandise, hoardings and brochures.",
+      "**The mark carries the name inside it.** graVITas sets VIT in the middle of its own word with an orbital ring around it: a wordmark, a monogram and the fest's idea in one form.",
+      "**One dark ground, one cyan.** Every surface sits on near-black with a single electric cyan doing all the signalling, so a piece is recognisable before it is read.",
+      "**Proved on the hardest surfaces.** Six ID card variants from Chief Patron to Volunteer, a gate taken from sketch to a built structure, certificates, merchandise, hoardings and brochures.",
     ],
     kind: "case-study",
     title: "Gravitas Identity",
@@ -5533,6 +5460,8 @@ export const PROJECTS: Project[] = [
     },
     cta: "See the Showcase",
     role: "Design Coordinator",
+    roleNote:
+      "Design coordinator for graVITas '25: identity, web and print across the fest.",
     tools: ["Figma", "Illustrator", "Photoshop"],
     description:
       "graVITas '25 is VIT's techno-management fest: 250+ events, 30,000+ attendees and participants from across the globe. This is the identity built for it - logo, website, merchandise, ID cards, brochures, flyers, hoardings, certificates and the entrance gate - held together by one dark ground and a single cyan.",
@@ -5570,6 +5499,22 @@ export const PROJECTS: Project[] = [
       equal bands of 2048 with no remainder - the boundaries were already
       known, so no cut detection was used or wanted.
     */
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "Many people made the pieces at different times, so the system had to be recognisable before anything on it was read." },
+          {
+            kind: "prose",
+            body: [
+              "Every one of 250+ events needs something printed, worn, hung on a lanyard or walked through. Without one system, a fest's identity drifts between the poster and the pass.",
+              "And the physical and the digital pull opposite ways: a hoarding is read at fifty metres, an ID card at fifty centimetres, and a website in the three seconds it takes to decide whether to register.",
+            ],
+          },
+        ],
+      },
+    ],
     caseBoard: {
       pieces: Array.from(
         { length: 16 },
@@ -5582,7 +5527,7 @@ export const PROJECTS: Project[] = [
   {
     id: "posterfolio-vol2",
     lead:
-      "**Posterfolio Vol. 2** is a volume of **six typographic posters** on distance, silence and the kinds of hurt that do not announce themselves. Each one carries its own short piece of writing, and the whole set was designed to run on one red, one near-black and a single grey.",
+      "**Posterfolio Vol. 2** is six typographic posters on distance, silence and the kinds of hurt that do not announce themselves, each paired with a short piece of writing of its own.",
     services: ["Graphic design", "Poster design"],
     headline:
       "Six posters about the same quiet subject, each one written down as carefully as it was drawn",
@@ -5627,6 +5572,22 @@ export const PROJECTS: Project[] = [
       fill: "#b3060f",
       hover: "#94050c",
     },
+    /* the About beat, written rather than falling back to the description */
+    sections: [
+      {
+        name: "overview",
+        blocks: [
+          { kind: "statement", text: "The subject is what goes unsaid, so the design holds back and lets the writing carry the weight." },
+          {
+            kind: "prose",
+            body: [
+              "The writing is part of each poster rather than a caption under it, so the type has to carry the mood on its own.",
+              "Three colours for six posters: one red, one near-black and a single grey. Holding the palette that tight is what makes six separate pieces read as one volume.",
+            ],
+          },
+        ],
+      },
+    ],
     posterVolume: {
       kicker: "creative posters.",
       label: "volume",

@@ -14,20 +14,15 @@ import PromoToast, { type Promo } from "@/components/PromoToast";
     whenever the visitor comes back up to the hero.
   - Every other page keeps its hero clear: nothing at all until the
     visitor has scrolled past it (HERO_SCREENS), then that page's opening
-    card 2s later, and the rules below from there.
-  - While reading: on the about and work pages, another one after the
-    visitor has kept scrolling for a while - at least GAP_MS since the last
-    card left and a screen and a half of scrolling since.
-  - When idle: after IDLE_MS with no scroll, pointer, key or touch.
+    card 2s later.
+  - Then a steady rhythm: every card stays VISIBLE_MS and drifts away on
+    its own, and the next one arrives CYCLE_GAP_MS after it left.
 
   What keeps it from being annoying
-  - One card at a time, and at most CAP per page view (the homepage's
-    return-to-hero card aside).
+  - One card at a time, and each is only up for a few seconds.
   - Never a card for the page you are already on.
-  - Cards not yet seen this visit are preferred; the same one does not
-    come back on the same page.
-  - Once the visitor starts scrolling, a card stays SCROLL_CLOSE_MS more so
-    it can still be read, then drifts away on its own.
+  - Cards not yet seen this visit are preferred, and the set cycles once
+    every card has had its turn on the page.
 
   It only runs on the pages where a nudge makes sense: home, about, work
   and the playground. The games, tools and contact page are left alone.
@@ -38,11 +33,9 @@ const ENTRY_DELAY_MS = 2000;
 /* how far a visitor must scroll on a non-home page before any card can
    appear: past the hero, which on these pages runs a little over a screen */
 const HERO_SCREENS = 1.2;
-const SCROLL_CLOSE_MS = 4500;
-const IDLE_MS = 18000;
-const GAP_MS = 45000;
-const GAP_SCREENS = 1.5;
-const CAP = 3;
+/* how long a card stays up, and the quiet between one card and the next */
+const VISIBLE_MS = 3000;
+const CYCLE_GAP_MS = 30000;
 const SEEN_KEY = "promos-seen";
 
 type Kind = "home" | "about" | "work" | "case" | "playground";
@@ -67,9 +60,6 @@ const ENTRY: Record<Kind, string> = {
 
 /* no cards at all at phone widths */
 const PHONE_QUERY = "(max-width: 760px)";
-
-/* the pages where a reader scrolling on gets further cards */
-const PERIODIC = new Set<Kind>(["about", "work", "case"]);
 
 function readSeen(): Set<string> {
   try {
@@ -145,9 +135,13 @@ export default function PromoManager({
 
   const pickNext = useCallback((): Promo | undefined => {
     const seen = readSeen();
-    const open = promos.filter(
-      (p) => p.href !== pathname && !page.current.shown.has(p.id),
-    );
+    const here = promos.filter((p) => p.href !== pathname);
+    let open = here.filter((p) => !page.current.shown.has(p.id));
+    /* every card has had its turn on this page: start the round again */
+    if (!open.length) {
+      page.current.shown.clear();
+      open = here;
+    }
     return open.find((p) => !seen.has(p.id)) ?? open[0];
   }, [promos, pathname]);
 
@@ -159,7 +153,6 @@ export default function PromoManager({
        as someone reading on. */
     if (!page.current.homeLike && !pastHero()) return;
     const pg = page.current;
-    if (counted && pg.count >= CAP) return;
     if (counted) pg.count += 1;
     pg.shown.add(promo.id);
     const seen = readSeen();
@@ -248,21 +241,11 @@ export default function PromoManager({
     };
   }, [kind, pathname, promos, show, pickNext]);
 
-  /* scrolling while a card is up: give it SCROLL_CLOSE_MS more, then let
-     it drift away. A nudge under 40px does not count */
+  /* every card is up for VISIBLE_MS, then drifts away on its own */
   useEffect(() => {
     if (!current || current.phase !== "shown") return;
-    const from = window.scrollY;
-    let timer = 0;
-    const onScroll = () => {
-      if (timer || Math.abs(window.scrollY - from) < 40) return;
-      timer = window.setTimeout(() => dismiss("fading"), SCROLL_CLOSE_MS);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.clearTimeout(timer);
-    };
+    const timer = window.setTimeout(() => dismiss("fading"), VISIBLE_MS);
+    return () => window.clearTimeout(timer);
   }, [current, dismiss]);
 
   /* activity, scroll distance, the idle and reading triggers, and the
@@ -309,29 +292,12 @@ export default function PromoManager({
       }
     };
 
+    /* the rhythm: CYCLE_GAP_MS after a card leaves, the next one comes */
     const tick = window.setInterval(() => {
       if (currentRef.current) return;
       const pg = page.current;
-      const now = performance.now();
-      if (!pg.started || pg.count >= CAP) return;
-
-      /* idle on one screen long enough */
-      if (now - pg.lastActivityAt >= IDLE_MS && now - pg.lastClosedAt >= 8000) {
-        pg.lastActivityAt = now;
-        show(pickNext());
-        return;
-      }
-
-      /* still reading: scrolling now, and far enough and long enough since
-         the last card */
-      if (
-        PERIODIC.has(kind) &&
-        now - pg.lastScrollAt < 1500 &&
-        now - pg.lastClosedAt >= GAP_MS &&
-        pg.scrolledSinceClose >= window.innerHeight * GAP_SCREENS
-      ) {
-        show(pickNext());
-      }
+      if (!pg.started || !pg.count) return;
+      if (performance.now() - pg.lastClosedAt >= CYCLE_GAP_MS) show(pickNext());
     }, 1000);
 
     const opts = { passive: true } as const;

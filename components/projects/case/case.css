@@ -1738,40 +1738,96 @@
 
 /* ---------- Results ---------- */
 
+/*
+  The outcome as figures, set large, in the same quiet tiled card as the
+  project facts. The number is the headline and the label explains it, which
+  is the reverse of the old row, where the figure sat small and grey at the
+  far end of a sentence.
+*/
 .csResults {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-  column-gap: var(--cs-xl);
+  gap: var(--cs-sm);
+}
+
+.csResults__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: rgba(16, 16, 16, 0.06);
+  box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.06);
+}
+
+/* five figures split three and two rather than a row of slivers */
+.csResults__grid:has(> :nth-child(5)) > .csResults__row {
+  flex-basis: calc(33.333% - 1px);
 }
 
 .csResults__row {
+  flex: 1 1 220px;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--cs-sm);
-  padding: var(--cs-sm) 0;
-  border-bottom: 1px solid var(--cs-line);
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(20px, 2vw, 32px) clamp(20px, 2vw, 30px);
+  background: #f6f2ec;
+}
+
+.csResults__value {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: clamp(40px, 4.4vw, 68px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  color: var(--cs-ink);
+  white-space: nowrap;
+}
+
+/* a target, marked on the number itself */
+.csResults__tag {
+  margin-top: 0.35em;
+  padding: 3px 8px;
+  border: 1px solid var(--cs-line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  color: var(--cs-mute);
 }
 
 .csResults__label {
   font-size: var(--cs-t-label);
   font-weight: 500;
-  line-height: 1.3;
-  color: var(--cs-ink);
+  line-height: 1.35;
+  color: var(--cs-ink-body);
 }
 
-.csResults__value {
-  font-size: var(--cs-t-label);
+.csResults__itemNote {
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--cs-mute);
-  white-space: nowrap;
 }
 
 .csResults__note {
-  grid-column: 1 / -1;
-  margin-top: var(--cs-md);
+  margin: 0;
   font-size: var(--cs-t-micro);
-  color: var(--cs-accent-ink);
-  max-width: 60ch;
+  line-height: 1.5;
+  color: var(--cs-mute);
+  max-width: 64ch;
+}
+
+@media (max-width: 520px) {
+  .csResults__grid {
+    border-radius: 16px;
+  }
+
+  .csResults__row,
+  .csResults__grid:has(> :nth-child(5)) > .csResults__row {
+    flex-basis: 100%;
+  }
 }
 
 /* ---------- related projects ---------- */
@@ -3930,51 +3986,88 @@
   that is around 390px, which holds the URL on one line and the longest
   scope on two.
 */
+/*
+  The project facts, as one card rather than a loose grid of hairlines.
+
+  White and rounded like the experiment cards on the homepage, so it reads as
+  an object on the paper. The dividers are the card's own background showing
+  through a 1px gap, and the cells are flex items that grow to fill their row,
+  so an odd count never leaves an empty grey cell at the end of a row.
+*/
 .csContext {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: var(--cs-lg);
-  row-gap: var(--cs-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
   margin: 0 0 var(--cs-xl);
+  overflow: hidden;
+  border-radius: 18px;
+  /* the dividers: faint, so the card reads as a tint of the paper rather
+     than a panel laid on top of it */
+  background: rgba(16, 16, 16, 0.06);
+  box-shadow: 0 0 0 1px rgba(16, 16, 16, 0.06);
 }
 
 .csContext__row {
+  flex: 1 1 240px;
   display: grid;
   align-content: start;
-  gap: var(--cs-2xs);
-  padding-top: var(--cs-xs);
-  border-top: 1px solid var(--cs-line);
+  gap: 10px;
+  padding: clamp(18px, 1.6vw, 26px) clamp(18px, 1.8vw, 28px) clamp(20px, 1.8vw, 28px);
+  background: #f6f2ec;
+  transition: background-color var(--dur-hover, 200ms) var(--ease-quint);
 }
 
 .csContext__key {
-  font-size: var(--cs-t-micro);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--cs-mute);
 }
 
+/* the site's square marker, the same one the Challenge and Solution use */
+.csContext__key::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--cs-accent);
+  opacity: 0.7;
+}
+
 .csContext__val {
   margin: 0;
-  font-size: var(--cs-t-label);
+  font-size: clamp(15px, 1.1vw, 17px);
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
   color: var(--cs-ink);
   /* a domain has no spaces to break at, so without this it either overflows
      the cell or splits mid-word; breaking it as a last resort beats both */
   overflow-wrap: break-word;
 }
 
-@media (max-width: 860px) {
-  .csContext {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--cs-md);
+/* five or six facts split three to a row rather than five and a stray */
+.csContext:has(> :nth-child(5)) > .csContext__row {
+  flex-basis: calc(33.333% - 1px);
+}
+
+@media (hover: hover) {
+  .csContext__row:hover {
+    background: #f9f6f1;
   }
 }
 
 @media (max-width: 520px) {
   .csContext {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: var(--cs-sm);
+    border-radius: 16px;
+  }
+
+  .csContext__row,
+  .csContext:has(> :nth-child(5)) > .csContext__row {
+    flex-basis: 100%;
   }
 }
 
@@ -4010,5 +4103,991 @@
   .csHero__cat {
     font-size: 11.5px;
     letter-spacing: 0.04em;
+  }
+}
+
+/* ---------- section heads and detail labels, in the site's own language ---------- */
+
+/*
+  The head borrows the homepage's Selected Projects title: the name set as a
+  heading, and the index as the same small tilted purple mono sticker that
+  sits beside "Projects" there. The hairline above stays where it was, still
+  drawn in on scroll.
+*/
+.csSec__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: var(--cs-sm);
+}
+
+.csSec__name {
+  order: 1;
+  text-align: left;
+  font-size: clamp(22px, 2.1vw, 32px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--cs-ink);
+}
+
+.csSec__no {
+  order: 2;
+  padding: 4px 9px;
+  border-radius: 4px;
+  background: var(--purple, #7c3aed);
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  color: #fff;
+  transform: translateY(-0.2em) rotate(-3deg);
+}
+
+.csSec--dark .csSec__name {
+  color: #fff;
+}
+
+.csSec--dark .csSec__no {
+  color: #fff;
+}
+
+/* Challenge and Solution: the About page's square marker and a tracked
+   uppercase label, rather than a word in brackets */
+.csDetails__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding-top: 0.45em;
+}
+
+.csDetails__dot {
+  width: 8px;
+  height: 8px;
+  background: var(--cs-accent);
+}
+
+/* ---------- embedded panels: the navbar's surface, reused ---------- */
+
+/*
+  The floating navbar is set INTO the page rather than laid on it: the
+  page's own cream, a 2px lit white edge, and a faint shadow inside the
+  shape instead of one cast below it. The project facts, the results and the
+  research figures use the same surface, as separate panels on a gap, so
+  every fact on the page reads as part of the same object family as the bar
+  at the top of it.
+*/
+.csContext,
+.csResults__grid,
+.csStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.csContext__row,
+.csResults__row,
+.csStat,
+.csCoverage {
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  background: rgba(242, 237, 230, 0.88);
+  box-shadow:
+    inset 0 1px 3px rgba(31, 31, 31, 0.09),
+    inset 0 -1px 2px rgba(31, 31, 31, 0.035);
+}
+
+@media (hover: hover) {
+  .csContext__row:hover {
+    background: rgba(246, 242, 236, 0.95);
+  }
+}
+
+/* five or six split three to a row, now that each is its own panel */
+.csContext:has(> :nth-child(5)) > .csContext__row,
+.csResults__grid:has(> :nth-child(5)) > .csResults__row {
+  flex-basis: calc(33.333% - 8px);
+}
+
+/* results at full strength: no reveal fade on the figures */
+.csResults__value {
+  color: var(--cs-ink);
+}
+
+/* ---------- research figures ---------- */
+
+.csStat {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(20px, 2vw, 28px);
+}
+
+.csStat__value {
+  font-size: clamp(40px, 4.2vw, 64px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  color: var(--cs-ink);
+}
+
+.csStat__label {
+  min-height: 2.7em;
+  font-size: var(--cs-t-label);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--cs-ink-body);
+}
+
+/* twenty cells, one per 5%, lit in the project's accent */
+.csStat__meter {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.csStat__cell {
+  aspect-ratio: 1 / 1.6;
+  border-radius: 3px;
+  background: rgba(16, 16, 16, 0.08);
+}
+
+.csStat--bad .csStat__cell.is-on {
+  background: var(--cs-accent);
+}
+
+.csStat--good .csStat__cell.is-on {
+  background: var(--cs-ink);
+}
+
+/* ---------- the N-of-total grid, in the same panel ---------- */
+
+.csCoverage {
+  padding: clamp(20px, 2vw, 28px);
+}
+
+.csCoverage__grid {
+  gap: 6px;
+}
+
+.csCell {
+  border-radius: 5px;
+  background: rgba(16, 16, 16, 0.07);
+}
+
+.csCell.is-on {
+  background: var(--cs-accent);
+}
+
+.csCoverage__count {
+  color: var(--cs-ink);
+}
+
+@media (max-width: 520px) {
+  .csContext:has(> :nth-child(5)) > .csContext__row,
+  .csResults__grid:has(> :nth-child(5)) > .csResults__row,
+  .csStat {
+    flex-basis: 100%;
+  }
+}
+
+.csCoverage__count {
+  font-size: clamp(40px, 4.2vw, 64px);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+/* ---------- the section sticker takes the project's own colour ---------- */
+
+.csSec__no,
+.csSec--dark .csSec__no {
+  background: var(--cs-accent);
+  color: var(--cs-on-accent, #fff);
+}
+
+/* ---------- More Work ---------- */
+
+/*
+  Each project is an embedded panel, the navbar's surface again, holding its
+  cover and a caption row with a round arrow. The caption sits INSIDE the
+  panel now, so it can no longer slide under the fixed back-to-top button and
+  the dev badge in the bottom corner, which is what was hiding it.
+*/
+.csNext {
+  gap: 14px;
+}
+
+.csNext__card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  background: rgba(242, 237, 230, 0.88);
+  box-shadow:
+    inset 0 1px 3px rgba(31, 31, 31, 0.09),
+    inset 0 -1px 2px rgba(31, 31, 31, 0.035);
+  transition: background-color var(--dur-hover, 200ms) var(--ease-quint);
+}
+
+.csNext__frame {
+  border-radius: 14px;
+}
+
+.csNext__frame::after {
+  display: none;
+}
+
+.csNext__shot {
+  aspect-ratio: 16 / 9;
+}
+
+.csNext__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-sm);
+  margin: 0;
+  padding: 16px 8px 8px 10px;
+}
+
+.csNext__text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.csNext__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cs-mute);
+}
+
+.csNext__kicker::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--cs-accent);
+}
+
+.csNext__title {
+  font-size: clamp(18px, 1.5vw, 24px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.csNext__cat {
+  margin: 0;
+  font-size: 13px;
+}
+
+.csNext__go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--cs-ink);
+  color: #fff;
+  transition:
+    background-color var(--dur-hover, 200ms) var(--ease-quint),
+    color var(--dur-hover, 200ms) var(--ease-quint),
+    transform var(--dur-state, 260ms) var(--ease-quint);
+}
+
+.csNext__go svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (hover: hover) {
+  .csNext__card:hover {
+    background: rgba(246, 242, 236, 0.95);
+  }
+
+  .csNext__card:hover .csNext__go {
+    background: var(--cs-accent);
+    color: var(--cs-on-accent, #fff);
+    transform: rotate(45deg);
+  }
+
+  .csNext__card:hover .csNext__title {
+    color: var(--cs-ink);
+  }
+}
+
+/* the fixed back-to-top and badge sit in the bottom corners; the last row
+   of the page keeps clear of them */
+.csFoot {
+  padding-bottom: clamp(56px, 8vh, 96px);
+}
+
+/* ---------- before and after ---------- */
+
+/*
+  Two panels, and the numbers carry the argument before a label is read:
+  a big muted count on the left, a big count in the project's colour on the
+  right. The steps are a numbered list rather than a wall of struck-through
+  chips, so eight things read as a sequence of chores and two read as two.
+*/
+.csCompare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.csLane,
+.csLane--after {
+  margin: 0;
+  padding: clamp(22px, 2.2vw, 32px);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-top: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  background: rgba(242, 237, 230, 0.88);
+  box-shadow:
+    inset 0 1px 3px rgba(31, 31, 31, 0.09),
+    inset 0 -1px 2px rgba(31, 31, 31, 0.035);
+}
+
+/* the answer is tinted with the project's colour, faintly */
+.csLane--after {
+  background: color-mix(in srgb, var(--cs-accent) 7%, rgba(242, 237, 230, 0.95));
+}
+
+.csLane__head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.csLane__count,
+.csLane--after .csLane__count {
+  font-size: clamp(48px, 5vw, 76px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: rgba(16, 16, 16, 0.28);
+}
+
+.csLane--after .csLane__count {
+  color: var(--cs-accent-ink);
+}
+
+.csLane__label {
+  font-size: var(--cs-t-label);
+  font-weight: 600;
+  color: var(--cs-ink);
+}
+
+.csLane__note {
+  margin: 10px 0 0;
+  max-width: 44ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--cs-mute);
+}
+
+.csLane__steps {
+  display: block;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: lane;
+}
+
+.csLane__steps li,
+.csLane--before .csLane__steps li,
+.csLane--after .csLane__steps li {
+  counter-increment: lane;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0;
+  padding: 11px 0;
+  border: 0;
+  border-top: 1px solid rgba(16, 16, 16, 0.07);
+  border-radius: 0;
+  background: none;
+  font-size: 15px;
+  line-height: 1.35;
+  text-decoration: none;
+  translate: none;
+}
+
+.csLane__steps li::before {
+  content: counter(lane, decimal-leading-zero);
+  flex: none;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--cs-mute);
+}
+
+.csLane--before .csLane__steps li {
+  color: rgba(16, 16, 16, 0.45);
+}
+
+.csLane--after .csLane__steps li {
+  color: var(--cs-ink);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.csLane--after .csLane__steps li::before {
+  color: var(--cs-accent-ink);
+}
+
+@media (max-width: 720px) {
+  .csCompare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* the answer lane reads as the good outcome: green, whatever the project's
+   colour, so "after" means the same thing on every page */
+.csLane--after {
+  --lane-good: #15803d;
+  background: color-mix(in srgb, #22c55e 9%, rgba(242, 237, 230, 0.95));
+}
+
+.csLane--after .csLane__count,
+.csLane--after .csLane__steps li::before {
+  color: var(--lane-good);
+}
+
+.csLane--after .csLane__steps li {
+  border-top-color: rgba(21, 128, 61, 0.14);
+}
+
+@media (hover: hover) {
+  .csLane--after .csLane__steps li:hover {
+    border-color: var(--lane-good);
+  }
+}
+
+/* ---------- the palette, as one strip ---------- */
+
+/*
+  On desktop the colours sit side by side in a single rounded strip, one
+  shared edge each, with the hex inside the colour and the name and use in
+  small type under it. Six colours cost one short row instead of a wall of
+  3:2 tiles; the phone list further up is unchanged.
+*/
+@media (min-width: 641px) {
+  .csPalette {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0;
+    max-width: 980px;
+  }
+
+  .csSwatch {
+    gap: 3px;
+  }
+
+  .csSwatch__chip {
+    aspect-ratio: auto;
+    height: 64px;
+    padding: 8px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: inset 0 0 0 1px rgba(16, 16, 16, 0.06);
+  }
+
+  .csSwatch:first-child .csSwatch__chip {
+    border-radius: 14px 0 0 14px;
+  }
+
+  .csSwatch:last-child .csSwatch__chip {
+    border-radius: 0 14px 14px 0;
+  }
+
+  .csSwatch__hex {
+    font-size: 10.5px;
+    padding: 2px 5px;
+  }
+
+  .csSwatch__name {
+    margin-top: 8px;
+    padding-right: 10px;
+    font-size: 13px;
+  }
+
+  .csSwatch__use {
+    padding-right: 10px;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+}
+
+/* ---------- the palette, as a brand board ---------- */
+
+/*
+  One big tile for the lead colour and four around it, like a brand
+  guidelines board: four columns by two rows on desktop, each tile labelled
+  inside itself. Five colours is the budget, which is what fills the board.
+*/
+.csBento {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: clamp(118px, 10vw, 150px);
+  gap: 10px;
+}
+
+.csTile:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+/* four colours: the last one takes the space the fifth would have */
+.csBento:not(:has(> :nth-child(5))) > .csTile:last-child:not(:first-child) {
+  grid-column: span 2;
+}
+
+.csTile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(14px, 1.3vw, 20px);
+  border-radius: 16px;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.csTile--light {
+  color: #141414;
+  box-shadow: inset 0 0 0 1px rgba(16, 16, 16, 0.08);
+}
+
+.csTile__head {
+  display: grid;
+  gap: 3px;
+}
+
+.csTile__name {
+  font-size: clamp(14px, 1.05vw, 17px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.csTile:first-child .csTile__name {
+  font-size: clamp(18px, 1.6vw, 24px);
+}
+
+.csTile__use {
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.72;
+}
+
+.csTile__codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+}
+
+.csTile__code {
+  display: grid;
+  gap: 2px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+
+.csTile__k {
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  .csBento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 118px;
+  }
+
+  .csTile:first-child {
+    grid-row: span 1;
+  }
+}
+
+/* ---------- panels a step lighter than the page ---------- */
+
+/*
+  The embedded panels sit one tone above the paper, with the same lit white
+  edge and a whisper of shadow under it, so they read as raised tiles set
+  into the page rather than cut-outs of it.
+*/
+.csContext__row,
+.csResults__row,
+.csStat,
+.csCoverage,
+.csNext__card,
+.csLane,
+.csTrial,
+.csType {
+  background: #f8f5f0;
+  box-shadow:
+    inset 0 1px 3px rgba(31, 31, 31, 0.07),
+    inset 0 -1px 2px rgba(31, 31, 31, 0.03),
+    0 1px 2px rgba(31, 31, 31, 0.04),
+    0 8px 20px -14px rgba(31, 31, 31, 0.18);
+}
+
+@media (hover: hover) {
+  .csContext__row:hover,
+  .csNext__card:hover {
+    background: #fbf9f5;
+  }
+}
+
+.csLane--after {
+  background: color-mix(in srgb, #22c55e 9%, #f8f5f0);
+}
+
+/* ---------- type trials and type systems, as specimen tiles ---------- */
+
+/*
+  A trial used to be a full-width row with the headline set at poster size,
+  one screen per face. As tiles the faces sit side by side, at a size that
+  still shows the letterforms, and the chosen one is marked in the project's
+  colour, the way the palette board treats its lead colour.
+*/
+.csTrials,
+.csTypeset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: 10px;
+}
+
+.csTrial,
+.csType {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(18px, 1.6vw, 24px);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+}
+
+.csTrial--chosen {
+  border-color: color-mix(in srgb, var(--cs-accent) 55%, #fff);
+}
+
+.csTrial--chosen::after {
+  content: "Chosen";
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--cs-accent);
+  color: var(--cs-on-accent, #fff);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.csTrial__grid {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.csTrial__head .csOutline,
+.csTrial__head .csOutline.csOutline {
+  width: auto;
+  max-width: 100%;
+  height: clamp(64px, 6vw, 92px);
+  -webkit-mask-position: left bottom;
+  mask-position: left bottom;
+}
+
+.csTrial__live {
+  font-size: clamp(26px, 2.4vw, 36px);
+}
+
+.csTrial__side {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding-right: 64px;
+}
+
+.csTrial__num {
+  width: 46px;
+}
+
+.csTrial__numLive {
+  font-size: 20px;
+}
+
+.csTrial__note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* the pairing trials: the headline small, the body sample as the specimen */
+.csTrial__pair {
+  gap: 10px;
+}
+
+.csTrial__pairHead {
+  max-width: 150px;
+}
+
+.csTrial__body {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* a typeface in a system: role, family, a sample and what it is for */
+.csType__sample {
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1.15;
+}
+
+.csType__use {
+  font-size: 12.5px;
+}
+
+/* at tile size the numeral specimen repeats what the headline shows */
+.csTrial__num,
+.csTrial__numLive {
+  display: none;
+}
+
+.csTrial__side {
+  padding-right: 70px;
+}
+
+/* the caption runs under the tiles, not as a tile of its own */
+.csTrials > .csFig__cap,
+.csTypeset > .csFig__cap {
+  grid-column: 1 / -1;
+}
+
+/* ---------- text runs the full width of its column ---------- */
+
+/*
+  No character caps on running text, captions or notes. A caption held to
+  58ch wrapped after half a line and left the rest of the row empty; the
+  text now fills whatever column it sits in, left edge to right edge.
+  Headings keep their own measure.
+*/
+.cs__body,
+.csHero__colBody,
+.csAbout .cs__body,
+.csFeature__head .cs__body,
+.csFeature--dense .csFeature__head .cs__body,
+.csFig__cap,
+.csResults__note,
+.csDir__note,
+.csTrial__body,
+.csTrial__note,
+.csGroup__intro,
+.csLane__note,
+.csWire__note,
+.csCoverage__note,
+.csType__use,
+.csLesson__body,
+.csHero__hook,
+.csChapter__lead .cs__body {
+  max-width: none;
+}
+
+/* the About paragraphs span the band, not its right-hand 62% */
+.csAbout {
+  width: 100%;
+  margin-left: 0;
+}
+
+/* Challenge and Solution: the label sits above its text, so the text runs
+   the full width of the column instead of a third of it */
+.csDetails__pair {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 14px;
+}
+
+/* phone: tiles grow to fit their text instead of a fixed row height, which
+   pushed the RGB line out of the small tiles */
+@media (max-width: 720px) {
+  .csBento {
+    grid-auto-rows: minmax(118px, auto);
+  }
+
+  .csTile {
+    gap: 14px;
+  }
+
+  .csTile__codes {
+    gap: 8px 16px;
+  }
+}
+
+@media (max-width: 720px) {
+  /* the small tiles always stack HEX over RGB, so every tile matches */
+  .csTile:not(:first-child) .csTile__codes {
+    flex-direction: column;
+  }
+}
+
+/* ---------- highlights: no holes in the grid ---------- */
+
+/*
+  A feature with two screens spans the row and puts them side by side; the
+  single-screen features pair up around it. `dense` lets a single one move up
+  beside another rather than sitting next to an empty cell, so every row is
+  either one wide feature or two halves.
+*/
+.csFeatures {
+  grid-auto-flow: row dense;
+}
+
+.csFeature--wide {
+  grid-column: 1 / -1;
+}
+
+.csFeature--dense.csFeature--wide .csRow--pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* ---------- the list marker: a tiny Shotsu ---------- */
+
+/*
+  The site's mascot, shrunk to a bullet: a soft jelly dome in the project's
+  colour, lit from the top, with Shotsu's two pill eyes. Drawn entirely in
+  gradients so it works on a pseudo-element and needs no asset.
+*/
+.csDetails__dot,
+.csContext__key::before,
+.csNext__kicker::before,
+.csMore__kicker::before {
+  content: "";
+  flex: none;
+  width: 15px;
+  height: 13px;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
+  background:
+    radial-gradient(ellipse 1.2px 2.1px at 37% 52%, #1d0c35 92%, transparent 100%),
+    radial-gradient(ellipse 1.2px 2.1px at 63% 52%, #1d0c35 92%, transparent 100%),
+    radial-gradient(ellipse 60% 35% at 50% 14%, rgba(255, 255, 255, 0.75), transparent 100%),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--cs-accent) 38%, #fff),
+      var(--cs-accent)
+    );
+  box-shadow:
+    inset 0 -2px 3px color-mix(in srgb, var(--cs-accent) 70%, #000 30%),
+    0 2px 5px -1px color-mix(in srgb, var(--cs-accent) 55%, transparent);
+  opacity: 1;
+}
+
+/* ---------- More work, as its own band above contact ---------- */
+
+.csMore {
+  margin-top: var(--cs-2xl);
+  padding: clamp(64px, 9vh, 110px) 0 clamp(80px, 11vh, 130px);
+  background: #ebe4d9;
+}
+
+.csMore__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: clamp(28px, 4vh, 44px);
+}
+
+.csMore__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cs-mute);
+}
+
+.csMore__title {
+  margin: 0;
+  font-size: clamp(36px, 4.4vw, 64px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  color: var(--cs-ink);
+}
+
+.csMore__all {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 999px;
+  background: var(--cs-ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--dur-hover, 200ms) var(--ease-quint), color var(--dur-hover, 200ms) var(--ease-quint);
+}
+
+.csMore__all svg {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--dur-state, 260ms) var(--ease-quint);
+}
+
+@media (hover: hover) {
+  .csMore__all:hover {
+    background: var(--cs-accent);
+    color: var(--cs-on-accent, #fff);
+  }
+
+  .csMore__all:hover svg {
+    transform: translateX(3px);
+  }
+}
+
+.csMore__all:focus-visible {
+  outline: 2px solid var(--cs-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .csMore__head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

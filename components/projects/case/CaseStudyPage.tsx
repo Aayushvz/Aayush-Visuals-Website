@@ -127,14 +127,14 @@ function SectionHead({ no, name }: { no: number; name: string }) {
   return (
     <div className="csSec__head">
       <p className="csSec__no" data-rise style={{ "--i": 1 } as CSSProperties}>
-        ({String(no).padStart(2, "0")})
+        {String(no).padStart(2, "0")}
       </p>
       <p
         className="csSec__name"
         data-rise
         style={{ "--i": 2 } as CSSProperties}
       >
-        ({name})
+        {name}
       </p>
     </div>
   );
@@ -628,19 +628,6 @@ export default function CaseStudyPage({ project }: { project: Project }) {
                     items={story.results.items}
                     note={story.results.note}
                   />
-                  <Marks />
-                </div>
-              </section>
-            ) : null}
-
-            {/* honest, and specific enough to be uncomfortable; a
-                reflection that only reports successes reads as a project
-                that never met any difficulty, which nobody believes */}
-            {story.reflection.length && !project.caseBoardOnly ? (
-              <section className="csSec csSec--invert">
-                <SectionHead no={++no} name="What it taught me" />
-                <div className="csSec__body">
-                  <Blocks groups={story.reflection} />
                 </div>
               </section>
             ) : null}
@@ -658,7 +645,23 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               <section className="csSec">
                 <SectionHead no={++no} name="Gallery" />
                 <div className="csSec__body">
-                  <MediaRows media={story.gallery} frame={framed} />
+                  <MediaRows
+                    media={story.gallery}
+                    frame={framed}
+                    oneRow={Boolean(project.galleryMedia?.length)}
+                  />
+                </div>
+              </section>
+            ) : null}
+
+            {/* honest, and specific enough to be uncomfortable; a
+                reflection that only reports successes reads as a project
+                that never met any difficulty, which nobody believes */}
+            {story.reflection.length && !project.caseBoardOnly ? (
+              <section className="csSec csSec--invert">
+                <SectionHead no={++no} name="What it taught me" />
+                <div className="csSec__body">
+                  <Blocks groups={story.reflection} />
                 </div>
               </section>
             ) : null}
@@ -672,46 +675,93 @@ export default function CaseStudyPage({ project }: { project: Project }) {
               </section>
             ) : null}
 
-            {next.length ? (
-              <section className="csSec csFoot">
-                <SectionHead no={++no} name="More Work" />
-                <div className="csSec__body">
-                  <div className="csNext">
-                    {next.map((p, i) => (
-                      <Link
-                        className="csNext__card"
-                        href={`/work/${p.id}`}
-                        data-rise
-                        data-cursor="project"
-                        style={{ "--i": i } as CSSProperties}
-                        key={p.id}
-                      >
-                        <div className="csNext__frame">
-                          <img
-                            className="csNext__shot"
-                            src={p.cover}
-                            alt={`${p.title}, cover`}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
-                        <div className="csNext__meta">
-                          <span className="csNext__no">
-                            {String(i + 1).padStart(3, "0")}
-                          </span>
-                          <span>
-                            <span className="csNext__title">{p.title}</span>
-                            <span className="csNext__cat">{p.category}</span>
-                          </span>
-                          <span className="csNext__year">{p.year}</span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            ) : null}
           </div>
+
+          {/*
+            More work, as its own section.
+
+            It sat inside the case study as one more numbered beat, which made
+            it read as part of this project. It is the way out of it, so it
+            gets its own band directly above the contact section, the same on
+            every project page.
+          */}
+          {next.length ? (
+            <section className="csMore" aria-labelledby="more-work-heading">
+              <div className="cs__inner">
+                <div className="csMore__head">
+                  <div>
+                    <p className="csMore__kicker">Keep exploring</p>
+                    <h2 className="csMore__title" id="more-work-heading">
+                      More work
+                    </h2>
+                  </div>
+                  <Link className="csMore__all" href="/work">
+                    All projects
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </Link>
+                </div>
+                <div className="csNext">
+                  {next.map((p, i) => (
+                    <Link
+                      className="csNext__card"
+                      href={`/work/${p.id}`}
+                      /* the same named hover as the homepage reel and /work
+                         (see workCursorProps), written out rather than spread
+                         so the element keeps the fast JSX path */
+                      data-cursor="work"
+                      data-cursor-title={p.title}
+                      data-cursor-sub={p.category}
+                      style={{ "--i": i } as CSSProperties}
+                      key={p.id}
+                    >
+                      <div className="csNext__frame">
+                        <img
+                          className="csNext__shot"
+                          src={p.cover}
+                          alt={`${p.title}, cover`}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                      <div className="csNext__meta">
+                        <span className="csNext__text">
+                          <span className="csNext__kicker">
+                            {i === 0 ? "Next project" : "Also see"}
+                          </span>
+                          <span className="csNext__title">{p.title}</span>
+                          <span className="csNext__cat">
+                            {p.category} · {p.year}
+                          </span>
+                        </span>
+                        <span className="csNext__go" aria-hidden>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M7 17 17 7M9 7h8v8" />
+                          </svg>
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <HomeContact />
         </main>
