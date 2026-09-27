@@ -765,14 +765,14 @@ export default function CricketGame({
             </b>
           </span>
           <span className="hud-bug__ball">{phase === "idle" ? "To come" : delivery.label}</span>
-          {/* phones carry the timing rail in the bar itself, off the bottom
-              of the screen where the bat button lives */}
-          <span className="hud-bug__rail" data-live={phase === "flight" || phase === "runup"} aria-hidden>
-            <span className="cktTap__zone cktTap__zone--early">Early</span>
-            <span className="cktTap__zone cktTap__zone--perfect">Perfect</span>
-            <span className="cktTap__zone cktTap__zone--late">Late</span>
-          </span>
         </div>
+        {/* phones hang the timing rail under the bar, off the bottom of
+          the screen where the bat button lives */}
+        <span className="hud-bug__rail" data-live={phase === "flight" || phase === "runup"} aria-hidden>
+          <span className="cktTap__zone cktTap__zone--early">Early</span>
+          <span className="cktTap__zone cktTap__zone--perfect">Perfect</span>
+          <span className="cktTap__zone cktTap__zone--late">Late</span>
+        </span>
       </div>
 
       {/* ---- top right: sound, pause, leave ---- */}

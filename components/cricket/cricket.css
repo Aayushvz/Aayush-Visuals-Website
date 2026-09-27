@@ -1372,33 +1372,25 @@
   }
 
   .hud-bug__panel {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      "team score rail"
-      "pips pips rail";
+    display: flex;
     align-items: center;
-    gap: 5px 8px;
+    gap: 8px;
     max-width: calc(100vw - 16px - var(--ctrl) - 8px);
-    padding: 5px 8px 7px 5px;
+    padding: 5px 9px 7px 5px;
     border-radius: 14px;
   }
 
   .hud-bug__team {
-    grid-area: team;
-    justify-self: start;
     min-width: 40px;
-    height: 30px;
+    height: 32px;
     font-size: 0.9rem;
   }
 
   .hud-bug__score {
-    grid-area: score;
     font-size: 1.6rem;
   }
 
   .hud-bug__pips {
-    grid-area: pips;
     gap: 3px;
   }
 
@@ -1408,19 +1400,20 @@
     border-radius: 5px;
   }
 
+  /* the timing rail hangs under the bar, as wide as it */
   .hud-bug__rail {
-    grid-area: rail;
     display: grid;
     grid-template-columns: 1fr 1.15fr 1fr;
-    align-self: center;
-    width: 132px;
+    justify-self: stretch;
+    margin: 6px 6px 0;
     overflow: hidden;
     border: 2px solid var(--g-ink);
     border-radius: 999px;
     font-family: var(--g-display);
-    font-size: 0.6rem;
+    font-size: 0.64rem;
     text-align: center;
-    opacity: 0.75;
+    box-shadow: 0 3px 0 var(--g-ink);
+    opacity: 0.8;
     transition: opacity 0.2s ease;
   }
 
@@ -1457,7 +1450,8 @@
   .hud-com {
     left: 8px;
     right: auto;
-    bottom: var(--dock);
+    top: 56%;
+    bottom: auto;
     width: min(230px, 62vw);
     gap: 6px;
     padding: 8px 10px 9px;
@@ -1545,7 +1539,7 @@
 
   /* ---- the start card: between the bar and the dock ---- */
   .ckt-card {
-    top: calc(var(--top) + 72px);
+    top: calc(var(--top) + 96px);
     transform: translateX(-50%);
     width: calc(100vw - 20px);
     gap: 9px;
