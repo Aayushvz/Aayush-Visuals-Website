@@ -47,10 +47,12 @@
      that use it as INK on a dark hover state. */
   --cs-bg: #fff;
   /* the panels (project facts, results, research figures, the next-project
-     card, before/after lanes, type tiles): a neutral step below the white,
-     so they stay tiles set into the page without turning beige on it */
-  --cs-panel: #f5f5f5;
-  --cs-panel-hover: #f0f0f0;
+     card, before/after lanes, type tiles) and the More work band: the
+     floating navbar's own surface. The bar is rgba(242, 237, 230, 0.88)
+     (.navbar--overLight), which over this white composites to #f4efe9, so
+     every tile on the page reads as the same material as the bar above it. */
+  --cs-panel: #f4efe9;
+  --cs-panel-hover: #f8f4ef;
   --cs-ink: #101010;
   /* the hero's measured ink. Softer than --cs-ink, which stays the near-black
      the rest of the page titles in - the opening block is set a shade back
@@ -187,6 +189,13 @@
 
 .cs__inner {
   padding-inline: var(--cs-pad);
+}
+
+/* room under the last section before the More work band. A dark closing
+   section runs full bleed and carries its own padding, so it is left to
+   meet the band edge to edge. */
+.cs__inner > .csSec:last-child:not(.csSec--invert) {
+  padding-bottom: var(--cs-xl);
 }
 
 /* ---------- shared type ---------- */
@@ -5022,9 +5031,7 @@
      a strip of page colour between it and the band */
   margin-top: 0;
   padding: clamp(64px, 9vh, 110px) 0 clamp(80px, 11vh, 130px);
-  /* a neutral step below the panels, so the band reads as its own ground
-     and the project cards on it still sit a shade lighter */
-  background: #ececec;
+  background: var(--cs-panel);
 }
 
 .csMore__head {
