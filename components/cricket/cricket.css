@@ -882,8 +882,8 @@
   height: 16px;
 }
 
-/* the in-bar wheel is the phone's; desktop has the corner panel */
-.hud-bug__wheel {
+/* the in-bar timing rail is the phone's; desktop has none */
+.hud-bug__rail {
   display: none;
 }
 
@@ -1346,7 +1346,7 @@
   .ckt {
     --hud-inset: 8px;
     --top: calc(env(safe-area-inset-top, 0px) + 8px);
-    --dock: calc(env(safe-area-inset-bottom, 0px) + 94px);
+    --dock: calc(env(safe-area-inset-bottom, 0px) + 70px);
     --ctrl: 94px;
   }
 
@@ -1375,8 +1375,8 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
-      "team score wheel"
-      "pips pips wheel";
+      "team score rail"
+      "pips pips rail";
     align-items: center;
     gap: 5px 8px;
     max-width: calc(100vw - 16px - var(--ctrl) - 8px);
@@ -1408,18 +1408,38 @@
     border-radius: 5px;
   }
 
-  .hud-bug__wheel {
-    grid-area: wheel;
-    display: block;
-    width: 70px;
-    padding: 4px 4px 2px;
+  .hud-bug__rail {
+    grid-area: rail;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    align-self: center;
+    width: 132px;
+    overflow: hidden;
     border: 2px solid var(--g-ink);
-    border-radius: 10px;
-    background: var(--g-well);
+    border-radius: 999px;
+    font-family: var(--g-display);
+    font-size: 0.6rem;
+    text-align: center;
+    opacity: 0.75;
+    transition: opacity 0.2s ease;
   }
 
-  .hud-bug__wheel .ckt-wagon-field {
-    stroke-width: 3.5;
+  .hud-bug__rail[data-live="true"] {
+    opacity: 1;
+  }
+
+  .hud-bug__rail .cktTap__zone {
+    padding: 3px 0 4px;
+    -webkit-text-stroke-width: 3px;
+  }
+
+  .hud-bug__rail .cktTap__zone--perfect {
+    border-inline-width: 2px;
+  }
+
+  /* the rail lives in the bar now, so the dock is only the button */
+  .cktTap__rail {
+    display: none;
   }
 
   .hud-ctrl {
@@ -1525,7 +1545,7 @@
 
   /* ---- the start card: between the bar and the dock ---- */
   .ckt-card {
-    top: calc(var(--top) + 58px);
+    top: calc(var(--top) + 72px);
     transform: translateX(-50%);
     width: calc(100vw - 20px);
     gap: 9px;
