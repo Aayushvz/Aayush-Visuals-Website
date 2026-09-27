@@ -1,13 +1,14 @@
 /*
   ============ CRICKET: THE MATCH ============
 
-  The match HUD, the start card, the pause menu and the scorecard, built
-  from the game kit (kit.css). The shot receipt keeps the hit stamp
-  (triangle, torn sticker, fire brush) that was asked to stay.
+  The match screen, the pause menu and the scorecard, built from the game
+  kit (kit.css): chunky outlined pieces, colour that means something, and
+  outlined Lilita type. The shot receipt keeps the previous kit's hit
+  stamp (the triangle, the torn sticker and the fire brush), because a hit
+  landing should feel different from the furniture around it.
 
-  Phones get their own layout rather than a shrunk desktop (see the end of
-  the file): one bar at the top, the scene, a slim commentary strip and one
-  bat button at the bottom. Nothing on any screen scrolls.
+  Scoped under .ckt so it can be imported as global CSS without touching
+  anything else on the site.
 */
 .ckt {
   --hud-inset: clamp(12px, 1.4vw, 20px);
@@ -18,6 +19,7 @@
   background: #0e2a3f;
   color: var(--g-text);
   font-family: var(--g-body);
+  /* the whole surface is the bat */
   cursor: crosshair;
   touch-action: manipulation;
   user-select: none;
@@ -34,12 +36,13 @@
   height: 100%;
 }
 
+/* before the first ball, the pitch steps back behind the start card */
 .ckt::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: radial-gradient(ellipse at 50% 50%, rgba(6, 9, 30, 0.7), rgba(6, 9, 30, 0.35) 75%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(20, 24, 70, 0.55), rgba(20, 24, 70, 0.2) 75%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
@@ -58,32 +61,27 @@
   z-index: 3;
 }
 
-/* ============ top left: the player ============ */
+/* ============ top left: the player card ============ */
 .hud-id {
   top: var(--hud-inset);
   left: var(--hud-inset);
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 14px 5px 5px;
-  border: 1px solid var(--g-edge);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(28, 36, 92, 0.86), rgba(10, 14, 44, 0.9));
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--g-shadow);
   text-decoration: none;
   cursor: pointer;
 }
 
 .hud-id__frame {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 58px;
+  height: 58px;
   flex: none;
   overflow: hidden;
-  border-radius: 10px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 14px;
   background: linear-gradient(180deg, var(--g-team-hi), var(--g-team));
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6), 0 4px 0 var(--g-ink);
 }
 
 .hud-id__face {
@@ -94,39 +92,43 @@
 
 .hud-id__text {
   display: grid;
+  justify-items: start;
   gap: 5px;
 }
 
 .hud-id__name {
-  font-size: 1.15rem;
-  line-height: 1;
+  font-size: 1.3rem;
 }
 
+/* the rank chip from the reference: a label and a number in a pill */
 .hud-id__rank {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--g-mute);
+  padding: 2px 3px 2px 10px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  background: var(--g-navy);
+  font-family: var(--g-display);
+  font-size: 0.8rem;
+  color: var(--g-yellow);
+  box-shadow: 0 3px 0 var(--g-ink);
 }
 
 .hud-id__rank b {
-  padding: 2px 6px;
-  border-radius: 4px;
+  min-width: 26px;
+  padding: 1px 6px 2px;
+  border-radius: 5px;
   background: var(--g-yellow);
-  font-family: var(--g-display);
-  font-size: 0.8rem;
-  font-style: italic;
-  letter-spacing: 0;
-  color: #2d1c00;
+  color: var(--g-ink);
+  font-weight: 400;
+  text-align: center;
 }
 
 .hud-id:focus-visible {
-  outline: 2px solid var(--g-yellow);
-  outline-offset: 3px;
+  outline: 4px solid #fff;
+  outline-offset: 4px;
+  border-radius: 14px;
 }
 
 /* ============ top centre: the scoreboard ============ */
@@ -134,86 +136,94 @@
   top: var(--hud-inset);
   left: 50%;
   transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
 }
 
 .hud-bug__panel {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 6px 8px 6px 6px;
-  border-radius: 14px;
+  padding: 8px 16px 11px 8px;
+  border-radius: 18px;
   white-space: nowrap;
 }
 
+/* the batting side's tile: its colour, its code */
 .hud-bug__team {
   display: grid;
   place-items: center;
-  min-width: 54px;
-  height: 42px;
-  padding: 0 10px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--g-team-hi) -30%, var(--g-team) 45%, var(--g-team-lo));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  min-width: 56px;
+  height: 46px;
+  padding: 0 8px 3px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--g-team-hi) -20%, var(--g-team) 50%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -4px 0 var(--g-team-lo);
   font-family: var(--g-display);
-  font-size: 1.15rem;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: 1.2rem;
   color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .hud-bug__score {
   display: flex;
   align-items: baseline;
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-variant-numeric: tabular-nums;
-  text-shadow: none;
 }
 
 .hud-bug__score small {
   margin-left: 2px;
   font-size: 0.55em;
-  color: var(--g-mute);
+  color: var(--g-soft);
+}
+
+.hud-bug__pips .g-pip {
+  --pip: 30px;
 }
 
 .hud-bug__sr {
   display: grid;
   justify-items: center;
-  gap: 3px;
-  padding: 0 12px;
-  border-left: 1px solid var(--g-edge);
+  gap: 2px;
+  padding: 3px 10px 5px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 10px;
+  background: var(--g-well);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .hud-bug__sr span {
   font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--g-mute);
 }
 
 .hud-bug__sr b {
   font-family: var(--g-display);
-  font-size: 1.1rem;
-  font-style: italic;
-  font-weight: 800;
+  font-size: 1.15rem;
+  font-weight: 400;
   line-height: 1;
   color: var(--g-yellow);
   font-variant-numeric: tabular-nums;
 }
 
+/* the delivery, as a status chip at the end of the board */
 .hud-bug__ball {
-  padding: 7px 12px;
-  border-radius: 9px;
-  background: rgba(47, 123, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(106, 166, 255, 0.35);
+  padding: 5px 12px 7px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--g-blue-hi), var(--g-blue) 55%);
+  box-shadow: inset 0 -3px 0 var(--g-blue-lo);
   font-family: var(--g-display);
   font-size: 0.95rem;
-  font-style: italic;
-  font-weight: 700;
-  letter-spacing: 0.04em;
   line-height: 1;
-  text-transform: uppercase;
-  color: #bcd6ff;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 /* ============ top right: the controls ============ */
@@ -222,20 +232,25 @@
   right: var(--hud-inset);
   z-index: 4;
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .hud-ctrl .g-icon[aria-pressed="true"] {
-  --base: var(--g-mute);
+  --hi: #8f97c4;
+  --base: #6b73a3;
+  --lo: #4c5383;
 }
 
-/* ============ bottom left: commentary, timing, level ============ */
+/* ============ bottom left: the commentator ============
+   A navy panel with the kit's outline: who is talking, what they said,
+   how the timing landed, and the level strip. Navy rather than the white
+   bubble it used to be, which read as a sticker slapped on the scene. */
 .hud-com {
   left: var(--hud-inset);
   bottom: var(--hud-inset);
   display: grid;
   gap: 10px;
-  width: min(360px, 38vw);
+  width: min(380px, 38vw);
   padding: 12px 14px 14px;
 }
 
@@ -247,10 +262,11 @@
 
 .hud-com__face {
   display: grid;
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
   flex: none;
   overflow: hidden;
+  border: 2.5px solid var(--g-ink);
   border-radius: 50%;
   background: linear-gradient(180deg, var(--g-team-hi), var(--g-team));
 }
@@ -261,16 +277,25 @@
   object-fit: cover;
 }
 
+.hud-com__head .g-label {
+  color: var(--g-soft);
+}
+
 .hud-com__live {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   margin-left: auto;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--g-red-hi);
+  padding: 3px 8px 4px;
+  border: 2px solid var(--g-ink);
+  border-radius: 7px;
+  background: var(--g-red);
+  font-family: var(--g-display);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #fff;
+  -webkit-text-stroke: 3px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .hud-com__live::before {
@@ -278,12 +303,11 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--g-red);
-  box-shadow: 0 0 8px var(--g-red);
-  animation: cktLive 1.4s ease-in-out infinite;
+  background: #fff;
+  animation: cktOnAir 1.4s ease-in-out infinite;
 }
 
-@keyframes cktLive {
+@keyframes cktOnAir {
   50% {
     opacity: 0.25;
   }
@@ -292,19 +316,19 @@
 .hud-com__line {
   margin: 0;
   min-height: 1.3em;
-  font-size: 1rem;
+  font-size: 1.02rem;
   font-weight: 600;
-  line-height: 1.35;
-  color: var(--g-text);
+  line-height: 1.32;
+  color: #fff;
   text-wrap: pretty;
 }
 
 .hud-com__xp {
   padding-top: 10px;
-  border-top: 1px solid rgba(150, 170, 255, 0.12);
+  border-top: 2px solid rgba(27, 29, 58, 0.6);
 }
 
-/* ---- timing ---- */
+/* ---- timing: yellow, green, yellow, with red ends ---- */
 .hud-timing {
   display: flex;
   align-items: center;
@@ -315,7 +339,8 @@
   --p: var(--ckt-perfect, 8%);
   position: relative;
   flex: 1;
-  height: 8px;
+  height: 14px;
+  border: 2.5px solid var(--g-ink);
   border-radius: 999px;
   background: linear-gradient(
     90deg,
@@ -325,177 +350,260 @@
     var(--g-yellow) calc(50% + var(--p)) 91%,
     var(--g-red) 91% 100%
   );
-  opacity: 0.9;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
 }
 
 .hud-timing__track i {
   position: absolute;
-  top: -5px;
+  top: -7px;
   left: var(--ckt-off, 50%);
-  width: 4px;
-  height: 18px;
-  border-radius: 2px;
+  width: 10px;
+  height: 22px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 4px;
   background: #fff;
-  box-shadow: 0 0 0 2px var(--g-ink), 0 0 10px rgba(255, 255, 255, 0.6);
   transform: translateX(-50%);
 }
 
 .hud-timing__label {
   flex: none;
   min-width: 5.4em;
+  padding: 3px 8px 4px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
   font-family: var(--g-display);
-  font-size: 0.95rem;
-  font-style: italic;
-  font-weight: 800;
+  font-size: 0.85rem;
   line-height: 1;
-  text-align: right;
-  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .hud-timing__label[data-grade="good"] {
-  color: var(--g-green-hi);
+  background: var(--g-green);
 }
 
 .hud-timing__label[data-grade="near"] {
-  color: var(--g-yellow);
+  background: var(--g-yellow);
 }
 
 .hud-timing__label[data-grade="miss"] {
-  color: var(--g-red-hi);
+  background: var(--g-red);
 }
 
 /* ---- level and XP ---- */
 .cktXp {
   position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
 .cktXp__hex {
-  --hex: 38px;
-  --hi: var(--g-yellow-hi);
-  --base: var(--g-yellow);
-  --lo: var(--g-yellow-lo);
-}
-
-.cktXp__hex .g-hex__text {
-  color: #2d1c00;
-  text-shadow: none;
+  --hex: 50px;
+  z-index: 1;
+  margin-right: -12px;
 }
 
 .cktXp__meter {
   flex: 1;
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .cktXp__top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  padding-left: 18px;
 }
 
 .cktXp__label {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--g-mute);
+  font-family: var(--g-display);
+  font-size: 0.95rem;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktXp__count {
   font-family: var(--g-display);
   font-size: 0.95rem;
-  font-style: italic;
-  font-weight: 800;
-  color: var(--g-text);
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
   font-variant-numeric: tabular-nums;
 }
 
 .cktXp__count small {
   font-size: 0.85em;
-  color: var(--g-mute);
+  color: var(--g-soft);
+}
+
+.cktXp__track {
+  height: 20px;
+}
+
+.cktXp__fill {
+  --hi: var(--g-yellow-hi);
+  --base: var(--g-yellow);
 }
 
 .cktXp__up {
   position: absolute;
   right: 0;
-  top: -28px;
+  top: -30px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: var(--g-yellow);
-  box-shadow: 0 6px 18px -6px rgba(255, 200, 61, 0.8);
+  padding: 4px 10px 6px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--g-yellow-hi), var(--g-yellow) 55%);
+  box-shadow: 0 3px 0 var(--g-ink);
   font-family: var(--g-display);
-  font-size: 0.9rem;
-  font-style: italic;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #2d1c00;
+  font-size: 0.95rem;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktXp__upIcon {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
+  color: #fff;
 }
 
-/* ============ the wagon wheel ============ */
+/* ============ bottom right: wagon wheel ============ */
 .hud-wheel {
   right: var(--hud-inset);
   bottom: var(--hud-inset);
   width: 220px;
   display: grid;
   gap: 8px;
-  padding: 12px 14px 12px;
+  padding: 12px 12px 10px;
 }
 
 .hud-wheel__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+}
+
+.hud-wheel__head .g-label {
+  color: var(--g-soft);
 }
 
 .hud-wheel__runs {
   font-family: var(--g-display);
-  font-size: 1rem;
-  font-style: italic;
-  font-weight: 800;
+  font-size: 1.1rem;
+  line-height: 1;
   color: var(--g-yellow);
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
+/* the ground the shots are drawn on, in its own well */
+.ckt-wagon {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ckt-wagon-field {
+  stroke: var(--g-ink);
+  stroke-width: 2.5;
+}
+
+.ckt-wagon-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.8;
+  stroke-dasharray: 2 2;
+}
+
+.ckt-wagon-grid {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 0.7;
+}
+
+.ckt-wagon-edge {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.4;
+}
+
+.ckt-wagon-pitch {
+  fill: #e6d3a0;
+  stroke: var(--g-ink);
+  stroke-width: 1;
+}
+
+.ckt-wagon-pin {
+  fill: #fff;
+  stroke: var(--g-ink);
+  stroke-width: 1.2;
+}
+
+.ckt-wagon-shot line {
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke: var(--g-blue-hi);
+}
+
+.ckt-wagon-shot--4 line {
+  stroke: var(--g-green-hi);
+}
+
+.ckt-wagon-shot--4 circle {
+  fill: var(--g-green);
+  stroke: var(--g-ink);
+}
+
+.ckt-wagon-shot--6 line {
+  stroke: var(--g-yellow);
+}
+
+.ckt-wagon-shot--6 circle {
+  fill: var(--g-yellow);
+  stroke: var(--g-ink);
+}
+
+/* how many of each shot, as three small chips */
 .wheel-key {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--g-mute);
 }
 
 .wheel-key span {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  padding: 3px 0 4px;
+  border: 2px solid var(--g-ink);
+  border-radius: 8px;
+  background: var(--g-well);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--g-soft);
 }
 
 .wheel-key b {
   font-family: var(--g-display);
-  font-size: 0.95rem;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: 0;
-  color: var(--g-text);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #fff;
 }
 
 .wheel-key i {
-  width: 10px;
-  height: 3px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--g-ink);
+  border-radius: 50%;
 }
 
 .wheel-key .k1 {
@@ -508,68 +616,6 @@
 
 .wheel-key .k6 {
   background: var(--g-yellow);
-}
-
-.ckt-wagon {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.ckt-wagon-field {
-  opacity: 0.85;
-}
-
-.ckt-wagon-ring {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.16);
-  stroke-width: 0.6;
-  stroke-dasharray: 2 2;
-}
-
-.ckt-wagon-grid {
-  stroke: rgba(255, 255, 255, 0.1);
-  stroke-width: 0.5;
-}
-
-.ckt-wagon-edge {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.7);
-  stroke-width: 1.2;
-}
-
-.ckt-wagon-pitch {
-  fill: #d8c38d;
-}
-
-.ckt-wagon-pin {
-  fill: #fff;
-}
-
-.ckt-wagon-shot line {
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke: var(--g-blue-hi);
-  filter: drop-shadow(0 0 2px rgba(106, 166, 255, 0.8));
-}
-
-.ckt-wagon-shot--4 line {
-  stroke: var(--g-green-hi);
-  filter: drop-shadow(0 0 2px rgba(63, 207, 74, 0.8));
-}
-
-.ckt-wagon-shot--4 circle {
-  fill: var(--g-green-hi);
-}
-
-.ckt-wagon-shot--6 line {
-  stroke: var(--g-yellow);
-  filter: drop-shadow(0 0 3px rgba(255, 200, 61, 0.9));
-}
-
-.ckt-wagon-shot--6 circle {
-  fill: var(--g-yellow);
 }
 
 /* ============ the shot receipt and the streak ============
@@ -639,47 +685,57 @@
 .cktCombo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px 8px 10px;
+  gap: 8px;
+  padding: 8px 14px 10px;
+  background: var(--g-yellow);
+  box-shadow: inset 0 -4px 0 var(--g-yellow-lo), 0 4px 0 var(--g-ink);
+}
+
+.cktCombo::after {
+  background: var(--g-yellow);
 }
 
 .cktCombo__count {
   font-family: var(--g-display);
-  font-size: 1.8rem;
-  font-style: italic;
-  font-weight: 800;
+  font-size: 1.9rem;
   line-height: 1;
-  color: var(--g-yellow);
+  color: #fff;
+  -webkit-text-stroke: 6px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktCombo__label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--g-text);
+  font-family: var(--g-display);
+  font-size: 1rem;
+  color: var(--g-ink);
 }
 
-/* ============ the start card ============ */
+/* ============ the start card ============
+   The matchup across the top, the title, one line of rules, the keys and
+   the button. Tighter than it was, and it sits in the band between the
+   scoreboard and the batter instead of over the whole middle. */
 .ckt-card {
+  --hi: #3c62c8;
+  --base: #2445a6;
+  --lo: #182f7d;
   position: absolute;
   z-index: 7;
   left: 50%;
   top: 52%;
-  width: min(460px, calc(100vw - 32px));
+  width: min(440px, calc(100vw - 32px));
   display: grid;
-  gap: 14px;
-  padding: 20px 24px 24px;
+  gap: 12px;
+  padding: 16px 22px 20px;
   transform: translate(-50%, -50%);
-  border-radius: 20px;
+  border-radius: 24px;
   cursor: default;
-  animation: cktCardIn 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  animation: cktCardIn 0.45s cubic-bezier(0.22, 1.4, 0.36, 1) both;
 }
 
 @keyframes cktCardIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -46%);
+    transform: translate(-50%, -50%) scale(0.8);
   }
 }
 
@@ -687,9 +743,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(150, 170, 255, 0.12);
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(27, 29, 58, 0.45);
 }
 
 .ckt-card__side {
@@ -698,13 +754,13 @@
   gap: 8px;
   font-family: var(--g-display);
   font-size: 1.2rem;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .ckt-card__side--opp {
-  color: var(--g-mute);
+  opacity: 0.75;
 }
 
 .ckt-card__logo {
@@ -713,31 +769,38 @@
 }
 
 .ckt-card__vs {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 50%;
+  background: var(--g-red);
   font-family: var(--g-display);
-  font-size: 0.9rem;
-  font-style: italic;
-  font-weight: 800;
-  color: var(--g-yellow);
+  font-size: 0.85rem;
+  color: #fff;
+  -webkit-text-stroke: 3px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .ckt-card__title {
   margin: 0;
-  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  font-size: clamp(2.2rem, 4.8vw, 3rem);
   text-align: center;
 }
 
 .ckt-card__title em {
   display: block;
-  font-style: italic;
+  font-style: normal;
   color: var(--g-yellow);
 }
 
 .ckt-card__body {
   margin: 0 auto;
-  max-width: 38ch;
+  max-width: 36ch;
   font-size: 0.95rem;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.4;
   text-align: center;
   color: var(--g-soft);
   text-wrap: pretty;
@@ -747,7 +810,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px 18px;
+  gap: 10px 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -761,34 +824,44 @@
 
 .ckt-keys span {
   margin-left: 2px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--g-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
 }
 
 .ckt-card__go {
   width: 100%;
-  margin-top: 4px;
 }
 
-/* ============ the scorecard ============ */
+/* ============ the scorecard ============
+   One card that fits the screen: the result on the left (outcome tag,
+   stars, verdict, the total, the over) and the numbers on the right
+   (stats, where the runs went, XP), with the two buttons across the
+   bottom. It used to be one long column that needed scrolling. */
 .ckt-over,
 .ckt-pause {
   position: absolute;
   inset: 0;
+  display: grid;
   overflow: hidden;
   cursor: default;
 }
 
 .ckt-over {
   z-index: 7;
-  display: grid;
   animation: cktFade 0.3s ease-out both;
 }
 
 .ckt-over > .g-burst,
 .ckt-pause > .g-burst {
   z-index: -1;
+}
+
+.ckt-over__crumb,
+.ckt-pause__crumb {
+  margin-top: max(16px, env(safe-area-inset-top, 0px));
+  width: max-content;
+  max-width: calc(100% - 16px);
 }
 
 .ckt-over__main {
@@ -801,22 +874,25 @@
 }
 
 .ckt-over__card {
+  --hi: #3c62c8;
+  --base: #2445a6;
+  --lo: #182f7d;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas:
     "hero side"
     "act act";
-  gap: 18px 26px;
-  width: min(820px, 100%);
-  padding: 24px 26px 22px;
-  border-radius: 22px;
-  animation: cktCardUp 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  gap: 16px 24px;
+  width: min(800px, 100%);
+  padding: 20px 22px 20px;
+  border-radius: 26px;
+  animation: cktCardUp 0.45s cubic-bezier(0.22, 1.3, 0.36, 1) both;
 }
 
 @keyframes cktCardUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: scale(0.9) translateY(20px);
   }
 }
 
@@ -824,7 +900,7 @@
   grid-area: hero;
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ckt-over__top {
@@ -833,32 +909,43 @@
   justify-content: space-between;
 }
 
+.ckt-over__top .g-ribbon {
+  padding: 0 24px;
+}
+
+.ckt-over__top .g-ribbon__body {
+  font-size: 1.1rem;
+}
+
 .ckt-over__top .g-star {
   width: 30px;
 }
 
 .ckt-over__top .g-star:nth-child(2) {
-  width: 38px;
+  width: 40px;
 }
 
 .ckt-over__verdict {
-  margin: 4px 0 0;
-  font-size: clamp(1.8rem, 3.4vw, 2.5rem);
+  margin: 0;
+  font-size: clamp(1.7rem, 3.2vw, 2.3rem);
   text-wrap: balance;
 }
 
 .ckt-over__runs {
   display: flex;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
 }
 
 .ckt-over__runs b {
-  font-size: 5rem;
-  line-height: 0.8;
+  font-size: 4.4rem;
+  font-weight: 400;
+  line-height: 0.85;
   color: var(--g-yellow);
-  text-shadow: 0 0 30px rgba(255, 200, 61, 0.35);
+  -webkit-text-stroke: 10px var(--g-ink);
+  paint-order: stroke fill;
+  text-shadow: 0 5px 0 var(--g-ink);
 }
 
 .ckt-over__runs span {
@@ -867,19 +954,20 @@
   padding-bottom: 4px;
   font-family: var(--g-display);
   font-size: 1.3rem;
-  font-style: italic;
-  font-weight: 800;
   line-height: 1;
-  text-transform: uppercase;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .ckt-over__runs small {
   font-family: var(--g-body);
-  font-size: 0.62rem;
-  font-style: normal;
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--g-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--g-soft);
+  -webkit-text-stroke: 0;
 }
 
 .ckt-over__pips .g-pip {
@@ -889,7 +977,8 @@
 .ckt-over__note {
   margin: 0;
   font-size: 0.92rem;
-  line-height: 1.45;
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--g-soft);
 }
 
@@ -897,48 +986,58 @@
   grid-area: side;
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 12px;
 }
 
+/* the four numbers as one outlined strip, not four candy tiles */
 .ckt-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   margin: 0;
-  border: 1px solid rgba(150, 170, 255, 0.14);
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 14px;
+  background: var(--g-well);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.3);
 }
 
 .ckt-stats__cell {
   display: grid;
-  gap: 6px;
-  padding: 10px 12px;
+  justify-items: center;
+  gap: 5px;
+  padding: 9px 4px 10px;
 }
 
 .ckt-stats__cell + .ckt-stats__cell {
-  border-left: 1px solid rgba(150, 170, 255, 0.12);
+  box-shadow: inset 2px 0 0 rgba(27, 29, 58, 0.9);
 }
 
 .ckt-stats dt {
   font-size: 0.56rem;
+  color: var(--g-soft);
 }
 
 .ckt-stats dd {
   margin: 0;
+  font-family: var(--g-display);
   font-size: 1.7rem;
+  line-height: 1;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .ckt-over__wheel {
   display: grid;
   gap: 8px;
-  padding: 10px 14px 12px;
-  border: 1px solid rgba(150, 170, 255, 0.12);
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.18);
+  padding: 10px 12px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 14px;
+  background: var(--g-well);
 }
 
 .ckt-over__wheel .ckt-wagon {
-  max-height: 112px;
+  max-height: 104px;
 }
 
 .ckt-over__xp {
@@ -951,41 +1050,42 @@
   flex: 1;
 }
 
+.ckt-over__xp .g-pill {
+  margin-left: 16px;
+  height: 36px;
+  font-family: var(--g-display);
+  font-size: 1rem;
+  color: var(--g-yellow);
+}
+
 .ckt-over__actions {
   grid-area: act;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(150, 170, 255, 0.12);
 }
 
 .ckt-over__out {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--g-soft);
+  font-family: var(--g-display);
+  font-size: 1rem;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
   text-decoration: none;
 }
 
 .ckt-over__out svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 2px 0 var(--g-ink));
 }
 
 .ckt-over__out:focus-visible {
-  outline: 2px solid var(--g-yellow);
+  outline: 3px solid #fff;
   outline-offset: 3px;
-}
-
-@media (hover: hover) {
-  .ckt-over__out:hover {
-    color: var(--g-text);
-  }
 }
 
 @keyframes cktFade {
@@ -997,93 +1097,72 @@
 /* ============ the pause menu ============ */
 .ckt-pause {
   z-index: 20;
-  display: grid;
+  /* one child, the frame, which lays out its own header, grid and footer */
   grid-template-rows: minmax(0, 1fr);
   animation: cktFade 0.18s ease-out;
 }
 
 .ckt-pause__frame {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto 1fr auto;
   min-height: 0;
   height: 100%;
-}
-
-.ckt-pause__crumb {
-  padding-top: env(safe-area-inset-top, 0px);
-  height: calc(56px + env(safe-area-inset-top, 0px));
 }
 
 .ckt-pause__state {
   display: flex;
   justify-content: center;
-  padding: 22px 16px 0;
+  padding: 14px 16px 0;
 }
 
 .ckt-pause__score {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 6px 12px 6px 6px;
-  border-radius: 14px;
+  gap: 12px;
+  padding: 7px 14px 10px 7px;
+  border-radius: 16px;
 }
 
 .ckt-pause__score b {
   font-size: 2rem;
-  text-shadow: none;
+  font-weight: 400;
 }
 
 .ckt-pause__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 320px));
+  grid-template-columns: repeat(2, minmax(0, 360px));
   align-content: center;
   justify-content: center;
-  gap: 14px;
+  gap: 18px 22px;
   min-height: 0;
-  padding: 16px;
+  overflow: hidden;
+  padding: 18px 16px 24px;
 }
 
 .ckt-pause__grid .g-tile {
-  animation: cktTile 0.35s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  animation: cktTile 0.4s cubic-bezier(0.22, 1.5, 0.36, 1) both;
 }
 
 .ckt-pause__grid .g-tile:nth-child(2) {
-  animation-delay: 0.04s;
+  animation-delay: 0.05s;
 }
 
 .ckt-pause__grid .g-tile:nth-child(3) {
-  animation-delay: 0.08s;
+  animation-delay: 0.1s;
 }
 
 .ckt-pause__grid .g-tile:nth-child(4) {
-  animation-delay: 0.12s;
+  animation-delay: 0.15s;
 }
 
 @keyframes cktTile {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: scale(0.6);
   }
 }
 
-.ckt-pause__foot {
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.ckt-pause__leave {
-  min-height: 40px;
-  padding: 0 14px 2px;
-  font-size: 0.95rem;
-}
-
-.ckt-pause__leave svg {
-  width: 15px;
-  height: 15px;
-}
-
-/* pulses hold still while paused */
+/* everything that pulses holds still while the match is paused */
 .ckt[data-paused] .hud-bug .g-pip.is-live,
 .ckt[data-paused] .hud-com__live::before {
   animation-play-state: paused;
@@ -1094,45 +1173,46 @@
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: calc(var(--hud-inset) + 4px);
+  bottom: calc(var(--hud-inset) + 2px);
   transform: translateX(-50%);
   margin: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  font-family: var(--g-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
   white-space: nowrap;
   pointer-events: none;
 }
 
-/* ============ the phone's bat button ============
+/* ============ the phone's one control ============
    Laid out as the base case and switched off above the phone breakpoint:
    a media query adds no specificity, and the other order lost to source
    order once already. */
 .cktTap {
   position: absolute;
   z-index: 6;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  left: calc(env(safe-area-inset-left, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 14px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
   display: grid;
   justify-items: center;
-  gap: 8px;
-  width: min(250px, calc(100% - 28px));
-  transform: translateX(-50%);
+  gap: 10px;
 }
 
 .cktTap__rail {
   display: grid;
-  grid-template-columns: 1fr 1.1fr 1fr;
-  gap: 2px;
-  width: 100%;
-  font-size: 0.56rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  width: min(300px, 100%);
+  overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 999px;
+  font-family: var(--g-display);
+  font-size: 0.8rem;
   text-align: center;
-  text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.7;
+  box-shadow: 0 3px 0 var(--g-ink);
   transition: opacity 0.2s ease;
 }
 
@@ -1141,28 +1221,30 @@
 }
 
 .cktTap__zone {
-  padding: 3px 0;
-  border-radius: 4px;
-  background: rgba(255, 200, 61, 0.2);
-  color: var(--g-yellow-hi);
+  padding: 3px 0 5px;
+  background: var(--g-yellow);
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktTap__zone--perfect {
-  background: rgba(63, 207, 74, 0.28);
-  color: var(--g-green-hi);
+  background: var(--g-green);
+  border-inline: var(--g-o) solid var(--g-ink);
 }
 
 .cktTap__btn {
-  width: 100%;
-  min-height: 52px;
-  font-size: 1.25rem;
+  width: min(250px, 100%);
+  min-height: 54px;
+  font-size: 1.45rem;
+  border-radius: 16px;
 }
 
 .cktTap__btn:disabled {
   opacity: 0.5;
 }
 
-@media (min-width: 601px) {
+@media (min-width: 561px) {
   .cktTap {
     display: none;
   }
@@ -1178,66 +1260,61 @@
   .hud-bug__ball {
     display: none;
   }
-
-  .hud-id {
-    padding: 5px;
-  }
 }
 
-@media (max-width: 860px) {
-  .hud-bug__sr,
-  .ckt-hint {
+@media (max-width: 820px) {
+  .hud-bug__sr {
     display: none;
   }
 
   .hud-com {
-    width: min(320px, 50vw);
+    width: min(330px, 52vw);
   }
 
   .hud-wheel {
-    width: 170px;
+    width: 160px;
+  }
+
+  .ckt-hint {
+    display: none;
   }
 }
 
-/* short windows: the scorecard and the start card come down together */
-@media (max-height: 700px) and (min-width: 601px) {
+/* short landscape windows */
+@media (max-height: 680px) and (min-width: 561px) {
+  .ckt-card {
+    gap: 9px;
+    padding: 14px 20px 16px;
+  }
+
+  .ckt-card__title {
+    font-size: 2.1rem;
+  }
+
+  .g-tile {
+    min-height: 100px;
+  }
+
   .ckt-over__card {
-    gap: 12px 22px;
-    padding: 18px 22px 16px;
+    gap: 12px 20px;
+    padding: 16px 20px;
   }
 
   .ckt-over__runs b {
-    font-size: 3.8rem;
+    font-size: 3.4rem;
   }
 
   .ckt-over__wheel .ckt-wagon {
-    max-height: 80px;
+    max-height: 76px;
   }
 
   .ckt-over__note {
     display: none;
   }
-
-  .ckt-card {
-    gap: 10px;
-    padding: 16px 20px 18px;
-  }
-
-  .ckt-card__title {
-    font-size: 2.2rem;
-  }
-
-  .ckt-card__match {
-    padding-bottom: 10px;
-  }
-
-  .g-tile {
-    min-height: 84px;
-  }
 }
 
-/* the scorecard stacks before it gets cramped */
-@media (max-width: 760px) and (min-width: 601px) {
+/* the scorecard stacks before it gets cramped, and drops the wheel */
+@media (max-width: 760px) and (min-width: 561px) {
   .ckt-over__card {
     grid-template-columns: 1fr;
     grid-template-areas: "hero" "side" "act";
@@ -1248,19 +1325,16 @@
   }
 }
 
-/* =====================================================================
-   PHONE
-   =====================================================================
-   One bar at the top (score and the two controls that matter), the
-   scene, a slim commentary strip and the bat button at the bottom. The
-   wagon wheel and the level strip leave the match; both are on the
-   scorecard. Every overlay is sized to the space between the bar and the
-   dock, so nothing can overlap and nothing scrolls. */
-@media (max-width: 600px) {
+/* ============ phone ============
+   One bar at the top, the scene, a slim commentary strip and the bat
+   button at the bottom. The wagon wheel and the level strip leave the
+   match (both are on the scorecard); every overlay is sized to the space
+   between the bar and the dock, so nothing overlaps and nothing scrolls. */
+@media (max-width: 560px) {
   .ckt {
     --hud-inset: 8px;
     --top: calc(env(safe-area-inset-top, 0px) + 8px);
-    --dock: calc(env(safe-area-inset-bottom, 0px) + 108px);
+    --dock: calc(env(safe-area-inset-bottom, 0px) + 124px);
   }
 
   .hud-id,
@@ -1279,23 +1353,23 @@
     top: var(--top);
     left: 8px;
     transform: none;
+    justify-items: start;
   }
 
   .hud-bug__panel {
     gap: 8px;
-    padding: 4px 8px 4px 4px;
-    border-radius: 12px;
+    padding: 5px 9px 7px 5px;
+    border-radius: 14px;
   }
 
   .hud-bug__team {
-    min-width: 40px;
-    height: 34px;
-    padding: 0 7px;
-    font-size: 0.95rem;
+    min-width: 44px;
+    height: 36px;
+    font-size: 1rem;
   }
 
   .hud-bug__score {
-    font-size: 1.7rem;
+    font-size: 1.8rem;
   }
 
   .hud-bug__pips {
@@ -1303,7 +1377,9 @@
   }
 
   .hud-bug__pips .g-pip {
-    --pip: 20px;
+    --pip: 21px;
+    border-width: 2px;
+    border-radius: 6px;
   }
 
   .hud-ctrl {
@@ -1313,8 +1389,8 @@
   }
 
   .hud-ctrl .g-icon {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
   }
 
   /* ---- commentary, as a strip above the dock ---- */
@@ -1323,22 +1399,21 @@
     right: 10px;
     bottom: var(--dock);
     width: auto;
-    gap: 6px;
-    padding: 9px 12px;
-    border-radius: 12px;
+    gap: 7px;
+    padding: 9px 12px 11px;
+    border-radius: 14px;
   }
 
   .hud-com__line {
     min-height: 0;
-    font-size: 0.86rem;
-    line-height: 1.3;
+    font-size: 0.88rem;
   }
 
   .hud-timing__label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
-  /* ---- the receipt and the streak sit in the open band mid-screen ---- */
+  /* ---- the receipt and the streak, in the open band mid-screen ---- */
   .cktReward,
   .cktCombo {
     top: 40%;
@@ -1368,17 +1443,17 @@
 
   /* ---- the start card: between the bar and the dock ---- */
   .ckt-card {
-    top: calc(var(--top) + 56px);
+    top: calc(var(--top) + 58px);
     transform: translateX(-50%);
     width: calc(100vw - 20px);
-    gap: 10px;
-    padding: 14px 16px 16px;
-    border-radius: 18px;
+    gap: 9px;
+    padding: 12px 14px 14px;
+    border-radius: 20px;
     animation-name: cktCardInPhone;
   }
 
   .ckt-card__match {
-    padding-bottom: 10px;
+    padding-bottom: 9px;
   }
 
   .ckt-card__logo {
@@ -1391,7 +1466,7 @@
   }
 
   .ckt-card__title {
-    font-size: 2rem;
+    font-size: 1.9rem;
   }
 
   .ckt-card__body {
@@ -1414,21 +1489,22 @@
     grid-template-columns: 1fr;
     grid-template-areas: "hero" "side" "act";
     gap: 12px;
-    padding: 16px 14px 14px;
-    border-radius: 18px;
+    padding: 14px 12px 14px;
+    border-width: 4px;
+    border-radius: 22px;
   }
 
   .ckt-over__hero {
-    gap: 8px;
+    gap: 7px;
   }
 
   .ckt-over__verdict {
-    margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
 
   .ckt-over__runs b {
-    font-size: 3.4rem;
+    font-size: 3.2rem;
+    -webkit-text-stroke-width: 8px;
   }
 
   .ckt-over__runs span {
@@ -1447,14 +1523,9 @@
     gap: 10px;
   }
 
-  .ckt-stats__cell {
-    padding: 8px 8px;
-    gap: 4px;
-  }
-
   .ckt-stats dt {
     font-size: 0.5rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
   }
 
   .ckt-stats dd {
@@ -1462,28 +1533,34 @@
   }
 
   .ckt-over__wheel {
-    padding: 8px 12px 10px;
+    padding: 8px 10px;
   }
 
   .ckt-over__wheel .ckt-wagon {
-    max-height: 84px;
+    max-height: 80px;
   }
 
   .ckt-over__actions {
     gap: 8px;
-    padding-top: 12px;
   }
 
   .ckt-over__actions .g-btn {
-    min-height: 46px;
-    padding: 0 10px 2px;
-    font-size: 1.05rem;
+    min-height: 48px;
+    padding: 0 10px 5px;
+    font-size: 1.1rem;
   }
 
   /* ---- the pause menu ---- */
   .ckt-pause__crumb {
-    height: calc(48px + env(safe-area-inset-top, 0px));
-    padding-inline: 12px 16px;
+    margin-top: max(10px, env(safe-area-inset-top, 0px));
+  }
+
+  .g-crumb {
+    height: 48px;
+  }
+
+  .g-crumb__mark {
+    width: 64px;
   }
 
   .g-crumb__home,
@@ -1491,8 +1568,12 @@
     display: none;
   }
 
-  .ckt-pause__state {
-    padding-top: 14px;
+  .g-crumb__trail {
+    padding: 0 36px 0 28px;
+  }
+
+  .g-crumb__trail b {
+    font-size: 1.2rem;
   }
 
   .ckt-pause__score b {
@@ -1500,53 +1581,54 @@
   }
 
   .ckt-pause__score .g-pip {
-    --pip: 20px;
+    --pip: 21px;
   }
 
   .ckt-pause__grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 12px 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px 10px 16px;
   }
 
   .g-tile {
     grid-template-columns: 1fr;
-    align-content: space-between;
-    gap: 12px;
-    min-height: 118px;
-    padding: 14px;
+    justify-items: start;
+    min-height: 120px;
+    padding: 12px 12px 14px;
+    border-radius: 18px 40px 18px 18px;
+    text-align: left;
   }
 
   .g-tile__icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
   }
 
   .g-tile__icon svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 
   .g-tile__label {
     font-size: 1.3rem;
+    -webkit-text-stroke-width: 6px;
   }
 
   .g-tile__meta {
-    top: 14px;
-    right: 12px;
+    top: 12px;
+    right: 14px;
   }
 
   .ckt-pause__foot {
     min-height: 0;
-    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom, 0px));
     font-size: 0.8rem;
     line-height: 1.35;
   }
 }
 
-/* the smallest phones: shed the optional lines */
-@media (max-width: 600px) and (max-height: 700px) {
+/* the smallest phones: the optional lines step out */
+@media (max-width: 560px) and (max-height: 700px) {
   .ckt-over__wheel,
   .ckt-over__note,
   .ckt-card__body {
@@ -1561,23 +1643,26 @@
 @keyframes cktCardInPhone {
   from {
     opacity: 0;
-    transform: translate(-50%, 16px);
+    transform: translate(-50%, 0) scale(0.9);
   }
 }
 
-/* no keyboard, no key hints */
 @media (pointer: coarse) {
   .ckt-keys,
   .g-tile .g-key {
     display: none;
   }
+
+  .ckt-card__body {
+    margin-bottom: 18px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hud-com__live::before,
+  .hud-com__who i,
   .ckt-card,
   .ckt-over,
-  .ckt-over__card,
+  .ckt-over__panel,
   .ckt-pause,
   .ckt-pause__grid .g-tile {
     animation: none;

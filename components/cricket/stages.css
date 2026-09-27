@@ -170,34 +170,33 @@
 .op__title span {
   display: block;
   font-family: var(--g-display);
-  font-style: italic;
-  font-weight: 800;
-  line-height: 0.88;
+  font-weight: 400;
+  line-height: 0.92;
   text-transform: uppercase;
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  -webkit-text-stroke: 9px var(--g-ink);
+  paint-order: stroke fill;
+  text-shadow: 0 6px 0 var(--g-ink);
 }
 
 .op__l1 {
-  font-size: clamp(1.4rem, 3.6vw, 2rem);
-  letter-spacing: 0.32em;
-  color: var(--g-soft);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  letter-spacing: 0.2em;
+  color: #fff;
+  -webkit-text-stroke-width: 7px !important;
 }
 
 .op__l2 {
-  font-size: clamp(3rem, 9vw, 5.4rem);
-  letter-spacing: 0.01em;
-  background: linear-gradient(180deg, #fff 30%, #c9d4ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
+  font-size: clamp(3.2rem, 10vw, 6rem);
+  letter-spacing: 0.02em;
+  color: var(--g-yellow);
 }
 
 .op__l3 {
-  font-size: clamp(1.4rem, 3.6vw, 2rem);
-  letter-spacing: 0.5em;
-  margin-right: -0.5em;
-  color: var(--g-yellow);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  letter-spacing: 0.3em;
+  margin-right: -0.3em;
+  color: #fff;
+  -webkit-text-stroke-width: 7px !important;
 }
 
 .op__tag {
@@ -231,16 +230,19 @@
   align-items: center;
   gap: 14px;
   padding: 8px 16px;
-  border: 1px solid var(--g-edge);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 999px;
   background: rgba(6, 9, 25, 0.55);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  border: var(--g-o) solid var(--g-ink);
+  background: var(--g-navy);
+  box-shadow: 0 4px 0 var(--g-ink);
   font-family: var(--g-display);
-  font-size: 1rem;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  font-size: 1.05rem;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
   animation-delay: 0.38s;
 }
 
@@ -250,7 +252,7 @@
 }
 
 .op__match em {
-  font-style: italic;
+  font-style: normal;
   color: var(--g-yellow);
 }
 
@@ -299,7 +301,6 @@
 .op__loadLabel b {
   font-family: var(--g-display);
   font-size: 0.95rem;
-  font-style: italic;
   letter-spacing: 0;
   color: var(--g-yellow);
   font-variant-numeric: tabular-nums;
@@ -321,7 +322,7 @@
   align-items: center;
   min-height: 40px;
   padding: 8px 16px;
-  border: 1px solid var(--g-edge);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 999px;
   background: rgba(6, 9, 25, 0.6);
   font-family: var(--g-body);
@@ -337,7 +338,7 @@
 @media (hover: hover) {
   .stgSkip:hover {
     color: #fff;
-    border-color: var(--g-edge-hi);
+    border-color: rgba(255, 255, 255, 0.55);
   }
 }
 

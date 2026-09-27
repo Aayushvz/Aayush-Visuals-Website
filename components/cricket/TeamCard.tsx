@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teamVars, type Team } from "./teams";
 import { Crest } from "./crests";
-import { Ribbon } from "./kit";
+import { Hex, Ribbon } from "./kit";
 
 /*
   A team card, built like a character card in a casual game: the whole
@@ -130,10 +130,9 @@ export default function TeamCard({
     >
       <div className="pk-card__lift">
         <div className="pk-card__body">
-          <div className="pk-card__top">
-            <Ribbon tone="team">{team.playstyle}</Ribbon>
-            <span className="pk-card__abbr">{team.abbr}</span>
-          </div>
+          <Ribbon tone="yellow" className="pk-card__ribbon">
+            {team.playstyle}
+          </Ribbon>
 
           <div className="pk-card__window">
             <Crest id={team.id} field={c.primary} emblem={c.light} className="pk-card__crest" />
@@ -168,6 +167,10 @@ export default function TeamCard({
           </button>
         </div>
       </div>
+
+      <Hex tone="team" className="pk-card__hex">
+        {team.abbr}
+      </Hex>
     </div>
   );
 }

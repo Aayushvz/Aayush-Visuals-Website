@@ -1,122 +1,91 @@
 /*
   ============ DPL GAME KIT ============
 
-  The visual language of every screen in the game: the opening, pick a
-  side, the match HUD, the pause menu and the scorecard.
+  The visual language of every screen in the game: pick a side, the match
+  HUD, the pause menu, the scorecard. It is a casual-game kit - the chunky,
+  bright, toy-like UI of Brawl Stars, Clash and the Smash Bros menus - and
+  it works by a handful of rules applied everywhere, never by decoration:
 
-  The target is a premium sports game's menus - a football game, a
-  racing game - not a toy. It keeps what makes game UI feel like game UI
-  (depth, pressable controls, colour that means something, big confident
-  numbers) and drops what made the previous pass read as childish: thick
-  cartoon outlines on everything, white bubble panels, candy-bright fills
-  on whole surfaces, and a rounded display face.
-
-  1. SURFACES are deep navy glass: a vertical gradient, a hairline edge
-     that is brighter at the top, a dark outer ring and a long soft
-     shadow. Everything you read sits on one, so white type is 14:1+
-     wherever the screen puts it.
-  2. COLOUR IS AN ACCENT. The side you picked (--g-team) marks identity;
-     gold marks what you earned (runs, XP, stars, levels); green is the
-     one primary action per screen; the result colours (blue 1, green 4,
-     gold 6, red W) appear only on results. Whole surfaces stay navy.
-  3. TYPE is Barlow Condensed, heavy and italic, uppercase, for titles,
-     buttons and numbers; Barlow for everything small. No outlined text:
-     a soft shadow separates type from a surface.
+  1. ONE OUTLINE. Every shape - button, panel, pip, badge, bar - has the
+     same thick navy stroke (--g-ink). That single rule is what makes a
+     screen full of different colours read as one family.
+  2. EVERY SURFACE IS AN OBJECT. A lit top edge (a white inset line), a
+     darker lip at the bottom, and a hard drop under it. Buttons press down
+     onto their lip. Nothing is a flat rectangle.
+  3. COLOUR MEANS SOMETHING. Green goes (play, resume, pick). Yellow is
+     reward (runs, XP, sixes). Blue navigates and informs. Purple and red
+     are accents (red also means out, and leaving). Navy is the quiet
+     ground everything sits on. The side you picked tints its own pieces.
+  4. TYPE IS OUTLINED. Titles, buttons and numbers are Lilita One in white
+     with the navy outline painted behind the fill and a hard drop - the
+     outline is what keeps white text legible on yellow and on sky alike.
+     Small print is Fredoka, rounded, on navy or white.
 */
 
 .dpl,
 .ckt {
-  --g-ink: #060919;
-  --g-navy: #141b48;
-  --g-navy-hi: #202a66;
-  --g-navy-lo: #0b1033;
-  --g-well: #0a0e2b;
-  --g-edge: rgba(150, 170, 255, 0.2);
-  --g-edge-hi: rgba(190, 205, 255, 0.34);
+  --g-ink: #1b1d3a;
+  --g-navy: #2b2f5c;
+  --g-navy-hi: #40436c;
+  --g-navy-lo: #1f2248;
+  --g-well: #161937;
 
-  --g-blue: #2f7bff;
-  --g-blue-hi: #6aa6ff;
-  --g-blue-lo: #1a4fc4;
-  --g-green: #3fcf4a;
-  --g-green-hi: #8bf06a;
-  --g-green-lo: #1d8a2c;
-  --g-yellow: #ffc83d;
-  --g-yellow-hi: #ffe28a;
-  --g-yellow-lo: #d9941a;
-  --g-purple: #8f4dff;
-  --g-purple-hi: #b98cff;
-  --g-purple-lo: #5a23c7;
-  --g-red: #ff4d5e;
-  --g-red-hi: #ff8c96;
-  --g-red-lo: #c21f36;
+  --g-blue: #1474e0;
+  --g-blue-hi: #49a6ff;
+  --g-blue-lo: #0b4fae;
+  --g-green: #53ce17;
+  --g-green-hi: #8ef04f;
+  --g-green-lo: #2c8f05;
+  --g-yellow: #fac602;
+  --g-yellow-hi: #ffe45c;
+  --g-yellow-lo: #d18f00;
+  --g-purple: #9b3bea;
+  --g-purple-hi: #c47dff;
+  --g-purple-lo: #6a1dbb;
+  --g-red: #ef3b3b;
+  --g-red-hi: #ff7b6b;
+  --g-red-lo: #b51d2a;
+  --g-sky: #8ad8ff;
 
-  --g-team: var(--tm-primary, #2f7bff);
+  --g-team: var(--tm-primary, #1474e0);
   --g-team-hi: var(--tm-light, #7dd3fc);
   --g-team-lo: var(--tm-deep, #1d4ed8);
 
-  --g-text: #f4f6ff;
-  --g-soft: #c3cbef;
-  --g-mute: #8791c2;
+  --g-text: #ffffff;
+  --g-soft: #d6ddff;
+  --g-mute: #9aa3d6;
 
-  --g-display: var(--ckt-game), "Barlow Condensed", var(--ckt-display), Impact, sans-serif;
-  --g-body: var(--ckt-round), "Barlow", var(--font-primary), system-ui, sans-serif;
+  --g-display: var(--ckt-game), "Lilita One", var(--ckt-display), Impact, sans-serif;
+  --g-body: var(--ckt-round), "Fredoka", var(--font-primary), system-ui, sans-serif;
 
-  --g-r: 12px;
-  --g-shadow: 0 0 0 1px var(--g-ink), 0 18px 40px -16px rgba(0, 0, 0, 0.75);
+  --g-o: 3px;
+  --g-r: 14px;
 }
 
-/* ============ type ============ */
+/* ============ outlined game type ============ */
 .g-title {
   font-family: var(--g-display);
-  font-style: italic;
-  font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: 0.005em;
-  text-transform: uppercase;
-  color: var(--g-text);
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.35);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #fff;
+  -webkit-text-stroke: calc(var(--g-o) * 2) var(--g-ink);
+  paint-order: stroke fill;
+  text-shadow: 0 0.07em 0 var(--g-ink);
 }
 
 .g-num {
   font-family: var(--g-display);
-  font-style: italic;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.g-label {
+.g-small {
   font-family: var(--g-body);
-  font-size: 0.66rem;
   font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--g-mute);
-}
-
-/* ============ surfaces ============ */
-.g-panel {
-  position: relative;
-  border: 1px solid var(--g-edge);
-  border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 34%),
-    linear-gradient(180deg, var(--g-navy-hi), var(--g-navy) 45%, var(--g-navy-lo));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), var(--g-shadow);
-  color: var(--g-text);
-}
-
-/* a translucent version, for HUD pieces that sit over the live scene */
-.g-glass {
-  position: relative;
-  border: 1px solid var(--g-edge);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(28, 36, 92, 0.86), rgba(10, 14, 44, 0.9));
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--g-shadow);
-  color: var(--g-text);
 }
 
 /* ============ buttons ============ */
@@ -129,217 +98,224 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 52px;
-  padding: 0 24px 2px;
-  border: 1px solid rgba(0, 0, 0, 0.45);
+  min-height: 56px;
+  padding: 0 26px 5px;
+  border: var(--g-o) solid var(--g-ink);
   border-radius: var(--g-r);
-  background: linear-gradient(180deg, var(--hi) -40%, var(--base) 45%, var(--lo) 130%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.22), 0 0 0 1px var(--g-ink),
-    0 10px 22px -10px var(--base);
+  background: linear-gradient(180deg, var(--hi) 0%, var(--base) 48%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), inset 0 -6px 0 var(--lo), 0 4px 0 var(--g-ink);
   font-family: var(--g-display);
-  font-size: 1.2rem;
-  font-style: italic;
-  font-weight: 800;
+  font-size: 1.3rem;
   line-height: 1;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: #fff;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  -webkit-text-stroke: 6px var(--g-ink);
+  paint-order: stroke fill;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
 }
 
 .g-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   flex: none;
+  stroke-width: 3;
+  filter: drop-shadow(0 2px 0 var(--g-ink));
 }
 
 .g-btn:active {
-  transform: translateY(2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.22), 0 0 0 1px var(--g-ink);
-}
-
-/* a quieter second action: navy with an edge */
-.g-btn--ghost {
-  background: linear-gradient(180deg, var(--g-navy-hi), var(--g-navy-lo));
-  border-color: var(--g-edge-hi);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 0 1px var(--g-ink);
+  transform: translateY(3px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 var(--lo), 0 1px 0 var(--g-ink);
 }
 
 .g-btn:focus-visible,
 .g-icon:focus-visible,
 .g-tile:focus-visible {
-  outline: 2px solid var(--g-yellow);
+  outline: 4px solid #fff;
   outline-offset: 3px;
 }
 
 @media (hover: hover) {
-  .g-btn:hover {
-    filter: brightness(1.08);
-  }
-
-  .g-btn--ghost:hover {
-    filter: none;
-    border-color: rgba(220, 230, 255, 0.55);
+  .g-btn:hover,
+  .g-icon:hover {
+    filter: brightness(1.08) saturate(1.08);
   }
 }
 
-/* square icon buttons: navy, the tone shows as the icon's colour */
+/* square icon buttons, the top-right controls */
 .g-icon {
-  --base: var(--g-soft);
+  --hi: var(--g-blue-hi);
+  --base: var(--g-blue);
+  --lo: var(--g-blue-lo);
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  border: 1px solid var(--g-edge);
+  width: 50px;
+  height: 50px;
+  padding: 0 0 4px;
+  border: var(--g-o) solid var(--g-ink);
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(32, 42, 102, 0.92), rgba(11, 16, 51, 0.94));
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), var(--g-shadow);
-  color: var(--base);
+  background: linear-gradient(180deg, var(--hi) 0%, var(--base) 50%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -5px 0 var(--lo), 0 4px 0 var(--g-ink);
+  color: #fff;
   cursor: pointer;
-  transition: transform 0.1s ease, border-color 0.15s ease, background-color 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
 }
 
 .g-icon svg {
-  width: 19px;
-  height: 19px;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 0 var(--g-ink));
 }
 
 .g-icon:active {
-  transform: translateY(2px);
+  transform: translateY(3px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 0 var(--lo), 0 1px 0 var(--g-ink);
 }
 
-@media (hover: hover) {
-  .g-icon:hover {
-    border-color: var(--base);
-  }
+/* ============ panels ============ */
+.g-panel {
+  --hi: var(--g-navy-hi);
+  --base: var(--g-navy);
+  --lo: var(--g-navy-lo);
+  position: relative;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.06) 0 2px, transparent 3px) 0 0 / 28px 28px,
+    linear-gradient(180deg, var(--hi), var(--base) 40%, var(--lo));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.18), inset 0 -6px 0 rgba(0, 0, 0, 0.18), 0 5px 0 var(--g-ink),
+    0 14px 28px -14px rgba(10, 12, 40, 0.6);
+  color: var(--g-text);
 }
 
-/* ============ the resource pill ============ */
+/* ============ the resource pill: an icon riding over a dark capsule ============ */
 .g-pill {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 12px 0 8px;
-  border: 1px solid rgba(255, 200, 61, 0.35);
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px 0 34px;
+  margin-left: 16px;
+  border: var(--g-o) solid var(--g-ink);
   border-radius: 999px;
-  background: rgba(255, 200, 61, 0.1);
-  font-family: var(--g-display);
-  font-style: italic;
-  font-weight: 800;
-  font-size: 1.05rem;
-  color: var(--g-yellow);
+  background: linear-gradient(180deg, var(--g-well), var(--g-navy-lo));
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3), 0 3px 0 var(--g-ink);
 }
 
 .g-pill > .g-ico {
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  translate: 0 -50%;
 }
 
 /* ============ bars ============ */
 .g-bar {
   position: relative;
-  height: 10px;
+  height: 20px;
   overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.35);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: var(--g-well);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.35);
 }
 
 .g-bar__fill {
-  --hi: var(--g-yellow-hi);
-  --base: var(--g-yellow);
+  --hi: var(--g-green-hi);
+  --base: var(--g-green);
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--g-yellow-lo), var(--base) 60%, var(--hi));
-  box-shadow: 0 0 12px rgba(255, 200, 61, 0.45);
+  background: linear-gradient(180deg, var(--hi) 0 40%, var(--base) 40%);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
 }
 
+/* segments, for bars that count */
 .g-bar--ticks::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), rgba(6, 9, 25, 0.7) calc(10% - 2px) 10%);
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--g-ink) calc(10% - 3px) 10%);
+  opacity: 0.55;
   pointer-events: none;
 }
 
-/* ============ the over, ball by ball ============ */
+/* ============ pips ============ */
 .g-pips {
   display: flex;
   gap: 5px;
 }
 
 .g-pip {
-  --pip: 26px;
+  --pip: 28px;
   display: grid;
   place-items: center;
   width: var(--pip);
   height: var(--pip);
-  border-radius: 50%;
+  padding-bottom: 3px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #b3bbdc, #8a93bd 55%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
   font-family: var(--g-display);
   font-size: calc(var(--pip) * 0.56);
-  font-style: italic;
-  font-weight: 800;
+  font-style: normal;
   line-height: 1;
-  color: var(--g-mute);
-  box-shadow: inset 0 0 0 1.5px rgba(150, 170, 255, 0.22);
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
+}
+
+/* a ball still to come is a dark slot with a quiet number, so the ones
+   already bowled carry all the colour on the board */
+.g-pip.is-todo {
+  background: var(--g-well);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.35);
+  color: #7d86bd;
+  -webkit-text-stroke: 0;
 }
 
 .g-pip.is-live {
-  color: var(--g-yellow);
-  box-shadow: inset 0 0 0 2px var(--g-yellow), 0 0 12px rgba(255, 200, 61, 0.55);
-  animation: gPipLive 1s ease-in-out infinite;
+  background: #fff;
+  color: var(--g-ink);
+  -webkit-text-stroke: 0;
+  box-shadow: 0 0 0 3px var(--g-yellow), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  animation: gPipLive 0.9s ease-in-out infinite;
 }
 
 @keyframes gPipLive {
   50% {
-    box-shadow: inset 0 0 0 2px var(--g-yellow), 0 0 3px rgba(255, 200, 61, 0.2);
+    box-shadow: 0 0 0 5px rgba(250, 198, 2, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
   }
 }
 
-.g-pip.is-dot,
-.g-pip.is-single,
-.g-pip.is-four,
-.g-pip.is-six,
-.g-pip.is-wicket {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
-}
-
 .g-pip.is-dot {
-  background: #394274;
-  color: var(--g-soft);
+  background: linear-gradient(180deg, #6f77a6, #545c8c 55%);
 }
 
 .g-pip.is-single {
-  background: linear-gradient(180deg, var(--g-blue-hi), var(--g-blue));
-  color: #fff;
+  background: linear-gradient(180deg, var(--g-blue-hi), var(--g-blue) 55%);
 }
 
 .g-pip.is-four {
-  background: linear-gradient(180deg, var(--g-green-hi), var(--g-green));
-  color: #06280c;
+  background: linear-gradient(180deg, var(--g-green-hi), var(--g-green) 55%);
 }
 
 .g-pip.is-six {
-  background: linear-gradient(180deg, var(--g-yellow-hi), var(--g-yellow));
-  color: #2d1c00;
+  background: linear-gradient(180deg, var(--g-yellow-hi), var(--g-yellow) 55%);
 }
 
 .g-pip.is-wicket {
-  background: linear-gradient(180deg, var(--g-red-hi), var(--g-red));
-  color: #fff;
+  background: linear-gradient(180deg, var(--g-red-hi), var(--g-red) 55%);
 }
 
-/* ============ hex badge: ranks, levels, team codes ============ */
+/* ============ hex badge ============ */
 .g-hex {
-  --hex: 60px;
+  --hex: 64px;
   --hi: var(--g-blue-hi);
   --base: var(--g-blue);
   --lo: var(--g-blue-lo);
@@ -349,7 +325,6 @@
   width: var(--hex);
   aspect-ratio: 100 / 110;
   flex: none;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
 }
 
 .g-hex svg {
@@ -367,103 +342,113 @@
 .g-hex__face {
   fill: var(--base);
   stroke: var(--g-ink);
-  stroke-width: 4;
+  stroke-width: 6;
   stroke-linejoin: round;
 }
 
 .g-hex__shine {
-  fill: rgba(255, 255, 255, 0.22);
+  fill: rgba(255, 255, 255, 0.4);
 }
 
 .g-hex__text {
   position: relative;
   margin-top: -4%;
   font-family: var(--g-display);
-  font-size: calc(var(--hex) * 0.36);
-  font-style: italic;
-  font-weight: 800;
+  font-size: calc(var(--hex) * 0.38);
   line-height: 1;
   color: #fff;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  -webkit-text-stroke: calc(var(--hex) * 0.08) var(--g-ink);
+  paint-order: stroke fill;
 }
 
-/* ============ tags (the ribbon, re-cut as an angled chip) ============ */
+/* ============ ribbon ============ */
 .g-ribbon {
   --hi: var(--g-red-hi);
   --base: var(--g-red);
   --lo: var(--g-red-lo);
   position: relative;
-  display: inline-block;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 34px;
 }
 
 .g-ribbon__tails {
-  display: none;
+  position: absolute;
+  inset: 0 0 -8px;
+  width: 100%;
+  height: calc(100% + 8px);
+  overflow: visible;
+}
+
+.g-ribbon__tail {
+  fill: var(--lo);
+  stroke: var(--g-ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .g-ribbon__body {
+  position: relative;
   display: block;
-  padding: 6px 18px 7px;
-  background: linear-gradient(180deg, var(--hi) -60%, var(--base) 55%, var(--lo) 140%);
-  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  padding: 7px 22px 10px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--hi), var(--base) 50%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -5px 0 var(--lo);
   font-family: var(--g-display);
-  font-size: 1rem;
-  font-style: italic;
-  font-weight: 800;
+  font-size: 1.3rem;
   line-height: 1;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   white-space: nowrap;
   color: #fff;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  -webkit-text-stroke: 6px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 /* ============ stars ============ */
 .g-stars {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 4px;
 }
 
 .g-star {
-  width: 38px;
+  width: 48px;
   height: auto;
   overflow: visible;
 }
 
 .g-star:nth-child(2) {
-  width: 50px;
-  margin-bottom: 4px;
+  width: 62px;
 }
 
 .g-star path:first-child {
-  fill: rgba(255, 255, 255, 0.08);
-  stroke: rgba(150, 170, 255, 0.3);
-  stroke-width: 3;
+  fill: #4a4f86;
+  stroke: var(--g-ink);
+  stroke-width: 6;
   stroke-linejoin: round;
 }
 
 .g-star__shine {
-  fill: transparent;
-}
-
-.g-star.is-on {
-  filter: drop-shadow(0 0 10px rgba(255, 200, 61, 0.6));
-  animation: gStar 0.5s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+  fill: rgba(255, 255, 255, 0.18);
 }
 
 .g-star.is-on path:first-child {
   fill: var(--g-yellow);
-  stroke: var(--g-yellow-lo);
 }
 
 .g-star.is-on .g-star__shine {
-  fill: rgba(255, 255, 255, 0.55);
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.g-star.is-on {
+  animation: gStar 0.45s cubic-bezier(0.22, 1.6, 0.36, 1) both;
 }
 
 @keyframes gStar {
   from {
     opacity: 0;
-    transform: scale(1.8) rotate(-15deg);
+    transform: scale(2) rotate(-20deg);
   }
 }
 
@@ -471,25 +456,26 @@
 .g-toggle {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 26px;
+  width: 64px;
+  height: 34px;
   flex: none;
+  border: var(--g-o) solid var(--g-ink);
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: inset 0 0 0 1px var(--g-edge);
+  background: #566089;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.25);
   transition: background-color 0.18s ease;
 }
 
 .g-toggle i {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
+  top: 1px;
+  left: 1px;
+  width: 26px;
+  height: 26px;
+  border: var(--g-o) solid var(--g-ink);
   border-radius: 50%;
-  background: #cfd6f5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s cubic-bezier(0.22, 1.2, 0.36, 1);
+  background: linear-gradient(180deg, #fff, #dfe4f5);
+  transition: transform 0.2s cubic-bezier(0.22, 1.4, 0.36, 1);
 }
 
 .g-toggle[data-on] {
@@ -497,108 +483,118 @@
 }
 
 .g-toggle[data-on] i {
-  background: #fff;
-  transform: translateX(18px);
+  transform: translateX(29px);
 }
 
 /* ============ keycaps ============ */
 .g-key {
   display: inline-grid;
   place-items: center;
-  min-width: 28px;
-  height: 26px;
-  padding: 0 7px;
-  border: 1px solid var(--g-edge-hi);
-  border-bottom-width: 2px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  font-family: var(--g-body);
-  font-size: 0.72rem;
-  font-weight: 700;
+  min-width: 32px;
+  height: 30px;
+  padding: 0 8px 3px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff, #e3e7f6);
+  box-shadow: inset 0 -3px 0 #b9c0dc, 0 3px 0 var(--g-ink);
+  font-family: var(--g-display);
+  font-size: 0.85rem;
   line-height: 1;
-  color: var(--g-text);
+  color: var(--g-ink);
 }
 
-/* ============ a dark speech panel, with a tail ============ */
+/* ============ speech bubble ============ */
 .g-bubble {
   position: relative;
   padding: 12px 16px 14px;
-  border: 1px solid var(--g-edge);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(30, 40, 100, 0.9), rgba(11, 16, 51, 0.92));
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--g-shadow);
-  color: var(--g-text);
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: inset 0 -4px 0 #d9deef, 0 4px 0 var(--g-ink);
+  color: var(--g-ink);
 }
 
-/* ============ the menu frame: header and footer ============ */
+.g-bubble::after {
+  content: "";
+  position: absolute;
+  left: 26px;
+  bottom: -14px;
+  width: 20px;
+  height: 16px;
+  background: #fff;
+  border: var(--g-o) solid var(--g-ink);
+  border-top: 0;
+  clip-path: polygon(0 0, 100% 0, 10% 100%);
+  border-radius: 0 0 0 4px;
+}
+
+/* ============ the menu frame: a Smash-style header and footer ============ */
 .g-crumb {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  height: 56px;
-  padding: 0 28px 0 16px;
-  border-bottom: 1px solid var(--g-edge);
-  background: linear-gradient(90deg, rgba(6, 9, 25, 0.8), rgba(6, 9, 25, 0.45) 60%, transparent);
+  align-items: stretch;
+  height: 60px;
+  filter: drop-shadow(0 4px 0 rgba(27, 29, 58, 0.35));
 }
 
 .g-crumb__mark {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 92px;
+  padding-right: 16px;
+  background: var(--g-ink);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%);
 }
 
 .g-crumb__mark .g-ico {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
 }
 
 .g-crumb__trail {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  margin-left: -18px;
+  padding: 0 64px 0 38px;
+  background: linear-gradient(180deg, #ffffff, #d7dcea);
+  clip-path: polygon(22px 0, 100% 0, calc(100% - 26px) 100%, 0 100%);
+  box-shadow: inset 0 -5px 0 #b3bbd2;
   font-family: var(--g-body);
-  font-size: 0.8rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--g-mute);
+  color: #3a3f6b;
   white-space: nowrap;
 }
 
 .g-crumb__trail b {
   font-family: var(--g-display);
-  font-size: 1.35rem;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  color: var(--g-text);
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .g-crumb__sep {
-  color: var(--g-yellow);
+  color: var(--g-blue);
+  font-weight: 700;
 }
 
 .g-foot {
   display: flex;
   align-items: center;
-  min-height: 56px;
-  padding: 0 28px;
-  border-top: 1px solid var(--g-edge);
-  background: rgba(6, 9, 25, 0.72);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  min-height: 52px;
+  padding: 0 28px 4px;
+  background: linear-gradient(180deg, #e9ecf5, #cfd5e6);
+  border-top: var(--g-o) solid var(--g-ink);
+  box-shadow: inset 0 3px 0 #fff;
   font-family: var(--g-body);
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   font-weight: 600;
-  color: var(--g-soft);
+  color: var(--g-ink);
 }
 
-/* ============ big menu tiles ============
-   Navy, like every other surface; the tone lives in the icon well, a
-   glow in the corner and the edge on hover. */
+/* ============ big menu tiles ============ */
 .g-tile {
   --hi: var(--g-green-hi);
   --base: var(--g-green);
@@ -606,125 +602,144 @@
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 16px;
-  min-height: 104px;
-  padding: 18px 20px;
+  align-items: end;
+  min-height: 150px;
+  padding: 18px 22px 22px;
   overflow: hidden;
-  border: 1px solid var(--g-edge);
-  border-radius: 16px;
+  border: 5px solid var(--g-ink);
+  border-radius: 24px 70px 24px 24px;
   background:
-    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--base) 26%, transparent), transparent 55%),
-    linear-gradient(180deg, var(--g-navy-hi), var(--g-navy-lo));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--g-shadow);
-  color: var(--g-text);
-  text-align: left;
+    linear-gradient(160deg, transparent 0 58%, rgba(255, 255, 255, 0.28) 58% 72%, transparent 72%),
+    linear-gradient(180deg, var(--hi), var(--base) 55%, var(--lo));
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.4), inset 0 -8px 0 rgba(0, 0, 0, 0.16), 0 6px 0 var(--g-ink);
+  color: #fff;
+  text-align: right;
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.g-tile::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 18px;
-  bottom: 18px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--base);
+  transition: transform 0.14s cubic-bezier(0.22, 1.4, 0.36, 1), box-shadow 0.14s ease;
 }
 
 .g-tile__icon {
+  align-self: start;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, var(--hi) -40%, var(--base) 50%, var(--lo) 140%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 18px -8px var(--base);
+  width: 64px;
+  height: 64px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 18px;
+  background: rgba(27, 29, 58, 0.28);
   color: #fff;
 }
 
 .g-tile__icon svg {
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 3px 0 var(--g-ink));
 }
 
 .g-tile__label {
   font-family: var(--g-display);
-  font-size: 1.7rem;
-  font-style: italic;
-  font-weight: 800;
-  line-height: 1;
-  text-transform: uppercase;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  line-height: 0.95;
+  color: #fff;
+  -webkit-text-stroke: 8px var(--g-ink);
+  paint-order: stroke fill;
+  text-shadow: 0 4px 0 var(--g-ink);
 }
 
 .g-tile__meta {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 16px;
+  right: 30px;
 }
 
+/* the highlighted tile wears the menu's selection aura */
 .g-tile:hover,
 .g-tile:focus-visible {
-  transform: translateY(-2px);
-  border-color: var(--base);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px var(--g-ink), 0 0 0 4px color-mix(in srgb, var(--base) 25%, transparent),
-    0 20px 40px -18px rgba(0, 0, 0, 0.8);
+  transform: scale(1.03);
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.4), inset 0 -8px 0 rgba(0, 0, 0, 0.16), 0 6px 0 var(--g-ink),
+    0 0 0 6px rgba(255, 255, 255, 0.85), 0 0 0 12px rgba(20, 116, 224, 0.55);
   outline: none;
 }
 
 .g-tile:active {
-  transform: translateY(0);
+  transform: scale(1.01) translateY(3px);
+}
+
+/* ============ the bright ground behind full-screen menus ============ */
+.g-ground {
+  background:
+    /* big soft shapes drifting across the sky, like a menu wallpaper */
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.5) 0 70px, transparent 71px),
+    radial-gradient(circle at 88% 78%, rgba(255, 255, 255, 0.35) 0 110px, transparent 111px),
+    repeating-linear-gradient(
+      -35deg,
+      transparent 0 60px,
+      rgba(255, 255, 255, 0.12) 60px 120px
+    ),
+    radial-gradient(130% 100% at 50% 20%, #9fe0ff 0%, #4fb4f5 45%, #1f7fdc 100%);
 }
 
 .g-ico {
   display: block;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .g-pip.is-live,
+  .g-star.is-on {
+    animation: none;
+  }
+
+  .g-tile,
+  .g-toggle i {
+    transition: none;
+  }
+}
+
 /* ============ the burst ground ============
-   Full-screen menus stand on a deep, dark burst: rays barely lighter than
-   the base, a faint halftone, two thin streaks and a coloured glow behind
-   the centre. It gives the screens motion and depth without competing
-   with the navy panels on top of it. */
+   The full-screen menus stand on a comic-book burst: a bright base, two
+   layers of rays (soft wedges far back, lightning spikes in front), a
+   halftone wash, two speed streaks and a pale glow at the centre so the
+   content in the middle always has the calmest part of the picture
+   behind it. Each screen picks a colour family: blue to choose, purple to
+   pause, yellow to celebrate, red for a wicket. */
 .g-burst {
-  --b-base: #0a1440;
-  --b-far: rgba(90, 140, 255, 0.05);
-  --b-near: rgba(40, 90, 230, 0.18);
-  --b-dots: rgba(120, 160, 255, 0.12);
-  --b-streak: rgba(120, 170, 255, 0.35);
-  --b-glow: rgba(40, 110, 255, 0.45);
+  --b-base: #3fb0ff;
+  --b-far: rgba(255, 255, 255, 0.16);
+  --b-near: #1c86ea;
+  --b-dots: rgba(255, 255, 255, 0.22);
+  --b-streak: rgba(255, 255, 255, 0.55);
+  --b-glow: rgba(210, 240, 255, 0.85);
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: radial-gradient(120% 90% at 50% 45%, color-mix(in srgb, var(--b-base) 70%, #fff 6%), var(--b-base) 60%, #03051a);
+  background: var(--b-base);
 }
 
 .g-burst--purple {
-  --b-base: #150b3d;
-  --b-far: rgba(160, 110, 255, 0.05);
-  --b-near: rgba(120, 60, 240, 0.2);
-  --b-dots: rgba(180, 140, 255, 0.12);
-  --b-streak: rgba(200, 160, 255, 0.35);
-  --b-glow: rgba(140, 70, 255, 0.45);
+  --b-base: #8b3bea;
+  --b-far: rgba(255, 255, 255, 0.12);
+  --b-near: #6a1dbb;
+  --b-dots: rgba(250, 198, 2, 0.55);
+  --b-streak: rgba(250, 226, 60, 0.85);
+  --b-glow: rgba(214, 170, 255, 0.8);
 }
 
 .g-burst--yellow {
-  --b-base: #16103a;
-  --b-far: rgba(255, 210, 120, 0.04);
-  --b-near: rgba(255, 190, 60, 0.12);
-  --b-dots: rgba(255, 200, 80, 0.12);
-  --b-streak: rgba(255, 210, 120, 0.35);
-  --b-glow: rgba(255, 180, 50, 0.35);
+  --b-base: #ffd21f;
+  --b-far: rgba(255, 255, 255, 0.28);
+  --b-near: #ffa800;
+  --b-dots: rgba(255, 138, 0, 0.35);
+  --b-streak: rgba(255, 255, 255, 0.7);
+  --b-glow: rgba(255, 246, 200, 0.9);
 }
 
 .g-burst--red {
-  --b-base: #1c0a26;
-  --b-far: rgba(255, 120, 140, 0.04);
-  --b-near: rgba(255, 70, 100, 0.13);
-  --b-dots: rgba(255, 110, 130, 0.12);
-  --b-streak: rgba(255, 140, 160, 0.3);
-  --b-glow: rgba(255, 60, 90, 0.35);
+  --b-base: #ff5a4f;
+  --b-far: rgba(255, 255, 255, 0.14);
+  --b-near: #d42a33;
+  --b-dots: rgba(255, 214, 90, 0.4);
+  --b-streak: rgba(255, 230, 150, 0.75);
+  --b-glow: rgba(255, 200, 190, 0.8);
 }
 
 .g-burst__rays {
@@ -734,7 +749,7 @@
   width: 170vmax;
   height: 170vmax;
   translate: -50% -50%;
-  animation: gSpin 200s linear infinite;
+  animation: gSpin 120s linear infinite;
 }
 
 .g-burst__far path {
@@ -745,37 +760,40 @@
   fill: var(--b-near);
 }
 
+/* halftone, heaviest in two opposite corners like a printed comic panel */
 .g-burst__dots {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, var(--b-dots) 0 1.4px, transparent 1.8px) 0 0 / 10px 10px;
-  -webkit-mask-image: linear-gradient(135deg, #000 0%, transparent 32%, transparent 68%, #000 100%);
-  mask-image: linear-gradient(135deg, #000 0%, transparent 32%, transparent 68%, #000 100%);
+  background: radial-gradient(circle, var(--b-dots) 0 2.2px, transparent 2.6px) 0 0 / 12px 12px;
+  -webkit-mask-image: linear-gradient(135deg, #000 0%, transparent 38%, transparent 62%, #000 100%);
+  mask-image: linear-gradient(135deg, #000 0%, transparent 38%, transparent 62%, #000 100%);
 }
 
 .g-burst__streak {
   position: absolute;
-  width: 50vmax;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--b-streak) 50%, transparent);
+  width: 60vmax;
+  height: 3vmax;
+  background: linear-gradient(90deg, transparent, var(--b-streak) 40%, transparent);
   rotate: -28deg;
+  opacity: 0.8;
 }
 
 .g-burst__streak--a {
-  left: -8vmax;
-  top: 22%;
+  left: -10vmax;
+  top: 18%;
 }
 
 .g-burst__streak--b {
-  right: -12vmax;
-  bottom: 20%;
+  right: -14vmax;
+  bottom: 16%;
+  height: 5vmax;
 }
 
 .g-burst__glow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(closest-side at 50% 50%, var(--b-glow), transparent 80%);
-  opacity: 0.6;
+  background: radial-gradient(closest-side at 50% 50%, var(--b-glow), transparent 75%);
+  opacity: 0.55;
 }
 
 @keyframes gSpin {
@@ -785,15 +803,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .g-burst__rays,
-  .g-pip.is-live,
-  .g-star.is-on {
+  .g-burst__rays {
     animation: none;
-  }
-
-  .g-tile,
-  .g-toggle i {
-    transition: none;
   }
 }
 
@@ -960,6 +971,60 @@
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* ============ additions: dark panels, a quiet button, labels, the mark ============ */
+
+/* the speech panel is navy, not white: white read as a sticker on the
+   scene and fought everything else on screen */
+.g-bubble {
+  background: linear-gradient(180deg, var(--g-navy-hi), var(--g-navy) 45%, var(--g-navy-lo));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.14), inset 0 -5px 0 rgba(0, 0, 0, 0.2), 0 4px 0 var(--g-ink);
+  color: var(--g-text);
+}
+
+.g-bubble::after {
+  background: var(--g-navy-lo);
+}
+
+/* a HUD panel over the live scene: the kit's navy panel, a touch see-through */
+.g-glass {
+  position: relative;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(64, 67, 108, 0.94), rgba(43, 47, 92, 0.94) 40%, rgba(31, 34, 72, 0.96));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.16), inset 0 -5px 0 rgba(0, 0, 0, 0.18), 0 5px 0 var(--g-ink),
+    0 14px 28px -14px rgba(10, 12, 40, 0.6);
+  color: var(--g-text);
+}
+
+/* the second action beside a green one */
+.g-btn--ghost {
+  --hi: var(--g-navy-hi);
+  --base: var(--g-navy);
+  --lo: var(--g-navy-lo);
+}
+
+.g-label {
+  font-family: var(--g-body);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--g-mute);
+}
+
+/* the Aayush Visuals mark takes the ink of whatever it sits on */
+.av-mark {
+  color: #fff;
+}
+
+.g-crumb__mark .av-mark {
+  width: 44px;
+  height: auto;
+}
+
 /* ============ tone: one knob that recolours any kit piece ============
    Last in the file on purpose: every piece declares its own default
    colour, and a tone has to win over that default at equal specificity. */
@@ -971,13 +1036,3 @@
 .g-tone--red { --hi: var(--g-red-hi); --base: var(--g-red); --lo: var(--g-red-lo); }
 .g-tone--navy { --hi: var(--g-navy-hi); --base: var(--g-navy); --lo: var(--g-navy-lo); }
 .g-tone--team { --hi: var(--g-team-hi); --base: var(--g-team); --lo: var(--g-team-lo); }
-
-/* the Aayush Visuals mark takes the ink of whatever it sits on */
-.av-mark {
-  color: #fff;
-}
-
-.g-crumb__mark .av-mark {
-  width: 34px;
-  height: auto;
-}

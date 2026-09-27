@@ -1,4 +1,4 @@
-import { Anton, Barlow, Barlow_Condensed, Bungee, Knewave } from "next/font/google";
+import { Anton, Bungee, Fredoka, Knewave, Lilita_One } from "next/font/google";
 import localFont from "next/font/local";
 
 /*
@@ -32,20 +32,20 @@ const anton = Anton({
 /*
   The game kit's two faces (see kit.css).
 
-  Barlow Condensed, heavy and italic, is the sports display face - the
-  lettering of a football game's menus and a broadcast's lower thirds -
-  for titles, buttons and every number. Barlow is its text partner for
-  labels, hints and commentary.
+  Lilita One is the chunky, rounded display face every casual game uses for
+  its buttons, titles and numbers, and it is set the way those games set it:
+  white, with a thick navy outline and a hard drop. Fredoka is the rounded
+  face for the small print - labels, hints, commentary - so even the quiet
+  text is soft-cornered like the rest of the kit.
 */
-const barlowCond = Barlow_Condensed({
+const lilita = Lilita_One({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  style: ["normal", "italic"],
+  weight: "400",
   display: "swap",
   variable: "--ckt-game",
 });
 
-const barlow = Barlow({
+const fredoka = Fredoka({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   display: "swap",
@@ -90,7 +90,7 @@ const gimora = localFont({
 
 export default function CricketLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${anton.variable} ${bungee.variable} ${barlowCond.variable} ${barlow.variable} ${knewave.variable} ${gimora.variable}`}>
+    <div className={`${anton.variable} ${bungee.variable} ${lilita.variable} ${fredoka.variable} ${knewave.variable} ${gimora.variable}`}>
       {children}
     </div>
   );

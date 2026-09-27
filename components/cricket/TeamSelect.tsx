@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useState } from "react";
 import TeamCard from "./TeamCard";
-import { AVMark, Burst } from "./kit";
+import { AVMark, Burst, Hex } from "./kit";
 import { TEAMS, type Team } from "./teams";
 
 /*
@@ -69,8 +69,8 @@ export default function TeamSelect({ onPick, reduced }: Props) {
           {TEAMS.map((team, i) => (
             <Fragment key={team.id}>
               {i === 1 && (
-                <span className="g-title pk__vs" aria-hidden>
-                  VS
+                <span className="pk__vs" aria-hidden>
+                  <Hex tone="red">VS</Hex>
                 </span>
               )}
               <TeamCard
