@@ -783,36 +783,36 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-left: 10px;
-  padding: 4px 9px;
+  margin-left: 8px;
+  padding: 3px 8px;
   border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.06em;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  vertical-align: 0.3em;
+  vertical-align: 0.35em;
   white-space: nowrap;
 }
 
+/* soft tints of each experiment's own colour, not a loud fill */
 .pgBadge--hot {
-  background: linear-gradient(135deg, #ff7a18, #ff3d6e);
-  color: #fff;
-  box-shadow: 0 4px 12px -4px rgba(255, 61, 110, 0.6);
+  background: rgba(124, 58, 237, 0.1);
+  color: #6d28d9;
 }
 
 .pgBadge--hot::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #fff;
-  animation: pgBadgePulse 1.4s ease-in-out infinite;
+  background: #7c3aed;
+  animation: pgBadgePulse 1.8s ease-in-out infinite;
 }
 
 .pgBadge--new {
-  background: #1f1f1f;
-  color: #ffcd11;
+  background: rgba(214, 160, 0, 0.14);
+  color: #7a5a00;
 }
 
 @keyframes pgBadgePulse {
