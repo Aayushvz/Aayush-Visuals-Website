@@ -12,11 +12,10 @@ import { BoltIcon } from "./gameIcons";
   near-zero and reads as a loss — so crossing the threshold fires an explicit
   flourish.
 
-  The level now sits on a gold medallion beside the meter rather than as a
-  line of text above it, which is the arcade kit's own arrangement: the
-  number you have earned is an object, the progress toward the next one is
-  a track. It also fixes a real legibility problem — "LVL 7" set at 0.68rem
-  was the smallest type in the game and the thing a player checks most.
+  The level is a plate of its own beside the meter rather than a line of
+  text above it: the number you have earned is an object, the progress
+  toward the next one is a track. "LVL 7" set at 0.68rem used to be the
+  smallest type in the game and it is the thing a player checks most.
 */
 export default function XpBar({
   xp,
@@ -34,21 +33,23 @@ export default function XpBar({
 
   return (
     <div className="cktXp" aria-label={`Level ${level}, ${intoLevel} of ${LEVEL_STEP} XP`}>
-      <span className="gk-star cktXp__medal" aria-hidden>
+      <span className="cktXp__lvl" aria-hidden>
+        <small>Lvl</small>
         {level}
       </span>
 
       <div className="cktXp__meter">
         <div className="cktXp__top">
-          <span className="cktXp__label">Level {level}</span>
+          <span className="cktXp__label">Creative XP</span>
           <span className="cktXp__count">
-            {intoLevel}/{LEVEL_STEP}
+            {intoLevel}
+            <small>/{LEVEL_STEP}</small>
           </span>
         </div>
 
-        <div className="gk-meter gk-pips cktXp__track">
+        <div className="cktXp__track">
           <motion.div
-            className="gk-meter__fill cktXp__fill"
+            className="cktXp__fill"
             initial={false}
             animate={{ width: `${Math.max(2, frac * 100)}%` }}
             transition={

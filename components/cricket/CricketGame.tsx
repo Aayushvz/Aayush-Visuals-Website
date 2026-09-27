@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageLink from "@/components/PageLink";
 import { OVER, clamp, resolveShot, runUpDelay, verdict } from "./engine";
-import type { Delivery, ShotResult } from "./engine";
+import type { Contact, Delivery, ShotResult } from "./engine";
 import { isMuted, playCrowd, playHit, playRelease, playStumps, setMuted, unlockAudio } from "./sound";
 import {
   buildScene,
@@ -31,6 +31,8 @@ import ComboPill from "./ComboPill";
 import XpBar from "./XpBar";
 import Avatar from "./Avatar";
 import Ticker from "./Ticker";
+import { createClock } from "./clock";
+import { teamById } from "./teams";
 import "./cricket.css";
 
 /*
@@ -90,11 +92,15 @@ export default function CricketGame({
     score: null,
   });
   const [menuOpen, setMenuOpen] = useState(false);
+  /* the match's own time: see clock.ts. One per mounted match. */
+  const [clock] = useState(createClock);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [ballIdx, setBallIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [plots, setPlots] = useState<Plot[]>([]);
+  /* every ball's outcome in order, for the over tracker */
+  const [overLog, setOverLog] = useState<Contact[]>([]);
   const [last, setLast] = useState<ShotResult | null>(null);
   const [out, setOut] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -147,11 +153,7 @@ export default function CricketGame({
     setXp(readProgress().xp);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (shoutTimerRef.current) window.clearTimeout(shoutTimerRef.current);
-    };
-  }, []);
+  useEffect(() => () => clock.dispose(), [clock]);
 
   const setPhaseBoth = useCallback((p: Phase) => {
     phaseRef.current = p;
@@ -194,22 +196,23 @@ export default function CricketGame({
       /* the run-up's own clock, so the nine-phase delivery cycle can be
          driven by real progress toward the release rather than by a loop
          that has no idea when the ball is due */
-      runUpStartRef.current = performance.now();
+      runUpStartRef.current = clock.now();
       runUpMsRef.current = delay;
-      window.setTimeout(() => {
+      clock.setTimeout(() => {
         /* the player may have left, or restarted, during the run-up */
         if (phaseRef.current !== "runup") return;
-        releaseAtRef.current = performance.now();
+        releaseAtRef.current = clock.now();
         setPhaseBoth("flight");
         playRelease();
       }, delay);
     },
-    [setPhaseBoth]
+    [setPhaseBoth, clock]
   );
 
   const finishBall = useCallback(
     (result: ShotResult) => {
       setLast(result);
+      setOverLog((l) => [...l, result.contact]);
       setPhaseBoth("resolved");
 
       /* ---- reward, combo and XP, before the wicket early-return so a
@@ -226,8 +229,8 @@ export default function CricketGame({
         xp: gained,
         xpLabel: xpLabel(result.contact),
       });
-      if (shoutTimerRef.current) window.clearTimeout(shoutTimerRef.current);
-      shoutTimerRef.current = window.setTimeout(() => setShout(null), 1900);
+      clock.clearTimeout(shoutTimerRef.current);
+      shoutTimerRef.current = clock.setTimeout(() => setShout(null), 1900);
 
       comboRef.current = extendsCombo(result.contact) ? comboRef.current + 1 : 0;
       setCombo(comboFor(comboRef.current));
@@ -236,7 +239,7 @@ export default function CricketGame({
         const next = prev + gained;
         if (levelFor(next) > levelFor(prev)) {
           setLevelUp(levelFor(next));
-          window.setTimeout(() => setLevelUp(null), 2200);
+          clock.setTimeout(() => setLevelUp(null), 2200);
         }
         writeProgress(next);
         return next;
@@ -250,12 +253,12 @@ export default function CricketGame({
         /* the ball's own line decides which way the timber goes, so the
            bails follow the delivery rather than always flying the same way */
         wicketRef.current = breakWicket(
-          performance.now(),
+          clock.now(),
           deliveryRef.current.swing * 6 + aimRef.current * 0.35
         );
         playStumps();
         setOut(true);
-        window.setTimeout(() => setPhaseBoth("over"), 1500);
+        clock.setTimeout(() => setPhaseBoth("over"), 1500);
         return;
       }
 
@@ -269,12 +272,12 @@ export default function CricketGame({
       if (result.contact === "six" && !reducedRef.current) shakeRef.current = 1;
 
       const next = ballIdx + 1;
-      window.setTimeout(() => {
+      clock.setTimeout(() => {
         if (next >= BALLS) setPhaseBoth("over");
         else bowl(next);
       }, 1600);
     },
-    [ballIdx, bowl, setPhaseBoth]
+    [ballIdx, bowl, setPhaseBoth, clock]
   );
 
   /*
@@ -284,6 +287,7 @@ export default function CricketGame({
   const swing = useCallback(() => {
     unlockAudio();
 
+    if (clock.paused) return;
     if (phaseRef.current === "idle" || phaseRef.current === "over") return;
     if (phaseRef.current !== "flight" || swungRef.current) return;
 
@@ -291,7 +295,7 @@ export default function CricketGame({
     swingAnimRef.current = 0.0001;
     const delivery = deliveryRef.current;
     const ideal = releaseAtRef.current + delivery.travelMs;
-    const offset = performance.now() - ideal;
+    const offset = clock.now() - ideal;
     const result = resolveShot(delivery, offset, aimRef.current);
     /* a six gets the lofted follow-through, a four the horizontal drive;
        everything else — including the ball that takes the stumps — plays the
@@ -301,13 +305,13 @@ export default function CricketGame({
 
     if (result.contact !== "wicket") {
       shotRef.current = {
-        at: performance.now(),
+        at: clock.now(),
         dir: result.direction,
         power: result.runs >= 6 ? 1 : result.runs >= 4 ? 0.75 : 0.45,
       };
     }
     finishBall(result);
-  }, [finishBall]);
+  }, [finishBall, clock]);
 
   /* native share sheet where the device has one, clipboard everywhere else */
   const [shared, setShared] = useState(false);
@@ -330,6 +334,7 @@ export default function CricketGame({
     unlockAudio();
     setScore(0);
     setPlots([]);
+    setOverLog([]);
     setOut(false);
     setLast(null);
     /* per-over counters reset; lifetime XP deliberately does not */
@@ -363,6 +368,12 @@ export default function CricketGame({
       swing();
     };
     const onKey = (e: KeyboardEvent) => {
+      if (clock.paused) return;
+      /* Escape pauses; the pause screen's own handler takes it from there */
+      if (e.key === "Escape") {
+        setMenuOpen(true);
+        return;
+      }
       if (e.key === "ArrowLeft") {
         aimRef.current = clamp(aimRef.current - 0.18, -1, 1);
         e.preventDefault();
@@ -389,7 +400,7 @@ export default function CricketGame({
       stage.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("keydown", onKey);
     };
-  }, [swing]);
+  }, [swing, clock]);
 
   /*
     A ball that arrives and is ignored is out, not a free pass. Checked on a
@@ -399,14 +410,14 @@ export default function CricketGame({
   useEffect(() => {
     if (phase !== "flight") return;
     const d = deliveryRef.current;
-    const id = window.setTimeout(() => {
+    const id = clock.setTimeout(() => {
       if (phaseRef.current === "flight" && !swungRef.current) {
         swungRef.current = true;
         finishBall(resolveShot(d, null, 0));
       }
     }, d.travelMs + d.windows.contact + 40);
-    return () => window.clearTimeout(id);
-  }, [phase, finishBall]);
+    return () => clock.clearTimeout(id);
+  }, [phase, finishBall, clock]);
 
   /* ---------------- rendering ---------------- */
 
@@ -437,10 +448,14 @@ export default function CricketGame({
     const ro = new ResizeObserver(resize);
     ro.observe(stage);
 
-    const draw = (now: number) => {
+    const draw = () => {
       rafRef.current = requestAnimationFrame(draw);
       const scene = sceneRef.current;
       if (!scene) return;
+      /* game time, not frame time: it stands still while the match is
+         paused, and so does everything drawn from it */
+      const now = clock.now();
+      const paused = clock.paused;
       const d = deliveryRef.current;
       const phase = phaseRef.current;
       const horizon = scene.horizon;
@@ -448,7 +463,7 @@ export default function CricketGame({
       const cx = scene.cx;
 
       ctx.save();
-      if (shakeRef.current > 0.01) {
+      if (shakeRef.current > 0.01 && !paused) {
         const s = shakeRef.current * 8;
         ctx.translate((Math.random() - 0.5) * s, (Math.random() - 0.5) * s);
         shakeRef.current *= 0.88;
@@ -497,7 +512,7 @@ export default function CricketGame({
       if (phase === "flight" || (phase === "resolved" && !shotRef.current)) {
         const p = clamp((now - releaseAtRef.current) / d.travelMs, 0, 1.12);
         const pos = ballAt(p, d, w, h, horizon, batY, cx);
-        pushTrail(trailRef.current, pos, reducedRef.current);
+        if (!paused) pushTrail(trailRef.current, pos, reducedRef.current);
         paintTrail(ctx, trailRef.current);
         paintBall(ctx, pos);
       }
@@ -508,13 +523,13 @@ export default function CricketGame({
         const x = cx + st.dir * w * 0.95 * t;
         const y = batY - Math.sin(t * Math.PI) * h * (0.4 + st.power * 0.45) - t * h * 0.22;
         const r = 14 * (1 - t * 0.8);
-        pushTrail(trailRef.current, { x, y, r }, reducedRef.current);
+        if (!paused) pushTrail(trailRef.current, { x, y, r }, reducedRef.current);
         paintTrail(ctx, trailRef.current);
         if (t < 1) paintBall(ctx, { x, y, r });
       }
 
       /* the batter eases into the follow through, then holds it */
-      if (swingAnimRef.current > 0) swingAnimRef.current = Math.min(1, swingAnimRef.current + 0.11);
+      if (swingAnimRef.current > 0 && !paused) swingAnimRef.current = Math.min(1, swingAnimRef.current + 0.11);
       /* the delivery's own line, so the stroke is played at the ball rather
          than at the same patch of turf six times an over */
       paintBatter(
@@ -540,7 +555,7 @@ export default function CricketGame({
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
-  }, []);
+  }, [clock]);
 
   const toggleMute = () => {
     const next = !muted;
@@ -551,11 +566,37 @@ export default function CricketGame({
   useEffect(() => setMutedState(isMuted()), []);
 
   /*
-    Dismiss the menu on an outside click or Escape.
+    The pause screen stops the match.
 
-    Escape is bound at capture so it closes the menu before the game's own
-    key handling sees it — otherwise the same press that shuts the popover
-    would also fall through to the match.
+    Opening it freezes the game clock, so the ball in the air, the run-up,
+    the gap before the next delivery and any card waiting to clear all hold
+    exactly where they are, and closing it picks every one of them up with
+    the time it had left.
+  */
+  useEffect(() => {
+    if (menuOpen) clock.pause();
+    else clock.resume();
+  }, [menuOpen, clock]);
+
+  /* a match left running in a background tab pauses itself: coming back to
+     a wicket you never saw fall is not a fair way to lose one */
+  useEffect(() => {
+    const onVis = () => {
+      const p = phaseRef.current;
+      if (document.hidden && (p === "runup" || p === "flight" || p === "resolved")) {
+        setMenuOpen(true);
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
+  /*
+    Close on a click outside the panel, and the pause screen's keys.
+
+    Bound at capture so Escape closes the screen before the game's own key
+    handling sees it - otherwise the press that resumes would also reach
+    the match and open the screen again.
   */
   useEffect(() => {
     if (!menuOpen) return;
@@ -563,9 +604,18 @@ export default function CricketGame({
       if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      setMenuOpen(false);
+      const k = e.key.toLowerCase();
+      if (k === "escape") {
+        e.stopPropagation();
+        setMenuOpen(false);
+      } else if (k === "r" && !e.metaKey && !e.ctrlKey) {
+        e.stopPropagation();
+        setMenuOpen(false);
+        start();
+      } else if (k === "m" && !e.metaKey && !e.ctrlKey) {
+        e.stopPropagation();
+        toggleMute();
+      }
     };
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("keydown", onKey, true);
@@ -573,7 +623,7 @@ export default function CricketGame({
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("keydown", onKey, true);
     };
-  }, [menuOpen]);
+  });
 
   /*
     Mirror the score into the ref the paint loop reads.
@@ -639,357 +689,351 @@ export default function CricketGame({
   /* runs per hundred balls, the standard cricket figure */
   const strikeRate = ballsFaced > 0 ? Math.round((score / ballsFaced) * 100) : 0;
 
+  const side = teamById(team);
+  const commentary = last
+    ? last.commentary
+    : phase === "flight"
+      ? "Watch it."
+      : phase === "runup"
+        ? "In his run-up."
+        : phase === "idle"
+          ? "Middle and leg, and settle in."
+          : "";
+  /* the ball in hand, for the tracker's live pip and the pause screen */
+  const live = phase === "runup" || phase === "flight" ? ballIdx : -1;
+  const ballsShown = out || phase === "over" ? ballsFaced : Math.min(BALLS, ballIdx + (phase === "idle" ? 0 : 1));
+
   return (
-    <div className="ckt" data-phase={phase}>
+    <div className="ckt" data-phase={phase} data-paused={menuOpen || undefined}>
       <div className="ckt-stage" ref={stageRef}>
         <canvas ref={canvasRef} className="ckt-canvas" aria-hidden="true" />
       </div>
 
-      <PageLink className="ckt-glass ckt-brand" href="/">
-        <Avatar className="ckt-brand__face" />
-        <span className="ckt-brand__name">Aayush VZ</span>
+      {/* ---- top left: who is batting ---- */}
+      <PageLink className="hud hud-id" href="/">
+        <Avatar className="hud-id__face" />
+        <span className="hud-id__text">
+          <span className="hud-id__role">At the crease</span>
+          <span className="hud-id__name">Aayush VZ</span>
+        </span>
       </PageLink>
 
-      <div className="ckt-glass ckt-board" role="status" aria-live="polite">
-        <span className="ckt-score">
+      {/*
+        ---- top centre: the score bug ----
+
+        Set the way a broadcast sets it: the batting side on its own colour,
+        the total, then this over ball by ball. The six pips replace the
+        "Balls 2/6" fraction - they carry the count AND what happened on
+        each one, which is the thing a cricket viewer actually glances up
+        for.
+      */}
+      <div
+        className="hud hud-bug"
+        role="status"
+        aria-live="polite"
+        aria-label={`${side.name} ${score} for ${out ? 1 : 0}, ball ${Math.max(1, ballsShown)} of ${BALLS}`}
+      >
+        <span className="hud-bug__team">{side.abbr}</span>
+        <span className="hud-bug__score">
           <Ticker value={score} reduced={reduced} />
-          <span className="ckt-score-sub">{out ? "-1" : "-0"}</span>
+          <span className="hud-bug__wkts">-{out ? 1 : 0}</span>
         </span>
-        <span className="ckt-divider" aria-hidden="true" />
-        <span className="ckt-meta">
-          <span className="ckt-meta-label">Balls</span>
-          <span className="ckt-meta-value">
-            {out || phase === "over" ? BALLS : ballIdx + (phase === "idle" ? 0 : 1)}/{BALLS}
-          </span>
+        <span className="hud-bug__block hud-bug__block--over">
+          <span className="hud-label">This over</span>
+          <OverPips log={overLog} live={live} />
         </span>
-        <span className="ckt-divider" aria-hidden="true" />
-        <span className="ckt-meta">
-          <span className="ckt-meta-label">Strike rate</span>
-          <span className="ckt-meta-value">
+        <span className="hud-bug__block hud-bug__block--sr">
+          <span className="hud-label">Strike rate</span>
+          <span className="hud-bug__value">
             <Ticker value={strikeRate} reduced={reduced} />
           </span>
         </span>
-        <span className="ckt-divider" aria-hidden="true" />
-        <span className="ckt-meta">
-          <span className="ckt-meta-label">Bowling</span>
-          <span className="ckt-meta-value">{phase === "idle" ? "TO COME" : delivery.label}</span>
+        <span className="hud-bug__block hud-bug__block--ball">
+          <span className="hud-label">Delivery</span>
+          <span className="hud-bug__value">{phase === "idle" ? "To come" : delivery.label}</span>
         </span>
       </div>
 
-
-      <div className="ckt-controls">
+      {/* ---- top right: sound, pause, leave ---- */}
+      <div className="hud-ctrl">
         <button
           type="button"
-          className="ckt-icon"
+          className="hud-btn hud-btn--sound"
           onClick={toggleMute}
           aria-pressed={muted}
           aria-label={muted ? "Turn sound on" : "Turn sound off"}
-          title={muted ? "Sound off" : "Sound on"}
+          title={muted ? "Sound off (M)" : "Sound on (M)"}
         >
           {muted ? <MutedIcon /> : <SoundIcon />}
         </button>
-
-        {/*
-          Everything that changes the match rather than the moment lives
-          behind the gear: restarting and switching sides both throw away
-          an over in progress, and one mis-tap next to "leave" would do it
-          silently. Sound stays outside because it is the one control
-          people reach for mid-ball.
-        */}
-        <div className="ckt-menu" ref={menuRef}>
-          <button
-            type="button"
-            className="ckt-icon"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-            aria-label="Match settings"
-            title="Settings"
-          >
-            <GearIcon />
-          </button>
-
-          {menuOpen && (
-            <div className="ckt-glass ckt-menu__panel" role="menu">
-              <p className="gk-head ckt-menu__head">Match</p>
-
-              {/*
-                Resume, first and on its own.
-
-                The menu is full-screen now, so the gear that opened it is
-                no longer obviously the thing that closes it — at that
-                scale it reads as chrome, not as a toggle. Every pause
-                screen worth copying puts "continue" at the top of the
-                list, and it is the option most people reaching this screen
-                actually want.
-              */}
-              <button
-                type="button"
-                className="ckt-menu__item ckt-menu__item--resume"
-                role="menuitem"
-                onClick={() => setMenuOpen(false)}
-              >
-                <ResumeIcon />
-                Resume
-              </button>
-
-              <button
-                type="button"
-                className="ckt-menu__item"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  start();
-                }}
-              >
-                <ReplayIcon />
-                {phase === "idle" ? "Start the over" : "Restart the over"}
-              </button>
-
-              <button
-                type="button"
-                className="ckt-menu__item"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onSwitchTeam?.();
-                }}
-              >
-                <SwapIcon />
-                Switch side
-              </button>
-
-              <button
-                type="button"
-                className="ckt-menu__item"
-                role="menuitem"
-                aria-pressed={muted}
-                onClick={toggleMute}
-              >
-                {muted ? <MutedIcon /> : <SoundIcon />}
-                {muted ? "Sound off" : "Sound on"}
-              </button>
-
-              <span className="ckt-menu__rule" aria-hidden />
-
-              <PageLink className="ckt-menu__item" href="/playground" role="menuitem">
-                <CloseIcon />
-                Leave the game
-              </PageLink>
-            </div>
-          )}
-        </div>
-
-        <PageLink className="ckt-icon" href="/playground" aria-label="Leave the game">
+        <button
+          type="button"
+          className="hud-btn"
+          onClick={() => setMenuOpen(true)}
+          aria-expanded={menuOpen}
+          aria-haspopup="dialog"
+          aria-label="Pause the match"
+          title="Pause (Esc)"
+        >
+          <PauseIcon />
+        </button>
+        <PageLink className="hud-btn" href="/playground" aria-label="Leave the game" title="Leave the game">
           <CloseIcon />
         </PageLink>
       </div>
 
       {phase !== "over" && <RewardCard shout={shout} reduced={reduced} />}
-      {/*
-        One transient overlay at a time.
-
-        The receipt and the streak chip occupy the same slot now, and both
-        are triggered by the same event — a shot that scored. Showing them
-        together stacked two cards on one spot; the receipt wins while it is
-        up, and the streak returns underneath it a second later, which also
-        reads better as a sequence than as a pile.
-      */}
+      {/* the receipt and the streak share one slot: the receipt wins while
+          it is up, and the streak returns under it a second later */}
       {phase !== "over" && !shout && <ComboPill combo={combo} reduced={reduced} />}
 
       {/*
-        Bottom-left is a stack, not two absolutely-positioned panels.
+        ---- bottom left: the commentary box ----
 
-        Both used to be pinned to the same corner with their own offsets,
-        which is fine exactly until one of them changes height — and the
-        commentary does, every ball, because the timing bar appears under
-        it after a shot. They overlapped. A flow column owns the corner and
-        the panels are ordinary blocks inside it, so their heights can
-        never collide.
+        A lower third, not a speech bubble: who is talking, what they said,
+        how the timing landed, and the level meter underneath. One column,
+        so the timing readout appearing under a shot pushes the meter down
+        instead of colliding with it.
       */}
-      <div className="ckt-dock">
-        <div className="ckt-glass ckt-say">
-        <Avatar className="ckt-say__face" />
-        <div className="ckt-say__body">
-        {/*
-          The bubble wraps the SPEECH only — the commentary and the timing
-          readout for the ball it describes. The level meter below is a
-          sibling, not a child: the mascot is not saying your XP total, and
-          when the meter was inside the bubble its medal (which hangs on a
-          negative margin) punched straight out through the bubble's edge.
-        */}
-        <div className="gk-bubble ckt-say__speech">
-        <p className="ckt-commentary">
-          {last
-            ? last.commentary
-            : phase === "flight"
-              ? "Watch it."
-              : phase === "runup"
-                ? "In his run-up."
-                : phase === "idle"
-                  ? "Middle and leg, and settle in."
-                  : ""}
-        </p>
+      <div className="hud hud-com">
+        <div className="hud-com__head">
+          <Avatar className="hud-com__face" />
+          <span className="hud-label hud-com__who">Commentary</span>
+          <span className="hud-com__onair" aria-hidden>
+            On air
+          </span>
+        </div>
+        <p className="hud-com__line">{commentary}</p>
 
         {last && last.contact !== "wicket" && (
-          <p className="ckt-timing">
+          <div className="hud-timing">
             <span
-              className="ckt-timing-bar"
+              className="hud-timing__track"
               style={
                 {
                   "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%`,
                 } as React.CSSProperties
               }
+              aria-hidden
             >
+              <span className="hud-timing__sweet" />
               <i />
             </span>
-            <span className="ckt-timing-label">
+            <span className="hud-timing__label">
               {Math.abs(last.offset) <= delivery.windows.perfect
-                ? "Perfect"
+                ? "Perfect timing"
                 : last.offset < 0
                   ? `${Math.round(-last.offset)}ms early`
                   : `${Math.round(last.offset)}ms late`}
             </span>
-          </p>
-        )}
-        </div>
-
-          {/*
-            The level meter shares the commentary panel rather than taking
-            a second one below it. They are always read together — what
-            just happened, and what it earned you — and two panels for one
-            thought is what made this corner crowded enough to collide in
-            the first place. It sits outside the bubble, though: see the
-            note on the speech wrapper above.
-          */}
-          <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
-        </div>
-        </div>
-      </div>
-
-      <div className="ckt-glass ckt-wheel">
-        <span className="ckt-wheel-label">Wagon wheel</span>
-        <Wagon plots={plots} />
-      </div>
-
-      {phase === "idle" && (
-        <div className="ckt-glass ckt-card">
-          <span className="gk-stars ckt-card__crown" aria-hidden>
-            <i />
-            <i />
-            <i />
-          </span>
-          <h1 className="gk-ribbon ckt-card__banner">
-            <span>Six balls.</span>
-            <span className="ckt-card__bannerGold">One innings.</span>
-          </h1>
-          <p className="ckt-rule">
-            Click, tap or press Space as the ball reaches you. Time it well for runs, and where
-            you aim decides where it goes. Get out and the over ends there.
-          </p>
-          <div className="ckt-actions">
-            <button type="button" className="ckt-cta" onClick={start}>
-              Take guard
-            </button>
           </div>
+        )}
+
+        <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
+      </div>
+
+      {/* ---- bottom right: the wagon wheel ---- */}
+      <div className="hud hud-wheel">
+        <span className="hud-label">Wagon wheel</span>
+        <Wagon plots={plots} />
+        <span className="hud-wheel__key" aria-hidden>
+          <i className="k1" />1<i className="k4" />4<i className="k6" />6
+        </span>
+      </div>
+
+      {/* ---- the start card ---- */}
+      {phase === "idle" && (
+        <div className="ckt-card ckt-card--intro" role="dialog" aria-labelledby="ckt-intro-title">
+          <div className="ckt-card__top">
+            <span className="ckt-card__tag">DPL</span>
+            <span className="ckt-card__meta">
+              {side.name} <b>batting</b>
+            </span>
+          </div>
+          <h1 className="ckt-card__title" id="ckt-intro-title">
+            Six balls.
+            <em>One innings.</em>
+          </h1>
+          <p className="ckt-card__body">
+            Play the shot as the ball reaches you. Timing decides the runs, your aim decides
+            where it goes, and a wicket ends the over on the spot.
+          </p>
+          <ul className="ckt-keys" aria-label="Controls">
+            <li>
+              <kbd>Space</kbd>
+              <span>Play the shot</span>
+            </li>
+            <li>
+              <kbd>←</kbd>
+              <kbd>→</kbd>
+              <span>Aim</span>
+            </li>
+            <li>
+              <kbd>Esc</kbd>
+              <span>Pause</span>
+            </li>
+          </ul>
+          <button type="button" className="ckt-btn ckt-btn--gold" onClick={start}>
+            Take guard
+            <ArrowIcon />
+          </button>
         </div>
       )}
 
-      {/*
-        The innings summary gets a ground of its own rather than floating
-        over the pitch.
-
-        A card over live play reads as an interruption you will come back
-        from. The over is finished — there is nothing behind it to return
-        to — so the pitch is covered and the summary sits on a surface
-        built for it. Its own element rather than a pseudo on the card,
-        because it has to paint BELOW the card and a pseudo-element cannot
-        escape its own parent's stacking context.
-      */}
+      {/* the finished innings gets a ground of its own: there is nothing
+          behind it to go back to, so the pitch is covered */}
       {phase === "over" && <div className="ckt-outro" aria-hidden />}
 
       {phase === "over" && (
-        <div className="ckt-glass ckt-card">
-          <span className="gk-stars ckt-card__crown" aria-hidden>
-            <i />
-            <i />
-            <i />
-          </span>
-          <p className="gk-head">{out ? "Over ended early" : "Over complete"}</p>
-          <h2 className="ckt-title ckt-title--result">{finalVerdict.title}</h2>
-          <p className="ckt-final">
-            {score} <span>off {out ? ballIdx + 1 : BALLS}</span>
-          </p>
-          <p className="ckt-rule">{finalVerdict.note}</p>
+        <div className="ckt-card ckt-card--over" role="dialog" aria-labelledby="ckt-over-title">
+          <div className="ckt-card__top">
+            <span className="ckt-card__tag">DPL</span>
+            <span className="ckt-card__meta">{out ? "Over ended early" : "Over complete"}</span>
+          </div>
 
-          <dl className="cktSummary">
+          <div className="ckt-card__result">
+            <h2 className="ckt-card__verdict" id="ckt-over-title">
+              {finalVerdict.title}
+            </h2>
+            <p className="ckt-card__final">
+              <b>{score}</b>
+              <span>off {out ? ballIdx + 1 : BALLS}</span>
+            </p>
+          </div>
+          <OverPips log={overLog} live={-1} />
+          <p className="ckt-card__body">{finalVerdict.note}</p>
+
+          <dl className="ckt-stats">
             {[
               ["Strike rate", String(strikeRate)],
               ["Fours", String(boundaries.fours)],
               ["Sixes", String(boundaries.sixes)],
-              ["Wickets lost", out ? "1" : "0"],
+              ["Wickets", out ? "1" : "0"],
             ].map(([k, v]) => (
-              <div className="cktSummary__cell" key={k}>
+              <div className="ckt-stats__cell" key={k}>
                 <dt>{k}</dt>
                 <dd>{v}</dd>
               </div>
             ))}
           </dl>
 
-          <div className="cktSummary__xp">
-            {/* awarded, not measured, so it takes the stub rather than
-                sitting as another line of text — see .gk-ticket */}
-            <span className="gk-ticket cktSummary__xpEarned">+{overXp} Creative XP</span>
+          <div className="ckt-card__xp">
+            <span className="ckt-card__earned">+{overXp} Creative XP</span>
             <XpBar xp={xp} levelUp={null} reduced={reduced} />
           </div>
 
-          {/*
-            Two ranked controls, then a link. The comps put the replay in
-            gold and the share in blue rather than making both the green
-            "go" — green in this kit means starting play, and neither of
-            these does that. Gold outranks blue because replaying is what
-            almost everyone reaching this card wants next.
-          */}
-          <div className="ckt-actions">
-            <button type="button" className="ckt-cta ckt-cta--gold" onClick={start}>
+          <div className="ckt-card__actions">
+            <button type="button" className="ckt-btn ckt-btn--gold" onClick={start}>
+              <ReplayIcon />
               Play again
             </button>
-            <button type="button" className="ckt-cta ckt-cta--blue" onClick={share}>
+            <button type="button" className="ckt-btn ckt-btn--line" onClick={share}>
               <ShareIcon />
               {shared ? "Copied" : "Share score"}
             </button>
           </div>
 
-          {/*
-            The way out of the game is a control now, not a ruled caption.
-
-            It was styled as a section header, which made the one link that
-            leaves for the actual portfolio the quietest thing on the card —
-            below even the run-out summary. It gets a cap of its own, sized
-            like the two above it but in the panel's own navy so it still
-            ranks third rather than competing with replay and share.
-          */}
-          <PageLink className="ckt-cta ckt-cta--ghost ckt-outLink" href="/work">
+          <PageLink className="ckt-card__out" href="/work">
             See the actual work
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M5 12h13M12 5l7 7-7 7" />
-            </svg>
+            <ArrowIcon />
           </PageLink>
         </div>
       )}
 
       {/*
-        The phone's whole input, in one thumb-sized object.
+        ---- the pause screen ----
 
-        A phone has no space bar and no arrow keys, and the desktop
-        affordance — tap anywhere on the pitch — is invisible: nothing on
-        screen says the stadium is a button. So portrait gets an explicit
-        dock at the bottom, inside the thumb arc, with the timing rail
-        directly above the control it belongs to.
+        The match behind it is frozen (see the clock effect above), so this
+        is a real pause rather than a menu laid over live play. The panel
+        says where the match stands, because that is the first thing anyone
+        coming back to a paused game wants to know.
+      */}
+      {menuOpen && (
+        <div className="ckt-pause" role="dialog" aria-modal="true" aria-labelledby="ckt-pause-title">
+          <div className="ckt-pause__panel" ref={menuRef}>
+            <div className="ckt-pause__head">
+              <span className="ckt-pause__glyph" aria-hidden>
+                <i />
+                <i />
+              </span>
+              <div>
+                <h2 className="ckt-pause__title" id="ckt-pause-title">
+                  Paused
+                </h2>
+                <p className="ckt-pause__state">
+                  <b>
+                    {side.abbr} {score}-{out ? 1 : 0}
+                  </b>
+                  <span>
+                    {phase === "idle"
+                      ? "Over not started"
+                      : phase === "over"
+                        ? "Over finished"
+                        : `Ball ${Math.max(1, ballsShown)} of ${BALLS}`}
+                  </span>
+                </p>
+              </div>
+            </div>
 
-        It is one button, not the five in the reference. The engine has one
-        input: a swing, timed. Five labelled shot types would be five
-        controls doing the same thing, which is worse than one honest one.
+            <OverPips log={overLog} live={live} />
+
+            <div className="ckt-pause__list">
+              {/* resume first and loudest: it is what almost everyone
+                  reaching this screen wants */}
+              <button
+                type="button"
+                className="ckt-pause__item ckt-pause__item--resume"
+                onClick={() => setMenuOpen(false)}
+                autoFocus
+              >
+                <ResumeIcon />
+                <span>Resume</span>
+                <kbd>Esc</kbd>
+              </button>
+              <button
+                type="button"
+                className="ckt-pause__item"
+                onClick={() => {
+                  setMenuOpen(false);
+                  start();
+                }}
+              >
+                <ReplayIcon />
+                <span>{phase === "idle" ? "Start the over" : "Restart the over"}</span>
+                <kbd>R</kbd>
+              </button>
+              <button
+                type="button"
+                className="ckt-pause__item"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onSwitchTeam?.();
+                }}
+              >
+                <SwapIcon />
+                <span>Switch side</span>
+              </button>
+              <button type="button" className="ckt-pause__item" aria-pressed={!muted} onClick={toggleMute}>
+                {muted ? <MutedIcon /> : <SoundIcon />}
+                <span>Sound</span>
+                <span className="ckt-pause__switch" data-on={!muted || undefined}>
+                  <i />
+                </span>
+              </button>
+            </div>
+
+            <PageLink className="ckt-pause__leave" href="/playground">
+              <CloseIcon />
+              Leave the game
+            </PageLink>
+          </div>
+        </div>
+      )}
+
+      {/*
+        The phone's whole input, in one thumb-sized control: a phone has no
+        space bar, and nothing on screen says the stadium is a button. The
+        timing rail sits directly above the control it belongs to.
       */}
       <div className="cktTap" data-live={phase === "flight" || phase === "runup"}>
         <div className="cktTap__rail" aria-hidden>
@@ -1004,27 +1048,61 @@ export default function CricketGame({
           onClick={phase === "idle" || phase === "over" ? start : swing}
           disabled={phase === "over"}
         >
-          {phase === "idle" ? "Tap to play" : "Play shot"}
+          {phase === "idle" ? "Take guard" : "Play shot"}
         </button>
       </div>
 
       <p className="ckt-hint">
-        {reduced ? "Reduced motion is on" : "Arrow keys aim · Space plays the shot"}
+        {reduced ? "Reduced motion is on" : "Arrow keys aim · Space plays the shot · Esc pauses"}
       </p>
     </div>
   );
 }
 
-/* the settings gear, and the two actions only it exposes */
-function GearIcon() {
+/*
+  The over, ball by ball: what a broadcast strip calls THIS OVER.
+
+  A pip per delivery - hollow for one still to come, ringed for the one in
+  hand, and filled with the scorer's mark once it is bowled: a dot for no
+  run, the runs for a scoring shot, W for the wicket. Colour carries the
+  weight a scorer's eye looks for first, boundaries and the dismissal.
+*/
+const MARK: Record<Contact, string> = { dot: "•", single: "1", four: "4", six: "6", wicket: "W" };
+
+function OverPips({ log, live }: { log: Contact[]; live: number }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <circle cx="12" cy="12" r="3.2" />
-      <path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.56V21a2 2 0 11-4 0v-.09A1.7 1.7 0 008.4 19.3a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.04 15a1.7 1.7 0 00-1.56-1.03H2.4a2 2 0 110-4h.09A1.7 1.7 0 004.04 9a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 008.4 4.7 1.7 1.7 0 009.43 3.14V3a2 2 0 114 0v.09a1.7 1.7 0 001.03 1.56 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 9v.09a1.7 1.7 0 001.56 1.03H21a2 2 0 110 4h-.09A1.7 1.7 0 0019.4 15z" />
+    <span className="pips" aria-hidden>
+      {Array.from({ length: BALLS }, (_, i) => {
+        const c = log[i];
+        const state = c ? `pip--${c}` : i === live ? "pip--live" : "pip--todo";
+        return (
+          <i key={i} className={`pip ${state}`}>
+            {c ? MARK[c] : ""}
+          </i>
+        );
+      })}
+    </span>
+  );
+}
+
+function PauseIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <rect x="5" y="4" width="3.4" height="12" rx="1" />
+      <rect x="11.6" y="4" width="3.4" height="12" rx="1" />
     </svg>
   );
 }
 
+function ArrowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 12h13M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+/* the pause screen's actions */
 function ReplayIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
