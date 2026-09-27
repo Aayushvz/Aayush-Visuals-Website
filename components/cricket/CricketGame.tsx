@@ -765,6 +765,11 @@ export default function CricketGame({
             </b>
           </span>
           <span className="hud-bug__ball">{phase === "idle" ? "To come" : delivery.label}</span>
+          {/* phones carry the wagon wheel in the bar itself; the desktop one
+              has its own panel in the bottom-right corner */}
+          <span className="hud-bug__wheel" aria-hidden>
+            <Wagon plots={plots} />
+          </span>
         </div>
       </div>
 
@@ -926,6 +931,19 @@ export default function CricketGame({
         <div className="ckt-over" role="dialog" aria-labelledby="ckt-over-title">
           <Burst tone={out ? "red" : "yellow"} />
 
+          <header className="g-crumb ckt-over__crumb">
+            <span className="g-crumb__mark">
+              <AVMark />
+            </span>
+            <span className="g-crumb__trail">
+              <span className="g-crumb__home">Design Premier League</span>
+              <span className="g-crumb__sep" aria-hidden>
+                ›
+              </span>
+              <b>Scorecard</b>
+            </span>
+          </header>
+
           <div className="ckt-over__main">
             <div className="g-panel ckt-over__card">
               <div className="ckt-over__hero">
@@ -944,7 +962,6 @@ export default function CricketGame({
                   </span>
                 </p>
                 <Pips log={overLog} live={-1} className="ckt-over__pips" />
-                <p className="ckt-over__note">{finalVerdict.note}</p>
               </div>
 
               <div className="ckt-over__side">
@@ -989,11 +1006,15 @@ export default function CricketGame({
               </div>
             </div>
 
-            <PageLink className="ckt-over__out" href="/work">
+          </div>
+
+          <footer className="g-foot ckt-over__foot">
+            <span>{finalVerdict.note}</span>
+            <PageLink className="g-btn g-tone--navy ckt-over__out" href="/work">
               See the real work
               <ArrowIcon />
             </PageLink>
-          </div>
+          </footer>
         </div>
       )}
 

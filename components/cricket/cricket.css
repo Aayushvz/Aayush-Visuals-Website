@@ -849,7 +849,42 @@
 
 .ckt-over {
   z-index: 7;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   animation: cktFade 0.3s ease-out both;
+}
+
+/* the menu footer on the scorecard and the pause screen: the line on the
+   left, the one action pinned to the right */
+.ckt-over__foot,
+.ckt-pause__foot {
+  gap: 16px;
+  padding-block: 8px max(8px, env(safe-area-inset-bottom, 0px));
+}
+
+.ckt-over__foot > span,
+.ckt-pause__foot > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.ckt-over__out,
+.ckt-pause__leave {
+  flex: none;
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 18px 5px;
+  font-size: 1.05rem;
+}
+
+.ckt-over__out svg,
+.ckt-pause__leave svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* the in-bar wheel is the phone's; desktop has the corner panel */
+.hud-bug__wheel {
+  display: none;
 }
 
 .ckt-over > .g-burst,
@@ -868,9 +903,8 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 14px;
   min-height: 0;
-  padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  padding: 16px;
 }
 
 .ckt-over__card {
@@ -1065,29 +1099,6 @@
   gap: 12px;
 }
 
-.ckt-over__out {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--g-display);
-  font-size: 1rem;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
-  text-decoration: none;
-}
-
-.ckt-over__out svg {
-  width: 16px;
-  height: 16px;
-  filter: drop-shadow(0 2px 0 var(--g-ink));
-}
-
-.ckt-over__out:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 3px;
-}
-
 @keyframes cktFade {
   from {
     opacity: 0;
@@ -1195,21 +1206,21 @@
   z-index: 6;
   left: calc(env(safe-area-inset-left, 0px) + 14px);
   right: calc(env(safe-area-inset-right, 0px) + 14px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 7px;
 }
 
 .cktTap__rail {
   display: grid;
   grid-template-columns: 1fr 1.15fr 1fr;
-  width: min(300px, 100%);
+  width: min(210px, 100%);
   overflow: hidden;
   border: var(--g-o) solid var(--g-ink);
   border-radius: 999px;
   font-family: var(--g-display);
-  font-size: 0.8rem;
+  font-size: 0.68rem;
   text-align: center;
   opacity: 0.7;
   box-shadow: 0 3px 0 var(--g-ink);
@@ -1234,10 +1245,11 @@
 }
 
 .cktTap__btn {
-  width: min(250px, 100%);
-  min-height: 54px;
-  font-size: 1.45rem;
-  border-radius: 16px;
+  width: min(210px, 100%);
+  min-height: 46px;
+  padding-bottom: 4px;
+  font-size: 1.2rem;
+  border-radius: 14px;
 }
 
 .cktTap__btn:disabled {
@@ -1334,7 +1346,8 @@
   .ckt {
     --hud-inset: 8px;
     --top: calc(env(safe-area-inset-top, 0px) + 8px);
-    --dock: calc(env(safe-area-inset-bottom, 0px) + 124px);
+    --dock: calc(env(safe-area-inset-bottom, 0px) + 94px);
+    --ctrl: 94px;
   }
 
   .hud-id,
@@ -1343,12 +1356,14 @@
   .hud-bug__sr,
   .hud-bug__ball,
   .hud-com__xp,
-  .hud-com__head,
   .ckt-hint {
     display: none;
   }
 
-  /* ---- the top bar ---- */
+  /* ---- the top bar ----
+     Two rows so it never runs under the controls: side and score on top,
+     the over's six balls underneath, and the wagon wheel standing at the
+     end across both. Its width is capped to the space the controls leave. */
   .hud-bug {
     top: var(--top);
     left: 8px;
@@ -1357,29 +1372,54 @@
   }
 
   .hud-bug__panel {
-    gap: 8px;
-    padding: 5px 9px 7px 5px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "team score wheel"
+      "pips pips wheel";
+    align-items: center;
+    gap: 5px 8px;
+    max-width: calc(100vw - 16px - var(--ctrl) - 8px);
+    padding: 5px 8px 7px 5px;
     border-radius: 14px;
   }
 
   .hud-bug__team {
-    min-width: 44px;
-    height: 36px;
-    font-size: 1rem;
+    grid-area: team;
+    justify-self: start;
+    min-width: 40px;
+    height: 30px;
+    font-size: 0.9rem;
   }
 
   .hud-bug__score {
-    font-size: 1.8rem;
+    grid-area: score;
+    font-size: 1.6rem;
   }
 
   .hud-bug__pips {
+    grid-area: pips;
     gap: 3px;
   }
 
   .hud-bug__pips .g-pip {
-    --pip: 21px;
+    --pip: 19px;
     border-width: 2px;
-    border-radius: 6px;
+    border-radius: 5px;
+  }
+
+  .hud-bug__wheel {
+    grid-area: wheel;
+    display: block;
+    width: 70px;
+    padding: 4px 4px 2px;
+    border: 2px solid var(--g-ink);
+    border-radius: 10px;
+    background: var(--g-well);
+  }
+
+  .hud-bug__wheel .ckt-wagon-field {
+    stroke-width: 3.5;
   }
 
   .hud-ctrl {
@@ -1393,24 +1433,66 @@
     height: 44px;
   }
 
-  /* ---- commentary, as a strip above the dock ---- */
+  /* ---- commentary: a small card on the left, above the dock ---- */
   .hud-com {
-    left: 10px;
-    right: 10px;
+    left: 8px;
+    right: auto;
     bottom: var(--dock);
-    width: auto;
-    gap: 7px;
-    padding: 9px 12px 11px;
-    border-radius: 14px;
+    width: min(230px, 62vw);
+    gap: 6px;
+    padding: 8px 10px 9px;
+    border-width: 2.5px;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.14), 0 3px 0 var(--g-ink), 0 10px 20px -10px rgba(10, 12, 40, 0.6);
+  }
+
+  .hud-com__head {
+    display: flex;
+    gap: 6px;
+  }
+
+  .hud-com__face {
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+  }
+
+  .hud-com__head .g-label {
+    font-size: 0.56rem;
+  }
+
+  .hud-com__live {
+    padding: 2px 6px 3px;
+    font-size: 0.6rem;
   }
 
   .hud-com__line {
     min-height: 0;
-    font-size: 0.88rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .hud-timing {
+    gap: 6px;
+  }
+
+  .hud-timing__track {
+    height: 10px;
+    border-width: 2px;
+  }
+
+  .hud-timing__track i {
+    top: -6px;
+    width: 8px;
+    height: 18px;
+    border-width: 2px;
   }
 
   .hud-timing__label {
-    font-size: 0.75rem;
+    min-width: 0;
+    padding: 2px 6px 3px;
+    border-width: 2px;
+    font-size: 0.66rem;
   }
 
   /* ---- the receipt and the streak, in the open band mid-screen ---- */
@@ -1481,8 +1563,7 @@
   /* ---- the scorecard: one tight column ---- */
   .ckt-over__main {
     align-content: center;
-    gap: 10px;
-    padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
+    padding: 10px;
   }
 
   .ckt-over__card {
@@ -1619,11 +1700,24 @@
     right: 14px;
   }
 
-  .ckt-pause__foot {
+  .ckt-pause__foot,
+  .ckt-over__foot {
     min-height: 0;
-    padding: 10px 12px max(10px, env(safe-area-inset-bottom, 0px));
-    font-size: 0.8rem;
-    line-height: 1.35;
+    gap: 10px;
+    padding: 8px 10px max(8px, env(safe-area-inset-bottom, 0px));
+    font-size: 0.78rem;
+    line-height: 1.3;
+  }
+
+  .ckt-over__out,
+  .ckt-pause__leave {
+    min-height: 40px;
+    padding: 0 12px 4px;
+    font-size: 0.95rem;
+  }
+
+  .ckt-over__crumb {
+    margin-top: max(10px, env(safe-area-inset-top, 0px));
   }
 }
 

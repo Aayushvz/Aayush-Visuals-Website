@@ -168,6 +168,46 @@ export default function Opening({ onStart, reduced }: Props) {
 
         <LeagueCrest className="op__crest" />
 
+        {/* the title, the tag and the matchup stand on a big league shield:
+            navy, outlined, with a gold inner line and the two sides'
+            colours meeting down the middle */}
+        <div className="op__plate">
+          <svg className="op__shield" viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden focusable="false">
+            <defs>
+              <linearGradient id="opShieldFace" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#3c62c8" />
+                <stop offset="0.5" stopColor="#2445a6" />
+                <stop offset="1" stopColor="#182f7d" />
+              </linearGradient>
+              <linearGradient id="opShieldGold" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#ffe45c" />
+                <stop offset="1" stopColor="#d18f00" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M200 10 L386 34 V168 C386 230 300 268 200 292 C100 268 14 230 14 168 V34 Z"
+              fill="#1b1d3a"
+              transform="translate(0 8)"
+            />
+            <path
+              d="M200 10 L386 34 V168 C386 230 300 268 200 292 C100 268 14 230 14 168 V34 Z"
+              fill="url(#opShieldFace)"
+              stroke="#1b1d3a"
+              strokeWidth="6"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path d="M14 34 L200 10 V292 C100 268 14 230 14 168 Z" fill="#7c3aed" opacity="0.28" />
+            <path
+              d="M200 26 L372 48 V166 C372 220 292 254 200 276 C108 254 28 220 28 166 V48 Z"
+              fill="none"
+              stroke="url(#opShieldGold)"
+              strokeWidth="2.5"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path d="M200 10 L386 34 V60 L200 38 L14 60 V34 Z" fill="#fff" opacity="0.12" />
+          </svg>
+
         <h1 className="op__title">
           <span className="op__l1">Design</span>
           <span className="op__l2">Premier</span>
@@ -187,6 +227,7 @@ export default function Opening({ onStart, reduced }: Props) {
             <Crest id={b.id} field={b.colours.primary} emblem={b.colours.light} />
           </span>
         </p>
+        </div>
 
         {/* the bar stands in for the button until the match has loaded:
             the screen only ever shows the control that is currently true */}

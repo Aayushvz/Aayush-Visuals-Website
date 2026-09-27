@@ -1947,7 +1947,7 @@ export function paintBigScreen(
   */
   const assemblyH = bh * 1.23;
   const by = portrait
-    ? Math.max(64, Math.min(standTop - bh * 0.3, h * 0.33 - assemblyH))
+    ? Math.max(94, Math.min(standTop - bh * 0.3, h * 0.33 - assemblyH))
     : Math.max(standTop - bh * 0.52, HUD_BAR_CLEARANCE);
 
   const bez = Math.max(3, bw * 0.02);
