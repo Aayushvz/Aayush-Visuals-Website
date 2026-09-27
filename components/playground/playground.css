@@ -777,3 +777,52 @@
     }
   }
 }
+
+/* ---- the small label beside a title: "Must try", "New" ---- */
+.pgBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 0.3em;
+  white-space: nowrap;
+}
+
+.pgBadge--hot {
+  background: linear-gradient(135deg, #ff7a18, #ff3d6e);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(255, 61, 110, 0.6);
+}
+
+.pgBadge--hot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pgBadgePulse 1.4s ease-in-out infinite;
+}
+
+.pgBadge--new {
+  background: #1f1f1f;
+  color: #ffcd11;
+}
+
+@keyframes pgBadgePulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgBadge--hot::before {
+    animation: none;
+  }
+}

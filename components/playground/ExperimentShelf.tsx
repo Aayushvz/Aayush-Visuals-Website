@@ -128,12 +128,14 @@ function Tags({ tags }: { tags: Tag[] }) {
    carries the sentence */
 function RowCopy({
   title,
+  badge,
   tagline,
   blurb,
   tags,
   children,
 }: {
   title: string;
+  badge?: { label: string; tone: "hot" | "new" };
   tagline: string;
   blurb: string;
   tags: Tag[];
@@ -144,7 +146,12 @@ function RowCopy({
       {/* the title and the button share a line: name on the left, the way
           in at the far right */}
       <div className="pgCard__head">
-        <h3 className="pgCard__title">{title}</h3>
+        <h3 className="pgCard__title">
+          {title}
+          {badge && (
+            <span className={`pgBadge pgBadge--${badge.tone}`}>{badge.label}</span>
+          )}
+        </h3>
         {children}
       </div>
       <p className="pgCard__tagline">{tagline}</p>
@@ -307,7 +314,7 @@ export default function ExperimentShelf() {
                   cover={e.cover}
                 />
                 </div>
-                <RowCopy title={e.title} tagline={e.tagline} blurb={e.blurb} tags={e.tags}>
+                <RowCopy title={e.title} badge={e.badge} tagline={e.tagline} blurb={e.blurb} tags={e.tags}>
                   <RigButton label={e.cta} external={isExternal(e.href)} />
                 </RowCopy>
               </CardLink>

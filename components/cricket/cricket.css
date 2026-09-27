@@ -400,10 +400,11 @@
   align-items: center;
 }
 
+/* the level badge sits beside the bar with a clear gap, not over it */
 .cktXp__hex {
-  --hex: 50px;
+  --hex: 46px;
   z-index: 1;
-  margin-right: -12px;
+  margin-right: 10px;
 }
 
 .cktXp__meter {
@@ -416,7 +417,6 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding-left: 18px;
 }
 
 .cktXp__label {
@@ -1745,5 +1745,32 @@
   .ckt-pause,
   .ckt-pause__grid .g-tile {
     animation: none;
+  }
+}
+
+/* the side's logo in its tile, where the three-letter code used to be */
+.hud-bug__team {
+  padding: 0 4px;
+}
+
+.hud-bug__logo {
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 2px 0 var(--g-ink));
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .hud-bug__logo {
+    width: 32px;
+    height: 32px;
   }
 }

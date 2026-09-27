@@ -25,6 +25,8 @@ export type Experiment = {
   id: string;
   index: string;
   title: string;
+  /** a small label beside the title on the shelf card, e.g. "Must try" */
+  badge?: { label: string; tone: "hot" | "new" };
   /* the small muted line above the title - what kind of thing this is */
   kind: string;
   /* the row's copy: one line that sells it, then two that explain it */
@@ -93,6 +95,7 @@ export const EXPERIMENTS: Experiment[] = [
     id: "dpl",
     index: "01",
     title: "Design Premier League",
+    badge: { label: "Must try", tone: "hot" },
     tags: [
       { label: "Browser game", icon: "game" },
       { label: "Cricket", icon: "ball" },
@@ -128,6 +131,7 @@ export const EXPERIMENTS: Experiment[] = [
     id: "cat",
     index: "02",
     title: "CAT Operator Assistant",
+    badge: { label: "New", tone: "new" },
     tags: [
       { label: "Dashboard", icon: "dashboard" },
       { label: "3D model", icon: "cube" },

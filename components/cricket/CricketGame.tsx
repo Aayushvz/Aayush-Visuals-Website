@@ -752,7 +752,10 @@ export default function CricketGame({
         aria-label={`${side.name} ${score} for ${out ? 1 : 0}, ball ${Math.max(1, ballsShown)} of ${BALLS}`}
       >
         <div className="g-panel hud-bug__panel">
-          <span className="hud-bug__team">{side.abbr}</span>
+          <span className="hud-bug__team" title={side.name}>
+                  <Crest id={team} field={side.colours.primary} emblem={side.colours.light} className="hud-bug__logo" />
+                  <span className="sr-only">{side.abbr}</span>
+                </span>
           <span className="g-title hud-bug__score">
             <Ticker value={score} reduced={reduced} />
             <small>/{out ? 1 : 0}</small>
@@ -1046,7 +1049,10 @@ export default function CricketGame({
 
             <div className="ckt-pause__state">
               <span className="g-panel ckt-pause__score">
-                <span className="hud-bug__team">{side.abbr}</span>
+                <span className="hud-bug__team" title={side.name}>
+                  <Crest id={team} field={side.colours.primary} emblem={side.colours.light} className="hud-bug__logo" />
+                  <span className="sr-only">{side.abbr}</span>
+                </span>
                 <b className="g-title">
                   {score}/{out ? 1 : 0}
                 </b>
