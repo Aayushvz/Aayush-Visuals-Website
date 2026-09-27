@@ -33,6 +33,8 @@ import Avatar from "./Avatar";
 import Ticker from "./Ticker";
 import { createClock } from "./clock";
 import { teamById } from "./teams";
+import { BallSlots, TriBadge } from "./kit";
+import "./kit.css";
 import "./cricket.css";
 
 /*
@@ -703,54 +705,63 @@ export default function CricketGame({
   const live = phase === "runup" || phase === "flight" ? ballIdx : -1;
   const ballsShown = out || phase === "over" ? ballsFaced : Math.min(BALLS, ballIdx + (phase === "idle" ? 0 : 1));
 
+  /* the timing meter's perfect band, as a share of the half-window either
+     side of the ideal - the engine's own numbers, drawn */
+  const perfectPct = (delivery.windows.perfect / delivery.windows.contact) * 50;
+
   return (
     <div className="ckt" data-phase={phase} data-paused={menuOpen || undefined}>
       <div className="ckt-stage" ref={stageRef}>
         <canvas ref={canvasRef} className="ckt-canvas" aria-hidden="true" />
       </div>
 
-      {/* ---- top left: who is batting ---- */}
-      <PageLink className="hud hud-id" href="/">
+      {/* ---- top left: who is batting, as a taped-up ID ---- */}
+      <PageLink className="hud-id" href="/">
         <Avatar className="hud-id__face" />
-        <span className="hud-id__text">
-          <span className="hud-id__role">At the crease</span>
-          <span className="hud-id__name">Aayush VZ</span>
+        <span className="k-sticker k-tape hud-id__name">
+          <span className="k-stamp">Bat</span>
+          Aayush VZ
         </span>
       </PageLink>
 
       {/*
-        ---- top centre: the score bug ----
+        ---- top centre: the score bar ----
 
-        Set the way a broadcast sets it: the batting side on its own colour,
-        the total, then this over ball by ball. The six pips replace the
-        "Balls 2/6" fraction - they carry the count AND what happened on
-        each one, which is the thing a cricket viewer actually glances up
-        for.
+        Built like the reference's charge bar: the side's triangle badge
+        overlapping the end of a long black plate, the total, then the over
+        as a rack of six ball slots. The delivery hangs underneath on a
+        sticker, the way the reference hangs its status label.
       */}
       <div
-        className="hud hud-bug"
+        className="hud-bug"
         role="status"
         aria-live="polite"
         aria-label={`${side.name} ${score} for ${out ? 1 : 0}, ball ${Math.max(1, ballsShown)} of ${BALLS}`}
       >
-        <span className="hud-bug__team">{side.abbr}</span>
-        <span className="hud-bug__score">
-          <Ticker value={score} reduced={reduced} />
-          <span className="hud-bug__wkts">-{out ? 1 : 0}</span>
-        </span>
-        <span className="hud-bug__block hud-bug__block--over">
-          <span className="hud-label">This over</span>
-          <OverPips log={overLog} live={live} />
-        </span>
-        <span className="hud-bug__block hud-bug__block--sr">
-          <span className="hud-label">Strike rate</span>
-          <span className="hud-bug__value">
-            <Ticker value={strikeRate} reduced={reduced} />
-          </span>
-        </span>
-        <span className="hud-bug__block hud-bug__block--ball">
-          <span className="hud-label">Delivery</span>
-          <span className="hud-bug__value">{phase === "idle" ? "To come" : delivery.label}</span>
+        <TriBadge tone="team" className="hud-bug__tri">
+          {side.abbr}
+        </TriBadge>
+        <div className="k-lift hud-bug__lift">
+          <div className="k-plate hud-bug__plate">
+            <span className="hud-bug__score">
+              <Ticker value={score} reduced={reduced} />
+              <small>-{out ? 1 : 0}</small>
+            </span>
+            <span className="hud-bug__over">
+              <span className="k-label">This over</span>
+              <BallSlots log={overLog} live={live} />
+            </span>
+            <span className="hud-bug__sr">
+              <span className="k-label">SR</span>
+              <b>
+                <Ticker value={strikeRate} reduced={reduced} />
+              </b>
+            </span>
+          </div>
+        </div>
+        <span className="k-sticker hud-bug__ball">
+          <span className="k-stamp">Ball {Math.max(1, ballsShown)}</span>
+          {phase === "idle" ? "To come" : delivery.label}
         </span>
       </div>
 
@@ -788,155 +799,186 @@ export default function CricketGame({
       {phase !== "over" && !shout && <ComboPill combo={combo} reduced={reduced} />}
 
       {/*
-        ---- bottom left: the commentary box ----
+        ---- bottom left: commentary, timing, level ----
 
-        A lower third, not a speech bubble: who is talking, what they said,
-        how the timing landed, and the level meter underneath. One column,
-        so the timing readout appearing under a shot pushes the meter down
-        instead of colliding with it.
+        One plate, top to bottom: who is talking and what they said, how
+        the timing landed on the reference's traffic-light scale, and the
+        level dial with its XP. One column, so the timing appearing under a
+        shot pushes the meter down instead of colliding with it.
       */}
-      <div className="hud hud-com">
-        <div className="hud-com__head">
-          <Avatar className="hud-com__face" />
-          <span className="hud-label hud-com__who">Commentary</span>
-          <span className="hud-com__onair" aria-hidden>
-            On air
-          </span>
-        </div>
-        <p className="hud-com__line">{commentary}</p>
-
-        {last && last.contact !== "wicket" && (
-          <div className="hud-timing">
-            <span
-              className="hud-timing__track"
-              style={
-                {
-                  "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%`,
-                } as React.CSSProperties
-              }
-              aria-hidden
-            >
-              <span className="hud-timing__sweet" />
-              <i />
-            </span>
-            <span className="hud-timing__label">
-              {Math.abs(last.offset) <= delivery.windows.perfect
-                ? "Perfect timing"
-                : last.offset < 0
-                  ? `${Math.round(-last.offset)}ms early`
-                  : `${Math.round(last.offset)}ms late`}
+      <div className="k-lift hud-com">
+        <div className="k-plate hud-com__plate">
+          <div className="hud-com__head">
+            <Avatar className="hud-com__face" />
+            <span className="k-label hud-com__who">Commentary</span>
+            <span className="hud-com__onair" aria-hidden>
+              On air
             </span>
           </div>
-        )}
+          <p className="hud-com__line">{commentary}</p>
 
-        <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
+          {last && last.contact !== "wicket" && (
+            <div className="hud-timing">
+              <span
+                className="hud-timing__track"
+                style={
+                  {
+                    "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%`,
+                    "--ckt-perfect": `${perfectPct}%`,
+                  } as React.CSSProperties
+                }
+                aria-hidden
+              >
+                <i />
+              </span>
+              <span
+                className="hud-timing__label"
+                data-grade={
+                  Math.abs(last.offset) <= delivery.windows.perfect
+                    ? "good"
+                    : Math.abs(last.offset) <= delivery.windows.contact * 0.7
+                      ? "near"
+                      : "miss"
+                }
+              >
+                {Math.abs(last.offset) <= delivery.windows.perfect
+                  ? "Perfect"
+                  : last.offset < 0
+                    ? `${Math.round(-last.offset)}ms early`
+                    : `${Math.round(last.offset)}ms late`}
+              </span>
+            </div>
+          )}
+
+          <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
+        </div>
       </div>
 
       {/* ---- bottom right: the wagon wheel ---- */}
-      <div className="hud hud-wheel">
-        <span className="hud-label">Wagon wheel</span>
-        <Wagon plots={plots} />
-        <span className="hud-wheel__key" aria-hidden>
-          <i className="k1" />1<i className="k4" />4<i className="k6" />6
-        </span>
+      <div className="k-lift hud-wheel">
+        <div className="k-plate hud-wheel__plate">
+          <span className="k-label">Wagon wheel</span>
+          <Wagon plots={plots} />
+          <span className="hud-wheel__key" aria-hidden>
+            <i className="k1" />1<i className="k4" />4<i className="k6" />6
+          </span>
+        </div>
       </div>
 
       {/* ---- the start card ---- */}
       {phase === "idle" && (
-        <div className="ckt-card ckt-card--intro" role="dialog" aria-labelledby="ckt-intro-title">
-          <div className="ckt-card__top">
-            <span className="ckt-card__tag">DPL</span>
-            <span className="ckt-card__meta">
-              {side.name} <b>batting</b>
-            </span>
+        <div className="k-lift ckt-card ckt-card--intro" role="dialog" aria-labelledby="ckt-intro-title">
+          <div className="k-plate ckt-card__plate">
+            <div className="ckt-card__top">
+              <TriBadge tone="team" className="ckt-card__tri">
+                {side.abbr}
+              </TriBadge>
+              <span className="k-sticker k-tape ckt-card__meta">
+                <span className="k-stamp">DPL</span>
+                {side.name} batting
+              </span>
+            </div>
+            <h1 className="ckt-card__title" id="ckt-intro-title">
+              <span className="k-brush">Six balls!</span>
+              <span className="k-brush k-brush--white">One innings.</span>
+            </h1>
+            <p className="ckt-card__body">
+              Play the shot as the ball reaches you. Timing decides the runs, your aim decides
+              where it goes, and a wicket ends the over on the spot.
+            </p>
+            <ul className="ckt-keys" aria-label="Controls">
+              <li>
+                <kbd className="k-key">Space</kbd>
+                <span>Play the shot</span>
+              </li>
+              <li>
+                <kbd className="k-key">←</kbd>
+                <kbd className="k-key">→</kbd>
+                <span>Aim</span>
+              </li>
+              <li>
+                <kbd className="k-key">Esc</kbd>
+                <span>Pause</span>
+              </li>
+            </ul>
+            <button type="button" className="k-btn k-btn--fire ckt-card__go" onClick={start}>
+              Take guard
+              <ArrowIcon />
+            </button>
           </div>
-          <h1 className="ckt-card__title" id="ckt-intro-title">
-            Six balls.
-            <em>One innings.</em>
-          </h1>
-          <p className="ckt-card__body">
-            Play the shot as the ball reaches you. Timing decides the runs, your aim decides
-            where it goes, and a wicket ends the over on the spot.
-          </p>
-          <ul className="ckt-keys" aria-label="Controls">
-            <li>
-              <kbd>Space</kbd>
-              <span>Play the shot</span>
-            </li>
-            <li>
-              <kbd>←</kbd>
-              <kbd>→</kbd>
-              <span>Aim</span>
-            </li>
-            <li>
-              <kbd>Esc</kbd>
-              <span>Pause</span>
-            </li>
-          </ul>
-          <button type="button" className="ckt-btn ckt-btn--gold" onClick={start}>
-            Take guard
-            <ArrowIcon />
-          </button>
         </div>
       )}
 
-      {/* the finished innings gets a ground of its own: there is nothing
+      {/* the finished innings gets the pick screen's wall: there is nothing
           behind it to go back to, so the pitch is covered */}
       {phase === "over" && <div className="ckt-outro" aria-hidden />}
 
+      {/* ---- the scorecard ---- */}
       {phase === "over" && (
-        <div className="ckt-card ckt-card--over" role="dialog" aria-labelledby="ckt-over-title">
-          <div className="ckt-card__top">
-            <span className="ckt-card__tag">DPL</span>
-            <span className="ckt-card__meta">{out ? "Over ended early" : "Over complete"}</span>
-          </div>
-
-          <div className="ckt-card__result">
-            <h2 className="ckt-card__verdict" id="ckt-over-title">
+        <div className="ckt-over" role="dialog" aria-labelledby="ckt-over-title">
+          <div className="ckt-over__head">
+            <span className="k-sticker k-tape ckt-over__kicker">
+              <span className="k-stamp">DPL</span>
+              {out ? "Over ended early" : "Over complete"}
+            </span>
+            <h2 className="k-brush ckt-over__verdict" id="ckt-over-title">
               {finalVerdict.title}
             </h2>
-            <p className="ckt-card__final">
-              <b>{score}</b>
-              <span>off {out ? ballIdx + 1 : BALLS}</span>
-            </p>
           </div>
-          <OverPips log={overLog} live={-1} />
-          <p className="ckt-card__body">{finalVerdict.note}</p>
 
-          <dl className="ckt-stats">
-            {[
-              ["Strike rate", String(strikeRate)],
-              ["Fours", String(boundaries.fours)],
-              ["Sixes", String(boundaries.sixes)],
-              ["Wickets", out ? "1" : "0"],
-            ].map(([k, v]) => (
-              <div className="ckt-stats__cell" key={k}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
+          <div className="k-lift ckt-over__lift">
+            <div className="k-plate ckt-over__plate">
+              <div className="ckt-over__score">
+                <TriBadge tone="team" className="ckt-over__tri">
+                  {side.abbr}
+                </TriBadge>
+                <p className="ckt-over__runs">
+                  <b>{score}</b>
+                  <span>
+                    off {out ? ballIdx + 1 : BALLS}
+                    <small>{out ? "1 wicket" : "not out"}</small>
+                  </span>
+                </p>
+                <BallSlots log={overLog} live={-1} className="ckt-over__slots" />
               </div>
-            ))}
-          </dl>
+              <p className="ckt-over__note">{finalVerdict.note}</p>
 
-          <div className="ckt-card__xp">
-            <span className="ckt-card__earned">+{overXp} Creative XP</span>
-            <XpBar xp={xp} levelUp={null} reduced={reduced} />
+              <dl className="ckt-stats">
+                {[
+                  ["Strike rate", String(strikeRate)],
+                  ["Fours", String(boundaries.fours)],
+                  ["Sixes", String(boundaries.sixes)],
+                  ["Wickets", out ? "1" : "0"],
+                ].map(([k, v]) => (
+                  <div className="ckt-stats__cell" key={k}>
+                    <dd>{v}</dd>
+                    <dt>{k}</dt>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="ckt-over__xp">
+                <span className="k-brush ckt-over__earned">+{overXp} XP</span>
+                <XpBar xp={xp} levelUp={null} reduced={reduced} />
+              </div>
+
+              <div className="ckt-over__actions">
+                <button type="button" className="k-btn k-btn--fire" onClick={start}>
+                  <ReplayIcon />
+                  Play again
+                </button>
+                <button type="button" className="k-btn k-btn--ink" onClick={share}>
+                  <ShareIcon />
+                  {shared ? "Copied" : "Share score"}
+                </button>
+              </div>
+
+              <PageLink className="ckt-over__out" href="/work">
+                See the actual work
+                <ArrowIcon />
+              </PageLink>
+            </div>
           </div>
-
-          <div className="ckt-card__actions">
-            <button type="button" className="ckt-btn ckt-btn--gold" onClick={start}>
-              <ReplayIcon />
-              Play again
-            </button>
-            <button type="button" className="ckt-btn ckt-btn--line" onClick={share}>
-              <ShareIcon />
-              {shared ? "Copied" : "Share score"}
-            </button>
-          </div>
-
-          <PageLink className="ckt-card__out" href="/work">
-            See the actual work
-            <ArrowIcon />
-          </PageLink>
         </div>
       )}
 
@@ -944,55 +986,47 @@ export default function CricketGame({
         ---- the pause screen ----
 
         The match behind it is frozen (see the clock effect above), so this
-        is a real pause rather than a menu laid over live play. The panel
-        says where the match stands, because that is the first thing anyone
-        coming back to a paused game wants to know.
+        is a real pause, not a menu over live play. It opens on where the
+        match stands, because that is the first thing anyone coming back
+        to a paused game wants to know.
       */}
       {menuOpen && (
         <div className="ckt-pause" role="dialog" aria-modal="true" aria-labelledby="ckt-pause-title">
           <div className="ckt-pause__panel" ref={menuRef}>
-            <div className="ckt-pause__head">
-              <span className="ckt-pause__glyph" aria-hidden>
-                <i />
-                <i />
+            <h2 className="k-brush ckt-pause__title" id="ckt-pause-title">
+              Paused!
+            </h2>
+            <div className="ckt-pause__state">
+              <span className="k-sticker k-tape">
+                <span className="k-stamp">{side.abbr}</span>
+                {score}-{out ? 1 : 0}
+                <em>
+                  {phase === "idle"
+                    ? "Over not started"
+                    : phase === "over"
+                      ? "Over finished"
+                      : `Ball ${Math.max(1, ballsShown)} of ${BALLS}`}
+                </em>
               </span>
-              <div>
-                <h2 className="ckt-pause__title" id="ckt-pause-title">
-                  Paused
-                </h2>
-                <p className="ckt-pause__state">
-                  <b>
-                    {side.abbr} {score}-{out ? 1 : 0}
-                  </b>
-                  <span>
-                    {phase === "idle"
-                      ? "Over not started"
-                      : phase === "over"
-                        ? "Over finished"
-                        : `Ball ${Math.max(1, ballsShown)} of ${BALLS}`}
-                  </span>
-                </p>
-              </div>
+              <BallSlots log={overLog} live={live} />
             </div>
-
-            <OverPips log={overLog} live={live} />
 
             <div className="ckt-pause__list">
               {/* resume first and loudest: it is what almost everyone
                   reaching this screen wants */}
               <button
                 type="button"
-                className="ckt-pause__item ckt-pause__item--resume"
+                className="k-btn k-btn--fire ckt-pause__item"
                 onClick={() => setMenuOpen(false)}
                 autoFocus
               >
                 <ResumeIcon />
                 <span>Resume</span>
-                <kbd>Esc</kbd>
+                <kbd className="k-key">Esc</kbd>
               </button>
               <button
                 type="button"
-                className="ckt-pause__item"
+                className="k-btn k-btn--ink ckt-pause__item"
                 onClick={() => {
                   setMenuOpen(false);
                   start();
@@ -1000,11 +1034,11 @@ export default function CricketGame({
               >
                 <ReplayIcon />
                 <span>{phase === "idle" ? "Start the over" : "Restart the over"}</span>
-                <kbd>R</kbd>
+                <kbd className="k-key">R</kbd>
               </button>
               <button
                 type="button"
-                className="ckt-pause__item"
+                className="k-btn k-btn--ink ckt-pause__item"
                 onClick={() => {
                   setMenuOpen(false);
                   onSwitchTeam?.();
@@ -1013,12 +1047,15 @@ export default function CricketGame({
                 <SwapIcon />
                 <span>Switch side</span>
               </button>
-              <button type="button" className="ckt-pause__item" aria-pressed={!muted} onClick={toggleMute}>
+              <button
+                type="button"
+                className="k-btn k-btn--ink ckt-pause__item"
+                aria-pressed={!muted}
+                onClick={toggleMute}
+              >
                 {muted ? <MutedIcon /> : <SoundIcon />}
-                <span>Sound</span>
-                <span className="ckt-pause__switch" data-on={!muted || undefined}>
-                  <i />
-                </span>
+                <span>Sound {muted ? "off" : "on"}</span>
+                <kbd className="k-key">M</kbd>
               </button>
             </div>
 
@@ -1044,11 +1081,11 @@ export default function CricketGame({
 
         <button
           type="button"
-          className="cktTap__btn"
+          className="k-btn k-btn--fire cktTap__btn"
           onClick={phase === "idle" || phase === "over" ? start : swing}
           disabled={phase === "over"}
         >
-          {phase === "idle" ? "Take guard" : "Play shot"}
+          {phase === "idle" ? "Take guard" : "Play shot!"}
         </button>
       </div>
 
@@ -1056,32 +1093,6 @@ export default function CricketGame({
         {reduced ? "Reduced motion is on" : "Arrow keys aim · Space plays the shot · Esc pauses"}
       </p>
     </div>
-  );
-}
-
-/*
-  The over, ball by ball: what a broadcast strip calls THIS OVER.
-
-  A pip per delivery - hollow for one still to come, ringed for the one in
-  hand, and filled with the scorer's mark once it is bowled: a dot for no
-  run, the runs for a scoring shot, W for the wicket. Colour carries the
-  weight a scorer's eye looks for first, boundaries and the dismissal.
-*/
-const MARK: Record<Contact, string> = { dot: "•", single: "1", four: "4", six: "6", wicket: "W" };
-
-function OverPips({ log, live }: { log: Contact[]; live: number }) {
-  return (
-    <span className="pips" aria-hidden>
-      {Array.from({ length: BALLS }, (_, i) => {
-        const c = log[i];
-        const state = c ? `pip--${c}` : i === live ? "pip--live" : "pip--todo";
-        return (
-          <i key={i} className={`pip ${state}`}>
-            {c ? MARK[c] : ""}
-          </i>
-        );
-      })}
-    </span>
   );
 }
 

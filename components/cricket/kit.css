@@ -1,0 +1,462 @@
+/*
+  ============ DPL GAME KIT ============
+
+  The visual language every screen of the game is built from: the pick
+  screen, the match HUD, the pause screen and the scorecard. Taken from a
+  fighting-game HUD reference and re-cut for cricket.
+
+  The grammar, in order of how loud it is:
+
+  1. BRUSH - Knewave, slanted, filled with fire and cut out with a thick
+     black outline. For the few words that should be shouted: titles,
+     SIX!, and the button that starts play. Never for running text, never
+     for numbers.
+  2. PLATES - near-black slabs with one or two corners cut off, a lit top
+     edge and a dark lip. Everything you read sits on one of these, which
+     is what makes the contrast work over a busy stadium: white on the
+     plate is 17:1.
+  3. STICKERS - torn off-white paper with a strip of tape, black type on
+     it (16:1). Labels, names, the small facts. They sit at a slight angle,
+     which is most of what makes the screen feel made by hand.
+  4. ACCENTS - the side's own colour for identity (the triangle badge, the
+     team fill); FIRE (amber to red) for action and anything just earned;
+     and the reference's own traffic-light scale for thresholds:
+     green #01FD99 good, yellow #F9DA17 close, red #CA2A2F miss.
+
+  Numbers are Anton. Small text is the site sans at 600, which is the only
+  thing here that is not shouting.
+*/
+
+.dpl,
+.ckt {
+  --k-ink: #0c0c0e;
+  --k-plate: #18191d;
+  --k-plate-hi: #24252b;
+  --k-plate-lo: #0f1013;
+  --k-edge: #34363e;
+  --k-paper: #f1ede4;
+  --k-paper-ink: #121214;
+  --k-text: #f7f5f0;
+  --k-dim: #b9b6ae;
+  --k-mute: #8d8a83;
+
+  --k-fire-1: #ffc233;
+  --k-fire-2: #ff6a13;
+  --k-fire-3: #e8261f;
+  --k-fire: linear-gradient(180deg, var(--k-fire-1) 0%, var(--k-fire-2) 52%, var(--k-fire-3) 100%);
+  --k-fire-x: linear-gradient(90deg, var(--k-fire-1), var(--k-fire-2) 55%, var(--k-fire-3));
+
+  --k-good: #01fd99;
+  --k-near: #f9da17;
+  --k-miss: #ca2a2f;
+
+  --k-team: var(--tm-primary, #2563eb);
+  --k-team-hi: var(--tm-light, #7dd3fc);
+  --k-team-lo: var(--tm-deep, #1d4ed8);
+
+  --k-brush: var(--ckt-brush), var(--ckt-display), Impact, sans-serif;
+  --k-num: var(--ckt-display), Impact, "Arial Narrow", sans-serif;
+
+  /* film grain, drawn once by the browser and tiled */
+  --k-grit: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+
+  /* the torn right edge of a sticker */
+  --k-torn: polygon(
+    0 3%, 18% 0, 46% 2%, 78% 0, 94% 1%, 97% 12%, 94% 22%, 99% 34%, 95% 46%,
+    100% 58%, 96% 70%, 99% 82%, 95% 93%, 82% 100%, 50% 97%, 20% 100%, 0 97%
+  );
+  /* a plate with its top-right and bottom-left corners cut */
+  --k-cut: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+
+/* ---------- brush lettering ---------- */
+.k-brush {
+  font-family: var(--k-brush);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  background: var(--k-fire);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* the outline, cut from four offset shadows of the filled shape rather
+     than a text-stroke, which would eat half of every letter */
+  filter: drop-shadow(2.5px 0 0 var(--k-ink)) drop-shadow(-2.5px 0 0 var(--k-ink))
+    drop-shadow(0 2.5px 0 var(--k-ink)) drop-shadow(0 -2.5px 0 var(--k-ink))
+    drop-shadow(0 6px 0 var(--k-ink));
+}
+
+.k-brush--white {
+  background: linear-gradient(180deg, #fff, #e9e5dc);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* ---------- plates ---------- */
+.k-plate {
+  position: relative;
+  background:
+    var(--k-grit),
+    linear-gradient(180deg, var(--k-plate-hi), var(--k-plate) 40%, var(--k-plate-lo));
+  background-blend-mode: soft-light, normal;
+  color: var(--k-text);
+  clip-path: var(--k-cut);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -3px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* a plate's shadow has to be a filter on a wrapper, because clip-path cuts
+   an ordinary box-shadow off along with the corner */
+.k-lift {
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+/* ---------- stickers and tape ---------- */
+.k-sticker {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 8px;
+  color: var(--k-paper-ink);
+  font-family: var(--k-num);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  rotate: -2deg;
+}
+
+/* the paper itself, torn - on a pseudo so the tape can overhang the edge
+   instead of being clipped off with it */
+.k-sticker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--k-paper);
+  clip-path: var(--k-torn);
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.2));
+}
+
+.k-tape {
+  position: relative;
+}
+
+/* on the sticker's left corner, clear of what it says */
+.k-tape::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -10px;
+  width: 42px;
+  height: 16px;
+  rotate: -28deg;
+  background: rgba(214, 212, 205, 0.6);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+  pointer-events: none;
+}
+
+/* the rubber stamp on a sticker, where the reference has its kanji */
+.k-stamp {
+  display: inline-grid;
+  place-items: center;
+  padding: 3px 4px 2px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  font-family: var(--k-num);
+  font-size: 0.6em;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+/* ---------- small labels ---------- */
+.k-label {
+  font-family: var(--font-primary);
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--k-mute);
+  white-space: nowrap;
+}
+
+/* ---------- the triangle badge ---------- */
+.k-tri {
+  --tri: 64px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tri);
+  aspect-ratio: 100 / 90;
+  flex: none;
+}
+
+.k-tri svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 4px 0 var(--k-ink));
+}
+
+.k-tri__body {
+  stroke: var(--k-ink);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+.k-tri--team .k-tri__body {
+  fill: var(--k-team);
+}
+
+.k-tri--fire .k-tri__body {
+  fill: var(--k-fire-2);
+}
+
+.k-tri--out .k-tri__body {
+  fill: var(--k-miss);
+}
+
+.k-tri__rim {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.k-tri__text {
+  position: relative;
+  margin-top: 26%;
+  font-family: var(--k-num);
+  font-size: calc(var(--tri) * 0.3);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- the ring gauge ---------- */
+.k-gauge {
+  --gauge: 64px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--gauge);
+  height: var(--gauge);
+  flex: none;
+}
+
+.k-gauge svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3px 0 var(--k-ink));
+}
+
+.k-gauge__rim {
+  fill: var(--k-ink);
+}
+
+.k-gauge__track {
+  fill: none;
+  stroke: #2b2c33;
+  stroke-width: 15;
+}
+
+.k-gauge__fill {
+  fill: none;
+  stroke: url(#kFire);
+  stroke-width: 15;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.k-gauge__core {
+  fill: #1c1d22;
+  stroke: var(--k-ink);
+  stroke-width: 3;
+}
+
+.k-gauge__text {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  font-family: var(--k-num);
+  font-size: calc(var(--gauge) * 0.28);
+  line-height: 0.9;
+  color: #fff;
+}
+
+.k-gauge__text small {
+  font-family: var(--font-primary);
+  font-size: max(8px, calc(var(--gauge) * 0.13));
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--k-dim);
+}
+
+/* ---------- the ball slots ---------- */
+.k-slots {
+  display: flex;
+  gap: 5px;
+}
+
+.k-slot {
+  --slot: 24px;
+  display: grid;
+  place-items: center;
+  width: var(--slot);
+  height: calc(var(--slot) * 1.18);
+  border-radius: 3px;
+  transform: skewX(-8deg);
+  font-style: normal;
+  /* an empty slot still has to read as a slot on a black plate: a lit rim */
+  background: linear-gradient(180deg, #34353d, #202127);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.22), 0 2px 0 var(--k-ink);
+}
+
+.k-slot b {
+  display: block;
+  transform: skewX(8deg);
+  font-family: var(--k-num);
+  font-size: calc(var(--slot) * 0.66);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.k-slot.is-live {
+  box-shadow: inset 0 0 0 2px var(--k-fire-2), 0 0 12px rgba(255, 106, 19, 0.55), 0 2px 0 var(--k-ink);
+  animation: kSlotLive 0.9s ease-in-out infinite;
+}
+
+@keyframes kSlotLive {
+  50% {
+    box-shadow: inset 0 0 0 2px var(--k-fire-1), 0 0 4px rgba(255, 106, 19, 0.2), 0 2px 0 var(--k-ink);
+  }
+}
+
+.k-slot.is-dot,
+.k-slot.is-single,
+.k-slot.is-four,
+.k-slot.is-six,
+.k-slot.is-wicket {
+  background: linear-gradient(180deg, #fbf8f1, var(--k-paper));
+  color: var(--k-paper-ink);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 2px 0 var(--k-ink);
+}
+
+.k-slot.is-dot {
+  color: #6b6860;
+}
+
+.k-slot.is-four {
+  background: var(--k-good);
+  color: #03281a;
+}
+
+.k-slot.is-six {
+  background: var(--k-fire);
+  color: var(--k-ink);
+}
+
+.k-slot.is-wicket {
+  background: var(--k-miss);
+  color: #fff;
+}
+
+/* ---------- keycaps ---------- */
+.k-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 4px;
+  background: var(--k-paper);
+  color: var(--k-paper-ink);
+  box-shadow: 0 3px 0 #9d998f, 0 4px 0 var(--k-ink);
+  font-family: var(--font-primary);
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- buttons ---------- */
+.k-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 26px;
+  border: 0;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  font-family: var(--k-num);
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.k-btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* fire: the one that starts play */
+.k-btn--fire {
+  background: var(--k-fire);
+  color: var(--k-ink);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), inset 0 -4px 0 rgba(120, 12, 8, 0.45);
+}
+
+/* ink: everything else */
+.k-btn--ink {
+  background: linear-gradient(180deg, #2a2b31, #141519);
+  color: var(--k-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -3px 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.k-btn:active {
+  transform: translateY(2px);
+}
+
+/* the ring is drawn inside: a clip-path cuts off anything outside the shape,
+   an outline included */
+.k-btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 5px var(--k-ink);
+}
+
+@media (hover: hover) {
+  .k-btn--fire:hover {
+    filter: brightness(1.08) saturate(1.1);
+  }
+
+  .k-btn--ink:hover {
+    filter: brightness(1.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-slot.is-live {
+    animation: none;
+  }
+
+  .k-gauge__fill {
+    transition: none;
+  }
+}

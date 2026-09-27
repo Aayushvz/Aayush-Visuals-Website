@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { Contact } from "./engine";
 import type { Reward } from "./rewards";
+import { TriBadge } from "./kit";
 
 /*
   The per-ball reward. Two lines: the cricket event, then the studio joke.
@@ -77,9 +78,14 @@ export default function RewardCard({
             what it scored and what it earned. Two readouts, no prose — this
             is now a receipt, and the board is the celebration.
           */}
-          <span className="cktReward__runs">{runsFor(shout.contact)}</span>
-          <span className="cktReward__verdict">{VERDICT[shout.contact]}</span>
-          <span className="cktReward__xp">
+          <TriBadge
+            tone={shout.contact === "wicket" ? "out" : big ? "fire" : "team"}
+            className="cktReward__tri"
+          >
+            {runsFor(shout.contact)}
+          </TriBadge>
+          <span className="k-sticker cktReward__verdict">{VERDICT[shout.contact]}</span>
+          <span className="k-brush cktReward__xp">
             +{shout.xp} {shout.xpLabel}
           </span>
 

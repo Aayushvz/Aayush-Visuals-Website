@@ -26,6 +26,9 @@ export type Team = {
   playstyle: Playstyle;
   /** one line explaining what picking this side actually does to the match */
   perk: string;
+  /** out of five, for the pick screen's bars: what picking this side does
+     to the engine, drawn rather than described */
+  ratings: { label: string; value: number }[];
 
   /* --- the palette this side art-directs the whole experience with --- */
   colours: {
@@ -55,6 +58,11 @@ export const TEAMS: Team[] = [
        itself — the side is about accuracy, so making it *easier* to time
        would say the opposite of what the card says */
     perk: "Perfect timing pays double. The window is unforgiving.",
+    ratings: [
+      { label: "Timing window", value: 2 },
+      { label: "Big hits", value: 5 },
+      { label: "Easy runs", value: 2 },
+    ],
     colours: {
       primary: "#7C3AED",
       light: "#A78BFA",
@@ -74,6 +82,11 @@ export const TEAMS: Team[] = [
     /* speed forgives mistiming but caps the ceiling: a side built on flow
        should feel generous and consistent, not explosive */
     perk: "A wider timing window, and singles come easy. Fewer maximums.",
+    ratings: [
+      { label: "Timing window", value: 5 },
+      { label: "Big hits", value: 3 },
+      { label: "Easy runs", value: 4 },
+    ],
     colours: {
       primary: "#2563EB",
       light: "#7DD3FC",

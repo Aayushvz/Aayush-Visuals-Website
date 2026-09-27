@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { LEVEL_STEP, levelFor, levelFraction } from "./progress";
 import { BoltIcon } from "./gameIcons";
+import { Gauge } from "./kit";
 
 /*
   Level and XP. The fill is a spring rather than a linear tween so gaining XP
@@ -12,10 +13,9 @@ import { BoltIcon } from "./gameIcons";
   near-zero and reads as a loss — so crossing the threshold fires an explicit
   flourish.
 
-  The level is a plate of its own beside the meter rather than a line of
-  text above it: the number you have earned is an object, the progress
-  toward the next one is a track. "LVL 7" set at 0.68rem used to be the
-  smallest type in the game and it is the thing a player checks most.
+  The level sits in a ring gauge that fills with fire as XP comes in - the
+  HUD reference's charge dial - with the exact count on a notched bar
+  beside it. The ring is the glance, the bar is the reading.
 */
 export default function XpBar({
   xp,
@@ -33,10 +33,10 @@ export default function XpBar({
 
   return (
     <div className="cktXp" aria-label={`Level ${level}, ${intoLevel} of ${LEVEL_STEP} XP`}>
-      <span className="cktXp__lvl" aria-hidden>
+      <Gauge value={frac} className="cktXp__gauge">
         <small>Lvl</small>
         {level}
-      </span>
+      </Gauge>
 
       <div className="cktXp__meter">
         <div className="cktXp__top">

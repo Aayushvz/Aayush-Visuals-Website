@@ -15,8 +15,10 @@ import { useAssets } from "./useAssets";
 /* gamekit first: it defines the tokens and primitives the other two
    stylesheets override for their own surfaces */
 import "./gamekit.css";
+import "./kit.css";
 import "./cricket.css";
 import "./stages.css";
+import "./pick.css";
 
 /*
   The shell.

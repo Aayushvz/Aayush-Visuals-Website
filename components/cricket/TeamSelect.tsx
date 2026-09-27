@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import TeamCard from "./TeamCard";
 import { TEAMS, type Team } from "./teams";
 
@@ -43,36 +43,32 @@ export default function TeamSelect({ onPick, reduced }: Props) {
 
   return (
     <div className="stg">
-      <div className="stgPick">
-        <div className="stgPick__head">
-          {/*
-            The header wears the same plate as the opening's subtitle and
-            the same display face as every scoreboard in the game. It was
-            the one heading still set in the site's body font, which made
-            the screen between the title card and the match look like it
-            belonged to a different product.
-          */}
-          <h2 className="gk-ribbon gk-ribbon--navy stgPick__title">
-            <i className="stgOpen__subStar" aria-hidden />
-            Choose your <span className="stgPick__gold">side</span>
-            <i className="stgOpen__subStar" aria-hidden />
-          </h2>
-          <p className="stgPick__hint">
-            {picked ? "Locked in" : "Two philosophies. One over."}
+      <div className="pk">
+        <div className="pk__head">
+          <h2 className="k-brush pk__title">Choose your side!</h2>
+          <p className="k-sticker k-tape pk__hint">
+            <span className="k-stamp">DPL</span>
+            {picked ? "Locked in. Walking out." : "Two philosophies. One over."}
           </p>
         </div>
 
-        <div className="stgPick__cards">
+        <div className="pk__cards">
           {TEAMS.map((team, i) => (
-            <TeamCard
-              key={team.id}
-              team={team}
-              index={i}
-              reduced={reduced}
-              selected={picked?.id === team.id}
-              dimmed={!!picked && picked.id !== team.id}
-              onChoose={choose}
-            />
+            <Fragment key={team.id}>
+              {i === 1 && (
+                <span className="k-brush pk__vs" aria-hidden>
+                  vs
+                </span>
+              )}
+              <TeamCard
+                team={team}
+                index={i}
+                reduced={reduced}
+                selected={picked?.id === team.id}
+                dimmed={!!picked && picked.id !== team.id}
+                onChoose={choose}
+              />
+            </Fragment>
           ))}
         </div>
       </div>

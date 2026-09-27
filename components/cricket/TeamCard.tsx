@@ -3,17 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teamVars, type Team } from "./teams";
 import { Crest } from "./crests";
+import { TriBadge } from "./kit";
 
 /*
-  A team card.
-
-  The screen comps put this back to what the card always said — playstyle,
-  abbreviation, crest, name, identity, motto, perk, one control — and paint
-  the whole panel in the side's own colour rather than the league blue. That
-  second part is the real idea: two identical blue cards make choosing a
-  side a reading exercise, and two differently-coloured ones make it a
-  glance. The team's palette drives the rim, the face and the button
-  through the kit's own tokens, so nothing here special-cases a team.
+  A team card: a black plate from the game kit (kit.css) with the side's
+  colour splashed behind its crest, its short name in the triangle badge,
+  its playstyle on a sticker, and three bars that show what picking it does
+  to the engine - the perk line says it, the bars let you compare it at a
+  glance across the two cards. The side's palette arrives as CSS variables
+  (teamVars), so nothing here special-cases a team.
 
   The card is not itself a button. It has a primary action inside it, and
   nesting a button in a button is invalid markup that hands a screen reader
@@ -101,6 +99,8 @@ export default function TeamCard({
 
   const c = team.colours;
 
+  const short = team.name.split(" ").pop();
+
   return (
     <div
       ref={ref}
@@ -108,8 +108,8 @@ export default function TeamCard({
       onPointerEnter={() => !reduced && setHot(true)}
       onPointerLeave={rest}
       className={[
-        "tcard",
-        `tcard--${team.playstyle}`,
+        "pk-card",
+        `pk-card--${team.playstyle}`,
         hot ? "is-hot" : "",
         selected ? "is-picked" : "",
         dimmed ? "is-dimmed" : "",
@@ -118,53 +118,65 @@ export default function TeamCard({
         .join(" ")}
       style={{ ...teamVars(team), "--stagger": `${index * 110}ms` } as React.CSSProperties}
     >
-      <div className="gk-panel tcard__panel">
-        <div className="gk-panel__face tcard__face">
-          {/* the sunburst behind the crest — the kit's way of saying "this
-              is the hero of the panel" without adding another border */}
-          <span className="tcard__rays" aria-hidden />
+      <div className="k-lift pk-card__lift">
+        <div className="k-plate pk-card__plate">
+          {/* the side's short name, huge and faint, as the plate's own print */}
+          <span className="pk-card__ghost" aria-hidden>
+            {team.abbr}
+          </span>
+          <span className="pk-card__splash" aria-hidden />
 
-          {/* holographic sheen. A hard-edged band, because a soft blur
-              reads as a gradient rather than as light on a surface. */}
-          <span className="tcard__holo" aria-hidden />
-
-          <div className="tcard__top">
-            <span className="tcard__style">{team.playstyle}</span>
-            <span className="tcard__abbr">{team.abbr}</span>
+          <div className="pk-card__top">
+            <TriBadge tone="team" className="pk-card__tri">
+              {team.abbr}
+            </TriBadge>
+            <span className="k-sticker k-tape pk-card__style">
+              <span className="k-stamp">DPL</span>
+              {team.playstyle}
+            </span>
           </div>
 
-          <Crest id={team.id} field={c.primary} emblem={c.light} className="tcard__crest" />
+          <Crest id={team.id} field={c.primary} emblem={c.light} className="pk-card__crest" />
 
-          <div className="tcard__body">
-            <h3 className="tcard__name">{team.name}</h3>
-            <p className="tcard__identity">{team.identity}</p>
-            <p className="tcard__motto">&ldquo;{team.motto}&rdquo;</p>
-          </div>
+          <h3 className="k-brush k-brush--white pk-card__name">{team.name}</h3>
+          <p className="pk-card__identity">
+            {team.identity} <span aria-hidden>·</span> <em>&ldquo;{team.motto}&rdquo;</em>
+          </p>
 
-          {/* the ruled break, dotted at each end. It is the one piece of
-              chrome separating the side's identity from what picking it
-              actually does, which are two different kinds of claim. */}
-          <span className="tcard__sep" aria-hidden />
+          <dl className="pk-bars">
+            {team.ratings.map((r) => (
+              <div className="pk-bars__row" key={r.label}>
+                <dt className="k-label">{r.label}</dt>
+                <dd aria-label={`${r.value} out of 5`}>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <i key={i} className={i < r.value ? "is-on" : ""} />
+                  ))}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-          <p className="tcard__perk">{team.perk}</p>
+          <p className="pk-card__perk">{team.perk}</p>
 
           <button
             type="button"
-            className="gk-btn gk-btn--block tcard__cta"
+            className="k-btn k-btn--fire pk-card__cta"
             onClick={() => onChoose(team)}
             aria-pressed={selected}
           >
-            {selected ? "Locked in" : "Choose side"}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            {selected ? "Locked in" : `Pick the ${short}`}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M5 12h13M12 5l7 7-7 7" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* the glow pooled under the card, which is what actually sells the
-          lift — a shadow alone reads as flat paper */}
-      <span className="tcard__pool" aria-hidden style={{ background: c.primary }} />
+      {selected && (
+        <span className="k-brush pk-card__stamp" aria-hidden>
+          Locked in!
+        </span>
+      )}
     </div>
   );
 }

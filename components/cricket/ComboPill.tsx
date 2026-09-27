@@ -42,8 +42,8 @@ export default function ComboPill({
             the right one here: the number is what changes ball to ball, so
             it leads and the word that qualifies it follows.
           */}
-          <span className="cktCombo__count">×{combo.count}</span>
-          <span className="cktCombo__label">{combo.label}</span>
+          <span className="k-brush cktCombo__count">×{combo.count}</span>
+          <span className="k-sticker cktCombo__label">{combo.label}</span>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,4 +1,4 @@
-import { Anton, Bungee } from "next/font/google";
+import { Anton, Bungee, Knewave } from "next/font/google";
 import localFont from "next/font/local";
 
 /*
@@ -27,6 +27,19 @@ const anton = Anton({
   weight: "400",
   display: "swap",
   variable: "--ckt-display",
+});
+
+/*
+  Knewave is the brush: a heavy, slanted, hand-cut face for the game's loud
+  words - titles, shouts and the buttons that start play. It is always set
+  with a fire gradient and a thick black outline (see .k-brush in kit.css),
+  never as running text, and never for numbers.
+*/
+const knewave = Knewave({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--ckt-brush",
 });
 
 const bungee = Bungee({
@@ -59,7 +72,7 @@ const gimora = localFont({
 
 export default function CricketLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${anton.variable} ${bungee.variable} ${gimora.variable}`}>
+    <div className={`${anton.variable} ${bungee.variable} ${knewave.variable} ${gimora.variable}`}>
       {children}
     </div>
   );
