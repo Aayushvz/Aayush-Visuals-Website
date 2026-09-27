@@ -20,9 +20,8 @@ function shortDate(shipped: string) {
   return `${MONTHS[Number(mm) - 1]} ${Number(dd)}`;
 }
 
-/* the most recent project: its case study on this site, not the live build */
-const RECENT_EXPERIMENT = "cat";
-const RECENT_CASE = "cat-operator-assistant";
+/* the most recent project: the cricket game, opened straight into play */
+const RECENT_EXPERIMENT = "dpl";
 
 /* featured case studies that get a popup of their own */
 const FEATURED = ["mike-tyson-invitational", "layover", "cpgrams"];
@@ -37,28 +36,27 @@ export function buildPromos(): Promo[] {
   const promos: Promo[] = [];
 
   const exp = EXPERIMENTS.find((e) => e.id === RECENT_EXPERIMENT);
-  const recentCase = PROJECTS.find((p) => p.id === RECENT_CASE);
-  if (exp && recentCase) {
+  if (exp) {
     promos.push({
       id: "recent",
-      href: `/work/${RECENT_CASE}`,
+      href: exp.href,
       band: "Most recent project",
       title: exp.title,
       meta: shortDate(exp.shipped),
       text: exp.blurb,
       marks: [
-        { kind: "image", src: "/cat-dashboard/excavator.jpg" },
+        { kind: "image", src: "/cricket/mascot.webp" },
         {
           kind: "badge",
-          bg: "#1a1712",
-          fg: "#fff",
-          node: <img src="/cat-dashboard/logo-white.png" alt="" width={19} height={13} />,
+          bg: exp.theme.accent,
+          fg: exp.theme.onAccent,
+          node: <Logo id={exp.id} />,
         },
       ],
-      status: "Just shipped",
+      status: "Play now",
       statusTone: "green",
       chips: exp.tags.filter((t) => t.label.length <= 13).slice(0, 3),
-      action: `Read the case study: ${exp.title}`,
+      action: `${exp.cta}: ${exp.title}`,
     });
   }
 

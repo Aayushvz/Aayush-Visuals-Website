@@ -272,7 +272,7 @@ export default function Footer() {
       <div className="seaFooter__dockWrapper">
         <div className="seaFooter__dock">
           <p className="seaFooter__colophon">
-            Designed by {PERSON_NAME}
+            &copy; {new Date().getFullYear()} {PERSON_NAME.toLowerCase()}. all rights reserved
           </p>
         </div>
       </div>
