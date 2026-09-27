@@ -1,72 +1,828 @@
 /*
   ============ DPL GAME KIT ============
 
-  The visual language every screen of the game is built from: the pick
-  screen, the match HUD, the pause screen and the scorecard. Taken from a
-  fighting-game HUD reference and re-cut for cricket.
+  The visual language of every screen in the game: pick a side, the match
+  HUD, the pause menu, the scorecard. It is a casual-game kit - the chunky,
+  bright, toy-like UI of Brawl Stars, Clash and the Smash Bros menus - and
+  it works by a handful of rules applied everywhere, never by decoration:
 
-  The grammar, in order of how loud it is:
-
-  1. BRUSH - Knewave, slanted, filled with fire and cut out with a thick
-     black outline. For the few words that should be shouted: titles,
-     SIX!, and the button that starts play. Never for running text, never
-     for numbers.
-  2. PLATES - near-black slabs with one or two corners cut off, a lit top
-     edge and a dark lip. Everything you read sits on one of these, which
-     is what makes the contrast work over a busy stadium: white on the
-     plate is 17:1.
-  3. STICKERS - torn off-white paper with a strip of tape, black type on
-     it (16:1). Labels, names, the small facts. They sit at a slight angle,
-     which is most of what makes the screen feel made by hand.
-  4. ACCENTS - the side's own colour for identity (the triangle badge, the
-     team fill); FIRE (amber to red) for action and anything just earned;
-     and the reference's own traffic-light scale for thresholds:
-     green #01FD99 good, yellow #F9DA17 close, red #CA2A2F miss.
-
-  Numbers are Anton. Small text is the site sans at 600, which is the only
-  thing here that is not shouting.
+  1. ONE OUTLINE. Every shape - button, panel, pip, badge, bar - has the
+     same thick navy stroke (--g-ink). That single rule is what makes a
+     screen full of different colours read as one family.
+  2. EVERY SURFACE IS AN OBJECT. A lit top edge (a white inset line), a
+     darker lip at the bottom, and a hard drop under it. Buttons press down
+     onto their lip. Nothing is a flat rectangle.
+  3. COLOUR MEANS SOMETHING. Green goes (play, resume, pick). Yellow is
+     reward (runs, XP, sixes). Blue navigates and informs. Purple and red
+     are accents (red also means out, and leaving). Navy is the quiet
+     ground everything sits on. The side you picked tints its own pieces.
+  4. TYPE IS OUTLINED. Titles, buttons and numbers are Lilita One in white
+     with the navy outline painted behind the fill and a hard drop - the
+     outline is what keeps white text legible on yellow and on sky alike.
+     Small print is Fredoka, rounded, on navy or white.
 */
 
 .dpl,
 .ckt {
+  --g-ink: #1b1d3a;
+  --g-navy: #2b2f5c;
+  --g-navy-hi: #40436c;
+  --g-navy-lo: #1f2248;
+  --g-well: #161937;
+
+  --g-blue: #1474e0;
+  --g-blue-hi: #49a6ff;
+  --g-blue-lo: #0b4fae;
+  --g-green: #53ce17;
+  --g-green-hi: #8ef04f;
+  --g-green-lo: #2c8f05;
+  --g-yellow: #fac602;
+  --g-yellow-hi: #ffe45c;
+  --g-yellow-lo: #d18f00;
+  --g-purple: #9b3bea;
+  --g-purple-hi: #c47dff;
+  --g-purple-lo: #6a1dbb;
+  --g-red: #ef3b3b;
+  --g-red-hi: #ff7b6b;
+  --g-red-lo: #b51d2a;
+  --g-sky: #8ad8ff;
+
+  --g-team: var(--tm-primary, #1474e0);
+  --g-team-hi: var(--tm-light, #7dd3fc);
+  --g-team-lo: var(--tm-deep, #1d4ed8);
+
+  --g-text: #ffffff;
+  --g-soft: #d6ddff;
+  --g-mute: #9aa3d6;
+
+  --g-display: var(--ckt-game), "Lilita One", var(--ckt-display), Impact, sans-serif;
+  --g-body: var(--ckt-round), "Fredoka", var(--font-primary), system-ui, sans-serif;
+
+  --g-o: 3px;
+  --g-r: 14px;
+}
+
+/* ============ outlined game type ============ */
+.g-title {
+  font-family: var(--g-display);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #fff;
+  -webkit-text-stroke: calc(var(--g-o) * 2) var(--g-ink);
+  paint-order: stroke fill;
+  text-shadow: 0 0.07em 0 var(--g-ink);
+}
+
+.g-num {
+  font-family: var(--g-display);
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.g-small {
+  font-family: var(--g-body);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ============ buttons ============ */
+.g-btn {
+  --hi: var(--g-green-hi);
+  --base: var(--g-green);
+  --lo: var(--g-green-lo);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 26px 5px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: var(--g-r);
+  background: linear-gradient(180deg, var(--hi) 0%, var(--base) 48%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), inset 0 -6px 0 var(--lo), 0 4px 0 var(--g-ink);
+  font-family: var(--g-display);
+  font-size: 1.3rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #fff;
+  -webkit-text-stroke: 6px var(--g-ink);
+  paint-order: stroke fill;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+
+.g-btn svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  stroke-width: 3;
+  filter: drop-shadow(0 2px 0 var(--g-ink));
+}
+
+.g-btn:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 var(--lo), 0 1px 0 var(--g-ink);
+}
+
+.g-btn:focus-visible,
+.g-icon:focus-visible,
+.g-tile:focus-visible {
+  outline: 4px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .g-btn:hover,
+  .g-icon:hover {
+    filter: brightness(1.08) saturate(1.08);
+  }
+}
+
+/* square icon buttons, the top-right controls */
+.g-icon {
+  --hi: var(--g-blue-hi);
+  --base: var(--g-blue);
+  --lo: var(--g-blue-lo);
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  padding: 0 0 4px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--hi) 0%, var(--base) 50%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -5px 0 var(--lo), 0 4px 0 var(--g-ink);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+
+.g-icon svg {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 0 var(--g-ink));
+}
+
+.g-icon:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 0 var(--lo), 0 1px 0 var(--g-ink);
+}
+
+/* ============ panels ============ */
+.g-panel {
+  --hi: var(--g-navy-hi);
+  --base: var(--g-navy);
+  --lo: var(--g-navy-lo);
+  position: relative;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.06) 0 2px, transparent 3px) 0 0 / 28px 28px,
+    linear-gradient(180deg, var(--hi), var(--base) 40%, var(--lo));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.18), inset 0 -6px 0 rgba(0, 0, 0, 0.18), 0 5px 0 var(--g-ink),
+    0 14px 28px -14px rgba(10, 12, 40, 0.6);
+  color: var(--g-text);
+}
+
+/* ============ the resource pill: an icon riding over a dark capsule ============ */
+.g-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px 0 34px;
+  margin-left: 16px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--g-well), var(--g-navy-lo));
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3), 0 3px 0 var(--g-ink);
+}
+
+.g-pill > .g-ico {
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  translate: 0 -50%;
+}
+
+/* ============ bars ============ */
+.g-bar {
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 999px;
+  background: var(--g-well);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.g-bar__fill {
+  --hi: var(--g-green-hi);
+  --base: var(--g-green);
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--hi) 0 40%, var(--base) 40%);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* segments, for bars that count */
+.g-bar--ticks::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--g-ink) calc(10% - 3px) 10%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* ============ pips ============ */
+.g-pips {
+  display: flex;
+  gap: 5px;
+}
+
+.g-pip {
+  --pip: 28px;
+  display: grid;
+  place-items: center;
+  width: var(--pip);
+  height: var(--pip);
+  padding-bottom: 3px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #b3bbdc, #8a93bd 55%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+  font-family: var(--g-display);
+  font-size: calc(var(--pip) * 0.56);
+  font-style: normal;
+  line-height: 1;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
+}
+
+.g-pip.is-todo {
+  color: #e8ebf7;
+}
+
+.g-pip.is-live {
+  background: #fff;
+  color: var(--g-ink);
+  -webkit-text-stroke: 0;
+  box-shadow: 0 0 0 3px var(--g-yellow), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  animation: gPipLive 0.9s ease-in-out infinite;
+}
+
+@keyframes gPipLive {
+  50% {
+    box-shadow: 0 0 0 5px rgba(250, 198, 2, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  }
+}
+
+.g-pip.is-dot {
+  background: linear-gradient(180deg, #6f77a6, #545c8c 55%);
+}
+
+.g-pip.is-single {
+  background: linear-gradient(180deg, var(--g-blue-hi), var(--g-blue) 55%);
+}
+
+.g-pip.is-four {
+  background: linear-gradient(180deg, var(--g-green-hi), var(--g-green) 55%);
+}
+
+.g-pip.is-six {
+  background: linear-gradient(180deg, var(--g-yellow-hi), var(--g-yellow) 55%);
+}
+
+.g-pip.is-wicket {
+  background: linear-gradient(180deg, var(--g-red-hi), var(--g-red) 55%);
+}
+
+/* ============ hex badge ============ */
+.g-hex {
+  --hex: 64px;
+  --hi: var(--g-blue-hi);
+  --base: var(--g-blue);
+  --lo: var(--g-blue-lo);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--hex);
+  aspect-ratio: 100 / 110;
+  flex: none;
+}
+
+.g-hex svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.g-hex__lip {
+  fill: var(--g-ink);
+}
+
+.g-hex__face {
+  fill: var(--base);
+  stroke: var(--g-ink);
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+
+.g-hex__shine {
+  fill: rgba(255, 255, 255, 0.4);
+}
+
+.g-hex__text {
+  position: relative;
+  margin-top: -4%;
+  font-family: var(--g-display);
+  font-size: calc(var(--hex) * 0.38);
+  line-height: 1;
+  color: #fff;
+  -webkit-text-stroke: calc(var(--hex) * 0.08) var(--g-ink);
+  paint-order: stroke fill;
+}
+
+/* ============ ribbon ============ */
+.g-ribbon {
+  --hi: var(--g-red-hi);
+  --base: var(--g-red);
+  --lo: var(--g-red-lo);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 34px;
+}
+
+.g-ribbon__tails {
+  position: absolute;
+  inset: 0 0 -8px;
+  width: 100%;
+  height: calc(100% + 8px);
+  overflow: visible;
+}
+
+.g-ribbon__tail {
+  fill: var(--lo);
+  stroke: var(--g-ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.g-ribbon__body {
+  position: relative;
+  display: block;
+  padding: 7px 22px 10px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--hi), var(--base) 50%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -5px 0 var(--lo);
+  font-family: var(--g-display);
+  font-size: 1.3rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: #fff;
+  -webkit-text-stroke: 6px var(--g-ink);
+  paint-order: stroke fill;
+}
+
+/* ============ stars ============ */
+.g-stars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.g-star {
+  width: 48px;
+  height: auto;
+  overflow: visible;
+}
+
+.g-star:nth-child(2) {
+  width: 62px;
+}
+
+.g-star path:first-child {
+  fill: #4a4f86;
+  stroke: var(--g-ink);
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+
+.g-star__shine {
+  fill: rgba(255, 255, 255, 0.18);
+}
+
+.g-star.is-on path:first-child {
+  fill: var(--g-yellow);
+}
+
+.g-star.is-on .g-star__shine {
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.g-star.is-on {
+  animation: gStar 0.45s cubic-bezier(0.22, 1.6, 0.36, 1) both;
+}
+
+@keyframes gStar {
+  from {
+    opacity: 0;
+    transform: scale(2) rotate(-20deg);
+  }
+}
+
+/* ============ toggle ============ */
+.g-toggle {
+  position: relative;
+  display: inline-block;
+  width: 64px;
+  height: 34px;
+  flex: none;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 999px;
+  background: #566089;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.25);
+  transition: background-color 0.18s ease;
+}
+
+.g-toggle i {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 26px;
+  height: 26px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff, #dfe4f5);
+  transition: transform 0.2s cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+
+.g-toggle[data-on] {
+  background: var(--g-green);
+}
+
+.g-toggle[data-on] i {
+  transform: translateX(29px);
+}
+
+/* ============ keycaps ============ */
+.g-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  height: 30px;
+  padding: 0 8px 3px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff, #e3e7f6);
+  box-shadow: inset 0 -3px 0 #b9c0dc, 0 3px 0 var(--g-ink);
+  font-family: var(--g-display);
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--g-ink);
+}
+
+/* ============ speech bubble ============ */
+.g-bubble {
+  position: relative;
+  padding: 12px 16px 14px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: inset 0 -4px 0 #d9deef, 0 4px 0 var(--g-ink);
+  color: var(--g-ink);
+}
+
+.g-bubble::after {
+  content: "";
+  position: absolute;
+  left: 26px;
+  bottom: -14px;
+  width: 20px;
+  height: 16px;
+  background: #fff;
+  border: var(--g-o) solid var(--g-ink);
+  border-top: 0;
+  clip-path: polygon(0 0, 100% 0, 10% 100%);
+  border-radius: 0 0 0 4px;
+}
+
+/* ============ the menu frame: a Smash-style header and footer ============ */
+.g-crumb {
+  display: flex;
+  align-items: stretch;
+  height: 60px;
+  filter: drop-shadow(0 4px 0 rgba(27, 29, 58, 0.35));
+}
+
+.g-crumb__mark {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  padding-right: 16px;
+  background: var(--g-ink);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%);
+}
+
+.g-crumb__mark .g-ico {
+  width: 40px;
+  height: 40px;
+}
+
+.g-crumb__trail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: -18px;
+  padding: 0 64px 0 38px;
+  background: linear-gradient(180deg, #ffffff, #d7dcea);
+  clip-path: polygon(22px 0, 100% 0, calc(100% - 26px) 100%, 0 100%);
+  box-shadow: inset 0 -5px 0 #b3bbd2;
+  font-family: var(--g-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #3a3f6b;
+  white-space: nowrap;
+}
+
+.g-crumb__trail b {
+  font-family: var(--g-display);
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
+}
+
+.g-crumb__sep {
+  color: var(--g-blue);
+  font-weight: 700;
+}
+
+.g-foot {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 28px 4px;
+  background: linear-gradient(180deg, #e9ecf5, #cfd5e6);
+  border-top: var(--g-o) solid var(--g-ink);
+  box-shadow: inset 0 3px 0 #fff;
+  font-family: var(--g-body);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--g-ink);
+}
+
+/* ============ big menu tiles ============ */
+.g-tile {
+  --hi: var(--g-green-hi);
+  --base: var(--g-green);
+  --lo: var(--g-green-lo);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  min-height: 150px;
+  padding: 18px 22px 22px;
+  overflow: hidden;
+  border: 5px solid var(--g-ink);
+  border-radius: 24px 70px 24px 24px;
+  background:
+    linear-gradient(160deg, transparent 0 58%, rgba(255, 255, 255, 0.28) 58% 72%, transparent 72%),
+    linear-gradient(180deg, var(--hi), var(--base) 55%, var(--lo));
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.4), inset 0 -8px 0 rgba(0, 0, 0, 0.16), 0 6px 0 var(--g-ink);
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+  transition: transform 0.14s cubic-bezier(0.22, 1.4, 0.36, 1), box-shadow 0.14s ease;
+}
+
+.g-tile__icon {
+  align-self: start;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 18px;
+  background: rgba(27, 29, 58, 0.28);
+  color: #fff;
+}
+
+.g-tile__icon svg {
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 3px 0 var(--g-ink));
+}
+
+.g-tile__label {
+  font-family: var(--g-display);
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  line-height: 0.95;
+  color: #fff;
+  -webkit-text-stroke: 8px var(--g-ink);
+  paint-order: stroke fill;
+  text-shadow: 0 4px 0 var(--g-ink);
+}
+
+.g-tile__meta {
+  position: absolute;
+  top: 16px;
+  right: 30px;
+}
+
+/* the highlighted tile wears the menu's selection aura */
+.g-tile:hover,
+.g-tile:focus-visible {
+  transform: scale(1.03);
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.4), inset 0 -8px 0 rgba(0, 0, 0, 0.16), 0 6px 0 var(--g-ink),
+    0 0 0 6px rgba(255, 255, 255, 0.85), 0 0 0 12px rgba(20, 116, 224, 0.55);
+  outline: none;
+}
+
+.g-tile:active {
+  transform: scale(1.01) translateY(3px);
+}
+
+/* ============ the bright ground behind full-screen menus ============ */
+.g-ground {
+  background:
+    /* big soft shapes drifting across the sky, like a menu wallpaper */
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.5) 0 70px, transparent 71px),
+    radial-gradient(circle at 88% 78%, rgba(255, 255, 255, 0.35) 0 110px, transparent 111px),
+    repeating-linear-gradient(
+      -35deg,
+      transparent 0 60px,
+      rgba(255, 255, 255, 0.12) 60px 120px
+    ),
+    radial-gradient(130% 100% at 50% 20%, #9fe0ff 0%, #4fb4f5 45%, #1f7fdc 100%);
+}
+
+.g-ico {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-pip.is-live,
+  .g-star.is-on {
+    animation: none;
+  }
+
+  .g-tile,
+  .g-toggle i {
+    transition: none;
+  }
+}
+
+/* ============ the burst ground ============
+   The full-screen menus stand on a comic-book burst: a bright base, two
+   layers of rays (soft wedges far back, lightning spikes in front), a
+   halftone wash, two speed streaks and a pale glow at the centre so the
+   content in the middle always has the calmest part of the picture
+   behind it. Each screen picks a colour family: blue to choose, purple to
+   pause, yellow to celebrate, red for a wicket. */
+.g-burst {
+  --b-base: #3fb0ff;
+  --b-far: rgba(255, 255, 255, 0.16);
+  --b-near: #1c86ea;
+  --b-dots: rgba(255, 255, 255, 0.22);
+  --b-streak: rgba(255, 255, 255, 0.55);
+  --b-glow: rgba(210, 240, 255, 0.85);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--b-base);
+}
+
+.g-burst--purple {
+  --b-base: #8b3bea;
+  --b-far: rgba(255, 255, 255, 0.12);
+  --b-near: #6a1dbb;
+  --b-dots: rgba(250, 198, 2, 0.55);
+  --b-streak: rgba(250, 226, 60, 0.85);
+  --b-glow: rgba(214, 170, 255, 0.8);
+}
+
+.g-burst--yellow {
+  --b-base: #ffd21f;
+  --b-far: rgba(255, 255, 255, 0.28);
+  --b-near: #ffa800;
+  --b-dots: rgba(255, 138, 0, 0.35);
+  --b-streak: rgba(255, 255, 255, 0.7);
+  --b-glow: rgba(255, 246, 200, 0.9);
+}
+
+.g-burst--red {
+  --b-base: #ff5a4f;
+  --b-far: rgba(255, 255, 255, 0.14);
+  --b-near: #d42a33;
+  --b-dots: rgba(255, 214, 90, 0.4);
+  --b-streak: rgba(255, 230, 150, 0.75);
+  --b-glow: rgba(255, 200, 190, 0.8);
+}
+
+.g-burst__rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 170vmax;
+  height: 170vmax;
+  translate: -50% -50%;
+  animation: gSpin 120s linear infinite;
+}
+
+.g-burst__far path {
+  fill: var(--b-far);
+}
+
+.g-burst__near path {
+  fill: var(--b-near);
+}
+
+/* halftone, heaviest in two opposite corners like a printed comic panel */
+.g-burst__dots {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, var(--b-dots) 0 2.2px, transparent 2.6px) 0 0 / 12px 12px;
+  -webkit-mask-image: linear-gradient(135deg, #000 0%, transparent 38%, transparent 62%, #000 100%);
+  mask-image: linear-gradient(135deg, #000 0%, transparent 38%, transparent 62%, #000 100%);
+}
+
+.g-burst__streak {
+  position: absolute;
+  width: 60vmax;
+  height: 3vmax;
+  background: linear-gradient(90deg, transparent, var(--b-streak) 40%, transparent);
+  rotate: -28deg;
+  opacity: 0.8;
+}
+
+.g-burst__streak--a {
+  left: -10vmax;
+  top: 18%;
+}
+
+.g-burst__streak--b {
+  right: -14vmax;
+  bottom: 16%;
+  height: 5vmax;
+}
+
+.g-burst__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side at 50% 50%, var(--b-glow), transparent 75%);
+  opacity: 0.55;
+}
+
+@keyframes gSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-burst__rays {
+    animation: none;
+  }
+}
+
+/* ============ the hit stamp (shot receipt) ============
+   Carried over from the previous kit on purpose; see the note in kit.tsx.
+   Its own small token set, scoped to the two roots. */
+.dpl,
+.ckt {
   --k-ink: #0c0c0e;
-  --k-plate: #18191d;
-  --k-plate-hi: #24252b;
-  --k-plate-lo: #0f1013;
-  --k-edge: #34363e;
   --k-paper: #f1ede4;
   --k-paper-ink: #121214;
-  --k-text: #f7f5f0;
-  --k-dim: #b9b6ae;
-  --k-mute: #8d8a83;
-
   --k-fire-1: #ffc233;
   --k-fire-2: #ff6a13;
   --k-fire-3: #e8261f;
   --k-fire: linear-gradient(180deg, var(--k-fire-1) 0%, var(--k-fire-2) 52%, var(--k-fire-3) 100%);
-  --k-fire-x: linear-gradient(90deg, var(--k-fire-1), var(--k-fire-2) 55%, var(--k-fire-3));
-
-  --k-good: #01fd99;
-  --k-near: #f9da17;
   --k-miss: #ca2a2f;
-
   --k-team: var(--tm-primary, #2563eb);
-  --k-team-hi: var(--tm-light, #7dd3fc);
-  --k-team-lo: var(--tm-deep, #1d4ed8);
-
   --k-brush: var(--ckt-brush), var(--ckt-display), Impact, sans-serif;
   --k-num: var(--ckt-display), Impact, "Arial Narrow", sans-serif;
-
-  /* film grain, drawn once by the browser and tiled */
-  --k-grit: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-
-  /* the torn right edge of a sticker */
   --k-torn: polygon(
     0 3%, 18% 0, 46% 2%, 78% 0, 94% 1%, 97% 12%, 94% 22%, 99% 34%, 95% 46%,
     100% 58%, 96% 70%, 99% 82%, 95% 93%, 82% 100%, 50% 97%, 20% 100%, 0 97%
   );
-  /* a plate with its top-right and bottom-left corners cut */
-  --k-cut: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
 }
 
 /* ---------- brush lettering ---------- */
@@ -91,24 +847,6 @@
   background: linear-gradient(180deg, #fff, #e9e5dc);
   -webkit-background-clip: text;
   background-clip: text;
-}
-
-/* ---------- plates ---------- */
-.k-plate {
-  position: relative;
-  background:
-    var(--k-grit),
-    linear-gradient(180deg, var(--k-plate-hi), var(--k-plate) 40%, var(--k-plate-lo));
-  background-blend-mode: soft-light, normal;
-  color: var(--k-text);
-  clip-path: var(--k-cut);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -3px 0 rgba(0, 0, 0, 0.45);
-}
-
-/* a plate's shadow has to be a filter on a wrapper, because clip-path cuts
-   an ordinary box-shadow off along with the corner */
-.k-lift {
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6));
 }
 
 /* ---------- stickers and tape ---------- */
@@ -173,18 +911,6 @@
   opacity: 0.8;
 }
 
-/* ---------- small labels ---------- */
-.k-label {
-  font-family: var(--font-primary);
-  font-size: 0.6rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--k-mute);
-  white-space: nowrap;
-}
-
 /* ---------- the triangle badge ---------- */
 .k-tri {
   --tri: 64px;
@@ -240,223 +966,14 @@
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* ---------- the ring gauge ---------- */
-.k-gauge {
-  --gauge: 64px;
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: var(--gauge);
-  height: var(--gauge);
-  flex: none;
-}
-
-.k-gauge svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 3px 0 var(--k-ink));
-}
-
-.k-gauge__rim {
-  fill: var(--k-ink);
-}
-
-.k-gauge__track {
-  fill: none;
-  stroke: #2b2c33;
-  stroke-width: 15;
-}
-
-.k-gauge__fill {
-  fill: none;
-  stroke: url(#kFire);
-  stroke-width: 15;
-  stroke-linecap: round;
-  transition: stroke-dasharray 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.k-gauge__core {
-  fill: #1c1d22;
-  stroke: var(--k-ink);
-  stroke-width: 3;
-}
-
-.k-gauge__text {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  font-family: var(--k-num);
-  font-size: calc(var(--gauge) * 0.28);
-  line-height: 0.9;
-  color: #fff;
-}
-
-.k-gauge__text small {
-  font-family: var(--font-primary);
-  font-size: max(8px, calc(var(--gauge) * 0.13));
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--k-dim);
-}
-
-/* ---------- the ball slots ---------- */
-.k-slots {
-  display: flex;
-  gap: 5px;
-}
-
-.k-slot {
-  --slot: 24px;
-  display: grid;
-  place-items: center;
-  width: var(--slot);
-  height: calc(var(--slot) * 1.18);
-  border-radius: 3px;
-  transform: skewX(-8deg);
-  font-style: normal;
-  /* an empty slot still has to read as a slot on a black plate: a lit rim */
-  background: linear-gradient(180deg, #34353d, #202127);
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.22), 0 2px 0 var(--k-ink);
-}
-
-.k-slot b {
-  display: block;
-  transform: skewX(8deg);
-  font-family: var(--k-num);
-  font-size: calc(var(--slot) * 0.66);
-  font-weight: 400;
-  line-height: 1;
-}
-
-.k-slot.is-live {
-  box-shadow: inset 0 0 0 2px var(--k-fire-2), 0 0 12px rgba(255, 106, 19, 0.55), 0 2px 0 var(--k-ink);
-  animation: kSlotLive 0.9s ease-in-out infinite;
-}
-
-@keyframes kSlotLive {
-  50% {
-    box-shadow: inset 0 0 0 2px var(--k-fire-1), 0 0 4px rgba(255, 106, 19, 0.2), 0 2px 0 var(--k-ink);
-  }
-}
-
-.k-slot.is-dot,
-.k-slot.is-single,
-.k-slot.is-four,
-.k-slot.is-six,
-.k-slot.is-wicket {
-  background: linear-gradient(180deg, #fbf8f1, var(--k-paper));
-  color: var(--k-paper-ink);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 2px 0 var(--k-ink);
-}
-
-.k-slot.is-dot {
-  color: #6b6860;
-}
-
-.k-slot.is-four {
-  background: var(--k-good);
-  color: #03281a;
-}
-
-.k-slot.is-six {
-  background: var(--k-fire);
-  color: var(--k-ink);
-}
-
-.k-slot.is-wicket {
-  background: var(--k-miss);
-  color: #fff;
-}
-
-/* ---------- keycaps ---------- */
-.k-key {
-  display: inline-grid;
-  place-items: center;
-  min-width: 26px;
-  height: 24px;
-  padding: 0 7px;
-  border-radius: 4px;
-  background: var(--k-paper);
-  color: var(--k-paper-ink);
-  box-shadow: 0 3px 0 #9d998f, 0 4px 0 var(--k-ink);
-  font-family: var(--font-primary);
-  font-size: 0.66rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.02em;
-}
-
-/* ---------- buttons ---------- */
-.k-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 54px;
-  padding: 0 26px;
-  border: 0;
-  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-  font-family: var(--k-num);
-  font-size: 1.1rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: transform 0.12s ease, filter 0.12s ease;
-}
-
-.k-btn svg {
-  width: 18px;
-  height: 18px;
-  flex: none;
-}
-
-/* fire: the one that starts play */
-.k-btn--fire {
-  background: var(--k-fire);
-  color: var(--k-ink);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), inset 0 -4px 0 rgba(120, 12, 8, 0.45);
-}
-
-/* ink: everything else */
-.k-btn--ink {
-  background: linear-gradient(180deg, #2a2b31, #141519);
-  color: var(--k-text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -3px 0 rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-}
-
-.k-btn:active {
-  transform: translateY(2px);
-}
-
-/* the ring is drawn inside: a clip-path cuts off anything outside the shape,
-   an outline included */
-.k-btn:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 5px var(--k-ink);
-}
-
-@media (hover: hover) {
-  .k-btn--fire:hover {
-    filter: brightness(1.08) saturate(1.1);
-  }
-
-  .k-btn--ink:hover {
-    filter: brightness(1.25);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .k-slot.is-live {
-    animation: none;
-  }
-
-  .k-gauge__fill {
-    transition: none;
-  }
-}
+/* ============ tone: one knob that recolours any kit piece ============
+   Last in the file on purpose: every piece declares its own default
+   colour, and a tone has to win over that default at equal specificity. */
+.g-tone--blue { --hi: var(--g-blue-hi); --base: var(--g-blue); --lo: var(--g-blue-lo); }
+.g-tone--green { --hi: var(--g-green-hi); --base: var(--g-green); --lo: var(--g-green-lo); }
+.g-tone--yellow,
+.g-tone--gold { --hi: var(--g-yellow-hi); --base: var(--g-yellow); --lo: var(--g-yellow-lo); }
+.g-tone--purple { --hi: var(--g-purple-hi); --base: var(--g-purple); --lo: var(--g-purple-lo); }
+.g-tone--red { --hi: var(--g-red-hi); --base: var(--g-red); --lo: var(--g-red-lo); }
+.g-tone--navy { --hi: var(--g-navy-hi); --base: var(--g-navy); --lo: var(--g-navy-lo); }
+.g-tone--team { --hi: var(--g-team-hi); --base: var(--g-team); --lo: var(--g-team-lo); }

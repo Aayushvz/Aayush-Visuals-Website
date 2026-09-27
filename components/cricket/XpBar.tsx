@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { LEVEL_STEP, levelFor, levelFraction } from "./progress";
 import { BoltIcon } from "./gameIcons";
-import { Gauge } from "./kit";
+import { Hex } from "./kit";
 
 /*
   Level and XP. The fill is a spring rather than a linear tween so gaining XP
@@ -13,9 +13,9 @@ import { Gauge } from "./kit";
   near-zero and reads as a loss — so crossing the threshold fires an explicit
   flourish.
 
-  The level sits in a ring gauge that fills with fire as XP comes in - the
-  HUD reference's charge dial - with the exact count on a notched bar
-  beside it. The ring is the glance, the bar is the reading.
+  The level sits on a gold hex badge at the end of a chunky bar - the
+  player-level strip every casual game carries - so the number you have
+  earned is an object and the progress toward the next one is a track.
 */
 export default function XpBar({
   xp,
@@ -33,10 +33,9 @@ export default function XpBar({
 
   return (
     <div className="cktXp" aria-label={`Level ${level}, ${intoLevel} of ${LEVEL_STEP} XP`}>
-      <Gauge value={frac} className="cktXp__gauge">
-        <small>Lvl</small>
+      <Hex tone="gold" className="cktXp__hex">
         {level}
-      </Gauge>
+      </Hex>
 
       <div className="cktXp__meter">
         <div className="cktXp__top">
@@ -47,11 +46,11 @@ export default function XpBar({
           </span>
         </div>
 
-        <div className="cktXp__track">
+        <div className="g-bar g-bar--ticks cktXp__track">
           <motion.div
-            className="cktXp__fill"
+            className="g-bar__fill cktXp__fill"
             initial={false}
-            animate={{ width: `${Math.max(2, frac * 100)}%` }}
+            animate={{ width: `${Math.max(4, frac * 100)}%` }}
             transition={
               reduced
                 ? { duration: 0 }

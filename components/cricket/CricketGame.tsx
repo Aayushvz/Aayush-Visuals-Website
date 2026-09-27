@@ -33,7 +33,7 @@ import Avatar from "./Avatar";
 import Ticker from "./Ticker";
 import { createClock } from "./clock";
 import { teamById } from "./teams";
-import { BallSlots, TriBadge } from "./kit";
+import { BallIcon, BoltIcon, Burst, Hex, Pips, Ribbon, Stars, Toggle } from "./kit";
 import "./kit.css";
 import "./cricket.css";
 
@@ -94,6 +94,8 @@ export default function CricketGame({
     score: null,
   });
   const [menuOpen, setMenuOpen] = useState(false);
+  /* the pause menu's footer line, for whichever tile is highlighted */
+  const [pauseHint, setPauseHint] = useState("Jump straight back in, right where you left off.");
   /* the match's own time: see clock.ts. One per mounted match. */
   const [clock] = useState(createClock);
 
@@ -709,28 +711,37 @@ export default function CricketGame({
      side of the ideal - the engine's own numbers, drawn */
   const perfectPct = (delivery.windows.perfect / delivery.windows.contact) * 50;
 
+  const level = levelFor(xp);
+  /* three stars, on the runs: a real over rewards a real total */
+  const stars = score >= 24 ? 3 : score >= 12 ? 2 : score >= 4 ? 1 : 0;
+
   return (
     <div className="ckt" data-phase={phase} data-paused={menuOpen || undefined}>
       <div className="ckt-stage" ref={stageRef}>
         <canvas ref={canvasRef} className="ckt-canvas" aria-hidden="true" />
       </div>
 
-      {/* ---- top left: who is batting, as a taped-up ID ---- */}
+      {/* ---- top left: the player card ---- */}
       <PageLink className="hud-id" href="/">
-        <Avatar className="hud-id__face" />
-        <span className="k-sticker k-tape hud-id__name">
-          <span className="k-stamp">Bat</span>
-          Aayush VZ
+        <span className="hud-id__frame">
+          <Avatar className="hud-id__face" />
+        </span>
+        <span className="hud-id__text">
+          <span className="g-title hud-id__name">Aayush VZ</span>
+          <span className="hud-id__rank">
+            <span>Level</span>
+            <b>{level}</b>
+          </span>
         </span>
       </PageLink>
 
       {/*
-        ---- top centre: the score bar ----
+        ---- top centre: the scoreboard ----
 
-        Built like the reference's charge bar: the side's triangle badge
-        overlapping the end of a long black plate, the total, then the over
-        as a rack of six ball slots. The delivery hangs underneath on a
-        sticker, the way the reference hangs its status label.
+        A navy panel with the batting side's tile, the total in big outlined
+        numerals, the over as six numbered pips, the strike rate, and the
+        delivery on a chip at the end - inside the board, because anything
+        hanging below it lands on the stadium screen.
       */}
       <div
         className="hud-bug"
@@ -738,38 +749,28 @@ export default function CricketGame({
         aria-live="polite"
         aria-label={`${side.name} ${score} for ${out ? 1 : 0}, ball ${Math.max(1, ballsShown)} of ${BALLS}`}
       >
-        <TriBadge tone="team" className="hud-bug__tri">
-          {side.abbr}
-        </TriBadge>
-        <div className="k-lift hud-bug__lift">
-          <div className="k-plate hud-bug__plate">
-            <span className="hud-bug__score">
-              <Ticker value={score} reduced={reduced} />
-              <small>-{out ? 1 : 0}</small>
-            </span>
-            <span className="hud-bug__over">
-              <span className="k-label">This over</span>
-              <BallSlots log={overLog} live={live} />
-            </span>
-            <span className="hud-bug__sr">
-              <span className="k-label">SR</span>
-              <b>
-                <Ticker value={strikeRate} reduced={reduced} />
-              </b>
-            </span>
-          </div>
+        <div className="g-panel hud-bug__panel">
+          <span className="hud-bug__team">{side.abbr}</span>
+          <span className="g-title hud-bug__score">
+            <Ticker value={score} reduced={reduced} />
+            <small>/{out ? 1 : 0}</small>
+          </span>
+          <Pips log={overLog} live={live} className="hud-bug__pips" />
+          <span className="hud-bug__sr">
+            <span>SR</span>
+            <b>
+              <Ticker value={strikeRate} reduced={reduced} />
+            </b>
+          </span>
+          <span className="hud-bug__ball">{phase === "idle" ? "To come" : delivery.label}</span>
         </div>
-        <span className="k-sticker hud-bug__ball">
-          <span className="k-stamp">Ball {Math.max(1, ballsShown)}</span>
-          {phase === "idle" ? "To come" : delivery.label}
-        </span>
       </div>
 
       {/* ---- top right: sound, pause, leave ---- */}
       <div className="hud-ctrl">
         <button
           type="button"
-          className="hud-btn hud-btn--sound"
+          className="g-icon hud-btn--sound"
           onClick={toggleMute}
           aria-pressed={muted}
           aria-label={muted ? "Turn sound on" : "Turn sound off"}
@@ -779,7 +780,7 @@ export default function CricketGame({
         </button>
         <button
           type="button"
-          className="hud-btn"
+          className="g-icon g-tone--yellow"
           onClick={() => setMenuOpen(true)}
           aria-expanded={menuOpen}
           aria-haspopup="dialog"
@@ -788,7 +789,7 @@ export default function CricketGame({
         >
           <PauseIcon />
         </button>
-        <PageLink className="hud-btn" href="/playground" aria-label="Leave the game" title="Leave the game">
+        <PageLink className="g-icon g-tone--red" href="/playground" aria-label="Leave the game" title="Leave the game">
           <CloseIcon />
         </PageLink>
       </div>
@@ -799,22 +800,17 @@ export default function CricketGame({
       {phase !== "over" && !shout && <ComboPill combo={combo} reduced={reduced} />}
 
       {/*
-        ---- bottom left: commentary, timing, level ----
+        ---- bottom left: the commentator speaks ----
 
-        One plate, top to bottom: who is talking and what they said, how
-        the timing landed on the reference's traffic-light scale, and the
-        level dial with its XP. One column, so the timing appearing under a
-        shot pushes the meter down instead of colliding with it.
+        A speech bubble, because it is someone talking, with the timing of
+        the last shot inside it on a traffic-light meter. The level bar sits
+        underneath, next to the commentator's portrait.
       */}
-      <div className="k-lift hud-com">
-        <div className="k-plate hud-com__plate">
-          <div className="hud-com__head">
-            <Avatar className="hud-com__face" />
-            <span className="k-label hud-com__who">Commentary</span>
-            <span className="hud-com__onair" aria-hidden>
-              On air
-            </span>
-          </div>
+      <div className="hud-com">
+        <div className="g-bubble hud-com__bubble">
+          <span className="hud-com__who">
+            <i aria-hidden /> Commentary
+          </span>
           <p className="hud-com__line">{commentary}</p>
 
           {last && last.contact !== "wicket" && (
@@ -842,227 +838,263 @@ export default function CricketGame({
                 }
               >
                 {Math.abs(last.offset) <= delivery.windows.perfect
-                  ? "Perfect"
+                  ? "Perfect!"
                   : last.offset < 0
                     ? `${Math.round(-last.offset)}ms early`
                     : `${Math.round(last.offset)}ms late`}
               </span>
             </div>
           )}
+        </div>
 
+        <div className="hud-com__foot">
+          <span className="hud-com__face">
+            <Avatar />
+          </span>
           <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
         </div>
       </div>
 
       {/* ---- bottom right: the wagon wheel ---- */}
-      <div className="k-lift hud-wheel">
-        <div className="k-plate hud-wheel__plate">
-          <span className="k-label">Wagon wheel</span>
-          <Wagon plots={plots} />
-          <span className="hud-wheel__key" aria-hidden>
-            <i className="k1" />1<i className="k4" />4<i className="k6" />6
-          </span>
-        </div>
+      <div className="g-panel hud-wheel">
+        <Ribbon tone="blue" className="hud-wheel__ribbon">
+          Wagon wheel
+        </Ribbon>
+        <Wagon plots={plots} />
+        <span className="hud-wheel__key" aria-hidden>
+          <i className="k1" />1<i className="k4" />4<i className="k6" />6
+        </span>
       </div>
 
       {/* ---- the start card ---- */}
       {phase === "idle" && (
-        <div className="k-lift ckt-card ckt-card--intro" role="dialog" aria-labelledby="ckt-intro-title">
-          <div className="k-plate ckt-card__plate">
-            <div className="ckt-card__top">
-              <TriBadge tone="team" className="ckt-card__tri">
-                {side.abbr}
-              </TriBadge>
-              <span className="k-sticker k-tape ckt-card__meta">
-                <span className="k-stamp">DPL</span>
-                {side.name} batting
-              </span>
-            </div>
-            <h1 className="ckt-card__title" id="ckt-intro-title">
-              <span className="k-brush">Six balls!</span>
-              <span className="k-brush k-brush--white">One innings.</span>
-            </h1>
-            <p className="ckt-card__body">
-              Play the shot as the ball reaches you. Timing decides the runs, your aim decides
-              where it goes, and a wicket ends the over on the spot.
-            </p>
-            <ul className="ckt-keys" aria-label="Controls">
-              <li>
-                <kbd className="k-key">Space</kbd>
-                <span>Play the shot</span>
-              </li>
-              <li>
-                <kbd className="k-key">←</kbd>
-                <kbd className="k-key">→</kbd>
-                <span>Aim</span>
-              </li>
-              <li>
-                <kbd className="k-key">Esc</kbd>
-                <span>Pause</span>
-              </li>
-            </ul>
-            <button type="button" className="k-btn k-btn--fire ckt-card__go" onClick={start}>
-              Take guard
-              <ArrowIcon />
-            </button>
+        <div className="g-panel ckt-card" role="dialog" aria-labelledby="ckt-intro-title">
+          <Ribbon tone="red" className="ckt-card__ribbon">
+            Six balls!
+          </Ribbon>
+          <div className="ckt-card__side">
+            <Hex tone="team" className="ckt-card__hex">
+              {side.abbr}
+            </Hex>
+            <span>
+              <b>{side.name}</b> batting
+            </span>
           </div>
+          <h1 className="g-title ckt-card__title" id="ckt-intro-title">
+            One innings.
+          </h1>
+          <p className="ckt-card__body">
+            Play the shot as the ball reaches you. Timing decides the runs, your aim decides
+            where it goes, and a wicket ends the over on the spot.
+          </p>
+          <ul className="ckt-keys" aria-label="Controls">
+            <li>
+              <kbd className="g-key">Space</kbd>
+              <span>Play the shot</span>
+            </li>
+            <li>
+              <kbd className="g-key">←</kbd>
+              <kbd className="g-key">→</kbd>
+              <span>Aim</span>
+            </li>
+            <li>
+              <kbd className="g-key">Esc</kbd>
+              <span>Pause</span>
+            </li>
+          </ul>
+          <button type="button" className="g-btn ckt-card__go" onClick={start}>
+            Play!
+            <PlayIcon />
+          </button>
         </div>
       )}
-
-      {/* the finished innings gets the pick screen's wall: there is nothing
-          behind it to go back to, so the pitch is covered */}
-      {phase === "over" && <div className="ckt-outro" aria-hidden />}
 
       {/* ---- the scorecard ---- */}
       {phase === "over" && (
         <div className="ckt-over" role="dialog" aria-labelledby="ckt-over-title">
-          <div className="ckt-over__head">
-            <span className="k-sticker k-tape ckt-over__kicker">
-              <span className="k-stamp">DPL</span>
-              {out ? "Over ended early" : "Over complete"}
-            </span>
-            <h2 className="k-brush ckt-over__verdict" id="ckt-over-title">
-              {finalVerdict.title}
-            </h2>
-          </div>
+          <Burst tone={out ? "red" : "yellow"} />
 
-          <div className="k-lift ckt-over__lift">
-            <div className="k-plate ckt-over__plate">
+          <header className="g-crumb ckt-over__crumb">
+            <span className="g-crumb__mark">
+              <BallIcon />
+            </span>
+            <span className="g-crumb__trail">
+              <span className="g-crumb__home">Design Premier League</span>
+              <span className="g-crumb__sep" aria-hidden>
+                ›
+              </span>
+              <b>Scorecard</b>
+            </span>
+          </header>
+
+          <div className="ckt-over__main">
+            <div className="g-panel ckt-over__panel">
+              <Ribbon tone={out ? "red" : "green"} className="ckt-over__ribbon">
+                {out ? "Out!" : "Over complete!"}
+              </Ribbon>
+              <Stars earned={stars} />
+
+              <h2 className="g-title ckt-over__verdict" id="ckt-over-title">
+                {finalVerdict.title}
+              </h2>
+
               <div className="ckt-over__score">
-                <TriBadge tone="team" className="ckt-over__tri">
-                  {side.abbr}
-                </TriBadge>
                 <p className="ckt-over__runs">
-                  <b>{score}</b>
-                  <span>
-                    off {out ? ballIdx + 1 : BALLS}
-                    <small>{out ? "1 wicket" : "not out"}</small>
-                  </span>
+                  <b className="g-title">{score}</b>
+                  <span>off {out ? ballIdx + 1 : BALLS}</span>
                 </p>
-                <BallSlots log={overLog} live={-1} className="ckt-over__slots" />
+                <Pips log={overLog} live={-1} className="ckt-over__pips" />
               </div>
-              <p className="ckt-over__note">{finalVerdict.note}</p>
 
               <dl className="ckt-stats">
-                {[
-                  ["Strike rate", String(strikeRate)],
-                  ["Fours", String(boundaries.fours)],
-                  ["Sixes", String(boundaries.sixes)],
-                  ["Wickets", out ? "1" : "0"],
-                ].map(([k, v]) => (
-                  <div className="ckt-stats__cell" key={k}>
-                    <dd>{v}</dd>
+                {(
+                  [
+                    ["Strike rate", String(strikeRate), "blue"],
+                    ["Fours", String(boundaries.fours), "green"],
+                    ["Sixes", String(boundaries.sixes), "yellow"],
+                    ["Wickets", out ? "1" : "0", "red"],
+                  ] as const
+                ).map(([k, v, tone]) => (
+                  <div className={`ckt-stats__cell g-tone--${tone}`} key={k}>
+                    <dd className="g-title">{v}</dd>
                     <dt>{k}</dt>
                   </div>
                 ))}
               </dl>
 
               <div className="ckt-over__xp">
-                <span className="k-brush ckt-over__earned">+{overXp} XP</span>
+                <span className="g-pill ckt-over__earned">
+                  <BoltIcon />+{overXp} XP
+                </span>
                 <XpBar xp={xp} levelUp={null} reduced={reduced} />
               </div>
 
               <div className="ckt-over__actions">
-                <button type="button" className="k-btn k-btn--fire" onClick={start}>
+                <button type="button" className="g-btn" onClick={start}>
                   <ReplayIcon />
                   Play again
                 </button>
-                <button type="button" className="k-btn k-btn--ink" onClick={share}>
+                <button type="button" className="g-btn g-tone--blue" onClick={share}>
                   <ShareIcon />
-                  {shared ? "Copied" : "Share score"}
+                  {shared ? "Copied!" : "Share"}
                 </button>
               </div>
-
-              <PageLink className="ckt-over__out" href="/work">
-                See the actual work
-                <ArrowIcon />
-              </PageLink>
             </div>
           </div>
+
+          <footer className="g-foot ckt-over__foot">
+            <span>{finalVerdict.note}</span>
+            <PageLink className="g-btn g-tone--navy ckt-over__out" href="/work">
+              See the real work
+              <ArrowIcon />
+            </PageLink>
+          </footer>
         </div>
       )}
 
       {/*
         ---- the pause screen ----
 
-        The match behind it is frozen (see the clock effect above), so this
-        is a real pause, not a menu over live play. It opens on where the
-        match stands, because that is the first thing anyone coming back
-        to a paused game wants to know.
+        A console options menu: the match is frozen behind it (see the clock
+        effect above), four big tiles for the four things you can do, and a
+        footer that explains whichever one you are on.
       */}
       {menuOpen && (
         <div className="ckt-pause" role="dialog" aria-modal="true" aria-labelledby="ckt-pause-title">
-          <div className="ckt-pause__panel" ref={menuRef}>
-            <h2 className="k-brush ckt-pause__title" id="ckt-pause-title">
-              Paused!
-            </h2>
-            <div className="ckt-pause__state">
-              <span className="k-sticker k-tape">
-                <span className="k-stamp">{side.abbr}</span>
-                {score}-{out ? 1 : 0}
-                <em>
-                  {phase === "idle"
-                    ? "Over not started"
-                    : phase === "over"
-                      ? "Over finished"
-                      : `Ball ${Math.max(1, ballsShown)} of ${BALLS}`}
-                </em>
+          <Burst tone="purple" />
+          <div className="ckt-pause__frame" ref={menuRef}>
+            <header className="g-crumb ckt-pause__crumb">
+              <span className="g-crumb__mark">
+                <BallIcon />
               </span>
-              <BallSlots log={overLog} live={live} />
+              <span className="g-crumb__trail">
+                <span className="g-crumb__home">{side.name}</span>
+                <span className="g-crumb__sep" aria-hidden>
+                  ›
+                </span>
+                <b id="ckt-pause-title">Paused</b>
+              </span>
+            </header>
+
+            <div className="ckt-pause__state">
+              <span className="g-panel ckt-pause__score">
+                <span className="hud-bug__team">{side.abbr}</span>
+                <b className="g-title">
+                  {score}/{out ? 1 : 0}
+                </b>
+                <Pips log={overLog} live={live} />
+              </span>
             </div>
 
-            <div className="ckt-pause__list">
-              {/* resume first and loudest: it is what almost everyone
-                  reaching this screen wants */}
+            <div className="ckt-pause__grid">
               <button
                 type="button"
-                className="k-btn k-btn--fire ckt-pause__item"
+                className="g-tile g-tone--green"
                 onClick={() => setMenuOpen(false)}
+                onFocus={() => setPauseHint("Jump straight back in, right where you left off.")}
+                onPointerEnter={() => setPauseHint("Jump straight back in, right where you left off.")}
                 autoFocus
               >
-                <ResumeIcon />
-                <span>Resume</span>
-                <kbd className="k-key">Esc</kbd>
+                <span className="g-tile__icon">
+                  <ResumeIcon />
+                </span>
+                <span className="g-tile__label">Resume</span>
+                <kbd className="g-key g-tile__meta">Esc</kbd>
               </button>
               <button
                 type="button"
-                className="k-btn k-btn--ink ckt-pause__item"
+                className="g-tile g-tone--yellow"
                 onClick={() => {
                   setMenuOpen(false);
                   start();
                 }}
+                onFocus={() => setPauseHint("Wipe the scoreboard and face all six balls again.")}
+                onPointerEnter={() => setPauseHint("Wipe the scoreboard and face all six balls again.")}
               >
-                <ReplayIcon />
-                <span>{phase === "idle" ? "Start the over" : "Restart the over"}</span>
-                <kbd className="k-key">R</kbd>
+                <span className="g-tile__icon">
+                  <ReplayIcon />
+                </span>
+                <span className="g-tile__label">{phase === "idle" ? "Start" : "Restart"}</span>
+                <kbd className="g-key g-tile__meta">R</kbd>
               </button>
               <button
                 type="button"
-                className="k-btn k-btn--ink ckt-pause__item"
+                className="g-tile g-tone--purple"
                 onClick={() => {
                   setMenuOpen(false);
                   onSwitchTeam?.();
                 }}
+                onFocus={() => setPauseHint("Swap to the other side. This over will not count.")}
+                onPointerEnter={() => setPauseHint("Swap to the other side. This over will not count.")}
               >
-                <SwapIcon />
-                <span>Switch side</span>
+                <span className="g-tile__icon">
+                  <SwapIcon />
+                </span>
+                <span className="g-tile__label">Switch side</span>
               </button>
               <button
                 type="button"
-                className="k-btn k-btn--ink ckt-pause__item"
+                className="g-tile g-tone--blue"
                 aria-pressed={!muted}
                 onClick={toggleMute}
+                onFocus={() => setPauseHint("Crowd, bat and stumps. Turn the ground up or down.")}
+                onPointerEnter={() => setPauseHint("Crowd, bat and stumps. Turn the ground up or down.")}
               >
-                {muted ? <MutedIcon /> : <SoundIcon />}
-                <span>Sound {muted ? "off" : "on"}</span>
-                <kbd className="k-key">M</kbd>
+                <span className="g-tile__icon">{muted ? <MutedIcon /> : <SoundIcon />}</span>
+                <span className="g-tile__label">Sound</span>
+                <span className="g-tile__meta">
+                  <Toggle on={!muted} />
+                </span>
               </button>
             </div>
 
-            <PageLink className="ckt-pause__leave" href="/playground">
-              <CloseIcon />
-              Leave the game
-            </PageLink>
+            <footer className="g-foot ckt-pause__foot">
+              <span aria-live="polite">{pauseHint}</span>
+              <PageLink className="g-btn g-tone--red ckt-pause__leave" href="/playground">
+                <CloseIcon />
+                Leave
+              </PageLink>
+            </footer>
           </div>
         </div>
       )}
@@ -1081,11 +1113,11 @@ export default function CricketGame({
 
         <button
           type="button"
-          className="k-btn k-btn--fire cktTap__btn"
+          className="g-btn cktTap__btn"
           onClick={phase === "idle" || phase === "over" ? start : swing}
           disabled={phase === "over"}
         >
-          {phase === "idle" ? "Take guard" : "Play shot!"}
+          {phase === "idle" ? "Play!" : "Swing!"}
         </button>
       </div>
 
@@ -1101,6 +1133,14 @@ function PauseIcon() {
     <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
       <rect x="5" y="4" width="3.4" height="12" rx="1" />
       <rect x="11.6" y="4" width="3.4" height="12" rx="1" />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M6 3.8l10.5 6.2L6 16.2z" />
     </svg>
   );
 }

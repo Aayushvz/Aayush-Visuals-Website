@@ -1,115 +1,82 @@
 /*
   ============ PICK A SIDE ============
 
-  The team selection screen, built from the game kit (kit.css).
-
-  The ground is the reference's own: a pale, gritty concrete wall with
-  faint print on it. That choice is about contrast, not mood - the cards
-  are black plates and the title is fire cut out in black, and both need a
-  LIGHT ground to stand off. On the stadium, or on a dark wall, a black
-  plate is just a hole.
+  The team selection screen, framed like a console game menu: a
+  breadcrumb header, the choice in the middle, and a footer that explains
+  whatever is under the pointer. It stands on the kit's blue burst, and
+  the two cards are each painted entirely in their side's colour - choosing
+  is a glance at purple versus blue before it is a reading of any words.
 */
 
 .pk {
-  position: relative;
-  z-index: 0;
-  display: grid;
-  justify-items: center;
-  gap: clamp(14px, 2.6vh, 28px);
-  width: 100%;
-  max-width: 66rem;
-}
-
-/* the wall */
-.pk::before {
-  content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: -2;
-  background:
-    var(--k-grit),
-    /* a barcode, pasted low on the right */
-    repeating-linear-gradient(
-        90deg,
-        rgba(20, 20, 22, 0.32) 0 2px,
-        transparent 2px 4px,
-        rgba(20, 20, 22, 0.32) 4px 5px,
-        transparent 5px 9px,
-        rgba(20, 20, 22, 0.32) 9px 12px,
-        transparent 12px 14px
-      )
-      right 5% bottom 7% / 120px 44px no-repeat,
-    radial-gradient(120% 95% at 50% 35%, #d8d6d0 0%, #bdbab3 55%, #8f8c86 100%);
-  background-blend-mode: soft-light, normal, normal;
-  animation: pkFade 0.4s ease-out both;
-}
-
-/* ghost print on the wall: the league's name, huge and faint */
-.pk::after {
-  content: "DPL 6";
-  position: fixed;
-  z-index: -1;
-  left: -2vw;
-  bottom: -4vw;
-  font-family: var(--k-num);
-  font-size: 34vw;
-  line-height: 0.8;
-  letter-spacing: -0.02em;
-  color: rgba(20, 20, 22, 0.07);
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* ---- the header ---- */
-.pk__head {
+  z-index: 4;
   display: grid;
-  justify-items: center;
-  gap: 10px;
-  text-align: center;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-family: var(--g-body);
+  color: var(--g-ink);
+  animation: pkFade 0.35s ease-out both;
 }
 
-.pk__title {
-  margin: 0;
-  font-size: clamp(2.3rem, 5.4vw, 4.4rem);
-  rotate: -3deg;
-  animation: pkTitle 0.6s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+.pk > .g-burst {
+  z-index: -1;
 }
 
-.pk__hint {
-  margin: 4px 0 0;
-  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
-  animation: pkRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+.pk__crumb {
+  position: relative;
+  margin-top: max(16px, env(safe-area-inset-top, 0px));
+  width: max-content;
+  max-width: calc(100% - 16px);
+  animation: pkSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* ---- the two cards ---- */
+.pk__main {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 16px 26px;
+}
+
 .pk__cards {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 360px) auto minmax(0, 360px);
   align-items: center;
-  gap: clamp(10px, 2vw, 26px);
-  width: 100%;
+  gap: clamp(12px, 2.4vw, 32px);
   perspective: 1400px;
 }
 
 .pk__vs {
-  font-size: clamp(2.2rem, 4.6vw, 3.8rem);
-  rotate: -10deg;
-  animation: pkTitle 0.6s cubic-bezier(0.22, 1.4, 0.36, 1) 0.3s both;
+  display: grid;
+  animation: pkPop 0.5s cubic-bezier(0.22, 1.6, 0.36, 1) 0.35s both;
 }
 
-.pk-card {
-  /* re-resolved here: the kit's --k-team is computed once at the root, and
-     each card carries its own side's palette (teamVars) */
-  --k-team: var(--tm-primary);
-  --k-team-hi: var(--tm-light);
-  --k-team-lo: var(--tm-deep);
+.pk__vs .g-hex {
+  --hex: 78px;
+  rotate: -8deg;
+}
+
+.pk__foot {
   position: relative;
-  -webkit-tap-highlight-color: transparent;
-  animation: pkCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--stagger, 0ms) both;
-  transition: opacity 0.45s ease-out, filter 0.45s ease-out;
+  padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  animation: pkUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 }
 
-/* the pointer: magnet first, then tilt about the card's own centre */
+/* ---- the card ---- */
+.pk-card {
+  --g-team: var(--tm-primary);
+  --g-team-hi: var(--tm-light);
+  --g-team-lo: var(--tm-deep);
+  position: relative;
+  padding-top: 18px;
+  -webkit-tap-highlight-color: transparent;
+  animation: pkCardIn 0.6s cubic-bezier(0.22, 1.3, 0.36, 1) var(--stagger, 0ms) both;
+  transition: opacity 0.4s ease-out, filter 0.4s ease-out;
+}
+
+/* the pointer: magnet first, then a tilt about the card's own centre */
 .pk-card__lift {
   transform: translate3d(var(--mag-x, 0), var(--mag-y, 0), 0) rotateX(var(--tilt-x, 0deg))
     rotateY(var(--tilt-y, 0deg));
@@ -120,158 +87,126 @@
   transition-duration: 0.12s;
 }
 
-.pk-card__plate {
-  --k-cut: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
+.pk-card__body {
   display: grid;
   justify-items: center;
   gap: 12px;
-  padding: 22px 24px 24px;
-  overflow: hidden;
+  padding: 30px 22px 22px;
+  border: 5px solid var(--g-ink);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12) 0 3px, transparent 4px) 0 0 / 26px 26px,
+    linear-gradient(180deg, var(--g-team-hi) -30%, var(--g-team) 35%, var(--g-team-lo));
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35), inset 0 -10px 0 rgba(0, 0, 0, 0.18), 0 7px 0 var(--g-ink),
+    0 22px 40px -18px rgba(10, 20, 60, 0.7);
   text-align: center;
 }
 
-/* the side's colour as a bar along the top edge, so the two plates are told
-   apart before anything on them is read */
-.pk-card__plate::before {
-  content: "";
+.pk-card__ribbon {
   position: absolute;
-  inset: 0 0 auto;
-  height: 5px;
-  background: var(--k-team);
-}
-
-.pk-card__ghost {
-  position: absolute;
-  right: -8px;
-  bottom: 26%;
-  font-family: var(--k-num);
-  font-size: 8.5rem;
-  line-height: 0.8;
-  color: rgba(255, 255, 255, 0.04);
-  pointer-events: none;
-}
-
-/* a brush stroke of the side's colour, laid behind the crest */
-.pk-card__splash {
-  position: absolute;
+  top: 0;
   left: 50%;
-  top: 118px;
-  width: 270px;
-  height: 150px;
-  translate: -50% -50%;
-  rotate: -8deg;
-  background: linear-gradient(100deg, var(--k-team-lo), var(--k-team) 55%, var(--k-team-hi));
-  clip-path: polygon(
-    3% 40%, 12% 26%, 26% 22%, 40% 14%, 58% 16%, 74% 10%, 92% 18%, 97% 30%, 93% 44%,
-    100% 58%, 90% 72%, 72% 76%, 56% 88%, 38% 84%, 20% 90%, 8% 78%, 1% 62%
-  );
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-.pk-card__top {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 18px;
+  translate: -50% 0;
   z-index: 2;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
 }
 
-.pk-card__tri {
-  --tri: 58px;
+.pk-card__ribbon .g-ribbon__body {
+  font-size: 1.2rem;
+  text-transform: capitalize;
 }
 
-.pk-card__style {
-  margin-top: 6px;
-  font-size: 0.82rem;
-  rotate: 3deg;
+.pk-card__hex {
+  --hex: 70px;
+  position: absolute;
+  top: 2px;
+  left: -14px;
+  z-index: 3;
+  rotate: -8deg;
+}
+
+/* the crest's window: a framed, darker screen inside the card */
+.pk-card__window {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-top: 8px;
+  border: 4px solid var(--g-ink);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.14) 0 2px, transparent 2.5px) 0 0 / 14px 14px,
+    radial-gradient(circle at 50% 40%, var(--g-team-hi) -40%, var(--g-team-lo) 75%);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.55), inset 0 -8px 0 rgba(0, 0, 0, 0.2);
 }
 
 .pk-card__crest {
-  position: relative;
-  z-index: 1;
-  width: min(150px, 52%);
+  width: 42%;
   height: auto;
-  margin-top: 26px;
-  filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.55));
-  transition: transform 0.4s cubic-bezier(0.22, 1.4, 0.36, 1);
+  filter: drop-shadow(0 6px 0 rgba(27, 29, 58, 0.6));
+  transition: transform 0.35s cubic-bezier(0.22, 1.6, 0.36, 1);
 }
 
 .pk-card.is-hot .pk-card__crest {
-  transform: scale(1.06) rotate(-3deg);
+  transform: scale(1.12) rotate(-4deg);
 }
 
 .pk-card__name {
-  position: relative;
-  z-index: 1;
-  margin: 2px 0 0;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  rotate: -2deg;
+  margin: 4px 0 0;
+  font-size: clamp(1.8rem, 2.8vw, 2.3rem);
 }
 
-.pk-card__identity {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--k-dim);
+.pk-card__motto {
+  margin: -4px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(27, 29, 58, 0.55);
 }
 
-.pk-card__identity em {
-  font-style: normal;
-  color: var(--k-text);
-}
-
-/* ---- the three bars ---- */
-.pk-bars {
+/* ---- the three meters: five chunky segments each ---- */
+.pk-card__stats {
   display: grid;
   gap: 8px;
   width: 100%;
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   padding: 12px 14px;
-  background: rgba(0, 0, 0, 0.3);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 14px;
+  background: rgba(22, 25, 55, 0.55);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.25);
 }
 
-.pk-bars__row {
+.pk-card__stat {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.pk-card__stat dt {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
   text-align: left;
 }
 
-.pk-bars dt {
-  color: var(--k-dim);
-}
-
-.pk-bars dd {
+.pk-card__stat dd {
   display: flex;
   gap: 4px;
   margin: 0;
 }
 
-.pk-bars i {
-  width: 22px;
-  height: 10px;
-  transform: skewX(-14deg);
-  background: #2c2d34;
+.pk-card__stat i {
+  width: 20px;
+  height: 16px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 5px;
+  background: #4a4f86;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
 }
 
-.pk-bars i.is-on {
-  background: var(--k-team-hi);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
-}
-
-.pk-card__perk {
-  margin: 0;
-  max-width: 34ch;
-  font-size: 0.84rem;
-  line-height: 1.45;
-  color: var(--k-dim);
-  text-wrap: pretty;
+.pk-card__stat i.is-on {
+  background: linear-gradient(180deg, var(--g-yellow-hi) 0 40%, var(--g-yellow) 40%);
 }
 
 .pk-card__cta {
@@ -279,27 +214,19 @@
   margin-top: 4px;
 }
 
-/* ---- picked and passed over ---- */
+/* ---- picked, and passed over ---- */
 .pk-card.is-picked .pk-card__lift {
-  transform: scale(1.03) translateY(-6px);
+  transform: scale(1.05) translateY(-6px);
+}
+
+.pk-card.is-picked .pk-card__body {
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35), inset 0 -10px 0 rgba(0, 0, 0, 0.18), 0 7px 0 var(--g-ink),
+    0 0 0 8px #fff, 0 0 0 14px var(--g-yellow);
 }
 
 .pk-card.is-dimmed {
-  opacity: 0.45;
-  filter: grayscale(0.85);
-}
-
-.pk-card__stamp {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  top: 44%;
-  font-size: clamp(2.4rem, 4vw, 3.2rem);
-  translate: -50% -50%;
-  rotate: -12deg;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: pkStamp 0.42s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+  opacity: 0.5;
+  filter: grayscale(0.9);
 }
 
 @keyframes pkFade {
@@ -308,117 +235,108 @@
   }
 }
 
-@keyframes pkRise {
+@keyframes pkSlide {
   from {
+    transform: translateX(-60px);
     opacity: 0;
-    transform: translateY(12px);
   }
 }
 
-@keyframes pkTitle {
+@keyframes pkUp {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pkPop {
   from {
     opacity: 0;
-    transform: scale(1.6);
+    transform: scale(0.2);
   }
 }
 
 @keyframes pkCardIn {
   from {
     opacity: 0;
-    transform: translateY(40px) rotate(2deg);
+    transform: translateY(60px) scale(0.9);
   }
 }
 
-@keyframes pkStamp {
-  from {
-    opacity: 0;
-    scale: 2.2;
+/* ---- a short window: tighten, keep both buttons on screen ---- */
+@media (max-height: 800px) and (min-width: 761px) {
+  .pk__main {
+    padding-block: 10px 16px;
   }
-}
 
-/* ---- a short window: everything comes down together ---- */
-@media (max-height: 800px) and (min-width: 721px) {
-  .pk-card__plate {
+  .pk-card__body {
     gap: 9px;
-    padding: 18px 20px 20px;
+    padding: 26px 20px 18px;
+  }
+
+  .pk-card__window {
+    aspect-ratio: 16 / 8;
   }
 
   .pk-card__crest {
-    width: min(112px, 42%);
-    margin-top: 18px;
+    width: 34%;
   }
 
-  .pk-card__splash {
-    top: 92px;
-    width: 220px;
-    height: 118px;
-  }
-
-  .pk-card__perk {
-    font-size: 0.8rem;
-  }
-
-  .pk__title {
-    font-size: clamp(2rem, 4.2vw, 3.2rem);
+  .g-crumb {
+    height: 52px;
   }
 }
 
-/* ---- phone: one card above the other ---- */
-@media (max-width: 720px) {
-  .pk {
-    gap: 12px;
-  }
-
+/* ---- phone: stacked, VS between ---- */
+@media (max-width: 760px) {
   .pk__cards {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
+    grid-template-columns: minmax(0, 380px);
+    gap: 4px;
   }
 
   .pk__vs {
     justify-self: center;
-    font-size: 2.2rem;
+    margin: -4px 0 -10px;
+    z-index: 2;
   }
 
-  .pk-card__plate {
-    gap: 9px;
-    padding: 16px 16px 18px;
+  .pk__vs .g-hex {
+    --hex: 60px;
   }
 
-  .pk-card__tri {
-    --tri: 50px;
+  .pk-card__window {
+    aspect-ratio: 16 / 8;
   }
 
   .pk-card__crest {
-    width: 104px;
-    margin-top: 20px;
+    width: 32%;
   }
 
-  .pk-card__splash {
-    top: 86px;
-    width: 220px;
-    height: 110px;
+  .g-crumb__mark {
+    width: 70px;
   }
 
-  .pk-card__name {
-    font-size: 1.9rem;
+  .g-crumb__trail {
+    padding: 0 40px 0 30px;
+    font-size: 0.85rem;
   }
 
-  .pk-card__perk {
-    font-size: 0.8rem;
+  .g-crumb__trail b {
+    font-size: 1.2rem;
   }
 
-  .pk::after {
-    font-size: 60vw;
+  .pk__foot {
+    min-height: 0;
+    padding: 10px 16px max(12px, env(safe-area-inset-bottom, 0px));
+    font-size: 0.9rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pk::before,
-  .pk__title,
-  .pk__hint,
+  .pk,
+  .pk__crumb,
   .pk__vs,
-  .pk-card,
-  .pk-card__stamp {
+  .pk__foot,
+  .pk-card {
     animation: pkFade 0.25s ease-out both;
   }
 

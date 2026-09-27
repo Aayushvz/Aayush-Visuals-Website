@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useState } from "react";
 import TeamCard from "./TeamCard";
+import { BallIcon, Burst, Hex } from "./kit";
 import { TEAMS, type Team } from "./teams";
 
 /*
@@ -27,6 +28,8 @@ type Props = {
 
 export default function TeamSelect({ onPick, reduced }: Props) {
   const [picked, setPicked] = useState<Team | null>(null);
+  /* the side under the pointer or focus, for the footer's explanation */
+  const [hint, setHint] = useState<Team | null>(null);
 
   const choose = useCallback(
     (team: Team) => {
@@ -41,23 +44,33 @@ export default function TeamSelect({ onPick, reduced }: Props) {
     [picked, onPick, reduced]
   );
 
-  return (
-    <div className="stg">
-      <div className="pk">
-        <div className="pk__head">
-          <h2 className="k-brush pk__title">Choose your side!</h2>
-          <p className="k-sticker k-tape pk__hint">
-            <span className="k-stamp">DPL</span>
-            {picked ? "Locked in. Walking out." : "Two philosophies. One over."}
-          </p>
-        </div>
+  const shown = picked ?? hint;
 
+  return (
+    <div className="pk">
+      <Burst tone="blue" />
+
+      {/* the menu frame: where you are, and a footer that explains */}
+      <header className="g-crumb pk__crumb">
+        <span className="g-crumb__mark">
+          <BallIcon />
+        </span>
+        <span className="g-crumb__trail">
+          <span className="g-crumb__home">Design Premier League</span>
+          <span className="g-crumb__sep" aria-hidden>
+            ›
+          </span>
+          <b>Pick a side</b>
+        </span>
+      </header>
+
+      <div className="pk__main">
         <div className="pk__cards">
           {TEAMS.map((team, i) => (
             <Fragment key={team.id}>
               {i === 1 && (
-                <span className="k-brush pk__vs" aria-hidden>
-                  vs
+                <span className="pk__vs" aria-hidden>
+                  <Hex tone="red">VS</Hex>
                 </span>
               )}
               <TeamCard
@@ -67,11 +80,20 @@ export default function TeamSelect({ onPick, reduced }: Props) {
                 selected={picked?.id === team.id}
                 dimmed={!!picked && picked.id !== team.id}
                 onChoose={choose}
+                onHint={setHint}
               />
             </Fragment>
           ))}
         </div>
       </div>
+
+      <footer className="g-foot pk__foot" aria-live="polite">
+        {picked
+          ? `${picked.name}, locked in. Walking out to the middle...`
+          : shown
+            ? `${shown.name}: ${shown.perk}`
+            : "Two philosophies, one over. Pick the side you play like."}
+      </footer>
     </div>
   );
 }

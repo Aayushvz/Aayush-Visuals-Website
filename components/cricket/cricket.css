@@ -1,31 +1,24 @@
 /*
   ============ CRICKET: THE MATCH ============
 
-  The match screen, built from the game kit (kit.css): black plates for
-  anything you read, torn stickers for labels, brush lettering for the
-  loud words, the side's triangle badge for identity, fire for action and
-  for what you earned, and the reference's traffic lights for timing.
-
-  Every panel is a plate rather than a translucent glass sheet on purpose.
-  The stadium behind the HUD is bright and busy - sky, crowd, LED boards -
-  and a see-through panel's contrast changes with whatever happens to be
-  behind it. A solid plate is 17:1 for white type everywhere on screen.
+  The match screen, the pause menu and the scorecard, built from the game
+  kit (kit.css): chunky outlined pieces, colour that means something, and
+  outlined Lilita type. The shot receipt keeps the previous kit's hit
+  stamp (the triangle, the torn sticker and the fire brush), because a hit
+  landing should feel different from the furniture around it.
 
   Scoped under .ckt so it can be imported as global CSS without touching
   anything else on the site.
 */
 .ckt {
-  --k-team: var(--tm-primary, #2563eb);
-  --k-team-hi: var(--tm-light, #7dd3fc);
-  --k-team-lo: var(--tm-deep, #1d4ed8);
   --hud-inset: clamp(12px, 1.4vw, 20px);
 
   position: fixed;
   inset: 0;
   overflow: hidden;
   background: #0e2a3f;
-  color: var(--k-text);
-  font-family: var(--font-primary);
+  color: var(--g-text);
+  font-family: var(--g-body);
   /* the whole surface is the bat */
   cursor: crosshair;
   touch-action: manipulation;
@@ -49,7 +42,7 @@
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: radial-gradient(ellipse at 50% 50%, rgba(8, 8, 10, 0.62), rgba(8, 8, 10, 0.3) 75%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(20, 24, 70, 0.55), rgba(20, 24, 70, 0.2) 75%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
@@ -68,438 +61,445 @@
   z-index: 3;
 }
 
-/* ============ top left: who is batting ============ */
+/* ============ top left: the player card ============ */
 .hud-id {
   top: var(--hud-inset);
   left: var(--hud-inset);
   display: flex;
   align-items: center;
+  gap: 10px;
   text-decoration: none;
   cursor: pointer;
 }
 
-.hud-id__face {
-  position: relative;
-  z-index: 1;
-  width: 46px;
-  height: 46px;
+.hud-id__frame {
+  display: grid;
+  width: 58px;
+  height: 58px;
   flex: none;
-  border: 3px solid var(--k-ink);
-  border-radius: 8px;
+  overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--g-team-hi), var(--g-team));
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6), 0 4px 0 var(--g-ink);
+}
+
+.hud-id__face {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  background: linear-gradient(180deg, var(--k-team-hi), var(--k-team));
-  box-shadow: 0 4px 0 var(--k-ink);
-  rotate: -5deg;
-  transition: rotate 0.2s ease;
+}
+
+.hud-id__text {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
 }
 
 .hud-id__name {
-  margin-left: -6px;
-  padding-left: 14px;
-  font-size: 0.95rem;
-  rotate: 2deg;
+  font-size: 1.3rem;
+}
+
+/* the rank chip from the reference: a label and a number in a pill */
+.hud-id__rank {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 3px 2px 10px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  background: var(--g-navy);
+  font-family: var(--g-display);
+  font-size: 0.8rem;
+  color: var(--g-yellow);
+  box-shadow: 0 3px 0 var(--g-ink);
+}
+
+.hud-id__rank b {
+  min-width: 26px;
+  padding: 1px 6px 2px;
+  border-radius: 5px;
+  background: var(--g-yellow);
+  color: var(--g-ink);
+  font-weight: 400;
+  text-align: center;
 }
 
 .hud-id:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 3px;
+  outline: 4px solid #fff;
+  outline-offset: 4px;
+  border-radius: 14px;
 }
 
-@media (hover: hover) {
-  .hud-id:hover .hud-id__face {
-    rotate: 3deg;
-  }
-}
-
-/* ============ top centre: the score bar ============ */
+/* ============ top centre: the scoreboard ============ */
 .hud-bug {
   top: var(--hud-inset);
   left: 50%;
   transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+}
+
+.hud-bug__panel {
   display: flex;
   align-items: center;
+  gap: 14px;
+  padding: 8px 16px 11px 8px;
+  border-radius: 18px;
   white-space: nowrap;
 }
 
-.hud-bug__tri {
-  --tri: 68px;
-  z-index: 2;
-  margin-right: -22px;
-}
-
-.hud-bug__plate {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  height: 60px;
-  padding: 0 42px 0 32px;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 26px) 100%, 0 100%);
-}
-
-/* the fire edge along the bottom of the bar, the reference's charge line */
-.hud-bug__plate::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 4px;
-  background: var(--k-fire-x);
+/* the batting side's tile: its colour, its code */
+.hud-bug__team {
+  display: grid;
+  place-items: center;
+  min-width: 56px;
+  height: 46px;
+  padding: 0 8px 3px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--g-team-hi) -20%, var(--g-team) 50%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -4px 0 var(--g-team-lo);
+  font-family: var(--g-display);
+  font-size: 1.2rem;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .hud-bug__score {
   display: flex;
   align-items: baseline;
-  font-family: var(--k-num);
   font-size: 2.5rem;
-  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .hud-bug__score small {
   margin-left: 2px;
-  font-size: 0.48em;
-  color: var(--k-dim);
+  font-size: 0.55em;
+  color: var(--g-soft);
 }
 
-.hud-bug__over,
+.hud-bug__pips .g-pip {
+  --pip: 30px;
+}
+
 .hud-bug__sr {
   display: grid;
-  gap: 6px;
+  justify-items: center;
+  gap: 2px;
+  padding: 3px 10px 5px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 10px;
+  background: var(--g-well);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
 }
 
-.hud-bug__over .k-slot {
-  --slot: 20px;
+.hud-bug__sr span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--g-mute);
 }
 
 .hud-bug__sr b {
-  font-family: var(--k-num);
-  font-size: 1.25rem;
+  font-family: var(--g-display);
+  font-size: 1.15rem;
   font-weight: 400;
   line-height: 1;
+  color: var(--g-yellow);
   font-variant-numeric: tabular-nums;
 }
 
+/* the delivery, as a status chip at the end of the board */
 .hud-bug__ball {
-  position: absolute;
-  z-index: 3;
-  right: 38px;
-  top: calc(100% - 6px);
-  font-size: 0.78rem;
-  rotate: 2deg;
+  padding: 5px 12px 7px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--g-blue-hi), var(--g-blue) 55%);
+  box-shadow: inset 0 -3px 0 var(--g-blue-lo);
+  font-family: var(--g-display);
+  font-size: 0.95rem;
+  line-height: 1;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
-/* ============ top right: sound, pause, leave ============ */
+/* ============ top right: the controls ============ */
 .hud-ctrl {
   top: var(--hud-inset);
   right: var(--hud-inset);
   z-index: 4;
   display: flex;
-  gap: 8px;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6));
+  gap: 10px;
 }
 
-.hud-btn {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  border: 0;
-  background: linear-gradient(180deg, #2a2b31, #141519);
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -3px 0 rgba(0, 0, 0, 0.5);
-  color: var(--k-text);
-  cursor: pointer;
-  transition: transform 0.1s ease;
+.hud-ctrl .g-icon[aria-pressed="true"] {
+  --hi: #8f97c4;
+  --base: #6b73a3;
+  --lo: #4c5383;
 }
 
-.hud-btn svg {
-  width: 19px;
-  height: 19px;
-}
-
-.hud-btn[aria-pressed="true"] {
-  color: var(--k-mute);
-}
-
-.hud-btn:active {
-  transform: translateY(2px);
-}
-
-.hud-btn:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 3px #fff;
-}
-
-@media (hover: hover) {
-  .hud-btn:hover {
-    background: var(--k-fire);
-    color: var(--k-ink);
-  }
-}
-
-/* ============ bottom left: commentary, timing, level ============ */
+/* ============ bottom left: the commentator ============ */
 .hud-com {
   left: var(--hud-inset);
   bottom: var(--hud-inset);
-  width: min(390px, 40vw);
+  display: grid;
+  gap: 16px;
+  width: min(380px, 40vw);
 }
 
-.hud-com__plate {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  padding: 14px 18px 16px;
+.hud-com__bubble {
+  display: grid;
+  gap: 8px;
 }
 
-.hud-com__head {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.hud-com__face {
-  width: 28px;
-  height: 28px;
-  flex: none;
-  border: 2px solid var(--k-ink);
-  border-radius: 50%;
-  object-fit: cover;
-  background: linear-gradient(180deg, var(--k-team-hi), var(--k-team));
-}
-
-.hud-com__onair {
+.hud-com__who {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-left: auto;
-  padding: 4px 9px 4px 8px;
-  background: var(--k-miss);
-  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
-  font-size: 0.56rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.16em;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--g-blue-lo);
 }
 
-.hud-com__onair::before {
-  content: "";
-  width: 5px;
-  height: 5px;
+.hud-com__who i {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--g-red);
   animation: cktOnAir 1.4s ease-in-out infinite;
 }
 
 @keyframes cktOnAir {
   50% {
-    opacity: 0.2;
+    opacity: 0.25;
   }
 }
 
 .hud-com__line {
   margin: 0;
-  min-height: 1.35em;
-  font-size: 1.02rem;
+  min-height: 1.3em;
+  font-size: 1.05rem;
   font-weight: 600;
-  line-height: 1.35;
-  color: var(--k-text);
+  line-height: 1.3;
+  color: var(--g-ink);
   text-wrap: pretty;
 }
 
-/* ---- timing, on the reference's traffic lights ----
-   The perfect band is the engine's own window (--ckt-perfect), close is
-   yellow, and the outer ends of the contact window are red. */
+.hud-com__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-com__face {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff, #cfe3ff);
+  box-shadow: 0 3px 0 var(--g-ink);
+}
+
+.hud-com__face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- timing: yellow, green, yellow, with red ends ---- */
 .hud-timing {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .hud-timing__track {
   --p: var(--ckt-perfect, 8%);
   position: relative;
   flex: 1;
-  height: 12px;
-  transform: skewX(-14deg);
+  height: 16px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 999px;
   background: linear-gradient(
     90deg,
-    var(--k-miss) 0 10%,
-    var(--k-near) 10% calc(50% - var(--p)),
-    var(--k-good) calc(50% - var(--p)) calc(50% + var(--p)),
-    var(--k-near) calc(50% + var(--p)) 90%,
-    var(--k-miss) 90% 100%
+    var(--g-red) 0 9%,
+    var(--g-yellow) 9% calc(50% - var(--p)),
+    var(--g-green) calc(50% - var(--p)) calc(50% + var(--p)),
+    var(--g-yellow) calc(50% + var(--p)) 91%,
+    var(--g-red) 91% 100%
   );
-}
-
-/* notches, so it reads as a gauge rather than a gradient */
-.hud-timing__track::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), var(--k-plate) calc(10% - 2px) 10%);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
 }
 
 .hud-timing__track i {
   position: absolute;
-  top: -6px;
+  top: -8px;
   left: var(--ckt-off, 50%);
-  width: 5px;
-  height: 24px;
+  width: 10px;
+  height: 26px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 4px;
   background: #fff;
-  box-shadow: 0 0 0 2px var(--k-ink);
   transform: translateX(-50%);
 }
 
 .hud-timing__label {
   flex: none;
-  min-width: 5.4em;
-  font-family: var(--k-num);
-  font-size: 0.98rem;
-  letter-spacing: 0.03em;
-  text-align: right;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
+  min-width: 5.6em;
+  padding: 3px 8px 4px;
+  border: 2.5px solid var(--g-ink);
+  border-radius: 8px;
+  font-family: var(--g-display);
+  font-size: 0.9rem;
+  line-height: 1;
+  text-align: center;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .hud-timing__label[data-grade="good"] {
-  color: var(--k-good);
+  background: var(--g-green);
 }
 
 .hud-timing__label[data-grade="near"] {
-  color: var(--k-near);
+  background: var(--g-yellow);
 }
 
-/* the reference's red is too dark for type on black (3.1:1); the label
-   takes a lighter red that clears 5:1 and keeps the meaning */
 .hud-timing__label[data-grade="miss"] {
-  color: #ff6b70;
+  background: var(--g-red);
 }
 
 /* ---- level and XP ---- */
 .cktXp {
   position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.cktXp__gauge {
-  --gauge: 60px;
-}
-
-.ckt-over .cktXp__gauge {
-  --gauge: 68px;
+.cktXp__hex {
+  --hex: 50px;
+  z-index: 1;
+  margin-right: -12px;
 }
 
 .cktXp__meter {
   flex: 1;
   display: grid;
-  gap: 7px;
+  gap: 4px;
 }
 
 .cktXp__top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  padding-left: 18px;
 }
 
 .cktXp__label {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--k-mute);
+  font-family: var(--g-display);
+  font-size: 0.95rem;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktXp__count {
-  font-family: var(--k-num);
+  font-family: var(--g-display);
   font-size: 0.95rem;
-  letter-spacing: 0.02em;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
   font-variant-numeric: tabular-nums;
 }
 
 .cktXp__count small {
-  font-size: 0.78em;
-  color: var(--k-mute);
+  font-size: 0.85em;
+  color: var(--g-soft);
 }
 
-/* the charge bar: skewed, notched, filling with fire */
 .cktXp__track {
-  position: relative;
-  height: 12px;
-  overflow: hidden;
-  transform: skewX(-14deg);
-  background: #2b2c33;
-}
-
-.cktXp__track::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--k-plate) calc(10% - 3px) 10%);
-  pointer-events: none;
+  height: 20px;
 }
 
 .cktXp__fill {
-  height: 100%;
-  background: var(--k-fire-x);
+  --hi: var(--g-yellow-hi);
+  --base: var(--g-yellow);
 }
 
 .cktXp__up {
   position: absolute;
   right: 0;
-  top: -16px;
+  top: -30px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
-  background: var(--k-fire);
-  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
-  color: var(--k-ink);
-  font-family: var(--k-num);
-  font-size: 0.85rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  padding: 4px 10px 6px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--g-yellow-hi), var(--g-yellow) 55%);
+  box-shadow: 0 3px 0 var(--g-ink);
+  font-family: var(--g-display);
+  font-size: 0.95rem;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktXp__upIcon {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
+  color: #fff;
 }
 
 /* ============ bottom right: wagon wheel ============ */
 .hud-wheel {
+  --hi: var(--g-navy-hi);
   right: var(--hud-inset);
   bottom: var(--hud-inset);
-  width: 200px;
+  width: 210px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 26px 12px 10px;
 }
 
-.hud-wheel__plate {
-  display: grid;
-  gap: 8px;
-  padding: 12px 12px 10px;
+.hud-wheel__ribbon {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.hud-wheel__ribbon .g-ribbon__body {
+  font-size: 1rem;
+  padding: 5px 16px 8px;
 }
 
 .hud-wheel__key {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-family: var(--k-num);
-  font-size: 0.74rem;
-  color: var(--k-dim);
+  font-family: var(--g-display);
+  font-size: 0.85rem;
+  color: #fff;
 }
 
 .hud-wheel__key i {
-  width: 12px;
-  height: 4px;
-  margin-left: 7px;
-  transform: skewX(-14deg);
+  width: 14px;
+  height: 8px;
+  margin-left: 8px;
+  border: 2px solid var(--g-ink);
+  border-radius: 3px;
 }
 
 .hud-wheel__key i:first-child {
@@ -507,15 +507,15 @@
 }
 
 .hud-wheel__key .k1 {
-  background: var(--k-paper);
+  background: var(--g-blue-hi);
 }
 
 .hud-wheel__key .k4 {
-  background: var(--k-good);
+  background: var(--g-green);
 }
 
 .hud-wheel__key .k6 {
-  background: var(--k-fire-2);
+  background: var(--g-yellow);
 }
 
 .ckt-wagon {
@@ -527,54 +527,62 @@
 
 .ckt-wagon-field {
   fill: url(#wagonField);
+  stroke: var(--g-ink);
+  stroke-width: 2.5;
 }
 
 .ckt-wagon-ring {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.16);
-  stroke-width: 0.6;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.8;
 }
 
 .ckt-wagon-grid {
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 0.6;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 0.8;
   stroke-dasharray: 1.5 2;
 }
 
 .ckt-wagon-edge {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.6);
-  stroke-width: 1.2;
+  stroke: #fff;
+  stroke-width: 1.4;
 }
 
 .ckt-wagon-pitch {
-  fill: #d9c79a;
+  fill: #e6d3a0;
+  stroke: var(--g-ink);
+  stroke-width: 1;
 }
 
 .ckt-wagon-pin {
   fill: #fff;
+  stroke: var(--g-ink);
+  stroke-width: 1.2;
 }
 
 .ckt-wagon-shot line {
-  stroke-width: 1.6;
+  stroke-width: 2.2;
   stroke-linecap: round;
-  stroke: var(--k-paper);
+  stroke: var(--g-blue-hi);
 }
 
 .ckt-wagon-shot--4 line {
-  stroke: var(--k-good);
+  stroke: var(--g-green-hi);
 }
 
 .ckt-wagon-shot--4 circle {
-  fill: var(--k-good);
+  fill: var(--g-green);
+  stroke: var(--g-ink);
 }
 
 .ckt-wagon-shot--6 line {
-  stroke: var(--k-fire-2);
+  stroke: var(--g-yellow);
 }
 
 .ckt-wagon-shot--6 circle {
-  fill: var(--k-fire-1);
+  fill: var(--g-yellow);
+  stroke: var(--g-ink);
 }
 
 /* ============ the shot receipt and the streak ============
@@ -642,91 +650,112 @@
 }
 
 .cktCombo {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.4));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 10px;
+  background: var(--g-yellow);
+  box-shadow: inset 0 -4px 0 var(--g-yellow-lo), 0 4px 0 var(--g-ink);
+}
+
+.cktCombo::after {
+  background: var(--g-yellow);
 }
 
 .cktCombo__count {
-  font-size: 2.6rem;
-  rotate: -6deg;
+  font-family: var(--g-display);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: #fff;
+  -webkit-text-stroke: 6px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktCombo__label {
-  font-size: 0.86rem;
+  font-family: var(--g-display);
+  font-size: 1rem;
+  color: var(--g-ink);
 }
 
 /* ============ the start card ============ */
 .ckt-card {
+  --hi: #3c62c8;
+  --base: #2445a6;
+  --lo: #182f7d;
   position: absolute;
   z-index: 7;
   left: 50%;
   top: 50%;
-  width: min(520px, calc(100vw - 32px));
-  transform: translate(-50%, -50%);
+  width: min(500px, calc(100vw - 32px));
+  max-height: calc(100svh - 170px);
+  overflow-y: auto;
+  padding: 40px 28px 26px;
+  transform: translate(-50%, -46%);
+  border-radius: 26px;
   cursor: default;
-  animation: cktCardIn 0.4s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+  overflow: visible;
+  animation: cktCardIn 0.5s cubic-bezier(0.22, 1.5, 0.36, 1) both;
 }
 
 @keyframes cktCardIn {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-50% + 24px)) rotate(1.5deg);
+    transform: translate(-50%, -46%) scale(0.7);
   }
 }
 
-.ckt-card__plate {
-  --k-cut: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
-  max-height: calc(100svh - 150px);
-  overflow-y: auto;
-  padding: 24px 30px 30px;
-  scrollbar-width: thin;
-}
-
-.ckt-card__plate::before {
-  content: "";
+.ckt-card__ribbon {
   position: absolute;
-  inset: 0 0 auto;
-  height: 5px;
-  background: var(--k-team);
+  top: -24px;
+  left: 50%;
+  translate: -50% 0;
 }
 
-.ckt-card__top {
+.ckt-card__ribbon .g-ribbon__body {
+  font-size: 1.7rem;
+  padding: 8px 30px 12px;
+}
+
+.ckt-card__side {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--g-soft);
 }
 
-.ckt-card__tri {
-  --tri: 54px;
+.ckt-card__side b {
+  font-weight: 700;
+  color: #fff;
 }
 
-.ckt-card__meta {
-  font-size: 0.86rem;
+.ckt-card__hex {
+  --hex: 44px;
 }
 
 .ckt-card__title {
-  display: grid;
-  justify-items: start;
-  gap: 2px;
-  margin: 18px 0 14px;
-  font-size: clamp(2.6rem, 5.8vw, 3.8rem);
-  rotate: -3deg;
+  margin: 12px 0 10px;
+  font-size: clamp(2.6rem, 6vw, 3.6rem);
+  text-align: center;
 }
 
 .ckt-card__body {
-  margin: 0;
-  max-width: 44ch;
-  font-size: 0.96rem;
-  line-height: 1.5;
-  color: #cfccc4;
+  margin: 0 auto;
+  max-width: 40ch;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--g-soft);
   text-wrap: pretty;
 }
 
 .ckt-keys {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px 20px;
   margin: 20px 0 24px;
   padding: 0;
@@ -740,257 +769,201 @@
 }
 
 .ckt-keys span {
-  margin-left: 3px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--k-dim);
+  margin-left: 2px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
 }
 
 .ckt-card__go {
   width: 100%;
-  min-height: 60px;
-  font-size: 1.3rem;
+  min-height: 66px;
+  font-size: 1.8rem;
 }
 
 /* ============ the scorecard ============ */
-
-/* the pick screen's wall again: the game's full-screen moments share one
-   ground, and the black plate needs a light one to stand off */
-.ckt-outro {
+.ckt-over,
+.ckt-pause {
   position: absolute;
   inset: 0;
-  z-index: 6;
-  background:
-    var(--k-grit),
-    radial-gradient(120% 95% at 50% 35%, #d8d6d0 0%, #bdbab3 55%, #8f8c86 100%);
-  background-blend-mode: soft-light, normal;
-  animation: cktFade 0.35s ease-out both;
-}
-
-.ckt-outro::after {
-  content: "DPL 6";
-  position: absolute;
-  left: -2vw;
-  bottom: -4vw;
-  font-family: var(--k-num);
-  font-size: 34vw;
-  line-height: 0.8;
-  color: rgba(20, 20, 22, 0.07);
-  white-space: nowrap;
-}
-
-.ckt-over {
-  position: absolute;
-  inset: 0;
-  z-index: 7;
   display: grid;
-  justify-items: center;
-  align-content: safe center;
-  gap: 16px;
-  padding: 24px 16px;
-  overflow-y: auto;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
   cursor: default;
 }
 
-.ckt-over__head {
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  text-align: center;
-  animation: cktRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+.ckt-over {
+  z-index: 7;
+  animation: cktFade 0.3s ease-out both;
 }
 
-.ckt-over__kicker {
-  font-size: 0.9rem;
+.ckt-over > .g-burst,
+.ckt-pause > .g-burst {
+  z-index: -1;
+}
+
+.ckt-over__crumb,
+.ckt-pause__crumb {
+  margin-top: max(16px, env(safe-area-inset-top, 0px));
+  width: max-content;
+  max-width: calc(100% - 16px);
+}
+
+.ckt-over__main {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 44px 16px 24px;
+}
+
+.ckt-over__panel {
+  --hi: #3c62c8;
+  --base: #2445a6;
+  --lo: #182f7d;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(560px, 100%);
+  padding: 34px 26px 24px;
+  border-radius: 28px;
+  animation: cktCardIn2 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+}
+
+@keyframes cktCardIn2 {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+}
+
+.ckt-over__ribbon {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.ckt-over__ribbon .g-ribbon__body {
+  font-size: 1.7rem;
+  padding: 8px 30px 12px;
 }
 
 .ckt-over__verdict {
   margin: 0;
-  max-width: 16ch;
-  font-size: clamp(2.3rem, 5vw, 3.8rem);
-  rotate: -3deg;
+  max-width: 18ch;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  text-align: center;
   text-wrap: balance;
 }
 
-.ckt-over__lift {
-  width: min(580px, 100%);
-  animation: cktRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
-}
-
-.ckt-over__plate {
-  --k-cut: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
-  padding: 22px 26px 24px;
-}
-
-.ckt-over__plate::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 5px;
-  background: var(--k-team);
-}
-
 .ckt-over__score {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 16px;
-}
-
-.ckt-over__tri {
-  --tri: 64px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
 }
 
 .ckt-over__runs {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   gap: 10px;
   margin: 0;
 }
 
-/* what you scored is what you earned: fire */
 .ckt-over__runs b {
-  font-family: var(--k-num);
-  font-size: 4.4rem;
+  font-size: 5rem;
   font-weight: 400;
-  line-height: 0.8;
-  background: var(--k-fire);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--g-yellow);
   font-variant-numeric: tabular-nums;
 }
 
 .ckt-over__runs span {
-  display: grid;
-  gap: 4px;
-  padding-bottom: 2px;
-  font-family: var(--k-num);
-  font-size: 1.2rem;
-  line-height: 1;
-  text-transform: uppercase;
+  font-family: var(--g-display);
+  font-size: 1.3rem;
+  color: #fff;
+  -webkit-text-stroke: 5px var(--g-ink);
+  paint-order: stroke fill;
 }
 
-.ckt-over__runs small {
-  font-family: var(--font-primary);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--k-mute);
+.ckt-over__pips .g-pip {
+  --pip: 34px;
 }
 
-.ckt-over__slots {
-  margin-left: auto;
-}
-
-.ckt-over__slots .k-slot {
-  --slot: 26px;
-}
-
-.ckt-over__note {
-  margin: 14px 0 0;
-  font-size: 0.94rem;
-  line-height: 1.5;
-  color: #cfccc4;
-}
-
-/* the four numbers, on paper tiles pinned at slight angles */
+/* the four numbers as four coloured tiles */
 .ckt-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin: 18px 0;
+  width: 100%;
+  margin: 6px 0 0;
 }
 
 .ckt-stats__cell {
   display: grid;
-  gap: 5px;
-  padding: 10px 12px 11px;
-  background: var(--k-paper);
-  color: var(--k-paper-ink);
-  clip-path: polygon(0 2%, 100% 0, 98% 100%, 2% 97%);
-  rotate: -1.5deg;
-}
-
-.ckt-stats__cell:nth-child(even) {
-  rotate: 1.5deg;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 6px 12px;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--hi), var(--base) 55%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -5px 0 var(--lo), 0 4px 0 var(--g-ink);
 }
 
 .ckt-stats dd {
   margin: 0;
-  font-family: var(--k-num);
   font-size: 2rem;
-  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .ckt-stats dt {
-  font-size: 0.56rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4a4843;
+  color: var(--g-ink);
 }
 
 .ckt-over__xp {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+  width: 100%;
+  margin-top: 6px;
 }
 
 .ckt-over__earned {
   flex: none;
-  font-size: 1.7rem;
-  rotate: -4deg;
-}
-
-.ckt-over__xp .cktXp {
-  flex: 1;
-  padding-top: 0;
-  border-top: 0;
+  font-family: var(--g-display);
+  font-size: 1.1rem;
+  color: var(--g-yellow);
 }
 
 .ckt-over__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 20px;
+  width: 100%;
+  margin-top: 8px;
 }
 
-.ckt-over__out {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--k-dim);
-  text-decoration: none;
-  transition: color 0.15s ease, gap 0.15s ease;
+.ckt-over__foot,
+.ckt-pause__foot {
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 8px max(10px, env(safe-area-inset-bottom, 0px));
 }
 
-.ckt-over__out svg {
-  width: 14px;
-  height: 14px;
+.ckt-over__out,
+.ckt-pause__leave {
+  min-height: 44px;
+  padding: 0 16px 4px;
+  font-size: 1rem;
 }
 
-.ckt-over__out:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-}
-
-@media (hover: hover) {
-  .ckt-over__out:hover {
-    gap: 9px;
-    color: var(--k-text);
-  }
-}
-
-@keyframes cktRise {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
+.ckt-over__out svg,
+.ckt-pause__leave svg {
+  width: 16px;
+  height: 16px;
 }
 
 @keyframes cktFade {
@@ -999,124 +972,77 @@
   }
 }
 
-/* ============ the pause screen ============ */
+/* ============ the pause menu ============ */
 .ckt-pause {
-  position: absolute;
-  inset: 0;
   z-index: 20;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: var(--k-grit), rgba(12, 12, 14, 0.66);
-  background-blend-mode: soft-light, normal;
-  -webkit-backdrop-filter: blur(10px) grayscale(0.5);
-  backdrop-filter: blur(10px) grayscale(0.5);
-  cursor: default;
-  animation: cktFade 0.16s ease-out;
+  /* one child, the frame, which lays out its own header, grid and footer */
+  grid-template-rows: minmax(0, 1fr);
+  animation: cktFade 0.18s ease-out;
 }
 
-.ckt-pause__panel {
+.ckt-pause__frame {
   display: grid;
-  gap: 14px;
-  width: min(420px, 100%);
-  max-height: 100%;
-  overflow-y: auto;
-  padding: 8px 4px;
-  animation: cktRise 0.26s cubic-bezier(0.22, 1.2, 0.36, 1);
-}
-
-.ckt-pause__title {
-  justify-self: start;
-  margin: 0 0 4px;
-  font-size: clamp(3.2rem, 8vw, 4.6rem);
-  rotate: -5deg;
+  grid-template-rows: auto auto 1fr auto;
+  min-height: 0;
+  height: 100%;
 }
 
 .ckt-pause__state {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 6px;
+  justify-content: center;
+  padding: 14px 16px 0;
 }
 
-.ckt-pause__state .k-sticker {
-  font-size: 1.05rem;
-}
-
-.ckt-pause__state em {
-  margin-left: 4px;
-  font-family: var(--font-primary);
-  font-size: 0.66rem;
-  font-style: normal;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: #5b5850;
-}
-
-.ckt-pause__state .k-slot {
-  --slot: 22px;
-}
-
-.ckt-pause__list {
-  display: grid;
-  gap: 10px;
-}
-
-.ckt-pause__item {
-  display: grid;
-  grid-template-columns: 20px 1fr auto;
-  justify-items: start;
-  gap: 14px;
-  min-height: 58px;
-  padding: 0 24px;
-  font-size: 1.12rem;
-}
-
-.ckt-pause__item svg {
-  width: 20px;
-  height: 20px;
-}
-
-.ckt-pause__item .k-key {
-  justify-self: end;
-}
-
-.ckt-pause__leave {
+.ckt-pause__score {
   display: inline-flex;
   align-items: center;
-  justify-self: center;
-  gap: 8px;
-  margin-top: 6px;
-  padding: 8px 12px;
-  font-size: 0.86rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #ff7a7e;
-  text-decoration: none;
+  gap: 12px;
+  padding: 7px 14px 10px 7px;
+  border-radius: 16px;
 }
 
-.ckt-pause__leave svg {
-  width: 16px;
-  height: 16px;
+.ckt-pause__score b {
+  font-size: 2rem;
+  font-weight: 400;
 }
 
-.ckt-pause__leave:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+.ckt-pause__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 360px));
+  align-content: center;
+  justify-content: center;
+  gap: 18px 22px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 16px 24px;
 }
 
-@media (hover: hover) {
-  .ckt-pause__leave:hover {
-    color: #ffb3b5;
+.ckt-pause__grid .g-tile {
+  animation: cktTile 0.4s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+}
+
+.ckt-pause__grid .g-tile:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.ckt-pause__grid .g-tile:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.ckt-pause__grid .g-tile:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+@keyframes cktTile {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
   }
 }
 
 /* everything that pulses holds still while the match is paused */
-.ckt[data-paused] .hud-bug .k-slot.is-live,
-.ckt[data-paused] .hud-com__onair::before {
+.ckt[data-paused] .hud-bug .g-pip.is-live,
+.ckt[data-paused] .hud-com__who i {
   animation-play-state: paused;
 }
 
@@ -1128,11 +1054,12 @@
   bottom: calc(var(--hud-inset) + 2px);
   transform: translateX(-50%);
   margin: 0;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.72);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  font-family: var(--g-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -1152,21 +1079,19 @@
   gap: 10px;
 }
 
-/* the engine's windows on the reference's traffic lights */
 .cktTap__rail {
   display: grid;
   grid-template-columns: 1fr 1.15fr 1fr;
-  gap: 3px;
   width: min(300px, 100%);
-  transform: skewX(-12deg);
-  font-size: 0.56rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  overflow: hidden;
+  border: var(--g-o) solid var(--g-ink);
+  border-radius: 999px;
+  font-family: var(--g-display);
+  font-size: 0.8rem;
   text-align: center;
-  text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.7;
+  box-shadow: 0 3px 0 var(--g-ink);
   transition: opacity 0.2s ease;
-  filter: drop-shadow(0 2px 0 var(--k-ink));
 }
 
 .cktTap[data-live="true"] .cktTap__rail {
@@ -1174,20 +1099,23 @@
 }
 
 .cktTap__zone {
-  padding: 5px 0;
-  background: var(--k-near);
-  color: #2a2100;
+  padding: 3px 0 5px;
+  background: var(--g-yellow);
+  color: #fff;
+  -webkit-text-stroke: 4px var(--g-ink);
+  paint-order: stroke fill;
 }
 
 .cktTap__zone--perfect {
-  background: var(--k-good);
-  color: #03281a;
+  background: var(--g-green);
+  border-inline: var(--g-o) solid var(--g-ink);
 }
 
 .cktTap__btn {
   width: min(330px, 100%);
-  min-height: 64px;
-  font-size: 1.45rem;
+  min-height: 72px;
+  font-size: 2rem;
+  border-radius: 20px;
 }
 
 .cktTap__btn:disabled {
@@ -1200,29 +1128,29 @@
   }
 }
 
-/* nothing left to play once the over is done */
 .ckt[data-phase="over"] .cktTap {
   display: none;
 }
 
 /* ============ narrower desktops and tablets ============ */
-@media (max-width: 960px) {
-  .hud-id {
+@media (max-width: 1100px) {
+  .hud-id__text,
+  .hud-bug__ball {
     display: none;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 820px) {
   .hud-bug__sr {
     display: none;
   }
 
   .hud-com {
-    width: min(330px, 54vw);
+    width: min(330px, 52vw);
   }
 
   .hud-wheel {
-    width: 150px;
+    width: 160px;
   }
 
   .ckt-hint {
@@ -1230,27 +1158,36 @@
   }
 }
 
-/* short landscape windows: the start card must never sit under the HUD */
-@media (max-height: 640px) and (min-width: 561px) {
-  .ckt-card__plate {
-    max-height: calc(100svh - 120px);
-    padding: 18px 24px 22px;
+/* short landscape windows */
+@media (max-height: 680px) and (min-width: 561px) {
+  .ckt-card {
+    padding: 34px 24px 20px;
   }
 
   .ckt-card__title {
-    margin: 12px 0 10px;
+    margin: 6px 0;
     font-size: 2.4rem;
   }
 
   .ckt-keys {
-    margin: 14px 0 16px;
+    margin: 12px 0 16px;
+  }
+
+  .ckt-card__go {
+    min-height: 56px;
+    font-size: 1.5rem;
+  }
+
+  .g-tile {
+    min-height: 118px;
+  }
+
+  .ckt-over__runs b {
+    font-size: 3.8rem;
   }
 }
 
-/* ============ phone ============
-   One bar at the top, the scene, and the one control at the bottom. Width
-   alone decides it: in-app webviews and narrow desktop windows report
-   `landscape` at portrait proportions. */
+/* ============ phone ============ */
 @media (max-width: 560px) {
   .ckt {
     --hud-inset: 8px;
@@ -1261,71 +1198,70 @@
   .ckt-hint,
   .hud-btn--sound,
   .hud-bug__sr,
-  .hud-bug .k-label {
+  .hud-bug__ball {
     display: none;
   }
 
   .hud-bug {
-    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
     left: calc(env(safe-area-inset-left, 0px) + 8px);
     transform: none;
+    justify-items: start;
   }
 
-  .hud-bug__tri {
-    --tri: 54px;
-    margin-right: -18px;
+  .hud-bug__panel {
+    gap: 8px;
+    padding: 6px 10px 9px 6px;
   }
 
-  .hud-bug__plate {
-    gap: 12px;
-    height: 50px;
-    padding: 0 30px 0 24px;
+  .hud-bug__team {
+    min-width: 44px;
+    height: 38px;
+    font-size: 1rem;
   }
 
   .hud-bug__score {
     font-size: 1.9rem;
   }
 
-  .hud-bug__over .k-slot {
-    --slot: 17px;
+  .hud-bug__pips {
+    gap: 3px;
   }
 
-  .hud-bug .k-slots {
-    gap: 4px;
-  }
-
-  .hud-bug__ball {
-    right: 26px;
-    font-size: 0.66rem;
+  .hud-bug__pips .g-pip {
+    --pip: 21px;
+    border-width: 2px;
+    border-radius: 6px;
   }
 
   .hud-ctrl {
-    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
     right: calc(env(safe-area-inset-right, 0px) + 8px);
     gap: 6px;
   }
 
-  .hud-btn {
-    width: 42px;
-    height: 42px;
+  .hud-ctrl .g-icon {
+    width: 44px;
+    height: 44px;
   }
 
-  /* the wheel tucks under the bar and stands down while the ball is live */
   .hud-wheel {
-    top: calc(env(safe-area-inset-top, 0px) + 92px);
+    top: calc(env(safe-area-inset-top, 0px) + 96px);
     right: calc(env(safe-area-inset-right, 0px) + 8px);
     bottom: auto;
-    width: 108px;
+    width: 116px;
+    padding: 18px 6px 6px;
     transition: opacity 0.2s ease-out, transform 0.2s ease-out;
   }
 
-  .hud-wheel__plate {
-    gap: 5px;
-    padding: 8px 8px 6px;
+  .hud-wheel__ribbon .g-ribbon__body {
+    font-size: 0.72rem;
+    padding: 3px 10px 5px;
   }
 
-  .hud-wheel .k-label {
-    font-size: 0.48rem;
+  .hud-wheel__ribbon {
+    top: -13px;
+    padding: 0 18px;
   }
 
   .hud-wheel__key {
@@ -1335,7 +1271,7 @@
   .ckt[data-phase="runup"] .hud-wheel,
   .ckt[data-phase="flight"] .hud-wheel {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.9);
     pointer-events: none;
   }
 
@@ -1366,19 +1302,14 @@
   }
 
   .ckt-card {
-    top: calc(env(safe-area-inset-top, 0px) + 84px);
+    top: calc(env(safe-area-inset-top, 0px) + 100px);
     transform: translate(-50%, 0);
+    padding: 34px 18px 18px;
     animation-name: cktCardInPhone;
   }
 
-  .ckt-card__plate {
-    max-height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 200px);
-    padding: 20px 20px 22px;
-  }
-
   .ckt-card__title {
-    margin: 14px 0 10px;
-    font-size: 2.5rem;
+    font-size: 2.4rem;
   }
 
   /* the dock below is the start button on a phone */
@@ -1386,26 +1317,30 @@
     display: none;
   }
 
-  .ckt-over {
-    align-content: start;
-    gap: 12px;
-    padding: calc(env(safe-area-inset-top, 0px) + 16px) 12px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  .g-crumb__home {
+    display: none;
   }
 
-  .ckt-over__verdict {
-    font-size: 2.3rem;
+  .g-crumb__sep {
+    display: none;
   }
 
-  .ckt-over__plate {
-    padding: 18px 16px 20px;
+  .ckt-over__main {
+    align-items: start;
+    padding: 40px 10px 16px;
+  }
+
+  .ckt-over__panel {
+    gap: 10px;
+    padding: 30px 14px 18px;
   }
 
   .ckt-over__runs b {
-    font-size: 3.6rem;
+    font-size: 3.8rem;
   }
 
-  .ckt-over__slots {
-    margin-left: 0;
+  .ckt-over__pips .g-pip {
+    --pip: 28px;
   }
 
   .ckt-stats {
@@ -1414,42 +1349,80 @@
 
   .ckt-over__xp {
     flex-wrap: wrap;
-    gap: 10px;
   }
 
-  .ckt-over__actions .k-btn {
-    padding: 0 14px;
-    font-size: 1rem;
+  .ckt-over__actions .g-btn {
+    padding: 0 12px 5px;
+    font-size: 1.1rem;
+  }
+
+  .ckt-over__foot > span,
+  .ckt-pause__foot > span {
+    font-size: 0.85rem;
+  }
+
+  .ckt-pause__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px 10px 16px;
+  }
+
+  .g-tile {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    min-height: 124px;
+    padding: 12px 12px 14px;
+    border-radius: 18px 42px 18px 18px;
+    text-align: left;
+  }
+
+  .g-tile__icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .g-tile__icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .g-tile__label {
+    font-size: 1.35rem;
+    -webkit-text-stroke-width: 6px;
+  }
+
+  .g-tile__meta {
+    top: 12px;
+    right: 14px;
   }
 }
 
 @keyframes cktCardInPhone {
   from {
     opacity: 0;
-    transform: translate(-50%, 18px);
+    transform: translate(-50%, 0) scale(0.8);
   }
 }
 
 /* no keyboard, no key hints */
 @media (pointer: coarse) {
   .ckt-keys,
-  .ckt-pause__item .k-key {
+  .g-tile .g-key {
     display: none;
   }
 
   .ckt-card__body {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hud-com__onair::before,
+  .hud-com__who i,
   .ckt-card,
-  .ckt-over__head,
-  .ckt-over__lift,
-  .ckt-outro,
+  .ckt-over,
+  .ckt-over__panel,
   .ckt-pause,
-  .ckt-pause__panel {
+  .ckt-pause__grid .g-tile {
     animation: none;
   }
 }

@@ -3,15 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teamVars, type Team } from "./teams";
 import { Crest } from "./crests";
-import { TriBadge } from "./kit";
+import { Hex, Ribbon } from "./kit";
 
 /*
-  A team card: a black plate from the game kit (kit.css) with the side's
-  colour splashed behind its crest, its short name in the triangle badge,
-  its playstyle on a sticker, and three bars that show what picking it does
-  to the engine - the perk line says it, the bars let you compare it at a
-  glance across the two cards. The side's palette arrives as CSS variables
-  (teamVars), so nothing here special-cases a team.
+  A team card, built like a character card in a casual game: the whole
+  card in the side's own colour, a ribbon with its playstyle across the
+  top, the crest in a framed window, three segment meters for what picking
+  it does to the engine, and one green button. The hex badge carries the
+  short name. The side's palette arrives as CSS variables (teamVars), so
+  nothing here special-cases a team.
 
   The card is not itself a button. It has a primary action inside it, and
   nesting a button in a button is invalid markup that hands a screen reader
@@ -31,6 +31,8 @@ type Props = {
   /** dims and pulls back the other card once a choice is made */
   dimmed: boolean;
   onChoose: (team: Team) => void;
+  /** tells the screen which side to explain in its footer */
+  onHint?: (team: Team | null) => void;
   reduced: boolean;
   index: number;
 };
@@ -40,6 +42,7 @@ export default function TeamCard({
   selected,
   dimmed,
   onChoose,
+  onHint,
   reduced,
   index,
 }: Props) {
@@ -105,11 +108,18 @@ export default function TeamCard({
     <div
       ref={ref}
       onPointerMove={onMove}
-      onPointerEnter={() => !reduced && setHot(true)}
-      onPointerLeave={rest}
+      onPointerEnter={() => {
+        if (!reduced) setHot(true);
+        onHint?.(team);
+      }}
+      onPointerLeave={() => {
+        rest();
+        onHint?.(null);
+      }}
+      onFocus={() => onHint?.(team)}
+      onBlur={() => onHint?.(null)}
       className={[
         "pk-card",
-        `pk-card--${team.playstyle}`,
         hot ? "is-hot" : "",
         selected ? "is-picked" : "",
         dimmed ? "is-dimmed" : "",
@@ -118,35 +128,23 @@ export default function TeamCard({
         .join(" ")}
       style={{ ...teamVars(team), "--stagger": `${index * 110}ms` } as React.CSSProperties}
     >
-      <div className="k-lift pk-card__lift">
-        <div className="k-plate pk-card__plate">
-          {/* the side's short name, huge and faint, as the plate's own print */}
-          <span className="pk-card__ghost" aria-hidden>
-            {team.abbr}
-          </span>
-          <span className="pk-card__splash" aria-hidden />
+      <div className="pk-card__lift">
+        <div className="pk-card__body">
+          <Ribbon tone="yellow" className="pk-card__ribbon">
+            {team.playstyle}
+          </Ribbon>
 
-          <div className="pk-card__top">
-            <TriBadge tone="team" className="pk-card__tri">
-              {team.abbr}
-            </TriBadge>
-            <span className="k-sticker k-tape pk-card__style">
-              <span className="k-stamp">DPL</span>
-              {team.playstyle}
-            </span>
+          <div className="pk-card__window">
+            <Crest id={team.id} field={c.primary} emblem={c.light} className="pk-card__crest" />
           </div>
 
-          <Crest id={team.id} field={c.primary} emblem={c.light} className="pk-card__crest" />
+          <h3 className="g-title pk-card__name">{team.name}</h3>
+          <p className="pk-card__motto">&ldquo;{team.motto}&rdquo;</p>
 
-          <h3 className="k-brush k-brush--white pk-card__name">{team.name}</h3>
-          <p className="pk-card__identity">
-            {team.identity} <span aria-hidden>·</span> <em>&ldquo;{team.motto}&rdquo;</em>
-          </p>
-
-          <dl className="pk-bars">
+          <dl className="pk-card__stats">
             {team.ratings.map((r) => (
-              <div className="pk-bars__row" key={r.label}>
-                <dt className="k-label">{r.label}</dt>
+              <div className="pk-card__stat" key={r.label}>
+                <dt>{r.label}</dt>
                 <dd aria-label={`${r.value} out of 5`}>
                   {Array.from({ length: 5 }, (_, i) => (
                     <i key={i} className={i < r.value ? "is-on" : ""} />
@@ -156,27 +154,20 @@ export default function TeamCard({
             ))}
           </dl>
 
-          <p className="pk-card__perk">{team.perk}</p>
-
           <button
             type="button"
-            className="k-btn k-btn--fire pk-card__cta"
+            className="g-btn pk-card__cta"
             onClick={() => onChoose(team)}
             aria-pressed={selected}
           >
-            {selected ? "Locked in" : `Pick the ${short}`}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M5 12h13M12 5l7 7-7 7" />
-            </svg>
+            {selected ? "Locked in!" : `Pick ${short}`}
           </button>
         </div>
       </div>
 
-      {selected && (
-        <span className="k-brush pk-card__stamp" aria-hidden>
-          Locked in!
-        </span>
-      )}
+      <Hex tone="team" className="pk-card__hex">
+        {team.abbr}
+      </Hex>
     </div>
   );
 }

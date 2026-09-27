@@ -613,9 +613,9 @@ function faces(ctx: CanvasRenderingContext2D) {
   }
   const cs = getComputedStyle(el);
   const d = cs.getPropertyValue("--ckt-display").trim();
-  /* the shouts use the game kit's brush face, so SIX! on the stadium
+  /* the shouts use the game kit's display face, so SIX! on the stadium
      screen and on the HUD are the same lettering */
-  const sh = cs.getPropertyValue("--ckt-brush").trim() || cs.getPropertyValue("--ckt-shout").trim();
+  const sh = cs.getPropertyValue("--ckt-game").trim() || cs.getPropertyValue("--ckt-shout").trim();
   if (!d) return { display: DISPLAY_FALLBACK, shout: SHOUT_FALLBACK };
   faceCache = {
     display: `${d}, ${DISPLAY_FALLBACK}`,
