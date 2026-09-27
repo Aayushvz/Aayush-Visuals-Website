@@ -656,23 +656,30 @@ function fitFont(ctx: CanvasRenderingContext2D, text: string, size: number, face
   return px;
 }
 
-/* the studio mark: a diamond with a cross through it */
-function diamondMark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, colour: string) {
+/*
+  The Aayush Visuals mark, the real one (public/logos): a slanted bar with
+  a rounded shoulder, and the purple dot. Traced from the source art on its
+  own 1932px grid and drawn centred at (x, y) with height 2r. The bar takes
+  `colour`; the dot keeps the brand purple unless the caller is drawing on
+  purple, in which case it passes `dot`.
+*/
+const AV_BAR = "M483 1335H798L1198 596H1005C940 596 860 640 826 700Z";
+let avBar: Path2D | null = null;
+
+function diamondMark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, colour: string, dot = "#b517ff") {
+  if (typeof Path2D === "undefined") return;
+  avBar ??= new Path2D(AV_BAR);
+  /* the mark spans x 483..1448, y 596..1335: 965 by 739 */
+  const k = (r * 2) / 739;
   ctx.save();
-  ctx.strokeStyle = colour;
-  ctx.lineWidth = Math.max(1, r * 0.2);
-  ctx.lineJoin = "miter";
+  ctx.translate(x - ((483 + 1448) / 2) * k, y - ((596 + 1335) / 2) * k);
+  ctx.scale(k, k);
+  ctx.fillStyle = colour;
+  ctx.fill(avBar);
+  ctx.fillStyle = dot;
   ctx.beginPath();
-  ctx.moveTo(x, y - r);
-  ctx.lineTo(x + r, y);
-  ctx.lineTo(x, y + r);
-  ctx.lineTo(x - r, y);
-  ctx.closePath();
-  ctx.moveTo(x, y - r);
-  ctx.lineTo(x, y + r);
-  ctx.moveTo(x - r, y);
-  ctx.lineTo(x + r, y);
-  ctx.stroke();
+  ctx.arc(1262, 1150, 186, 0, Math.PI * 2);
+  ctx.fill();
   ctx.restore();
 }
 
@@ -714,12 +721,12 @@ const SLIDES: Slide[] = [
       const size = fitFont(ctx, "AAYUSH VISUALS", sh * 0.5, face, sw * 0.66);
       const tw = ctx.measureText("AAYUSH VISUALS").width;
       const mark = sh * 0.24;
-      const total = mark * 2 + sh * 0.3 + tw;
+      const total = mark * 2.6 + sh * 0.3 + tw;
       const left = x + (sw - total) / 2;
-      diamondMark(ctx, left + mark, y + sh / 2, mark, "#ffffff");
+      diamondMark(ctx, left + mark * 1.3, y + sh / 2, mark, "#ffffff", "#f0d6ff");
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "left";
-      ctx.fillText("AAYUSH VISUALS", left + mark * 2 + sh * 0.3, y + sh / 2 + size * 0.04);
+      ctx.fillText("AAYUSH VISUALS", left + mark * 2.6 + sh * 0.3, y + sh / 2 + size * 0.04);
     },
   },
   {
@@ -1926,8 +1933,11 @@ export function paintBigScreen(
     the reference: 69% of the width at an aspect of 0.58.
   */
   const portrait = w / h < 0.72;
-  const bw = portrait ? w * 0.69 : Math.min(w * 0.34, h * 0.42);
-  const bh = bw * (portrait ? 0.58 : 0.42);
+  /* portrait: a smaller, wider screen set into the upper deck, clear of the
+     phone's top bar and well above the boards, so the stand still reads
+     around it instead of the screen filling the band */
+  const bw = portrait ? Math.min(w * 0.58, 260) : Math.min(w * 0.34, h * 0.42);
+  const bh = bw * (portrait ? 0.5 : 0.42);
   const bx = cx - bw / 2;
   /*
     Anchored by the bottom of the whole assembly in portrait (screen,
@@ -1937,7 +1947,7 @@ export function paintBigScreen(
   */
   const assemblyH = bh * 1.23;
   const by = portrait
-    ? Math.max(HUD_BAR_CLEARANCE, h * 0.375 - assemblyH)
+    ? Math.max(64, Math.min(standTop - bh * 0.3, h * 0.33 - assemblyH))
     : Math.max(standTop - bh * 0.52, HUD_BAR_CLEARANCE);
 
   const bez = Math.max(3, bw * 0.02);
@@ -2150,7 +2160,7 @@ export function paintBigScreen(
   const uw = ctx.measureText(unit).width + ribbonH * 2.2;
   const shift = still ? 0 : (now * 0.02) % uw;
   for (let x = bx - uw + shift; x < bx + bw; x += uw) {
-    diamondMark(ctx, x + ribbonH * 0.6, ry + ribbonH / 2, ribbonH * 0.26, "#a78bfa");
+    diamondMark(ctx, x + ribbonH * 0.6, ry + ribbonH / 2, ribbonH * 0.28, "#ffffff");
     ctx.fillStyle = "#c4b5fd";
     ctx.fillText(unit, x + ribbonH * 1.2, ry + ribbonH / 2 + ribbonH * 0.03);
   }

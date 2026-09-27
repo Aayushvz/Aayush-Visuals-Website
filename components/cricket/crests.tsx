@@ -1,142 +1,111 @@
 /*
-  Team crests.
+  Team logos.
 
-  These replace the emoji mascots the cards used to carry. Emoji were
-  never really placeholders here — they were the whole identity of a card
-  that is otherwise asking to be read as a collectible, and they render as
-  a different drawing on every platform, at a weight nobody chose, with no
-  way to tint them to the side's colours. The design checklist has a flat
-  rule about it: icons are SVG, not emoji.
+  Each side has a mascot mark in the style of an esports or franchise logo:
+  a head built from flat, angular facets, a dark keyline around the whole
+  silhouette, and one hot accent (the panther's eyes, the falcon's beak).
+  Facets rather than gradients because a logo has to hold at 40px on a
+  scoreboard as well as at 160px on a card, and flat planes survive
+  shrinking where soft shading turns to mud.
 
-  Both crests are built on one shield so the two sides read as belonging
-  to the same league — the field colour and the emblem inside it are the
-  only things that change. The shield carries a gold rim because gold is
-  this kit's "earned" colour everywhere else too, and a crest is the one
-  piece of a team card that should look like it was awarded.
+  Colours come from the side's palette: `field` is the primary, `emblem`
+  the light partner. The shadow planes are the primary under a translucent
+  dark layer, so a third colour never has to be passed in.
 
-  Drawn on a 100x110 grid at a single weight. No gradients inside the
-  emblem itself: at the size a card shows this, gradient detail turns to
-  mud, and a flat silhouette is what survives.
+  Drawn on a 200x200 grid.
 */
 
 type CrestProps = {
-  /** the side's brand colour — fills the shield's field */
+  /** the side's brand colour */
   field: string;
-  /** the lighter partner, used for the emblem so it lifts off the field */
+  /** the lighter partner */
   emblem: string;
   className?: string;
 };
 
-const SHIELD =
-  "M50 3 L92 12 C94.2 12.5 95 14 95 16 V56 C95 82 76 98.5 50 107 C24 98.5 5 82 5 56 V16 C5 14 5.8 12.5 8 12 Z";
+const INK = "#0a0722";
+const SHADE = "rgba(8, 4, 30, 0.45)";
 
-/*
-  The rim is one path drawn twice — once thick in gold as the outer edge,
-  once as the clipped field on top. Stroking a single shape beats nesting
-  two scaled copies, which never keeps an even margin around a shield's
-  point.
-*/
-function Shield({
-  field,
-  children,
-  title,
-}: {
-  field: string;
-  children: React.ReactNode;
-  title: string;
-}) {
+export function PantherCrest({ field, emblem, className }: CrestProps) {
   return (
-    <svg viewBox="0 0 100 110" role="img" aria-label={title} className="crest">
-      <defs>
-        <linearGradient id={`crestRim-${title}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffe071" />
-          <stop offset="50%" stopColor="#ffc32e" />
-          <stop offset="100%" stopColor="#e08a12" />
-        </linearGradient>
-        <linearGradient id={`crestField-${title}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={field} stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#0d1f52" />
-        </linearGradient>
-      </defs>
-
-      {/* the plate, then the rim over it, so the gold edge is never cut by
-          the field's own antialiasing */}
-      <path d={SHIELD} fill={`url(#crestField-${title})`} />
+    <svg viewBox="0 0 200 200" className={`crest crest--panther ${className ?? ""}`} aria-hidden focusable="false">
+      {/* the silhouette, keyline first */}
       <path
-        d={SHIELD}
-        fill="none"
-        stroke={`url(#crestRim-${title})`}
-        strokeWidth="7"
+        d="M36 26 72 50 100 44 128 50 164 26 162 78 176 106 152 142 128 170 100 182 72 170 48 142 24 106 38 78Z"
+        fill={field}
+        stroke={INK}
+        strokeWidth="8"
         strokeLinejoin="round"
       />
-      {/* the highlight across the shield's upper half, matching the panels */}
-      <path
-        d="M50 3 L92 12 C94.2 12.5 95 14 95 16 V44 C72 54 28 54 5 44 V16 C5 14 5.8 12.5 8 12 Z"
-        fill="#ffffff"
-        opacity="0.1"
-      />
-      {children}
+      {/* ears: the inner ear in the light colour */}
+      <path d="M46 42 68 56 52 74Z" fill={emblem} />
+      <path d="M154 42 132 56 148 74Z" fill={emblem} />
+      {/* the shadow planes down the sides of the face */}
+      <path d="M38 78 24 106 48 142 66 124 58 100Z" fill={SHADE} />
+      <path d="M162 78 176 106 152 142 134 124 142 100Z" fill={SHADE} />
+      <path d="M72 170 100 182 128 170 116 156 100 162 84 156Z" fill={SHADE} />
+      {/* the lit plane down the brow */}
+      <path d="M100 48 122 84 100 118 78 84Z" fill={emblem} opacity="0.55" />
+      {/* brows, heavy and angled down to the nose */}
+      <path d="M46 86 90 94 86 102 50 96Z" fill={INK} />
+      <path d="M154 86 110 94 114 102 150 96Z" fill={INK} />
+      {/* eyes */}
+      <path d="M56 99 86 104 80 115 62 110Z" fill="#d7ff3d" />
+      <path d="M144 99 114 104 120 115 138 110Z" fill="#d7ff3d" />
+      <path d="M71 101 75 102 73 113 70 112Z" fill={INK} />
+      <path d="M129 101 125 102 127 113 130 112Z" fill={INK} />
+      {/* the muzzle */}
+      <path d="M78 130 100 120 122 130 118 154 100 164 82 154Z" fill={emblem} />
+      <path d="M100 120 122 130 118 154 100 164Z" fill={SHADE} opacity="0.5" />
+      {/* nose and mouth */}
+      <path d="M88 126 112 126 100 140Z" fill={INK} />
+      <path d="M100 140 100 148 M100 148 88 154 M100 148 112 154" stroke={INK} strokeWidth="4" strokeLinecap="round" fill="none" />
+      {/* fangs */}
+      <path d="M89 153 95 152 92 163Z" fill="#fff" />
+      <path d="M111 153 105 152 108 163Z" fill="#fff" />
     </svg>
   );
 }
 
-/* --- Pixel Panthers ---------------------------------------------------
-   A panther head squared off to the grid. The brief for this side is
-   "every pixel matters", so the silhouette is deliberately built from
-   straight cuts and right angles rather than the curves a big-cat crest
-   would normally use — the shape argues the same thing the card's copy
-   does. */
-export function PantherCrest({ field, emblem, className }: CrestProps) {
-  return (
-    <span className={className}>
-      <Shield field={field} title="Panthers">
-        <g fill={emblem}>
-          {/* ears */}
-          <path d="M26 34 L38 30 L36 44 Z" />
-          <path d="M74 34 L62 30 L64 44 Z" />
-          {/* skull */}
-          <path d="M30 38 H70 L74 58 L64 76 H36 L26 58 Z" />
-        </g>
-        {/* eyes — cut out of the skull rather than drawn on it, so the
-            silhouette stays one solid shape */}
-        <g fill="#0d1f52">
-          <path d="M34 50 L45 53 L43 60 L34 57 Z" />
-          <path d="M66 50 L55 53 L57 60 L66 57 Z" />
-        </g>
-        {/* muzzle */}
-        <path d="M44 64 H56 L53 71 H47 Z" fill="#0d1f52" />
-        {/* whisker rule, the one straight highlight */}
-        <path d="M38 68 H30 M62 68 H70" stroke={emblem} strokeWidth="2.5" strokeLinecap="square" />
-      </Shield>
-    </span>
-  );
-}
-
-/* --- Flow Falcons -----------------------------------------------------
-   A falcon in profile, all swept diagonals. This side's argument is speed
-   and flow, so every line in the emblem leans forward; nothing in it is
-   vertical. */
 export function FalconCrest({ field, emblem, className }: CrestProps) {
   return (
-    <span className={className}>
-      <Shield field={field} title="Falcons">
-        <g fill={emblem}>
-          {/* swept crown and nape */}
-          <path d="M28 32 L66 38 L72 52 L58 50 L46 74 L34 68 L30 52 Z" />
-          {/* beak, hooked down past the jaw line */}
-          <path d="M66 50 L84 54 L74 62 L64 58 Z" />
-          {/* the trailing crest feather */}
-          <path d="M28 32 L20 46 L31 44 Z" />
-        </g>
-        {/* eye, and the brow bar that gives a falcon its scowl */}
-        <circle cx="60" cy="47" r="4" fill="#0d1f52" />
-        <path d="M50 40 L70 44" stroke="#0d1f52" strokeWidth="3.5" strokeLinecap="round" />
-      </Shield>
-    </span>
+    <svg viewBox="0 0 200 200" className={`crest crest--falcon ${className ?? ""}`} aria-hidden focusable="false">
+      {/* swept feathers behind the head, drawn first so the head sits on them */}
+      <path
+        d="M58 70 14 70 44 90 8 104 42 116 12 140 50 140 60 118Z"
+        fill={emblem}
+        stroke={INK}
+        strokeWidth="8"
+        strokeLinejoin="round"
+      />
+      {/* the head */}
+      <path
+        d="M46 154 40 112 54 70 82 42 118 34 150 46 170 70 182 94 170 118 158 106 148 112 140 126 128 154 112 180 78 182Z"
+        fill={field}
+        stroke={INK}
+        strokeWidth="8"
+        strokeLinejoin="round"
+      />
+      {/* the lit crown */}
+      <path d="M82 42 118 34 150 46 112 66 84 80Z" fill={emblem} opacity="0.6" />
+      {/* shadow down the back of the neck */}
+      <path d="M46 154 40 112 60 118 76 150 78 182Z" fill={SHADE} />
+      {/* the beak: gold, hooked, with its lower edge in shadow */}
+      <path d="M146 70 170 70 182 94 170 118 160 102 146 98Z" fill="#ffc83d" stroke={INK} strokeWidth="5" strokeLinejoin="round" />
+      <path d="M160 102 170 118 182 94 172 96Z" fill="#c9861a" />
+      {/* the brow ridge, heavy over the eye */}
+      <path d="M104 66 150 60 144 72 110 76Z" fill={INK} />
+      {/* eye */}
+      <circle cx="130" cy="84" r="10" fill="#fff5cc" stroke={INK} strokeWidth="4" />
+      <circle cx="132" cy="84" r="4.5" fill={INK} />
+      {/* the falcon's tear mark, running down from the eye */}
+      <path d="M120 94 136 96 126 134 112 124Z" fill={INK} />
+      {/* a pale chest plane */}
+      <path d="M128 154 112 180 92 164 114 134Z" fill={emblem} opacity="0.7" />
+    </svg>
   );
 }
 
-/** Pick a crest by team id, so callers never switch on it themselves. */
 export function Crest({
   id,
   field,

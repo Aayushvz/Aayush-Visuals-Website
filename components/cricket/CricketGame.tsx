@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import PageLink from "@/components/PageLink";
 import { OVER, clamp, resolveShot, runUpDelay, verdict } from "./engine";
 import type { Contact, Delivery, ShotResult } from "./engine";
@@ -33,7 +33,8 @@ import Avatar from "./Avatar";
 import Ticker from "./Ticker";
 import { createClock } from "./clock";
 import { teamById } from "./teams";
-import { BallIcon, BoltIcon, Burst, Hex, Pips, Ribbon, Stars, Toggle } from "./kit";
+import { AVMark, BoltIcon, Burst, Pips, Ribbon, Stars, Toggle } from "./kit";
+import { Crest } from "./crests";
 import "./kit.css";
 import "./cricket.css";
 
@@ -694,6 +695,7 @@ export default function CricketGame({
   const strikeRate = ballsFaced > 0 ? Math.round((score / ballsFaced) * 100) : 0;
 
   const side = teamById(team);
+  const rival = teamById(opponent);
   const commentary = last
     ? last.commentary
     : phase === "flight"
@@ -800,97 +802,99 @@ export default function CricketGame({
       {phase !== "over" && !shout && <ComboPill combo={combo} reduced={reduced} />}
 
       {/*
-        ---- bottom left: the commentator speaks ----
+        ---- bottom left: commentary, timing, level ----
 
-        A speech bubble, because it is someone talking, with the timing of
-        the last shot inside it on a traffic-light meter. The level bar sits
-        underneath, next to the commentator's portrait.
+        A dark glass panel: who is talking and what they said, how the last
+        shot's timing landed on a traffic-light meter, and the level strip.
+        On a phone the same panel becomes a slim strip above the bat button,
+        and the level strip steps out (see cricket.css).
       */}
-      <div className="hud-com">
-        <div className="g-bubble hud-com__bubble">
-          <span className="hud-com__who">
-            <i aria-hidden /> Commentary
-          </span>
-          <p className="hud-com__line">{commentary}</p>
-
-          {last && last.contact !== "wicket" && (
-            <div className="hud-timing">
-              <span
-                className="hud-timing__track"
-                style={
-                  {
-                    "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%`,
-                    "--ckt-perfect": `${perfectPct}%`,
-                  } as React.CSSProperties
-                }
-                aria-hidden
-              >
-                <i />
-              </span>
-              <span
-                className="hud-timing__label"
-                data-grade={
-                  Math.abs(last.offset) <= delivery.windows.perfect
-                    ? "good"
-                    : Math.abs(last.offset) <= delivery.windows.contact * 0.7
-                      ? "near"
-                      : "miss"
-                }
-              >
-                {Math.abs(last.offset) <= delivery.windows.perfect
-                  ? "Perfect!"
-                  : last.offset < 0
-                    ? `${Math.round(-last.offset)}ms early`
-                    : `${Math.round(last.offset)}ms late`}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="hud-com__foot">
+      <div className="g-glass hud-com">
+        <div className="hud-com__head">
           <span className="hud-com__face">
             <Avatar />
           </span>
+          <span className="g-label">Commentary</span>
+          <span className="hud-com__live" aria-hidden>
+            Live
+          </span>
+        </div>
+        <p className="hud-com__line">{commentary}</p>
+
+        {last && last.contact !== "wicket" && (
+          <div className="hud-timing">
+            <span
+              className="hud-timing__track"
+              style={
+                {
+                  "--ckt-off": `${clamp(last.offset / delivery.windows.contact, -1, 1) * 50 + 50}%`,
+                  "--ckt-perfect": `${perfectPct}%`,
+                } as React.CSSProperties
+              }
+              aria-hidden
+            >
+              <i />
+            </span>
+            <span
+              className="hud-timing__label"
+              data-grade={
+                Math.abs(last.offset) <= delivery.windows.perfect
+                  ? "good"
+                  : Math.abs(last.offset) <= delivery.windows.contact * 0.7
+                    ? "near"
+                    : "miss"
+              }
+            >
+              {Math.abs(last.offset) <= delivery.windows.perfect
+                ? "Perfect"
+                : last.offset < 0
+                  ? `${Math.round(-last.offset)}ms early`
+                  : `${Math.round(last.offset)}ms late`}
+            </span>
+          </div>
+        )}
+
+        <div className="hud-com__xp">
           <XpBar xp={xp} levelUp={levelUp} reduced={reduced} />
         </div>
       </div>
 
       {/* ---- bottom right: the wagon wheel ---- */}
-      <div className="g-panel hud-wheel">
-        <Ribbon tone="blue" className="hud-wheel__ribbon">
-          Wagon wheel
-        </Ribbon>
+      <div className="g-glass hud-wheel">
+        <div className="hud-wheel__head">
+          <span className="g-label">Wagon wheel</span>
+          <span className="hud-wheel__runs">{score} runs</span>
+        </div>
         <Wagon plots={plots} />
-        <span className="hud-wheel__key" aria-hidden>
-          <i className="k1" />1<i className="k4" />4<i className="k6" />6
-        </span>
+        <WheelKey plots={plots} />
       </div>
 
       {/* ---- the start card ---- */}
       {phase === "idle" && (
         <div className="g-panel ckt-card" role="dialog" aria-labelledby="ckt-intro-title">
-          <Ribbon tone="red" className="ckt-card__ribbon">
-            Six balls!
-          </Ribbon>
-          <div className="ckt-card__side">
-            <Hex tone="team" className="ckt-card__hex">
-              {side.abbr}
-            </Hex>
-            <span>
-              <b>{side.name}</b> batting
+          <div className="ckt-card__match">
+            <span className="ckt-card__side">
+              <Crest id={team} field={side.colours.primary} emblem={side.colours.light} className="ckt-card__logo" />
+              <b>{side.abbr}</b>
+            </span>
+            <span className="ckt-card__vs">vs</span>
+            <span className="ckt-card__side ckt-card__side--opp">
+              <b>{rival.abbr}</b>
+              <Crest id={opponent} field={rival.colours.primary} emblem={rival.colours.light} className="ckt-card__logo" />
             </span>
           </div>
           <h1 className="g-title ckt-card__title" id="ckt-intro-title">
-            One innings.
+            Six balls.
+            <em>One innings.</em>
           </h1>
           <p className="ckt-card__body">
             Play the shot as the ball reaches you. Timing decides the runs, your aim decides
-            where it goes, and a wicket ends the over on the spot.
+            where it goes, and a wicket ends the over.
           </p>
           <ul className="ckt-keys" aria-label="Controls">
             <li>
               <kbd className="g-key">Space</kbd>
-              <span>Play the shot</span>
+              <span>Shot</span>
             </li>
             <li>
               <kbd className="g-key">←</kbd>
@@ -903,70 +907,74 @@ export default function CricketGame({
             </li>
           </ul>
           <button type="button" className="g-btn ckt-card__go" onClick={start}>
-            Play!
             <PlayIcon />
+            Take guard
           </button>
         </div>
       )}
 
-      {/* ---- the scorecard ---- */}
+      {/*
+        ---- the scorecard ----
+
+        One card, two columns on a wide screen: the result on the left
+        (verdict, stars, the total, the over ball by ball), the numbers on
+        the right (stats, where the runs went, XP) with the two actions
+        under both. Sized to fit the viewport outright, so it never scrolls;
+        on a phone it becomes one tight column.
+      */}
       {phase === "over" && (
         <div className="ckt-over" role="dialog" aria-labelledby="ckt-over-title">
           <Burst tone={out ? "red" : "yellow"} />
 
-          <header className="g-crumb ckt-over__crumb">
-            <span className="g-crumb__mark">
-              <BallIcon />
-            </span>
-            <span className="g-crumb__trail">
-              <span className="g-crumb__home">Design Premier League</span>
-              <span className="g-crumb__sep" aria-hidden>
-                ›
-              </span>
-              <b>Scorecard</b>
-            </span>
-          </header>
-
           <div className="ckt-over__main">
-            <div className="g-panel ckt-over__panel">
-              <Ribbon tone={out ? "red" : "green"} className="ckt-over__ribbon">
-                {out ? "Out!" : "Over complete!"}
-              </Ribbon>
-              <Stars earned={stars} />
-
-              <h2 className="g-title ckt-over__verdict" id="ckt-over-title">
-                {finalVerdict.title}
-              </h2>
-
-              <div className="ckt-over__score">
+            <div className="g-panel ckt-over__card">
+              <div className="ckt-over__hero">
+                <div className="ckt-over__top">
+                  <Ribbon tone={out ? "red" : "green"}>{out ? "Out" : "Over complete"}</Ribbon>
+                  <Stars earned={stars} />
+                </div>
+                <h2 className="g-title ckt-over__verdict" id="ckt-over-title">
+                  {finalVerdict.title}
+                </h2>
                 <p className="ckt-over__runs">
-                  <b className="g-title">{score}</b>
-                  <span>off {out ? ballIdx + 1 : BALLS}</span>
+                  <b className="g-num">{score}</b>
+                  <span>
+                    off {out ? ballIdx + 1 : BALLS}
+                    <small>{out ? "1 wicket" : "not out"}</small>
+                  </span>
                 </p>
                 <Pips log={overLog} live={-1} className="ckt-over__pips" />
+                <p className="ckt-over__note">{finalVerdict.note}</p>
               </div>
 
-              <dl className="ckt-stats">
-                {(
-                  [
-                    ["Strike rate", String(strikeRate), "blue"],
-                    ["Fours", String(boundaries.fours), "green"],
-                    ["Sixes", String(boundaries.sixes), "yellow"],
-                    ["Wickets", out ? "1" : "0", "red"],
-                  ] as const
-                ).map(([k, v, tone]) => (
-                  <div className={`ckt-stats__cell g-tone--${tone}`} key={k}>
-                    <dd className="g-title">{v}</dd>
-                    <dt>{k}</dt>
-                  </div>
-                ))}
-              </dl>
+              <div className="ckt-over__side">
+                <dl className="ckt-stats">
+                  {(
+                    [
+                      ["Strike rate", String(strikeRate)],
+                      ["Fours", String(boundaries.fours)],
+                      ["Sixes", String(boundaries.sixes)],
+                      ["Wickets", out ? "1" : "0"],
+                    ] as const
+                  ).map(([k, v]) => (
+                    <div className="ckt-stats__cell" key={k}>
+                      <dt className="g-label">{k}</dt>
+                      <dd className="g-num">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
 
-              <div className="ckt-over__xp">
-                <span className="g-pill ckt-over__earned">
-                  <BoltIcon />+{overXp} XP
-                </span>
-                <XpBar xp={xp} levelUp={null} reduced={reduced} />
+                <div className="ckt-over__wheel">
+                  <Wagon plots={plots} />
+                  <WheelKey plots={plots} />
+                </div>
+
+                <div className="ckt-over__xp">
+                  <span className="g-pill">
+                    <BoltIcon />+{overXp} XP
+                  </span>
+                  <XpBar xp={xp} levelUp={null} reduced={reduced} />
+                </div>
               </div>
 
               <div className="ckt-over__actions">
@@ -974,21 +982,18 @@ export default function CricketGame({
                   <ReplayIcon />
                   Play again
                 </button>
-                <button type="button" className="g-btn g-tone--blue" onClick={share}>
+                <button type="button" className="g-btn g-btn--ghost" onClick={share}>
                   <ShareIcon />
-                  {shared ? "Copied!" : "Share"}
+                  {shared ? "Copied" : "Share"}
                 </button>
               </div>
             </div>
-          </div>
 
-          <footer className="g-foot ckt-over__foot">
-            <span>{finalVerdict.note}</span>
-            <PageLink className="g-btn g-tone--navy ckt-over__out" href="/work">
+            <PageLink className="ckt-over__out" href="/work">
               See the real work
               <ArrowIcon />
             </PageLink>
-          </footer>
+          </div>
         </div>
       )}
 
@@ -1005,7 +1010,7 @@ export default function CricketGame({
           <div className="ckt-pause__frame" ref={menuRef}>
             <header className="g-crumb ckt-pause__crumb">
               <span className="g-crumb__mark">
-                <BallIcon />
+                <AVMark />
               </span>
               <span className="g-crumb__trail">
                 <span className="g-crumb__home">{side.name}</span>
@@ -1238,7 +1243,32 @@ function ResumeIcon() {
   zero shots, and every line added afterwards lands somewhere meaningful
   rather than in empty space.
 */
+/* how many of each scoring shot, under the wheel */
+function WheelKey({ plots }: { plots: Plot[] }) {
+  const n = (r: number) => plots.filter((p) => (r === 1 ? p.runs < 4 : p.runs === r)).length;
+  return (
+    <span className="wheel-key">
+      <span>
+        <i className="k1" />
+        1s <b>{n(1)}</b>
+      </span>
+      <span>
+        <i className="k4" />
+        4s <b>{n(4)}</b>
+      </span>
+      <span>
+        <i className="k6" />
+        6s <b>{n(6)}</b>
+      </span>
+    </span>
+  );
+}
+
 function Wagon({ plots }: { plots: Plot[] }) {
+  /* one gradient per wheel: two wheels can be mounted at once (HUD and
+     scorecard), and a gradient inside a hidden SVG paints nothing for the
+     other one that refers to it by a shared id */
+  const fieldId = `wagonField${useId().replace(/:/g, "")}`;
   return (
     <svg
       className="ckt-wagon"
@@ -1252,14 +1282,14 @@ function Wagon({ plots }: { plots: Plot[] }) {
       <defs>
         {/* the outfield, lit from the batter's end so the far boundary sits
             back — the same top-down light every surface in this kit uses */}
-        <linearGradient id="wagonField" x1="0" y1="1" x2="0" y2="0">
+        <linearGradient id={fieldId} x1="0" y1="1" x2="0" y2="0">
           <stop offset="0%" stopColor="#2f7d3f" />
           <stop offset="100%" stopColor="#1c5a2b" />
         </linearGradient>
       </defs>
 
       {/* the field itself */}
-      <path d="M6 62 A54 54 0 0 1 114 62 Z" className="ckt-wagon-field" />
+      <path d="M6 62 A54 54 0 0 1 114 62 Z" className="ckt-wagon-field" fill={`url(#${fieldId})`} />
 
       {/* the mown ring inside the rope, and the 30-yard circle */}
       <path d="M20 62 A40 40 0 0 1 100 62" className="ckt-wagon-ring" />

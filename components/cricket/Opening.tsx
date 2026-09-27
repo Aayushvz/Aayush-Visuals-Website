@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import TitleCrest from "./TitleCrest";
+import { AVMark, LeagueCrest } from "./kit";
+import { Crest } from "./crests";
+import { TEAMS } from "./teams";
 import { useAssets } from "./useAssets";
 
 /*
@@ -154,97 +156,73 @@ export default function Opening({ onStart, reduced }: Props) {
     };
   }, [reduced, spawn]);
 
+  const [a, b] = TEAMS;
+
   return (
     <div className="stg stg--pass">
-      <div className="stgOpen">
-        <p className="stgOpen__kicker">Aayush Raj presents</p>
-
-        {/* the crown, as in the comps — three gold stars over the wordmark */}
-        <span className="gk-stars stgOpen__crown" aria-hidden>
-          <i />
-          <i />
-          <i />
-        </span>
-
-        {/*
-          The wordmark and the badge are one block but two elements: the
-          crest is decoration and the words are a real <h1>. Keeping the
-          type in HTML is what gives the screen the document heading it
-          needs, and lets the three lines take their own colours.
-        */}
-        <div className="stgOpen__lockup">
-          <TitleCrest />
-          <h1 className="stgOpen__title">
-            <span className="stgOpen__l1">Design</span>
-            <span className="stgOpen__l2">Premier</span>
-            <span className="stgOpen__l3">League</span>
-          </h1>
-        </div>
-
-        <p className="gk-ribbon gk-ribbon--navy stgOpen__sub">
-          <i className="stgOpen__subStar" aria-hidden />
-          Play your portfolio
-          <i className="stgOpen__subStar" aria-hidden />
+      <div className="op">
+        <p className="op__presents">
+          <AVMark />
+          Aayush Visuals presents
         </p>
 
-        {/*
-          The bar replaces the button rather than sitting above it.
+        <LeagueCrest className="op__crest" />
 
-          Two controls where one is dead is the worst version of this: a
-          disabled cap still reads as pressable and invites a tap that does
-          nothing. Swapping them means the screen only ever shows the thing
-          that is currently true — loading, or ready.
-        */}
+        <h1 className="op__title">
+          <span className="op__l1">Design</span>
+          <span className="op__l2">Premier</span>
+          <span className="op__l3">League</span>
+        </h1>
+
+        <p className="op__tag">Play the portfolio</p>
+
+        <p className="op__match" aria-label={`${a.name} versus ${b.name}`}>
+          <span className="op__side">
+            <Crest id={a.id} field={a.colours.primary} emblem={a.colours.light} />
+            {a.abbr}
+          </span>
+          <em>vs</em>
+          <span className="op__side">
+            {b.abbr}
+            <Crest id={b.id} field={b.colours.primary} emblem={b.colours.light} />
+          </span>
+        </p>
+
+        {/* the bar stands in for the button until the match has loaded:
+            the screen only ever shows the control that is currently true */}
         {!ready ? (
           <div
-            className="stgLoad"
+            className="op__load"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(progress * 100)}
             aria-label="Loading the match"
           >
-            <span className="stgLoad__label">
-              Warming up<span className="stgLoad__pct">{Math.round(progress * 100)}%</span>
+            <span className="op__loadLabel">
+              Warming up <b>{Math.round(progress * 100)}%</b>
             </span>
-            <span className="gk-meter stgLoad__track">
-              <span
-                className="gk-meter__fill"
-                style={{ width: `${Math.max(4, progress * 100)}%` }}
-              />
+            <span className="g-bar">
+              <span className="g-bar__fill" style={{ display: "block", width: `${Math.max(4, progress * 100)}%` }} />
             </span>
           </div>
         ) : (
-        <button
-          ref={btnRef}
-          type="button"
-          className="stgStart"
-          onClick={onStart}
-          onPointerEnter={() => (hotRef.current = true)}
-          onPointerLeave={() => (hotRef.current = false)}
-          onFocus={() => (hotRef.current = true)}
-          onBlur={() => (hotRef.current = false)}
-        >
-          {!reduced && (
-            <canvas ref={sparkRef} className="stgStart__spark" aria-hidden />
-          )}
-          <span className="stgStart__ring" aria-hidden />
-          <span className="stgStart__body">
+          <button
+            ref={btnRef}
+            type="button"
+            className="g-btn op__go"
+            onClick={onStart}
+            onPointerEnter={() => (hotRef.current = true)}
+            onPointerLeave={() => (hotRef.current = false)}
+            onFocus={() => (hotRef.current = true)}
+            onBlur={() => (hotRef.current = false)}
+          >
+            {!reduced && <canvas ref={sparkRef} className="op__spark" aria-hidden />}
             Take the field
-            <svg
-              className="stgStart__arrow"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M5 12h13M12 5l7 7-7 7" />
             </svg>
-          </span>
-        </button>
+          </button>
         )}
       </div>
     </div>

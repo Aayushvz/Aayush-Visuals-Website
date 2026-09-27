@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teamVars, type Team } from "./teams";
 import { Crest } from "./crests";
-import { Hex, Ribbon } from "./kit";
+import { Ribbon } from "./kit";
 
 /*
   A team card, built like a character card in a casual game: the whole
@@ -130,25 +130,29 @@ export default function TeamCard({
     >
       <div className="pk-card__lift">
         <div className="pk-card__body">
-          <Ribbon tone="yellow" className="pk-card__ribbon">
-            {team.playstyle}
-          </Ribbon>
+          <div className="pk-card__top">
+            <Ribbon tone="team">{team.playstyle}</Ribbon>
+            <span className="pk-card__abbr">{team.abbr}</span>
+          </div>
 
           <div className="pk-card__window">
             <Crest id={team.id} field={c.primary} emblem={c.light} className="pk-card__crest" />
           </div>
 
           <h3 className="g-title pk-card__name">{team.name}</h3>
-          <p className="pk-card__motto">&ldquo;{team.motto}&rdquo;</p>
+          <p className="pk-card__motto">{team.motto}</p>
 
           <dl className="pk-card__stats">
             {team.ratings.map((r) => (
               <div className="pk-card__stat" key={r.label}>
                 <dt>{r.label}</dt>
                 <dd aria-label={`${r.value} out of 5`}>
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <i key={i} className={i < r.value ? "is-on" : ""} />
-                  ))}
+                  <span className="pk-meter">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <i key={i} className={i < r.value ? "is-on" : ""} />
+                    ))}
+                  </span>
+                  <b>{r.value}</b>
                 </dd>
               </div>
             ))}
@@ -164,10 +168,6 @@ export default function TeamCard({
           </button>
         </div>
       </div>
-
-      <Hex tone="team" className="pk-card__hex">
-        {team.abbr}
-      </Hex>
     </div>
   );
 }

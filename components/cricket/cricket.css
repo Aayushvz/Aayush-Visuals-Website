@@ -1,14 +1,13 @@
 /*
   ============ CRICKET: THE MATCH ============
 
-  The match screen, the pause menu and the scorecard, built from the game
-  kit (kit.css): chunky outlined pieces, colour that means something, and
-  outlined Lilita type. The shot receipt keeps the previous kit's hit
-  stamp (the triangle, the torn sticker and the fire brush), because a hit
-  landing should feel different from the furniture around it.
+  The match HUD, the start card, the pause menu and the scorecard, built
+  from the game kit (kit.css). The shot receipt keeps the hit stamp
+  (triangle, torn sticker, fire brush) that was asked to stay.
 
-  Scoped under .ckt so it can be imported as global CSS without touching
-  anything else on the site.
+  Phones get their own layout rather than a shrunk desktop (see the end of
+  the file): one bar at the top, the scene, a slim commentary strip and one
+  bat button at the bottom. Nothing on any screen scrolls.
 */
 .ckt {
   --hud-inset: clamp(12px, 1.4vw, 20px);
@@ -19,7 +18,6 @@
   background: #0e2a3f;
   color: var(--g-text);
   font-family: var(--g-body);
-  /* the whole surface is the bat */
   cursor: crosshair;
   touch-action: manipulation;
   user-select: none;
@@ -36,13 +34,12 @@
   height: 100%;
 }
 
-/* before the first ball, the pitch steps back behind the start card */
 .ckt::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: radial-gradient(ellipse at 50% 50%, rgba(20, 24, 70, 0.55), rgba(20, 24, 70, 0.2) 75%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(6, 9, 30, 0.7), rgba(6, 9, 30, 0.35) 75%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
@@ -61,27 +58,32 @@
   z-index: 3;
 }
 
-/* ============ top left: the player card ============ */
+/* ============ top left: the player ============ */
 .hud-id {
   top: var(--hud-inset);
   left: var(--hud-inset);
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 5px 14px 5px 5px;
+  border: 1px solid var(--g-edge);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(28, 36, 92, 0.86), rgba(10, 14, 44, 0.9));
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--g-shadow);
   text-decoration: none;
   cursor: pointer;
 }
 
 .hud-id__frame {
   display: grid;
-  width: 58px;
-  height: 58px;
+  width: 42px;
+  height: 42px;
   flex: none;
   overflow: hidden;
-  border: var(--g-o) solid var(--g-ink);
-  border-radius: 14px;
+  border-radius: 10px;
   background: linear-gradient(180deg, var(--g-team-hi), var(--g-team));
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6), 0 4px 0 var(--g-ink);
 }
 
 .hud-id__face {
@@ -92,43 +94,39 @@
 
 .hud-id__text {
   display: grid;
-  justify-items: start;
   gap: 5px;
 }
 
 .hud-id__name {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
+  line-height: 1;
 }
 
-/* the rank chip from the reference: a label and a number in a pill */
 .hud-id__rank {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 3px 2px 10px;
-  border: 2.5px solid var(--g-ink);
-  border-radius: 8px;
-  background: var(--g-navy);
-  font-family: var(--g-display);
-  font-size: 0.8rem;
-  color: var(--g-yellow);
-  box-shadow: 0 3px 0 var(--g-ink);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--g-mute);
 }
 
 .hud-id__rank b {
-  min-width: 26px;
-  padding: 1px 6px 2px;
-  border-radius: 5px;
+  padding: 2px 6px;
+  border-radius: 4px;
   background: var(--g-yellow);
-  color: var(--g-ink);
-  font-weight: 400;
-  text-align: center;
+  font-family: var(--g-display);
+  font-size: 0.8rem;
+  font-style: italic;
+  letter-spacing: 0;
+  color: #2d1c00;
 }
 
 .hud-id:focus-visible {
-  outline: 4px solid #fff;
-  outline-offset: 4px;
-  border-radius: 14px;
+  outline: 2px solid var(--g-yellow);
+  outline-offset: 3px;
 }
 
 /* ============ top centre: the scoreboard ============ */
@@ -136,94 +134,86 @@
   top: var(--hud-inset);
   left: 50%;
   transform: translateX(-50%);
-  display: grid;
-  justify-items: center;
 }
 
 .hud-bug__panel {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 8px 16px 11px 8px;
-  border-radius: 18px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 14px;
   white-space: nowrap;
 }
 
-/* the batting side's tile: its colour, its code */
 .hud-bug__team {
   display: grid;
   place-items: center;
-  min-width: 56px;
-  height: 46px;
-  padding: 0 8px 3px;
-  border: var(--g-o) solid var(--g-ink);
-  border-radius: 12px;
-  background: linear-gradient(180deg, var(--g-team-hi) -20%, var(--g-team) 50%);
-  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -4px 0 var(--g-team-lo);
+  min-width: 54px;
+  height: 42px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--g-team-hi) -30%, var(--g-team) 45%, var(--g-team-lo));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   font-family: var(--g-display);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   color: #fff;
-  -webkit-text-stroke: 5px var(--g-ink);
-  paint-order: stroke fill;
 }
 
 .hud-bug__score {
   display: flex;
   align-items: baseline;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-variant-numeric: tabular-nums;
+  text-shadow: none;
 }
 
 .hud-bug__score small {
   margin-left: 2px;
   font-size: 0.55em;
-  color: var(--g-soft);
-}
-
-.hud-bug__pips .g-pip {
-  --pip: 30px;
+  color: var(--g-mute);
 }
 
 .hud-bug__sr {
   display: grid;
   justify-items: center;
-  gap: 2px;
-  padding: 3px 10px 5px;
-  border: 2.5px solid var(--g-ink);
-  border-radius: 10px;
-  background: var(--g-well);
-  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+  gap: 3px;
+  padding: 0 12px;
+  border-left: 1px solid var(--g-edge);
 }
 
 .hud-bug__sr span {
   font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--g-mute);
 }
 
 .hud-bug__sr b {
   font-family: var(--g-display);
-  font-size: 1.15rem;
-  font-weight: 400;
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 800;
   line-height: 1;
   color: var(--g-yellow);
   font-variant-numeric: tabular-nums;
 }
 
-/* the delivery, as a status chip at the end of the board */
 .hud-bug__ball {
-  padding: 5px 12px 7px;
-  border: 2.5px solid var(--g-ink);
-  border-radius: 10px;
-  background: linear-gradient(180deg, var(--g-blue-hi), var(--g-blue) 55%);
-  box-shadow: inset 0 -3px 0 var(--g-blue-lo);
+  padding: 7px 12px;
+  border-radius: 9px;
+  background: rgba(47, 123, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(106, 166, 255, 0.35);
   font-family: var(--g-display);
   font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   line-height: 1;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  text-transform: uppercase;
+  color: #bcd6ff;
 }
 
 /* ============ top right: the controls ============ */
@@ -232,80 +222,37 @@
   right: var(--hud-inset);
   z-index: 4;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .hud-ctrl .g-icon[aria-pressed="true"] {
-  --hi: #8f97c4;
-  --base: #6b73a3;
-  --lo: #4c5383;
+  --base: var(--g-mute);
 }
 
-/* ============ bottom left: the commentator ============ */
+/* ============ bottom left: commentary, timing, level ============ */
 .hud-com {
   left: var(--hud-inset);
   bottom: var(--hud-inset);
   display: grid;
-  gap: 16px;
-  width: min(380px, 40vw);
+  gap: 10px;
+  width: min(360px, 38vw);
+  padding: 12px 14px 14px;
 }
 
-.hud-com__bubble {
-  display: grid;
-  gap: 8px;
-}
-
-.hud-com__who {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--g-blue-lo);
-}
-
-.hud-com__who i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--g-red);
-  animation: cktOnAir 1.4s ease-in-out infinite;
-}
-
-@keyframes cktOnAir {
-  50% {
-    opacity: 0.25;
-  }
-}
-
-.hud-com__line {
-  margin: 0;
-  min-height: 1.3em;
-  font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--g-ink);
-  text-wrap: pretty;
-}
-
-.hud-com__foot {
+.hud-com__head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .hud-com__face {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 26px;
+  height: 26px;
   flex: none;
   overflow: hidden;
-  border: var(--g-o) solid var(--g-ink);
   border-radius: 50%;
-  background: linear-gradient(180deg, #fff, #cfe3ff);
-  box-shadow: 0 3px 0 var(--g-ink);
+  background: linear-gradient(180deg, var(--g-team-hi), var(--g-team));
 }
 
 .hud-com__face img {
@@ -314,7 +261,50 @@
   object-fit: cover;
 }
 
-/* ---- timing: yellow, green, yellow, with red ends ---- */
+.hud-com__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--g-red-hi);
+}
+
+.hud-com__live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--g-red);
+  box-shadow: 0 0 8px var(--g-red);
+  animation: cktLive 1.4s ease-in-out infinite;
+}
+
+@keyframes cktLive {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.hud-com__line {
+  margin: 0;
+  min-height: 1.3em;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--g-text);
+  text-wrap: pretty;
+}
+
+.hud-com__xp {
+  padding-top: 10px;
+  border-top: 1px solid rgba(150, 170, 255, 0.12);
+}
+
+/* ---- timing ---- */
 .hud-timing {
   display: flex;
   align-items: center;
@@ -325,8 +315,7 @@
   --p: var(--ckt-perfect, 8%);
   position: relative;
   flex: 1;
-  height: 16px;
-  border: 2.5px solid var(--g-ink);
+  height: 8px;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
@@ -336,185 +325,188 @@
     var(--g-yellow) calc(50% + var(--p)) 91%,
     var(--g-red) 91% 100%
   );
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
 }
 
 .hud-timing__track i {
   position: absolute;
-  top: -8px;
+  top: -5px;
   left: var(--ckt-off, 50%);
-  width: 10px;
-  height: 26px;
-  border: 2.5px solid var(--g-ink);
-  border-radius: 4px;
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
   background: #fff;
+  box-shadow: 0 0 0 2px var(--g-ink), 0 0 10px rgba(255, 255, 255, 0.6);
   transform: translateX(-50%);
 }
 
 .hud-timing__label {
   flex: none;
-  min-width: 5.6em;
-  padding: 3px 8px 4px;
-  border: 2.5px solid var(--g-ink);
-  border-radius: 8px;
+  min-width: 5.4em;
   font-family: var(--g-display);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 800;
   line-height: 1;
-  text-align: center;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  text-align: right;
+  text-transform: uppercase;
 }
 
 .hud-timing__label[data-grade="good"] {
-  background: var(--g-green);
+  color: var(--g-green-hi);
 }
 
 .hud-timing__label[data-grade="near"] {
-  background: var(--g-yellow);
+  color: var(--g-yellow);
 }
 
 .hud-timing__label[data-grade="miss"] {
-  background: var(--g-red);
+  color: var(--g-red-hi);
 }
 
 /* ---- level and XP ---- */
 .cktXp {
   position: relative;
-  flex: 1;
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .cktXp__hex {
-  --hex: 50px;
-  z-index: 1;
-  margin-right: -12px;
+  --hex: 38px;
+  --hi: var(--g-yellow-hi);
+  --base: var(--g-yellow);
+  --lo: var(--g-yellow-lo);
+}
+
+.cktXp__hex .g-hex__text {
+  color: #2d1c00;
+  text-shadow: none;
 }
 
 .cktXp__meter {
   flex: 1;
   display: grid;
-  gap: 4px;
+  gap: 6px;
 }
 
 .cktXp__top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding-left: 18px;
 }
 
 .cktXp__label {
-  font-family: var(--g-display);
-  font-size: 0.95rem;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--g-mute);
 }
 
 .cktXp__count {
   font-family: var(--g-display);
   font-size: 0.95rem;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  font-style: italic;
+  font-weight: 800;
+  color: var(--g-text);
   font-variant-numeric: tabular-nums;
 }
 
 .cktXp__count small {
   font-size: 0.85em;
-  color: var(--g-soft);
-}
-
-.cktXp__track {
-  height: 20px;
-}
-
-.cktXp__fill {
-  --hi: var(--g-yellow-hi);
-  --base: var(--g-yellow);
+  color: var(--g-mute);
 }
 
 .cktXp__up {
   position: absolute;
   right: 0;
-  top: -30px;
+  top: -28px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px 6px;
-  border: var(--g-o) solid var(--g-ink);
-  border-radius: 10px;
-  background: linear-gradient(180deg, var(--g-yellow-hi), var(--g-yellow) 55%);
-  box-shadow: 0 3px 0 var(--g-ink);
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--g-yellow);
+  box-shadow: 0 6px 18px -6px rgba(255, 200, 61, 0.8);
   font-family: var(--g-display);
-  font-size: 0.95rem;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  font-size: 0.9rem;
+  font-style: italic;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #2d1c00;
 }
 
 .cktXp__upIcon {
-  width: 14px;
-  height: 14px;
-  color: #fff;
+  width: 13px;
+  height: 13px;
 }
 
-/* ============ bottom right: wagon wheel ============ */
+/* ============ the wagon wheel ============ */
 .hud-wheel {
-  --hi: var(--g-navy-hi);
   right: var(--hud-inset);
   bottom: var(--hud-inset);
-  width: 210px;
+  width: 220px;
   display: grid;
-  justify-items: center;
-  gap: 6px;
-  padding: 26px 12px 10px;
+  gap: 8px;
+  padding: 12px 14px 12px;
 }
 
-.hud-wheel__ribbon {
-  position: absolute;
-  top: -18px;
-  left: 50%;
-  translate: -50% 0;
-}
-
-.hud-wheel__ribbon .g-ribbon__body {
-  font-size: 1rem;
-  padding: 5px 16px 8px;
-}
-
-.hud-wheel__key {
+.hud-wheel__head {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.hud-wheel__runs {
   font-family: var(--g-display);
-  font-size: 0.85rem;
-  color: #fff;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 800;
+  color: var(--g-yellow);
 }
 
-.hud-wheel__key i {
-  width: 14px;
-  height: 8px;
-  margin-left: 8px;
-  border: 2px solid var(--g-ink);
-  border-radius: 3px;
+.wheel-key {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--g-mute);
 }
 
-.hud-wheel__key i:first-child {
-  margin-left: 0;
+.wheel-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.hud-wheel__key .k1 {
+.wheel-key b {
+  font-family: var(--g-display);
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--g-text);
+}
+
+.wheel-key i {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.wheel-key .k1 {
   background: var(--g-blue-hi);
 }
 
-.hud-wheel__key .k4 {
+.wheel-key .k4 {
   background: var(--g-green);
 }
 
-.hud-wheel__key .k6 {
+.wheel-key .k6 {
   background: var(--g-yellow);
 }
 
@@ -526,63 +518,58 @@
 }
 
 .ckt-wagon-field {
-  fill: url(#wagonField);
-  stroke: var(--g-ink);
-  stroke-width: 2.5;
+  opacity: 0.85;
 }
 
 .ckt-wagon-ring {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.22);
-  stroke-width: 0.8;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 2;
 }
 
 .ckt-wagon-grid {
-  stroke: rgba(255, 255, 255, 0.16);
-  stroke-width: 0.8;
-  stroke-dasharray: 1.5 2;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 0.5;
 }
 
 .ckt-wagon-edge {
   fill: none;
-  stroke: #fff;
-  stroke-width: 1.4;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.2;
 }
 
 .ckt-wagon-pitch {
-  fill: #e6d3a0;
-  stroke: var(--g-ink);
-  stroke-width: 1;
+  fill: #d8c38d;
 }
 
 .ckt-wagon-pin {
   fill: #fff;
-  stroke: var(--g-ink);
-  stroke-width: 1.2;
 }
 
 .ckt-wagon-shot line {
-  stroke-width: 2.2;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke: var(--g-blue-hi);
+  filter: drop-shadow(0 0 2px rgba(106, 166, 255, 0.8));
 }
 
 .ckt-wagon-shot--4 line {
   stroke: var(--g-green-hi);
+  filter: drop-shadow(0 0 2px rgba(63, 207, 74, 0.8));
 }
 
 .ckt-wagon-shot--4 circle {
-  fill: var(--g-green);
-  stroke: var(--g-ink);
+  fill: var(--g-green-hi);
 }
 
 .ckt-wagon-shot--6 line {
   stroke: var(--g-yellow);
+  filter: drop-shadow(0 0 3px rgba(255, 200, 61, 0.9));
 }
 
 .ckt-wagon-shot--6 circle {
   fill: var(--g-yellow);
-  stroke: var(--g-ink);
 }
 
 /* ============ the shot receipt and the streak ============
@@ -652,99 +639,103 @@
 .cktCombo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px 10px;
-  background: var(--g-yellow);
-  box-shadow: inset 0 -4px 0 var(--g-yellow-lo), 0 4px 0 var(--g-ink);
-}
-
-.cktCombo::after {
-  background: var(--g-yellow);
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
 }
 
 .cktCombo__count {
   font-family: var(--g-display);
-  font-size: 1.9rem;
+  font-size: 1.8rem;
+  font-style: italic;
+  font-weight: 800;
   line-height: 1;
-  color: #fff;
-  -webkit-text-stroke: 6px var(--g-ink);
-  paint-order: stroke fill;
+  color: var(--g-yellow);
 }
 
 .cktCombo__label {
-  font-family: var(--g-display);
-  font-size: 1rem;
-  color: var(--g-ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--g-text);
 }
 
 /* ============ the start card ============ */
 .ckt-card {
-  --hi: #3c62c8;
-  --base: #2445a6;
-  --lo: #182f7d;
   position: absolute;
   z-index: 7;
   left: 50%;
-  top: 50%;
-  width: min(500px, calc(100vw - 32px));
-  max-height: calc(100svh - 170px);
-  overflow-y: auto;
-  padding: 40px 28px 26px;
-  transform: translate(-50%, -46%);
-  border-radius: 26px;
+  top: 52%;
+  width: min(460px, calc(100vw - 32px));
+  display: grid;
+  gap: 14px;
+  padding: 20px 24px 24px;
+  transform: translate(-50%, -50%);
+  border-radius: 20px;
   cursor: default;
-  overflow: visible;
-  animation: cktCardIn 0.5s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+  animation: cktCardIn 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
 }
 
 @keyframes cktCardIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -46%) scale(0.7);
+    transform: translate(-50%, -46%);
   }
 }
 
-.ckt-card__ribbon {
-  position: absolute;
-  top: -24px;
-  left: 50%;
-  translate: -50% 0;
-}
-
-.ckt-card__ribbon .g-ribbon__body {
-  font-size: 1.7rem;
-  padding: 8px 30px 12px;
-}
-
-.ckt-card__side {
+.ckt-card__match {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--g-soft);
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(150, 170, 255, 0.12);
 }
 
-.ckt-card__side b {
-  font-weight: 700;
-  color: #fff;
+.ckt-card__side {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--g-display);
+  font-size: 1.2rem;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
-.ckt-card__hex {
-  --hex: 44px;
+.ckt-card__side--opp {
+  color: var(--g-mute);
+}
+
+.ckt-card__logo {
+  width: 40px;
+  height: 40px;
+}
+
+.ckt-card__vs {
+  font-family: var(--g-display);
+  font-size: 0.9rem;
+  font-style: italic;
+  font-weight: 800;
+  color: var(--g-yellow);
 }
 
 .ckt-card__title {
-  margin: 12px 0 10px;
-  font-size: clamp(2.6rem, 6vw, 3.6rem);
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
   text-align: center;
+}
+
+.ckt-card__title em {
+  display: block;
+  font-style: italic;
+  color: var(--g-yellow);
 }
 
 .ckt-card__body {
   margin: 0 auto;
-  max-width: 40ch;
-  font-size: 1rem;
+  max-width: 38ch;
+  font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.45;
   text-align: center;
@@ -756,8 +747,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px 20px;
-  margin: 20px 0 24px;
+  gap: 10px 18px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -765,20 +756,19 @@
 .ckt-keys li {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .ckt-keys span {
   margin-left: 2px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--g-soft);
 }
 
 .ckt-card__go {
   width: 100%;
-  min-height: 66px;
-  font-size: 1.8rem;
+  margin-top: 4px;
 }
 
 /* ============ the scorecard ============ */
@@ -786,14 +776,13 @@
 .ckt-pause {
   position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
   overflow: hidden;
   cursor: default;
 }
 
 .ckt-over {
   z-index: 7;
+  display: grid;
   animation: cktFade 0.3s ease-out both;
 }
 
@@ -802,168 +791,201 @@
   z-index: -1;
 }
 
-.ckt-over__crumb,
-.ckt-pause__crumb {
-  margin-top: max(16px, env(safe-area-inset-top, 0px));
-  width: max-content;
-  max-width: calc(100% - 16px);
-}
-
 .ckt-over__main {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 14px;
   min-height: 0;
-  overflow-y: auto;
-  padding: 44px 16px 24px;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
 }
 
-.ckt-over__panel {
-  --hi: #3c62c8;
-  --base: #2445a6;
-  --lo: #182f7d;
+.ckt-over__card {
   display: grid;
-  justify-items: center;
-  gap: 12px;
-  width: min(560px, 100%);
-  padding: 34px 26px 24px;
-  border-radius: 28px;
-  animation: cktCardIn2 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "hero side"
+    "act act";
+  gap: 18px 26px;
+  width: min(820px, 100%);
+  padding: 24px 26px 22px;
+  border-radius: 22px;
+  animation: cktCardUp 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
 }
 
-@keyframes cktCardIn2 {
+@keyframes cktCardUp {
   from {
     opacity: 0;
-    transform: scale(0.8) translateY(30px);
+    transform: translateY(24px);
   }
 }
 
-.ckt-over__ribbon {
-  position: absolute;
-  top: -26px;
-  left: 50%;
-  translate: -50% 0;
+.ckt-over__hero {
+  grid-area: hero;
+  display: grid;
+  align-content: start;
+  gap: 12px;
 }
 
-.ckt-over__ribbon .g-ribbon__body {
-  font-size: 1.7rem;
-  padding: 8px 30px 12px;
+.ckt-over__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ckt-over__top .g-star {
+  width: 30px;
+}
+
+.ckt-over__top .g-star:nth-child(2) {
+  width: 38px;
 }
 
 .ckt-over__verdict {
-  margin: 0;
-  max-width: 18ch;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  text-align: center;
+  margin: 4px 0 0;
+  font-size: clamp(1.8rem, 3.4vw, 2.5rem);
   text-wrap: balance;
-}
-
-.ckt-over__score {
-  display: grid;
-  justify-items: center;
-  gap: 10px;
 }
 
 .ckt-over__runs {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 12px;
   margin: 0;
 }
 
 .ckt-over__runs b {
   font-size: 5rem;
-  font-weight: 400;
+  line-height: 0.8;
   color: var(--g-yellow);
-  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 30px rgba(255, 200, 61, 0.35);
 }
 
 .ckt-over__runs span {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 4px;
   font-family: var(--g-display);
   font-size: 1.3rem;
-  color: #fff;
-  -webkit-text-stroke: 5px var(--g-ink);
-  paint-order: stroke fill;
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.ckt-over__runs small {
+  font-family: var(--g-body);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--g-mute);
 }
 
 .ckt-over__pips .g-pip {
-  --pip: 34px;
+  --pip: 30px;
 }
 
-/* the four numbers as four coloured tiles */
+.ckt-over__note {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--g-soft);
+}
+
+.ckt-over__side {
+  grid-area: side;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
 .ckt-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  width: 100%;
-  margin: 6px 0 0;
+  margin: 0;
+  border: 1px solid rgba(150, 170, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .ckt-stats__cell {
   display: grid;
-  justify-items: center;
-  gap: 4px;
-  padding: 10px 6px 12px;
-  border: var(--g-o) solid var(--g-ink);
-  border-radius: 14px;
-  background: linear-gradient(180deg, var(--hi), var(--base) 55%);
-  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), inset 0 -5px 0 var(--lo), 0 4px 0 var(--g-ink);
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.ckt-stats__cell + .ckt-stats__cell {
+  border-left: 1px solid rgba(150, 170, 255, 0.12);
+}
+
+.ckt-stats dt {
+  font-size: 0.56rem;
 }
 
 .ckt-stats dd {
   margin: 0;
-  font-size: 2rem;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.7rem;
 }
 
-.ckt-stats dt {
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--g-ink);
+.ckt-over__wheel {
+  display: grid;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border: 1px solid rgba(150, 170, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.ckt-over__wheel .ckt-wagon {
+  max-height: 112px;
 }
 
 .ckt-over__xp {
   display: flex;
   align-items: center;
-  gap: 14px;
-  width: 100%;
-  margin-top: 6px;
+  gap: 12px;
 }
 
-.ckt-over__earned {
-  flex: none;
-  font-family: var(--g-display);
-  font-size: 1.1rem;
-  color: var(--g-yellow);
+.ckt-over__xp .cktXp {
+  flex: 1;
 }
 
 .ckt-over__actions {
+  grid-area: act;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  width: 100%;
-  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(150, 170, 255, 0.12);
 }
 
-.ckt-over__foot,
-.ckt-pause__foot {
-  justify-content: space-between;
-  gap: 16px;
-  padding-block: 8px max(10px, env(safe-area-inset-bottom, 0px));
+.ckt-over__out {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--g-soft);
+  text-decoration: none;
 }
 
-.ckt-over__out,
-.ckt-pause__leave {
-  min-height: 44px;
-  padding: 0 16px 4px;
-  font-size: 1rem;
+.ckt-over__out svg {
+  width: 14px;
+  height: 14px;
 }
 
-.ckt-over__out svg,
-.ckt-pause__leave svg {
-  width: 16px;
-  height: 16px;
+.ckt-over__out:focus-visible {
+  outline: 2px solid var(--g-yellow);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .ckt-over__out:hover {
+    color: var(--g-text);
+  }
 }
 
 @keyframes cktFade {
@@ -975,74 +997,95 @@
 /* ============ the pause menu ============ */
 .ckt-pause {
   z-index: 20;
-  /* one child, the frame, which lays out its own header, grid and footer */
+  display: grid;
   grid-template-rows: minmax(0, 1fr);
   animation: cktFade 0.18s ease-out;
 }
 
 .ckt-pause__frame {
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   min-height: 0;
   height: 100%;
+}
+
+.ckt-pause__crumb {
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(56px + env(safe-area-inset-top, 0px));
 }
 
 .ckt-pause__state {
   display: flex;
   justify-content: center;
-  padding: 14px 16px 0;
+  padding: 22px 16px 0;
 }
 
 .ckt-pause__score {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 7px 14px 10px 7px;
-  border-radius: 16px;
+  gap: 14px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 14px;
 }
 
 .ckt-pause__score b {
   font-size: 2rem;
-  font-weight: 400;
+  text-shadow: none;
 }
 
 .ckt-pause__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 360px));
+  grid-template-columns: repeat(2, minmax(0, 320px));
   align-content: center;
   justify-content: center;
-  gap: 18px 22px;
+  gap: 14px;
   min-height: 0;
-  overflow-y: auto;
-  padding: 18px 16px 24px;
+  padding: 16px;
 }
 
 .ckt-pause__grid .g-tile {
-  animation: cktTile 0.4s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+  animation: cktTile 0.35s cubic-bezier(0.22, 1.2, 0.36, 1) both;
 }
 
 .ckt-pause__grid .g-tile:nth-child(2) {
-  animation-delay: 0.05s;
+  animation-delay: 0.04s;
 }
 
 .ckt-pause__grid .g-tile:nth-child(3) {
-  animation-delay: 0.1s;
+  animation-delay: 0.08s;
 }
 
 .ckt-pause__grid .g-tile:nth-child(4) {
-  animation-delay: 0.15s;
+  animation-delay: 0.12s;
 }
 
 @keyframes cktTile {
   from {
     opacity: 0;
-    transform: scale(0.6);
+    transform: translateY(14px);
   }
 }
 
-/* everything that pulses holds still while the match is paused */
+.ckt-pause__foot {
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ckt-pause__leave {
+  min-height: 40px;
+  padding: 0 14px 2px;
+  font-size: 0.95rem;
+}
+
+.ckt-pause__leave svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* pulses hold still while paused */
 .ckt[data-paused] .hud-bug .g-pip.is-live,
-.ckt[data-paused] .hud-com__who i {
+.ckt[data-paused] .hud-com__live::before {
   animation-play-state: paused;
 }
 
@@ -1051,46 +1094,45 @@
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: calc(var(--hud-inset) + 2px);
+  bottom: calc(var(--hud-inset) + 4px);
   transform: translateX(-50%);
   margin: 0;
-  font-family: var(--g-display);
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
   pointer-events: none;
 }
 
-/* ============ the phone's one control ============
+/* ============ the phone's bat button ============
    Laid out as the base case and switched off above the phone breakpoint:
    a media query adds no specificity, and the other order lost to source
    order once already. */
 .cktTap {
   position: absolute;
   z-index: 6;
-  left: calc(env(safe-area-inset-left, 0px) + 14px);
-  right: calc(env(safe-area-inset-right, 0px) + 14px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 8px;
+  width: min(250px, calc(100% - 28px));
+  transform: translateX(-50%);
 }
 
 .cktTap__rail {
   display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  width: min(300px, 100%);
-  overflow: hidden;
-  border: var(--g-o) solid var(--g-ink);
-  border-radius: 999px;
-  font-family: var(--g-display);
-  font-size: 0.8rem;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-align: center;
-  opacity: 0.7;
-  box-shadow: 0 3px 0 var(--g-ink);
+  text-transform: uppercase;
+  opacity: 0.55;
   transition: opacity 0.2s ease;
 }
 
@@ -1099,30 +1141,28 @@
 }
 
 .cktTap__zone {
-  padding: 3px 0 5px;
-  background: var(--g-yellow);
-  color: #fff;
-  -webkit-text-stroke: 4px var(--g-ink);
-  paint-order: stroke fill;
+  padding: 3px 0;
+  border-radius: 4px;
+  background: rgba(255, 200, 61, 0.2);
+  color: var(--g-yellow-hi);
 }
 
 .cktTap__zone--perfect {
-  background: var(--g-green);
-  border-inline: var(--g-o) solid var(--g-ink);
+  background: rgba(63, 207, 74, 0.28);
+  color: var(--g-green-hi);
 }
 
 .cktTap__btn {
-  width: min(330px, 100%);
-  min-height: 72px;
-  font-size: 2rem;
-  border-radius: 20px;
+  width: 100%;
+  min-height: 52px;
+  font-size: 1.25rem;
 }
 
 .cktTap__btn:disabled {
   opacity: 0.5;
 }
 
-@media (min-width: 561px) {
+@media (min-width: 601px) {
   .cktTap {
     display: none;
   }
@@ -1138,90 +1178,124 @@
   .hud-bug__ball {
     display: none;
   }
+
+  .hud-id {
+    padding: 5px;
+  }
 }
 
-@media (max-width: 820px) {
-  .hud-bug__sr {
+@media (max-width: 860px) {
+  .hud-bug__sr,
+  .ckt-hint {
     display: none;
   }
 
   .hud-com {
-    width: min(330px, 52vw);
+    width: min(320px, 50vw);
   }
 
   .hud-wheel {
-    width: 160px;
-  }
-
-  .ckt-hint {
-    display: none;
+    width: 170px;
   }
 }
 
-/* short landscape windows */
-@media (max-height: 680px) and (min-width: 561px) {
-  .ckt-card {
-    padding: 34px 24px 20px;
-  }
-
-  .ckt-card__title {
-    margin: 6px 0;
-    font-size: 2.4rem;
-  }
-
-  .ckt-keys {
-    margin: 12px 0 16px;
-  }
-
-  .ckt-card__go {
-    min-height: 56px;
-    font-size: 1.5rem;
-  }
-
-  .g-tile {
-    min-height: 118px;
+/* short windows: the scorecard and the start card come down together */
+@media (max-height: 700px) and (min-width: 601px) {
+  .ckt-over__card {
+    gap: 12px 22px;
+    padding: 18px 22px 16px;
   }
 
   .ckt-over__runs b {
     font-size: 3.8rem;
   }
-}
 
-/* ============ phone ============ */
-@media (max-width: 560px) {
-  .ckt {
-    --hud-inset: 8px;
+  .ckt-over__wheel .ckt-wagon {
+    max-height: 80px;
   }
 
-  .hud-id,
-  .hud-com,
-  .ckt-hint,
-  .hud-btn--sound,
-  .hud-bug__sr,
-  .hud-bug__ball {
+  .ckt-over__note {
     display: none;
   }
 
+  .ckt-card {
+    gap: 10px;
+    padding: 16px 20px 18px;
+  }
+
+  .ckt-card__title {
+    font-size: 2.2rem;
+  }
+
+  .ckt-card__match {
+    padding-bottom: 10px;
+  }
+
+  .g-tile {
+    min-height: 84px;
+  }
+}
+
+/* the scorecard stacks before it gets cramped */
+@media (max-width: 760px) and (min-width: 601px) {
+  .ckt-over__card {
+    grid-template-columns: 1fr;
+    grid-template-areas: "hero" "side" "act";
+  }
+
+  .ckt-over__wheel {
+    display: none;
+  }
+}
+
+/* =====================================================================
+   PHONE
+   =====================================================================
+   One bar at the top (score and the two controls that matter), the
+   scene, a slim commentary strip and the bat button at the bottom. The
+   wagon wheel and the level strip leave the match; both are on the
+   scorecard. Every overlay is sized to the space between the bar and the
+   dock, so nothing can overlap and nothing scrolls. */
+@media (max-width: 600px) {
+  .ckt {
+    --hud-inset: 8px;
+    --top: calc(env(safe-area-inset-top, 0px) + 8px);
+    --dock: calc(env(safe-area-inset-bottom, 0px) + 108px);
+  }
+
+  .hud-id,
+  .hud-wheel,
+  .hud-btn--sound,
+  .hud-bug__sr,
+  .hud-bug__ball,
+  .hud-com__xp,
+  .hud-com__head,
+  .ckt-hint {
+    display: none;
+  }
+
+  /* ---- the top bar ---- */
   .hud-bug {
-    top: calc(env(safe-area-inset-top, 0px) + 8px);
-    left: calc(env(safe-area-inset-left, 0px) + 8px);
+    top: var(--top);
+    left: 8px;
     transform: none;
-    justify-items: start;
   }
 
   .hud-bug__panel {
     gap: 8px;
-    padding: 6px 10px 9px 6px;
+    padding: 4px 8px 4px 4px;
+    border-radius: 12px;
   }
 
   .hud-bug__team {
-    min-width: 44px;
-    height: 38px;
-    font-size: 1rem;
+    min-width: 40px;
+    height: 34px;
+    padding: 0 7px;
+    font-size: 0.95rem;
   }
 
   .hud-bug__score {
-    font-size: 1.9rem;
+    font-size: 1.7rem;
   }
 
   .hud-bug__pips {
@@ -1229,178 +1303,265 @@
   }
 
   .hud-bug__pips .g-pip {
-    --pip: 21px;
-    border-width: 2px;
-    border-radius: 6px;
+    --pip: 20px;
   }
 
   .hud-ctrl {
-    top: calc(env(safe-area-inset-top, 0px) + 10px);
-    right: calc(env(safe-area-inset-right, 0px) + 8px);
+    top: var(--top);
+    right: 8px;
     gap: 6px;
   }
 
   .hud-ctrl .g-icon {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
   }
 
-  .hud-wheel {
-    top: calc(env(safe-area-inset-top, 0px) + 96px);
-    right: calc(env(safe-area-inset-right, 0px) + 8px);
-    bottom: auto;
-    width: 116px;
-    padding: 18px 6px 6px;
-    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  /* ---- commentary, as a strip above the dock ---- */
+  .hud-com {
+    left: 10px;
+    right: 10px;
+    bottom: var(--dock);
+    width: auto;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 12px;
   }
 
-  .hud-wheel__ribbon .g-ribbon__body {
-    font-size: 0.72rem;
-    padding: 3px 10px 5px;
+  .hud-com__line {
+    min-height: 0;
+    font-size: 0.86rem;
+    line-height: 1.3;
   }
 
-  .hud-wheel__ribbon {
-    top: -13px;
-    padding: 0 18px;
+  .hud-timing__label {
+    font-size: 0.8rem;
   }
 
-  .hud-wheel__key {
-    display: none;
-  }
-
-  .ckt[data-phase="runup"] .hud-wheel,
-  .ckt[data-phase="flight"] .hud-wheel {
-    opacity: 0;
-    transform: scale(0.9);
-    pointer-events: none;
-  }
-
+  /* ---- the receipt and the streak sit in the open band mid-screen ---- */
   .cktReward,
   .cktCombo {
+    top: 40%;
     right: 12px;
   }
 
   .cktReward__tri {
-    --tri: 78px;
+    --tri: 72px;
   }
 
   .cktReward--big .cktReward__tri {
-    --tri: 88px;
+    --tri: 82px;
   }
 
   .cktReward__tri .k-tri__text,
   .cktReward--big .cktReward__tri .k-tri__text {
-    font-size: 1.9rem;
+    font-size: 1.8rem;
   }
 
   .cktReward__verdict {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
 
   .cktReward__xp {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
+  /* ---- the start card: between the bar and the dock ---- */
   .ckt-card {
-    top: calc(env(safe-area-inset-top, 0px) + 100px);
-    transform: translate(-50%, 0);
-    padding: 34px 18px 18px;
+    top: calc(var(--top) + 56px);
+    transform: translateX(-50%);
+    width: calc(100vw - 20px);
+    gap: 10px;
+    padding: 14px 16px 16px;
+    border-radius: 18px;
     animation-name: cktCardInPhone;
   }
 
-  .ckt-card__title {
-    font-size: 2.4rem;
+  .ckt-card__match {
+    padding-bottom: 10px;
   }
 
-  /* the dock below is the start button on a phone */
+  .ckt-card__logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ckt-card__side {
+    font-size: 1rem;
+  }
+
+  .ckt-card__title {
+    font-size: 2rem;
+  }
+
+  .ckt-card__body {
+    font-size: 0.86rem;
+  }
+
+  /* the dock is the start button here */
   .ckt-card__go {
     display: none;
   }
 
-  .g-crumb__home {
-    display: none;
+  /* ---- the scorecard: one tight column ---- */
+  .ckt-over__main {
+    align-content: center;
+    gap: 10px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
   }
 
+  .ckt-over__card {
+    grid-template-columns: 1fr;
+    grid-template-areas: "hero" "side" "act";
+    gap: 12px;
+    padding: 16px 14px 14px;
+    border-radius: 18px;
+  }
+
+  .ckt-over__hero {
+    gap: 8px;
+  }
+
+  .ckt-over__verdict {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+
+  .ckt-over__runs b {
+    font-size: 3.4rem;
+  }
+
+  .ckt-over__runs span {
+    font-size: 1.05rem;
+  }
+
+  .ckt-over__pips .g-pip {
+    --pip: 26px;
+  }
+
+  .ckt-over__note {
+    font-size: 0.82rem;
+  }
+
+  .ckt-over__side {
+    gap: 10px;
+  }
+
+  .ckt-stats__cell {
+    padding: 8px 8px;
+    gap: 4px;
+  }
+
+  .ckt-stats dt {
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+  }
+
+  .ckt-stats dd {
+    font-size: 1.35rem;
+  }
+
+  .ckt-over__wheel {
+    padding: 8px 12px 10px;
+  }
+
+  .ckt-over__wheel .ckt-wagon {
+    max-height: 84px;
+  }
+
+  .ckt-over__actions {
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .ckt-over__actions .g-btn {
+    min-height: 46px;
+    padding: 0 10px 2px;
+    font-size: 1.05rem;
+  }
+
+  /* ---- the pause menu ---- */
+  .ckt-pause__crumb {
+    height: calc(48px + env(safe-area-inset-top, 0px));
+    padding-inline: 12px 16px;
+  }
+
+  .g-crumb__home,
   .g-crumb__sep {
     display: none;
   }
 
-  .ckt-over__main {
-    align-items: start;
-    padding: 40px 10px 16px;
+  .ckt-pause__state {
+    padding-top: 14px;
   }
 
-  .ckt-over__panel {
-    gap: 10px;
-    padding: 30px 14px 18px;
+  .ckt-pause__score b {
+    font-size: 1.6rem;
   }
 
-  .ckt-over__runs b {
-    font-size: 3.8rem;
-  }
-
-  .ckt-over__pips .g-pip {
-    --pip: 28px;
-  }
-
-  .ckt-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .ckt-over__xp {
-    flex-wrap: wrap;
-  }
-
-  .ckt-over__actions .g-btn {
-    padding: 0 12px 5px;
-    font-size: 1.1rem;
-  }
-
-  .ckt-over__foot > span,
-  .ckt-pause__foot > span {
-    font-size: 0.85rem;
+  .ckt-pause__score .g-pip {
+    --pip: 20px;
   }
 
   .ckt-pause__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    padding: 14px 10px 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px 10px;
   }
 
   .g-tile {
     grid-template-columns: 1fr;
-    justify-items: start;
-    min-height: 124px;
-    padding: 12px 12px 14px;
-    border-radius: 18px 42px 18px 18px;
-    text-align: left;
+    align-content: space-between;
+    gap: 12px;
+    min-height: 118px;
+    padding: 14px;
   }
 
   .g-tile__icon {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
   }
 
   .g-tile__icon svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
   }
 
   .g-tile__label {
-    font-size: 1.35rem;
-    -webkit-text-stroke-width: 6px;
+    font-size: 1.3rem;
   }
 
   .g-tile__meta {
-    top: 12px;
-    right: 14px;
+    top: 14px;
+    right: 12px;
+  }
+
+  .ckt-pause__foot {
+    min-height: 0;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+}
+
+/* the smallest phones: shed the optional lines */
+@media (max-width: 600px) and (max-height: 700px) {
+  .ckt-over__wheel,
+  .ckt-over__note,
+  .ckt-card__body {
+    display: none;
+  }
+
+  .ckt-over__runs b {
+    font-size: 2.8rem;
   }
 }
 
 @keyframes cktCardInPhone {
   from {
     opacity: 0;
-    transform: translate(-50%, 0) scale(0.8);
+    transform: translate(-50%, 16px);
   }
 }
 
@@ -1410,17 +1571,13 @@
   .g-tile .g-key {
     display: none;
   }
-
-  .ckt-card__body {
-    margin-bottom: 18px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hud-com__who i,
+  .hud-com__live::before,
   .ckt-card,
   .ckt-over,
-  .ckt-over__panel,
+  .ckt-over__card,
   .ckt-pause,
   .ckt-pause__grid .g-tile {
     animation: none;

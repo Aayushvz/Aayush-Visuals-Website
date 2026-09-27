@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useState } from "react";
 import TeamCard from "./TeamCard";
-import { BallIcon, Burst, Hex } from "./kit";
+import { AVMark, Burst } from "./kit";
 import { TEAMS, type Team } from "./teams";
 
 /*
@@ -53,7 +53,7 @@ export default function TeamSelect({ onPick, reduced }: Props) {
       {/* the menu frame: where you are, and a footer that explains */}
       <header className="g-crumb pk__crumb">
         <span className="g-crumb__mark">
-          <BallIcon />
+          <AVMark />
         </span>
         <span className="g-crumb__trail">
           <span className="g-crumb__home">Design Premier League</span>
@@ -69,8 +69,8 @@ export default function TeamSelect({ onPick, reduced }: Props) {
           {TEAMS.map((team, i) => (
             <Fragment key={team.id}>
               {i === 1 && (
-                <span className="pk__vs" aria-hidden>
-                  <Hex tone="red">VS</Hex>
+                <span className="g-title pk__vs" aria-hidden>
+                  VS
                 </span>
               )}
               <TeamCard

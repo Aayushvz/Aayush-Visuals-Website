@@ -95,270 +95,255 @@
   pointer-events: auto;
 }
 
-/* ============================ opening ============================ */
+/* ============================ opening ============================
 
-.stgOpen {
-  display: grid;
-  justify-items: center;
-  text-align: center;
-  gap: clamp(10px, 1.8vh, 20px);
-  max-width: 44rem;
-}
+   The title screen over the stadium fly-in: the Aayush Visuals mark and
+   "presents", the league crest, the title in the kit's sports type, the
+   matchup, then one control - a loading bar while the match downloads,
+   swapped for the start button once it has. Everything arrives in a short
+   stagger; the camera move behind it is the real entrance. */
 
-/*
-  The title lands one line at a time.
-
-  Both lines share a single keyframe and differ only by delay, which is what
-  keeps them feeling like one gesture instead of two animations that happen
-  to be near each other. The overshoot is small (1.04) and the scale starts
-  below 1: the title arrives *toward* you, the way a broadcast sting does.
-*/
-.stgOpen__kicker {
-  font-family: var(--stg-mono);
-  font-size: clamp(11px, 1vw, 12px);
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--stg-faint);
-  animation: stgRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* the badge and the words share one grid cell so the type sits on the
-   plate at every width, instead of being positioned against it in px */
-.stgOpen__lockup {
-  display: grid;
-  place-items: center;
-  width: min(560px, 92vw);
-  animation: stgTitle 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
-}
-
-.stgOpen__lockup > * {
-  grid-area: 1 / 1;
-}
-
-.stgCrest {
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 16px 34px rgba(0, 0, 0, 0.55));
-}
-
-.stgOpen__title {
+.op {
   position: relative;
+  z-index: 0;
   display: grid;
   justify-items: center;
-  /* nudged up off the shield's point, where the ball sits */
-  margin: 0 0 8% 0;
-  font-family: var(--ckt-title), var(--ckt-display, var(--font-primary));
-  font-size: clamp(34px, 7.4vw, 88px);
-  /*
-    400, not 800. Gimora DEMO ships a single Regular cut, so any weight
-    above it is a browser-synthesised bold — the glyphs get smeared
-    sideways, which on a geometric face with even strokes shows up as
-    thickened verticals against unchanged curves. The face is heavy
-    enough at Regular to hold the wordmark on its own.
-  */
-  font-weight: 400;
-  line-height: 0.86;
-  letter-spacing: -0.02em;
+  gap: clamp(10px, 2vh, 18px);
+  width: min(560px, 100%);
+  text-align: center;
+  color: var(--g-text);
+}
+
+/* a dark pool behind the lockup, so the type never sits on raw crowd */
+.op::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: max(900px, 140%);
+  height: 130%;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(4, 6, 22, 0.82), rgba(4, 6, 22, 0.55) 55%, transparent);
+  pointer-events: none;
+}
+
+.op > * {
+  animation: stgRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.op__presents {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--g-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
+  color: var(--g-soft);
 }
 
-/*
-  Three lines, three colours: white, gold, white. The comp uses the middle
-  line's gold as the only accent in the wordmark, which is what keeps a
-  three-word title from reading as three equal words — and gold on this
-  navy plate measures 5.7:1, so it holds at any of these sizes.
-*/
-.stgOpen__l1,
-.stgOpen__l3 {
+.op__presents .av-mark {
+  width: 28px;
+  height: auto;
   color: #fff;
-  font-size: clamp(30px, 6.2vw, 74px);
-  text-shadow: 0 3px 0 #0b1c4a, 0 6px 18px rgba(0, 0, 0, 0.5);
 }
 
-.stgOpen__l2 {
-  font-size: clamp(26px, 5.4vw, 64px);
-  background: linear-gradient(180deg, #ffe071 0%, #ffc32e 52%, #e08a12 100%);
+.op__crest {
+  width: clamp(96px, 16vh, 150px);
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
+  animation-name: opCrest;
+  animation-duration: 0.8s;
+  animation-delay: 0.1s;
+}
+
+.op__title {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  animation-delay: 0.2s;
+}
+
+.op__title span {
+  display: block;
+  font-family: var(--g-display);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 0.88;
+  text-transform: uppercase;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.op__l1 {
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+  letter-spacing: 0.32em;
+  color: var(--g-soft);
+}
+
+.op__l2 {
+  font-size: clamp(3rem, 9vw, 5.4rem);
+  letter-spacing: 0.01em;
+  background: linear-gradient(180deg, #fff 30%, #c9d4ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 3px 0 #0b1c4a) drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
 }
 
-.stgOpen__sub {
+.op__l3 {
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+  letter-spacing: 0.5em;
+  margin-right: -0.5em;
+  color: var(--g-yellow);
+}
+
+.op__tag {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin: 0;
-  font-family: var(--stg-mono);
-  font-size: clamp(12px, 1.5vw, 16px);
+  font-family: var(--g-body);
+  font-size: 0.78rem;
+  font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--stg-dim);
-  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
+  color: var(--g-soft);
+  animation-delay: 0.3s;
 }
 
-/* ---- the start control ---- */
-
-.stgStart {
-  position: relative;
-  margin-top: clamp(10px, 2vh, 22px);
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  isolation: isolate;
-  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
-  -webkit-tap-highlight-color: transparent;
+.op__tag::before,
+.op__tag::after {
+  content: "";
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g-yellow));
 }
 
-/*
-  The one control on the title card, now the kit's green cap.
+.op__tag::after {
+  transform: scaleX(-1);
+}
 
-  It was a frosted glass pill, which was the right button for the old
-  restrained treatment and the wrong one the moment anything else on screen
-  became a moulded object — a translucent control next to a solid card reads
-  as disabled. Green because it is the only "go" in the whole experience;
-  every other green in the game is this same button.
-*/
-.stgStart__body {
-  position: relative;
-  z-index: 2;
+.op__match {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  border: 1px solid var(--g-edge);
+  border-radius: 999px;
+  background: rgba(6, 9, 25, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-family: var(--g-display);
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  animation-delay: 0.38s;
+}
+
+.op__match .crest {
+  width: 30px;
+  height: 30px;
+}
+
+.op__match em {
+  font-style: italic;
+  color: var(--g-yellow);
+}
+
+.op__side {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: 52px;
-  padding: 15px 34px;
-  border: 3px solid rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-  background: linear-gradient(
-    180deg,
-    var(--gk-green-lit) 0%,
-    var(--gk-green) 30%,
-    var(--gk-green-deep) 100%
-  );
-  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 7px 0 var(--gk-green-deep),
-    0 14px 22px rgba(4, 12, 38, 0.5);
-  /* the title card's one CTA, so it takes the display face rather than the
-     mono the smaller stage labels use. 400 because the DEMO cut has no
-     bold — see the note on .stgOpen__title */
-  font-family: var(--ckt-title), var(--ckt-display, var(--font-primary));
-  font-size: clamp(14px, 1.4vw, 17px);
-  font-weight: 400;
-  letter-spacing: 0.12em;
+  gap: 8px;
+}
+
+.op__go {
+  position: relative;
+  min-width: 250px;
+  min-height: 56px;
+  margin-top: 6px;
+  font-size: 1.35rem;
+  animation-delay: 0.46s;
+}
+
+.op__spark {
+  position: absolute;
+  inset: -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 80px);
+  pointer-events: none;
+}
+
+.op__load {
+  display: grid;
+  gap: 8px;
+  width: min(280px, 80vw);
+  margin-top: 6px;
+  animation-delay: 0.46s;
+}
+
+.op__loadLabel {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--g-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #fff;
-  text-shadow: var(--gk-text-relief);
-  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
+  color: var(--g-soft);
 }
 
-.stgStart:active .stgStart__body {
-  transform: translateY(7px);
-  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.4), 0 0 0 var(--gk-green-deep),
-    0 2px 6px rgba(4, 12, 38, 0.4);
+.op__loadLabel b {
+  font-family: var(--g-display);
+  font-size: 0.95rem;
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--g-yellow);
+  font-variant-numeric: tabular-nums;
 }
 
-/* the ring that breathes behind the button, so it reads as live before
-   anyone has touched it */
-.stgStart__ring {
-  position: absolute;
-  inset: -8px;
-  border-radius: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.24);
-  animation: stgPulse 2.6s ease-in-out infinite;
-  pointer-events: none;
-}
-
-/* hover brightens, it does not lift. The cap owns 7px of travel for the
-   press, and a hover that raises it first means a pointer crossing into
-   the button and clicking sends it 9px in one gesture — a wobble, not a
-   press. Same call as the in-game .ckt-cta. */
-@media (hover: hover) {
-  .stgStart:hover .stgStart__body {
-    filter: brightness(1.08);
+@keyframes opCrest {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
   }
 }
 
-.stgStart:focus-visible {
-  outline: 3px solid var(--gk-gold-lit);
-  outline-offset: 6px;
-  border-radius: 22px;
-}
-
-.stgStart__arrow {
-  width: 15px;
-  height: 15px;
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@media (hover: hover) {
-  .stgStart:hover .stgStart__arrow {
-    transform: translateX(3px);
-  }
-}
-
-/* hover particles live on their own canvas so they can never trigger
-   layout, and so the button stays a button */
-.stgStart__spark {
-  position: absolute;
-  inset: -60px;
-  /*
-    The explicit size is load-bearing, not belt-and-braces for the insets.
-
-    A canvas is a replaced element, and an absolutely positioned replaced
-    element with `width: auto` takes its width from its *intrinsic* size —
-    the width/height content attributes, i.e. the bitmap — and then drops
-    `right`/`bottom` as over-constrained. So with insets alone the box was
-    sized by the backing store rather than by this rule, and Opening's fit()
-    (measure the box, multiply by devicePixelRatio, write it back) became a
-    feedback loop: on any display above 1x the canvas grew by that factor
-    every ResizeObserver tick. Measured on the page, one cycle at 2x took it
-    375 -> 750 -> 1500px. Past the size a bitmap can be allocated at, it
-    paints as a broken image — the white rectangle running from 60px
-    up-left of the button to the corner of the screen.
-
-    Stating width and height keeps the box a function of this rule, so the
-    measurement fit() takes can no longer be one it caused.
-  */
-  width: calc(100% + 120px);
-  height: calc(100% + 120px);
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* ---- skip ---- */
-
-/* Skip stays quiet on purpose: it is the way *past* the thing the screen
-   exists to show, so it gets the touch-target floor and legible contrast
-   and nothing else. Giving it a moulded cap would put it in the same rank
-   as "Take the field". */
+/* ---- skip: the way past the opening, kept quiet ---- */
 .stgSkip {
   position: absolute;
   right: clamp(14px, 3vw, 34px);
-  bottom: clamp(14px, 3vw, 30px);
+  bottom: calc(clamp(14px, 3vw, 30px) + env(safe-area-inset-bottom, 0px));
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 9px 18px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--g-edge);
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.28);
-  background: rgba(10, 22, 54, 0.66);
-  font-family: var(--stg-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  background: rgba(6, 9, 25, 0.6);
+  font-family: var(--g-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #cfe0f8;
+  color: var(--g-soft);
   cursor: pointer;
-  transition: color 0.2s ease-out, border-color 0.2s ease-out,
-    background 0.2s ease-out;
+  transition: color 0.2s ease-out, border-color 0.2s ease-out;
 }
+
 @media (hover: hover) {
   .stgSkip:hover {
     color: #fff;
-    border-color: rgba(255, 255, 255, 0.55);
-    background: rgba(16, 34, 78, 0.8);
+    border-color: var(--g-edge-hi);
   }
 }
+
 .stgSkip:focus-visible {
-  outline: 3px solid var(--gk-gold-lit);
+  outline: 2px solid var(--g-yellow);
   outline-offset: 3px;
-  color: #fff;
 }
 
 @keyframes stgRise {
@@ -366,104 +351,12 @@
     opacity: 0;
     transform: translateY(14px);
   }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes stgTitle {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(18px);
-    letter-spacing: 0.06em;
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.04) translateY(0);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    letter-spacing: -0.035em;
-  }
-}
-
-@keyframes stgPulse {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.05);
-  }
-}
-
-/* ========================= reduced motion ========================= */
-
-@media (prefers-reduced-motion: reduce) {
-  /*
-    Nothing here is decoration that can simply be deleted — the title and
-    the cards animate IN, so removing the animation removes the element.
-    Each one collapses to a cross-fade instead: the staging survives, the
-    travel does not.
-  */
-  .stgOpen__kicker,
-  .stgOpen__title,
-  .stgOpen__sub,
-  .stgStart {
-    animation: stgFade 0.3s ease-out both;
-  }
-  .stgStart__ring {
-    animation: none;
-  }
 }
 
 @keyframes stgFade {
   from {
     opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
-}
-
-/* ---- the comps' opening treatment ---- */
-
-.stgOpen__crown {
-  animation: stgRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
-}
-
-/*
-  The subtitle as a ribbon rather than loose tracked-out type.
-
-  Its red is the same nameplate red as the game's own title banner, so the
-  two screens that carry a headline carry it on the same object. The tails
-  need room to hang, hence the inline margin — the parent is a centred grid
-  and would otherwise size the banner to the text and clip them.
-*/
-.stgOpen__subStar {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin: 0 10px;
-  vertical-align: -1px;
-  background: linear-gradient(180deg, var(--gk-gold-lit), var(--gk-gold) 55%, var(--gk-gold-deep));
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-}
-
-.stgOpen__sub {
-  margin: 0 26px;
-  justify-self: center;
-  font-family: var(--stg-mono);
-  font-size: clamp(12px, 1.5vw, 16px);
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: #fff;
-  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
 }
 
 /* a short window keeps the stages' padding tight */
@@ -473,81 +366,26 @@
   }
 }
 
-/* phones: the safe areas at both ends, and momentum scrolling */
+/* phones: the safe areas at both ends */
 @media (max-width: 720px) {
   .stg {
-    padding-block: calc(env(safe-area-inset-top, 0px) + 14px)
-      calc(env(safe-area-inset-bottom, 0px) + 20px);
-    -webkit-overflow-scrolling: touch;
+    padding-block: calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 20px);
+    overflow: hidden;
+  }
+
+  .op__match {
+    font-size: 0.9rem;
+  }
+
+  .op__go {
+    min-width: 220px;
+    min-height: 52px;
+    font-size: 1.2rem;
   }
 }
 
-/*
-  The subtitle ribbon's tails, on a narrow screen.
-
-  The banner is centred with a fixed inline margin, so on a phone it runs
-  nearly edge to edge and the folded tails end up detached against the
-  screen sides — two red blocks with nothing between them and the banner.
-  Below 560px the banner narrows to its text and the tails come back in
-  where they belong.
-*/
-@media (max-width: 560px) {
-  .stgOpen__sub {
-    margin: 0 34px;
-    padding: 8px 16px 9px;
-    font-size: 11px;
-    letter-spacing: 0.16em;
+@media (prefers-reduced-motion: reduce) {
+  .op > * {
+    animation: stgFade 0.3s ease-out both;
   }
-
-  .stgOpen__sub::before,
-  .stgOpen__sub::after {
-    width: 22px;
-  }
-
-  .stgOpen__sub::before {
-    left: -16px;
-  }
-  .stgOpen__sub::after {
-    right: -16px;
-  }
-}
-
-/* ---- the loading gate ----
-
-   Sized and placed to match the button it stands in for, so the title card
-   does not reflow when the match finishes loading — the bar occupies the
-   same block, and the swap reads as one control changing state rather than
-   the screen rearranging itself under the pointer.
-*/
-.stgLoad {
-  display: grid;
-  justify-items: center;
-  gap: 9px;
-  width: min(300px, 76vw);
-  min-height: 52px;
-  margin-top: clamp(10px, 2vh, 22px);
-  animation: stgRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
-}
-
-.stgLoad__label {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-family: var(--stg-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #cfe0f8;
-}
-
-/* tabular so the percentage does not jitter the label's width as it counts */
-.stgLoad__pct {
-  color: var(--gk-gold);
-  font-variant-numeric: tabular-nums;
-}
-
-.stgLoad__track {
-  width: 100%;
-  height: 16px;
 }

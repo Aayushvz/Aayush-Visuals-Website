@@ -122,6 +122,80 @@ export function Toggle({ on }: { on: boolean }) {
   );
 }
 
+/* ---------- the Aayush Visuals mark ----------
+
+   The real logo (public/logos): a slanted bar with a rounded shoulder and
+   the purple dot, traced as vectors so it is sharp at any size and the bar
+   can take the surface's ink. */
+export function AVMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="440 560 1050 810" className={`g-ico av-mark ${className}`} aria-hidden focusable="false">
+      <path d="M483 1335H798L1198 596H1005C940 596 860 640 826 700Z" fill="currentColor" />
+      <circle cx="1262" cy="1150" r="186" fill="#b517ff" />
+    </svg>
+  );
+}
+
+/* ---------- the league crest ----------
+
+   A shield split on the diagonal between the two sides' colours - the
+   league is the two of them - with the ball at its heart and DPL on a
+   gold band. Flat planes and one keyline, like the team logos. */
+export function LeagueCrest({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 230" className={className} aria-hidden focusable="false">
+      <defs>
+        <clipPath id="lcShield">
+          <path d="M100 8 186 34V116C186 168 148 204 100 222 52 204 14 168 14 116V34Z" />
+        </clipPath>
+        <linearGradient id="lcGold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffe28a" />
+          <stop offset="1" stopColor="#d9941a" />
+        </linearGradient>
+      </defs>
+      <path d="M100 8 186 34V116C186 168 148 204 100 222 52 204 14 168 14 116V34Z" fill="#0a0722" />
+      <g clipPath="url(#lcShield)">
+        <path d="M0 0H200L0 230Z" fill="#7c3aed" transform="translate(0 0)" />
+        <path d="M200 0V230H0Z" fill="#2563eb" />
+        <path d="M0 0H200L0 230Z" fill="rgba(255,255,255,0.08)" />
+        <path d="M200 0 0 230" stroke="#0a0722" strokeWidth="6" />
+      </g>
+      <path
+        d="M100 8 186 34V116C186 168 148 204 100 222 52 204 14 168 14 116V34Z"
+        fill="none"
+        stroke="url(#lcGold)"
+        strokeWidth="7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M100 20 174 42V116C174 160 142 191 100 208 58 191 26 160 26 116V42Z"
+        fill="none"
+        stroke="rgba(255,255,255,0.3)"
+        strokeWidth="1.5"
+      />
+      {/* the ball */}
+      <circle cx="100" cy="100" r="34" fill="#e8423a" stroke="#0a0722" strokeWidth="5" />
+      <path d="M80 74c10 14 10 38 0 52M120 74c-10 14-10 38 0 52" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeDasharray="3 4" />
+      <ellipse cx="88" cy="86" rx="9" ry="5" fill="#fff" opacity="0.4" transform="rotate(-35 88 86)" />
+      {/* the band */}
+      <path d="M30 150H170L162 176H38Z" fill="url(#lcGold)" stroke="#0a0722" strokeWidth="4" strokeLinejoin="round" />
+      <text
+        x="100"
+        y="171"
+        textAnchor="middle"
+        fontFamily="var(--ckt-game), 'Barlow Condensed', Impact, sans-serif"
+        fontStyle="italic"
+        fontWeight="800"
+        fontSize="24"
+        letterSpacing="4"
+        fill="#1a1238"
+      >
+        DPL
+      </text>
+    </svg>
+  );
+}
+
 /* ---------- small icons in the kit's own style ---------- */
 export function BallIcon({ className = "" }: { className?: string }) {
   return (
