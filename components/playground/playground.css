@@ -557,110 +557,154 @@
    Responsive
    ========================================================== */
 
-/* the copy drops under the rig once the two stop fitting side by side;
-   the arrow rides along at the end of the title's row */
-@media (max-width: 900px) {
-  .pgCard__link,
-  .pgCard__row {
+/* ---- the shelf as a three-up grid ----
+
+   Three experiments to a row, each a white card with its rig on top as
+   the artwork and the copy under it in reading order: name, the line that
+   sells it, the explanation, the tags, and the way in pinned to the foot
+   so a row of cards lines its buttons up. The rig itself is untouched. */
+.pgGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.4vw, 22px);
+}
+
+.pgCard {
+  display: flex;
+}
+
+.pgCard > .pgCard__link,
+.pgCard > .pgCard__row {
+  flex: 1;
+  align-content: start;
+  grid-template-rows: auto 1fr;
+}
+
+.pgCard__copy {
+  height: 100%;
+}
+
+.pgCard__link,
+.pgCard__row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding: 10px 10px 20px;
+}
+
+/*
+  Stacked, the copy runs as one column in reading order: name, the line
+  that sells it, the explanation, the tags, then the way in last. The
+  head row dissolves (display: contents) so the button can drop to the
+  end instead of wedging itself between the title and the tagline.
+*/
+.pgCard__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 6px;
+}
+
+.pgCard__head {
+  display: contents;
+}
+
+.pgCard__title {
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.pgCard__tagline {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.pgCard__blurb {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.pgCard__tagline,
+.pgCard__blurb {
+  max-width: none;
+}
+
+.pgTags {
+  order: 1;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.pgTag {
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px 0 3px;
+  font-size: 12px;
+}
+
+.pgTag__badge {
+  width: 22px;
+  height: 22px;
+}
+
+.pgTag__badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* a smaller button, last in the column */
+.pgBtn {
+  order: 2;
+  margin-top: 18px;
+  padding: 3px;
+  border-radius: 12px;
+}
+
+.pgBtn__face {
+  height: 38px;
+  padding: 0 3px 0 14px;
+  border-radius: 9px;
+}
+
+.pgBtn__label {
+  font-size: 14px;
+}
+
+.pgBtn__key {
+  width: 32px;
+  height: 32px;
+  margin-left: 14px;
+  border-radius: 6px;
+}
+
+.pgBtn__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pgBtn--off .pgBtn__face {
+  padding-right: 14px;
+}
+
+/* the button sits at the foot of the card, whatever the copy's length */
+.pgBtn {
+  margin-top: auto;
+}
+
+.pgTags {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1100px) {
+  .pgGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .pgGrid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    padding: 10px 10px 20px;
-  }
-
-  /*
-    Stacked, the copy runs as one column in reading order: name, the line
-    that sells it, the explanation, the tags, then the way in last. The
-    head row dissolves (display: contents) so the button can drop to the
-    end instead of wedging itself between the title and the tagline.
-  */
-  .pgCard__copy {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0 6px;
-  }
-
-  .pgCard__head {
-    display: contents;
-  }
-
-  .pgCard__title {
-    font-size: 21px;
-    line-height: 1.2;
-  }
-
-  .pgCard__tagline {
-    margin-top: 6px;
-    font-size: 15px;
-    line-height: 1.4;
-  }
-
-  .pgCard__blurb {
-    margin-top: 6px;
-    font-size: 14px;
-    line-height: 1.55;
-  }
-
-  .pgCard__tagline,
-  .pgCard__blurb {
-    max-width: none;
-  }
-
-  .pgTags {
-    order: 1;
-    gap: 6px;
-    margin-top: 14px;
-  }
-
-  .pgTag {
-    gap: 6px;
-    height: 28px;
-    padding: 0 11px 0 3px;
-    font-size: 12px;
-  }
-
-  .pgTag__badge {
-    width: 22px;
-    height: 22px;
-  }
-
-  .pgTag__badge svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  /* a smaller button, last in the column */
-  .pgBtn {
-    order: 2;
-    margin-top: 18px;
-    padding: 3px;
-    border-radius: 12px;
-  }
-
-  .pgBtn__face {
-    height: 38px;
-    padding: 0 3px 0 14px;
-    border-radius: 9px;
-  }
-
-  .pgBtn__label {
-    font-size: 14px;
-  }
-
-  .pgBtn__key {
-    width: 32px;
-    height: 32px;
-    margin-left: 14px;
-    border-radius: 6px;
-  }
-
-  .pgBtn__icon svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .pgBtn--off .pgBtn__face {
-    padding-right: 14px;
   }
 }
 
