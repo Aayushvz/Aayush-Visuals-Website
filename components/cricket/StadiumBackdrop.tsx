@@ -5,6 +5,7 @@ import {
   buildScene,
   paintField,
   paintForegroundGrass,
+  paintHoardings,
   paintSky,
   paintStadium,
   paintStumps,
@@ -125,6 +126,7 @@ export default function StadiumBackdrop({ settled, reduced }: Props) {
 
       paintSky(ctx, s, now);
       paintStadium(ctx, s);
+      paintHoardings(ctx, s, now, reduced);
       paintField(ctx, s);
       paintStumps(ctx, s, false);
       paintForegroundGrass(ctx, s);

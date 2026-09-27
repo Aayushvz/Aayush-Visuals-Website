@@ -16,10 +16,11 @@ import {
   paintStadium,
   paintBigScreen,
   paintFloodlights,
+  paintHoardings,
   paintStrikerWicket,
   paintStumps,
 } from "./scene";
-import type { Scene } from "./scene";
+import type { Board, Scene } from "./scene";
 import { breakWicket, STANDING, type WicketState } from "./wicket";
 import type { TeamKit } from "./spriteKit";
 import { preloadBatter, type BatterAction } from "./batterSprites";
@@ -83,9 +84,10 @@ export default function CricketGame({
   const menuRef = useRef<HTMLDivElement | null>(null);
   /* what the stadium's big screen is showing, kept in a ref so the paint
      loop can read it without being restarted on every run scored */
-  const boardRef = useRef<{ shout: string | null; quote: string }>({
+  const boardRef = useRef<Board>({
     shout: null,
     quote: "Six balls. One innings.",
+    score: null,
   });
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -457,6 +459,7 @@ export default function CricketGame({
          than standing on top of the crowd */
       paintFloodlights(ctx, scene);
       paintStadium(ctx, scene);
+      paintHoardings(ctx, scene, now, reducedRef.current);
       /*
         The board reads the score through a ref, not through the closure.
 
@@ -465,7 +468,7 @@ export default function CricketGame({
         the effect ran, and the screen would sit on 0-0 all over. The ref is
         written on every state change below.
       */
-      paintBigScreen(ctx, scene, boardRef.current, now);
+      paintBigScreen(ctx, scene, boardRef.current, now, reducedRef.current);
       paintField(ctx, scene);
       paintFielders(ctx, scene, now, opponent);
       paintStumps(ctx, scene, phase === "resolved" && swungRef.current && trailRef.current.length === 0);
@@ -581,14 +584,14 @@ export default function CricketGame({
     scored and the stadium showing it.
   */
   /*
-    The board carries the commentary, not the score.
+    The board carries the commentary, with the score in a slim header row.
 
-    The HUD bar sits directly above it showing runs, balls and strike rate;
-    a board repeating those is a board saying nothing. What had nowhere to
-    live was the shot's own story, which used to be thrown over the middle
-    of the pitch on a card. While a shout is live the board shows it with
-    the studio line beneath; between deliveries it idles on whatever the
-    commentary is currently saying.
+    The body is the shot's own story, which used to be thrown over the
+    middle of the pitch on a card: while a shout is live the board shows it
+    with the studio line beneath, and between deliveries it idles on
+    whatever the commentary is currently saying. The header is what makes
+    it a stadium scoreboard rather than a caption box - one line, small,
+    under the league badge.
   */
   /*
     The board goes dark behind a card.
@@ -618,6 +621,16 @@ export default function CricketGame({
             : phase === "runup"
               ? "In his run-up."
               : "Six balls. One innings.",
+    /* the screen's header row, the same figures the HUD bar shows: a real
+       ground's screen carries the score whatever the broadcast overlays */
+    score: cardUp
+      ? null
+      : {
+          runs: score,
+          wickets: out ? 1 : 0,
+          balls: out ? BALLS : ballIdx + 1,
+          of: BALLS,
+        },
   };
 
   const delivery = OVER[ballIdx];

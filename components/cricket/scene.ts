@@ -47,45 +47,98 @@ function mulberry32(seed: number) {
   };
 }
 
-const CROWD_COLOURS = [
-  "#ffd93d", "#ffb703", "#e63946", "#f4a261", "#4361ee",
-  "#3a86ff", "#ffffff", "#f1faee", "#8ecae6", "#e76f51",
+/*
+  The crowd is people, not confetti.
+
+  It used to be a field of bright dots in ten saturated colours, which is
+  what a crowd looks like from a satellite. From the middle it reads as
+  heads and shoulders: a skin tone on top of a shirt, packed tight enough
+  that each row's heads overlap the shirts of the row behind. The shirts
+  are weighted the way a real ground dresses - mostly the two sides'
+  colours, a lot of white and dark, a few loud outliers - and slightly
+  knocked back, because a stand at this distance is lit by the sky and
+  never fully saturated.
+*/
+const SHIRTS: [string, number][] = [
+  ["#2d56c4", 9], ["#3d6ee0", 7], ["#1d3a8c", 5], /* the blue side */
+  ["#6d34d6", 7], ["#8452e6", 5], ["#4c2399", 3], /* the purple side */
+  ["#eef0f4", 7], ["#cfd5de", 3],                 /* white and grey */
+  ["#262b36", 5], ["#3b4150", 3],                 /* dark */
+  ["#f0b52a", 3], ["#d8404b", 2], ["#ee7a36", 1], ["#1f9e7a", 1],
 ];
+const SHIRT_TOTAL = SHIRTS.reduce((n, [, w]) => n + w, 0);
+const SKINS = ["#f0c8a2", "#dba77d", "#bf8458", "#94603f", "#6a432b"];
+const HAIR = "#241a14";
+
+function pickShirt(r: number) {
+  let n = r * SHIRT_TOTAL;
+  for (let i = 0; i < SHIRTS.length; i++) {
+    n -= SHIRTS[i][1];
+    if (n <= 0) return i;
+  }
+  return 0;
+}
+
+export type Fan = { x: number; dy: number; shirt: number; skin: number; hair: boolean; flag: number };
+export type CrowdRow = { y: number; r: number; fans: Fan[] };
 
 export function buildScene(w: number, h: number) {
   const rnd = mulberry32(20260804);
   const horizon = h * 0.44;
   const cx = w / 2;
 
-  /* ---- crowd ---- */
+  /*
+    ---- the bowl's geometry ----
+
+    Two decks split by a fascia, a roof over the top one, and the perimeter
+    boards along the bottom. Every horizontal line in the stand follows the
+    same bow (see standY) so the decks, the fascia and the roof all read as
+    one curved structure rather than stripes laid across a flat wall.
+  */
   const standTop = h * 0.17;
-  const standBottom = horizon - h * 0.02;
-  const rows = Math.max(10, Math.round(h * 0.055));
-  const crowd: { x: number; y: number; r: number; c: string }[] = [];
-  /* vertical gangways, so the bank of colour has structure rather than
-     being an even wash of dots across the whole width */
-  const aisles = [0.19, 0.5, 0.81];
-  for (let row = 0; row < rows; row++) {
-    const t = row / (rows - 1);
-    const y = standTop + (standBottom - standTop) * t;
-    /* nearer rows sit lower, are bigger and are spaced wider */
-    const size = 1.1 + t * 2.2;
-    const step = size * 2.5;
-    const bow = (1 - t) * h * 0.05;
-    for (let x = -step; x < w + step; x += step) {
-      if (rnd() < 0.12) continue; /* empty seats break up the banding */
-      if (aisles.some((a) => Math.abs(x / w - a) < 0.012)) continue;
-      /* a darker tier break every few rows reads as a deck division */
-      if (row % 7 === 3 && rnd() < 0.75) continue;
-      const dip = Math.sin((x / w) * Math.PI) * bow;
-      crowd.push({
-        x: x + (rnd() - 0.5) * step * 0.6,
-        y: y - dip + (rnd() - 0.5) * size,
-        r: size * (0.7 + rnd() * 0.5),
-        c: CROWD_COLOURS[(rnd() * CROWD_COLOURS.length) | 0],
-      });
+  const boardH = h * 0.042;
+  const boardY = horizon - boardH;
+  const span = boardY - standTop;
+  const upperTop = standTop + h * 0.024;
+  const fasciaTop = standTop + span * 0.44;
+  const fasciaH = h * 0.02;
+  const lowerTop = fasciaTop + fasciaH;
+  const lowerBot = boardY - h * 0.003;
+
+  /* gangways: the same fractions on both decks, so the stairs line up */
+  const aisles = [0.07, 0.19, 0.345, 0.5, 0.655, 0.81, 0.93];
+
+  /* ---- crowd, row by row, back to front ---- */
+  const rMin = h * 0.0017;
+  const rMax = h * 0.0039;
+  const crowd: CrowdRow[] = [];
+  const deck = (top: number, bot: number) => {
+    let y = top + rMin * 1.4;
+    while (y < bot - rMin) {
+      const t = (y - standTop) / span;
+      const r = rMin + (rMax - rMin) * t;
+      const step = r * 2.3;
+      const gap = 0.0038 + t * 0.0042;
+      const fans: Fan[] = [];
+      for (let x = -step; x < w + step; x += step) {
+        if (aisles.some((a) => Math.abs(x / w - a) < gap)) continue;
+        if (rnd() < 0.06) continue; /* the odd empty seat */
+        fans.push({
+          x: x + (rnd() - 0.5) * step * 0.35,
+          dy: (rnd() - 0.5) * r * 0.5,
+          shirt: pickShirt(rnd()),
+          skin: (rnd() * SKINS.length) | 0,
+          hair: rnd() < 0.7,
+          /* one fan in a hundred and fifty is holding something up */
+          flag: rnd() < 0.0065 ? (rnd() * SHIRTS.length) | 0 : -1,
+        });
+      }
+      crowd.push({ y, r, fans });
+      y += r * 2.05;
     }
-  }
+  };
+  deck(upperTop, fasciaTop);
+  deck(lowerTop, lowerBot);
 
   /* ---- clouds ---- */
   const clouds = Array.from({ length: 5 }, (_, i) => ({
@@ -145,6 +198,7 @@ export function buildScene(w: number, h: number) {
 
   return {
     w, h, horizon, cx, crowd, clouds, fielders, standTop,
+    boardH, boardY, upperTop, fasciaTop, fasciaH, lowerTop, lowerBot, aisles,
     /* filled in by the first paintStadium — see bakeStands */
     stands: null as HTMLCanvasElement | null,
   };
@@ -195,10 +249,13 @@ const STUMP_RATIO = 0.27;
 export function paintSky(ctx: CanvasRenderingContext2D, s: Scene, now: number) {
   const { w, h, horizon } = s;
 
+  /* deeper overhead, paling to a hazy band at the roofline, the way a
+     summer sky actually grades - the old ramp was one saturated blue */
   const sky = ctx.createLinearGradient(0, 0, 0, horizon);
-  sky.addColorStop(0, "#1b8bd8");
-  sky.addColorStop(0.55, "#48b6ec");
-  sky.addColorStop(1, "#a8e4f7");
+  sky.addColorStop(0, "#2a78c8");
+  sky.addColorStop(0.4, "#4f9fe0");
+  sky.addColorStop(0.75, "#8cc6ee");
+  sky.addColorStop(1, "#cfe8f6");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, w, horizon);
 
@@ -217,8 +274,13 @@ export function paintSky(ctx: CanvasRenderingContext2D, s: Scene, now: number) {
   }
 }
 
+/* a cumulus lit from above: bright tops, a cool grey belly */
 function puff(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  const g = ctx.createLinearGradient(0, y - r * 0.9, 0, y + r * 0.6);
+  g.addColorStop(0, "rgba(255,255,255,0.97)");
+  g.addColorStop(0.55, "rgba(246,249,253,0.93)");
+  g.addColorStop(1, "rgba(203,218,234,0.9)");
+  ctx.fillStyle = g;
   ctx.beginPath();
   ctx.ellipse(x, y, r * 1.5, r * 0.62, 0, 0, Math.PI * 2);
   ctx.ellipse(x - r * 0.75, y + r * 0.12, r * 0.72, r * 0.46, 0, 0, Math.PI * 2);
@@ -230,9 +292,9 @@ function puff(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
 /*
   ---- the stands, painted once and then replayed as a bitmap ----
 
-  Everything above the horizon is fixed for the life of a scene: the bowl,
-  the roof, the towers, seven and a half thousand crowd dots and the
-  hoardings. Painting it live cost 15-21ms of a 16ms frame at 1280x720 —
+  Everything in the stand is fixed for the life of a scene: the bowl, the
+  roof, the stairs and some ten thousand fans. (The perimeter boards are not
+  in here - their content moves, so paintHoardings draws them every frame.) Painting it live cost 15-21ms of a 16ms frame at 1280x720 —
   around thirty times every other painter in this file added together, and
   on its own the difference between the game running and the game crawling.
   Blitting it back is 0.8ms.
@@ -249,8 +311,8 @@ function puff(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
     pixels; the fly-in hands it device pixels and paints under a camera zoom
     that starts at 1.28. Baking at a flat 1x would have shipped a soft
     stadium on every retina phone.
-  - Extent. The band stops at the horizon, which is where the last thing
-    drawn here — the bottom edge of the hoardings — ends. The floodlight
+  - Extent. The band stops at the horizon; the stand itself ends a little
+    above it, where the boards begin. The floodlight
     glow is the only mark that reaches for more room and it resolves to
     0.35h, still clear of it. A full-frame cache would have cost more than
     twice the memory and twice the fill rate to carry empty pixels.
@@ -286,80 +348,484 @@ export function paintStadium(ctx: CanvasRenderingContext2D, s: Scene) {
   ctx.drawImage(s.stands, 0, 0, s.w, s.horizon);
 }
 
+/*
+  Where a horizontal line of the stand sits at a given x.
+
+  The far stand is the inside of an oval seen from one end, so its rows arch
+  up toward the middle of the frame, and they arch more the further back
+  they are: the front row, at the boards, is dead straight. Every band in
+  the stand - rows, fascia, roof - goes through this, which is what keeps
+  them parallel to each other instead of each carrying its own curve.
+*/
+function standY(s: Scene, y: number, x: number) {
+  const t = Math.max(0, Math.min(1, (y - s.standTop) / (s.boardY - s.standTop)));
+  const u = Math.max(0, Math.min(1, x / s.w));
+  return y - Math.sin(u * Math.PI) * (1 - t) * s.h * 0.05;
+}
+
+/* trace one stand line left to right (or back), for filling bands */
+function traceStand(ctx: CanvasRenderingContext2D, s: Scene, y: number, reverse = false) {
+  const n = 48;
+  for (let i = 0; i <= n; i++) {
+    const k = reverse ? n - i : i;
+    const x = -4 + ((s.w + 8) * k) / n;
+    const py = standY(s, y, x);
+    if (i === 0 && !reverse) ctx.moveTo(x, py);
+    else ctx.lineTo(x, py);
+  }
+}
+
+function standBand(ctx: CanvasRenderingContext2D, s: Scene, y0: number, y1: number) {
+  ctx.beginPath();
+  traceStand(ctx, s, y0);
+  traceStand(ctx, s, y1, true);
+  ctx.closePath();
+}
+
 function drawStands(ctx: CanvasRenderingContext2D, s: Scene) {
-  const { w, h, horizon, standTop, cx } = s;
+  const { w, h, standTop, boardY, upperTop, fasciaTop, fasciaH, lowerTop, lowerBot } = s;
 
-  /* the bowl: a dark band the crowd sits on */
-  ctx.beginPath();
-  ctx.moveTo(0, standTop + h * 0.02);
-  ctx.quadraticCurveTo(cx, standTop - h * 0.05, w, standTop + h * 0.02);
-  ctx.lineTo(w, horizon);
-  ctx.lineTo(0, horizon);
-  ctx.closePath();
-  const bowl = ctx.createLinearGradient(0, standTop, 0, horizon);
-  bowl.addColorStop(0, "#243046");
-  bowl.addColorStop(1, "#141c2b");
-  ctx.fillStyle = bowl;
+  /* ---- the seating bowl: the colour you see through the gaps ---- */
+  standBand(ctx, s, upperTop - h * 0.004, boardY);
+  const seats = ctx.createLinearGradient(0, standTop - h * 0.05, 0, boardY);
+  seats.addColorStop(0, "#141c2e");
+  seats.addColorStop(0.45, "#1b2742");
+  seats.addColorStop(1, "#22335a");
+  ctx.fillStyle = seats;
   ctx.fill();
 
-  /* roof canopy */
-  ctx.beginPath();
-  ctx.moveTo(-10, standTop + h * 0.035);
-  ctx.quadraticCurveTo(cx, standTop - h * 0.06, w + 10, standTop + h * 0.035);
-  ctx.lineTo(w + 10, standTop + h * 0.012);
-  ctx.quadraticCurveTo(cx, standTop - h * 0.085, -10, standTop + h * 0.012);
-  ctx.closePath();
-  ctx.fillStyle = "#eef2f6";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(20,28,43,0.35)";
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
-
-  /* floodlight towers */
-  for (const fx of [w * 0.12, w * 0.88]) {
-    ctx.fillStyle = "#cfd8e3";
-    ctx.fillRect(fx - 2, standTop - h * 0.02, 4, h * 0.06);
-    ctx.fillStyle = "#f7fbff";
-    for (let i = 0; i < 3; i++)
-      for (let j = 0; j < 3; j++)
-        ctx.fillRect(fx - 13 + i * 9, standTop - h * 0.075 + j * 7, 7, 5);
-    const glow = ctx.createRadialGradient(fx, standTop - h * 0.05, 0, fx, standTop - h * 0.05, h * 0.16);
-    glow.addColorStop(0, "rgba(255,255,255,0.4)");
-    glow.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = glow;
-    ctx.fillRect(fx - h * 0.2, standTop - h * 0.22, h * 0.4, h * 0.4);
+  /* terrace steps: a dark lip under every row, so the empty seats read as
+     tiers rather than as holes in a wall */
+  ctx.strokeStyle = "rgba(4,8,18,0.35)";
+  for (const row of s.crowd) {
+    ctx.lineWidth = Math.max(0.6, row.r * 0.35);
+    ctx.beginPath();
+    traceStand(ctx, s, row.y + row.r * 1.55);
+    ctx.stroke();
   }
 
-  /* the crowd itself */
-  for (const p of s.crowd) {
-    ctx.fillStyle = p.c;
+  /* ---- gangways: concrete stairs, wider toward the front ---- */
+  for (const a of s.aisles) {
+    const ax = a * w;
+    const topW = w * 0.0042;
+    const botW = w * 0.0085;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.moveTo(ax - topW, standY(s, upperTop, ax - topW));
+    ctx.lineTo(ax + topW, standY(s, upperTop, ax + topW));
+    ctx.lineTo(ax + botW, lowerBot);
+    ctx.lineTo(ax - botW, lowerBot);
+    ctx.closePath();
+    const stair = ctx.createLinearGradient(0, standTop, 0, boardY);
+    stair.addColorStop(0, "#2c3446");
+    stair.addColorStop(1, "#4d5667");
+    ctx.fillStyle = stair;
+    ctx.fill();
+    /* the treads */
+    ctx.strokeStyle = "rgba(20,26,40,0.45)";
+    ctx.lineWidth = 0.8;
+    for (const row of s.crowd) {
+      if ((row.y | 0) % 2) continue;
+      const t = (row.y - standTop) / (boardY - standTop);
+      const half = topW + (botW - topW) * t;
+      const ty = standY(s, row.y + row.r, ax);
+      ctx.beginPath();
+      ctx.moveTo(ax - half, ty);
+      ctx.lineTo(ax + half, ty);
+      ctx.stroke();
+    }
+  }
+
+  /* ---- the crowd, back row first so each row overlaps the one behind ---- */
+  for (const row of s.crowd) {
+    const r = row.r;
+    /* raised flags go behind their own row's heads */
+    for (const f of row.fans) {
+      if (f.flag < 0) continue;
+      const y = standY(s, row.y, f.x) + f.dy;
+      ctx.strokeStyle = "#1a1a1a";
+      ctx.lineWidth = Math.max(0.6, r * 0.25);
+      ctx.beginPath();
+      ctx.moveTo(f.x + r * 0.8, y + r);
+      ctx.lineTo(f.x + r * 0.8, y - r * 4);
+      ctx.stroke();
+      ctx.fillStyle = SHIRTS[f.flag][0];
+      ctx.fillRect(f.x + r * 0.8, y - r * 4, r * 3.2, r * 2);
+    }
+    /* shirts, batched by colour: one path per colour per row */
+    for (let c = 0; c < SHIRTS.length; c++) {
+      ctx.beginPath();
+      let any = false;
+      for (const f of row.fans) {
+        if (f.shirt !== c) continue;
+        const y = standY(s, row.y, f.x) + f.dy;
+        ctx.moveTo(f.x + r * 1.35, y + r * 1.75);
+        ctx.ellipse(f.x, y + r * 1.75, r * 1.35, r * 1.05, 0, 0, Math.PI * 2);
+        any = true;
+      }
+      if (!any) continue;
+      ctx.fillStyle = SHIRTS[c][0];
+      ctx.fill();
+    }
+    /* heads */
+    for (let k = 0; k < SKINS.length; k++) {
+      ctx.beginPath();
+      let any = false;
+      for (const f of row.fans) {
+        if (f.skin !== k) continue;
+        const y = standY(s, row.y, f.x) + f.dy;
+        ctx.moveTo(f.x + r * 0.78, y);
+        ctx.arc(f.x, y, r * 0.78, 0, Math.PI * 2);
+        any = true;
+      }
+      if (!any) continue;
+      ctx.fillStyle = SKINS[k];
+      ctx.fill();
+    }
+    /* hair, as the top half of the head */
+    ctx.beginPath();
+    for (const f of row.fans) {
+      if (!f.hair) continue;
+      const y = standY(s, row.y, f.x) + f.dy;
+      ctx.moveTo(f.x + r * 0.8, y - r * 0.05);
+      ctx.arc(f.x, y - r * 0.05, r * 0.8, Math.PI, 0, false);
+    }
+    ctx.fillStyle = HAIR;
     ctx.fill();
   }
 
-  /* sponsor hoardings ring the ground and give the horizon a hard edge */
-  const boardH = h * 0.038;
-  const boardY = horizon - boardH;
-  /* block count follows width: eight boards on a phone leaves 40px each and
-     the sponsor names collide into noise */
-  const palette = ["#e63946", "#ffd93d", "#1d3557", "#2a9d8f"];
-  const count = Math.max(3, Math.round(w / 190));
-  const blocks = Array.from({ length: count }, (_, i) => palette[i % palette.length]);
-  const bw = w / blocks.length;
-  blocks.forEach((c, i) => {
-    ctx.fillStyle = c;
-    ctx.fillRect(i * bw, boardY, bw + 1, boardH);
-  });
-  if (bw > 110) {
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = `${Math.round(boardH * 0.46)}px var(--ckt-display), Impact, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    blocks.forEach((_, i) => {
-      ctx.fillText(i % 2 === 0 ? "AAYUSH VISUALS" : "SIX BALLS", i * bw + bw / 2, boardY + boardH / 2);
-    });
+  /* ---- tunnel mouths into the lower deck ---- */
+  const tunnelH = (lowerBot - lowerTop) * 0.3;
+  for (const a of [0.13, 0.265, 0.735, 0.87]) {
+    const tx = a * w;
+    const tw = w * 0.022;
+    const ty = lowerTop + (lowerBot - lowerTop) * 0.34;
+    ctx.fillStyle = "#070a12";
+    ctx.beginPath();
+    ctx.moveTo(tx - tw * 0.5, ty);
+    ctx.lineTo(tx + tw * 0.5, ty);
+    ctx.lineTo(tx + tw * 0.56, ty + tunnelH);
+    ctx.lineTo(tx - tw * 0.56, ty + tunnelH);
+    ctx.closePath();
+    ctx.fill();
+    /* the rail across the top of it */
+    ctx.fillStyle = "#9aa4b5";
+    ctx.fillRect(tx - tw * 0.62, ty - 1.2, tw * 1.24, 1.4);
   }
+
+  /* ---- the roof's shadow over the upper deck, following the bow ---- */
+  const shade = (fasciaTop - upperTop) * 0.7;
+  for (let i = 0; i < 6; i++) {
+    standBand(ctx, s, upperTop - h * 0.006, upperTop + shade * ((i + 1) / 6));
+    ctx.fillStyle = "rgba(6,10,24,0.1)";
+    ctx.fill();
+  }
+
+  /* ---- the fascia between the decks, with its LED ribbon ---- */
+  standBand(ctx, s, fasciaTop, fasciaTop + fasciaH);
+  ctx.fillStyle = "#0a0f1c";
+  ctx.fill();
+  standBand(ctx, s, fasciaTop + fasciaH * 0.24, fasciaTop + fasciaH * 0.8);
+  const ribbon = ctx.createLinearGradient(0, 0, w, 0);
+  for (let i = 0; i <= 8; i++) {
+    ribbon.addColorStop(i / 8, i % 2 ? "rgba(124,58,237,0.95)" : "rgba(58,110,224,0.95)");
+  }
+  ctx.fillStyle = ribbon;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.22)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  traceStand(ctx, s, fasciaTop);
+  ctx.stroke();
+  /* and the glass balustrade at the front of the upper deck */
+  ctx.strokeStyle = "rgba(210,225,245,0.35)";
+  ctx.beginPath();
+  traceStand(ctx, s, fasciaTop - h * 0.004);
+  ctx.stroke();
+
+  /* ---- the roof: the underside of a cantilever, lit along its edge ---- */
+  const roofTop = standTop - h * 0.034;
+  const roofEdge = upperTop - h * 0.004;
+  standBand(ctx, s, roofTop, roofEdge);
+  const under = ctx.createLinearGradient(0, roofTop - h * 0.05, 0, roofEdge);
+  under.addColorStop(0, "#56637a");
+  under.addColorStop(1, "#2b3446");
+  ctx.fillStyle = under;
+  ctx.fill();
+  /* the ribs of the roof structure, converging slightly on the middle */
+  ctx.strokeStyle = "rgba(16,22,36,0.45)";
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 24; i++) {
+    const x = (w * i) / 24;
+    const lean = (x - w / 2) * 0.04;
+    ctx.beginPath();
+    ctx.moveTo(x - lean, standY(s, roofTop, x - lean));
+    ctx.lineTo(x, standY(s, roofEdge, x));
+    ctx.stroke();
+  }
+  /* the top edge catches the sky, the leading edge catches the sun */
+  ctx.strokeStyle = "#e9eef5";
+  ctx.lineWidth = Math.max(1.5, h * 0.004);
+  ctx.beginPath();
+  traceStand(ctx, s, roofTop);
+  ctx.stroke();
+  ctx.strokeStyle = "#cfd8e4";
+  ctx.lineWidth = Math.max(2, h * 0.0065);
+  ctx.beginPath();
+  traceStand(ctx, s, roofEdge);
+  ctx.stroke();
+  /* a thin shadow line just under the edge, where the roof meets the stand */
+  ctx.strokeStyle = "rgba(0,0,0,0.35)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  traceStand(ctx, s, roofEdge + h * 0.0045);
+  ctx.stroke();
+
+  /* a touch of air between the camera and the far stand */
+  const haze = ctx.createLinearGradient(0, roofTop, 0, boardY);
+  haze.addColorStop(0, "rgba(170,205,235,0.14)");
+  haze.addColorStop(1, "rgba(170,205,235,0)");
+  standBand(ctx, s, roofTop, boardY);
+  ctx.fillStyle = haze;
+  ctx.fill();
+}
+
+/* ============ type and texture for the stadium's screens ============ */
+
+/*
+  The real family names behind the route's display faces.
+
+  next/font registers Anton as something like `__Anton_1f2e3d`, not as
+  `Anton`, and a canvas cannot read the CSS variable that holds it: a font
+  string with `var(...)` in it is invalid and silently ignored, which is why
+  the boards were being lettered in the context's default 10px sans. The
+  variables are read once off the canvas element, which sits inside the
+  layout that declares them, and cached.
+*/
+const DISPLAY_FALLBACK = 'Anton, Impact, "Arial Narrow", sans-serif';
+const SHOUT_FALLBACK = 'Bungee, Anton, Impact, sans-serif';
+let faceCache: { display: string; shout: string } | null = null;
+
+function faces(ctx: CanvasRenderingContext2D) {
+  if (faceCache) return faceCache;
+  const el = ctx.canvas;
+  if (typeof HTMLCanvasElement === "undefined" || !(el instanceof HTMLCanvasElement) || !el.isConnected) {
+    return { display: DISPLAY_FALLBACK, shout: SHOUT_FALLBACK };
+  }
+  const cs = getComputedStyle(el);
+  const d = cs.getPropertyValue("--ckt-display").trim();
+  const sh = cs.getPropertyValue("--ckt-shout").trim();
+  if (!d) return { display: DISPLAY_FALLBACK, shout: SHOUT_FALLBACK };
+  faceCache = {
+    display: `${d}, ${DISPLAY_FALLBACK}`,
+    shout: `${sh || d}, ${SHOUT_FALLBACK}`,
+  };
+  return faceCache;
+}
+
+/* LED scanlines: one dark line every third pixel, as a repeating pattern */
+const scanCache = new WeakMap<CanvasRenderingContext2D, CanvasPattern | null>();
+function scanlines(ctx: CanvasRenderingContext2D) {
+  if (scanCache.has(ctx)) return scanCache.get(ctx) ?? null;
+  let pat: CanvasPattern | null = null;
+  if (typeof document !== "undefined") {
+    const cv = document.createElement("canvas");
+    cv.width = 1;
+    cv.height = 3;
+    const c = cv.getContext("2d");
+    if (c) {
+      c.fillStyle = "rgba(0,0,0,0.55)";
+      c.fillRect(0, 2, 1, 1);
+      pat = ctx.createPattern(cv, "repeat");
+    }
+  }
+  scanCache.set(ctx, pat);
+  return pat;
+}
+
+/* shrink a line until it fits, rather than letting the canvas run it off
+   the edge of its panel */
+function fitFont(ctx: CanvasRenderingContext2D, text: string, size: number, face: string, maxW: number) {
+  let px = size;
+  ctx.font = `${px}px ${face}`;
+  while (px > size * 0.5 && ctx.measureText(text).width > maxW) {
+    px -= 1;
+    ctx.font = `${px}px ${face}`;
+  }
+  return px;
+}
+
+/* the studio mark: a diamond with a cross through it */
+function diamondMark(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, colour: string) {
+  ctx.save();
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = Math.max(1, r * 0.2);
+  ctx.lineJoin = "miter";
+  ctx.beginPath();
+  ctx.moveTo(x, y - r);
+  ctx.lineTo(x + r, y);
+  ctx.lineTo(x, y + r);
+  ctx.lineTo(x - r, y);
+  ctx.closePath();
+  ctx.moveTo(x, y - r);
+  ctx.lineTo(x, y + r);
+  ctx.moveTo(x - r, y);
+  ctx.lineTo(x + r, y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function cricketBall(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+  g.addColorStop(0, "#ff6b6b");
+  g.addColorStop(1, "#b3121f");
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,240,230,0.85)";
+  ctx.lineWidth = Math.max(0.8, r * 0.12);
+  ctx.beginPath();
+  ctx.arc(x - r * 1.35, y, r * 1.1, -0.62, 0.62);
+  ctx.stroke();
+}
+
+/* ============ perimeter boards ============
+
+   LED boards around the boundary, drawn every frame because they move: the
+   content runs slowly along the ring the way real perimeter LED does. Four
+   designed panels in a fixed rotation, on a dark physical frame whose
+   seams stay put while the picture slides past them - the seams are what
+   make it read as hardware showing an image, rather than an image.
+
+   They used to be four flat colour blocks, red, yellow, navy and teal, with
+   the names in whatever font the context happened to have.
+*/
+type Slide = {
+  bg: [string, string];
+  draw: (ctx: CanvasRenderingContext2D, x: number, y: number, sw: number, sh: number, face: string) => void;
+};
+
+const SLIDES: Slide[] = [
+  {
+    bg: ["#4c1d95", "#7c3aed"],
+    draw(ctx, x, y, sw, sh, face) {
+      const size = fitFont(ctx, "AAYUSH VISUALS", sh * 0.5, face, sw * 0.66);
+      const tw = ctx.measureText("AAYUSH VISUALS").width;
+      const mark = sh * 0.24;
+      const total = mark * 2 + sh * 0.3 + tw;
+      const left = x + (sw - total) / 2;
+      diamondMark(ctx, left + mark, y + sh / 2, mark, "#ffffff");
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "left";
+      ctx.fillText("AAYUSH VISUALS", left + mark * 2 + sh * 0.3, y + sh / 2 + size * 0.04);
+    },
+  },
+  {
+    bg: ["#0a1430", "#13235a"],
+    draw(ctx, x, y, sw, sh, face) {
+      const size = fitFont(ctx, "SIX BALLS", sh * 0.5, face, sw * 0.4);
+      const a = ctx.measureText("SIX BALLS").width;
+      ctx.font = `${Math.round(size * 0.62)}px ${face}`;
+      const b = ctx.measureText("ONE INNINGS").width;
+      const ball = sh * 0.22;
+      const total = ball * 2 + sh * 0.28 + a + sh * 0.3 + b;
+      let cx = x + (sw - total) / 2;
+      cricketBall(ctx, cx + ball, y + sh / 2, ball);
+      cx += ball * 2 + sh * 0.28;
+      ctx.textAlign = "left";
+      ctx.font = `${size}px ${face}`;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText("SIX BALLS", cx, y + sh / 2 + size * 0.04);
+      cx += a + sh * 0.3;
+      ctx.font = `${Math.round(size * 0.62)}px ${face}`;
+      ctx.fillStyle = "#7fa6ff";
+      ctx.fillText("ONE INNINGS", cx, y + sh / 2 + size * 0.03);
+    },
+  },
+  {
+    bg: ["#f4f2fb", "#ffffff"],
+    draw(ctx, x, y, sw, sh, face) {
+      const text = "DESIGN PREMIER LEAGUE";
+      const size = fitFont(ctx, text, sh * 0.44, face, sw * 0.8);
+      const tw = ctx.measureText(text).width;
+      const dot = sh * 0.09;
+      const left = x + (sw - tw - dot * 4) / 2;
+      ctx.fillStyle = "#7c3aed";
+      ctx.beginPath();
+      ctx.arc(left + dot, y + sh / 2, dot, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#1a1238";
+      ctx.textAlign = "left";
+      ctx.fillText(text, left + dot * 4, y + sh / 2 + size * 0.04);
+    },
+  },
+  {
+    bg: ["#f2a60f", "#ffc53a"],
+    draw(ctx, x, y, sw, sh, face) {
+      const text = "AAYUSHVISUALS.COM";
+      const size = fitFont(ctx, text, sh * 0.46, face, sw * 0.76);
+      ctx.fillStyle = "#1a1238";
+      ctx.textAlign = "center";
+      ctx.fillText(text, x + sw / 2, y + sh / 2 + size * 0.04);
+    },
+  },
+];
+
+export function paintHoardings(ctx: CanvasRenderingContext2D, s: Scene, now: number, still = false) {
+  const { w, boardY, boardH } = s;
+  const face = faces(ctx).display;
+
+  /* the frame, and the kick plate along the bottom */
+  ctx.fillStyle = "#06080e";
+  ctx.fillRect(0, boardY - 1, w, boardH + 1);
+
+  const ledY = boardY + Math.max(1.5, boardH * 0.06);
+  const ledH = boardH * 0.8;
+  const sw = Math.max(170, Math.min(340, boardH * 7.4));
+  const cycle = sw * SLIDES.length;
+  const offset = still ? 0 : ((now * 0.028) % cycle);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, ledY, w, ledH);
+  ctx.clip();
+  ctx.textBaseline = "middle";
+
+  let i = 0;
+  for (let x = -offset; x < w; x += sw, i++) {
+    const slide = SLIDES[i % SLIDES.length];
+    const g = ctx.createLinearGradient(0, ledY, 0, ledY + ledH);
+    g.addColorStop(0, slide.bg[1]);
+    g.addColorStop(1, slide.bg[0]);
+    ctx.fillStyle = g;
+    ctx.fillRect(x, ledY, sw + 1, ledH);
+    slide.draw(ctx, x, ledY, sw, ledH, face);
+  }
+
+  /* the LED itself: scanlines, and a sheen along the top of the panels */
+  const scan = scanlines(ctx);
+  if (scan) {
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = scan;
+    ctx.fillRect(0, ledY, w, ledH);
+    ctx.globalAlpha = 1;
+  }
+  const sheen = ctx.createLinearGradient(0, ledY, 0, ledY + ledH);
+  sheen.addColorStop(0, "rgba(255,255,255,0.18)");
+  sheen.addColorStop(0.45, "rgba(255,255,255,0.03)");
+  sheen.addColorStop(1, "rgba(0,0,0,0.12)");
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, ledY, w, ledH);
+  ctx.restore();
+
+  /* the joins between cabinets: fixed, while the picture slides past */
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  const seam = boardH * 4.2;
+  for (let x = seam; x < w; x += seam) ctx.fillRect(Math.round(x), ledY, 1, ledH);
+
+  /* the lit top edge of the frame */
+  ctx.fillStyle = "rgba(255,255,255,0.28)";
+  ctx.fillRect(0, boardY - 1, w, 1);
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
 }
@@ -404,12 +870,29 @@ export function paintField(ctx: CanvasRenderingContext2D, s: Scene) {
   }
   ctx.restore();
 
-  /* boundary rope */
-  ctx.beginPath();
-  ctx.moveTo(-20, horizon + h * 0.035);
-  ctx.quadraticCurveTo(cx, horizon - h * 0.01, w + 20, horizon + h * 0.035);
-  ctx.strokeStyle = "rgba(255,255,255,0.85)";
-  ctx.lineWidth = 2.5;
+  /* the boards' shadow on the grass behind the rope */
+  const board = ctx.createLinearGradient(0, horizon, 0, horizon + h * 0.03);
+  board.addColorStop(0, "rgba(8,30,14,0.45)");
+  board.addColorStop(1, "rgba(8,30,14,0)");
+  ctx.fillStyle = board;
+  ctx.fillRect(0, horizon, w, h * 0.03);
+
+  /* boundary rope: a padded cushion, so it has a shadow and a lit top */
+  const rope = () => {
+    ctx.beginPath();
+    ctx.moveTo(-20, horizon + h * 0.035);
+    ctx.quadraticCurveTo(cx, horizon - h * 0.01, w + 20, horizon + h * 0.035);
+  };
+  ctx.save();
+  ctx.translate(0, Math.max(1.5, h * 0.003));
+  rope();
+  ctx.strokeStyle = "rgba(6,40,16,0.4)";
+  ctx.lineWidth = Math.max(3, h * 0.006);
+  ctx.stroke();
+  ctx.restore();
+  rope();
+  ctx.strokeStyle = "#f1f3f6";
+  ctx.lineWidth = Math.max(2.5, h * 0.0048);
   ctx.stroke();
 
   /* the square, a paler patch the strip sits on */
@@ -1404,15 +1887,6 @@ export function paintForegroundGrass(ctx: CanvasRenderingContext2D, s: Scene) {
    narrower board in the same spot rather than a desktop board cropped.
 */
 
-/* the canvas cannot read `var(--ckt-display)`, so the display face is
-   named directly here. Anton is loaded by the route's layout; the fallbacks
-   matter because a canvas silently draws in the default serif if the family
-   is missing, which on a scoreboard is very obvious. */
-const DISPLAY_STACK = 'Anton, Impact, "Arial Narrow", sans-serif';
-/* the shout face — loud for one second, and reserved for exactly that.
-   Bungee is loaded by the route's layout alongside Anton. */
-const SHOUT_STACK = 'Bungee, Anton, Impact, sans-serif';
-
 /* the status bar's own height plus its inset, in CSS pixels. The board is
    pushed clear of this rather than of a fraction of canvas height, because
    the bar is a fixed-size object and a percentage only clears it at the
@@ -1424,261 +1898,310 @@ export type Board = {
   shout: string | null;
   /** the design-studio line under it, or the idle prompt */
   quote: string;
+  /** the live score for the header row; null while the screen is dark */
+  score?: { runs: number; wickets: number; balls: number; of: number } | null;
 };
 
 export function paintBigScreen(
   ctx: CanvasRenderingContext2D,
   s: Scene,
   b: Board,
-  now: number
+  now: number,
+  still = false
 ) {
   const { w, h, cx, standTop } = s;
+  const { display, shout: shoutFace } = faces(ctx);
 
   /*
     Sized off the stand band, not the canvas. The board reads as an object
     in the stadium only while its proportions hold against the thing it is
     mounted on — tie it to canvas width and it becomes a billboard on a
     phone and a postage stamp on a monitor.
-  */
-  /*
-    Portrait gets a much bigger board, and sits it lower.
 
-    `min(w * 0.34, h * 0.42)` is a landscape rule: on a narrow tall frame the
-    width term wins by a mile and the board comes out about 127px on a
-    375px screen — a postage stamp carrying a punchline nobody can read. In
-    portrait the board is the only thing on that band of screen, so it can
-    have most of the width.
-  */
-  /*
-    Portrait numbers are measured off the reference, not guessed.
-
-    On an 862x1856 frame the board runs x 128->720 and y 337->682: 69% of
-    the width, an aspect of 0.58, and a top edge at 18.2% of the height.
-    Three passes of nudging a width fraction never converged because two of
-    the three were wrong at once — it was too wide AND too squat AND too
-    high, and moving one at a time just traded faults.
+    Portrait gets a much bigger board, and sits it lower: `min(w * 0.34,
+    h * 0.42)` is a landscape rule, and on a narrow tall frame it comes out
+    about 127px on a 375px screen. The portrait numbers were measured off
+    the reference: 69% of the width at an aspect of 0.58.
   */
   const portrait = w / h < 0.72;
   const bw = portrait ? w * 0.69 : Math.min(w * 0.34, h * 0.42);
   const bh = bw * (portrait ? 0.58 : 0.42);
   const bx = cx - bw / 2;
   /*
-    Below the HUD, always.
-
-    It used to hang at `standTop - bh * 0.52`, which put its top edge under
-    the status bar — the bar is drawn in the DOM above this canvas, so the
-    board lost its own headline. The position is now whichever is lower:
-    where the stand wants it, or clear of the bar.
-  */
-  /* portrait pins the top edge to the measured fraction; landscape keeps
-     the stand-relative rule, clamped clear of the HUD bar */
-  /*
-    Anchored by its BOTTOM edge in portrait, not its top.
-
-    The complaint every time was that the board sat on the field covers —
-    which is a statement about where its lower edge lands, and the board is
-    not just the panel: the coloured hoarding strip hangs under it to
-    bh * 1.23. Pinning the top meant that total height pushed the bottom
-    wherever it liked, so each lift moved the panel and left the strip
-    still on the grass.
-
-    Now the assembly's bottom is placed at 0.375h — comfortably above the
-    ground-level sponsor boards, which sit just under the horizon at 0.44h —
-    and the top follows from however tall the board happens to be. Clamped
-    so it can never ride up under the status bar.
+    Anchored by the bottom of the whole assembly in portrait (screen,
+    housing and the ribbon under it, bh * 1.23) so it always clears the
+    ground-level boards; in landscape by the stand. Both clamped clear of
+    the HUD bar, which is drawn in the DOM above this canvas.
   */
   const assemblyH = bh * 1.23;
   const by = portrait
     ? Math.max(HUD_BAR_CLEARANCE, h * 0.375 - assemblyH)
     : Math.max(standTop - bh * 0.52, HUD_BAR_CLEARANCE);
 
-  /* --- the gantry it stands on --- */
-  ctx.fillStyle = "#1a1a1a";
-  ctx.fillRect(cx - bw * 0.06, by + bh, bw * 0.12, Math.max(0, standTop + h * 0.09 - (by + bh)));
+  const bez = Math.max(3, bw * 0.02);
+  const ribbonH = Math.max(6, bh * 0.085);
+  const houseX = bx - bez;
+  const houseY = by - bez;
+  const houseW = bw + bez * 2;
+  const houseH = bh + bez * 2.6 + ribbonH;
 
-  /*
-    --- the casing ---
+  /* --- the steel it stands on: two legs and a cross-brace --- */
+  const legTop = houseY + houseH - bez;
+  const legBot = Math.max(legTop, standTop + h * 0.09);
+  const legW = Math.max(3, bw * 0.028);
+  ctx.fillStyle = "#171b23";
+  for (const k of [0.24, 0.76]) {
+    ctx.fillRect(bx + bw * k - legW / 2, legTop, legW, legBot - legTop);
+  }
+  if (legBot - legTop > legW * 2) {
+    ctx.strokeStyle = "#171b23";
+    ctx.lineWidth = Math.max(1.5, legW * 0.35);
+    ctx.beginPath();
+    ctx.moveTo(bx + bw * 0.24, legTop + legW);
+    ctx.lineTo(bx + bw * 0.76, legBot);
+    ctx.moveTo(bx + bw * 0.76, legTop + legW);
+    ctx.lineTo(bx + bw * 0.24, legBot);
+    ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  for (const k of [0.24, 0.76]) {
+    ctx.fillRect(bx + bw * k - legW / 2, legTop, 1, legBot - legTop);
+  }
 
-    Black, like the panel it holds. This is the surround that shows as a
-    band above and below the screen, so a navy casing around a black screen
-    does not read as trim — it reads as the screen still being blue at the
-    edges. The gold uprights are the only colour the unit keeps, and they
-    are what stops the whole assembly disappearing into the stand behind it.
-  */
-  const r = bh * 0.09;
+  /* --- the housing: a graphite cabinet with a soft shadow behind it --- */
+  ctx.fillStyle = "rgba(4,8,18,0.35)";
   ctx.beginPath();
-  ctx.roundRect(bx - bw * 0.035, by - bh * 0.05, bw * 1.07, bh * 1.13, r);
-  ctx.fillStyle = "#20242c";
+  ctx.roundRect(houseX + bez * 0.8, houseY + bez * 1.4, houseW, houseH, bez * 1.2);
   ctx.fill();
-  ctx.lineWidth = Math.max(1.5, bw * 0.012);
-  ctx.strokeStyle = "#000000";
-  ctx.stroke();
 
-  ctx.fillStyle = "#f5b81f";
-  ctx.fillRect(bx - bw * 0.025, by, bw * 0.045, bh);
-  ctx.fillRect(bx + bw * 0.98, by, bw * 0.045, bh);
+  const house = ctx.createLinearGradient(0, houseY, 0, houseY + houseH);
+  house.addColorStop(0, "#3a404c");
+  house.addColorStop(0.08, "#232831");
+  house.addColorStop(1, "#15181e");
+  ctx.fillStyle = house;
+  ctx.beginPath();
+  ctx.roundRect(houseX, houseY, houseW, houseH, bez * 1.2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(0,0,0,0.7)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.22)";
+  ctx.fillRect(houseX + bez, houseY + 0.5, houseW - bez * 2, 1);
 
   /* --- the panel --- */
-  ctx.beginPath();
-  ctx.roundRect(bx, by, bw, bh, r * 0.7);
-  ctx.fillStyle = "#191d24";
-  ctx.fill();
-
+  const off = !b.shout && !b.quote;
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(bx, by, bw, bh, r * 0.7);
+  ctx.rect(bx, by, bw, bh);
   ctx.clip();
 
-  /*
-    --- the stage the words stand on ---
-
-    Flat and dark, deliberately.
-
-    This carried a radial wash and a slowly rotating fan of sixteen rays,
-    on the theory that the type should look lit from behind rather than
-    printed on a rectangle. On the board at its real size that reads as
-    pattern, not backlight: the rays are wide enough at the rim to cross
-    the text at an angle and the whole panel competes with the one thing it
-    exists to display, which is a line of commentary that changes every
-    ball.
-
-    A real stadium LED is black when it is not lit. The words are white
-    display type at 14% of the board height with relief under them — they
-    have all the separation they need from black, and none of the rays'
-    cost. The confetti below stays, because that fires for about a second
-    when something is worth celebrating and is the whole point when it does.
-
-    Left as a fill rather than deleted outright so the panel's own rounding
-    and clip still apply, and so this stays the single place the screen's
-    background is decided.
-  */
-  /*
-    Off-black, not black.
-
-    A true #000 panel reads as a hole cut in the canvas rather than as a
-    screen mounted in a stand — there is nothing darker on the field for it
-    to sit against, so it stops being an object. A slightly blue-lifted
-    charcoal keeps it clearly the darkest thing in the frame while still
-    catching the stadium's own colour temperature.
-  */
-  ctx.fillStyle = "#191d24";
+  const panel = ctx.createLinearGradient(0, by, 0, by + bh);
+  panel.addColorStop(0, off ? "#07090e" : "#0a1024");
+  panel.addColorStop(1, off ? "#05070b" : "#060914");
+  ctx.fillStyle = panel;
   ctx.fillRect(bx, by, bw, bh);
+
+  const headH = bh * 0.2;
+  if (!off) {
+    /* a low wash of brand colour from below, like a lit stage */
+    const wash = ctx.createRadialGradient(cx, by + bh * 1.1, 0, cx, by + bh * 1.1, bw * 0.6);
+    wash.addColorStop(0, "rgba(124,58,237,0.32)");
+    wash.addColorStop(1, "rgba(124,58,237,0)");
+    ctx.fillStyle = wash;
+    ctx.fillRect(bx, by, bw, bh);
+
+    /* --- the header row: league on the left, the score on the right --- */
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fillRect(bx, by, bw, headH);
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.fillRect(bx, by + headH, bw, 1);
+
+    const pad = bw * 0.035;
+    const midY = by + headH / 2;
+    ctx.textBaseline = "middle";
+
+    /* the DPL badge */
+    const badgeH = headH * 0.62;
+    const badgeW = badgeH * 1.9;
+    ctx.fillStyle = "#7c3aed";
+    ctx.beginPath();
+    ctx.roundRect(bx + pad, midY - badgeH / 2, badgeW, badgeH, badgeH * 0.2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.font = `${Math.round(badgeH * 0.68)}px ${display}`;
+    ctx.fillText("DPL", bx + pad + badgeW / 2, midY + badgeH * 0.03);
+
+    /* the score, right-aligned */
+    let scoreLeft = bx + bw - pad;
+    if (b.score) {
+      const sc = b.score;
+      const big = `${sc.runs}/${sc.wickets}`;
+      const small = `${sc.balls}/${sc.of} BALLS`;
+      ctx.textAlign = "right";
+      ctx.font = `${Math.round(headH * 0.36)}px ${display}`;
+      ctx.fillStyle = "rgba(200,210,235,0.75)";
+      ctx.fillText(small, scoreLeft, midY + headH * 0.02);
+      scoreLeft -= ctx.measureText(small).width + headH * 0.35;
+      ctx.font = `${Math.round(headH * 0.62)}px ${display}`;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(big, scoreLeft, midY + headH * 0.03);
+      scoreLeft -= ctx.measureText(big).width + headH * 0.3;
+      ctx.font = `${Math.round(headH * 0.36)}px ${display}`;
+      ctx.fillStyle = "#c4b5fd";
+      const who = "AAYUSH VZ";
+      const whoW = ctx.measureText(who).width;
+      if (scoreLeft - whoW > bx + pad + badgeW + headH * 0.4) {
+        ctx.fillText(who, scoreLeft, midY + headH * 0.02);
+        scoreLeft -= whoW;
+      }
+    }
+
+    /* the league name, only where it fits between badge and score */
+    const league = "DESIGN PREMIER LEAGUE";
+    ctx.textAlign = "left";
+    ctx.font = `${Math.round(headH * 0.34)}px ${display}`;
+    const leagueX = bx + pad + badgeW + headH * 0.3;
+    if (leagueX + ctx.measureText(league).width < scoreLeft - headH * 0.5) {
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.fillText(league, leagueX, midY + headH * 0.02);
+    }
+
+    /* a live dot that breathes */
+    const pulse = still ? 1 : 0.55 + 0.45 * Math.sin(now / 420);
+    ctx.fillStyle = `rgba(255,70,85,${pulse.toFixed(3)})`;
+    ctx.beginPath();
+    ctx.arc(bx + pad + badgeW + headH * 0.12, midY - badgeH * 0.36, Math.max(1.5, headH * 0.07), 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   /* confetti — only while something is being celebrated */
   if (b.shout) {
     const bits = ["#ff4d5e", "#ffc32e", "#4ade80", "#5aa2ff", "#ffffff"];
     for (let i = 0; i < 22; i++) {
-      /* deterministic scatter: a hash of the index, so the pieces sit in
-         the same places every shout instead of flickering frame to frame */
+      /* a hash of the index, so the pieces sit in the same places every
+         shout instead of flickering frame to frame */
       const n = Math.sin(i * 127.1) * 43758.5453;
       const fx = bx + (n - Math.floor(n)) * bw;
       const m = Math.sin(i * 311.7) * 24634.6345;
-      const fy = by + (m - Math.floor(m)) * bh;
+      const fy = by + headH + (m - Math.floor(m)) * (bh - headH);
       ctx.save();
       ctx.translate(fx, fy);
       ctx.rotate(i * 1.7 + now / 900);
-      ctx.globalAlpha = 0.85;
+      ctx.globalAlpha = 0.8;
       ctx.fillStyle = bits[i % bits.length];
-      ctx.fillRect(-bh * 0.018, -bh * 0.03, bh * 0.036, bh * 0.06);
+      ctx.fillRect(-bh * 0.016, -bh * 0.026, bh * 0.032, bh * 0.052);
       ctx.restore();
     }
     ctx.globalAlpha = 1;
   }
 
-  /* --- the words --- */
+  /* --- the words, lit like LED rather than printed like a sticker --- */
+  const bodyY = by + headH;
+  const bodyH = bh - headH;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-
   if (b.shout) {
-    ctx.font = `${Math.round(bh * 0.25)}px ${SHOUT_STACK}`;
-    reliefText(ctx, b.shout, cx, by + bh * 0.4, bw * 0.9, {
-      top: "#fff3c4",
-      mid: "#ffc32e",
-      low: "#e08a12",
+    ledText(ctx, b.shout, cx, bodyY + bodyH * 0.38, bw * 0.88, Math.round(bh * 0.24), shoutFace, {
+      fill: ["#fff4c9", "#ffc32e", "#f08c12"],
+      glow: "rgba(255,190,60,0.45)",
     });
-
-    ctx.font = `${Math.round(bh * 0.12)}px ${DISPLAY_STACK}`;
-    reliefText(ctx, b.quote, cx, by + bh * 0.74, bw * 0.88, {
-      top: "#ffffff",
-      mid: "#ffffff",
-      low: "#d4d4d4",
+    ledText(ctx, b.quote, cx, bodyY + bodyH * 0.76, bw * 0.86, Math.round(bh * 0.1), display, {
+      fill: ["#ffffff", "#ffffff", "#dfe4f2"],
+      glow: "rgba(170,150,255,0.35)",
     });
-  } else {
-    ctx.font = `${Math.round(bh * 0.14)}px ${DISPLAY_STACK}`;
-    reliefText(ctx, b.quote, cx, by + bh * 0.5, bw * 0.88, {
-      top: "#ffffff",
-      mid: "#ffffff",
-      low: "#d4d4d4",
+  } else if (b.quote) {
+    ledText(ctx, b.quote, cx, bodyY + bodyH * 0.5, bw * 0.86, Math.round(bh * 0.13), display, {
+      fill: ["#ffffff", "#ffffff", "#dfe4f2"],
+      glow: "rgba(170,150,255,0.35)",
     });
   }
+
+  /* the LED grain, and the glass in front of it catching the sky */
+  const scan = scanlines(ctx);
+  if (scan) {
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = scan;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.globalAlpha = 1;
+  }
+  const glare = ctx.createLinearGradient(bx, by, bx + bw * 0.6, by + bh);
+  glare.addColorStop(0, "rgba(255,255,255,0.09)");
+  glare.addColorStop(0.35, "rgba(255,255,255,0.02)");
+  glare.addColorStop(0.36, "rgba(255,255,255,0)");
+  ctx.fillStyle = glare;
+  ctx.fillRect(bx, by, bw, bh);
   ctx.restore();
 
-  /* --- the hoarding strip under the board --- */
-  const sy = by + bh * 1.1;
-  const sh = bh * 0.13;
-  const cols = ["#c9202e", "#f5b81f", "#1b7a4a", "#1b3f7a"];
-  const cw = (bw * 1.07) / 8;
-  for (let i = 0; i < 8; i++) {
-    ctx.fillStyle = cols[i % cols.length];
-    ctx.fillRect(bx - bw * 0.035 + i * cw, sy, cw, sh);
+  /* --- the ribbon under the screen, running the other way to the boards --- */
+  const ry = by + bh + bez * 0.8;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(bx, ry, bw, ribbonH);
+  ctx.clip();
+  ctx.fillStyle = "#07090f";
+  ctx.fillRect(bx, ry, bw, ribbonH);
+  const unit = "AAYUSH VISUALS";
+  ctx.font = `${Math.round(ribbonH * 0.62)}px ${display}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  const uw = ctx.measureText(unit).width + ribbonH * 2.2;
+  const shift = still ? 0 : (now * 0.02) % uw;
+  for (let x = bx - uw + shift; x < bx + bw; x += uw) {
+    diamondMark(ctx, x + ribbonH * 0.6, ry + ribbonH / 2, ribbonH * 0.26, "#a78bfa");
+    ctx.fillStyle = "#c4b5fd";
+    ctx.fillText(unit, x + ribbonH * 1.2, ry + ribbonH / 2 + ribbonH * 0.03);
   }
+  if (scan) {
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = scan;
+    ctx.fillRect(bx, ry, bw, ribbonH);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
 }
 
 /*
-  Draw a word the way the reference does: a hard dark outline, a vertical
-  gradient fill, and a drop beneath it so the letters stand off the panel.
+  A line of type as an LED screen shows it: a soft halo of light around the
+  letters, then the letters themselves, top-lit. No black outline - that is
+  how a sticker is lettered, and it was most of why the board read as a toy.
 
-  The outline is what makes it survive the busy background — gold type
-  straight onto a lit blue burst has nothing separating it from the rays,
-  and the whole point of the burst is that it is bright. Stroke first, fill
-  second: stroking over the fill eats half the letterform's weight.
+  The halo is a wide, faint stroke rather than shadowBlur: shadowBlur on
+  text is expensive to run every frame and this runs every frame.
 
-  It also guarantees the line fits the board.
-
-  Canvas will happily run a string straight off the edge of its panel, and
-  these lines are authored copy of varying length — "No notes. None." beside
-  "Client's nephew redesigned it." The font shrinks until it fits rather
-  than the string being clipped, because a punchline with its last two words
-  cut off is worse than a slightly smaller punchline.
+  It also guarantees the line fits: the font shrinks rather than the string
+  running off the panel, because a punchline with its last two words cut
+  off is worse than a slightly smaller one.
 */
-function reliefText(
+function ledText(
   ctx: CanvasRenderingContext2D,
   text: string,
   x: number,
   y: number,
   maxW: number,
-  ramp: { top: string; mid: string; low: string }
+  size: number,
+  face: string,
+  look: { fill: [string, string, string]; glow: string }
 ) {
-  const base = parseFloat(ctx.font);
-  let size = base;
-  while (size > base * 0.55 && ctx.measureText(text).width > maxW) {
-    size -= 1;
-    ctx.font = ctx.font.replace(/^[\d.]+px/, `${size}px`);
-  }
-
-  const drop = Math.max(2, size * 0.07);
-
-  /* the shadow the letters cast onto the panel. Neutral, like the panel:
-     the navy this used to be was invisible against a blue board and became
-     a blue halo the moment the board went black. */
-  ctx.fillStyle = "rgba(0,0,0,0.55)";
-  ctx.fillText(text, x, y + drop * 1.6, maxW);
-
-  /* the outline */
+  const px = fitFont(ctx, text, size, face, maxW);
   ctx.lineJoin = "round";
-  ctx.lineWidth = Math.max(3, size * 0.17);
-  ctx.strokeStyle = "#000000";
-  ctx.strokeText(text, x, y, maxW);
+  ctx.strokeStyle = look.glow;
+  ctx.globalAlpha = 0.5;
+  ctx.lineWidth = px * 0.34;
+  ctx.strokeText(text, x, y);
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = px * 0.14;
+  ctx.strokeText(text, x, y);
 
-  /* and the fill, top-lit like every other surface in the kit */
-  const g = ctx.createLinearGradient(0, y - size * 0.55, 0, y + size * 0.55);
-  g.addColorStop(0, ramp.top);
-  g.addColorStop(0.55, ramp.mid);
-  g.addColorStop(1, ramp.low);
+  const g = ctx.createLinearGradient(0, y - px * 0.55, 0, y + px * 0.55);
+  g.addColorStop(0, look.fill[0]);
+  g.addColorStop(0.55, look.fill[1]);
+  g.addColorStop(1, look.fill[2]);
   ctx.fillStyle = g;
-  ctx.fillText(text, x, y, maxW);
+  ctx.fillText(text, x, y);
 }
-
 
 /* ============ floodlights ============
 
@@ -1699,62 +2222,89 @@ export function paintFloodlights(ctx: CanvasRenderingContext2D, s: Scene) {
   for (const side of [-1, 1] as const) {
     const x = w / 2 + side * w * 0.36;
     const headW = Math.min(w * 0.1, h * 0.13);
-    const headH = headW * 0.6;
+    const headH = headW * 0.62;
     /* the head sits well above the roofline and the mast runs all the way
-       down into the stand — it was starting at standTop - 14% and ending at
-       standTop + 5%, which is a stub, so the lamp read as floating */
+       down behind the stand, so the lamp never reads as floating */
     const headY = standTop - h * 0.2;
+    const base = standTop + h * 0.05;
+    const topY = headY + headH;
 
-    /* the mast, tapering into the stand */
+    /* --- the mast: a lattice, two rails and a zigzag of bracing --- */
+    const t0 = headW * 0.06;
+    const t1 = headW * 0.15;
+    ctx.strokeStyle = "#3d4a60";
+    ctx.lineWidth = Math.max(1.5, headW * 0.035);
     ctx.beginPath();
-    ctx.moveTo(x - headW * 0.07, headY + headH);
-    ctx.lineTo(x + headW * 0.07, headY + headH);
-    ctx.lineTo(x + headW * 0.12, standTop + h * 0.05);
-    ctx.lineTo(x - headW * 0.12, standTop + h * 0.05);
+    ctx.moveTo(x - t0, topY);
+    ctx.lineTo(x - t1, base);
+    ctx.moveTo(x + t0, topY);
+    ctx.lineTo(x + t1, base);
+    ctx.stroke();
+    ctx.lineWidth = Math.max(0.8, headW * 0.014);
+    ctx.beginPath();
+    const n = 10;
+    for (let i = 0; i < n; i++) {
+      const ya = topY + ((base - topY) * i) / n;
+      const yb = topY + ((base - topY) * (i + 1)) / n;
+      const wa = t0 + ((t1 - t0) * i) / n;
+      const wb = t0 + ((t1 - t0) * (i + 1)) / n;
+      const flip = i % 2 ? 1 : -1;
+      ctx.moveTo(x - wa * flip, ya);
+      ctx.lineTo(x + wb * flip, yb);
+    }
+    ctx.stroke();
+
+    /* --- the headframe, tipped toward the pitch --- */
+    const tilt = headW * 0.08;
+    ctx.beginPath();
+    ctx.moveTo(x - headW / 2 - tilt * 0.4, headY);
+    ctx.lineTo(x + headW / 2 + tilt * 0.4, headY);
+    ctx.lineTo(x + headW / 2, headY + headH);
+    ctx.lineTo(x - headW / 2, headY + headH);
     ctx.closePath();
-    ctx.fillStyle = "#4a5d7e";
+    ctx.fillStyle = "#2a3446";
     ctx.fill();
+    ctx.strokeStyle = "#141a26";
+    ctx.lineWidth = Math.max(1, headW * 0.02);
+    ctx.stroke();
+    /* the service walkway under the lamps */
+    ctx.fillStyle = "#3d4a60";
+    ctx.fillRect(x - headW * 0.46, headY + headH, headW * 0.92, Math.max(1.5, headW * 0.04));
 
-    /* the head, then the bloom OVER it — behind the head it was being
-       covered by the very thing it is supposed to be glowing from, which is
-       why the lamps read as flat grey grids */
-
-    /* the head, and its grid of lamps */
-    ctx.beginPath();
-    ctx.roundRect(x - headW / 2, headY, headW, headH, headW * 0.06);
-    ctx.fillStyle = "#5b6f92";
-    ctx.fill();
-
-    /* the glow, additive, on top of the lit head */
-    const g = ctx.createRadialGradient(x, headY + headH / 2, headW * 0.1, x, headY + headH / 2, headW * 1.6);
-    g.addColorStop(0, "rgba(228,244,255,0.55)");
-    g.addColorStop(0.4, "rgba(190,225,255,0.2)");
-    g.addColorStop(1, "rgba(190,225,255,0)");
-
-    const cols = 4;
+    /* --- the lamps: warm-white discs in a grid --- */
+    const cols = 5;
     const rows = 3;
     const pad = headW * 0.07;
     const cw = (headW - pad * 2) / cols;
     const ch = (headH - pad * 2) / rows;
-    ctx.fillStyle = "#f2f9ff";
+    const lr = Math.min(cw, ch) * 0.36;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
+        const lx = x - headW / 2 + pad + cw * (c + 0.5);
+        const ly = headY + pad + ch * (r + 0.5);
+        ctx.fillStyle = "#11161f";
         ctx.beginPath();
-        ctx.roundRect(
-          x - headW / 2 + pad + c * cw + cw * 0.12,
-          headY + pad + r * ch + ch * 0.12,
-          cw * 0.76,
-          ch * 0.76,
-          cw * 0.12
-        );
+        ctx.arc(lx, ly, lr * 1.18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fffbea";
+        ctx.beginPath();
+        ctx.arc(lx, ly, lr, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
+    /* --- the bloom, additive, over the lit head: a gradient rather than
+       shadowBlur, which on a lamp this size is one of the most expensive
+       things a 2D context can be asked for, every frame --- */
+    const cyH = headY + headH / 2;
+    const g = ctx.createRadialGradient(x, cyH, headW * 0.1, x, cyH, headW * 1.5);
+    g.addColorStop(0, "rgba(255,250,228,0.5)");
+    g.addColorStop(0.35, "rgba(220,235,255,0.16)");
+    g.addColorStop(1, "rgba(220,235,255,0)");
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = g;
-    ctx.fillRect(x - headW * 1.6, headY + headH / 2 - headW * 1.6, headW * 3.2, headW * 3.2);
+    ctx.fillRect(x - headW * 1.5, cyH - headW * 1.5, headW * 3, headW * 3);
     ctx.restore();
   }
 }
