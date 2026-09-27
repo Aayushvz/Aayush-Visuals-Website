@@ -778,7 +778,7 @@
   }
 }
 
-/* ---- the small label beside a title: "Must try", "New" ---- */
+/* ---- the small label beside a title: "Must try", "New" (quiet on purpose) ---- */
 .pgBadge {
   display: inline-flex;
   align-items: center;
