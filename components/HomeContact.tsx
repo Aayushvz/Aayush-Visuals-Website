@@ -38,11 +38,11 @@ export default function HomeContact() {
       <div className="hcs__inner">
         <div className="hcs__left">
           <h2 className="hcs__heading" id="contact-heading">
-            Got something in mind?
+            Open to product design roles.
           </h2>
           <p className="hcs__tagline">
-            A job, a project, a wild idea. Whatever it is, drop me a message and
-            let&rsquo;s see what we can make out of it.
+            I&rsquo;m looking for full-time Product Design and UI/UX roles. If your
+            team is hiring, drop me a message and let&rsquo;s talk.
           </p>
 
           <button type="button" className="hcs__copy" onClick={copyEmail}>

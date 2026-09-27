@@ -8,7 +8,10 @@ import useSurfaceTone from "./useSurfaceTone";
 import LogoMark from "./LogoMark";
 
 /*
-  Four destinations, and the panel shows the ones you are not already on.
+  Four destinations plus the Contact button, all of them always shown; the
+  page you are on is marked (purple, with a dot) rather than removed, so the
+  sheet reads the same everywhere. The notes below describe the earlier rule
+  that dropped the current route.
 
   The current route is dropped and "home" takes the freed slot, so the sheet
   spends it on somewhere you can actually go rather than on a link back to the
@@ -51,7 +54,8 @@ export default function MobileNav({
   const barRef = useRef<HTMLElement>(null);
   const pathname = usePathname() ?? "/";
   const reduced = useReducedMotion();
-  const links = ALL_LINKS.filter((l) => !isCurrent(l.href, pathname));
+  /* every destination shows, the page you are on marked rather than hidden */
+  const links = ALL_LINKS;
   /* the foot button goes to /contact, so on /contact it is a link to self */
   const onContact = isCurrent("/contact", pathname);
   /* the collapsed pill takes the tone of whatever it is over, exactly as the
@@ -161,6 +165,7 @@ export default function MobileNav({
                   <PageLink
                     href={l.href}
                     className="mobileNavCard__link"
+                    aria-current={isCurrent(l.href, pathname) ? "page" : undefined}
                     onClick={() => setOpen(false)}
                   >
                     <span className="mobileNavCard__linkText">{l.label}</span>
@@ -176,7 +181,7 @@ export default function MobileNav({
                 "Contact me", not "Start a project": it is the only thing this
                 button has ever done, and while a "contact" row sat directly
                 above it the two labels made one destination look like two. */}
-            {onContact ? null : (
+            {(
             <motion.div
               className="mobileNavCard__foot"
               initial={reduced ? false : { opacity: 0, y: position === "top" ? -8 : 8 }}
@@ -190,6 +195,7 @@ export default function MobileNav({
               <PageLink
                 href="/contact"
                 className="mobileNavCard__cta"
+                aria-current={onContact ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
                 Contact me

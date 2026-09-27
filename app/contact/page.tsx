@@ -3,7 +3,7 @@ import ContactPageClient from "@/components/contact/ContactPageClient";
 import { OG_IMAGE } from "@/lib/site";
 
 const description =
-  "Get in touch with Aayush Raj (Aayush Visuals) for product design, brand identity, UI/UX and creative collaborations.";
+  "Get in touch with Aayush Raj (Aayush Visuals), a product designer open to full-time Product Design and UI/UX roles.";
 
 export const metadata: Metadata = {
   title: "Contact",

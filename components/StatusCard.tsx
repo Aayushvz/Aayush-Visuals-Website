@@ -76,7 +76,7 @@ export default function StatusCard({ onHire }: { onHire: () => void }) {
             <p className="statusCard__name">Aayush Raj</p>
             <p className="statusCard__avail">
               <span className="statusCard__availDot" aria-hidden />
-              Available for work
+              Open to roles
             </p>
           </div>
         </div>

@@ -235,8 +235,8 @@ export default function ContactPageClient() {
               <span className="contactPage__titleDot">.</span>
             </h1>
             <p className="contactPage__subtitle">
-              Have a project in mind, want to collaborate, or just want to say hello?
-              Drop me a message and I will get back to you soon.
+              I&rsquo;m open to Product Design and UI/UX roles. If your team is hiring,
+              tell me about the role and I will get back to you soon.
             </p>
           </div>
           <StatusCard onHire={startHire} />
@@ -288,7 +288,7 @@ export default function ContactPageClient() {
                   id="c-subject"
                   className="contactPage__input"
                   type="text"
-                  placeholder="Project collaboration, freelance, just saying hi..."
+                  placeholder="Product designer role, UI/UX opening, just saying hi..."
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                 />
@@ -302,7 +302,7 @@ export default function ContactPageClient() {
                   className="contactPage__textarea"
                   required
                   rows={5}
-                  placeholder="Tell me about your project, timeline, budget..."
+                  placeholder="Tell me about the role, the team and what you are building..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
@@ -366,7 +366,7 @@ export default function ContactPageClient() {
 
             <div className="contactPage__infoBlock contactPage__infoBlock--availability">
               <span className="contactPage__availDot" aria-hidden />
-              <span>Available for freelance</span>
+              <span>Open to product design &amp; UI/UX roles</span>
             </div>
           </aside>
         </div>

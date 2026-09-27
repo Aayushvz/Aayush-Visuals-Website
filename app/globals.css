@@ -13549,3 +13549,20 @@ html.dpl-page .preloader {
     animation: none;
   }
 }
+
+/* the mobile sheet marks the page you are on instead of hiding it */
+.mobileNavCard__link[aria-current="page"] .mobileNavCard__linkText {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #a78bfa;
+}
+
+.mobileNavCard__link[aria-current="page"] .mobileNavCard__linkText::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+}
