@@ -38,15 +38,19 @@
     land somewhere deliberate instead of on Arial.
   */
   /* ---- ink ---- */
-  /* the site's own paper, not white. --cream is defined once in globals.css
-     and is what every light surface on the homepage is painted in, so taking
-     the token rather than copying #f2ede6 means the two cannot drift.
+  /* white paper. The case studies step off the homepage's cream onto a
+     clean sheet, so the work - mostly screenshots on neutral grounds - is
+     not seen through a warm tint.
 
      This is the page's paper in every sense: the five places that read
      --cs-bg all want "whatever this page is painted on", including the two
-     that use it as INK on a dark hover state, where cream on near-black is
-     the same pairing the rest of the site uses. */
-  --cs-bg: var(--cream);
+     that use it as INK on a dark hover state. */
+  --cs-bg: #fff;
+  /* the panels (project facts, results, research figures, the next-project
+     card, before/after lanes, type tiles): a neutral step below the white,
+     so they stay tiles set into the page without turning beige on it */
+  --cs-panel: #f5f5f5;
+  --cs-panel-hover: #f0f0f0;
   --cs-ink: #101010;
   /* the hero's measured ink. Softer than --cs-ink, which stays the near-black
      the rest of the page titles in - the opening block is set a shade back
@@ -158,9 +162,9 @@
 /*
   When the page is also the parallax stage it inherits .hpParallax__stage,
   which paints cream so the purple footer cannot bleed through it. A case
-  study is now painted in that same cream, so this selector no longer changes
-  the colour - it is kept because it restates the z-index below, and because
-  --cs-bg is what .csSec--invert flips to go dark. The stage still does its
+  study is painted white, so this selector is what overrides that cream; it
+  also restates the z-index below, and --cs-bg is what .csSec--invert flips
+  to go dark. The stage still does its
   job either way: the surface is opaque.
 */
 .cs.hpParallax__stage {
@@ -1770,7 +1774,7 @@
   flex-direction: column;
   gap: 10px;
   padding: clamp(20px, 2vw, 32px) clamp(20px, 2vw, 30px);
-  background: #f6f2ec;
+  background: var(--cs-panel);
 }
 
 .csResults__value {
@@ -4013,7 +4017,7 @@
   align-content: start;
   gap: 10px;
   padding: clamp(18px, 1.6vw, 26px) clamp(18px, 1.8vw, 28px) clamp(20px, 1.8vw, 28px);
-  background: #f6f2ec;
+  background: var(--cs-panel);
   transition: background-color var(--dur-hover, 200ms) var(--ease-quint);
 }
 
@@ -4056,7 +4060,7 @@
 
 @media (hover: hover) {
   .csContext__row:hover {
-    background: #f9f6f1;
+    background: var(--cs-panel-hover);
   }
 }
 
@@ -4177,7 +4181,7 @@
 
 /*
   The floating navbar is set INTO the page rather than laid on it: the
-  page's own cream, a 2px lit white edge, and a faint shadow inside the
+  page's panel tone, a 2px lit white edge, and a faint shadow inside the
   shape instead of one cast below it. The project facts, the results and the
   research figures use the same surface, as separate panels on a gap, so
   every fact on the page reads as part of the same object family as the bar
@@ -4201,7 +4205,7 @@
 .csCoverage {
   border: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  background: rgba(242, 237, 230, 0.88);
+  background: var(--cs-panel);
   box-shadow:
     inset 0 1px 3px rgba(31, 31, 31, 0.09),
     inset 0 -1px 2px rgba(31, 31, 31, 0.035);
@@ -4209,7 +4213,7 @@
 
 @media (hover: hover) {
   .csContext__row:hover {
-    background: rgba(246, 242, 236, 0.95);
+    background: var(--cs-panel-hover);
   }
 }
 
@@ -4336,7 +4340,7 @@
   padding: 10px;
   border: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 22px;
-  background: rgba(242, 237, 230, 0.88);
+  background: var(--cs-panel);
   box-shadow:
     inset 0 1px 3px rgba(31, 31, 31, 0.09),
     inset 0 -1px 2px rgba(31, 31, 31, 0.035);
@@ -4422,7 +4426,7 @@
 
 @media (hover: hover) {
   .csNext__card:hover {
-    background: rgba(246, 242, 236, 0.95);
+    background: var(--cs-panel-hover);
   }
 
   .csNext__card:hover .csNext__go {
@@ -4464,7 +4468,7 @@
   border: 2px solid rgba(255, 255, 255, 0.95);
   border-top: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 18px;
-  background: rgba(242, 237, 230, 0.88);
+  background: var(--cs-panel);
   box-shadow:
     inset 0 1px 3px rgba(31, 31, 31, 0.09),
     inset 0 -1px 2px rgba(31, 31, 31, 0.035);
@@ -4472,7 +4476,7 @@
 
 /* the answer is tinted with the project's colour, faintly */
 .csLane--after {
-  background: color-mix(in srgb, var(--cs-accent) 7%, rgba(242, 237, 230, 0.95));
+  background: color-mix(in srgb, var(--cs-accent) 7%, var(--cs-panel));
 }
 
 .csLane__head {
@@ -4567,7 +4571,7 @@
    colour, so "after" means the same thing on every page */
 .csLane--after {
   --lane-good: #15803d;
-  background: color-mix(in srgb, #22c55e 9%, rgba(242, 237, 230, 0.95));
+  background: color-mix(in srgb, #22c55e 9%, var(--cs-panel));
 }
 
 .csLane--after .csLane__count,
@@ -4735,12 +4739,12 @@
   }
 }
 
-/* ---------- panels a step lighter than the page ---------- */
+/* ---------- panels a step off the page ---------- */
 
 /*
-  The embedded panels sit one tone above the paper, with the same lit white
-  edge and a whisper of shadow under it, so they read as raised tiles set
-  into the page rather than cut-outs of it.
+  The embedded panels sit one neutral tone below the white paper, with the
+  same lit white edge and a whisper of shadow under it, so they read as
+  tiles set into the page rather than cut-outs of it.
 */
 .csContext__row,
 .csResults__row,
@@ -4750,7 +4754,7 @@
 .csLane,
 .csTrial,
 .csType {
-  background: #f8f5f0;
+  background: var(--cs-panel);
   box-shadow:
     inset 0 1px 3px rgba(31, 31, 31, 0.07),
     inset 0 -1px 2px rgba(31, 31, 31, 0.03),
@@ -4761,12 +4765,12 @@
 @media (hover: hover) {
   .csContext__row:hover,
   .csNext__card:hover {
-    background: #fbf9f5;
+    background: var(--cs-panel-hover);
   }
 }
 
 .csLane--after {
-  background: color-mix(in srgb, #22c55e 9%, #f8f5f0);
+  background: color-mix(in srgb, #22c55e 9%, var(--cs-panel));
 }
 
 /* ---------- type trials and type systems, as specimen tiles ---------- */
@@ -5018,7 +5022,9 @@
      a strip of page colour between it and the band */
   margin-top: 0;
   padding: clamp(64px, 9vh, 110px) 0 clamp(80px, 11vh, 130px);
-  background: #ebe4d9;
+  /* a neutral step below the panels, so the band reads as its own ground
+     and the project cards on it still sit a shade lighter */
+  background: #ececec;
 }
 
 .csMore__head {
