@@ -1,0 +1,263 @@
+/*
+  /test - a hero synthesised from eight references.
+
+  Route-scoped: every selector is prefixed `st`.
+
+  The composition is positioned in percentages against .stStage, so it
+  holds together as a picture at any width instead of reflowing. The
+  wordmark is sized against vmin, which keeps it in proportion to the stage
+  on both a wide monitor and a tall phone.
+*/
+
+.stStage {
+  --st-purple: #7c3aed;
+  --st-ink: #231a12;
+  --st-cream: #f2ede6;
+
+  /* pointer parallax, written by StudioHero; 0 until the pointer moves */
+  --px: 0;
+  --py: 0;
+
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--st-purple);
+  display: grid;
+  place-items: center;
+}
+
+.stDefs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* ---------- ground ---------- */
+
+.stBlob,
+.stSquiggle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.stSquiggle {
+  z-index: 1;
+  opacity: 0.85;
+  translate: calc(var(--px) * -18px) calc(var(--py) * -14px);
+}
+
+.stBlob {
+  z-index: 2;
+}
+
+/* ---------- the wordmark ---------- */
+
+.stWord {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+/* Both copies occupy the whole stage and sit exactly on top of each other.
+   They must, because the clip below is expressed in the layer's own
+   bounding box - if the two layers were different sizes the ink copy would
+   land somewhere other than the cream one. */
+.stWord__layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  text-align: center;
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  /* deliberately larger than the frame: the references crop their type at
+     the edges and it is a large part of why they feel confident */
+  font-size: clamp(72px, 18.5vw, 268px);
+}
+
+.stWord__layer--base {
+  color: var(--st-cream);
+}
+
+.stWord__layer--cut {
+  color: var(--st-ink);
+  clip-path: url(#stBlobClip);
+}
+
+.stWord__line {
+  display: block;
+}
+
+.stWord__line--b {
+  /* the second line runs wider than the first, as in the references */
+  letter-spacing: -0.055em;
+}
+
+/* ---------- satellites ---------- */
+
+.stBadge {
+  position: absolute;
+  z-index: 4;
+  right: 6%;
+  top: 14%;
+  width: clamp(92px, 11vw, 158px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  translate: calc(var(--px) * 26px) calc(var(--py) * 22px);
+}
+
+.stBadge__ring {
+  width: 100%;
+  height: 100%;
+  animation: stSpin 18s linear infinite;
+}
+
+.stBadge__text {
+  fill: var(--st-cream);
+  font-family: var(--font-primary);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.stBadge__dot {
+  position: absolute;
+  width: 32%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e8834a;
+}
+
+@keyframes stSpin {
+  to { rotate: 360deg; }
+}
+
+.stDoodle {
+  position: absolute;
+  z-index: 4;
+}
+
+.stDoodle--star {
+  left: 6%;
+  top: 14%;
+  width: clamp(44px, 6vw, 86px);
+  translate: calc(var(--px) * 34px) calc(var(--py) * 28px);
+  animation: stBob 5.5s ease-in-out infinite alternate;
+}
+
+.stDoodle--flower {
+  right: 7%;
+  bottom: 11%;
+  width: clamp(48px, 7vw, 96px);
+  translate: calc(var(--px) * -30px) calc(var(--py) * -24px);
+  animation: stBob 6.8s ease-in-out infinite alternate -2s;
+}
+
+@keyframes stBob {
+  from { rotate: -7deg; }
+  to { rotate: 7deg; }
+}
+
+/* small outlined labels, as on the badge-heavy references */
+.stPill {
+  position: absolute;
+  z-index: 4;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  font-family: var(--font-primary);
+  font-size: clamp(11px, 1.05vw, 15px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  translate: calc(var(--px) * 14px) calc(var(--py) * 12px);
+}
+
+.stPill--a { left: 23%; top: 12%; color: var(--st-cream); rotate: -6deg; }
+.stPill--b { right: 23%; top: 12%; color: var(--st-cream); rotate: 5deg; }
+.stPill--c { left: 7%; bottom: 9%; color: var(--st-ink); rotate: 3deg; }
+
+.stBubble {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 7%;
+  translate: -50% 0;
+  background: var(--st-ink);
+  color: var(--st-cream);
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: clamp(12px, 1.1vw, 16px);
+  padding: 10px 18px;
+  border-radius: 14px;
+  rotate: -2deg;
+}
+
+/* the bubble's tail */
+.stBubble::after {
+  content: "";
+  position: absolute;
+  left: 26px;
+  bottom: -9px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: var(--st-ink);
+  border-bottom: 0;
+}
+
+/* ---------- grain ---------- */
+
+/* An SVG feTurbulence as a data URI - a real noise field rather than a
+   tiled PNG, so it never shows a repeat seam at large sizes. */
+.stGrain {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.34;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- motion off ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .stBadge__ring,
+  .stDoodle--star,
+  .stDoodle--flower {
+    animation: none;
+  }
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 760px) {
+  /* the side labels have nowhere to go at phone width without landing on
+     the wordmark, so they stand down rather than overlap it */
+  .stPill--a,
+  .stPill--b {
+    display: none;
+  }
+
+  .stWord__layer {
+    font-size: clamp(64px, 26vw, 150px);
+  }
+
+  .stBadge { right: 5%; top: 11%; }
+  .stDoodle--star { left: 5%; top: 13%; }
+  .stDoodle--flower { right: 6%; bottom: 16%; }
+  .stPill--c { left: 50%; bottom: 20%; translate: -50% 0; }
+}

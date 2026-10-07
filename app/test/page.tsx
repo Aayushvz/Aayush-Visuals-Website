@@ -1,13 +1,25 @@
 import type { Metadata } from "next";
-import TestPageClient from "@/components/test/TestPageClient";
+import { Fredoka } from "next/font/google";
+import StudioPageClient from "@/components/test/studio/StudioPageClient";
 
 /*
-  An alternate homepage treatment, kept off to one side at /test.
+  An alternate hero, synthesised from a set of references rather than
+  traced from one. The pixel-art variant lives next door at /test/pixel.
 
-  noindex is the point of the route: this is a thing to look at and judge,
-  not a page that should turn up in a search for Aayush. It is excluded from
-  the sitemap for the same reason.
+  Fredoka is loaded HERE rather than in the root layout: it is the display
+  face for this one route, and adding it to the layout would ship it to
+  every page on the site for the sake of a scratch route.
+
+  noindex, like its neighbour - these are things to look at, not pages that
+  should turn up in a search for Aayush.
 */
+const display = Fredoka({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Test",
   description: "An alternate homepage treatment.",
@@ -16,5 +28,5 @@ export const metadata: Metadata = {
 };
 
 export default function TestPage() {
-  return <TestPageClient />;
+  return <StudioPageClient displayClass={display.className} />;
 }
