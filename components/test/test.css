@@ -1,0 +1,340 @@
+/*
+  /test - pixel-art hero, traced from a reference image.
+
+  Everything is positioned in percentages against .pxStage. The reference is
+  a composed picture, not a document, so the pieces hold their relationship
+  to each other at every width instead of reflowing into a column. The
+  wordmark scales with vw, which keeps the stickers at the right size
+  relative to it without a single media query for the art itself.
+
+  Route-scoped: every selector is prefixed `px`. Nothing here leaks.
+*/
+
+.pxStage {
+  --px-ink: #140b2b;
+  --px-leak: #ff5ce1;
+
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(130% 110% at 42% 42%, #9a5cff 0%, #7634e2 38%, #5a21bd 66%, #3d1188 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* a fine pointer gets the drawn arrow instead of the OS one; coarse
+   pointers keep whatever the device gives them */
+@media (pointer: fine) {
+  .pxStage,
+  .pxStage * {
+    cursor: none;
+  }
+}
+
+/* ---------- ground texture ---------- */
+
+/* Large soft blocks of lighter and darker purple. Blurred hard: the
+   reference's background is out of focus, and crisp cells here would read
+   as a checkerboard rather than as depth. */
+.pxMosaic {
+  position: absolute;
+  inset: -6%;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  filter: blur(17px);
+  z-index: 0;
+}
+
+.pxMosaic__cell {
+  display: block;
+  animation: pxShimmer 11s ease-in-out infinite alternate;
+}
+
+@keyframes pxShimmer {
+  from { opacity: inherit; transform: none; }
+  to { filter: brightness(1.5); }
+}
+
+.pxGlow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(42% 46% at 44% 44%, rgba(255, 255, 255, 0.3), transparent 70%);
+  pointer-events: none;
+}
+
+.pxVignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(85% 85% at 50% 50%, transparent 38%, rgba(22, 5, 50, 0.72) 100%);
+  pointer-events: none;
+}
+
+/* ---------- out-of-focus cards at the edges ---------- */
+
+.pxBlurCard {
+  position: absolute;
+  z-index: 2;
+  background: #f4f1ea;
+  border: 5px solid var(--px-ink);
+  filter: blur(7px);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.pxBlurCard--tl {
+  left: -7%;
+  top: -9%;
+  width: 20%;
+  height: 20%;
+  transform: rotate(-13deg);
+}
+
+.pxBlurCard--tr {
+  right: -8%;
+  top: -7%;
+  width: 17%;
+  height: 17%;
+  transform: rotate(16deg);
+}
+
+.pxBlurCard--bl {
+  left: -9%;
+  bottom: -10%;
+  width: 19%;
+  height: 16%;
+  transform: rotate(9deg);
+  background: var(--px-ink);
+}
+
+/* ---------- the wordmark ---------- */
+
+.pxCenter {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: 4vw;
+  /* clear the floating nav pill, which overlaps the top of the stage */
+  padding-top: clamp(56px, 9vh, 104px);
+}
+
+.pxName {
+  margin: 0 0 clamp(4px, 0.8vw, 12px);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(18px, 2.9vw, 44px);
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 3px 0 rgba(20, 11, 43, 0.5), 0 0 26px rgba(255, 255, 255, 0.35);
+}
+
+.pxWord {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* the two lines overlap slightly, as they do in the reference */
+  gap: 0;
+}
+
+/* the dark bloom the letters sit on */
+.pxWord__blob {
+  position: absolute;
+  inset: -22% -12%;
+  z-index: -1;
+  border-radius: 46% 54% 52% 48% / 48% 46% 54% 52%;
+  background: radial-gradient(58% 62% at 50% 50%, rgba(32, 8, 76, 0.98), rgba(32, 8, 76, 0.5) 55%, rgba(32, 8, 76, 0) 78%);
+  filter: blur(34px);
+}
+
+/* Sized by HEIGHT, not width. These glyphs are ~2.5:1, so a width-based
+   size blows the lockup past the bottom of the viewport before it looks
+   big enough. Height-first also means the two lines keep their real
+   proportion to each other - "folio" is genuinely wider than "Port". */
+.pxWord__line {
+  display: block;
+  width: auto;
+  height: min(27vh, 25vw);
+  transition: transform 220ms var(--ease-quint, cubic-bezier(0.22, 1, 0.36, 1));
+  filter: drop-shadow(0 8px 0 rgba(20, 11, 43, 0.28));
+}
+
+.pxWord__line--b {
+  margin-top: -2.5%;
+}
+
+.pxWord:hover .pxWord__line--a { transform: translateY(-6px) rotate(-0.5deg); }
+.pxWord:hover .pxWord__line--b { transform: translateY(5px) rotate(0.4deg); }
+
+/* magenta light-leaks sitting inside the letters */
+.pxLeak {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  filter: blur(16px);
+  pointer-events: none;
+  background: radial-gradient(circle, var(--px-leak), transparent 70%);
+  animation: pxPulse 6s ease-in-out infinite alternate;
+}
+
+.pxLeak--a { left: 30%; top: 30%; width: 14%; height: 30%; }
+.pxLeak--b { left: 58%; top: 24%; width: 12%; height: 28%; animation-delay: -3s; }
+
+@keyframes pxPulse {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+/* ---------- stickers ---------- */
+
+.pxSticker {
+  position: absolute;
+  z-index: 6;
+  background: #fff;
+  border: 3px solid var(--px-ink);
+  padding: 9px 12px;
+  box-shadow: 0 5px 0 rgba(20, 11, 43, 0.26);
+  animation: pxDrift 7s ease-in-out infinite alternate;
+}
+
+.pxSticker--dark {
+  background: var(--px-ink);
+  border-color: var(--px-ink);
+}
+
+.pxSticker__text {
+  display: block;
+  height: auto;
+  width: auto;
+}
+
+/* the speech-bubble tail, a rotated square tucked under the border */
+.pxSticker__tail {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: #fff;
+  border: 4px solid var(--px-ink);
+  transform: rotate(45deg);
+}
+
+.pxSticker__tail--bl {
+  left: 16%;
+  bottom: -11px;
+  clip-path: polygon(0 100%, 100% 100%, 0 0);
+}
+
+.pxSticker__tail--br {
+  right: 16%;
+  bottom: -11px;
+  clip-path: polygon(100% 100%, 100% 0, 0 100%);
+}
+
+.pxSticker--hello {
+  right: 6%;
+  top: 13%;
+  transform: rotate(-7deg);
+  animation-delay: -1.4s;
+}
+
+.pxSticker--omg {
+  left: 9%;
+  top: 36%;
+  transform: rotate(-11deg);
+  animation-delay: -3.1s;
+}
+
+.pxSticker--welcome {
+  left: 38%;
+  bottom: 7%;
+  transform: rotate(-5deg);
+  animation-delay: -5.2s;
+}
+
+.pxSticker--best {
+  right: 3%;
+  bottom: 5%;
+  transform: rotate(-3deg);
+  animation-delay: -2.2s;
+}
+
+/* the one cropped by the frame edge, bottom left */
+.pxSticker--cut {
+  left: -4%;
+  bottom: 6%;
+  transform: rotate(7deg);
+  animation-delay: -6.1s;
+}
+
+@keyframes pxDrift {
+  from { translate: 0 0; }
+  to { translate: 0 -9px; }
+}
+
+/* ---------- the drawn cursor ---------- */
+
+.pxCursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  /* the arrow's point is its origin, like a real cursor hotspot */
+  margin: -2px 0 0 -2px;
+}
+
+.pxCursor--on { opacity: 1; }
+
+/* ---------- motion off ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pxMosaic__cell,
+  .pxLeak,
+  .pxSticker {
+    animation: none;
+  }
+  .pxWord__line { transition: none; }
+}
+
+/* ---------- narrow screens ---------- */
+
+/* The art does not reflow, it shrinks - but below ~640px the stickers start
+   colliding with the wordmark, so the two that sit closest to it stand down. */
+@media (max-width: 640px) {
+  .pxSticker--omg,
+  .pxSticker--cut {
+    display: none;
+  }
+
+  /* The mosaic is 144 cells either way. Left at 16x9 in a portrait
+     viewport each cell is tall and narrow, and the ground reads as
+     vertical stripes rather than blocks - so the grid turns on its side
+     with the screen. */
+  .pxMosaic {
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(16, 1fr);
+  }
+
+  .pxSticker { border-width: 2px; padding: 7px 9px; }
+  .pxSticker--hello { right: 4%; top: 15%; }
+  .pxSticker--welcome { left: 20%; bottom: 16%; }
+
+  /* the longest label - at phone width it otherwise runs off the frame */
+  /* Centred with transform, NOT the `translate` property: pxDrift
+     animates `translate`, and an animation on that property wins over a
+     static declaration of it, which silently threw the centring away. */
+  .pxSticker--best {
+    right: auto;
+    left: 50%;
+    bottom: 7%;
+    transform: translateX(-50%) rotate(-3deg) scale(0.76);
+  }
+}
