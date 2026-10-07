@@ -253,32 +253,12 @@ body:has(.aboutPage__bar) .shotsu {
   outline-offset: 5px;
 }
 
-.shotsuOrb--talking .shotsuOrb__ear {
-  animation: shotsuPerk 0.9s ease-in-out infinite alternate;
-}
-
-@keyframes shotsuPerk {
-  from { transform: translateX(-50%) rotate(-6deg); }
-  to { transform: translateX(-50%) rotate(6deg); }
-}
-
-/* speaking: while a card is up, the orb breathes a ring outward */
-.shotsuOrb--talking::before {
-  animation: shotsuPulse 1.8s ease-out infinite;
-}
-
-@keyframes shotsuPulse {
-  0% { transform: scale(0.9); opacity: 0.9; }
-  100% { transform: scale(1.35); opacity: 0; }
-}
-
 /* ==========================================================
    The face (shared by the orb and its pocket version)
 
    Pill eyes that drift toward the pointer and blink, and a mouth that
    only appears for some moods. The orb's data-mood picks the look: it
-   drifts through these while idle, is happy while a card is up, and
-   hovering it gets the happy face too.
+   drifts through these while idle, and hovering it gets the happy face.
    ========================================================== */
 
 .shotsuFace {
@@ -417,30 +397,6 @@ body:has(.aboutPage__bar) .shotsu {
 /* listening: with the chat open it looks up at the panel */
 .shotsuOrb--open .shotsuFace {
   transform: translate(-50%, calc(-50% - 0.05em));
-}
-
-/* ==========================================================
-   Cards, spoken from the orb
-   ========================================================== */
-
-.shotsu .recentToast {
-  right: var(--orb-gap);
-  bottom: calc(var(--orb-gap) + var(--orb-lift) + var(--orb) + 16px);
-  transform-origin: calc(100% - 29px) calc(100% + 16px);
-}
-
-/* the tail, pointing down at the orb's centre */
-.shotsu .recentToast::after {
-  content: "";
-  position: absolute;
-  right: 22px;
-  bottom: -7px;
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  background: #fff;
-  transform: rotate(45deg);
-  box-shadow: 3px 3px 5px rgba(31, 31, 31, 0.06);
 }
 
 /* ==========================================================
@@ -1170,8 +1126,6 @@ body:has(.aboutPage__bar) .shotsu {
   .shotsuFace__eye,
   .shotsuOrb__floor,
   .shotsuOrb__body,
-  .shotsuOrb--talking .shotsuOrb__ear,
-  .shotsuOrb--talking::before,
   .shotsuChat,
   .shotsuMsg,
   .shotsuChat__progress,

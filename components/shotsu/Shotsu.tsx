@@ -3,21 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import PageLink from "@/components/PageLink";
-import PromoManager from "@/components/PromoManager";
-import type { Promo } from "@/components/PromoToast";
 import "./shotsu.css";
 
 /*
   Shotsu - the site's assistant, living in a purple orb at the bottom right.
 
   The orb is a glossy sphere with a pair of eyes that follow the pointer
-  and blink now and then. It does two jobs:
-  - it talks: the notification cards (PromoManager) now rise out of it as
-    speech bubbles, with a tail pointing back down at the orb;
-  - it listens: click it and a chat panel opens above it, in the same
-    design language as those cards (white card, purple band, dashed inner
-    card), where visitors can ask about Aayush. Answers stream from
-    /api/shotsu, grounded in his resumes.
+  and blink now and then. Click it and a chat panel opens above it (white
+  card, purple band, dashed inner card), where visitors can ask about
+  Aayush. Answers stream from /api/shotsu, grounded in his resumes.
+
+  It used to also speak unprompted: promo cards rose out of it as speech
+  bubbles on a timer. Those are gone - it only speaks when spoken to.
 
   It lives in the root layout, so a conversation survives moving between
   pages. It stays off the games and tools, which have interfaces of their
@@ -149,21 +146,19 @@ function RichText({ text, onNavigate }: { text: string; onNavigate: () => void }
 
 function Orb({
   open,
-  talking,
   onClick,
 }: {
   open: boolean;
-  talking: boolean;
   onClick: () => void;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   const [mood, setMood] = useState<Mood>("idle");
 
   /* every few seconds it pulls a face, then settles back. Not while the
-     chat is open or a card is up (those have their own looks), and not at
-     all for visitors who prefer reduced motion */
+     chat is open (that has its own look), and not at all for visitors who
+     prefer reduced motion */
   useEffect(() => {
-    if (open || talking) {
+    if (open) {
       setMood("idle");
       return;
     }
@@ -180,7 +175,7 @@ function Orb({
       window.clearInterval(tick);
       window.clearTimeout(back);
     };
-  }, [open, talking]);
+  }, [open]);
 
   /* the eyes look toward the pointer, a couple of pixels at most */
   useEffect(() => {
@@ -211,10 +206,10 @@ function Orb({
     <button
       ref={ref}
       type="button"
-      className={`shotsuOrb${open ? " shotsuOrb--open" : ""}${talking ? " shotsuOrb--talking" : ""}`}
+      className={`shotsuOrb${open ? " shotsuOrb--open" : ""}`}
       aria-label={open ? "Close Shotsu" : "Ask Shotsu, Aayush's assistant"}
       aria-expanded={open}
-      data-mood={talking ? "happy" : mood}
+      data-mood={mood}
       onClick={onClick}
     >
       {/* ear, glow and body squish together as one */}
@@ -249,10 +244,9 @@ function Orb({
   );
 }
 
-export default function Shotsu({ promos }: { promos: Promo[] }) {
+export default function Shotsu() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
-  const [talking, setTalking] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -349,9 +343,6 @@ export default function Shotsu({ promos }: { promos: Promo[] }) {
 
   return (
     <div className="shotsu">
-      {/* the notification cards speak from the orb; paused while chatting */}
-      <PromoManager promos={promos} paused={open} onActive={setTalking} />
-
       {open ? (
         <section
           className={`shotsuChat${empty ? " shotsuChat--empty" : ""}`}
@@ -501,7 +492,7 @@ export default function Shotsu({ promos }: { promos: Promo[] }) {
         </section>
       ) : null}
 
-      <Orb open={open} talking={talking && !open} onClick={() => setOpen((o) => !o)} />
+      <Orb open={open} onClick={() => setOpen((o) => !o)} />
     </div>
   );
 }

@@ -12,7 +12,6 @@ import {
 import localFont from "next/font/local";
 import Preloader from "@/components/Preloader";
 import Shotsu from "@/components/shotsu/Shotsu";
-import { buildPromos } from "@/components/promos";
 import PageTransition from "@/components/PageTransition";
 import AnimationBudget from "@/components/AnimationBudget";
 import ScrollRestore from "@/components/ScrollRestore";
@@ -294,9 +293,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Preloader />
-        {/* Shotsu: the assistant orb, which also carries the notification
-            cards (which one, and when, is decided per page) */}
-        <Shotsu promos={buildPromos()} />
+        {/* Shotsu: the assistant orb. It no longer pushes cards at anyone;
+            it speaks only when clicked. */}
+        <Shotsu />
         <PageTransition />
         <AnimationBudget />
         <ScrollRestore />
