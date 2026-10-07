@@ -36,7 +36,7 @@ const ALL_LINKS = [
   { label: "home", href: "/" },
   { label: "about me", href: "/about" },
   { label: "projects", href: "/work" },
-  { label: "games", href: "/playground" },
+  { label: "experiments", href: "/playground" },
 ];
 
 /* `/work/riviera` is inside `projects`, so a prefix match, not equality -

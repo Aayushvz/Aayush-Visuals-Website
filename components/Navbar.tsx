@@ -19,7 +19,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Projects", href: "/work" },
-  { label: "Games", href: "/playground" },
+  { label: "Experiments", href: "/playground" },
 ];
 
 export default function Navbar() {
