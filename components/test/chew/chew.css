@@ -1,0 +1,252 @@
+/*
+  /test - recreation of a reference hero.
+
+  Route-scoped, every selector prefixed `cw`. Positions are percentages
+  measured off the reference at 1200x643; type is sized in vw. The whole
+  thing is a picture, so it scales rather than reflows.
+*/
+
+.cwStage {
+  --cw-purple: #9b5ce5;
+  --cw-ink: #0a0a0a;
+  --cw-lime: #dff236;
+
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--cw-purple);
+  font-family: var(--font-primary);
+  color: #fff;
+}
+
+.cwSwoosh {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cwStage > *:not(.cwSwoosh) {
+  position: absolute;
+  z-index: 1;
+}
+
+/* ---------- corner marks ---------- */
+
+.cwBrand {
+  left: 4.3%;
+  top: 6.5%;
+  font-size: clamp(15px, 1.7vw, 24px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.cwKicker {
+  right: 4.5%;
+  top: 8%;
+  font-size: clamp(10px, 1.05vw, 14px);
+  font-weight: 400;
+}
+
+.cwYear {
+  left: 5.2%;
+  bottom: 8%;
+  font-size: clamp(10px, 1vw, 13px);
+}
+
+.cwIndex {
+  right: 4.5%;
+  bottom: 7%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(10px, 1vw, 13px);
+  display: grid;
+  gap: 0.75em;
+  min-width: 7.5em;
+}
+
+.cwIndex li {
+  display: flex;
+  justify-content: space-between;
+  gap: 2.4em;
+}
+
+.cwIndex b {
+  font-weight: 600;
+}
+
+/* ---------- the label row ---------- */
+
+.cwPill {
+  top: 17.5%;
+  padding: 0.52em 1.15em;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  font-size: clamp(9px, 1vw, 13px);
+  white-space: nowrap;
+}
+
+.cwPill--l { left: 32.4%; }
+.cwPill--r { left: 61.6%; }
+
+/* The black banner between them. Its ends are cut rather than rounded,
+   which is what stops the row reading as three identical pills. */
+.cwTab {
+  left: 50%;
+  top: 16.4%;
+  translate: -50% 0;
+  background: var(--cw-ink);
+  color: #fff;
+  font-weight: 700;
+  font-size: clamp(11px, 1.45vw, 19px);
+  padding: 0.55em 1.5em 0.7em;
+  white-space: nowrap;
+  clip-path: polygon(0 0, 100% 0, 100% 64%, 93% 100%, 7% 100%, 0 64%);
+}
+
+/* ---------- the wordmark ---------- */
+
+.cwWord {
+  left: 49.2%;
+  top: 46.2%;
+  translate: -50% -50%;
+  display: grid;
+  justify-items: start;
+  line-height: 0.69;
+  letter-spacing: -0.045em;
+  font-size: clamp(60px, 10.8vw, 142px);
+  white-space: nowrap;
+}
+
+.cwWord__a {
+  color: #fff;
+  position: relative;
+  rotate: -1.6deg;
+}
+
+/* the second line tucks under and to the right, overlapping the first */
+.cwWord__b {
+  color: var(--cw-ink);
+  rotate: -1deg;
+  margin-left: 0.72em;
+}
+
+.cwWord__reg {
+  position: absolute;
+  right: -0.42em;
+  bottom: 0.1em;
+  font-family: var(--font-primary);
+  font-size: 0.13em;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* ---------- badges ---------- */
+
+.cwBadgeL {
+  left: 25.4%;
+  top: 34%;
+  translate: -50% -50%;
+  width: clamp(72px, 8.6vw, 114px);
+  rotate: -18deg;
+}
+
+.cwBadgeL__svg { width: 100%; height: auto; display: block; }
+
+.cwBadgeL__arc,
+.cwBadgeL__box,
+.cwBadgeL__big,
+.cwBadgeL__amp,
+.cwBadgeL__foot {
+  font-family: var(--font-primary);
+  text-anchor: middle;
+}
+
+.cwBadgeL__arc { fill: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; }
+.cwBadgeL__box { fill: #2f5ff0; font-size: 8.5px; font-weight: 700; }
+.cwBadgeL__big { fill: #fff; font-size: 21px; font-weight: 700; letter-spacing: -0.02em; }
+.cwBadgeL__amp { fill: #2f5ff0; font-size: 9px; font-weight: 700; }
+.cwBadgeL__foot { fill: #fff; font-size: 8px; font-weight: 500; }
+
+.cwBadgeR {
+  left: 71.5%;
+  top: 45.4%;
+  translate: -50% -50%;
+  width: clamp(68px, 8vw, 106px);
+  rotate: -8deg;
+}
+
+.cwBadgeR__svg { width: 100%; height: auto; display: block; }
+
+.cwBadgeR__text {
+  fill: var(--cw-ink);
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.cwBadgeR__paw { width: 100px; height: 100px; }
+
+/* ---------- scatter ---------- */
+
+.cwPaw {
+  width: clamp(22px, 3.2vw, 42px);
+  height: auto;
+}
+
+.cwPaw--a { left: 71.8%; top: 27.7%; rotate: 14deg; }
+.cwPaw--b { left: 28.3%; top: 58.8%; rotate: -8deg; width: clamp(20px, 3vw, 39px); }
+.cwPaw--c { left: 32.3%; top: 73.9%; rotate: 6deg; width: clamp(15px, 2.2vw, 29px); }
+
+.cwStar {
+  width: clamp(9px, 1.25vw, 17px);
+  height: auto;
+}
+
+.cwStar--a { left: 39%; top: 24.5%; }
+.cwStar--b { left: 67.4%; top: 24.5%; }
+.cwStar--c { left: 68.2%; top: 67%; }
+
+/* ---------- the disc at the bottom edge ---------- */
+
+/* Cropped by the frame on purpose: in the reference it reads as a sticker
+   half off the page, which is a large part of why the composition feels
+   like a poster rather than a slide. */
+.cwDisc {
+  left: 50%;
+  bottom: 0;
+  translate: -50% 42%;
+  width: clamp(110px, 13vw, 170px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--cw-ink);
+  display: flex;
+  justify-content: center;
+  padding-top: 1.15em;
+  font-size: clamp(10px, 1.08vw, 14px);
+  font-weight: 700;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 760px) {
+  /* the label row and the index have nowhere to sit at phone width without
+     landing on the badges, so the row stacks and the index stands down */
+  .cwPill--l { left: 6%; top: 14%; }
+  .cwPill--r { right: 6%; left: auto; top: 14%; }
+  .cwTab { top: 21%; }
+  .cwWord { font-size: clamp(50px, 17vw, 96px); top: 46%; }
+  .cwBadgeL { left: 20%; top: 31%; width: 86px; }
+  .cwBadgeR { left: 79%; top: 60%; width: 78px; }
+  .cwPaw--a { left: 78%; top: 25%; }
+  .cwPaw--b { left: 14%; top: 62%; }
+  .cwPaw--c { left: 24%; top: 76%; }
+  .cwIndex { display: none; }
+  .cwStar--c { left: 80%; top: 76%; }
+}

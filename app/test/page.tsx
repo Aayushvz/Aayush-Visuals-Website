@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { Fredoka } from "next/font/google";
-import StudioPageClient from "@/components/test/studio/StudioPageClient";
+import { Titan_One } from "next/font/google";
+import ChewHero from "@/components/test/chew/ChewHero";
 
 /*
-  An alternate hero, synthesised from a set of references rather than
-  traced from one. The pixel-art variant lives next door at /test/pixel.
+  A close recreation of a reference hero. The pixel-art variant is next
+  door at /test/pixel.
 
-  Fredoka is loaded HERE rather than in the root layout: it is the display
-  face for this one route, and adding it to the layout would ship it to
-  every page on the site for the sake of a scratch route.
+  No site navbar here, unlike the other variants: the reference carries its
+  own chrome in the corners and a row of labels exactly where the nav pill
+  floats, and the two cannot both occupy that band.
 
-  noindex, like its neighbour - these are things to look at, not pages that
-  should turn up in a search for Aayush.
+  Titan One is loaded on this route rather than in the root layout - it is
+  the display face for one scratch page.
 */
-const display = Fredoka({
+const display = Titan_One({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
+  weight: "400",
+  variable: "--font-chew",
   display: "swap",
 });
 
@@ -28,5 +28,9 @@ export const metadata: Metadata = {
 };
 
 export default function TestPage() {
-  return <StudioPageClient displayClass={display.className} />;
+  return (
+    <main>
+      <ChewHero displayClass={display.className} />
+    </main>
+  );
 }
