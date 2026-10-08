@@ -1,28 +1,22 @@
 import type { Metadata } from "next";
-import { Titan_One } from "next/font/google";
-import ChewHero from "@/components/test/chew/ChewHero";
+import AvHero from "@/components/test/av/AvHero";
 
 /*
-  A close recreation of a reference hero. The pixel-art variant is next
-  door at /test/pixel.
+  An alternative hero for the portfolio.
 
-  No site navbar here, unlike the other variants: the reference carries its
-  own chrome in the corners and a row of labels exactly where the nav pill
-  floats, and the two cannot both occupy that band.
+  No font is loaded for this route. The wordmark is set in the hand-drawn
+  alphabet in components/test/av/glyphs.ts, which is why there is no
+  next/font call here and no display face in the root layout for it.
 
-  Titan One is loaded on this route rather than in the root layout - it is
-  the display face for one scratch page.
+  Siblings: /test/pixel (a pixel-art trace) and /test/chew (a recreation of
+  the reference this one's composition learned from).
+
+  noindex - this is a thing to look at and judge, not a page that should
+  turn up in a search for Aayush.
 */
-const display = Titan_One({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-chew",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "Test",
-  description: "An alternate homepage treatment.",
+  description: "An alternative hero treatment for Aayush Visuals.",
   alternates: { canonical: "/test" },
   robots: { index: false, follow: false },
 };
@@ -30,7 +24,7 @@ export const metadata: Metadata = {
 export default function TestPage() {
   return (
     <main>
-      <ChewHero displayClass={display.className} />
+      <AvHero />
     </main>
   );
 }

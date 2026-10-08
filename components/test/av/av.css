@@ -1,0 +1,263 @@
+/*
+  /test - alternative hero for Aayush Visuals.
+
+  Route-scoped, every selector prefixed `av`. Positions are percentages of
+  the stage and type is sized in vw, so the composition scales as a picture
+  rather than reflowing. The palette is the site's own: brand purple,
+  cream, ink, with orange as the single accent. Four colours, no more -
+  the thing that made the earlier attempt look cheap was five fighting.
+*/
+
+.avStage {
+  --av-purple: #7c3aed;
+  --av-cream: #f2ede6;
+  --av-ink: #1f1f1f;
+  --av-orange: #e8834a;
+
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--av-purple);
+  font-family: var(--font-primary);
+  color: var(--av-cream);
+}
+
+.avSwoosh {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.avStage > *:not(.avSwoosh) {
+  position: absolute;
+  z-index: 1;
+}
+
+/* ---------- corner marks ---------- */
+
+.avMark {
+  left: 4.4%;
+  top: 6.8%;
+  font-size: clamp(11px, 1.15vw, 15px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.avRole {
+  right: 4.4%;
+  top: 7.4%;
+  font-size: clamp(10px, 1.02vw, 13px);
+  opacity: 0.9;
+}
+
+.avYear {
+  left: 4.6%;
+  bottom: 7.5%;
+  font-size: clamp(10px, 1vw, 13px);
+  opacity: 0.9;
+}
+
+/* ---------- label row ---------- */
+
+.avPill {
+  top: 17.5%;
+  padding: 0.5em 1.1em;
+  border: 1px solid rgba(242, 237, 230, 0.75);
+  border-radius: 999px;
+  font-size: clamp(9px, 0.95vw, 12px);
+  white-space: nowrap;
+}
+
+.avPill--l { left: 31%; }
+.avPill--r { right: 31%; }
+
+/* the one filled thing in the row - its cut ends are what stop the three
+   reading as a row of identical pills */
+.avTab {
+  left: 50%;
+  top: 16.3%;
+  translate: -50% 0;
+  background: var(--av-ink);
+  color: var(--av-cream);
+  font-weight: 700;
+  font-size: clamp(10px, 1.3vw, 17px);
+  padding: 0.5em 1.4em 0.65em;
+  white-space: nowrap;
+  clip-path: polygon(0 0, 100% 0, 100% 64%, 93% 100%, 7% 100%, 0 64%);
+}
+
+/* ---------- wordmark ---------- */
+
+.avWord {
+  left: 49%;
+  top: 46.5%;
+  translate: -50% -50%;
+  display: grid;
+  justify-items: start;
+  /* the hand-drawn glyphs carry their own sidebearings, so the only metric
+     needed here is how tall a line is */
+  --av-line: clamp(74px, 13.4vw, 186px);
+}
+
+.avWord__a,
+.avWord__b {
+  display: block;
+  height: var(--av-line);
+  width: auto;
+}
+
+.avWord__a { color: var(--av-cream); rotate: -1.4deg; }
+
+/* indented, not centred: the two lines read as one lockup this way, and
+   the overlap is what gives the pair its weight */
+.avWord__b {
+  color: var(--av-ink);
+  rotate: -0.8deg;
+  margin-left: 11%;
+  margin-top: -14.5%;
+}
+
+/* ---------- badges ---------- */
+
+.avBadgeL {
+  left: 23.6%;
+  top: 35%;
+  translate: -50% -50%;
+  width: clamp(74px, 8.4vw, 112px);
+  rotate: -17deg;
+}
+
+.avBadgeR {
+  left: 74%;
+  top: 47%;
+  translate: -50% -50%;
+  width: clamp(70px, 8vw, 106px);
+  rotate: -7deg;
+}
+
+.avBadgeL svg,
+.avBadgeR svg { width: 100%; height: auto; display: block; }
+
+.avBadgeL__arc,
+.avBadgeL__chip,
+.avBadgeL__big,
+.avBadgeL__amp,
+.avBadgeL__foot {
+  font-family: var(--font-primary);
+  text-anchor: middle;
+}
+
+.avBadgeL__arc  { fill: var(--av-cream); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; }
+.avBadgeL__chip { fill: var(--av-ink); font-size: 7.5px; font-weight: 700; }
+.avBadgeL__big  { fill: var(--av-cream); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.avBadgeL__amp  { fill: var(--av-ink); font-size: 9px; font-weight: 700; }
+.avBadgeL__foot { fill: var(--av-cream); font-size: 7.5px; font-weight: 500; opacity: 0.85; }
+
+.avBadgeR__text {
+  fill: var(--av-ink);
+  font-family: var(--font-primary);
+  font-size: 9.6px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- scatter ---------- */
+
+.avStar {
+  color: var(--av-orange);
+  width: clamp(10px, 1.35vw, 19px);
+  height: auto;
+  animation: avFloat 7s ease-in-out infinite alternate;
+}
+
+.avStar--a { left: 36.5%; top: 25%; }
+.avStar--b { left: 66.5%; top: 24%; animation-delay: -2.4s; }
+.avStar--c { left: 69.5%; top: 68%; animation-delay: -4.6s; }
+.avStar--d { left: 29%; top: 70%; width: clamp(8px, 1vw, 14px); animation-delay: -1.2s; }
+
+@keyframes avFloat {
+  from { translate: 0 0; rotate: 0deg; }
+  to   { translate: 0 -8px; rotate: 22deg; }
+}
+
+/* ---------- the disc at the bottom edge ---------- */
+
+/* Cropped by the frame on purpose - it reads as a sticker half off the
+   page, which is most of why the composition feels like a poster. */
+.avDisc {
+  left: 50%;
+  bottom: 0;
+  translate: -50% 42%;
+  width: clamp(112px, 13vw, 168px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--av-cream);
+  color: var(--av-ink);
+  display: flex;
+  justify-content: center;
+  padding-top: 1.1em;
+  font-size: clamp(10px, 1.05vw, 13px);
+  font-weight: 700;
+  transition: translate 240ms var(--ease-quint, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.avDisc:hover { translate: -50% 36%; }
+
+/* ---------- index ---------- */
+
+.avIndex {
+  right: 4.4%;
+  bottom: 6.5%;
+  font-size: clamp(10px, 1vw, 13px);
+}
+
+.avIndex ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.7em; }
+
+.avIndex a {
+  display: flex;
+  justify-content: space-between;
+  gap: 2.6em;
+  min-width: 8.5em;
+  opacity: 0.88;
+  transition: opacity 160ms ease, translate 160ms ease;
+}
+
+.avIndex a:hover { opacity: 1; translate: -3px 0; }
+.avIndex b { font-weight: 600; }
+
+/* ---------- motion off ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .avStar { animation: none; }
+  .avDisc, .avIndex a { transition: none; }
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 760px) {
+  /* the label row cannot hold three across a phone, so the outer two take
+     the corners and the filled one keeps the centre */
+  .avPill--l { left: 5%; top: 13.5%; }
+  .avPill--r { right: 5%; top: 13.5%; }
+  .avTab { top: 20%; }
+
+  .avWord { --av-line: clamp(66px, 22vw, 130px); top: 47%; }
+
+  .avBadgeL { left: 20%; top: 32%; width: 84px; }
+  .avBadgeR { left: 79%; top: 61%; width: 76px; }
+
+  .avStar--a { left: 10%; top: 26%; }
+  .avStar--b { left: 88%; top: 25%; }
+  .avStar--c { left: 86%; top: 77%; }
+  .avStar--d { left: 12%; top: 74%; }
+
+  .avRole { display: none; }
+  .avIndex { right: 50%; translate: 50% 0; bottom: 4.5%; }
+  .avIndex ul { grid-auto-flow: column; gap: 1.4em; }
+  .avIndex a { min-width: 0; gap: 0.5em; }
+  .avDisc { display: none; }
+}
