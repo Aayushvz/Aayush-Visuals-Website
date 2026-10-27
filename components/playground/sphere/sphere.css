@@ -114,13 +114,13 @@ video.pgs-card__visual { position: absolute; inset: 0; }
   opacity: 0;
   visibility: hidden;
   transform: translateY(6px);
-  transition: opacity 0.5s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), visibility linear 0.5s;
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), visibility linear 0.2s;
 }
 .pgs__caption.is-visible {
   opacity: 1;
   visibility: visible;
   transform: none;
-  transition: opacity 0.5s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), visibility;
+  transition: opacity 0.3s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), visibility;
 }
 .pgs__title {
   pointer-events: auto;

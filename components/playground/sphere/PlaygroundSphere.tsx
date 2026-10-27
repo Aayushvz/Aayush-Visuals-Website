@@ -34,8 +34,8 @@ import "./sphere.css";
   Proportions measured off the reference: card 4:3, sphere radius 2.65
   card widths, stage pushed back 0.522 R, perspective 2.8 viewport widths.
 
-  One card per entry (no repeats, see ./entries): the featured one in front,
-  the rest in a ring around it. Cards are either an animated demo (./demos) or the
+  Cards tile the whole ball (see SLOTS below), entries repeating so every
+  view is full; the featured one sits in front. Cards are either an animated demo (./demos) or the
   live product in a browser window (BrowserShot: a real recording or a real
   capture). Loops and videos only run on cards turned toward the viewer
   (.is-live).
@@ -45,16 +45,17 @@ type M3 = number[]; // row-major 3x3
 type V3 = [number, number, number];
 
 /*
-  The ball is covered all the way round, so spinning it never runs out of
-  projects - it loops. The front hemisphere holds every entry once: the
-  featured one dead ahead, the rest in a ring RING_DEG out from it (the
-  view at rest). The back hemisphere is that layout's exact ANTIPODE, so
-  each entry has precisely two copies 180deg apart - which can never be on
-  screen together, however the ball is turned. Ring neighbours sit ~36deg
-  apart, more than a card's angular width (~21deg), so nothing overlaps.
+  The ball is tiled all the way round, so whichever way it is turned the
+  view is full of cards - no empty band, no bare poles. SLOTS points are
+  spread evenly over the sphere (a Fibonacci lattice, at least ~35deg
+  apart, more than a card's ~22deg angular width, so nothing overlaps), with the first
+  one dead ahead for the featured card. Entries repeat to fill them: each
+  slot, nearest the front first, takes the entry whose other copies are
+  FARTHEST from it, so twins are never neighbours and the view at rest
+  holds as many different projects as fit.
 */
 const FEATURED_ID = "invoice";
-const RING_DEG = 46;
+const SLOTS = 26;
 const START = 0;
 
 const mul = (a: M3, b: M3): M3 => {
@@ -119,22 +120,48 @@ type Card = { entry: SphereEntry; home: number; preview: Preview; n: V3; lon: nu
 
 function buildCards(): Card[] {
   const order = [...ENTRIES].sort((a, b) => Number(b.id === FEATURED_ID) - Number(a.id === FEATURED_ID));
-  const ring = order.length - 1;
-  const th = (RING_DEG * Math.PI) / 180;
-  /* CSS coordinates: +z toward the viewer, +y DOWN */
-  const slots: { home: number; n: V3 }[] = [{ home: 0, n: [0, 0, 1] }];
-  for (let k = 0; k < ring; k++) {
-    const az = Math.PI / 2 + (k * 2 * Math.PI) / ring; // 90deg = straight up
-    const c = Math.cos(az),
-      s = Math.sin(az);
-    slots.push({ home: k + 1, n: [Math.sin(th) * c, -Math.sin(th) * s, Math.cos(th)] });
+  /* Fibonacci lattice about +z (CSS coordinates: +z toward the viewer, +y
+     DOWN), the half-step variant (pinning points ON the poles squeezes
+     them to 18deg), then turned so point 0 sits exactly at +z, the front */
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  const raw: V3[] = [];
+  for (let i = 0; i < SLOTS; i++) {
+    const z = 1 - (2 * i + 1) / SLOTS;
+    const r = Math.sqrt(1 - z * z);
+    raw.push([r * Math.cos(i * golden), r * Math.sin(i * golden), z]);
   }
-  /* the back hemisphere: every front slot's antipode, same entry */
-  for (const f of [...slots]) slots.push({ home: f.home, n: [-f.n[0], -f.n[1], -f.n[2]] });
-  return slots.map(({ home, n }) => ({
-    entry: order[home],
-    home,
-    preview: order[home].preview,
+  const p0 = raw[0];
+  /* axis p0 x z: turns p0 onto +z (checked numerically against rot()) */
+  const toFront = rot([p0[1], -p0[0], 0], Math.acos(p0[2]));
+  const pts = raw.map((v) => apply(toFront, v));
+  pts[0] = [0, 0, 1];
+  /* fill nearest-the-front first: the featured entry at the front, then
+     each slot takes the entry whose nearest existing copy is farthest
+     away (ties: the entry used least, then list order) */
+  const copies: V3[][] = order.map(() => []);
+  const homes: number[] = [];
+  pts.forEach((n, i) => {
+    let pick = 0;
+    if (i > 0) {
+      let bestD = -Infinity,
+        bestUses = Infinity;
+      order.forEach((_, h) => {
+        const near = copies[h].reduce((m, c) => Math.min(m, Math.acos(Math.max(-1, Math.min(1, c[0] * n[0] + c[1] * n[1] + c[2] * n[2])))), Math.PI * 2);
+        const uses = copies[h].length;
+        if (near > bestD + 1e-6 || (Math.abs(near - bestD) <= 1e-6 && uses < bestUses)) {
+          bestD = near;
+          bestUses = uses;
+          pick = h;
+        }
+      });
+    }
+    copies[pick].push(n);
+    homes.push(pick);
+  });
+  return pts.map((n, i) => ({
+    entry: order[homes[i]],
+    home: homes[i],
+    preview: order[homes[i]].preview,
     n,
     lon: Math.atan2(n[0], n[2]),
     lat: Math.asin(-n[1]),
@@ -278,9 +305,11 @@ export default function PlaygroundSphere() {
       });
 
       /* snap: once nearly still, glide the chosen card onto the front */
+      let snapLeft = Infinity;
       if (!S.dragging && Math.abs(S.vx) < 0.004 && Math.abs(S.vy) < 0.004) {
         const idx = S.target >= 0 ? S.target : bi;
         const [next, left] = toward(S.m, uprightFor(cards[idx]), S.reduce ? 1 : S.target >= 0 ? 0.11 : 0.09);
+        snapLeft = left;
         S.m = next;
         if (left > 0.0006) busy = true;
         else S.target = -1;
@@ -322,7 +351,11 @@ export default function PlaygroundSphere() {
         }
         setFront(bi);
       }
-      const now = !busy && !S.dragging && S.spread > 0.98;
+      /* the caption (and click-to-open) don't wait for the motion's long
+         exponential tails - the coast, the snap and the intro inflate all
+         creep on for a second or two - only for the snap to have the card
+         nearly upright, about 2 degrees out */
+      const now = !S.dragging && S.spread > 0.9 && (!busy || snapLeft < 0.035);
       if (now !== S.settled) {
         S.settled = now;
         setSettled(now);
