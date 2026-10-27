@@ -46,7 +46,28 @@ export type Experiment = {
   stats: [Stat, Stat];
   theme: Theme;
   tags: Tag[];
+  /*
+    What the playground sphere shows for this entry, first one first.
+    "cover" renders the drawn cover component; an image is a real
+    screenshot or render from the build. Every preview links to `href`.
+  */
+  previews: Preview[];
 };
+
+export type Preview =
+  | { type: "cover" }
+  /* an animated product-demo loop, drawn in sphere/demos.tsx under this id */
+  | { type: "demo" }
+  /* a real recording; plays muted and looped only while its card faces you */
+  | { type: "video"; src: string; poster: string }
+  /*
+    The live product inside a browser window: a real recording (video) or a
+    real capture (image, slowly panned). `url` is what the address bar shows.
+  */
+  | { type: "browser"; url: string; video?: string; poster?: string; image?: string; aspect?: number }
+  /* a brand reel: real applications of an identity, crossfading */
+  | { type: "reel"; images: string[] }
+  | { type: "image"; src: string; alt: string };
 
 export type Stat = { value: string; label: string };
 
@@ -125,6 +146,15 @@ export const EXPERIMENTS: Experiment[] = [
       { value: "6", label: "Balls an over" },
       { value: "2", label: "Teams" },
     ],
+    /* real gameplay: one over recorded off /cricket, inside a browser window */
+    previews: [
+      {
+        type: "browser",
+        url: "aayushvisuals.com/cricket",
+        video: "/playground/dpl-gameplay.mp4",
+        poster: "/playground/dpl-gameplay.webp",
+      },
+    ],
     status: "live",
   },
   {
@@ -161,6 +191,8 @@ export const EXPERIMENTS: Experiment[] = [
       { value: "5", label: "Menu tabs" },
       { value: "2", label: "Languages" },
     ],
+    /* a tour of the real app's screens (sphere/demos.tsx) */
+    previews: [{ type: "demo" }],
     status: "live",
   },
   {
@@ -196,6 +228,15 @@ export const EXPERIMENTS: Experiment[] = [
       { value: "1", label: "Frog" },
       { value: "0", label: "Timers" },
     ],
+    /* the real pond, recorded live */
+    previews: [
+      {
+        type: "browser",
+        url: "aayushvisuals.com/frog",
+        video: "/playground/pond-live.mp4",
+        poster: "/playground/pond-live.webp",
+      },
+    ],
     status: "live",
   },
   {
@@ -229,6 +270,7 @@ export const EXPERIMENTS: Experiment[] = [
       { value: "0", label: "Signups" },
       { value: "0", label: "Uploads" },
     ],
+    previews: [{ type: "demo" }],
     status: "live",
   },
   {
@@ -266,6 +308,8 @@ export const EXPERIMENTS: Experiment[] = [
       { value: "13", label: "Clauses" },
       { value: "0", label: "Signups" },
     ],
+    /* the real contract builder, panned across form, document and styles */
+    previews: [{ type: "browser", url: "aayushvisuals.com/contract", image: "/playground/contract-builder.webp" }],
     status: "live",
   },
 ];

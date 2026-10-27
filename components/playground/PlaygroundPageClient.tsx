@@ -3,19 +3,18 @@
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
-import Reveals from "@/components/Reveals";
-import Footer from "@/components/Footer";
-import HomeContact from "@/components/HomeContact";
-import ExperimentShelf from "./ExperimentShelf";
-import "./playground.css";
+import PlaygroundSphere from "./sphere/PlaygroundSphere";
 
 /*
-  /playground shell. Same persistent chrome as the other routes (nav, custom
-  cursor, reveal observer, footer).
+  /playground shell: the site's nav, mobile nav and cursor around one
+  full-screen ball of experiments (sphere/PlaygroundSphere.tsx), after
+  guillaumezhu.com/playground.
 
-  The page opens straight on the shelf now — the physics-toy hero that used
-  to sit above it is gone. The shelf sits on the site's cream and carries its
-  own light rails, so no global .rails layer is mounted here.
+  It is a single screen on purpose - the wheel and every drag turn the
+  ball, so there is no page scroll and no footer below it.
+
+  The earlier rig-card shelf (ExperimentShelf + playground.css) is no
+  longer mounted but is left in place.
 */
 export default function PlaygroundPageClient() {
   return (
@@ -23,19 +22,9 @@ export default function PlaygroundPageClient() {
       <Navbar />
       <MobileNav />
       <Cursor />
-
-      <Reveals />
-      {/* The footer sits OUTSIDE main so it still reads as a contentinfo
-          landmark, which a footer nested inside main does not. It has to
-          stay a sibling of the stage for the parallax - sticky travels
-          within its parent - so main becomes the stage itself. */}
-      <div className="hpParallax">
-        <main className="hpParallax__stage">
-          <ExperimentShelf />
-          <HomeContact />
-        </main>
-        <Footer />
-      </div>
+      <main>
+        <PlaygroundSphere />
+      </main>
     </>
   );
 }

@@ -352,6 +352,20 @@ export default function CricketGame({
     bowl(0);
   }, [bowl]);
 
+  /* dev only: how long until the perfect swing, read by the script that
+     records the playground's gameplay video. Never present in production. */
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const w = window as Window & { __dplTiming?: () => { phase: string; msToPerfect: number } };
+    w.__dplTiming = () => ({
+      phase: phaseRef.current,
+      msToPerfect: releaseAtRef.current + deliveryRef.current.travelMs - clock.now(),
+    });
+    return () => {
+      delete w.__dplTiming;
+    };
+  }, [clock]);
+
   /* ---------------- input ---------------- */
 
   useEffect(() => {
