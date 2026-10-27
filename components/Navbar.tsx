@@ -17,7 +17,7 @@ import LogoMark from "./LogoMark";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
+  { label: "Journey", href: "/about" },
   { label: "Projects", href: "/work" },
   { label: "Experiments", href: "/playground" },
 ];
@@ -25,7 +25,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const ref = useRef<HTMLElement>(null);
-  const overLight = useSurfaceTone(ref, pathname) === "light";
+  const tone = useSurfaceTone(ref, pathname);
 
   /*
     Surface-aware tone.
@@ -48,7 +48,7 @@ export default function Navbar() {
   return (
     <header
       ref={ref}
-      className={`navbar ${overLight ? "navbar--overLight" : "navbar--overDark"}`}
+      className={`navbar ${tone === "glass" ? "navbar--glass" : tone === "light" ? "navbar--overLight" : "navbar--overDark"}`}
     >
       {/* the mark carries no text, so the link needs its own accessible name */}
       <PageLink href="/" className="navbar__logo" aria-label="aayush vz, home">

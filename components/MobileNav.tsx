@@ -34,7 +34,7 @@ import LogoMark from "./LogoMark";
 */
 const ALL_LINKS = [
   { label: "home", href: "/" },
-  { label: "about me", href: "/about" },
+  { label: "journey", href: "/about" },
   { label: "projects", href: "/work" },
   { label: "experiments", href: "/playground" },
 ];
@@ -60,7 +60,7 @@ export default function MobileNav({
   const onContact = isCurrent("/contact", pathname);
   /* the collapsed pill takes the tone of whatever it is over, exactly as the
      desktop bar does; the expanded sheet stays dark on purpose */
-  const overLight = useSurfaceTone(barRef) === "light";
+  const tone = useSurfaceTone(barRef);
   const [open, setOpen] = useState(false);
 
   const renderBar = (isOpen: boolean) => (
@@ -102,7 +102,7 @@ export default function MobileNav({
         <nav
           ref={barRef}
           className={`mobileNav ${position === "top" ? "mobileNav--top" : "mobileNav--bottom"} ${
-            overLight ? "mobileNav--overLight" : "mobileNav--overDark"
+            tone === "glass" ? "mobileNav--glass" : tone === "light" ? "mobileNav--overLight" : "mobileNav--overDark"
           }`}
           aria-label="Mobile navigation"
         >

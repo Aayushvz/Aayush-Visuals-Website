@@ -7,7 +7,7 @@ const description =
   "Aayush Raj is a product designer and design engineer in India with 5+ years across UI/UX, design systems, brand identity and motion, from national government platforms to global sports brands.";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "Journey",
   description,
   keywords: [
     "product designer India",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
      than merging into it, so omitting this ships the page with no share card */
   openGraph: {
     type: "profile",
-    title: "About - Aayush Raj",
+    title: "Journey - Aayush Raj",
     description,
     url: "/about",
     images: [OG_IMAGE],

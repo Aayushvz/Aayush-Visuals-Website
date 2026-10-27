@@ -561,7 +561,10 @@ html.has-cursor .cursorRing {
   transition: opacity 0.5s var(--ease-quint);
 }
 
-.past-rails .rails {
+.past-rails .rails,
+/* the 3D hero is its own rounded frame: the hairlines ruled across it read
+   as stray lines, so they stay off until About has risen most of the way */
+.in-zh-hero .rails {
   opacity: 0;
 }
 
@@ -771,6 +774,61 @@ html.has-cursor .cursorRing {
 .navbar--overLight .navbar__logo sup,
 .navbar--overLight .navbar__links a[aria-current="page"] {
   color: #7c3aed;
+}
+
+/* Over the 3D hero (data-surface="glass"): frosted, grainy glass instead
+   of a cream or near-black cover, so the purple field and the mark read
+   through the bar. A barely-there white tint and a heavy blur, a lit top
+   edge fading down the stroke, and a fine film grain (an SVG noise tile on
+   ::before, under the content) - the grain is what makes it read as frosted
+   glass rather than a tinted panel. White type. */
+.navbar--glass,
+.mobileNav--glass {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 60%, rgba(255, 255, 255, 0.08));
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.04);
+  backdrop-filter: blur(28px) saturate(160%) brightness(1.04);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 24px rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.navbar--glass::before,
+.mobileNav--glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+}
+.navbar--glass .navbar__logo,
+.navbar--glass .navbar__links a {
+  color: #ffffff;
+}
+.navbar--glass .navbar__logo path[fill="#8B5CF6"],
+.mobileNav--glass .mobileNav__logoMark path[fill="#8B5CF6"] {
+  /* the wordmark's purple "vz" sinks into the purple glass: a soft pink
+     from the hero's magenta streak keeps it an accent and keeps it legible */
+  fill: #ffb8e6;
+}
+.navbar--glass .navbar__logo sup,
+.navbar--glass .navbar__links a[aria-current="page"] {
+  color: #ffd6f2;
+}
+/* the purple Contact button vanished into the purple glass: invert it to a
+   solid white chip with violet type, the one opaque thing in the bar */
+.navbar--glass .navbar__contact {
+  background: #ffffff;
+  color: #5b21b6;
+}
+.navbar--glass .navbar__contact:hover {
+  background: #f3e8ff;
 }
 
 /* ---------- hero ---------- */
@@ -5274,7 +5332,9 @@ html.has-cursor .cursorRing {
    pinned the pill dark on every light-theme page. */
 
 .mobileNav--top {
-  top: max(16px, env(safe-area-inset-top, 16px)) !important;
+  /* 24px matches the pill's 24px side inset, so inside a 10px-padded frame
+     (the 3D hero) the gap to the frame is even on top and sides */
+  top: max(24px, env(safe-area-inset-top, 24px)) !important;
   bottom: auto !important;
 }
 
@@ -6252,7 +6312,7 @@ html.has-cursor .cursorRing {
    it to obsidian is redundant - the base rule already is */
 
 .mobileNavCard--top {
-  top: max(16px, env(safe-area-inset-top, 16px)) !important;
+  top: max(24px, env(safe-area-inset-top, 24px)) !important;
   bottom: auto !important;
   padding: 0 !important;
 }

@@ -1,0 +1,159 @@
+/* /test/zhu - all selectors prefixed zh */
+
+.zh {
+  --zh-page: #f4e5de;
+  --zh-ink: #ece6f5;
+  --zh-pin: 3500px;
+  background: var(--zh-page);
+}
+
+/* the scroll budget for the pinned hero: one screen plus the pin */
+.zh-stage { position: relative; height: calc(100svh + var(--zh-pin)); }
+.zh-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding: 10px; /* the same blush margin on all four sides */
+  box-sizing: border-box;
+}
+.zh-after { height: 70svh; }
+
+/* embedded on the homepage: the site's own nav, background and next
+   section take over */
+.zh--embedded { background: transparent; }
+.zh--embedded .zh-stage { height: calc(200svh + var(--zh-pin)); }
+
+.zh-frame {
+  position: relative;
+  transform-origin: 50% 0;
+  height: calc(100svh - 20px);
+  min-height: 460px;
+  overflow: hidden;
+  border-radius: 24px;
+  isolation: isolate;
+  color: var(--zh-ink);
+  font-family: var(--font-aeonik), "General Sans", system-ui, sans-serif;
+}
+
+.zh-poster,
+.zh-canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+.zh-poster {
+  z-index: 0;
+  background:
+    radial-gradient(60% 70% at 70% 45%, rgba(255, 61, 139, 0.55), transparent 70%),
+    radial-gradient(70% 80% at 20% 60%, #7c3aed, transparent 75%),
+    linear-gradient(120deg, #1e0b4f, #4c1d95 45%, #a78bfa);
+}
+.zh-canvas { z-index: 1; touch-action: pan-y; opacity: 0; transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+/* shown only once the lit scene and the name are ready (Scene's ReadyGate) */
+.zh-canvas.is-ready { opacity: 1; }
+
+/* ---------- chrome ---------- */
+.zh-logo {
+  position: absolute;
+  z-index: 3;
+  top: 30px;
+  left: 30px;
+  color: var(--zh-ink);
+  line-height: 0;
+}
+.zh-logo__svg { width: 120px; height: auto; }
+
+.zh-nav {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+}
+.zh-nav__link {
+  padding: 10px 18px;
+  border-radius: 999px;
+  color: var(--zh-ink);
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: background 0.3s;
+}
+.zh-nav__link:hover { background: rgba(255, 255, 255, 0.14); }
+.zh-nav__link:focus-visible,
+.zh-logo:focus-visible { outline: 2px solid var(--zh-ink); outline-offset: 3px; }
+
+.zh-scroll {
+  position: absolute;
+  z-index: 3;
+  left: 24px;
+  bottom: 28px;
+  display: grid;
+  gap: 9px;
+}
+.zh-scroll i { display: block; width: 16px; height: 1.5px; border-radius: 2px; background: rgba(236, 230, 245, 0.55); }
+.zh-scroll i.is-active { width: 36px; background: var(--zh-ink); }
+.zh-scroll i:nth-child(2) { width: 58px; }
+
+/* ---------- no-WebGL fallback ---------- */
+.zh-fallback {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.zh-fallback__name {
+  grid-area: 1 / 1;
+  font-size: clamp(64px, 15vw, 260px);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+.zh-fallback__mark {
+  grid-area: 1 / 1;
+  width: clamp(140px, 22vw, 380px);
+  height: auto;
+  color: #c4b5fd;
+  rotate: -4deg;
+}
+
+.zh-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .zh { --zh-pin: 2800px; }
+}
+
+@media (max-width: 760px) {
+  .zh-pin { padding: 10px; }
+  .zh-frame { height: calc(100svh - 20px); border-radius: 20px; }
+  /* the reference's phone view: logo top-left, a compact pill beside it */
+  /* phones: the site's MobileNav pill is the only chrome - the hero's own
+     logo and compact nav would peek out behind it */
+  .zh-logo,
+  .zh-nav { display: none; }
+  .zh-logo__svg { width: 74px; }
+  .zh-nav { left: auto; right: 10px; top: 12px; translate: none; gap: 0; padding: 6px 6px; }
+  .zh-nav__link { padding: 8px 9px; font-size: 13px; }
+  .zh-nav__link:nth-child(1),
+  .zh-nav__link:nth-child(2) { display: none; } /* Home and Journey: logo and menu cover them */
+}

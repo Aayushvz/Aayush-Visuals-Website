@@ -157,7 +157,7 @@ export const PILLS: Pill[] = [
     phone position unconditionally: the others are decoration and can be
     dropped at that width, this one is the route to /about.
   */
-  { label: "About me", icon: Arrow, x: 13, y: 80, rot: 7, bg: "#7c3aed", href: "/about", phone: { x: 72, y: 92, rot: 7 } },
+  { label: "My journey", icon: Arrow, x: 13, y: 80, rot: 7, bg: "#7c3aed", href: "/about", phone: { x: 72, y: 92, rot: 7 } },
 ];
 
 export const CHIPS: Chip[] = [

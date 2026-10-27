@@ -5,7 +5,8 @@ import { useEffect, useState, type RefObject } from "react";
 /*
   Reports whether the page surface beneath a fixed element is dark or
   light, so floating chrome (navbar pills) can restyle itself per
-  section while scrolling. Samples the element stack under the pill's
+  section while scrolling. A surface marked data-surface="glass" (the 3D
+  hero) reports "glass": the pills go clear there instead of covering it. Samples the element stack under the pill's
   centre each scroll frame and picks the first opaque background color.
 */
 /*
@@ -34,7 +35,7 @@ export default function useSurfaceTone(
   ref: RefObject<HTMLElement | null>,
   rerunKey?: unknown
 ) {
-  const [tone, setTone] = useState<"dark" | "light">("dark");
+  const [tone, setTone] = useState<"dark" | "light" | "glass">("dark");
 
   useEffect(() => {
     let raf = 0;
@@ -62,6 +63,10 @@ export default function useSurfaceTone(
       for (const under of document.elementsFromPoint(x, y)) {
         if (el.contains(under)) continue;
         if (isOverlay(under)) continue;
+        if (under.closest('[data-surface="glass"]')) {
+          setTone("glass");
+          return;
+        }
         const style = getComputedStyle(under);
         /* SVG shapes (e.g. the brush-stroke section edges) paint via fill,
            not background-color */

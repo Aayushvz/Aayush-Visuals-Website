@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
 
-import Hero from "@/components/Hero";
+import ZhuHero from "@/components/test/zhu/ZhuHero";
 import About from "@/components/About";
 import Statement from "@/components/Statement";
 import Process from "@/components/Process";
@@ -48,7 +48,7 @@ export default function Home() {
           <h1 className="srOnly">
             Aayush Raj - Product Designer and Design Engineer
           </h1>
-          <Hero />
+          <ZhuHero embedded />
           {/* About rises over the pinned hero (stage pulled up 100vh, higher
               z) with its stepped-band top edge, then pins inside this stage;
               the stage's extra spacer provides a calm dwell before the
