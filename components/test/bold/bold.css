@@ -1,0 +1,417 @@
+/* /test/bold - poster hero. Everything is scoped under .bh. */
+
+.bh, .bh * { box-sizing: border-box; }
+
+.bh {
+  --bh-bg: #6b2bff;
+  --bh-bg-deep: #4f12e6;
+  --bh-giant: #8350ff;
+  --bh-ink: #14002e;
+  --bh-paper: #ffffff;
+  --bh-pink: #ff7ad9;
+  --bh-cyan: #6ee7ff;
+  --mx: 0;
+  --my: 0;
+
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: clip;
+  isolation: isolate;
+  color: var(--bh-paper);
+  background:
+    radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(40, 0, 120, 0.45) 100%),
+    var(--bh-bg);
+  font-family: var(--font-aeonik), "General Sans", system-ui, sans-serif;
+  cursor: default;
+}
+
+/* ---------- 1. Field: cropped giant letterforms ---------- */
+.bh-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  translate: calc(var(--mx) * -18px) calc(var(--my) * -12px);
+}
+.bh-giant {
+  position: absolute;
+  color: var(--bh-giant);
+  line-height: 0.78;
+  user-select: none;
+  white-space: nowrap;
+}
+.bh-giant--a {
+  font-family: var(--font-archivo), sans-serif;
+  font-weight: 900;
+  font-stretch: 62%;
+  font-size: 92vh;
+  letter-spacing: -0.04em;
+  left: -6vw;
+  top: -22vh;
+}
+.bh-giant--v {
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-size: 118vh;
+  right: -9vw;
+  top: -28vh;
+}
+.bh-giant--y {
+  font-family: var(--font-archivo), sans-serif;
+  font-weight: 900;
+  font-stretch: 62%;
+  font-size: 70vh;
+  left: 38vw;
+  bottom: -46vh;
+}
+.bh-giant--dot {
+  width: 15vh;
+  height: 17vh;
+  border-radius: 50%;
+  background: var(--bh-giant);
+  left: 26vw;
+  top: 44vh;
+  rotate: 12deg;
+}
+
+/* ---------- 2. Shards ---------- */
+.bh-shards {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.bh-shard {
+  position: absolute;
+  translate: -50% -50%;
+  transform: translate3d(
+    calc(var(--mx) * var(--d) * 70px),
+    calc(var(--my) * var(--d) * 50px),
+    0
+  );
+  opacity: 0;
+  animation: bh-in 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: calc(0.25s + var(--d) * 0.25s);
+}
+.bh-shard__float {
+  width: 100%;
+  height: 100%;
+  rotate: var(--r);
+  animation: bh-float calc(9s + var(--d) * 4s) ease-in-out infinite alternate;
+}
+.bh-shard__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 18px 30px rgba(30, 0, 90, 0.35));
+}
+@keyframes bh-float {
+  from { transform: translateY(-10px) rotate(-6deg); }
+  to   { transform: translateY(12px) rotate(8deg); }
+}
+@keyframes bh-in {
+  from { opacity: 0; scale: 0.6; }
+  to   { opacity: 1; scale: 1; }
+}
+
+/* ---------- Top chrome ---------- */
+.bh-top {
+  position: absolute;
+  z-index: 5;
+  inset: 28px clamp(16px, 4vw, 56px) auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.bh-logo {
+  justify-self: start;
+  color: var(--bh-paper);
+  text-decoration: none;
+  font-family: var(--font-serif), serif;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.bh-logo sup {
+  font-family: var(--font-aeonik), sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 2px;
+  vertical-align: 14px;
+}
+.bh-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--bh-paper);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font: 500 16px/1 var(--font-aeonik), sans-serif;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.bh-menu:hover { background: rgba(255, 255, 255, 0.22); }
+.bh-menu__dots {
+  display: grid;
+  grid-template-columns: 4px 4px;
+  gap: 3px;
+}
+.bh-menu__dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.bh-menu__dots i:first-child { grid-row: span 2; align-self: center; }
+.bh-cta {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 30px;
+  border-radius: 999px;
+  color: var(--bh-ink);
+  background: var(--bh-paper);
+  text-decoration: none;
+  font: 500 16px/1 var(--font-aeonik), sans-serif;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s;
+}
+.bh-cta:hover { transform: translateY(-2px); background: #f1ebff; }
+
+/* ---------- 3. Headline ---------- */
+.bh-center {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vh, 32px);
+  padding-bottom: 2vh;
+  pointer-events: none;
+  transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 8px), 0);
+}
+.bh-title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-archivo), sans-serif;
+  font-weight: 900;
+  font-stretch: 62%;
+  font-size: clamp(48px, min(19vh, 14.2vw), 210px);
+  line-height: 0.86;
+  letter-spacing: -0.012em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.bh-line {
+  display: block;
+  overflow: clip;
+  padding: 0 0.04em;
+}
+.bh-line > span {
+  display: block;
+  /* chromatic fringe, like light through the shards */
+  text-shadow:
+    -0.022em 0 0 rgba(255, 122, 217, 0.75),
+    0.022em 0 0 rgba(110, 231, 255, 0.6);
+  translate: 0 105%;
+  animation: bh-rise 1s cubic-bezier(0.2, 0.85, 0.15, 1) forwards;
+  animation-delay: calc(0.15s + var(--i) * 0.12s);
+}
+.bh-line--ink > span {
+  color: var(--bh-ink);
+  text-shadow:
+    -0.02em 0 0 rgba(255, 122, 217, 0.55),
+    0.02em 0 0 rgba(110, 231, 255, 0.35);
+}
+@keyframes bh-rise {
+  to { translate: 0 0; }
+}
+
+.bh-sub {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  opacity: 0;
+  animation: bh-fade 0.8s 0.8s forwards;
+}
+@keyframes bh-fade { to { opacity: 1; } }
+
+/* ---------- Bottom chrome ---------- */
+.bh-reel {
+  position: absolute;
+  z-index: 5;
+  left: clamp(16px, 2.4vw, 36px);
+  bottom: clamp(16px, 2.4vw, 28px);
+  width: 330px;
+  height: 250px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #1d0550, #0e0228 70%);
+  box-shadow: 0 24px 60px rgba(20, 0, 60, 0.45);
+  color: var(--bh-paper);
+  text-decoration: none;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  opacity: 0;
+  translate: 0 24px;
+  animation: bh-card 0.9s 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bh-reel:hover { transform: translateY(-4px) rotate(-0.6deg); }
+@keyframes bh-card { to { opacity: 1; translate: 0 0; } }
+.bh-reel__tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+.bh-reel__tag i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+}
+.bh-reel__frame {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #2a0b6b;
+}
+.bh-reel__frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  scale: 1.08;
+  transition: opacity 0.7s ease, scale 2.6s linear;
+}
+.bh-reel__frame img.is-on { opacity: 1; scale: 1; }
+.bh-reel__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+}
+.bh-reel__meta b { font-weight: 500; }
+.bh-reel__meta span { opacity: 0.55; font-variant-numeric: tabular-nums; }
+
+.bh-plus {
+  position: absolute;
+  z-index: 5;
+  left: calc(clamp(16px, 2.4vw, 36px) + 352px);
+  bottom: clamp(56px, 8vh, 90px);
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.3s, rotate 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bh-plus:hover { background: rgba(255, 255, 255, 0.2); rotate: 90deg; }
+.bh-plus svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--bh-paper);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.bh-scroll {
+  position: absolute;
+  z-index: 5;
+  right: clamp(16px, 2.4vw, 36px);
+  bottom: clamp(16px, 2.4vw, 28px);
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+}
+.bh-scroll svg {
+  position: absolute;
+  inset: 0;
+  animation: bh-spin 14s linear infinite;
+}
+.bh-scroll text {
+  fill: rgba(255, 255, 255, 0.85);
+  font: 500 10.4px var(--font-aeonik), sans-serif;
+  letter-spacing: 0.08em;
+}
+.bh-scroll__arrow { font-size: 18px; opacity: 0.85; }
+@keyframes bh-spin { to { rotate: 360deg; } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .bh-shard { scale: 0.75; }
+  .bh-plus { display: none; }
+  .bh-giant--a { font-size: 70vh; }
+}
+@media (max-width: 640px) {
+  .bh-top { top: 16px; }
+  .bh-menu { height: 44px; padding: 0 18px; font-size: 14px; }
+  .bh-cta { height: 44px; padding: 0 16px; font-size: 13px; }
+  .bh-logo { font-size: 24px; }
+  .bh-top { grid-template-columns: auto 1fr; gap: 10px; }
+  .bh-menu { display: none; }
+  .bh-sub { white-space: normal; text-align: center; padding: 0 16px; }
+  .bh-scroll { width: 84px; height: 84px; }
+  .bh-shard { scale: 0.6; }
+  .bh-giant--v { right: -30vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bh *, .bh *::before, .bh *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+  }
+  .bh-scroll svg, .bh-shard__float { animation: none !important; }
+  .bh-reel__frame img { transition: opacity 0.3s; }
+}
+
+/* small or short screens: the reel collapses into a compact chip so it
+   never sits on the headline */
+@media (max-width: 1100px), (max-height: 820px) {
+  .bh-reel {
+    width: auto;
+    height: auto;
+    padding: 8px 16px 8px 8px;
+    border-radius: 16px;
+    grid-template-columns: 64px auto;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .bh-reel__tag { display: none; }
+  .bh-reel__frame { width: 64px; height: 64px; border-radius: 10px; }
+  .bh-reel__meta { flex-direction: column; gap: 3px; font-size: 12px; }
+  .bh-plus { left: calc(clamp(16px, 2.4vw, 36px) + 180px); bottom: calc(clamp(16px, 2.4vw, 28px) + 12px); width: 56px; height: 56px; border-radius: 16px; }
+  .bh-scroll { width: 84px; height: 84px; }
+}

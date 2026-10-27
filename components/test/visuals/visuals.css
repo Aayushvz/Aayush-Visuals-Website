@@ -1,0 +1,223 @@
+/* /test/visuals - everything scoped under .vz */
+
+.vz, .vz * { box-sizing: border-box; }
+
+.vz {
+  --vz-paper: color-mix(in srgb, var(--purple) 24%, #fff);
+  --vz-ink: var(--purple);
+  --mx: 0;
+  --my: 0;
+  /* composition unit: the whole poster is laid out in k, centred on the
+     viewport, so it scales as one picture from a phone to a 4K screen */
+  --k: min(1vh, 1.4vw);
+  /* glyph units -> k */
+  --u: 0.125;
+
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: clip;
+  isolation: isolate;
+  background: var(--vz-paper);
+  color: var(--vz-ink);
+  font-family: var(--font-aeonik), "General Sans", system-ui, sans-serif;
+}
+.vz.vz--pen { cursor: none; }
+.vz.vz--pen.vz--link { cursor: pointer; }
+
+/* ---------- ink canvas (paper layer) ---------- */
+.vz-ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---------- giant letterforms ---------- */
+.vz-giants {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.vz-g {
+  position: absolute;
+  line-height: 0;
+  transform: translate3d(
+    calc(var(--mx) * var(--d) * -46px),
+    calc(var(--my) * var(--d) * -30px),
+    0
+  );
+}
+.vz-g__svg {
+  display: block;
+  height: 100%;
+  width: auto;
+  overflow: visible;
+  opacity: 0;
+}
+.vz--go .vz-g__svg {
+  animation: vz-giant 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--d) * 0.12s);
+}
+@keyframes vz-giant {
+  from { opacity: 0; scale: 1.06; }
+  to   { opacity: 1; scale: 1; }
+}
+
+.vz-g { height: calc(var(--gh) * var(--u) * var(--k)); }
+/* packed like the reference: letterforms crowd to within a few k of the
+   lockup's clear box (x +-29k, y +-18k) and nearly touch each other */
+.vz-g--A { left: calc(50% + var(--k) * -133); top: calc(50% + var(--k) * -106); }
+.vz-g--l { left: calc(50% + var(--k) * -12);  top: calc(50% + var(--k) * -134); }
+.vz-g--u { left: calc(50% + var(--k) * 27);   top: calc(50% + var(--k) * -84); }
+.vz-g--i { left: calc(50% + var(--k) * -101); top: calc(50% + var(--k) * 6); }
+.vz-g--a { left: calc(50% + var(--k) * -16);  top: calc(50% + var(--k) * 21); }
+.vz-g--S { display: none; }
+.vz-g--dot { display: none; }
+
+/* ---------- lockup ---------- */
+.vz-mark {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--k) * 48);
+  margin: 0;
+  translate: -50% -50%;
+  transform: translate3d(calc(var(--mx) * 8px), calc(var(--my) * 6px), 0);
+  line-height: 0;
+}
+.vz-mark__svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* the writing: each stroke's centreline, stroked wider than the pen,
+   uncovered along its length in stroke order */
+.vz-writeMask {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 400;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+.vz--go .vz-writeMask {
+  animation: vz-write 0.46s cubic-bezier(0.55, 0.05, 0.35, 1) forwards;
+  animation-delay: calc(0.45s + var(--i) * 0.085s);
+}
+@keyframes vz-write { to { stroke-dashoffset: 0; } }
+
+/* ---------- chrome ---------- */
+.vz-top,
+.vz-bottom {
+  position: absolute;
+  z-index: 4;
+  left: clamp(16px, 2.6vw, 40px);
+  right: clamp(16px, 2.6vw, 40px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  opacity: 0;
+}
+.vz--go .vz-top,
+.vz--go .vz-bottom { animation: vz-fade 0.8s 2s forwards; }
+.vz-top { top: clamp(16px, 2.6vw, 32px); }
+.vz-bottom { bottom: clamp(16px, 2.6vw, 32px); }
+@keyframes vz-fade { to { opacity: 1; } }
+
+.vz-meta {
+  justify-self: start;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  /* pills of paper, so labels stay legible where they cross a letterform */
+  background: var(--vz-paper);
+}
+.vz-meta--r { justify-self: end; }
+.vz-meta i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--vz-ink);
+  animation: vz-pulse 2.4s ease-in-out infinite;
+}
+@keyframes vz-pulse { 50% { opacity: 0.3; } }
+
+.vz-nav {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--vz-paper);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vz-ink) 22%, transparent);
+}
+.vz-nav a {
+  padding: 8px 16px;
+  border-radius: 999px;
+  color: var(--vz-ink);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.25s, color 0.25s;
+}
+.vz-nav a:hover { background: var(--vz-ink); color: var(--vz-paper); }
+.vz-nav a:focus-visible,
+.vz-top a:focus-visible { outline: 2px solid var(--vz-ink); outline-offset: 3px; }
+
+.vz-hint { justify-self: center; font-size: 12px; }
+
+/* the pen */
+.vz-pen {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 6px;
+  margin: -3px 0 0 -17px;
+  border-radius: 1.5px;
+  background: var(--vz-ink);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  will-change: transform;
+}
+.vz--pen .vz-pen { opacity: 1; }
+.vz--pen.vz--link .vz-pen { opacity: 0; }
+
+/* ---------- responsive ---------- */
+/* portrait: the same alphabet, re-cropped for a tall frame */
+@media (max-aspect-ratio: 3/4) {
+  .vz { --u: 0.16; }
+  .vz-g--A { left: calc(50% + var(--k) * -100); top: calc(50% + var(--k) * -163); }
+  .vz-g--l { display: none; }
+  .vz-g--u { left: calc(50% + var(--k) * 28);   top: calc(50% + var(--k) * -70); }
+  .vz-g--i { left: calc(50% + var(--k) * -66);  top: calc(50% + var(--k) * 27); }
+  .vz-g--a { left: calc(50% + var(--k) * -4);   top: calc(50% + var(--k) * 46); }
+  .vz-mark { width: calc(var(--k) * 54); }
+}
+
+@media (max-width: 640px) {
+  .vz-top { grid-template-columns: 1fr; justify-items: center; }
+  .vz-top > .vz-meta { display: none; }
+  .vz-nav a { padding: 7px 11px; font-size: 12px; }
+  .vz-bottom { grid-template-columns: 1fr; gap: 6px; justify-items: start; }
+  .vz-hint { display: none; }
+  .vz-meta--r { justify-self: start; }
+  .vz-meta { padding: 6px 11px; font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vz-writeMask { animation: none; stroke-dashoffset: 0; }
+  .vz-g__svg { animation: none; opacity: 1; }
+  .vz-top, .vz-bottom { animation: none; opacity: 1; }
+  .vz-meta i { animation: none; }
+  .vz-g, .vz-mark { transform: none; }
+}
