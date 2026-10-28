@@ -8,11 +8,14 @@
 }
 
 /* the scroll budget for the pinned hero: one screen plus the pin */
-.zh-stage { position: relative; height: calc(100svh + var(--zh-pin)); }
+/* dvh, not svh: on a phone the browser bar hides as you scroll and the
+   screen grows; an svh frame stayed the bar-showing height and left a
+   strip of page under it */
+.zh-stage { position: relative; height: calc(100dvh + var(--zh-pin)); }
 .zh-pin {
   position: sticky;
   top: 0;
-  height: 100svh;
+  height: 100dvh;
   padding: 10px; /* the same blush margin on all four sides */
   box-sizing: border-box;
 }
@@ -21,12 +24,12 @@
 /* embedded on the homepage: the site's own nav, background and next
    section take over */
 .zh--embedded { background: transparent; }
-.zh--embedded .zh-stage { height: calc(100svh + var(--zh-pin)); }
+.zh--embedded .zh-stage { height: calc(100dvh + var(--zh-pin)); }
 
 .zh-frame {
   position: relative;
   transform-origin: 50% 0;
-  height: calc(100svh - 20px);
+  height: calc(100dvh - 20px);
   min-height: 460px;
   overflow: hidden;
   border-radius: 24px;
@@ -192,7 +195,7 @@
      as it turns, so the tagline sits higher to stay clear of it */
   .zh-tag { top: calc(var(--zh-name-top, 30%) - 3.1em); }
   .zh-pin { padding: 10px; }
-  .zh-frame { height: calc(100svh - 20px); border-radius: 20px; }
+  .zh-frame { height: calc(100dvh - 20px); border-radius: 20px; }
   /* the reference's phone view: logo top-left, a compact pill beside it */
   /* phones: the site's MobileNav pill is the only chrome - the hero's own
      logo and compact nav would peek out behind it */
