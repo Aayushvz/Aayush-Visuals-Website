@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { smooth, type ScrollState } from "./scroll";
 import * as THREE from "three";
 
@@ -50,7 +50,10 @@ function paint(family: string) {
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   /* `size` and `widest` are canvas px; the caller turns them into world units */
-  return { tex, aspect: H / W, size, widest, W };
+  /* the top of the first line's ascenders, as a fraction of the canvas
+     height - lets the page place things just above the name */
+  const topFrac = (H - (asc + lead)) / 2 / H;
+  return { tex, aspect: H / W, size, widest, W, topFrac };
 }
 
 /*
@@ -64,21 +67,29 @@ export default function NameType({
   maxWidth,
   scroll,
   onReady,
+  entered = true,
 }: {
   fontSize: number;
   maxWidth: number;
   scroll: React.MutableRefObject<ScrollState>;
   /* called once the name is painted in the real font */
   onReady?: () => void;
+  /* the hero has come in: the name fades in a beat after the mark has
+     risen out of the loader, so the loader's last frame is the mark alone */
+  entered?: boolean;
 }) {
   const mat = useRef<THREE.MeshBasicMaterial>(null);
+  const enteredAt = useRef<number | null>(null);
   /* fades out over p 0.2 -> 0.4 as the camera swings away. alphaTest scales
      with the fade, so the letters keep writing depth (the weave) while they
      are visible, and the plane drops out entirely once gone */
-  useFrame(() => {
+  useFrame((state) => {
     const m = mat.current;
     if (!m) return;
-    const o = 1 - smooth(scroll.current.p, 0.2, 0.4);
+    const now = state.clock.elapsedTime;
+    if (entered && enteredAt.current === null) enteredAt.current = now;
+    const intro = enteredAt.current === null ? 0 : smooth(now - enteredAt.current, 0.55, 1.35);
+    const o = intro * (1 - smooth(scroll.current.p, 0.2, 0.4));
     m.opacity = o;
     m.alphaTest = 0.5 * o;
     m.visible = o > 0.002;
@@ -103,20 +114,40 @@ export default function NameType({
     if (painted) onReady?.();
   }, [painted, onReady]);
 
-  if (!painted) return null;
   /* plane width that renders the type at `fontSize` world units ... */
-  let w = (fontSize * painted.W) / painted.size;
+  let w = painted ? (fontSize * painted.W) / painted.size : 0;
   /* ... unless that makes the longest line wider than allowed */
-  const lineW = (painted.widest * w) / painted.W;
-  if (lineW > maxWidth) w *= maxWidth / lineW;
+  if (painted) {
+    const lineW = (painted.widest * w) / painted.W;
+    if (lineW > maxWidth) w *= maxWidth / lineW;
+  }
+
+  /* publish the name's top edge, in px from the frame's top at the resting
+     camera, as --zh-name-top on the frame: the DOM tagline above the name
+     (ZhuHero) is placed from it */
+  const { viewport, size, gl } = useThree();
+  useEffect(() => {
+    if (!painted) return;
+    const planeH = w * painted.aspect;
+    const yTop = planeH * (0.5 - painted.topFrac);
+    const px = ((viewport.height / 2 - yTop) / viewport.height) * size.height;
+    const frame = gl.domElement.closest(".zh-frame") as HTMLElement | null;
+    frame?.style.setProperty("--zh-name-top", `${px.toFixed(1)}px`);
+  }, [painted, w, viewport.height, size.height, gl]);
+
+  if (!painted) return null;
   return (
-    <mesh position={[0, 0, 0]} scale={[w, w * painted.aspect, 1]}>
+    /* the name never occludes the mark: it writes no depth and draws
+       first (renderOrder 0; the mark's materials are in the same
+       transparent pass at 1 and 2), so the mark always sits over it */
+    <mesh position={[0, 0, 0]} scale={[w, w * painted.aspect, 1]} renderOrder={0}>
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial
         ref={mat}
         map={painted.tex}
         transparent
         alphaTest={0.5}
+        depthWrite={false}
         toneMapped={false}
         opacity={1}
       />

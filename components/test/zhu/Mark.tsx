@@ -39,9 +39,11 @@ import { RISE, type ScrollState } from "./scroll";
 /* the mark's gradient, from the backdrop's own palette: its violet at the
    foot, the magenta streak (softened to orchid) through the middle, its
    lilac at the head */
-const VIOLET = new THREE.Color("#6d28d9");
-const ORCHID = new THREE.Color("#b54ee6");
-const LILAC = new THREE.Color("#c4a6ff");
+/* light, so the surface mostly passes on what it reflects (the backdrop,
+   via the environment cube) and only tints it toward the brand violet */
+const VIOLET = new THREE.Color("#a78bfa");
+const ORCHID = new THREE.Color("#e2a6f5");
+const LILAC = new THREE.Color("#efe6ff");
 /* a faint self-glow in the backdrop's tone, which rises over the scroll as
    the field brightens from indigo to lilac, so the mark keeps its place in
    the gradient rather than going dark against it */
@@ -267,10 +269,21 @@ export default function Mark({
     () =>
       new THREE.MeshPhysicalMaterial({
         vertexColors: true,
-        roughness: 0.34,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.22,
-        envMapIntensity: 0.9,
+        /* drawn in the transparent pass (still fully opaque, still writing
+           depth) so its renderOrder puts it after the name: the mark sits
+           OVER "aayush visuals" rather than weaving through it */
+        transparent: true,
+        /* mostly metal: the backdrop's colours reflect across it and shift
+           as it turns; a thin iridescent film adds the violet-to-pink sheen
+           at the edges, like the reference's logo */
+        metalness: 0.85,
+        roughness: 0.18,
+        clearcoat: 0.7,
+        clearcoatRoughness: 0.18,
+        iridescence: 1,
+        iridescenceIOR: 1.35,
+        iridescenceThicknessRange: [180, 560],
+        envMapIntensity: 1.6,
       }),
     [],
   );
@@ -329,7 +342,7 @@ export default function Mark({
     /* the glow follows the backdrop's brightening over the scroll */
     const sp = scroll.current.p;
     satin.emissive.copy(GLOW_START).lerp(GLOW_END, sp);
-    satin.emissiveIntensity = 0.08 + 0.12 * sp;
+    satin.emissiveIntensity = 0.04 + 0.04 * sp;
 
     if (entered) depthScale.current = THREE.MathUtils.damp(depthScale.current, 1, reduced ? 100 : 2.6, dt);
 

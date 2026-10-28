@@ -11029,9 +11029,9 @@ html.contact-page-active body {
 
 /* ============================================================
    ENTRANCE PRELOADER (components/Preloader.tsx)
-   A giant wordmark on the brand purple, with the role pills dropping
-   onto it; the whole sheet then lifts away on var(--ease-inout),
-   revealing the homepage already rendered underneath.
+   A small "Aayush" in a run of scripts, then the flat logo, then the sheet
+   lifts away. Two looks: light (white paper, the words going from black
+   into the hero's gradient) and dark (deep indigo, white logo).
    ============================================================ */
 
 .preloader {
@@ -11079,106 +11079,84 @@ html.dpl-page .preloader {
 }
 
 /* ---------- the loader itself ----------
-   Purple ground, light type. The wordmark rises out of the bottom edge and
-   is cut by it; the role pills are positioned entirely by the WAAPI track
-   Preloader builds, so at rest they wait far above the screen. Their fill is
-   the ground colour, which is what lets one pill read as lying on top of
-   another where they overlap. */
+   The words and the logo share one grid cell in the middle, small and
+   quiet. Everything that moves is opacity / transform (WAAPI). */
 .ldr {
-  background: var(--purple);
-  color: #fff;
-  font-family: var(--font-primary);
+  display: grid;
+  place-items: center;
 }
 
-.ldr__top {
-  position: absolute;
-  top: clamp(20px, 3.2vw, 44px);
-  left: clamp(20px, 4vw, 60px);
-  right: clamp(20px, 4vw, 60px);
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  font-size: clamp(13px, 1.15vw, 18px);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.92);
+.ldr--dark {
+  background: #150b36;
+  color: #ece6f5;
 }
 
-.ldr__count {
-  font-variant-numeric: tabular-nums;
+.ldr--light {
+  background: #ffffff;
+  color: #111111;
 }
 
-.ldr__word {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  /* centred, and pushed down so the bottom edge of the screen cuts it */
-  translate: -50% 17%;
-  font-size: 30vw;
-  font-weight: 700;
-  line-height: 0.8;
-  letter-spacing: -0.055em;
-  white-space: nowrap;
-  color: var(--cream);
-  /* the rise animation brings it in; measured while invisible */
+.ldr__stage {
+  display: grid;
+  place-items: center;
+}
+
+.ldr__name,
+.ldr__mark {
+  grid-area: 1 / 1;
   opacity: 0;
+  will-change: transform, opacity;
 }
 
-.ldr__base {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  vertical-align: baseline;
-}
-
-.ldr__pill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translateY(-200vh);
-  padding: 0.42em 1.05em 0.48em;
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  border-radius: 999px;
-  background: var(--purple);
-  color: #fff;
-  font-size: clamp(13px, 1.85vw, 30px);
+.ldr__name {
+  font-family: var(--font-aeonik), system-ui, sans-serif;
+  font-size: clamp(22px, 1.8vw, 29px);
   font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  line-height: 1.3;
+  letter-spacing: 0;
   white-space: nowrap;
-  will-change: transform;
 }
 
-/* reduced motion: no drop, no rise; the pile is simply there, then fades */
-.ldr--static .ldr__word {
+/* light: each word is filled with the hero's gradient mixed into black by
+   how early it comes (--t, 0 -> 1), so the run starts black and ends fully
+   in colour. Padding keeps descenders and marks inside the clipped fill */
+.ldr--light .ldr__name {
+  --k: calc((1 - var(--t)) * 100%);
+  padding: 0.15em 0.1em;
+  color: transparent;
+  background: linear-gradient(
+    100deg,
+    color-mix(in oklab, #111111 var(--k), #3b1590),
+    color-mix(in oklab, #111111 var(--k), #7c3aed) 55%,
+    color-mix(in oklab, #111111 var(--k), #ff3d8b)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.ldr__mark {
+  width: clamp(40px, 3.2vw, 52px);
+  line-height: 0;
+}
+
+.ldr--dark .ldr__mark {
+  color: #ffffff;
+}
+
+.ldr__mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* reduced motion: the Latin name, still, then a fade */
+.ldr--static .ldr__name:last-of-type {
   opacity: 1;
 }
 
 .ldr--fade {
   opacity: 0;
   transition: opacity 300ms ease;
-}
-
-@media (max-width: 640px) {
-  .ldr__pill--wide {
-    display: none;
-  }
-
-  /* cut by the bottom edge like desktop, a weight heavier so the smaller
-     word still carries the screen */
-  .ldr__word {
-    /* the letters' ink runs edge to edge. Both values are measured, and hold
-       at any width because ink scales linearly with the font size: the size
-       sets the ink to the screen width, and the extra 0.75vw centres the ink
-       rather than the box, since the a and the h carry unequal sidebearings */
-    translate: calc(-50% - 0.75vw) 3%;
-    font-size: 31.75vw;
-    font-weight: 900;
-  }
-
-  .ldr__pill {
-    font-size: 13px;
-  }
 }
 
 /* ============================================================

@@ -48,13 +48,24 @@ function setLine(items: Item[]) {
   return { placed, width: x - TRACK };
 }
 
+/** how many pen strokes the lockup writes (for timing the writing) */
+export function strokeCount() {
+  const count = (items: Item[]) =>
+    items.reduce((n, it) => n + ink(it.k).strokes.length + (it.over ? ink(it.over.k).strokes.length : 0), 0);
+  return count(LINE_1) + count(LINE_2);
+}
+
 export default function Wordmark({
   className,
   write = true,
   gap = 34,
+  idPrefix = "wm",
 }: {
   className?: string;
   write?: boolean;
+  /** mask id prefix: two lockups on one page (the loader over /test/visuals)
+      must not share ids */
+  idPrefix?: string;
   /** clearance (units) between line 1's baseline and line 2's tallest point */
   gap?: number;
 }) {
@@ -78,7 +89,7 @@ export default function Wordmark({
         {g.strokes.map((s, j) => {
           const i = strokeIndex++;
           if (!write) return <path key={j} d={s.ink} />;
-          const id = `wm-${key}-${j}`;
+          const id = `${idPrefix}-${key}-${j}`;
           return (
             <g key={j}>
               <mask id={id} maskUnits="userSpaceOnUse" x="-500" y="-500" width="2000" height="2000">

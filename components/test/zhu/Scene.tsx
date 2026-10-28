@@ -115,7 +115,7 @@ function Content({
     <>
       <Backdrop reduced={reduced} />
       <CameraRig scroll={scroll} />
-      <NameType fontSize={fontSize} maxWidth={maxWidth} scroll={scroll} onReady={nameIn} />
+      <NameType fontSize={fontSize} maxWidth={maxWidth} scroll={scroll} onReady={nameIn} entered={entered && ready} />
       <Mark scale={markScale} reduced={reduced} entered={entered && ready} scroll={scroll} />
       <ReadyGate armed={named} onReady={allIn} />
       <Roles scroll={scroll} />
@@ -127,13 +127,19 @@ export default function Scene({
   reduced,
   entered,
   scroll,
+  onShown,
 }: {
   reduced: boolean;
   entered: boolean;
   scroll: React.MutableRefObject<ScrollState>;
+  /* the lit scene is on screen (the loader waits for this to hand off) */
+  onShown?: () => void;
 }) {
   const [shown, setShown] = useState(false);
-  const show = useCallback(() => setShown(true), []);
+  const show = useCallback(() => {
+    setShown(true);
+    onShown?.();
+  }, [onShown]);
   return (
     <Canvas
       className={`zh-canvas${shown ? " is-ready" : ""}`}
@@ -147,11 +153,15 @@ export default function Scene({
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
       <ambientLight intensity={0.35} />
-      <Environment resolution={256}>
-        <Lightformer form="rect" intensity={2.2} position={[0, 4, 3]} scale={[8, 2, 1]} color="#ffffff" />
-        <Lightformer form="rect" intensity={1.4} position={[-5, 0, 1]} rotation-y={Math.PI / 2} scale={[6, 3, 1]} color="#ff3d8b" />
-        <Lightformer form="rect" intensity={1.2} position={[5, 0, 1]} rotation-y={-Math.PI / 2} scale={[6, 3, 1]} color="#a78bfa" />
-        <Lightformer form="circle" intensity={0.8} position={[0, -4, 2]} scale={4} color="#7c3aed" />
+      {/* The mark reflects the hero's OWN backdrop: the same 360deg gradient
+          shader, rendered into the environment cube (live, so its drift and
+          streak move in the reflections too), plus one soft white strip for
+          a highlight. So the mark's colour always comes from the field it
+          sits in, shifting as it turns - as the reference's does - rather
+          than a fixed paint that fights it. */}
+      <Environment resolution={128} frames={reduced ? 1 : Infinity}>
+        <Backdrop reduced={reduced} />
+        <Lightformer form="rect" intensity={1.6} position={[0, 4, 3]} scale={[8, 1.5, 1]} color="#ffffff" />
       </Environment>
       <Content reduced={reduced} entered={entered} scroll={scroll} onReady={show} />
     </Canvas>

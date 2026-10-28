@@ -53,6 +53,47 @@
 /* shown only once the lit scene and the name are ready (Scene's ReadyGate) */
 .zh-canvas.is-ready { opacity: 1; }
 
+/* ---------- tagline ---------- */
+/* sits just above the name; --zh-name-top comes from NameType. Hidden
+   until the canvas has faded in (or the no-WebGL fallback shows), then its
+   opacity follows the scroll through --zh-tag-o */
+.zh-tag {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  top: calc(var(--zh-name-top, 30%) - 1.5em);
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-aeonik), system-ui, sans-serif;
+  font-size: clamp(14px, 1.3vw, 21px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgba(236, 230, 245, 0.78);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* and only once the hero has come in: after the mark and the name */
+.zh-frame.is-entered .zh-canvas.is-ready ~ .zh-tag,
+.zh-frame.is-entered .zh-fallback ~ .zh-tag {
+  opacity: var(--zh-tag-o, 1);
+  /* a one-off entrance (not a transition delay, which would also lag the
+     scroll fade) */
+  animation: zh-tag-in 0.7s 1.1s backwards;
+}
+@keyframes zh-tag-in { from { opacity: 0; } }
+.zh-tag__role {
+  display: inline-block;
+  color: #ffffff;
+  transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease;
+}
+.zh-tag__role.is-out {
+  opacity: 0;
+  transform: translateY(-0.35em);
+  filter: blur(3px);
+}
+
 /* ---------- chrome ---------- */
 .zh-logo {
   position: absolute;
@@ -144,6 +185,12 @@
 }
 
 @media (max-width: 760px) {
+  /* phones: the whole sequence (orbit, roles) in about two screens of
+     scrolling rather than nearly four */
+  .zh { --zh-pin: 1500px; }
+  /* the mark stands tall on a phone and its top swings up past the name
+     as it turns, so the tagline sits higher to stay clear of it */
+  .zh-tag { top: calc(var(--zh-name-top, 30%) - 3.1em); }
   .zh-pin { padding: 10px; }
   .zh-frame { height: calc(100svh - 20px); border-radius: 20px; }
   /* the reference's phone view: logo top-left, a compact pill beside it */
