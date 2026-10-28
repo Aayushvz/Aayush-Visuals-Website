@@ -1379,6 +1379,18 @@ html.has-cursor .cursorRing {
   height: 160vh;
 }
 
+/* after the 3D hero (components/test/zhu), the hand-off is the
+   reference's: the hero's frame squeezes a touch and scrolls away like a
+   card, and About simply follows it in flow - no pull-up over a held
+   frame, and no stepped bands rising over it */
+.zh--embedded + .aboutStage {
+  margin-top: 0;
+}
+
+.zh--embedded + .aboutStage .about__steps {
+  display: none;
+}
+
 /* The panel itself. White/off-white on purpose — the hero is the one dark,
    saturated beat; this is the calm editorial counter-beat. Purple returns
    only as a small accent (card dot, cursor-proximity glow in the dot
@@ -1658,14 +1670,49 @@ html.has-cursor .cursorRing {
   rotate: var(--rot, 0deg);
 }
 
+/* Each tag is a small object - a lit top edge and a soft contact shadow -
+   since they are picked up and thrown. Sentence case at normal tracking
+   reads calmer than the spaced-out capitals did. Colours live in
+   components/aboutTags.tsx. */
+.aboutTags__pill,
+.aboutTags__chip {
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(30, 11, 79, 0.06),
+    0 10px 22px -14px rgba(30, 11, 79, 0.45);
+}
+
 .aboutTags__pill {
-  gap: 0.6em;
-  padding: 0.95em 1.45em;
+  gap: 0.55em;
+  padding: 0.9em 1.35em;
   border-radius: 999px;
+  font-size: 1.12em;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: -0.005em;
   white-space: nowrap;
+}
+
+.aboutTags--dark {
+  color: #f4effe;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 12px 24px -14px rgba(30, 11, 79, 0.6);
+}
+
+.aboutTags--outline {
+  color: #5b21b6;
+  background: rgba(255, 255, 255, 0.35) !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(124, 58, 237, 0.55),
+    0 10px 22px -16px rgba(30, 11, 79, 0.35);
+}
+
+.aboutTags__icon,
+.aboutTags__icon svg {
+  opacity: 0.75;
 }
 
 .aboutTags__label {
@@ -2051,6 +2098,32 @@ html.has-cursor .cursorRing {
   /* lift the logo slightly off the glass face for depth */
   transform: translateZ(12px);
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+}
+
+/* 3D logos (components/statement/Logo3D.tsx): once a tile's canvas is up,
+   the logo is the object - no glass box, no flat icon, no CSS float (the
+   sway is in 3D). The canvas overhangs the tile so a turning logo never
+   clips at its edges. */
+.toolTile__obj {
+  position: relative;
+}
+
+.toolTile__3d {
+  position: absolute;
+  inset: -22%;
+  pointer-events: none;
+}
+
+.toolTile--3d .toolTile__obj {
+  width: clamp(72px, 6.4vw, 104px);
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.toolTile--3d .toolTile__obj > svg {
+  display: none !important;
 }
 
 /*

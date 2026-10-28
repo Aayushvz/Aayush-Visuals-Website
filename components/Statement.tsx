@@ -1,6 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+
+/* the logos as solid 3D objects; three.js loads only when this section does */
+const Logo3D = dynamic(() => import("./statement/Logo3D"), { ssr: false });
+
+function hasWebGL() {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
 
 /*
   Full-screen dark statement canvas — the section after About.
@@ -100,6 +113,11 @@ export default function Statement() {
   const toolRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotRef = useRef<HTMLSpanElement>(null);
   const [revealed, setRevealed] = useState(false);
+  /* 3D logos when WebGL is there; each tile drops its flat icon and glass
+     box once its own canvas is up (ready[i]) */
+  const [webgl, setWebgl] = useState(false);
+  const [ready, setReady] = useState<boolean[]>([]);
+  useEffect(() => setWebgl(hasWebGL()), []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -367,13 +385,28 @@ export default function Statement() {
         {TOOLS.map((tool, i) => (
           <div
             key={tool.id}
-            className={`toolTile toolTile--${tool.id}`}
+            className={`toolTile toolTile--${tool.id}${ready[i] ? " toolTile--3d" : ""}`}
             ref={(el) => {
               toolRefs.current[i] = el;
             }}
           >
             <span className="toolTile__enter">
-              <span className="toolTile__obj">{tool.icon}</span>
+              <span className="toolTile__obj">
+                {tool.icon}
+                {webgl && (
+                  <Logo3D
+                    id={tool.id}
+                    phase={i * 1.7}
+                    onReady={() =>
+                      setReady((r) => {
+                        const n = [...r];
+                        n[i] = true;
+                        return n;
+                      })
+                    }
+                  />
+                )}
+              </span>
               <span className="toolTile__label">{tool.label}</span>
             </span>
           </div>

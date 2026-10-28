@@ -68,6 +68,18 @@ const CLICK_SLOP = 6;
    tag through the wall before the solver sees it */
 const MAX_THROW = 32;
 
+/* the tag's surface: "transparent" is an outlined tag; a dark fill takes
+   light type. Luminance from the hex, so the palette in ./aboutTags is the
+   only place colours are chosen */
+function tone(bg: string) {
+  if (bg === "transparent") return " aboutTags--outline";
+  const m = /^#([0-9a-f]{6})$/i.exec(bg);
+  if (!m) return "";
+  const n = parseInt(m[1], 16);
+  const lum = (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+  return lum < 0.55 ? " aboutTags--dark" : "";
+}
+
 export default function AboutTagPile() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const els = useRef<(HTMLElement | null)[]>([]);
@@ -435,7 +447,7 @@ export default function AboutTagPile() {
               }
             : null),
         } as CSSProperties;
-        const off = it.phone ? "" : " aboutTags__off";
+        const off = (it.phone ? "" : " aboutTags__off") + tone(it.bg);
         const ref = (el: HTMLElement | null) => {
           els.current[i] = el;
         };

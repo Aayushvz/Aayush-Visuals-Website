@@ -66,70 +66,29 @@ function Greeting() {
 function DotField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  /* a faint, static dot grid behind the section: painted once per size,
+     no pointer reaction and no animation loop */
   useEffect(() => {
     const canvas = canvasRef.current;
     const section = canvas?.closest(".about") as HTMLElement | null;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !section || !ctx) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const GAP = 26;
-    const RADIUS = 160;
-    const DECAY = 0.9;
-
-    let w = 0;
-    let h = 0;
-    let cols = 0;
-    let rows = 0;
-    let heat = new Float32Array(0);
-    const pointer = { x: -9999, y: -9999, active: false };
-
-    const resize = () => {
+    const paint = () => {
       const rect = section.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = rect.width;
-      h = rect.height;
+      const w = rect.width;
+      const h = rect.height;
       canvas.width = Math.max(1, Math.round(w * dpr));
       canvas.height = Math.max(1, Math.round(h * dpr));
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cols = Math.ceil(w / GAP) + 1;
-      rows = Math.ceil(h / GAP) + 1;
-      heat = new Float32Array(cols * rows);
-    };
-
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(section);
-
-    const setPointer = (clientX: number, clientY: number) => {
-      const rect = section.getBoundingClientRect();
-      pointer.x = clientX - rect.left;
-      pointer.y = clientY - rect.top;
-      pointer.active = true;
-    };
-    const onMove = (e: PointerEvent) => setPointer(e.clientX, e.clientY);
-    const onTouch = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (t) setPointer(t.clientX, t.clientY);
-    };
-    const onLeave = () => {
-      pointer.active = false;
-    };
-
-    section.addEventListener("pointermove", onMove, { passive: true });
-    section.addEventListener("pointerleave", onLeave, { passive: true });
-    section.addEventListener("touchmove", onTouch, { passive: true });
-    section.addEventListener("touchend", onLeave, { passive: true });
-    section.addEventListener("touchcancel", onLeave, { passive: true });
-
-    // Nearly invisible grey by default — small enough that it never
-    // competes with text; only a soft purple brand-accent glow near the
-    // pointer makes it read as intentional.
-    const paintStatic = () => {
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "rgba(31, 31, 31, 0.05)";
+      const cols = Math.ceil(w / GAP) + 1;
+      const rows = Math.ceil(h / GAP) + 1;
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
           ctx.beginPath();
@@ -139,73 +98,10 @@ function DotField() {
       }
     };
 
-    const cleanup = () => {
-      ro.disconnect();
-      section.removeEventListener("pointermove", onMove);
-      section.removeEventListener("pointerleave", onLeave);
-      section.removeEventListener("touchmove", onTouch);
-      section.removeEventListener("touchend", onLeave);
-      section.removeEventListener("touchcancel", onLeave);
-    };
-
-    if (reduced) {
-      paintStatic();
-      return cleanup;
-    }
-
-    // Pause the draw loop while the section is off-screen.
-    let visible = false;
-    const io = new IntersectionObserver((entries) => {
-      visible = entries[0]?.isIntersecting ?? false;
-      if (visible && !raf) raf = requestAnimationFrame(draw);
-    });
-    io.observe(section);
-
-    let raf = 0;
-    function draw() {
-      if (!visible) {
-        raf = 0;
-        return;
-      }
-      ctx!.clearRect(0, 0, w, h);
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const i = y * cols + x;
-          const px = x * GAP;
-          const py = y * GAP;
-          if (pointer.active) {
-            const d = Math.hypot(px - pointer.x, py - pointer.y);
-            if (d < RADIUS) {
-              const falloff = Math.pow(1 - d / RADIUS, 1.6);
-              if (falloff > heat[i]) heat[i] = falloff;
-            }
-          }
-          const hv = heat[i];
-          heat[i] = hv > 0.003 ? hv * DECAY : 0;
-
-          // Base dots stay ink-grey and near-invisible; heat blends them
-          // toward the brand purple, so the interaction itself is the
-          // section's only real dose of purple.
-          const base = 0.045 + hv * 0.02;
-          const purple = hv * 0.34;
-          const r = 1 + hv * 0.85;
-          ctx!.beginPath();
-          ctx!.fillStyle = `rgba(${Math.round(31 + hv * 93)}, ${Math.round(31 + hv * 27)}, ${Math.round(
-            31 + hv * 206
-          )}, ${(base + purple).toFixed(3)})`;
-          ctx!.arc(px, py, r, 0, Math.PI * 2);
-          ctx!.fill();
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    }
-    raf = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-      cleanup();
-    };
+    paint();
+    const ro = new ResizeObserver(paint);
+    ro.observe(section);
+    return () => ro.disconnect();
   }, []);
 
   return <canvas className="about__dots" ref={canvasRef} aria-hidden />;
@@ -302,11 +198,11 @@ export default function About() {
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.72, delay: 0.06, ease: EASE }}
           >
-            I turn <em>complex problems</em>{" "}
+            I turn complex problems{" "}
             <br />
             into products that{" "}
             <br />
-            <em>feel obvious.</em>
+            feel obvious.
           </motion.h2>
 
           <motion.p

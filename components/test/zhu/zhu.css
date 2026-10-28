@@ -21,7 +21,7 @@
 /* embedded on the homepage: the site's own nav, background and next
    section take over */
 .zh--embedded { background: transparent; }
-.zh--embedded .zh-stage { height: calc(200svh + var(--zh-pin)); }
+.zh--embedded .zh-stage { height: calc(100svh + var(--zh-pin)); }
 
 .zh-frame {
   position: relative;

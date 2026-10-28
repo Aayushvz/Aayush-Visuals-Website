@@ -32,7 +32,7 @@ import { markOutline } from "@/components/test/zhu/markGeometry";
 
 /* "Aayush" around the world, ending where it started */
 const NAMES = [
-  "Aayush",
+  "aayush",
   "आयुष",
   "アーユシュ",
   "아유시",
@@ -40,7 +40,7 @@ const NAMES = [
   "আয়ুষ",
   "Аюш",
   "阿尤什",
-  "Aayush",
+  "aayush",
 ];
 
 /* timing, ms */

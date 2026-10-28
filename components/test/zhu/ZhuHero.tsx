@@ -107,8 +107,8 @@ function hasWebGL() {
 /*
   `embedded` is the homepage form: no own nav or logo (the site's Navbar and
   MobileNav are already there), no trailing spacer, a <div> rather than
-  <main>, and one extra screen on the pin so the whole sequence finishes
-  before the About panel rises over the held frame.
+  <main>. After the pin the frame squeezes a touch and scrolls away, and
+  About follows it in flow (globals.css: .zh--embedded + .aboutStage).
 */
 export default function ZhuHero({ embedded = false }: { embedded?: boolean }) {
   const [gl, setGl] = useState<boolean | null>(null);
@@ -141,8 +141,8 @@ export default function ZhuHero({ embedded = false }: { embedded?: boolean }) {
     const measure = () => {
       raf = 0;
       const r = st.getBoundingClientRect();
-      /* the pin length itself (--zh-pin), not the stage height: embedded,
-         the stage carries one more screen after the pin for the hand-off */
+      /* the pin length itself (--zh-pin), not the stage height (which also
+         holds the frame's own screen) */
       const pin = Math.max(1, parseFloat(getComputedStyle(st).getPropertyValue("--zh-pin")) || 3500);
       const passed = -r.top;
       scroll.current.p = Math.min(1, Math.max(0, passed / pin));
