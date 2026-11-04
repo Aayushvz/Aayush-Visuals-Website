@@ -1467,7 +1467,7 @@ export const PROJECTS: Project[] = [
     cover: "/projects/riviera-cover.webp",
     preview: {
       kind: "website",
-      href: "https://riviera-lol.vercel.app/",
+      href: "https://riviera2026-frontend.vercel.app/",
       image: "/projects/riviera-cover.webp",
     },
     cta: "Visit Live Website",
