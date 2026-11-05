@@ -21,9 +21,12 @@ import ProjectMedia from "@/components/projects/ProjectMedia";
 type Props = {
   item: WorkItem;
   index: number;
+  /** in the first screen: fetch its media straight away */
+  above?: boolean;
 };
 
-export default function ProjectCard({ item, index }: Props) {
+export default function ProjectCard({ item, index, above = false }: Props) {
+  const isLoop = /\.(webm|mp4)$/i.test(item.thumbnail);
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -63,6 +66,14 @@ export default function ProjectCard({ item, index }: Props) {
             src={item.thumbnail}
             alt={item.title}
             poster={item.poster}
+            /* the works grid's first row is the first screen of /work and
+               holds its largest paint; it used to be lazy-loaded like the
+               rest, so the browser waited for layout before even asking
+               for it. Stills only: a loop already starts as soon as it is
+               on screen, and eager would make it download in full (505 KB
+               for the first card) during the page load */
+            eager={above && !isLoop}
+            priority={above && !isLoop}
           />
         </div>
       </PageLink>

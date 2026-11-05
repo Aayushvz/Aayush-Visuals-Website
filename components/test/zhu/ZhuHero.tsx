@@ -8,6 +8,7 @@ import { markOutline } from "./markGeometry";
 import { smooth } from "./scroll";
 import type { ScrollState } from "./scroll";
 import "./zhu.css";
+import { hasWebGL } from "@/lib/webgl";
 
 /*
   /test/zhu - the guillaumezhu.com hero, in the Aayush Visuals purple.
@@ -95,15 +96,6 @@ function FlatMark({ className }: { className?: string }) {
   );
 }
 
-function hasWebGL() {
-  try {
-    const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
-
 /*
   `embedded` is the homepage form: no own nav or logo (the site's Navbar and
   MobileNav are already there), no trailing spacer, a <div> rather than
@@ -118,6 +110,16 @@ export default function ZhuHero({ embedded = false }: { embedded?: boolean }) {
   const frame = useRef<HTMLElement>(null);
   const scroll = useRef<ScrollState>({ p: 0, v: 0 });
   const tag = useRef<HTMLParagraphElement>(null);
+  /* is any of the frame on screen? the 3D scene stops drawing when not
+     (Scene's LoopGate) - one observer, no scroll work */
+  const [live, setLive] = useState(true);
+  useEffect(() => {
+    const fr = frame.current;
+    if (!fr) return;
+    const io = new IntersectionObserver(([e]) => setLive(e.isIntersecting));
+    io.observe(fr);
+    return () => io.disconnect();
+  }, []);
   /* tells the site loader the lit scene is up, so it can open onto the
      mark (the loader ends on this very logo; see Preloader.tsx) */
   const shown = useCallback(() => {
@@ -222,7 +224,7 @@ export default function ZhuHero({ embedded = false }: { embedded?: boolean }) {
 
         {/* poster: the backdrop's palette in CSS, under the canvas */}
         <div className="zh-poster" aria-hidden />
-        {gl && <Scene reduced={reduced} entered={entered} scroll={scroll} onShown={shown} />}
+        {gl && <Scene reduced={reduced} entered={entered} scroll={scroll} onShown={shown} live={live} />}
         {gl === false && (
           <div className="zh-fallback" aria-hidden>
             <span className="zh-fallback__name">

@@ -212,7 +212,9 @@ export default function DeferUntilNear({
 
   return (
     <>
-      {flowAnchor ? <div ref={anchorRef} aria-hidden /> : null}
+      {/* data-anim-anchor: AnimationBudget idles the sticky section after
+          this marker until the marker is near, for the same reason */}
+      {flowAnchor ? <div ref={anchorRef} aria-hidden data-anim-anchor="" /> : null}
       <div ref={ref} className={className} style={filled ? undefined : { minHeight }}>
         {shown ? children : null}
       </div>

@@ -71,13 +71,40 @@ function MagneticDotField() {
     const RADIUS = 180;
     const DECAY = 0.92;
 
-    let w = 0, h = 0, cols = 0, rows = 0;
+    let w = 0, h = 0, cols = 0, rows = 0, dpr = 1;
     let heat = new Float32Array(0);
     const pointer = { x: -9999, y: -9999, active: false };
 
+    /*
+      PERFORMANCE. This used to redraw every dot on the page - ~4,000 of
+      them, each its own path, fill and colour string, on a page-sized
+      canvas at 2x - on every frame, forever, whether or not anything was
+      moving. Measured, that held the whole contact page at ~15 fps on a
+      desktop even with the mouse still.
+
+      Now the resting grid (every dot at heat 0) is painted once into an
+      offscreen layer and copied to the screen once. After that a frame
+      touches only the dots that are warm: each warm dot's small square is
+      cleared and the dot drawn alone, exactly as before, and a dot that has
+      just gone back to rest gets its square copied back from the resting
+      layer. Only the cells inside the pointer's radius are visited. When the
+      pointer has left and the last dot has cooled, the loop stops; the next
+      pointermove starts it again. Same colours, sizes, falloff and decay -
+      the picture is identical, frame for frame.
+    */
+    const fill = (hv: number) =>
+      `rgba(${Math.round(124 + hv * 43)}, ${Math.round(58 + hv * 81)}, ${Math.round(237)}, ${(0.03 + hv * 0.02 + hv * 0.45).toFixed(3)})`;
+    const base = document.createElement("canvas");
+    const bctx = base.getContext("2d")!;
+    /* indices of dots with heat > 0 */
+    let hot = new Set<number>();
+    /* dots that went back to rest last frame and need their copy restored */
+    const cooled: number[] = [];
+    let raf = 0;
+
     const resize = () => {
       const rect = wrap.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = rect.width;
       h = rect.height;
       canvas.width = Math.max(1, Math.round(w * dpr));
@@ -88,6 +115,39 @@ function MagneticDotField() {
       cols = Math.ceil(w / GAP) + 1;
       rows = Math.ceil(h / GAP) + 1;
       heat = new Float32Array(cols * rows);
+      hot = new Set();
+      cooled.length = 0;
+      /* the resting grid, drawn once */
+      base.width = canvas.width;
+      base.height = canvas.height;
+      bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      bctx.clearRect(0, 0, w, h);
+      bctx.fillStyle = fill(0);
+      for (let y = 0; y < rows; y++)
+        for (let x = 0; x < cols; x++) {
+          bctx.beginPath();
+          bctx.arc(x * GAP, y * GAP, 1, 0, Math.PI * 2);
+          bctx.fill();
+        }
+      if (!reduced) paint();
+    };
+
+    /* a dot's square in device pixels, whole pixels so the clear and the
+       copy from the base layer always cover exactly the same pixels */
+    const square = (i: number): [number, number, number] => {
+      const px = (i % cols) * GAP;
+      const py = Math.floor(i / cols) * GAP;
+      const x0 = Math.floor((px - 4) * dpr);
+      const y0 = Math.floor((py - 4) * dpr);
+      return [x0, y0, Math.ceil((px + 4) * dpr) - x0];
+    };
+
+    /* the resting layer, copied pixel for pixel */
+    const paint = () => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(base, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resize();
@@ -99,6 +159,7 @@ function MagneticDotField() {
       pointer.x = cx - rect.left;
       pointer.y = cy - rect.top;
       pointer.active = true;
+      if (!reduced && !raf) raf = requestAnimationFrame(draw);
     };
     const onMove = (e: PointerEvent) => setPointer(e.clientX, e.clientY);
     const onLeave = () => { pointer.active = false; };
@@ -123,36 +184,60 @@ function MagneticDotField() {
       return cleanup;
     }
 
-    let raf = 0;
     function draw() {
-      ctx!.clearRect(0, 0, w, h);
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const i = y * cols + x;
-          const px = x * GAP;
-          const py = y * GAP;
-          if (pointer.active) {
-            const d = Math.hypot(px - pointer.x, py - pointer.y);
+      raf = 0;
+      /* warm the dots inside the pointer's radius - only those cells */
+      if (pointer.active) {
+        const x0 = Math.max(0, Math.floor((pointer.x - RADIUS) / GAP));
+        const x1 = Math.min(cols - 1, Math.ceil((pointer.x + RADIUS) / GAP));
+        const y0 = Math.max(0, Math.floor((pointer.y - RADIUS) / GAP));
+        const y1 = Math.min(rows - 1, Math.ceil((pointer.y + RADIUS) / GAP));
+        for (let y = y0; y <= y1; y++)
+          for (let x = x0; x <= x1; x++) {
+            const i = y * cols + x;
+            const d = Math.hypot(x * GAP - pointer.x, y * GAP - pointer.y);
             if (d < RADIUS) {
               const falloff = Math.pow(1 - d / RADIUS, 1.6);
               if (falloff > heat[i]) heat[i] = falloff;
+              if (heat[i] > 0) hot.add(i);
             }
           }
-          const hv = heat[i];
-          heat[i] = hv > 0.003 ? hv * DECAY : 0;
-
-          const base = 0.03 + hv * 0.02;
-          const purple = hv * 0.45;
-          const r = 1 + hv * 1.2;
-          ctx!.beginPath();
-          ctx!.fillStyle = `rgba(${Math.round(124 + hv * 43)}, ${Math.round(58 + hv * 81)}, ${Math.round(237)}, ${(base + purple).toFixed(3)})`;
-          ctx!.arc(px, py, r, 0, Math.PI * 2);
-          ctx!.fill();
-        }
       }
-      raf = requestAnimationFrame(draw);
+      /* only the squares that change are touched: a dot that cooled to rest
+         last frame gets its resting copy back from the base layer, and each
+         warm dot's square is cleared and the dot drawn alone, as it always
+         was (dots are GAP apart, so a square holds nothing else). Copying
+         the whole page-sized layer every frame instead cost more than the
+         dots themselves while the pointer moved. */
+      for (const i of cooled) {
+        if (hot.has(i)) continue;
+        const [sx, sy, s] = square(i);
+        ctx!.setTransform(1, 0, 0, 1, 0, 0);
+        ctx!.clearRect(sx, sy, s, s);
+        ctx!.drawImage(base, sx, sy, s, s, sx, sy, s, s);
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      cooled.length = 0;
+      for (const i of hot) {
+        const hv = heat[i];
+        heat[i] = hv > 0.003 ? hv * DECAY : 0;
+        if (heat[i] === 0) {
+          hot.delete(i);
+          cooled.push(i);
+        }
+        const [sx, sy, s] = square(i);
+        ctx!.setTransform(1, 0, 0, 1, 0, 0);
+        ctx!.clearRect(sx, sy, s, s);
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx!.beginPath();
+        ctx!.fillStyle = fill(hv);
+        ctx!.arc((i % cols) * GAP, Math.floor(i / cols) * GAP, 1 + hv * 1.2, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+      /* park once nothing is warm and the pointer has gone (one more frame
+         if a dot has just cooled, to put its resting copy back) */
+      if (pointer.active || hot.size > 0 || cooled.length > 0) raf = requestAnimationFrame(draw);
     }
-    raf = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(raf);

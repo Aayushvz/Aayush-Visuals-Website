@@ -285,7 +285,7 @@ export default function PixelBackground() {
 
           const op = Math.min(0.30, cloudOp * (0.4 + cloudD * 0.6));
           ctx.globalAlpha = op;
-          ctx.fillStyle = `rgb(${BASE_R},${BASE_G},${BASE_B})`;
+          ctx.fillStyle = BASE_FILL;
           ctx.fillRect(cellX, cellY, SQ, SQ);
         }
       }

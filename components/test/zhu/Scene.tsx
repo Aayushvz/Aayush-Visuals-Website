@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Environment, Lightformer } from "@react-three/drei";
@@ -17,8 +17,8 @@ import { ORBIT, RISE, type ScrollState } from "./scroll";
   Lightformers (no HDR download), a key light, and a hot magenta rim that
   echoes the backdrop's streak.
 
-  Loaded only on /test/zhu via next/dynamic, so three.js never reaches the
-  other routes.
+  Loaded via next/dynamic (it is the homepage hero and /test/zhu), so
+  three.js never reaches the other routes.
 */
 
 /*
@@ -79,6 +79,40 @@ function ReadyGate({ armed, onReady }: { armed: boolean; onReady: () => void }) 
   return null;
 }
 
+/*
+  Stops the render loop while the hero is off screen, and starts it again,
+  unchanged, when it returns.
+
+  Before this the canvas drew every frame for the whole visit - the live
+  environment cube, the glass pass and the screen pass - so ~1,500 draw
+  calls a second were still being made at the very bottom of the homepage,
+  where nothing of the hero is visible, and the rest of the page scrolled on
+  what was left of the frame.
+
+  R3F's setFrameloop resets clock.elapsedTime to 0, and the name's intro
+  and the mark's hold are timed off elapsedTime, so a plain toggle would
+  replay (or hide) them on the way back. The clock is saved on pause and put
+  back on resume, so the scene simply carries on from the frame it left.
+  Nothing is paused until the scene has reported ready, so the loader's
+  hand-off never waits on a hero that cannot draw.
+*/
+function LoopGate({ live }: { live: boolean }) {
+  const setFrameloop = useThree((s) => s.setFrameloop);
+  const clock = useThree((s) => s.clock);
+  const saved = useRef<number | null>(null);
+  useEffect(() => {
+    if (!live) {
+      saved.current = clock.elapsedTime;
+      setFrameloop("never");
+    } else if (saved.current !== null) {
+      setFrameloop("always");
+      clock.elapsedTime = saved.current;
+      saved.current = null;
+    }
+  }, [live, clock, setFrameloop]);
+  return null;
+}
+
 function Content({
   reduced,
   entered,
@@ -92,6 +126,9 @@ function Content({
 }) {
   const [named, setNamed] = useState(false);
   const [ready, setReady] = useState(false);
+  /* the shaders are compiled (Mark's warm-up) */
+  const [warm, setWarm] = useState(false);
+  const warmed = useCallback(() => setWarm(true), []);
   const nameIn = useCallback(() => setNamed(true), []);
   const allIn = useCallback(() => {
     setReady(true);
@@ -116,8 +153,8 @@ function Content({
       <Backdrop reduced={reduced} />
       <CameraRig scroll={scroll} />
       <NameType fontSize={fontSize} maxWidth={maxWidth} scroll={scroll} onReady={nameIn} entered={entered && ready} />
-      <Mark scale={markScale} reduced={reduced} entered={entered && ready} scroll={scroll} />
-      <ReadyGate armed={named} onReady={allIn} />
+      <Mark scale={markScale} reduced={reduced} entered={entered && ready} scroll={scroll} warmWhen={named} onWarm={warmed} />
+      <ReadyGate armed={named && warm} onReady={allIn} />
       <Roles scroll={scroll} />
     </>
   );
@@ -128,12 +165,15 @@ export default function Scene({
   entered,
   scroll,
   onShown,
+  live = true,
 }: {
   reduced: boolean;
   entered: boolean;
   scroll: React.MutableRefObject<ScrollState>;
   /* the lit scene is on screen (the loader waits for this to hand off) */
   onShown?: () => void;
+  /* false while the hero is off screen: the render loop stops (LoopGate) */
+  live?: boolean;
 }) {
   const [shown, setShown] = useState(false);
   const show = useCallback(() => {
@@ -164,6 +204,7 @@ export default function Scene({
         <Lightformer form="rect" intensity={1.6} position={[0, 4, 3]} scale={[8, 1.5, 1]} color="#ffffff" />
       </Environment>
       <Content reduced={reduced} entered={entered} scroll={scroll} onReady={show} />
+      <LoopGate live={live || !shown} />
     </Canvas>
   );
 }

@@ -2,18 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { hasWebGL } from "@/lib/webgl";
 
 /* the logos as solid 3D objects; three.js loads only when this section does */
 const Logo3D = dynamic(() => import("./statement/Logo3D"), { ssr: false });
-
-function hasWebGL() {
-  try {
-    const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
 
 /*
   Full-screen dark statement canvas — the section after About.

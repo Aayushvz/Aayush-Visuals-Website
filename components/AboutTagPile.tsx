@@ -265,6 +265,24 @@ export default function AboutTagPile() {
       let released = false;
       let raf = 0;
       let running = true;
+      /*
+        Parking. The pile used to step the physics and rewrite every tag's
+        transform on every frame for as long as the panel was near the
+        screen - which, pinned, is a long stretch of the page - even though
+        a settled pile does not move. Once every tag has been still for
+        STILL_FRAMES frames (and nothing is held), the loop stops; it picks
+        up again the moment a tag is grabbed. A resting body has nothing
+        left to show, so the picture is the same.
+      */
+      const STILL_FRAMES = 45;
+      let still = 0;
+      let parked = false;
+      let held = false;
+      const wake = () => {
+        parked = false;
+        still = 0;
+        if (running && !raf) raf = requestAnimationFrame(frame);
+      };
 
       /* out-and-back overshoot on the way in, so a tag lands rather than
          simply appears */
@@ -296,7 +314,13 @@ export default function AboutTagPile() {
             `rotate(${l.body.angle.toFixed(4)}rad) scale(${s.toFixed(3)})`;
         }
 
-        if (running) raf = requestAnimationFrame(frame);
+        if (released && !held) {
+          const calm = live.every((l) => l.body.speed < 0.02 && Math.abs(l.body.angularSpeed) < 0.0005);
+          still = calm ? still + 1 : 0;
+          if (still >= STILL_FRAMES) parked = true;
+        }
+
+        if (running && !parked) raf = requestAnimationFrame(frame);
       };
       raf = requestAnimationFrame(frame);
 
@@ -305,7 +329,7 @@ export default function AboutTagPile() {
       const vis = new IntersectionObserver(
         ([e]) => {
           running = e.isIntersecting;
-          if (running && !raf) raf = requestAnimationFrame(frame);
+          if (running && !raf && !parked) raf = requestAnimationFrame(frame);
         },
         { rootMargin: "200px 0px" },
       );
@@ -336,6 +360,8 @@ export default function AboutTagPile() {
         drag = { l, id: e.pointerId, px: e.clientX, py: e.clientY, vx: 0, vy: 0, moved: 0, caught: false };
         Body.setStatic(l.body, true);
         l.el.classList.add("aboutTags__held");
+        held = true;
+        wake();
       };
 
       const onMove = (e: PointerEvent) => {
@@ -381,6 +407,7 @@ export default function AboutTagPile() {
         if (!drag) return;
         const d = drag;
         drag = null;
+        held = false;
         d.l.el.classList.remove("aboutTags__held");
         if (d.caught) {
           try {

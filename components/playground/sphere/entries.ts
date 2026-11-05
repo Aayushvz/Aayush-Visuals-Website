@@ -76,11 +76,11 @@ const projects: SphereEntry[] = [
     preview: {
       type: "reel",
       images: [
-        "/projects/dropby/statement.webp",
-        "/projects/dropby/billboard.webp",
-        "/projects/dropby/posters-street.webp",
-        "/projects/dropby/banners.webp",
-        "/projects/dropby/posters-wall.webp",
+        "/playground/reel/dropby-statement.webp",
+        "/playground/reel/dropby-billboard.webp",
+        "/playground/reel/dropby-posters-street.webp",
+        "/playground/reel/dropby-banners.webp",
+        "/playground/reel/dropby-posters-wall.webp",
       ],
     },
   },
