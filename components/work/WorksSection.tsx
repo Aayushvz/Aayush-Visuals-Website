@@ -67,7 +67,7 @@ export default function WorksSection() {
       {results.length > 0 ? (
         <div className="worksGrid">
           {results.map((item, i) => (
-            <ProjectCard key={item.id} item={item} index={i} />
+            <ProjectCard key={item.id} item={item} index={i} above={i < 3} />
           ))}
         </div>
       ) : (

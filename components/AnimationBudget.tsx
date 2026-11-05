@@ -34,6 +34,29 @@ export default function AnimationBudget() {
       { rootMargin: "300px 0px" }
     );
 
+    /*
+      Sticky footers. The homepage and About footers are position: sticky
+      at the bottom of the screen, hidden behind the opaque page until the
+      very end - so geometrically they are "on screen" from the first frame,
+      the observer above never idles them, and their night-sky twinkle
+      (box-shadow), glow drift (background-position) and flame
+      (drop-shadow) kept repainting behind the page for the whole visit.
+
+      Each such footer is preceded by a zero-height marker where it falls in
+      flow ([data-anim-anchor]). The footer is idled until that marker comes
+      within the same 300px margin, which is when it is about to be
+      uncovered; it never pops in mid-freeze, exactly like the sections.
+    */
+    const anchorIo = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const wrap = e.target.nextElementSibling;
+          if (wrap) wrap.classList.toggle("anim-idle", !e.isIntersecting);
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+
     /* re-scan after route changes: sections are swapped by the App Router
        without this component unmounting. Debounced — re-observing is
        idempotent, so this only needs to settle eventually, and it must
@@ -42,6 +65,7 @@ export default function AnimationBudget() {
       document
         .querySelectorAll("section, footer, [data-anim-scope]")
         .forEach((el) => io.observe(el));
+      document.querySelectorAll("[data-anim-anchor]").forEach((el) => anchorIo.observe(el));
     };
     scan();
 
@@ -57,6 +81,7 @@ export default function AnimationBudget() {
 
     return () => {
       io.disconnect();
+      anchorIo.disconnect();
       mo.disconnect();
       if (pending) window.clearTimeout(pending);
     };

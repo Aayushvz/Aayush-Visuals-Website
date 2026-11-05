@@ -36,7 +36,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:dir(gallery|services|projects|logos|hero|footer|about)/:path*",
+        /* playground and skills were outside this list, so their posters,
+           demo videos (~4 MB) and the six Skills images came back as a 304
+           round trip on every visit */
+        source: "/:dir(gallery|services|projects|logos|hero|footer|about|playground|skills)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        /* loose files at the root of /public: the custom cursor (every
+           route), a background texture, and the share image */
+        source: "/:file(cursor-pointer\\.svg|cursor-click\\.svg|purple_ice_background\\.webp|og\\.png)",
         headers: [
           {
             key: "Cache-Control",

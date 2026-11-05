@@ -36,27 +36,12 @@ const SECTION_MARKS = [
 
 export default function AboutPageClient() {
   const [portraitHover, setPortraitHover] = useState(false);
-  const [scrolling, setScrolling] = useState(false);
   /* the telemetry bar is the hero's own instrument panel, so it lives and
      dies with the hero rather than following you down the whole page */
   const [heroOnScreen, setHeroOnScreen] = useState(true);
 const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
   const interacted = useRef(false);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const onScroll = () => {
-      setScrolling(true);
-      clearTimeout(timer);
-      timer = setTimeout(() => setScrolling(false), 650);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(timer);
-    };
-  }, []);
 
   useEffect(() => {
     document.documentElement.classList.add("about-page-active");
@@ -113,9 +98,10 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
     setPortraitHover(h);
   };
 
-  const status: AboutStatus = scrolling
-    ? "SCROLLING"
-    : portraitHover
+  /* "SCROLLING" is decided inside StatusBar: it used to be state here, and
+     flipping it at the start and end of every scroll re-rendered this whole
+     page - story, intro scene, work deck - for one word in the bar */
+  const status: AboutStatus = portraitHover
       ? "ASCII ACTIVE"
       : interacted.current
         ? "AVAILABLE"
@@ -224,6 +210,9 @@ const [currentSection, setCurrentSection] = useState(SECTION_MARKS[0].label);
           {/* the wrapper (not .footer) is the sticky element: sticky can only
               move within its direct parent, and this wrapper's parent spans
               stage + footer */}
+          {/* where the footer falls in flow; AnimationBudget idles the
+              sticky footer until this is near (zero height, no layout) */}
+          <div aria-hidden data-anim-anchor="" />
           <div className="aboutParallax__footerWrap" ref={setSectionRef(7)}>
             <Footer />
           </div>

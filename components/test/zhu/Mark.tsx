@@ -229,15 +229,63 @@ export default function Mark({
   reduced,
   entered,
   scroll,
+  warmWhen = true,
+  onWarm,
 }: {
   scale: number;
   reduced: boolean;
   entered: boolean;
   scroll: React.MutableRefObject<ScrollState>;
+  /* every material is in the scene (the name has painted): compile now */
+  warmWhen?: boolean;
+  /* the scene's shaders are compiled; the first frame can be drawn */
+  onWarm?: () => void;
 }) {
   const { barGeo, dotGeo, dot } = useMarkGeometry();
   const { gl, scene, camera } = useThree();
   const fbo = useFBO({ samples: 4 });
+
+  /*
+    Shader warm-up, off the main thread.
+
+    The first gl.render used to compile every program in the scene on the
+    spot, and linking blocks: profiled, that one frame held the main thread
+    for ~1.7 s (60% of it in three's getUniforms, i.e. waiting on the link),
+    which is what froze the loader's word run and made up most of the
+    homepage's Total Blocking Time. compileAsync issues the same compiles
+    through KHR_parallel_shader_compile and polls for completion instead,
+    so the browser keeps running while the GPU driver works.
+
+    Both variants are compiled: the glass pass renders into the FBO, and a
+    render target gets its own program (no tone mapping, linear output), so
+    warming only the screen variant would leave that compile on the first
+    frame. Nothing is drawn until this resolves; the canvas is still hidden
+    under the poster then (ReadyGate waits on it too), so nothing changes
+    on screen.
+  */
+  const warm = useRef(false);
+  useEffect(() => {
+    if (!warmWhen || warm.current) return;
+    let alive = true;
+    const done = () => {
+      if (!alive || warm.current) return;
+      warm.current = true;
+      onWarm?.();
+    };
+    try {
+      gl.setRenderTarget(fbo);
+      const toTarget = gl.compileAsync(scene, camera);
+      gl.setRenderTarget(null);
+      const toScreen = gl.compileAsync(scene, camera);
+      Promise.all([toTarget, toScreen]).then(done, done);
+    } catch {
+      gl.setRenderTarget(null);
+      done();
+    }
+    return () => {
+      alive = false;
+    };
+  }, [warmWhen, gl, scene, camera, fbo, onWarm]);
 
   const root = useRef<THREE.Group>(null);
   const spinG = useRef<THREE.Group>(null);
@@ -330,6 +378,8 @@ export default function Mark({
 
   /* priority 1: this frame callback takes over rendering */
   useFrame((state, dt) => {
+    /* nothing to draw until the shaders are in (see the warm-up above) */
+    if (!warm.current) return;
     const t = state.clock.elapsedTime;
     const u = glass.uniforms;
     u.uTime.value = t;

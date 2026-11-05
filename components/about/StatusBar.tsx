@@ -32,6 +32,23 @@ export default function StatusBar({
   const scrlRef = useRef<HTMLSpanElement>(null);
   const crsrRef = useRef<HTMLSpanElement>(null);
   const [time, setTime] = useState("--:--:--");
+  /* SCROLLING while the page moves and for 650 ms after; kept here, not in
+     the page, so only the bar re-renders for it */
+  const [scrolling, setScrolling] = useState(false);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onScroll = () => {
+      setScrolling(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setScrolling(false), 650);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, []);
+  const shown: AboutStatus = scrolling ? "SCROLLING" : status;
 
   useEffect(() => {
     const fmt = new Intl.DateTimeFormat("en-GB", {
@@ -119,8 +136,8 @@ export default function StatusBar({
 
       <span className="aboutPage__barCell aboutPage__barCell--status">
         <span className="aboutPage__barKey">STATUS</span>
-        <span className="aboutPage__barVal aboutPage__barVal--status" key={status}>
-          {status}
+        <span className="aboutPage__barVal aboutPage__barVal--status" key={shown}>
+          {shown}
         </span>
       </span>
       <span className="aboutPage__barCell aboutPage__barCell--theme">

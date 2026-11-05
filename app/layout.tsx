@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import {
   Archivo,
   Instrument_Serif,
-  Cinzel_Decorative,
   Cinzel,
   Inter,
   Caveat,
@@ -42,14 +41,25 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-const cinzelDec = Cinzel_Decorative({
-  subsets: ["latin"],
-  weight: ["700", "900"],
-  variable: "--font-cinzel-dec",
-  display: "swap",
-});
+/*
+  PRELOADING. A next/font family declared here is preloaded on EVERY route,
+  because this is the root layout. Before, that was 15 font files (544 KB)
+  fetched at top priority on every page, competing with the hero's script on
+  slow connections and holding up document.fonts.ready, which the hero's
+  name (and so the loader) waits on.
 
+  So only the faces the main pages draw with stay preloaded: Aeonik (the
+  interface face), Archivo and Instrument Serif. The families below that are
+  only used by one tool or one page set `preload: false`: their @font-face
+  is still declared everywhere, and the browser fetches the file the moment
+  a glyph in that face is actually drawn, so those pages look the same.
+
+  Cinzel Decorative was removed: --font-cinzel-dec was used nowhere.
+*/
+
+/* only the contract tool's font picker offers it */
 const cinzel = Cinzel({
+  preload: false,
   subsets: ["latin"],
   weight: ["600", "700", "800", "900"],
   variable: "--font-cinzel",
@@ -68,6 +78,7 @@ const cinzel = Cinzel({
   real contrast axis, not two lookalike handwriting fonts.
 */
 const caveat = Caveat({
+  preload: false,
   subsets: ["latin"],
   weight: ["400", "600"],
   variable: "--font-caveat",
@@ -75,6 +86,7 @@ const caveat = Caveat({
 });
 
 const permanentMarker = Permanent_Marker({
+  preload: false,
   subsets: ["latin"],
   weight: "400",
   variable: "--font-marker",
@@ -82,6 +94,7 @@ const permanentMarker = Permanent_Marker({
 });
 
 const grenzeGotisch = Grenze_Gotisch({
+  preload: false,
   subsets: ["latin"],
   weight: ["500", "700"],
   variable: "--font-gothic",
@@ -91,6 +104,7 @@ const grenzeGotisch = Grenze_Gotisch({
 // Figma's own UI typeface — scoped to the Figma-styled project-page chrome
 // (tab bar, panels, dock) only; the rest of the site keeps its own fonts.
 const inter = Inter({
+  preload: false,
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
@@ -274,7 +288,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${generalSans.variable} ${aeonik.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzelDec.variable} ${cinzel.variable} ${inter.variable} ${caveat.variable} ${permanentMarker.variable} ${grenzeGotisch.variable}`}
+      className={`${generalSans.variable} ${aeonik.variable} ${archivo.variable} ${instrumentSerif.variable} ${cinzel.variable} ${inter.variable} ${caveat.variable} ${permanentMarker.variable} ${grenzeGotisch.variable}`}
       suppressHydrationWarning
     >
       <body>

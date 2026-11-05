@@ -7,6 +7,7 @@ import {
   type ProjectShot,
 } from "@/components/projects/projectData";
 import { mediaSrc } from "@/lib/mediaSrc";
+import CaseVideo from "./CaseVideo";
 
 /*
   What a project page says, and how little of it.
@@ -990,19 +991,16 @@ function Img({
      is a video until it moves */
   if (src.endsWith(".webm") || src.endsWith(".mp4")) {
     return wrap(
-      <video
+      /* plays only near the screen; see CaseVideo */
+      <CaseVideo
         className={className}
         /* video may live off the deployment; see lib/mediaSrc */
         src={mediaSrc(src)}
         style={inner}
         width={box?.[0]}
         height={box?.[1]}
-        data-rise={reveal ? "shot" : undefined}
-        muted
-        loop
-        playsInline
-        autoPlay
-        aria-label={alt}
+        rise={reveal}
+        label={alt}
       />,
     );
   }

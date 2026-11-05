@@ -143,9 +143,26 @@ export default function WorkHero() {
   /* autoplay: the whole stack flows up one slot (~1s). It reads the live scroll
      value each tick, so it self-pauses the moment the user scrolls past the top
      zone and resumes when they return - never latched. */
+  /* is the deck on (or near) the screen? It lives far down the About page,
+     and its 1 s autoplay used to re-render all 20 animated cards every
+     second from page load onward - while nobody could see them. Off screen
+     the tick is skipped; the deck carries on from the same card when it
+     comes back. */
+  const near = useRef(false);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => (near.current = e.isIntersecting), {
+      rootMargin: "50% 0px",
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   useEffect(() => {
     if (reduce || phase !== "cycling") return;
     const id = window.setInterval(() => {
+      if (!near.current) return;
       if (scrollYProgress.get() > ENGAGE) return; // scroll owns the deck now
       setFront((f) => (f + 1) % N);
     }, 1000);
@@ -265,8 +282,12 @@ export default function WorkHero() {
                       src={p.bgVideoUrl ?? p.cover}
                       alt={p.title}
                       poster={p.cover}
-                      eager={i < 4}
-                      priority={i < 2}
+                      /* not eager: this deck sits far below the fold on
+                         /about, and eager meant its first loop (505 KB) and
+                         two covers at fetchpriority=high were fetched with
+                         the page, competing with the hero. Lazy media still
+                         arrives well before the deck scrolls into view. */
+                      eager={false}
                     />
                   </PageLink>
                 </motion.article>
