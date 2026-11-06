@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { ORBIT, RISE, smooth, type ScrollState } from "./scroll";
+import { ORBIT, RISE, restViewport, smooth, type ScrollState } from "./scroll";
 
 /*
   The two roles the scroll arrives at, after the reference's "art director"
@@ -62,7 +62,7 @@ const ROLES = [
 ];
 
 export default function Roles({ scroll }: { scroll: React.MutableRefObject<ScrollState> }) {
-  const { viewport } = useThree();
+  const viewport = restViewport(useThree((s) => s.size));
   const [family, setFamily] = useState<string | null>(null);
   const mats = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
 

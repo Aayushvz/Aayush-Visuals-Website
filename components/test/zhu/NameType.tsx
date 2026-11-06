@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { smooth, type ScrollState } from "./scroll";
+import { restViewport, smooth, type ScrollState } from "./scroll";
 import * as THREE from "three";
 
 /*
@@ -125,7 +125,8 @@ export default function NameType({
   /* publish the name's top edge, in px from the frame's top at the resting
      camera, as --zh-name-top on the frame: the DOM tagline above the name
      (ZhuHero) is placed from it */
-  const { viewport, size, gl } = useThree();
+  const { size, gl } = useThree();
+  const viewport = restViewport(size);
   useEffect(() => {
     if (!painted) return;
     const planeH = w * painted.aspect;

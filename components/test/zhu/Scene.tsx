@@ -8,7 +8,7 @@ import Backdrop from "./Backdrop";
 import NameType from "./NameType";
 import Mark from "./Mark";
 import Roles from "./Roles";
-import { ORBIT, RISE, type ScrollState } from "./scroll";
+import { FOV, ORBIT, RISE, restViewport, type ScrollState } from "./scroll";
 
 /*
   The hero's one canvas: a 360deg backdrop round everything, the name at
@@ -134,7 +134,8 @@ function Content({
     setReady(true);
     onReady();
   }, [onReady]);
-  const { viewport } = useThree();
+  const size = useThree((s) => s.size);
+  const viewport = restViewport(size);
   const phone = viewport.width < viewport.height;
   /* sized off the frame HEIGHT, like the reference: the two-line name block
      is ~0.42 H (font ~0.266 H), never wider than 80% of the frame (88% on
@@ -147,7 +148,8 @@ function Content({
   /* phones, smaller on request: the name to 72% of the width (was 88%),
      the mark to ~0.4 W (was ~0.62 W) */
   const maxWidth = viewport.width * (phone ? 0.72 : 0.84);
-  const markScale = phone ? Math.min(viewport.height * 0.2, viewport.width * 0.4) : Math.min(viewport.height * 0.3, viewport.width * 0.3);
+  /* phones: smaller again on request (was min(0.2 H, 0.4 W)) */
+  const markScale = phone ? Math.min(viewport.height * 0.15, viewport.width * 0.3) : Math.min(viewport.height * 0.3, viewport.width * 0.3);
   return (
     <>
       <Backdrop reduced={reduced} />
@@ -189,7 +191,7 @@ export default function Scene({
          it shrank the canvas, which the scale then shrank again - the poster
          showed along the right and bottom edges as the hero scrolled away */
       resize={{ offsetSize: true, scroll: false }}
-      camera={{ position: [0, 0, 5], fov: 35 }}
+      camera={{ position: [0, 0, ORBIT], fov: FOV }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
       <ambientLight intensity={0.35} />
