@@ -1163,12 +1163,28 @@ Expected: `cards: 8`, `hrefs: true`, `h1: "The Descent"`, `sphere: 0`.
 
 Read console messages in a **fresh tab** (an existing tab's console buffer carries stale errors from earlier servers) and confirm no errors.
 
-- [ ] **Step 6: Measure the budget baseline**
+- [x] **Step 6: Measure the budget baseline**
 
-Stop the dev server first — `next build` and `next dev` fight over `.next`.
+Next 16.2.10 no longer prints a "First Load JS" column, and there is no
+`app-build-manifest.json` to read, so the budget is measured as bytes the
+browser actually downloads from a production build. That is also directly
+comparable to the 1.13 MB of JS measured on ORVAE.
 
-Run: `npm run build`
-Record the First Load JS figure printed for the `/playground` route. This is the baseline that the 60 KB budget is measured against in Tasks 8 and 10.
+1. Stop the dev server (`next build` and `next dev` fight over `.next`).
+2. `npm run build`
+3. `preview_start` the `portfolio-prod` config (added to `.claude/launch.json`).
+4. Load `/playground` and evaluate:
+
+```js
+const r = performance.getEntriesByType('resource');
+const js = r.filter(x => /\.js(\?|$)/.test(x.name));
+const sum = a => a.reduce((t, x) => t + (x.encodedBodySize || 0), 0);
+JSON.stringify({ scripts: js.length, jsKB: +(sum(js) / 1024).toFixed(1), allKB: +(sum(r) / 1024).toFixed(1) });
+```
+
+**Measured baseline, 2026-11-18: 327.5 KB of JS across 13 scripts; 670.9 KB
+total page weight.** Tasks 8 and 10 compare against this; the budget allows
+growth of 60 KB, so **JS must stay under 387.5 KB**.
 
 - [ ] **Step 7: Commit**
 

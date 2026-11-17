@@ -8,6 +8,14 @@
       "port": 3000,
       "autoPort": true,
       "cwd": "C:\\Users\\aayus\\aayushraj-portfolio"
+    },
+    {
+      "name": "portfolio-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "port": 3200,
+      "autoPort": true,
+      "cwd": "C:\\Users\\aayus\\aayushraj-portfolio"
     }
   ]
 }

@@ -1,0 +1,114 @@
+/*
+  The descent's DOM layer. Act colours are declared here as tokens so the
+  canvas and the DOM read from one palette: Piltover gold at the top, Zaun
+  green and violet through the middle, ember orange at the floor.
+*/
+.descent {
+  --dsc-gold: #e7b55c;
+  --dsc-sky: #9ec6e8;
+  --dsc-green: #5ff0b0;
+  --dsc-violet: #7c3aed;
+  --dsc-ember: #ff7a2f;
+  --dsc-ink: #f2ece1;
+  --dsc-bg: #0b0a12;
+
+  position: relative;
+  background: linear-gradient(180deg, #141326 0%, #0f1a18 48%, #1b0d08 100%);
+  color: var(--dsc-ink);
+  min-height: 100svh;
+  padding: clamp(80px, 12vh, 160px) var(--page-content-inset) 20vh;
+}
+
+.descent__eyebrow {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dsc-gold);
+}
+
+.descent__title {
+  margin: 0 0 18px;
+  font-size: clamp(44px, 8vw, 110px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.descent__lede {
+  margin: 0;
+  max-width: 46ch;
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.6;
+  color: rgba(242, 236, 225, 0.72);
+}
+
+.descent__list {
+  list-style: none;
+  margin: clamp(48px, 10vh, 120px) 0 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(14px, 2vw, 26px);
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+}
+
+.descent__card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: clamp(14px, 1.6vw, 22px);
+  border: 1px solid rgba(231, 181, 92, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+}
+
+.descent__card:hover,
+.descent__card:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(231, 181, 92, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.descent__poster {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.descent__kind {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dsc-green);
+}
+
+.descent__cardTitle {
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 600;
+}
+
+.descent__blurb {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(242, 236, 225, 0.66);
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .descent__card {
+    transition: none;
+  }
+
+  .descent__card:hover,
+  .descent__card:focus-visible {
+    transform: none;
+  }
+}

@@ -3,18 +3,15 @@
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
-import PlaygroundSphere from "./sphere/PlaygroundSphere";
+import DescentPage from "./descent/DescentPage";
 
 /*
-  /playground shell: the site's nav, mobile nav and cursor around one
-  full-screen ball of experiments (sphere/PlaygroundSphere.tsx), after
-  guillaumezhu.com/playground.
+  /playground shell: the site's nav, mobile nav and cursor around the
+  descent (descent/DescentPage.tsx).
 
-  It is a single screen on purpose - the wheel and every drag turn the
-  ball, so there is no page scroll and no footer below it.
-
-  The earlier rig-card shelf (ExperimentShelf + playground.css) is no
-  longer mounted but is left in place.
+  The earlier rig-card shelf (ExperimentShelf + playground.css) and the
+  playground sphere (sphere/PlaygroundSphere.tsx) are no longer mounted
+  but are left in place.
 */
 export default function PlaygroundPageClient() {
   return (
@@ -23,7 +20,7 @@ export default function PlaygroundPageClient() {
       <MobileNav />
       <Cursor />
       <main>
-        <PlaygroundSphere />
+        <DescentPage />
       </main>
     </>
   );
