@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"components/contract/**/*.test.ts\" \"components/test/zhu/**/*.test.ts\""
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"components/contract/**/*.test.ts\" \"components/test/zhu/**/*.test.ts\" \"components/playground/descent/**/*.test.ts\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
