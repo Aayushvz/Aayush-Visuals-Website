@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chasmWallOffsets, heightField, makeNoise2D } from "./terrain.ts";
+import { chasmWallOffsets, heightField, makeNoise2D } from "./terrainMath.ts";
 
 test("noise is in [-1, 1] and deterministic for a seed", () => {
   const a = makeNoise2D(7);

@@ -1,26 +1,55 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { useLowPowerMode } from "@/components/about/useLowPowerMode";
+import { hasWebGL } from "@/lib/webgl";
 import { EXPERIMENTS } from "../experiments";
 import { descentCards } from "./cards";
+import { DESCENT_SCREENS } from "./progress";
+import { tierFor } from "./quality";
+import { useDescentScroll } from "./useDescentScroll";
 import "./descent.css";
 
 /*
-  The DOM half of the descent, and the whole page until the canvas lands.
+  The descent.
 
-  This markup is not a fallback bolted on afterwards — it is the page. The
-  canvas, when it arrives, is decorative and aria-hidden; everything a
-  reader, a crawler or a keyboard needs is here, in order, as real links.
+  The DOM below is not a fallback bolted on afterwards — it is the page.
+  The canvas is decorative and aria-hidden; everything a reader, a crawler
+  or a keyboard needs is here, in order, as real links. Three separate
+  paths stay on it permanently: no WebGL, reduced motion, and no JS.
 
   EXPERIMENTS is passed into descentCards rather than imported by it: that
   module is unit-tested, and experiments.ts reaches into ./covers, which is
   JSX the test runner cannot parse. Passing it here keeps the card list
   testable and still lets TypeScript check the shape at this call site.
 */
+
+/* kept out of the first load: the people who only ever get the flat page
+   should not pay for three.js to reach them */
+const DescentScene = dynamic(() => import("./Scene"), { ssr: false });
+
 export default function DescentPage() {
   const cards = descentCards(EXPERIMENTS);
+  const mode = useLowPowerMode();
+  const progress = useDescentScroll();
+  const [portrait, setPortrait] = useState(false);
+  const [immersive, setImmersive] = useState(false);
+
+  useEffect(() => {
+    setPortrait(window.innerHeight > window.innerWidth);
+    /* both reduced motion and absent WebGL stay on the flat page. A frozen
+       3D scene is still a 3D scene, and someone who asked for less motion
+       does not want a camera flown at them slowly. */
+    setImmersive(!mode.reducedMotion && hasWebGL());
+  }, [mode.reducedMotion]);
+
+  const tier = tierFor(mode, portrait);
 
   return (
-    <div className="descent">
+    <div className={immersive ? "descent descent--3d" : "descent"}>
+      {immersive ? <DescentScene progress={progress} tier={tier} /> : null}
+
       <header className="descent__intro">
         <p className="descent__eyebrow">Experiments</p>
         <h1 className="descent__title">The Descent</h1>
@@ -51,6 +80,17 @@ export default function DescentPage() {
           </li>
         ))}
       </ol>
+
+      {/* the scroll the journey is measured against. Only in immersive
+          mode — on the flat page the cards are the content and a 13-screen
+          void under them would be nonsense. */}
+      {immersive ? (
+        <div
+          className="descent__spacer"
+          style={{ height: `${DESCENT_SCREENS * 100}svh` }}
+          aria-hidden
+        />
+      ) : null}
     </div>
   );
 }

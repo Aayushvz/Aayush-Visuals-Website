@@ -28,9 +28,18 @@ test("progress clamps past the ends instead of overshooting", () => {
   assert.equal(rawProgress(999999, 800), 1);
 });
 
-test("progress never divides by zero on a degenerate viewport", () => {
-  const p = rawProgress(100, 0);
-  assert.ok(Number.isFinite(p), `got ${p}`);
+/*
+  A hidden browser tab really does report innerHeight 0 — found the hard
+  way. Returning a finite number is not enough: anything but 0 means the
+  camera jumps to the bottom of the descent the moment the page is
+  scrolled before it has been laid out.
+*/
+test("a viewport with no height means no progress, not full progress", () => {
+  for (const scrollY of [0, 100, 99999]) {
+    assert.equal(rawProgress(scrollY, 0), 0, `scrollY ${scrollY}`);
+  }
+  assert.equal(rawProgress(100, -5), 0);
+  assert.equal(rawProgress(100, NaN), 0);
 });
 
 test("damp moves toward the target without overshooting it", () => {

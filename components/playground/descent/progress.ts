@@ -14,8 +14,17 @@ export const clamp01 = (x: number): number => (x < 0 ? 0 : x > 1 ? 1 : x);
 
 export const descentHeight = (vh: number): number => vh * DESCENT_SCREENS;
 
-/** Where we are in the scrollable travel, 0 at the top, 1 at the bottom. */
+/*
+  Where we are in the scrollable travel, 0 at the top, 1 at the bottom.
+
+  A viewport of zero height means the page has not been laid out yet — a
+  hidden tab, an iframe with no box, a measurement taken too early. Dividing
+  by the 1px floor there would read as "scrolled all the way to the bottom"
+  the instant scrollY moved, snapping the camera to the forge. Nothing is
+  the honest answer until there is a viewport to measure against.
+*/
 export function rawProgress(scrollY: number, vh: number): number {
+  if (!(vh > 0)) return 0;
   const travel = Math.max(1, descentHeight(vh) - vh);
   return clamp01(scrollY / travel);
 }
