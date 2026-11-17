@@ -68,6 +68,28 @@ test("the list is stable across calls", () => {
   assert.deepEqual(descentCards(FIXTURE), descentCards(FIXTURE));
 });
 
+test("artwork paths point into /playground, where the assets actually live", () => {
+  for (const c of descentCards(FIXTURE)) {
+    if (c.poster) assert.match(c.poster, /^\/playground\//, `${c.id} poster: ${c.poster}`);
+    if (c.video) assert.match(c.video, /^\/playground\//, `${c.id} video: ${c.video}`);
+  }
+});
+
+/* the overlay shows the poster until the camera is nearest, then swaps in
+   the loop — a video with no poster frame would pop in from nothing */
+test("every card with a video also has a poster to sit under it", () => {
+  for (const c of descentCards(FIXTURE)) {
+    if (c.video) assert.ok(c.poster, `${c.id} has a video but no poster`);
+  }
+});
+
+test("seven of the eight cards carry artwork", () => {
+  const withArt = descentCards(FIXTURE).filter((c) => c.poster);
+  assert.equal(withArt.length, 7);
+  const without = descentCards(FIXTURE).find((c) => !c.poster);
+  assert.equal(without?.id, "cat", "the only card without art should be cat");
+});
+
 test("a renamed or removed experiment fails loudly instead of vanishing", () => {
   const short = FIXTURE.filter((e) => e.id !== "pond");
   assert.throws(() => descentCards(short), /pond/);

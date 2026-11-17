@@ -75,6 +75,25 @@ const PROJECT_CARDS: Record<
   },
 };
 
+/*
+  Artwork for the five experiments.
+
+  The experiment entries carry drawn cover *components*, which this module
+  cannot touch — they are JSX, and this file has to stay loadable by the
+  test runner. These are the real screenshots and capture loops already in
+  /public/playground, referenced by path instead.
+
+  "cat" has no capture in /public/playground, so it has no poster and the
+  overlay falls back to type alone. That is a real gap, not an oversight:
+  the asset does not exist yet.
+*/
+const EXPERIMENT_ART: Record<string, { poster?: string; video?: string }> = {
+  pond: { poster: "/playground/pond-live.webp", video: "/playground/pond-live.mp4" },
+  dpl: { poster: "/playground/dpl-gameplay.webp", video: "/playground/dpl-gameplay.mp4" },
+  contract: { poster: "/playground/contract-builder.webp" },
+  invoice: { poster: "/playground/invoice-ui.png" },
+};
+
 /** Evenly spaced inside the act, inset from both boundaries. */
 function stopsFor(actId: "chasm" | "forge", count: number): number[] {
   const act = ACTS.find((a) => a.id === actId)!;
@@ -97,7 +116,16 @@ export function descentCards(experiments: readonly ExperimentSource[]): DescentC
     /* Loudly, rather than quietly dropping a card: a renamed experiment
        should break the build, not silently shrink the journey to seven. */
     if (!e) throw new Error(`descentCards: no experiment "${id}"`);
-    return { id, act, stop, title: e.title, kind: e.kind, href: e.href, blurb: e.blurb };
+    return {
+      id,
+      act,
+      stop,
+      title: e.title,
+      kind: e.kind,
+      href: e.href,
+      blurb: e.blurb,
+      ...EXPERIMENT_ART[id],
+    };
   };
 
   return [
