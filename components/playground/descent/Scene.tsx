@@ -4,7 +4,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import Atmosphere from "./Atmosphere";
+import CardAnchors, { type ScreenMap } from "./CardAnchors";
 import Terrain from "./Terrain";
+import type { DescentCard } from "./cards";
 import { cameraAt, lookAtAt, makeCurve } from "./path";
 import type { Tier } from "./quality";
 import type { DescentProgress } from "./useDescentScroll";
@@ -66,10 +68,14 @@ function Rig({ progress }: { progress: React.RefObject<DescentProgress> }) {
 }
 
 export default function DescentScene({
+  cards,
   progress,
+  screens,
   tier,
 }: {
+  cards: DescentCard[];
   progress: React.RefObject<DescentProgress>;
+  screens: React.RefObject<ScreenMap>;
   tier: Tier;
 }) {
   const [live, setLive] = useState(true);
@@ -92,6 +98,7 @@ export default function DescentScene({
         <Rig progress={progress} />
         <Atmosphere progress={progress} />
         <Terrain segments={tier.terrainSegments} />
+        <CardAnchors cards={cards} progress={progress} screens={screens} />
       </Canvas>
     </div>
   );

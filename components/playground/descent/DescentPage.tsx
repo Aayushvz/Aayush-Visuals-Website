@@ -1,10 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLowPowerMode } from "@/components/about/useLowPowerMode";
 import { hasWebGL } from "@/lib/webgl";
 import { EXPERIMENTS } from "../experiments";
+import type { ScreenMap } from "./CardAnchors";
+import CardLayer from "./CardLayer";
 import { descentCards } from "./cards";
 import { DESCENT_SCREENS } from "./progress";
 import { tierFor } from "./quality";
@@ -30,9 +32,12 @@ import "./descent.css";
 const DescentScene = dynamic(() => import("./Scene"), { ssr: false });
 
 export default function DescentPage() {
-  const cards = descentCards(EXPERIMENTS);
+  const cards = useMemo(() => descentCards(EXPERIMENTS), []);
   const mode = useLowPowerMode();
   const progress = useDescentScroll();
+  /* written by the scene each frame, read by the overlay each frame —
+     a plain Map rather than state, for the same reason progress is */
+  const screens = useRef<ScreenMap>(new Map());
   const [portrait, setPortrait] = useState(false);
   const [immersive, setImmersive] = useState(false);
 
@@ -48,7 +53,12 @@ export default function DescentPage() {
 
   return (
     <div className={immersive ? "descent descent--3d" : "descent"}>
-      {immersive ? <DescentScene progress={progress} tier={tier} /> : null}
+      {immersive ? (
+        <>
+          <DescentScene cards={cards} progress={progress} screens={screens} tier={tier} />
+          <CardLayer cards={cards} screens={screens} />
+        </>
+      ) : null}
 
       <header className="descent__intro">
         <p className="descent__eyebrow">Experiments</p>
