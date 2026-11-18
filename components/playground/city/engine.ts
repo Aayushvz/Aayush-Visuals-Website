@@ -936,12 +936,21 @@ export class CityEngine {
   ) {
     if (!this.miniMap) this.miniMap = this.buildMiniMap();
 
-    /* sized against the viewport, not fixed: at a fixed radius the dish
-       swallowed a quarter of a small window */
-    const R = Math.max(26, Math.min(46, Math.min(vw, vh) * 0.13));
-    const SPAN = 22; // tiles visible across the radar
-    const cx = camX + vw - R - 16;
-    const cy = camY + vh - R - 16;
+    /*
+      Sized against the viewport, not fixed: at a fixed radius the dish
+      swallowed a quarter of a small window.
+
+      On a phone it also moves to the top right. Bottom right is where
+      the thumb and the interact button live, and a radar under a thumb
+      is a radar nobody can read.
+    */
+    const compact = vw < 260;
+    const R = compact
+      ? Math.max(20, Math.min(28, vw * 0.13))
+      : Math.max(26, Math.min(46, Math.min(vw, vh) * 0.13));
+    const SPAN = compact ? 18 : 22; // tiles visible across the radar
+    const cx = camX + vw - R - (compact ? 10 : 16);
+    const cy = compact ? camY + R + 30 : camY + vh - R - 16;
     const scale = (R * 2) / (SPAN * TILE); // screen px per world px
 
     ctx.save();

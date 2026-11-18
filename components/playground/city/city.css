@@ -335,3 +335,84 @@
 
 .coc__sound:hover,
 .coc__sound:focus-visible { color: var(--coc-cyan); }
+
+/* ── phone layout ───────────────────────────────────────────────────
+   Keyed on width as well as pointer type: a desktop browser at phone
+   width is how most people check a responsive layout, and gating the
+   touch controls on `pointer: coarse` alone means they never appear
+   there. */
+
+@media (pointer: coarse), (max-width: 760px) {
+  .coc__touch { display: grid; }
+
+  .coc__hud {
+    top: 10px;
+    gap: 8px;
+    padding: 7px 9px;
+    font-size: 7px;
+    letter-spacing: 0.04em;
+  }
+
+  .coc__hud--tl { left: 10px; }
+  .coc__hud--tr { right: 10px; }
+
+  /*
+    Four corners, four things, none of them touching: district top left,
+    radar top right (moved there in engine.ts), thumbstick bottom left,
+    interact bottom right. Sound and exit stack under the district chip,
+    because the only other free corner is under a thumb.
+  */
+  .coc__hud--tr {
+    top: 44px;
+    left: 10px;
+    right: auto;
+    gap: 10px;
+  }
+
+  /* clear of both thumbs */
+  .coc__prompt {
+    bottom: 146px;
+    padding: 9px 14px;
+    font-size: 7px;
+    gap: 8px;
+  }
+
+  .coc__touch--stick {
+    left: 18px;
+    bottom: 22px;
+    width: 104px;
+    height: 104px;
+  }
+
+  .coc__knob { width: 40px; height: 40px; }
+
+  .coc__touch--act {
+    right: 18px;
+    bottom: 56px;
+    width: 66px;
+    height: 66px;
+    font-size: 17px;
+  }
+
+  /* the discovery box becomes a sheet: a centred card with 20px of
+     margin left nothing readable on a 390px screen */
+  .coc__panel { padding: 0; align-items: end; }
+
+  .coc__panelInner {
+    width: 100%;
+    max-height: 82svh;
+    padding: 18px 16px 22px;
+  }
+
+  .coc__panelTitle { font-size: 12px; line-height: 1.5; }
+  .coc__panelBlurb { font-size: 13px; }
+  .coc__panelShot { margin-bottom: 12px; }
+  .coc__panelActions { gap: 8px; }
+  .coc__btn { padding: 11px 14px; font-size: 7px; }
+}
+
+/* very short screens: the sheet must not swallow the whole view */
+@media (max-height: 520px) {
+  .coc__panelInner { max-height: 92svh; padding: 12px 14px 16px; }
+  .coc__panelShot { display: none; }
+}

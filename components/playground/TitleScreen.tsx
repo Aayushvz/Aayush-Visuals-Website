@@ -239,13 +239,10 @@ export default function TitleScreen() {
       <div className="pgt__vignette" aria-hidden />
 
       <div className="pgt__content">
-        <p className="pgt__kicker">Aayush Visuals presents</p>
         <h1 className="pgt__title">
           <span className="pgt__titleTop">Aayush&apos;s</span>
           <span className="pgt__titleBig">EXPERIMENTS</span>
         </h1>
-        <p className="pgt__sub">An open world. Eight things I built, hidden in it.</p>
-
         <nav className="pgt__menu">
           {MENU.map((item, i) => (
             <Link
@@ -263,8 +260,6 @@ export default function TitleScreen() {
             </Link>
           ))}
         </nav>
-
-        <p className="pgt__hint">↑ ↓ to choose · Enter to start</p>
       </div>
     </div>
   );
