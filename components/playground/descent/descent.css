@@ -102,7 +102,113 @@
   text-wrap: pretty;
 }
 
-/* ---- immersive mode ---- */
+/* ---- the world behind the cards ---- */
+
+.descent--world {
+  background: #05070d;
+}
+
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.world--still {
+  background: linear-gradient(180deg, #101737 0%, #38325f 42%, #b2644f 72%, #efa058 100%);
+}
+
+.world__scene {
+  position: absolute;
+  inset: 0;
+  /* the cross-fade. Long, because a hard cut between two scenes reads as
+     a glitch rather than as travel */
+  transition: opacity 0.45s linear;
+}
+
+.world__scene svg {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  display: block;
+}
+
+.world__scene [data-depth] {
+  will-change: transform;
+}
+
+/* the content sits above the world, and gets a floor of darkness under it
+   so the cards never have to compete with a bright sky for contrast */
+.descent--world .descent__intro,
+.descent--world .descent__list {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+  The scrim earns contrast for the cards without flattening the view.
+
+  It is weighted to the bottom and left — where the cards and the copy
+  live — and leaves the top two fifths almost untouched, so the first
+  screen is the scene rather than a dark rectangle with the scene faintly
+  behind it. An even wash over the whole viewport was what made the
+  valley look unlit.
+*/
+.descent--world::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(5, 7, 13, 0.34) 72%, rgba(5, 7, 13, 0.58) 100%),
+    linear-gradient(90deg, rgba(5, 7, 13, 0.4) 0%, transparent 46%);
+}
+
+.descent__cue {
+  margin: 36px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(242, 236, 225, 0.6);
+  animation: descentCue 2.4s ease-in-out infinite;
+}
+
+@keyframes descentCue {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50%      { opacity: 1;    transform: translateY(5px); }
+}
+
+/* the first screen is the design, so the cards start below the fold */
+.descent--world .descent__intro {
+  min-height: 78svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.descent--world .descent__card {
+  background: rgba(8, 10, 18, 0.66);
+  backdrop-filter: blur(14px);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.descent--world .descent__card:hover,
+.descent--world .descent__card:focus-visible {
+  background: rgba(8, 10, 18, 0.82);
+  border-color: rgba(231, 181, 92, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .descent__cue { animation: none; opacity: 0.6; }
+  .world__scene { transition: none; }
+}
+
+/* ---- immersive mode (the retired 3D path) ---- */
 
 .descent__canvas {
   position: fixed;

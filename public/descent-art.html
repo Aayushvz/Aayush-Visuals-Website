@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Descent — art direction</title>
+<style>
+  :root{ color-scheme: dark; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:#07080c; font-family:ui-sans-serif,system-ui,sans-serif; }
+  .scene{ position:relative; height:100svh; overflow:hidden; }
+  .scene svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .label{
+    position:absolute; left:28px; bottom:26px; z-index:5;
+    font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+    color:rgba(255,255,255,.55); font-weight:600;
+  }
+  .title{
+    position:absolute; left:28px; top:50%; transform:translateY(-50%); z-index:5;
+    font-size:clamp(34px,6vw,86px); font-weight:700; line-height:.95;
+    letter-spacing:-.03em; color:#fff; text-shadow:0 4px 40px rgba(0,0,0,.5);
+    max-width:12ch;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─────────────── 1. THE VALLEY ─────────────── -->
+<section class="scene">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#121a3a"/>
+        <stop offset=".42" stop-color="#3b3566"/>
+        <stop offset=".70" stop-color="#b86a53"/>
+        <stop offset="1"   stop-color="#f2a65a"/>
+      </linearGradient>
+      <radialGradient id="sun1" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#ffe3a3"/>
+        <stop offset=".55" stop-color="#ffb061"/>
+        <stop offset="1" stop-color="#ffb061" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="lake1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f0a265"/>
+        <stop offset=".5" stop-color="#6b4a74"/>
+        <stop offset="1" stop-color="#241d44"/>
+      </linearGradient>
+    </defs>
+
+    <rect width="1440" height="900" fill="url(#sky1)"/>
+    <circle cx="980" cy="470" r="300" fill="url(#sun1)" opacity=".85"/>
+    <circle cx="980" cy="470" r="52" fill="#ffeec4"/>
+
+    <!-- birds -->
+    <g stroke="#2b2447" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8">
+      <path d="M300 250c8-9 16-9 24 0M324 250c8-9 16-9 24 0"/>
+      <path d="M420 198c6-7 12-7 18 0M438 198c6-7 12-7 18 0"/>
+      <path d="M372 310c5-6 10-6 15 0M387 310c5-6 10-6 15 0"/>
+    </g>
+
+    <!-- ridges: far to near, each darker and greener -->
+    <path d="M0 560 L190 430 L330 520 L470 398 L650 545 L820 452 L1010 560 L1180 470 L1440 585 L1440 900 L0 900Z" fill="#6c5f8c" opacity=".55"/>
+    <path d="M0 625 L180 520 L360 600 L540 492 L720 608 L900 530 L1100 632 L1280 548 L1440 640 L1440 900 L0 900Z" fill="#4a4570" opacity=".8"/>
+    <path d="M0 700 L220 600 L420 690 L600 578 L800 700 L1000 620 L1220 718 L1440 640 L1440 900 L0 900Z" fill="#2f3457"/>
+
+    <!-- lake -->
+    <path d="M0 742 L1440 742 L1440 820 L0 820Z" fill="url(#lake1)"/>
+    <g stroke="#ffd9a8" stroke-width="2" opacity=".45">
+      <path d="M840 762h260M880 778h190M910 795h130"/>
+    </g>
+
+    <!-- near bank + pines -->
+    <path d="M0 800 L1440 800 L1440 900 L0 900Z" fill="#161a33"/>
+    <g fill="#10142a">
+      <path d="M90 800l34-120 34 120z"/><path d="M150 800l26-92 26 92z"/>
+      <path d="M1230 800l30-104 30 104z"/><path d="M1290 800l38-132 38 132z"/>
+      <path d="M1180 800l20-70 20 70z"/>
+    </g>
+    <!-- a deer on the bank -->
+    <g fill="#10142a" transform="translate(560,742) scale(1.25)">
+      <path d="M0 58V34l6-10 16-4 14 4 6 10v24h-6V42l-8 6-12 1-10-4v13z"/>
+      <path d="M38 24l-3-14 5 1 3 9zM46 26l5-13 4 3-5 12z"/>
+    </g>
+  </svg>
+  <h2 class="title">Still<br>water</h2>
+  <p class="label">01 — the valley</p>
+</section>
+
+<!-- ─────────────── 2. THE FALLS ─────────────── -->
+<section class="scene">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#17384a"/>
+        <stop offset=".6" stop-color="#2f6f6a"/>
+        <stop offset="1" stop-color="#58a67f"/>
+      </linearGradient>
+      <linearGradient id="fall2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#eafaff"/>
+        <stop offset=".55" stop-color="#9fe0e8"/>
+        <stop offset="1" stop-color="#d8f4fb" stop-opacity=".25"/>
+      </linearGradient>
+      <radialGradient id="mist2" cx=".5" cy="1" r=".75">
+        <stop offset="0" stop-color="#eafaff" stop-opacity=".85"/>
+        <stop offset="1" stop-color="#eafaff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <rect width="1440" height="900" fill="url(#sky2)"/>
+
+    <!-- far canyon walls -->
+    <path d="M0 0 L300 0 L250 900 L0 900Z" fill="#1d4a4e" opacity=".6"/>
+    <path d="M1440 0 L1150 0 L1210 900 L1440 900Z" fill="#1d4a4e" opacity=".6"/>
+
+    <!-- the waterfall -->
+    <path d="M640 120 L820 120 L870 760 L600 760Z" fill="url(#fall2)"/>
+    <g stroke="#ffffff" stroke-width="3" opacity=".5">
+      <path d="M672 150v580M712 140v590M760 150v575M808 165v560"/>
+    </g>
+
+    <!-- near cliffs, hard silhouettes -->
+    <path d="M0 210 L300 150 L430 300 L520 220 L560 900 L0 900Z" fill="#0f3230"/>
+    <path d="M1440 190 L1160 140 L1010 290 L930 230 L905 900 L1440 900Z" fill="#0f3230"/>
+
+    <!-- greenery on the ledges -->
+    <g fill="#1f6b45">
+      <circle cx="300" cy="268" r="46"/><circle cx="360" cy="292" r="34"/><circle cx="250" cy="300" r="38"/>
+      <circle cx="1100" cy="250" r="50"/><circle cx="1040" cy="282" r="36"/><circle cx="1160" cy="286" r="32"/>
+    </g>
+    <g fill="#2b8c57">
+      <circle cx="292" cy="252" r="30"/><circle cx="1092" cy="236" r="32"/>
+    </g>
+
+    <!-- plunge pool + mist -->
+    <ellipse cx="730" cy="790" rx="420" ry="80" fill="#1a5560"/>
+    <ellipse cx="730" cy="770" rx="330" ry="150" fill="url(#mist2)"/>
+    <path d="M0 830 L1440 830 L1440 900 L0 900Z" fill="#0b2628"/>
+  </svg>
+  <h2 class="title" style="left:auto;right:28px;text-align:right;">Over<br>the edge</h2>
+  <p class="label">02 — the falls</p>
+</section>
+
+<!-- ─────────────── 3. THE CAVE ─────────────── -->
+<section class="scene">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="mouth3" cx=".5" cy=".46" r=".5">
+        <stop offset="0" stop-color="#bfe9d8"/>
+        <stop offset=".45" stop-color="#3b8f86"/>
+        <stop offset="1" stop-color="#0a2430"/>
+      </radialGradient>
+      <linearGradient id="shaft3" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#cdf3e6" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#cdf3e6" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <rect width="1440" height="900" fill="#071a22"/>
+    <ellipse cx="720" cy="420" rx="430" ry="330" fill="url(#mouth3)"/>
+
+    <!-- light shafts from the mouth -->
+    <g fill="url(#shaft3)">
+      <path d="M620 140 L700 140 L820 900 L560 900Z"/>
+      <path d="M790 150 L840 150 L980 900 L800 900Z"/>
+    </g>
+
+    <!-- cave walls closing in -->
+    <path d="M0 0 L1440 0 L1440 120 Q1080 300 980 0 Z" fill="#061016"/>
+    <path d="M0 0 L520 0 Q420 320 0 170 Z" fill="#061016"/>
+    <path d="M0 900 L0 640 Q380 760 520 900 Z" fill="#040b10"/>
+    <path d="M1440 900 L1440 620 Q1060 740 940 900 Z" fill="#040b10"/>
+
+    <!-- stalactites -->
+    <g fill="#061016">
+      <path d="M540 0l26 150 26-150z"/><path d="M620 0l18 108 18-108z"/>
+      <path d="M840 0l22 130 22-130z"/><path d="M910 0l16 92 16-92z"/>
+    </g>
+    <g fill="#040b10">
+      <path d="M600 900l24-130 24 130z"/><path d="M820 900l20-108 20 108z"/>
+    </g>
+
+    <!-- glow pool -->
+    <ellipse cx="720" cy="700" rx="200" ry="44" fill="#1d7d74" opacity=".7"/>
+    <ellipse cx="720" cy="700" rx="120" ry="24" fill="#6fe3cd" opacity=".55"/>
+  </svg>
+  <h2 class="title">Into<br>the dark</h2>
+  <p class="label">03 — the cave</p>
+</section>
+
+<!-- ─────────────── 4. THE LAYERS ─────────────── -->
+<section class="scene">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="heat4" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1b0d12"/>
+        <stop offset=".45" stop-color="#5a1b16"/>
+        <stop offset=".78" stop-color="#c7441d"/>
+        <stop offset="1" stop-color="#ffb43d"/>
+      </linearGradient>
+      <radialGradient id="core4" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fff0c2"/>
+        <stop offset=".4" stop-color="#ff9a2e"/>
+        <stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <rect width="1440" height="900" fill="url(#heat4)"/>
+
+    <!-- strata bands, getting hotter downward -->
+    <path d="M0 120 L1440 90 L1440 170 L0 205Z" fill="#2a1620"/>
+    <path d="M0 230 L1440 195 L1440 290 L0 320Z" fill="#3a1a1c"/>
+    <path d="M0 345 L1440 300 L1440 395 L0 430Z" fill="#4e2018"/>
+    <g stroke="#ff8a3d" stroke-width="3" opacity=".5">
+      <path d="M0 250 L1440 215M0 362 L1440 318"/>
+    </g>
+
+    <!-- molten core glow -->
+    <circle cx="720" cy="700" r="280" fill="url(#core4)" opacity=".9"/>
+
+    <!-- lava river -->
+    <path d="M0 690 Q360 640 720 700 T1440 690 L1440 790 Q1080 740 720 800 T0 790Z" fill="#ff6a21"/>
+    <path d="M0 715 Q360 670 720 726 T1440 716 L1440 756 Q1080 712 720 766 T0 756Z" fill="#ff9a2e"/>
+    <path d="M0 718 Q360 674 720 728 T1440 718 L1440 750 Q1080 708 720 762 T0 752Z" fill="#ffd36b"/>
+
+    <!-- near crust silhouettes -->
+    <path d="M0 800 L180 760 L340 806 L520 764 L700 812 L880 768 L1060 814 L1240 770 L1440 808 L1440 900 L0 900Z" fill="#190a0c"/>
+
+    <!-- embers -->
+    <g fill="#ffcf7a">
+      <circle cx="240" cy="612" r="4"/><circle cx="420" cy="560" r="3"/><circle cx="640" cy="596" r="5"/>
+      <circle cx="880" cy="548" r="3"/><circle cx="1080" cy="604" r="4"/><circle cx="1280" cy="566" r="3"/>
+      <circle cx="330" cy="500" r="2.5"/><circle cx="760" cy="486" r="2.5"/><circle cx="1180" cy="496" r="2.5"/>
+    </g>
+  </svg>
+  <h2 class="title" style="left:auto;right:28px;text-align:right;">The<br>forge</h2>
+  <p class="label">04 — the layers</p>
+</section>
+
+</body>
+</html>
