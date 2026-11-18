@@ -15,17 +15,15 @@ import "./city.css";
   two meet at `onState`, which fires only when the HUD's content actually
   changes (the nearby building, the found count), never per frame.
 
-  The engine is constructed on START, not on mount, so arriving at the
-  route costs nothing until the visitor asks to play — and `destroy()` on
-  unmount takes the loop and every listener with it.
+  There is no start screen. The visitor already pressed "Enter the city"
+  on the playground title screen, and asking them to press start again on
+  arrival is a door in front of a door. The game begins on mount, and
+  `destroy()` on unmount takes the loop and every listener with it.
 */
-
-type Phase = "intro" | "playing";
 
 export default function CityExperience() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<CityEngine | null>(null);
-  const [phase, setPhase] = useState<Phase>("intro");
   const [hud, setHud] = useState<GameState | null>(null);
   const [open, setOpen] = useState<Discovery | null>(null);
   const [muted, setMuted] = useState(false);
@@ -51,7 +49,6 @@ export default function CityExperience() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "playing") return;
     const cv = canvasRef.current;
     if (!cv) return;
 
@@ -83,7 +80,7 @@ export default function CityExperience() {
       audioRef.current = null;
       engineRef.current = null;
     };
-  }, [phase, fit]);
+  }, [fit]);
 
   const closePanel = useCallback(() => {
     const e = engineRef.current;
@@ -109,32 +106,7 @@ export default function CityExperience() {
 
   return (
     <div className="coc">
-      {phase === "intro" ? (
-        <div className="coc__intro">
-          <p className="coc__kicker">Aayush Visuals — Playground</p>
-          <h1 className="coc__title">City of Creators</h1>
-          <p className="coc__sub">An open world. Endless discoveries.</p>
-          <p className="coc__body">
-            Explore the city and find the eight things I built. They are
-            hidden in the buildings, marked with a beacon.
-          </p>
-          <div className="coc__actions">
-            <button className="coc__btn coc__btn--go" onClick={() => setPhase("playing")}>
-              Start exploring
-            </button>
-            <a className="coc__btn" href="/playground">
-              Back to Playground
-            </a>
-          </div>
-          <dl className="coc__keys">
-            <div><dt>WASD</dt><dd>Move</dd></div>
-            <div><dt>Shift</dt><dd>Sprint</dd></div>
-            <div><dt>E</dt><dd>Enter a building</dd></div>
-            <div><dt>Esc</dt><dd>Close</dd></div>
-          </dl>
-        </div>
-      ) : (
-        <div className="coc__stage">
+      <div className="coc__stage">
           <canvas className="coc__canvas" ref={canvasRef} />
 
           <div className="coc__hud coc__hud--tl">
@@ -208,7 +180,6 @@ export default function CityExperience() {
             </div>
           ) : null}
         </div>
-      )}
     </div>
   );
 }

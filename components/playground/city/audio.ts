@@ -19,6 +19,8 @@ export class CityAudio {
   private ambientGain: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   private lastStep = 0;
+  /** removes the one-shot resume listeners; set only if they were added */
+  private releaseWake: (() => void) | null = null;
   muted = false;
 
   /** called from the Start click, so the context begins running */
@@ -30,6 +32,27 @@ export class CityAudio {
 
     const ctx = new Ctor();
     this.ctx = ctx;
+
+    /*
+      The game now starts on page load, so there is no click on this page
+      to create the context under — the visitor's click was on the title
+      screen, a navigation ago. A context born that way is suspended, and
+      stays suspended however many sounds are queued into it. So the first
+      real input here resumes it, whatever that input happens to be.
+    */
+    if (ctx.state === "suspended") {
+      const wake = () => {
+        void ctx.resume();
+        window.removeEventListener("pointerdown", wake);
+        window.removeEventListener("keydown", wake);
+      };
+      window.addEventListener("pointerdown", wake, { once: false });
+      window.addEventListener("keydown", wake, { once: false });
+      this.releaseWake = () => {
+        window.removeEventListener("pointerdown", wake);
+        window.removeEventListener("keydown", wake);
+      };
+    }
 
     const master = ctx.createGain();
     master.gain.value = 0.5;
@@ -169,6 +192,8 @@ export class CityAudio {
   }
 
   destroy() {
+    this.releaseWake?.();
+    this.releaseWake = null;
     this.ctx?.close().catch(() => {});
     this.ctx = null;
     this.master = null;
