@@ -22,6 +22,16 @@
   overflow: hidden;
 }
 
+/*
+  The game's own chrome, built the way a 16-bit game builds a box: a hard
+  bevel out of inset shadows, square corners, no blur anywhere. A rounded
+  translucent card reads as a website floating over a game; this reads as
+  part of the game.
+*/
+.coc__arcade {
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+}
+
 /* ── intro ── */
 
 .coc__intro {
@@ -75,34 +85,40 @@
 
 .coc__btn {
   display: inline-block;
-  padding: 12px 22px;
-  border: 1px solid rgba(232, 236, 248, 0.26);
-  border-radius: 4px;
-  background: transparent;
+  padding: 13px 20px;
+  border: 0;
+  border-radius: 0;
+  background: #262c5c;
   color: inherit;
-  font: inherit;
-  font-size: 13px;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 8px;
   letter-spacing: 0.06em;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.55),
+    0 3px 0 rgba(0, 0, 0, 0.5);
+  transition: transform 0.08s steps(2);
 }
 
 .coc__btn:hover,
 .coc__btn:focus-visible {
-  background: rgba(232, 236, 248, 0.1);
-  border-color: rgba(232, 236, 248, 0.5);
+  transform: translateY(-2px);
+}
+
+.coc__btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
 .coc__btn--go {
   background: var(--coc-red);
-  border-color: var(--coc-red);
 }
 
 .coc__btn--go:hover,
 .coc__btn--go:focus-visible {
   background: #ef3348;
-  border-color: #ef3348;
 }
 
 .coc__keys {
@@ -135,12 +151,15 @@
   display: flex;
   gap: 14px;
   align-items: center;
-  padding: 8px 14px;
-  border: 1px solid rgba(232, 236, 248, 0.18);
-  border-radius: 4px;
-  background: rgba(10, 12, 22, 0.72);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  padding: 10px 14px;
+  background: #14183a;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.18),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.6),
+    0 0 0 3px #0a0c1e;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -161,19 +180,28 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 18px;
-  border: 1px solid rgba(89, 232, 255, 0.5);
-  border-radius: 4px;
-  background: rgba(10, 12, 22, 0.85);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  padding: 12px 20px;
+  background: #14183a;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.6),
+    0 0 0 3px #0a0c1e;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  animation: cocBob 1.6s steps(2) infinite;
+}
+
+@keyframes cocBob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
 }
 
 .coc__prompt kbd {
-  padding: 2px 8px;
-  border: 1px solid var(--coc-cyan);
-  border-radius: 3px;
-  color: var(--coc-cyan);
+  padding: 4px 7px;
+  background: #ffd79a;
+  color: #1b1026;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.35), 0 2px 0 rgba(0, 0, 0, 0.5);
   font: inherit;
 }
 
@@ -193,39 +221,46 @@
   width: min(560px, 100%);
   max-height: 86vh;
   overflow-y: auto;
-  padding: clamp(20px, 3vw, 32px);
-  border: 1px solid rgba(89, 232, 255, 0.35);
-  border-radius: 6px;
-  background: var(--coc-panel);
+  padding: clamp(20px, 3vw, 30px);
+  background: #14183a;
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.6),
+    0 0 0 3px #0a0c1e,
+    0 6px 0 rgba(0, 0, 0, 0.45);
 }
 
 .coc__panelKicker {
-  margin: 0 0 10px;
-  font-size: 10px;
-  letter-spacing: 0.24em;
+  margin: 0 0 14px;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--coc-cyan);
+  color: #ffd79a;
 }
 
 .coc__panelTitle {
-  margin: 0 0 16px;
-  font-size: clamp(22px, 3vw, 32px);
-  line-height: 1.1;
+  margin: 0 0 18px;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: clamp(11px, 1.6vw, 15px);
+  line-height: 1.6;
+  text-shadow: 2px 2px 0 #0a0c1e;
 }
 
 .coc__panelShot {
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  border-radius: 4px;
-  image-rendering: auto;
-  margin-bottom: 16px;
+  border-radius: 0;
+  box-shadow: 0 0 0 3px #0a0c1e, inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+  margin-bottom: 18px;
 }
 
 .coc__panelKind {
-  margin: 0 0 8px;
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  margin: 0 0 10px;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--coc-cyan);
 }
@@ -286,6 +321,7 @@
 }
 
 .coc__sound {
+  font-family: var(--pg-arcade), ui-monospace, monospace;
   padding: 0;
   border: 0;
   background: none;

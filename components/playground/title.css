@@ -1,0 +1,178 @@
+/*
+  The title screen. Every rule is scoped under .pgt — nothing here touches
+  a global selector or the rest of the portfolio.
+*/
+
+.pgt {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #0b0e20;
+  color: #fdf6e3;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: clamp(20px, 5vw, 60px);
+}
+
+.pgt__scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* the whole point: no smoothing, so the pixel grid stays a pixel grid */
+  image-rendering: pixelated;
+}
+
+.pgt__beacon {
+  animation: pgtBeacon 1.6s steps(2) infinite;
+}
+
+@keyframes pgtBeacon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.pgt__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 38%, transparent 30%, rgba(6, 8, 20, 0.72) 100%),
+    linear-gradient(180deg, rgba(6, 8, 20, 0.55) 0%, transparent 28%);
+}
+
+.pgt__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.pgt__kicker {
+  margin: 0 0 18px;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: clamp(7px, 1vw, 10px);
+  letter-spacing: 0.14em;
+  color: #ffd79a;
+  text-shadow: 2px 2px 0 #1b1026;
+}
+
+.pgt__title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(4px, 1vw, 10px);
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  line-height: 1;
+}
+
+.pgt__titleTop {
+  font-size: clamp(14px, 2.6vw, 26px);
+  color: #fdf6e3;
+  /* the hard offset shadow is the whole SNES logo look — no blur */
+  text-shadow: 3px 3px 0 #1b1026;
+}
+
+.pgt__titleBig {
+  font-size: clamp(26px, 7.2vw, 76px);
+  color: #ff8a3d;
+  text-shadow:
+    0 4px 0 #a33c12,
+    4px 4px 0 #1b1026,
+    -3px 0 0 #1b1026,
+    3px 0 0 #1b1026,
+    0 -3px 0 #1b1026;
+  letter-spacing: 0.02em;
+}
+
+.pgt__sub {
+  margin: clamp(18px, 3vw, 30px) 0 0;
+  max-width: 34ch;
+  font-size: clamp(12px, 1.3vw, 15px);
+  line-height: 1.7;
+  color: rgba(253, 246, 227, 0.82);
+  text-shadow: 1px 1px 0 rgba(10, 12, 26, 0.8);
+}
+
+/* ── the menu ── */
+
+.pgt__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: clamp(26px, 4vw, 44px);
+}
+
+.pgt__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px 12px 16px;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: clamp(8px, 1.05vw, 11px);
+  letter-spacing: 0.06em;
+  color: #fdf6e3;
+  text-decoration: none;
+  background: rgba(14, 18, 38, 0.82);
+  /* the chunky bevel: four hard edges, no radius, no blur */
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.55),
+    0 3px 0 rgba(0, 0, 0, 0.5);
+  transition: transform 0.08s steps(2), background 0.12s linear;
+}
+
+.pgt__item--primary {
+  background: rgba(214, 39, 60, 0.9);
+}
+
+.pgt__cursor {
+  opacity: 0;
+  color: #ffd79a;
+  transform: translateX(-4px);
+}
+
+.pgt__item.is-sel,
+.pgt__item:hover,
+.pgt__item:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(32, 40, 74, 0.95);
+}
+
+.pgt__item--primary.is-sel,
+.pgt__item--primary:hover,
+.pgt__item--primary:focus-visible {
+  background: #ef3348;
+}
+
+.pgt__item.is-sel .pgt__cursor,
+.pgt__item:hover .pgt__cursor {
+  opacity: 1;
+  animation: pgtBlink 0.9s steps(2) infinite;
+}
+
+@keyframes pgtBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.pgt__hint {
+  margin: clamp(22px, 3vw, 34px) 0 0;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: clamp(6px, 0.8vw, 8px);
+  letter-spacing: 0.1em;
+  color: rgba(253, 246, 227, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgt__beacon,
+  .pgt__item.is-sel .pgt__cursor,
+  .pgt__item:hover .pgt__cursor {
+    animation: none;
+  }
+  .pgt__item { transition: none; }
+}

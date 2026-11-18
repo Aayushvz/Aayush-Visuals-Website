@@ -3,11 +3,13 @@
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
+import TitleScreen from "./TitleScreen";
 import DescentPage from "./descent/DescentPage";
 
 /*
-  /playground shell: the site's nav, mobile nav and cursor around the
-  descent (descent/DescentPage.tsx).
+  /playground: the title screen for City of Creators, with the experiment
+  shelf below it for anyone who would rather just read the list than play
+  anything.
 
   The earlier rig-card shelf (ExperimentShelf + playground.css) and the
   playground sphere (sphere/PlaygroundSphere.tsx) are no longer mounted
@@ -20,7 +22,10 @@ export default function PlaygroundPageClient() {
       <MobileNav />
       <Cursor />
       <main>
-        <DescentPage />
+        <TitleScreen />
+        <section id="shelf">
+          <DescentPage />
+        </section>
       </main>
     </>
   );
