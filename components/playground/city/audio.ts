@@ -18,6 +18,8 @@ export class CityAudio {
   private master: GainNode | null = null;
   private ambientGain: GainNode | null = null;
   private noise: AudioBuffer | null = null;
+  private music: HTMLAudioElement | null = null;
+  private musicGain: GainNode | null = null;
   private lastStep = 0;
   /** removes the one-shot resume listeners; set only if they were added */
   private releaseWake: (() => void) | null = null;
@@ -40,19 +42,33 @@ export class CityAudio {
       stays suspended however many sounds are queued into it. So the first
       real input here resumes it, whatever that input happens to be.
     */
-    if (ctx.state === "suspended") {
-      const wake = () => {
-        void ctx.resume();
-        window.removeEventListener("pointerdown", wake);
-        window.removeEventListener("keydown", wake);
-      };
-      window.addEventListener("pointerdown", wake, { once: false });
-      window.addEventListener("keydown", wake, { once: false });
-      this.releaseWake = () => {
-        window.removeEventListener("pointerdown", wake);
-        window.removeEventListener("keydown", wake);
-      };
-    }
+    /*
+      The game starts on page load, so there is no click on this page to
+      create the context under — the visitor's click was on the title
+      screen, a navigation ago. A context born that way is suspended and
+      stays suspended however many sounds are queued into it.
+
+      The listener is attached whatever state the context reports, not
+      only when it says "suspended". The music element needs a gesture of
+      its own regardless of the context, and hanging that off the
+      suspended branch meant a context that happened to start running
+      left the theme permanently paused.
+    */
+    const wake = () => {
+      void ctx.resume();
+      this.wakeMusic();
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+      window.removeEventListener("touchstart", wake);
+    };
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+    window.addEventListener("touchstart", wake);
+    this.releaseWake = () => {
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+      window.removeEventListener("touchstart", wake);
+    };
 
     const master = ctx.createGain();
     master.gain.value = 0.5;
@@ -69,6 +85,74 @@ export class CityAudio {
     this.noise = buf;
 
     this.startAmbience();
+    this.startMusic();
+    /* some browsers allow it outright; if not, the wake listener has it */
+    this.wakeMusic();
+  }
+
+  /*
+    The theme.
+
+    Routed through the same master gain as everything else, so the one
+    mute button covers it — a separate <audio> element muted on its own
+    is how you end up with a muted game still playing music.
+
+    preload="none" and a play() that is only called from the first real
+    gesture: the file is a megabyte, and a visitor who never clicks
+    should never pay for it.
+  */
+  private startMusic() {
+    const ctx = this.ctx;
+    if (!ctx || !this.master) return;
+
+    const el = document.createElement("audio");
+    el.loop = true;
+    el.preload = "none";
+    el.crossOrigin = "anonymous";
+
+    const ogg = document.createElement("source");
+    ogg.src = "/playground/audio/city-theme.ogg";
+    ogg.type = "audio/ogg; codecs=opus";
+    const m4a = document.createElement("source");
+    m4a.src = "/playground/audio/city-theme.m4a";
+    m4a.type = "audio/mp4";
+    el.appendChild(ogg);
+    el.appendChild(m4a);
+
+    const gain = ctx.createGain();
+    /* under the game, not over it: the footsteps and the discovery chime
+       still have to be audible through it */
+    gain.gain.value = 0.34;
+    gain.connect(this.master);
+    this.musicGain = gain;
+
+    try {
+      ctx.createMediaElementSource(el).connect(gain);
+    } catch {
+      /* some browsers refuse a media source more than once per element;
+         fall back to the element's own volume so the music still plays */
+      el.volume = 0.34;
+      gain.disconnect();
+      this.musicGain = null;
+    }
+
+    /* in the document, hidden: a detached media element plays in most
+       browsers but not all, and an attached one is also inspectable */
+    el.setAttribute("aria-hidden", "true");
+    el.style.display = "none";
+    document.body.appendChild(el);
+
+    this.music = el;
+  }
+
+  /** called from the first gesture, alongside the context resume */
+  private wakeMusic() {
+    const el = this.music;
+    if (!el || this.muted) return;
+    el.load();
+    void el.play().catch(() => {
+      /* autoplay still refused: the visitor can press the sound toggle */
+    });
   }
 
   /*
@@ -189,9 +273,21 @@ export class CityAudio {
     if (this.master && this.ctx) {
       this.master.gain.setTargetAtTime(m ? 0 : 0.5, this.ctx.currentTime, 0.05);
     }
+    /* the toggle doubles as the manual start, for browsers that refused
+       the automatic one */
+    if (!m) {
+      void this.ctx?.resume();
+      this.wakeMusic();
+    } else {
+      this.music?.pause();
+    }
   }
 
   destroy() {
+    this.music?.pause();
+    this.music?.remove();
+    this.music = null;
+    this.musicGain = null;
     this.releaseWake?.();
     this.releaseWake = null;
     this.ctx?.close().catch(() => {});
