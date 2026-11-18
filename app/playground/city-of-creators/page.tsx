@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import CityExperience from "@/components/playground/city/CityExperience";
+import Navbar from "@/components/Navbar";
+import MobileNav from "@/components/MobileNav";
 import { OG_IMAGE } from "@/lib/site";
 
 /* bare title — the root layout's template appends " - Aayush Raj" */
@@ -20,5 +22,14 @@ export const metadata: Metadata = {
 };
 
 export default function CityOfCreatorsPage() {
-  return <CityExperience />;
+  return (
+    <>
+      {/* the site's own nav, wearing the arcade skin from
+          app/playground/playground-chrome.css, so a visitor can leave the
+          city without hunting for the exit chip */}
+      <Navbar />
+      <MobileNav />
+      <CityExperience />
+    </>
+  );
 }

@@ -950,7 +950,9 @@ export class CityEngine {
       : Math.max(26, Math.min(46, Math.min(vw, vh) * 0.13));
     const SPAN = compact ? 18 : 22; // tiles visible across the radar
     const cx = camX + vw - R - (compact ? 10 : 16);
-    const cy = compact ? camY + R + 30 : camY + vh - R - 16;
+    /* clear of the site bar, which is fixed at the top of a phone and
+       does not know the canvas exists */
+    const cy = compact ? camY + R + 46 : camY + vh - R - 16;
     const scale = (R * 2) / (SPAN * TILE); // screen px per world px
 
     ctx.save();

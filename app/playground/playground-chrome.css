@@ -1,0 +1,124 @@
+/*
+  The site navbar, re-skinned for the arcade — and only here.
+
+  Every rule is scoped under .pg-scope, the wrapper this route's layout
+  puts around its children, so nothing in this file can reach the
+  homepage, the work pages or anything else. That was a condition of the
+  brief: the experiment must not restyle the portfolio around it.
+
+  The glass bar becomes a 16-bit panel: square corners, a hard bevel out
+  of inset shadows, no blur, no transitions that ease. A capsule with a
+  backdrop-filter sitting over a pixel game is the single most obvious
+  way to break the illusion.
+*/
+
+.pg-scope .navbar {
+  border-radius: 0;
+  border: 0;
+  padding: 10px 12px 10px 18px;
+  background: #14183a;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.18),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.6),
+    0 0 0 3px #0a0c1e;
+  color: #fdf6e3;
+  /* above the game canvas, which sits at z-index 50 */
+  z-index: 120;
+  transition: none;
+}
+
+.pg-scope .navbar__links {
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+
+.pg-scope .navbar__links a {
+  color: rgba(253, 246, 227, 0.82);
+  transition: color 0.1s steps(2);
+}
+
+.pg-scope .navbar__links a:hover,
+.pg-scope .navbar__links a[aria-current="page"] {
+  color: #59e8ff;
+}
+
+.pg-scope .navbar__logo {
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 10px;
+  color: #fdf6e3;
+}
+
+.pg-scope .navbar__logoMark {
+  filter: drop-shadow(2px 2px 0 #0a0c1e);
+}
+
+.pg-scope .navbar__contact {
+  border-radius: 0;
+  background: #d6273c;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 400;
+  min-height: 0;
+  padding: 11px 14px;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.55),
+    0 3px 0 rgba(0, 0, 0, 0.5);
+  /* steps(), not ease: the bar should snap like a sprite, not glide */
+  transition: transform 0.08s steps(2);
+}
+
+.pg-scope .navbar__contact:hover {
+  background: #ef3348;
+  transform: translateY(-2px);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.55),
+    0 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.pg-scope .navbar__contact:active {
+  transform: translateY(1px);
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* the mobile pill gets the same treatment */
+.pg-scope .mobileNav,
+.pg-scope .mobileNav__bar {
+  border-radius: 0;
+  background: #14183a;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.18),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.6),
+    0 0 0 3px #0a0c1e;
+  z-index: 120;
+}
+
+/*
+  Inside the game the bar shrinks and moves off the centre line, because
+  the city's own chrome owns the top corners and the middle is where the
+  player actually looks.
+*/
+.pg-scope .coc ~ .navbar,
+.pg-scope .navbar.is-inGame {
+  top: 10px;
+  padding: 7px 9px 7px 12px;
+}
+
+@media (max-width: 760px) {
+  .pg-scope .navbar {
+    /* the game's district chip owns the top-left on a phone; the bar
+       keeps the centre and gives up its padding instead */
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .pg-scope .navbar__links { font-size: 7px; }
+  .pg-scope .navbar__logo { font-size: 8px; }
+  .pg-scope .navbar__contact { padding: 9px 10px; font-size: 7px; }
+}

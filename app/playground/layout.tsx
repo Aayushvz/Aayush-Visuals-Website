@@ -1,4 +1,5 @@
 import { Press_Start_2P } from "next/font/google";
+import "./playground-chrome.css";
 
 /*
   The arcade face, loaded for /playground and its children only.
@@ -19,5 +20,7 @@ const pressStart = Press_Start_2P({
 });
 
 export default function PlaygroundLayout({ children }: { children: React.ReactNode }) {
-  return <div className={pressStart.variable}>{children}</div>;
+  /* .pg-scope is what every rule in playground-chrome.css hangs off, so
+     the arcade skin cannot reach the rest of the portfolio */
+  return <div className={`pg-scope ${pressStart.variable}`}>{children}</div>;
 }

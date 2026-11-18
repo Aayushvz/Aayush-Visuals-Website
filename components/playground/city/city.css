@@ -345,8 +345,10 @@
 @media (pointer: coarse), (max-width: 760px) {
   .coc__touch { display: grid; }
 
+  /* the site bar owns the top of a phone screen, so the game's own
+     chrome starts below it rather than underneath it */
   .coc__hud {
-    top: 10px;
+    top: 84px;
     gap: 8px;
     padding: 7px 9px;
     font-size: 7px;
@@ -363,7 +365,7 @@
     because the only other free corner is under a thumb.
   */
   .coc__hud--tr {
-    top: 44px;
+    top: 118px;
     left: 10px;
     right: auto;
     gap: 10px;
