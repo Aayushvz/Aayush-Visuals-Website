@@ -176,7 +176,16 @@ export default function CityExperience() {
           <Stick engineRef={engineRef} />
 
           {open ? (
-            <div className="coc__panel" role="dialog" aria-label={open.title}>
+            <div
+              className="coc__panel"
+              role="dialog"
+              aria-label={open.title}
+              /* clicking the backdrop closes; clicks inside the card must
+                 not, so this only fires when the target IS the backdrop */
+              onMouseDown={(e) => {
+                if (e.target === e.currentTarget) closePanel();
+              }}
+            >
               <div className="coc__panelInner">
                 <p className="coc__panelKicker">{open.label} — discovery</p>
                 <h2 className="coc__panelTitle">{card?.title ?? open.title}</h2>

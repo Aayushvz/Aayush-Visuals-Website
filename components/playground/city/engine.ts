@@ -273,7 +273,30 @@ export class CityEngine {
       this.nearby = best;
       this.emit();
     }
+
+    /*
+      Walking into a doorway opens it.
+
+      Pressing E still works, but having to press anything at all made
+      people walk past buildings without ever learning there was
+      something inside. `armed` stops it reopening the instant the panel
+      closes: it only re-arms once you have stepped away again.
+    */
+    /* 20px, not 13: standing in the doorway puts the hero one tile (16px)
+       from the door's centre, so a tighter threshold meant walking up to a
+       building never opened it and only the E key ever worked */
+    if (best && bestD < 20) {
+      if (this.armed && !this.paused) {
+        this.armed = false;
+        this.onEnter(best);
+      }
+    } else if (!best || bestD > 30) {
+      this.armed = true;
+    }
   }
+
+  /** false between opening a discovery and walking away from it */
+  private armed = true;
 
   private emit() {
     this.onState({
@@ -336,7 +359,7 @@ export class CityEngine {
     this.renderNight(ctx, camX, camY, vw, vh, x0, y0, x1, y1);
     /* after the night wash, so navigation is never dimmed by it */
     this.renderCompass(ctx, camX, camY, vw, vh);
-    this.renderMiniMap(ctx, camX, camY, vw);
+    this.renderMiniMap(ctx, camX, camY, vw, vh);
 
     /* shadow then hero, so he sits on the ground rather than floating */
     ctx.fillStyle = "rgba(10,10,18,0.3)";
@@ -513,26 +536,90 @@ export class CityEngine {
     vh: number
   ) {
     for (const car of this.world.cars) {
-      if (car.x < camX - 30 || car.x > camX + vw + 30) continue;
-      if (car.y < camY - 30 || car.y > camY + vh + 30) continue;
+      if (car.x < camX - 32 || car.x > camX + vw + 32) continue;
+      if (car.y < camY - 32 || car.y > camY + vh + 32) continue;
 
       const horiz = car.dx !== 0;
-      const w = horiz ? 18 : 10;
-      const h = horiz ? 10 : 18;
+      const L = 22; // length along travel
+      const W = 11; // width across
+      const w = horiz ? L : W;
+      const h = horiz ? W : L;
       const x = Math.round(car.x - w / 2);
       const y = Math.round(car.y - h / 2);
 
-      ctx.fillStyle = "rgba(10,10,18,0.3)";
-      ctx.fillRect(x + 1, y + h - 2, w, 3);
+      /* ground shadow, offset the way the street lights fall */
+      ctx.fillStyle = "rgba(6,8,16,0.38)";
+      ctx.fillRect(x + 1, y + 2, w, h);
+
+      /* wheels first, so the body sits over them */
+      ctx.fillStyle = "#15171f";
+      if (horiz) {
+        ctx.fillRect(x + 3, y - 1, 5, 2);
+        ctx.fillRect(x + L - 8, y - 1, 5, 2);
+        ctx.fillRect(x + 3, y + W - 1, 5, 2);
+        ctx.fillRect(x + L - 8, y + W - 1, 5, 2);
+      } else {
+        ctx.fillRect(x - 1, y + 3, 2, 5);
+        ctx.fillRect(x - 1, y + L - 8, 2, 5);
+        ctx.fillRect(x + W - 1, y + 3, 2, 5);
+        ctx.fillRect(x + W - 1, y + L - 8, 2, 5);
+      }
+
+      /* body, with a darker rim so it has an edge rather than floating */
       ctx.fillStyle = car.colour;
       ctx.fillRect(x, y, w, h);
-      /* roof + screen: two bands are enough to read as a car from above */
-      ctx.fillStyle = "rgba(255,255,255,0.22)";
-      if (horiz) ctx.fillRect(x + 5, y + 1, 8, h - 2);
-      else ctx.fillRect(x + 1, y + 5, w - 2, 8);
-      ctx.fillStyle = "#ffe9b0";
-      if (horiz) ctx.fillRect(car.dx > 0 ? x + w - 2 : x, y + 1, 2, 2);
-      else ctx.fillRect(x + 1, car.dy > 0 ? y + h - 2 : y, 2, 2);
+      ctx.fillStyle = "rgba(0,0,0,0.28)";
+      if (horiz) {
+        ctx.fillRect(x, y + h - 2, w, 2);
+        ctx.fillRect(x, y, w, 1);
+      } else {
+        ctx.fillRect(x + w - 2, y, 2, h);
+        ctx.fillRect(x, y, 1, h);
+      }
+
+      /* cabin and glass: the roof is the car colour darkened, the
+         windscreen and rear screen are separate so you can read which
+         way it is pointing at a glance */
+      const dark = "rgba(0,0,0,0.35)";
+      const glass = "rgba(150,200,230,0.75)";
+      if (horiz) {
+        ctx.fillStyle = dark;
+        ctx.fillRect(x + 6, y + 1, 10, h - 2);
+        ctx.fillStyle = glass;
+        ctx.fillRect(car.dx > 0 ? x + 15 : x + 5, y + 2, 2, h - 4);
+        ctx.fillRect(car.dx > 0 ? x + 5 : x + 15, y + 2, 2, h - 4);
+        ctx.fillStyle = "rgba(255,255,255,0.14)";
+        ctx.fillRect(x + 7, y + 1, 8, 2);
+      } else {
+        ctx.fillStyle = dark;
+        ctx.fillRect(x + 1, y + 6, w - 2, 10);
+        ctx.fillStyle = glass;
+        ctx.fillRect(x + 2, car.dy > 0 ? y + 15 : y + 5, w - 4, 2);
+        ctx.fillRect(x + 2, car.dy > 0 ? y + 5 : y + 15, w - 4, 2);
+        ctx.fillStyle = "rgba(255,255,255,0.14)";
+        ctx.fillRect(x + 1, y + 7, 2, 8);
+      }
+
+      /* lamps: white ahead, red behind */
+      ctx.fillStyle = "#fff3cf";
+      ctx.fillStyle = "#ffeec4";
+      if (horiz) {
+        const fx = car.dx > 0 ? x + w - 2 : x;
+        ctx.fillRect(fx, y + 1, 2, 2);
+        ctx.fillRect(fx, y + h - 3, 2, 2);
+        ctx.fillStyle = "#e0453a";
+        const rx = car.dx > 0 ? x : x + w - 2;
+        ctx.fillRect(rx, y + 1, 2, 2);
+        ctx.fillRect(rx, y + h - 3, 2, 2);
+      } else {
+        const fy = car.dy > 0 ? y + h - 2 : y;
+        ctx.fillRect(x + 1, fy, 2, 2);
+        ctx.fillRect(x + w - 3, fy, 2, 2);
+        ctx.fillStyle = "#e0453a";
+        const ry = car.dy > 0 ? y : y + h - 2;
+        ctx.fillRect(x + 1, ry, 2, 2);
+        ctx.fillRect(x + w - 3, ry, 2, 2);
+      }
     }
   }
 
@@ -588,23 +675,23 @@ export class CityEngine {
       const near = this.nearby?.id === d.id;
 
       /* the plate */
-      ctx.font = "7px ui-monospace, monospace";
+      ctx.font = "5px ui-monospace, monospace";
       const label = done ? `✓ ${d.label}` : d.label;
-      const w = ctx.measureText(label).width + 8;
-      const py = cy - 27 + bob;
+      const w = ctx.measureText(label).width + 5;
+      const py = cy - 22 + bob;
 
-      ctx.fillStyle = done ? "rgba(8,12,22,0.7)" : "rgba(8,12,22,0.88)";
-      ctx.fillRect(cx - w / 2, py - 6, w, 12);
+      ctx.fillStyle = done ? "rgba(8,12,22,0.62)" : "rgba(8,12,22,0.82)";
+      ctx.fillRect(cx - w / 2, py - 4, w, 8);
       ctx.fillStyle = done ? "rgba(89,232,255,0.45)" : near ? "#ffffff" : "rgba(89,232,255,0.95)";
       ctx.fillText(label, cx, py);
 
       /* the beacon */
       ctx.fillStyle = done ? "rgba(89,232,255,0.3)" : "rgba(89,232,255,0.9)";
       ctx.beginPath();
-      ctx.moveTo(cx, cy - 18 + bob);
-      ctx.lineTo(cx + 4, cy - 13 + bob);
+      ctx.moveTo(cx, cy - 15 + bob);
+      ctx.lineTo(cx + 2.5, cy - 11.5 + bob);
       ctx.lineTo(cx, cy - 8 + bob);
-      ctx.lineTo(cx - 4, cy - 13 + bob);
+      ctx.lineTo(cx - 2.5, cy - 11.5 + bob);
       ctx.closePath();
       ctx.fill();
 
@@ -649,17 +736,17 @@ export class CityEngine {
       ctx.rotate(ang);
       ctx.fillStyle = "rgba(89,232,255,0.85)";
       ctx.beginPath();
-      ctx.moveTo(7, 0);
-      ctx.lineTo(-4, -4.5);
-      ctx.lineTo(-4, 4.5);
+      ctx.moveTo(5, 0);
+      ctx.lineTo(-3, -3.2);
+      ctx.lineTo(-3, 3.2);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
 
-      ctx.font = "7px ui-monospace, monospace";
+      ctx.font = "5px ui-monospace, monospace";
       ctx.fillStyle = "rgba(89,232,255,0.8)";
       ctx.textAlign = "center";
-      ctx.fillText(`${dist}m`, cx, cy + 12);
+      ctx.fillText(`${dist}m`, cx, cy + 9);
     }
   }
 
@@ -678,54 +765,195 @@ export class CityEngine {
     c.height = this.world.h;
     const g = c.getContext("2d");
     if (!g) return c;
+
+    const isBuilding = (x: number, y: number) => {
+      const cell = cellAt(this.world, x, y);
+      return !!cell && (cell.id.startsWith("roof") || cell.id.startsWith("fac_"));
+    };
+
+    /* ground first */
     for (let y = 0; y < this.world.h; y++) {
       for (let x = 0; x < this.world.w; x++) {
         const cell = cellAt(this.world, x, y);
         if (!cell) continue;
         const id = cell.id;
-        g.fillStyle = id.startsWith("road") || id.startsWith("zebra")
-          ? "#262b3d"
-          : id === "grass" || id === "tree"
-            ? "#2f5f3c"
-            : id.startsWith("roof")
-              ? "#555a74"
-              : id.startsWith("fac_")
-                ? "#7a6a74"
-                : "#3b4054";
+        g.fillStyle =
+          id.startsWith("road") || id.startsWith("zebra")
+            ? "#20242f"
+            : id === "grass" || id === "tree"
+              ? "#2c5c3a"
+              : "#39404f";
+        g.fillRect(x, y, 1, 1);
+      }
+    }
+
+    /*
+      Then the buildings, extruded.
+
+      A flat fill made the radar a grid of grey squares. Dropping a dark
+      pixel below-right of every building and lighting its northern edge
+      fakes a light source, and suddenly the blocks have height - the same
+      trick the city itself uses with its parapets.
+    */
+    for (let y = 0; y < this.world.h; y++) {
+      for (let x = 0; x < this.world.w; x++) {
+        if (!isBuilding(x, y)) continue;
+        if (!isBuilding(x + 1, y) || !isBuilding(x, y + 1)) {
+          g.fillStyle = "rgba(4,6,12,0.55)";
+          g.fillRect(x + 1, y + 1, 1, 1);
+        }
+      }
+    }
+    for (let y = 0; y < this.world.h; y++) {
+      for (let x = 0; x < this.world.w; x++) {
+        if (!isBuilding(x, y)) continue;
+        const lit = !isBuilding(x, y - 1);
+        g.fillStyle = lit ? "#7e86a6" : "#5b6179";
         g.fillRect(x, y, 1, 1);
       }
     }
     return c;
   }
 
-  private renderMiniMap(ctx: CanvasRenderingContext2D, camX: number, camY: number, vw: number) {
+  private renderMiniMap(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    vw: number,
+    vh: number
+  ) {
     if (!this.miniMap) this.miniMap = this.buildMiniMap();
-    const mapW = 84;
-    const mapH = Math.round((mapW * this.world.h) / this.world.w);
-    const x = camX + vw - mapW - 12;
-    const y = camY + 46;
+
+    /* sized against the viewport, not fixed: at a fixed radius the dish
+       swallowed a quarter of a small window */
+    const R = Math.max(26, Math.min(46, Math.min(vw, vh) * 0.13));
+    const SPAN = 22; // tiles visible across the radar
+    const cx = camX + vw - R - 16;
+    const cy = camY + vh - R - 16;
+    const scale = (R * 2) / (SPAN * TILE); // screen px per world px
 
     ctx.save();
-    ctx.globalAlpha = 0.92;
-    ctx.fillStyle = "rgba(8,10,20,0.9)";
-    ctx.fillRect(x - 3, y - 3, mapW + 6, mapH + 6);
-    ctx.drawImage(this.miniMap, x, y, mapW, mapH);
 
-    const sx = mapW / (this.world.w * TILE);
-    const sy = mapH / (this.world.h * TILE);
+    /* the dish, sitting above the city on a soft shadow */
+    ctx.beginPath();
+    ctx.arc(cx + 1.5, cy + 3, R, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.fill();
 
-    /* discoveries, then the hero on top so he is never hidden under one */
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(6,9,18,0.86)";
+    ctx.fill();
+    ctx.save();
+    ctx.clip();
+
+    const srcW = SPAN;
+    const srcX = this.px / TILE - srcW / 2;
+    const srcY = this.py / TILE - srcW / 2;
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = 0.95;
+    ctx.drawImage(this.miniMap, srcX, srcY, srcW, srcW, cx - R, cy - R, R * 2, R * 2);
+    ctx.globalAlpha = 1;
+
+    /* blips. Anything outside the dish is pinned to its rim, pointing the
+       way, which is the behaviour that makes a radar useful */
     for (const d of this.world.discoveries) {
-      ctx.fillStyle = this.found.has(d.id) ? "rgba(89,232,255,0.5)" : "#59e8ff";
-      ctx.fillRect(x + d.tx * TILE * sx - 1.5, y + d.ty * TILE * sy - 1.5, 3, 3);
+      const wx = d.tx * TILE + TILE / 2;
+      const wy = d.ty * TILE;
+      let bx = cx + (wx - this.px) * scale;
+      let by = cy + (wy - this.py) * scale;
+      const dist = Math.hypot(bx - cx, by - cy);
+      const edge = dist > R - 6;
+      if (edge) {
+        const a = Math.atan2(by - cy, bx - cx);
+        bx = cx + Math.cos(a) * (R - 6);
+        by = cy + Math.sin(a) * (R - 6);
+      }
+      const done = this.found.has(d.id);
+      if (!done) {
+        ctx.fillStyle = "rgba(89,232,255,0.3)";
+        ctx.beginPath();
+        ctx.arc(bx, by, edge ? 4 : 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = done ? "rgba(89,232,255,0.45)" : "#9df3ff";
+      ctx.beginPath();
+      ctx.arc(bx, by, edge ? 2 : 2.6, 0, Math.PI * 2);
+      ctx.fill();
+      if (!done && !edge) {
+        ctx.strokeStyle = "rgba(89,232,255,0.5)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(bx, by, 5 + Math.sin(performance.now() / 300) * 1.5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
-    ctx.fillStyle = "#ff3a4e";
-    ctx.fillRect(x + this.px * sx - 1.5, y + this.py * sy - 1.5, 3, 3);
+    /* traffic, so the radar feels live */
+    ctx.fillStyle = "rgba(230,235,255,0.5)";
+    for (const car of this.world.cars) {
+      const bx = cx + (car.x - this.px) * scale;
+      const by = cy + (car.y - this.py) * scale;
+      if (Math.hypot(bx - cx, by - cy) > R - 4) continue;
+      ctx.fillRect(bx - 1, by - 1, 2, 2);
+    }
 
-    ctx.strokeStyle = "rgba(232,236,248,0.35)";
+    /* the player arrow, pointing the way he faces */
+    const ang =
+      this.dir === "up" ? -Math.PI / 2 : this.dir === "down" ? Math.PI / 2 : this.dir === "left" ? Math.PI : 0;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(ang);
+    ctx.fillStyle = "#ff3a4e";
+    ctx.beginPath();
+    ctx.moveTo(6, 0);
+    ctx.lineTo(-4, -4);
+    ctx.lineTo(-2, 0);
+    ctx.lineTo(-4, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    /*
+      Glass. A vignette darkens the rim so the dish reads as a bowl
+      rather than a sticker, and one bright arc across the top left is
+      the reflection every physical screen has.
+    */
+    const vg = ctx.createRadialGradient(cx, cy, R * 0.45, cx, cy, R);
+    vg.addColorStop(0, "rgba(0,0,0,0)");
+    vg.addColorStop(1, "rgba(2,4,10,0.75)");
+    ctx.fillStyle = vg;
+    ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+    const gloss = ctx.createLinearGradient(cx - R, cy - R, cx + R * 0.3, cy + R * 0.4);
+    gloss.addColorStop(0, "rgba(255,255,255,0.16)");
+    gloss.addColorStop(0.55, "rgba(255,255,255,0.03)");
+    gloss.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gloss;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore(); // un-clip
+
+    /* bezel and north mark */
+    ctx.strokeStyle = "rgba(10,14,24,0.9)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 1, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(190,205,235,0.55)";
     ctx.lineWidth = 1;
-    ctx.strokeRect(x - 3, y - 3, mapW + 6, mapH + 6);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(232,236,248,0.75)";
+    ctx.font = "7px ui-monospace, monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("N", cx, cy - R - 6);
+
     ctx.restore();
   }
 }
