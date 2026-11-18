@@ -70,6 +70,9 @@ export class CityEngine {
   /** set by the shell while a panel is open, so the city does not move under it */
   paused = false;
 
+  /** supplied by the shell after the Start gesture */
+  audio: { step: (s: "stone" | "grass" | "road", now: number, running: boolean) => void; discover: () => void } | null = null;
+
   constructor(opts: EngineOptions) {
     this.canvas = opts.canvas;
     const ctx = this.canvas.getContext("2d");
@@ -185,6 +188,14 @@ export class CityEngine {
 
     this.checkNearby();
     this.updateTraffic(dt);
+
+    /* footsteps, keyed to what is under the hero's feet */
+    if (this.moving) {
+      const cell = cellAt(this.world, Math.floor(this.px / TILE), Math.floor((this.py + 6) / TILE));
+      const id = cell?.id ?? "walk";
+      const surface = id === "grass" || id === "tree" ? "grass" : id.startsWith("road") || id.startsWith("zebra") ? "road" : "stone";
+      this.audio?.step(surface, performance.now(), !!this.keys.shift);
+    }
   }
 
   /*
@@ -323,6 +334,9 @@ export class CityEngine {
     this.renderNpcs(ctx, camX, camY, vw, vh);
     this.renderMarkers(ctx);
     this.renderNight(ctx, camX, camY, vw, vh, x0, y0, x1, y1);
+    /* after the night wash, so navigation is never dimmed by it */
+    this.renderCompass(ctx, camX, camY, vw, vh);
+    this.renderMiniMap(ctx, camX, camY, vw);
 
     /* shadow then hero, so he sits on the ground rather than floating */
     ctx.fillStyle = "rgba(10,10,18,0.3)";
@@ -553,31 +567,166 @@ export class CityEngine {
     }
   }
 
+  /*
+    The work pointers.
+
+    A floating diamond on its own told you a building mattered but never
+    which work was inside, so every beacon now carries its name on a
+    plate. Found ones dim and get a tick, which is what turns eight
+    identical markers into a checklist you can read at a glance.
+  */
   private renderMarkers(ctx: CanvasRenderingContext2D) {
     const t = performance.now() / 1000;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
     for (const d of this.world.discoveries) {
       const cx = d.tx * TILE + TILE / 2;
       const cy = d.ty * TILE;
       const bob = Math.sin(t * 2.2 + d.tx) * 2;
       const done = this.found.has(d.id);
+      const near = this.nearby?.id === d.id;
 
-      ctx.fillStyle = done ? "rgba(89,232,255,0.35)" : "rgba(89,232,255,0.85)";
-      /* a diamond, drawn as two triangles — reads as a waypoint at 16px
-         where a circle would just be a blob */
+      /* the plate */
+      ctx.font = "7px ui-monospace, monospace";
+      const label = done ? `✓ ${d.label}` : d.label;
+      const w = ctx.measureText(label).width + 8;
+      const py = cy - 27 + bob;
+
+      ctx.fillStyle = done ? "rgba(8,12,22,0.7)" : "rgba(8,12,22,0.88)";
+      ctx.fillRect(cx - w / 2, py - 6, w, 12);
+      ctx.fillStyle = done ? "rgba(89,232,255,0.45)" : near ? "#ffffff" : "rgba(89,232,255,0.95)";
+      ctx.fillText(label, cx, py);
+
+      /* the beacon */
+      ctx.fillStyle = done ? "rgba(89,232,255,0.3)" : "rgba(89,232,255,0.9)";
       ctx.beginPath();
-      ctx.moveTo(cx, cy - 16 + bob);
-      ctx.lineTo(cx + 4, cy - 11 + bob);
-      ctx.lineTo(cx, cy - 6 + bob);
-      ctx.lineTo(cx - 4, cy - 11 + bob);
+      ctx.moveTo(cx, cy - 18 + bob);
+      ctx.lineTo(cx + 4, cy - 13 + bob);
+      ctx.lineTo(cx, cy - 8 + bob);
+      ctx.lineTo(cx - 4, cy - 13 + bob);
       ctx.closePath();
       ctx.fill();
 
-      if (this.nearby?.id === d.id) {
-        ctx.strokeStyle = "rgba(89,232,255,0.9)";
+      if (near) {
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
         ctx.lineWidth = 1;
         ctx.strokeRect(d.tx * TILE - 4, d.ty * TILE - 4, TILE + 8, TILE + 8);
       }
     }
+  }
+
+  /*
+    Arrows for what you cannot see.
+
+    The city is 72x56 tiles and the viewport shows maybe a twentieth of
+    it, so without these the remaining discoveries are a guessing game.
+    One chevron per unfound discovery, pinned to the screen edge nearest
+    it, with the distance in metres so it reads as navigation.
+  */
+  private renderCompass(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    vw: number,
+    vh: number
+  ) {
+    const pad = 26;
+    for (const d of this.world.discoveries) {
+      if (this.found.has(d.id)) continue;
+      const tx = d.tx * TILE + TILE / 2;
+      const ty = d.ty * TILE;
+      /* on screen already? then the beacon is doing the job */
+      if (tx > camX + 20 && tx < camX + vw - 20 && ty > camY + 30 && ty < camY + vh - 20) continue;
+
+      const ang = Math.atan2(ty - this.py, tx - this.px);
+      const cx = camX + vw / 2 + Math.cos(ang) * (vw / 2 - pad);
+      const cy = camY + vh / 2 + Math.sin(ang) * (vh / 2 - pad);
+      const dist = Math.round(Math.hypot(tx - this.px, ty - this.py) / TILE);
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(ang);
+      ctx.fillStyle = "rgba(89,232,255,0.85)";
+      ctx.beginPath();
+      ctx.moveTo(7, 0);
+      ctx.lineTo(-4, -4.5);
+      ctx.lineTo(-4, 4.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      ctx.font = "7px ui-monospace, monospace";
+      ctx.fillStyle = "rgba(89,232,255,0.8)";
+      ctx.textAlign = "center";
+      ctx.fillText(`${dist}m`, cx, cy + 12);
+    }
+  }
+
+  /*
+    The mini-map.
+
+    The city layout never changes, so it is rasterised once at one pixel
+    per tile and then blitted — redrawing 4,032 tiles into a corner every
+    frame would cost more than the whole rest of the render.
+  */
+  private miniMap: HTMLCanvasElement | null = null;
+
+  private buildMiniMap() {
+    const c = document.createElement("canvas");
+    c.width = this.world.w;
+    c.height = this.world.h;
+    const g = c.getContext("2d");
+    if (!g) return c;
+    for (let y = 0; y < this.world.h; y++) {
+      for (let x = 0; x < this.world.w; x++) {
+        const cell = cellAt(this.world, x, y);
+        if (!cell) continue;
+        const id = cell.id;
+        g.fillStyle = id.startsWith("road") || id.startsWith("zebra")
+          ? "#262b3d"
+          : id === "grass" || id === "tree"
+            ? "#2f5f3c"
+            : id.startsWith("roof")
+              ? "#555a74"
+              : id.startsWith("fac_")
+                ? "#7a6a74"
+                : "#3b4054";
+        g.fillRect(x, y, 1, 1);
+      }
+    }
+    return c;
+  }
+
+  private renderMiniMap(ctx: CanvasRenderingContext2D, camX: number, camY: number, vw: number) {
+    if (!this.miniMap) this.miniMap = this.buildMiniMap();
+    const mapW = 84;
+    const mapH = Math.round((mapW * this.world.h) / this.world.w);
+    const x = camX + vw - mapW - 12;
+    const y = camY + 46;
+
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "rgba(8,10,20,0.9)";
+    ctx.fillRect(x - 3, y - 3, mapW + 6, mapH + 6);
+    ctx.drawImage(this.miniMap, x, y, mapW, mapH);
+
+    const sx = mapW / (this.world.w * TILE);
+    const sy = mapH / (this.world.h * TILE);
+
+    /* discoveries, then the hero on top so he is never hidden under one */
+    for (const d of this.world.discoveries) {
+      ctx.fillStyle = this.found.has(d.id) ? "rgba(89,232,255,0.5)" : "#59e8ff";
+      ctx.fillRect(x + d.tx * TILE * sx - 1.5, y + d.ty * TILE * sy - 1.5, 3, 3);
+    }
+
+    ctx.fillStyle = "#ff3a4e";
+    ctx.fillRect(x + this.px * sx - 1.5, y + this.py * sy - 1.5, 3, 3);
+
+    ctx.strokeStyle = "rgba(232,236,248,0.35)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x - 3, y - 3, mapW + 6, mapH + 6);
+    ctx.restore();
   }
 }
 

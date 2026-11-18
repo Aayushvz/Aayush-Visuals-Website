@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EXPERIMENTS } from "../experiments";
 import { descentCards } from "../descent/cards";
+import { CityAudio } from "./audio";
 import { CityEngine, type GameState } from "./engine";
 import { DISCOVERIES, type Discovery } from "./world";
 import "./city.css";
@@ -27,6 +28,8 @@ export default function CityExperience() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [hud, setHud] = useState<GameState | null>(null);
   const [open, setOpen] = useState<Discovery | null>(null);
+  const [muted, setMuted] = useState(false);
+  const audioRef = useRef<CityAudio | null>(null);
 
   /* the real project copy, reused from the playground data so a discovery
      shows the actual experiment rather than a stub */
@@ -53,14 +56,22 @@ export default function CityExperience() {
     if (!cv) return;
 
     fit();
+    /* built here, not on mount: an AudioContext created before a user
+       gesture is born suspended and never recovers on some browsers */
+    const audio = new CityAudio();
+    audio.init();
+    audioRef.current = audio;
+
     const engine = new CityEngine({
       canvas: cv,
       onState: setHud,
       onEnter: (d) => {
         engine.paused = true;
+        audio.discover();
         setOpen(d);
       },
     });
+    engine.audio = audio;
     engineRef.current = engine;
     engine.start();
 
@@ -68,6 +79,8 @@ export default function CityExperience() {
     return () => {
       window.removeEventListener("resize", fit);
       engine.destroy();
+      audio.destroy();
+      audioRef.current = null;
       engineRef.current = null;
     };
   }, [phase, fit]);
@@ -129,9 +142,22 @@ export default function CityExperience() {
             <span className="coc__found">{found} / {DISCOVERIES.length} found</span>
           </div>
 
-          <a className="coc__hud coc__hud--tr coc__exit" href="/playground">
-            Exit
-          </a>
+          <div className="coc__hud coc__hud--tr">
+            <button
+              className="coc__sound"
+              onClick={() => {
+                const m = !muted;
+                setMuted(m);
+                audioRef.current?.setMuted(m);
+              }}
+              aria-pressed={muted}
+            >
+              {muted ? "Sound off" : "Sound on"}
+            </button>
+            <a className="coc__exit" href="/playground">
+              Exit
+            </a>
+          </div>
 
           {hud?.nearby && !open ? (
             <div className="coc__prompt">

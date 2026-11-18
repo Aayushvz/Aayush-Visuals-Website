@@ -284,3 +284,18 @@
   .coc__hud { font-size: 10px; padding: 6px 10px; }
   .coc__prompt { bottom: 160px; }
 }
+
+.coc__sound {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--coc-dim);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.coc__sound:hover,
+.coc__sound:focus-visible { color: var(--coc-cyan); }
