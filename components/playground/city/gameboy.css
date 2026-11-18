@@ -1,0 +1,1241 @@
+/*
+  Game Boy — Spider-Man Special Edition
+  Authentic DMG-01 console silhouette with:
+  - Deep superhero red finish with subtle web aesthetics
+  - Classic curved screen bezel with battery LED
+  - Embossed GAME BOY typography
+  - Tactile cross D-pad, slanted SELECT/START pills, and round B/A buttons
+  - Diagonal speaker grille slits
+  - STRICTLY ZERO HORIZONTAL SCROLLBARS (no siders)
+  - Embedded Shotsu AI Assistant
+*/
+
+/* ── Screen and Drawer Overlay ── */
+
+.gb__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 86px 16px 16px;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: auto;
+  overflow: hidden !important;
+}
+
+@media (max-width: 600px) {
+  .gb__overlay {
+    padding: 60px 10px 12px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+}
+
+/* Global scrollbar suppression across the Game Boy */
+.gb__overlay,
+.gb__chassis,
+.gb__screen,
+.gb__view,
+.gb__worksList,
+.gb__shotsuChat,
+.gb__overlay * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.gb__overlay *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ── The Authentic Game Boy Chassis ── */
+
+.gb__chassis {
+  position: relative;
+  width: 336px;
+  max-width: 94vw;
+  height: min(calc(100vh - 106px), 540px);
+  max-height: calc(100vh - 106px);
+  margin-top: 0;
+  background: linear-gradient(175deg, #bf1b2c 0%, #991321 45%, #6a0b16 100%);
+  border-radius: 18px 18px 18px 46px;
+  border: 3.5px solid #0d111d;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.4),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.55),
+    0 16px 40px rgba(0, 0, 0, 0.75),
+    0 0 0 1px #d63345;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px 16px;
+  box-sizing: border-box;
+  user-select: none;
+  pointer-events: auto;
+  font-family: var(--pg-arcade), ui-monospace, SFMono-Regular, monospace;
+  animation: gbSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+@media (max-width: 600px) {
+  .gb__chassis {
+    width: min(340px, 94vw);
+    height: min(calc(100dvh - 72px), 510px);
+    max-height: calc(100dvh - 72px);
+    padding: 10px 12px 14px;
+    border-radius: 14px 14px 14px 36px;
+    margin-top: 0;
+  }
+}
+
+@keyframes gbSlideIn {
+  from { transform: translateX(-80px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Top Grooves / Vents */
+.gb__topGrooves {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.gb__topGrooves span {
+  width: 50px;
+  height: 3px;
+  background: #4d0a11;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Close Button */
+.gb__closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  background: #252e48;
+  color: #fff;
+  border: 1px solid #0d111d;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 10;
+  transition: all 0.1s;
+}
+
+.gb__closeBtn:hover {
+  background: #d6273c;
+  transform: scale(1.08);
+}
+
+/* ── Curved Dark Screen Bezel ── */
+
+.gb__bezel {
+  position: relative;
+  background: #141724;
+  border-radius: 12px 12px 28px 12px;
+  padding: 10px 12px 12px;
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.8),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow: visible !important;
+}
+
+.gb__bezelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  margin-bottom: 2px;
+}
+
+/* Spidey Eye Badge (Top-Left of Bezel, Image 3) */
+.gb__spideyEyeBadge {
+  width: 22px;
+  height: 22px;
+  background: radial-gradient(circle, #ea580c 0%, #c2410c 70%, #9a3412 100%);
+  border: 2px solid #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: 0 0 6px rgba(234, 88, 12, 0.6);
+  flex-shrink: 0;
+}
+
+.gb__spideyEyeLens {
+  width: 5px;
+  height: 8px;
+  background: #ffffff;
+  border: 1px solid #000;
+  border-radius: 1px 1px 4px 4px;
+}
+
+.gb__spideyEyeLens--l {
+  transform: rotate(18deg) skewX(6deg);
+}
+
+.gb__spideyEyeLens--r {
+  transform: rotate(-18deg) skewX(-6deg);
+}
+
+/* Spidey Tracker Center Pill Banner (Image 3) */
+.gb__spideyTrackerPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2.5px 8px;
+  background: #0d182a;
+  border: 1.5px solid #38bdf8;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+}
+
+.gb__trackerText {
+  font-size: 7px;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  color: #38bdf8;
+}
+
+.gb__trackerMaskIcon {
+  width: 9px;
+  height: 9px;
+  background: #ef4444;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.gb__trackerMaskIcon::before,
+.gb__trackerMaskIcon::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  width: 2px;
+  height: 3px;
+  background: #fff;
+  border-radius: 1px;
+}
+
+.gb__trackerMaskIcon::before { left: 1px; }
+.gb__trackerMaskIcon::after { right: 1px; }
+
+/* White Square Spider Badge (Top-Right of Bezel, Image 3) */
+.gb__spiderSquareBadge {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #000;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+/* Side Protruding Tabs (Image 3) */
+.gb__sideTab {
+  position: absolute;
+  left: -12px;
+  width: 14px;
+  height: 16px;
+  background: #ffffff;
+  border: 1.5px solid #000;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  font-size: 8px;
+  display: grid;
+  place-items: center;
+  z-index: 5;
+  box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.gb__sideTab--1 { top: 78px; }
+.gb__sideTab--2 { top: 100px; }
+
+/* Bottom Left Chibi Standing Spider-Man Badge */
+.gb__chibiSpideyBadge {
+  position: absolute;
+  left: 6px;
+  bottom: 8px;
+  width: 14px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
+}
+
+.gb__chibiHead {
+  width: 12px;
+  height: 10px;
+  background: #ef4444;
+  border: 1px solid #000;
+  border-radius: 5px 5px 3px 3px;
+  position: relative;
+}
+
+.gb__chibiHead::before,
+.gb__chibiHead::after {
+  content: "";
+  position: absolute;
+  top: 2.5px;
+  width: 3px;
+  height: 4px;
+  background: #fff;
+  border: 0.8px solid #000;
+}
+.gb__chibiHead::before { left: 1px; transform: rotate(12deg); }
+.gb__chibiHead::after { right: 1px; transform: rotate(-12deg); }
+
+.gb__chibiBody {
+  width: 10px;
+  height: 8px;
+  background: #1d4ed8;
+  border: 1px solid #000;
+  border-top: none;
+}
+
+/* ── Screen Tabs ── */
+
+.gb__tabs {
+  display: flex;
+  gap: 3px;
+  background: #090c14;
+  padding: 3px;
+  border-radius: 3px;
+  border: 1px solid #1a2034;
+  overflow-x: hidden !important;
+}
+
+.gb__tab {
+  flex: 1;
+  background: transparent;
+  color: #6a7796;
+  border: 0;
+  padding: 4px 2px;
+  font-family: inherit;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+  transition: all 0.1s;
+}
+
+.gb__tab.is-active {
+  background: #1e40af;
+  color: #ffffff;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.3), 0 0 6px rgba(30, 64, 175, 0.5);
+}
+
+.gb__tab:hover:not(.is-active) {
+  color: #c4d0ec;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Dot-Matrix LCD Screen Window ── */
+
+.gb__screen {
+  position: relative;
+  background: #101622;
+  border: 2px solid #060910;
+  border-radius: 4px;
+  height: 250px;
+  overflow-y: hidden;
+  overflow-x: hidden !important;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+}
+
+.gb__scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  z-index: 5;
+}
+
+.gb__view {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-x: hidden !important;
+}
+
+/* ── VIEW 1: STATUS ── */
+
+.gb__view--status {
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.gb__hangingSpidey {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 50% 0;
+  animation: gbSpideySwing 3s ease-in-out infinite alternate;
+  margin-top: -4px;
+  margin-bottom: 2px;
+}
+
+@keyframes gbSpideySwing {
+  0% { transform: rotate(-5deg); }
+  100% { transform: rotate(5deg); }
+}
+
+.gb__webLine {
+  width: 1.5px;
+  height: 22px;
+  background: #ffffff;
+  box-shadow: 0 0 3px #ffffff;
+}
+
+.gb__spideyInverted {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gb__invFeet {
+  width: 10px;
+  height: 5px;
+  background: #ef4444;
+  border: 1px solid #000;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+}
+
+.gb__invTorso {
+  width: 12px;
+  height: 8px;
+  background: #1d4ed8;
+  border: 1px solid #000;
+  position: relative;
+}
+
+.gb__invTorso::after {
+  content: "";
+  position: absolute;
+  inset: 1px 3px;
+  background: #ef4444;
+}
+
+.gb__invHead {
+  width: 18px;
+  height: 16px;
+  background: #ef4444;
+  border: 1.5px solid #000;
+  border-radius: 4px 4px 8px 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.gb__invEye {
+  width: 4px;
+  height: 5px;
+  background: #ffffff;
+  border: 1px solid #000;
+  border-radius: 1px 1px 3px 3px;
+}
+
+.gb__invEye--l { transform: rotate(14deg); }
+.gb__invEye--r { transform: rotate(-14deg); }
+
+.gb__welcomeText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 7px;
+  color: #59e8ff;
+  letter-spacing: 0.08em;
+  margin: 3px 0;
+  line-height: 1.35;
+}
+
+.gb__welcomeText p { margin: 0; }
+
+.gb__promptText {
+  font-size: 6.5px;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  margin: 2px 0 4px;
+  text-transform: uppercase;
+}
+
+.gb__trackerBottomBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 8px;
+  background: #09101d;
+  border: 1px solid #1e3a68;
+  border-radius: 3px;
+  font-size: 6.5px;
+  color: #38bdf8;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+.gb__speakerIcon {
+  font-size: 8px;
+}
+
+.gb__eqBar {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.gb__eqBlock {
+  width: 8px;
+  height: 8px;
+  background: #1e3a68;
+  border: 1px solid #0a1424;
+}
+
+.gb__eqBlock.is-pulsing {
+  background: #59e8ff;
+  box-shadow: 0 0 6px #59e8ff;
+  animation: gbEqPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes gbEqPulse {
+  0% { transform: scaleY(0.6); opacity: 0.4; }
+  100% { transform: scaleY(1.3); opacity: 1; }
+}
+
+.gb__soundToggles {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.gb__soundBtn {
+  background: #141b34;
+  color: #7b8db6;
+  border: 1px solid #23305a;
+  border-radius: 2px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 7.5px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.gb__soundBtn.is-active {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #59e8ff;
+  box-shadow: 0 0 6px rgba(89, 232, 255, 0.4);
+}
+
+.gb__statusMeta {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 7px;
+  color: #7b8db6;
+  border-top: 1px solid #182244;
+  padding-top: 4px;
+}
+
+/* ── VIEW 2: WORKS ── */
+
+.gb__view--works {
+  overflow: hidden !important;
+}
+
+.gb__listHeading {
+  margin: 0 0 6px;
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  color: #ffd166;
+  font-weight: bold;
+}
+
+.gb__worksList {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden !important;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gb__workItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0b0f1d;
+  padding: 5px 7px;
+  border-radius: 3px;
+  border: 1px solid #1a223e;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.gb__workItem:hover,
+.gb__workItem.is-selected {
+  background: #162044;
+  border-color: #59e8ff;
+}
+
+.gb__workDot {
+  color: #59e8ff;
+  font-size: 8px;
+}
+
+.gb__workMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.gb__workMeta strong {
+  font-size: 7.5px;
+  color: #ffffff;
+}
+
+.gb__workMeta span {
+  font-size: 6.5px;
+  color: #8fa0cc;
+}
+
+.gb__workBtns {
+  display: flex;
+  gap: 4px;
+}
+
+.gb__actBtn {
+  background: #1e3a68;
+  color: #ffffff;
+  border: 1px solid #2d5598;
+  border-radius: 2px;
+  padding: 2px 6px;
+  font-family: inherit;
+  font-size: 6.5px;
+  cursor: pointer;
+}
+
+.gb__actBtn--open {
+  background: #d6273c;
+  border-color: #ef3348;
+}
+
+.gb__actBtn:hover {
+  filter: brightness(1.2);
+}
+
+/* ── VIEW 3: EMBEDDED SHOTSU AI ── */
+
+.gb__view--shotsu {
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.gb__shotsuHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 4px 8px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.gb__shotsuMascot {
+  font-size: 14px;
+  filter: drop-shadow(0 0 4px #a78bfa);
+}
+
+.gb__shotsuHeader strong {
+  display: block;
+  font-size: 7.5px;
+  color: #c4b5fd;
+}
+
+.gb__shotsuHeader span {
+  font-size: 6.5px;
+  color: #94a3b8;
+}
+
+.gb__shotsuChat {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden !important;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 2px;
+  margin-bottom: 6px;
+}
+
+.gb__chatBubble {
+  background: #0b0f1e;
+  border: 1px solid #1a2240;
+  border-radius: 4px;
+  padding: 5px 8px;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.gb__chatBubble--bot {
+  background: #11172e;
+  border-color: #27366d;
+}
+
+.gb__chatBubble--user {
+  background: #1c2754;
+  border-color: #3b82f6;
+}
+
+.gb__bubbleRole {
+  display: block;
+  font-size: 6.5px;
+  font-weight: bold;
+  color: #59e8ff;
+  margin-bottom: 2px;
+}
+
+.gb__chatBubble--bot .gb__bubbleRole {
+  color: #a78bfa;
+}
+
+.gb__chatBubble p {
+  margin: 0;
+  font-size: 7px;
+  color: #f1f5f9;
+  letter-spacing: 0.02em;
+}
+
+.gb__typingDots {
+  display: inline-flex;
+  gap: 3px;
+  color: #a78bfa;
+  animation: gbPulseDots 1s infinite alternate;
+}
+
+@keyframes gbPulseDots {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.gb__quickChips {
+  display: flex;
+  gap: 4px;
+  overflow-x: hidden !important;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.gb__chip {
+  background: #131934;
+  color: #94a3b8;
+  border: 1px solid #253364;
+  border-radius: 2px;
+  padding: 2px 6px;
+  font-family: inherit;
+  font-size: 6.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.1s;
+}
+
+.gb__chip:hover:not(:disabled) {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.gb__shotsuForm {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.gb__shotsuInput {
+  flex: 1;
+  background: #090c16;
+  border: 1px solid #1f2b54;
+  border-radius: 2px;
+  padding: 4px 6px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 7px;
+  outline: none;
+}
+
+.gb__shotsuInput:focus {
+  border-color: #a78bfa;
+}
+
+.gb__shotsuSend {
+  background: #8b5cf6;
+  color: #fff;
+  border: 0;
+  border-radius: 2px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 7px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.gb__shotsuSend:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+.gb__shotsuSend:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── VIEW 4: AUDIO ── */
+
+.gb__view--music {
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.gb__nowPlaying {
+  background: #0c1020;
+  border: 1px solid #1a2244;
+  padding: 8px 12px;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gb__trackNum {
+  font-size: 7px;
+  color: #59e8ff;
+  display: block;
+}
+
+.gb__nowPlaying h4 {
+  margin: 3px 0;
+  font-size: 9px;
+  color: #ffffff;
+}
+
+.gb__nowPlaying p {
+  margin: 0;
+  font-size: 7px;
+  color: #8da0cc;
+}
+
+.gb__visualizer {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+  height: 40px;
+  margin: 10px 0;
+}
+
+.gb__vBar {
+  width: 12px;
+  height: 8px;
+  background: #1e3a68;
+  border-radius: 1px;
+}
+
+.gb__vBar.is-dancing {
+  background: #59e8ff;
+  animation: gbDanceBar 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes gbDanceBar {
+  0% { height: 6px; }
+  100% { height: 36px; }
+}
+
+.gb__audioControls {
+  display: flex;
+  gap: 8px;
+}
+
+.gb__volumeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 7.5px;
+  color: #8da0cc;
+  width: 100%;
+  justify-content: center;
+}
+
+.gb__volSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 110px;
+  height: 6px;
+  background: #090e1f;
+  border: 1px solid #1f2b52;
+  border-radius: 3px;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.gb__volSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #59e8ff;
+  border: 1.5px solid #0a0e20;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(89, 232, 255, 0.8);
+}
+
+.gb__volSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #59e8ff;
+  border: 1.5px solid #0a0e20;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(89, 232, 255, 0.8);
+}
+
+/* ── VIEW 5: WORLD ── */
+
+.gb__view--world {
+  justify-content: space-between;
+  text-align: center;
+}
+
+.gb__worldCard {
+  background: #0c1020;
+  border: 1px solid #1a2244;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.gb__worldTitle {
+  font-size: 7px;
+  color: #ffd166;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.gb__worldMode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 8px;
+  color: #ffffff;
+}
+
+.gb__worldStats {
+  display: flex;
+  justify-content: space-around;
+  background: #0b0f1c;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 7px;
+}
+
+.gb__worldStats div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gb__worldStats strong {
+  color: #59e8ff;
+  font-size: 8px;
+}
+
+.gb__hint {
+  font-size: 6.5px;
+  color: #7b8db6;
+  margin: 0;
+}
+
+/* ── Embossed Classic Game Boy Typography ── */
+
+.gb__logoLockup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 6px;
+  margin: 10px 0 6px;
+}
+
+.gb__logoMain {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: #27060a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.gb__logoSub {
+  font-size: 6.5px;
+  letter-spacing: 0.22em;
+  color: #ffb4bc;
+  font-weight: bold;
+}
+
+/* ── Classic Game Boy Lower Physical Controls ── */
+
+.gb__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  margin-top: 4px;
+}
+
+/* Cross D-PAD */
+.gb__dpad {
+  position: relative;
+  width: 74px;
+  height: 74px;
+}
+
+.gb__dpBtn {
+  position: absolute;
+  background: #1a1e2e;
+  border: 1px solid #090c14;
+  color: #4a5472;
+  font-size: 8px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.6);
+  padding: 0;
+}
+
+.gb__dpBtn:hover {
+  background: #252b42;
+  color: #59e8ff;
+}
+
+.gb__dpBtn:active {
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.gb__dpUp {
+  top: 0;
+  left: 25px;
+  width: 24px;
+  height: 25px;
+  border-radius: 4px 4px 0 0;
+}
+
+.gb__dpDown {
+  bottom: 0;
+  left: 25px;
+  width: 24px;
+  height: 25px;
+  border-radius: 0 0 4px 4px;
+}
+
+.gb__dpLeft {
+  top: 25px;
+  left: 0;
+  width: 25px;
+  height: 24px;
+  border-radius: 4px 0 0 4px;
+}
+
+.gb__dpRight {
+  top: 25px;
+  right: 0;
+  width: 25px;
+  height: 24px;
+  border-radius: 0 4px 4px 0;
+}
+
+.gb__dpCenter {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  width: 24px;
+  height: 24px;
+  background: #1a1e2e;
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+/* Slanted SELECT & START Pills */
+.gb__selectStart {
+  display: flex;
+  gap: 14px;
+  transform: rotate(-26deg);
+  margin-top: 20px;
+}
+
+.gb__pillWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.gb__pillBtn {
+  width: 32px;
+  height: 9px;
+  background: #22293e;
+  border-radius: 6px;
+  border: 1px solid #080a12;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.25), 0 2px 2px rgba(0, 0, 0, 0.5);
+}
+
+.gb__pillBtn:active {
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.gb__pillLabel {
+  font-size: 6px;
+  letter-spacing: 0.08em;
+  color: #ffb4bc;
+  font-weight: bold;
+}
+
+/* Slanted Round B & A Action Buttons */
+.gb__actionButtons {
+  display: flex;
+  gap: 12px;
+  transform: rotate(-26deg);
+  margin-top: -6px;
+}
+
+.gb__roundWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.gb__roundBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #0d111d;
+  color: #fff;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.4),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+    0 3px 6px rgba(0, 0, 0, 0.6);
+  transition: all 0.08s;
+}
+
+.gb__roundBtn--b {
+  background: #1e40af;
+}
+
+.gb__roundBtn--a {
+  background: #e11d48;
+}
+
+.gb__roundBtn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.gb__roundBtn:active {
+  transform: translateY(1px);
+  box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.8);
+}
+
+.gb__btnLabel {
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: #ffb4bc;
+  font-weight: bold;
+}
+
+/* ── Diagonal Speaker Grille Slits on Bottom Right ── */
+
+.gb__speakerGrille {
+  position: absolute;
+  bottom: 12px;
+  right: 18px;
+  display: flex;
+  gap: 5px;
+  transform: rotate(-30deg);
+}
+
+.gb__speakerGrille span {
+  width: 4px;
+  height: 36px;
+  background: #4a070e;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* ── Mobile Viewports ── */
+
+@media (max-width: 600px) {
+  .gb__chassis {
+    width: 340px;
+    height: 94vh;
+    padding: 12px 14px;
+  }
+
+  .gb__screen {
+    height: 220px;
+  }
+
+  .gb__dpad {
+    transform: scale(0.85);
+  }
+
+  .gb__actionButtons {
+    transform: rotate(-26deg) scale(0.9);
+  }
+}

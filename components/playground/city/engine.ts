@@ -1,8 +1,12 @@
 import {
   buildAtlas,
   heroFrameIndex,
+  HERO_CELL_H,
+  HERO_CELL_W,
   HERO_H,
   HERO_W,
+  NPC_CELL_H,
+  NPC_CELL_W,
   propAtlasIndex,
   TILE,
   tileAtlasIndex,
@@ -23,21 +27,17 @@ import { drawItem, drawVenueFloor } from "./interiors";
 /*
   The game loop, kept out of React entirely.
 
-  React owns the shell — intro screen, HUD, the project panel — and this
-  owns the frame. They talk through two narrow channels: `setInput` going
-  in, and the `onState` callback coming out, which fires only when
-  something the HUD renders actually changes. Nothing here triggers a
-  re-render per frame.
+  React owns the shell — intro screen, HUD, Game Boy, project panel — and this
+  owns the frame. They talk through narrow channels: input going in, and
+  onState going out when something the HUD renders changes.
 
-  `destroy()` releases every listener and cancels the loop, because this
-  mounts inside a portfolio and a leaked rAF would keep burning battery on
-  whatever page the visitor goes to next.
+  Supports Day and Night cycles, varied vehicle models, realistic character
+  rendering, direct teleportation, and smooth performance.
 */
 
-const SPEED = 62; // px per second, walking
-const SPRINT = 108;
-const INTERACT_RANGE = 26;
-/** a lamp is at full strength within this, and dark beyond LAMP_OFF */
+const SPEED = 68; // px per second, walking
+const SPRINT = 118;
+const INTERACT_RANGE = 28;
 const LAMP_ON = 46;
 const LAMP_OFF = 120;
 
@@ -47,12 +47,14 @@ export type GameState = {
   found: string[];
   x: number;
   y: number;
+  isDay: boolean;
 };
 
 export type EngineOptions = {
   canvas: HTMLCanvasElement;
   onState: (s: GameState) => void;
   onEnter: (d: Discovery) => void;
+  onToggleGameBoy?: () => void;
 };
 
 type Keys = Record<string, boolean>;
@@ -60,6 +62,8 @@ type Keys = Record<string, boolean>;
 export class CityEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private dayAtlas: Atlas;
+  private nightAtlas: Atlas;
   private atlas: Atlas;
   private world: World;
   private keys: Keys = {};
@@ -74,16 +78,25 @@ export class CityEngine {
   private frame = 0;
   private moving = false;
 
+  public isDay = false; // default night; toggles with Day/Night switch
+
   private found = new Set<string>();
   private nearby: Discovery | null = null;
   private onState: (s: GameState) => void;
   private onEnter: (d: Discovery) => void;
+  private onToggleGameBoy?: () => void;
 
-  /** set by the shell while a panel is open, so the city does not move under it */
+  /** set by the shell while a panel or drawer is open */
   paused = false;
 
-  /** supplied by the shell after the Start gesture */
-  audio: { step: (s: "stone" | "grass" | "road", now: number, running: boolean) => void; discover: () => void } | null = null;
+  /** supplied by the shell after the audio start */
+  audio: {
+    step: (s: "stone" | "grass" | "road", now: number, running: boolean) => void;
+    discover: () => void;
+    playWarp?: () => void;
+  } | null = null;
+
+  stick = { x: 0, y: 0 };
 
   constructor(opts: EngineOptions) {
     this.canvas = opts.canvas;
@@ -92,12 +105,16 @@ export class CityEngine {
     this.ctx = ctx;
     this.ctx.imageSmoothingEnabled = false;
 
-    this.atlas = buildAtlas();
+    this.dayAtlas = buildAtlas(true);
+    this.nightAtlas = buildAtlas(false);
+    this.atlas = this.isDay ? this.dayAtlas : this.nightAtlas;
+
     this.world = buildWorld(DISCOVERIES);
     this.px = this.world.spawn.x;
     this.py = this.world.spawn.y;
     this.onState = opts.onState;
     this.onEnter = opts.onEnter;
+    this.onToggleGameBoy = opts.onToggleGameBoy;
 
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
@@ -110,7 +127,13 @@ export class CityEngine {
     const k = e.key.toLowerCase();
     if (MOVE_KEYS.has(k) || k === " " || k === "e") e.preventDefault();
     this.keys[k] = true;
-    if (k === "e" && this.nearby && !this.paused) this.onEnter(this.nearby);
+
+    if (k === "e" && this.nearby && !this.paused) {
+      this.onEnter(this.nearby);
+    } else if (k === "g") {
+      e.preventDefault();
+      this.onToggleGameBoy?.();
+    }
   };
 
   private onKeyUp = (e: KeyboardEvent) => {
@@ -121,16 +144,27 @@ export class CityEngine {
     this.keys = {};
   };
 
-  /** touch joystick, -1..1 on each axis */
-  stick = { x: 0, y: 0 };
-
-  /** the on-screen interact button */
-  interact = () => {
+  interact() {
     if (this.nearby && !this.paused) this.onEnter(this.nearby);
-  };
+  }
 
-  markFound(id: string) {
-    this.found.add(id);
+  setDay(day: boolean) {
+    this.isDay = day;
+    this.atlas = this.isDay ? this.dayAtlas : this.nightAtlas;
+    this.miniMap = null;
+    this.emit();
+  }
+
+  toggleDayNight() {
+    this.setDay(!this.isDay);
+  }
+
+  teleportTo(tx: number, ty: number) {
+    this.px = tx * TILE + 8;
+    this.py = (ty + 1) * TILE + 10;
+    this.dir = "up";
+    this.audio?.playWarp?.();
+    this.checkNearby();
     this.emit();
   }
 
@@ -152,11 +186,14 @@ export class CityEngine {
     window.removeEventListener("blur", this.clearKeys);
   }
 
+  markFound(id: string) {
+    this.found.add(id);
+    this.emit();
+  }
+
   private tick = (now: number) => {
     if (!this.running) return;
-    /* clamp: a backgrounded tab hands back a delta of seconds, which would
-       teleport the player through a wall on the first frame back */
-    const dt = Math.min(0.05, (now - this.last) / 1000);
+    const dt = Math.min(0.08, (now - this.last) / 1000);
     this.last = now;
 
     if (!this.paused) this.update(dt);
@@ -165,77 +202,84 @@ export class CityEngine {
     this.raf = requestAnimationFrame(this.tick);
   };
 
+  /* ── simulation ────────────────────────────────────────────────── */
+
   private update(dt: number) {
-    const k = this.keys;
-    let ax = (k.a || k.arrowleft ? -1 : 0) + (k.d || k.arrowright ? 1 : 0);
-    let ay = (k.w || k.arrowup ? -1 : 0) + (k.s || k.arrowdown ? 1 : 0);
+    let vx = 0;
+    let vy = 0;
+
+    if (this.keys["w"] || this.keys["arrowup"]) vy -= 1;
+    if (this.keys["s"] || this.keys["arrowdown"]) vy += 1;
+    if (this.keys["a"] || this.keys["arrowleft"]) vx -= 1;
+    if (this.keys["d"] || this.keys["arrowright"]) vx += 1;
 
     if (this.stick.x || this.stick.y) {
-      ax = this.stick.x;
-      ay = this.stick.y;
+      vx = this.stick.x;
+      vy = this.stick.y;
     }
 
-    const len = Math.hypot(ax, ay);
+    const len = Math.hypot(vx, vy);
     this.moving = len > 0.08;
 
     if (this.moving) {
-      ax /= len;
-      ay /= len;
-      const speed = k.shift ? SPRINT : SPEED;
+      const spd = (this.keys["shift"] ? SPRINT : SPEED) * dt;
+      const nx = (vx / len) * spd;
+      const ny = (vy / len) * spd;
 
-      /* axes resolved separately so sliding along a wall works instead of
-         sticking the moment one axis is blocked */
-      this.moveAxis(ax * speed * dt, 0);
-      this.moveAxis(0, ay * speed * dt);
+      if (Math.abs(vx) > Math.abs(vy)) {
+        this.dir = vx > 0 ? "right" : "left";
+      } else {
+        this.dir = vy > 0 ? "down" : "up";
+      }
 
-      if (Math.abs(ax) > Math.abs(ay)) this.dir = ax < 0 ? "left" : "right";
-      else this.dir = ay < 0 ? "up" : "down";
+      this.moveAxis(nx, 0);
+      this.moveAxis(0, ny);
 
-      this.animT += dt * (k.shift ? 14 : 9);
+      this.animT += dt * (this.keys["shift"] ? 11 : 7.5);
       this.frame = Math.floor(this.animT) % 4;
     } else {
-      this.frame = 0;
       this.animT = 0;
+      this.frame = 0;
     }
 
     this.checkNearby();
     this.updateTraffic(dt);
 
-    /* footsteps, keyed to what is under the hero's feet */
     if (this.moving) {
-      const cell = cellAt(this.world, Math.floor(this.px / TILE), Math.floor((this.py + 6) / TILE));
+      const cell = cellAt(
+        this.world,
+        Math.floor(this.px / TILE),
+        Math.floor((this.py + 6) / TILE)
+      );
       const id = cell?.id ?? "walk";
-      const surface = id === "grass" || id === "tree" ? "grass" : id.startsWith("road") || id.startsWith("zebra") ? "road" : "stone";
+      const surface =
+        id === "grass" || id === "tree"
+          ? "grass"
+          : id.startsWith("road") || id.startsWith("zebra")
+            ? "road"
+            : "stone";
       this.audio?.step(surface, performance.now(), !!this.keys.shift);
     }
   }
 
-  /*
-    Traffic and pedestrians.
-
-    Cars loop the full width or height of the map and wrap, which costs
-    nothing and means the streets are never empty wherever you are.
-    Pedestrians turn round when the pavement runs out rather than
-    pathfinding — at this scale the difference is invisible and the cost
-    is not.
-  */
   private updateTraffic(dt: number) {
     const wpx = this.world.w * TILE;
     const hpx = this.world.h * TILE;
 
     for (const car of this.world.cars) {
+      if (car.isParked) continue;
       car.x += car.dx * car.speed * dt;
       car.y += car.dy * car.speed * dt;
-      if (car.x < -24) car.x = wpx + 24;
-      if (car.x > wpx + 24) car.x = -24;
-      if (car.y < -24) car.y = hpx + 24;
-      if (car.y > hpx + 24) car.y = -24;
+      if (car.x < -36) car.x = wpx + 36;
+      if (car.x > wpx + 36) car.x = -36;
+      if (car.y < -36) car.y = hpx + 36;
+      if (car.y > hpx + 36) car.y = -36;
     }
 
     for (const n of this.world.npcs) {
       n.t += dt;
-      const nx = n.x + n.dx * 18 * dt;
-      const ny = n.y + n.dy * 18 * dt;
+      const nx = n.x + n.dx * 20 * dt;
+      const ny = n.y + n.dy * 20 * dt;
       if (solidAt(this.world, nx, ny + 4)) {
         n.dx = -n.dx;
         n.dy = -n.dy;
@@ -246,14 +290,13 @@ export class CityEngine {
     }
   }
 
-  /* the hero's feet are the collider — a box the size of the whole sprite
-     would stop him walking under the overhang of anything */
+  /* hero feet collider */
   private moveAxis(dx: number, dy: number) {
     const nx = this.px + dx;
     const ny = this.py + dy;
     const halfW = 4;
-    const top = 4;
-    const bottom = 7;
+    const top = 0;
+    const bottom = 4;
 
     const corners: Array<[number, number]> = [
       [nx - halfW, ny + top],
@@ -263,7 +306,7 @@ export class CityEngine {
     ];
 
     if (corners.some(([cx, cy]) => solidAt(this.world, cx, cy))) return;
-    if (this.world.venues.some((v) => venueSolidAt(v, nx, ny + 5))) return;
+    if (this.world.venues.some((v) => venueSolidAt(v, nx, ny + 4))) return;
     this.px = nx;
     this.py = ny;
   }
@@ -287,31 +330,18 @@ export class CityEngine {
       this.emit();
     }
 
-    /*
-      Walking into a doorway opens it.
-
-      Pressing E still works, but having to press anything at all made
-      people walk past buildings without ever learning there was
-      something inside. `armed` stops it reopening the instant the panel
-      closes: it only re-arms once you have stepped away again.
-    */
-    /* 20px, not 13: standing in the doorway puts the hero one tile (16px)
-       from the door's centre, so a tighter threshold meant walking up to a
-       building never opened it and only the E key ever worked */
-    if (best && bestD < 20) {
+    if (best && bestD < 22) {
       if (this.armed && !this.paused) {
         this.armed = false;
         this.onEnter(best);
       }
-    } else if (!best || bestD > 30) {
+    } else if (!best || bestD > 32) {
       this.armed = true;
     }
   }
 
-  /** false between opening a discovery and walking away from it */
   private armed = true;
 
-  /** only fires when something the HUD actually renders has changed */
   private emit() {
     this.onState({
       district: this.nearby?.label ?? "Downtown",
@@ -319,6 +349,7 @@ export class CityEngine {
       found: [...this.found],
       x: this.px,
       y: this.py,
+      isDay: this.isDay,
     });
   }
 
@@ -330,25 +361,25 @@ export class CityEngine {
     const vw = canvas.width / scale;
     const vh = canvas.height / scale;
 
-    /* camera follows, clamped so the view never leaves the city */
     const camX = Math.max(0, Math.min(this.world.w * TILE - vw, this.px - vw / 2));
     const camY = Math.max(0, Math.min(this.world.h * TILE - vh, this.py - vh / 2));
 
     ctx.save();
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = "#14141c";
+
+    // Background fill
+    ctx.fillStyle = this.isDay ? "#d2d8e4" : "#14141c";
     ctx.fillRect(0, 0, vw, vh);
 
     ctx.translate(-Math.round(camX), -Math.round(camY));
 
-    /* only the tiles on screen — the city is 60x44 and drawing all of it
-       every frame is 2,640 blits for the ~400 that are visible */
     const x0 = Math.max(0, Math.floor(camX / TILE));
     const y0 = Math.max(0, Math.floor(camY / TILE));
     const x1 = Math.min(this.world.w - 1, Math.ceil((camX + vw) / TILE));
     const y1 = Math.min(this.world.h - 1, Math.ceil((camY + vh) / TILE));
 
+    // 1. Tiles
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
         const cell = cellAt(this.world, x, y);
@@ -367,49 +398,127 @@ export class CityEngine {
       }
     }
 
+    // 2. Venues & Props
     this.renderVenues(ctx, x0, y0, x1, y1);
     this.renderProps(ctx, x0, y0, x1, y1);
+
+    // 3. Vehicles & NPCs
     this.renderCars(ctx, camX, camY, vw, vh);
     this.renderNpcs(ctx, camX, camY, vw, vh);
+
+    // 4. Lighting Pass (Daylight sun shadows or Night glow)
+    if (this.isDay) {
+      this.renderDaylight(ctx, camX, camY, vw, vh, x0, y0, x1, y1);
+    } else {
+      this.renderNight(ctx, camX, camY, vw, vh, x0, y0, x1, y1);
+    }
+
+    // 5. Markers (rendered AFTER lighting so tags stay luminous, crisp & high-contrast!)
     this.renderMarkers(ctx);
-    this.renderNight(ctx, camX, camY, vw, vh, x0, y0, x1, y1);
-    /* after the night wash, so navigation is never dimmed by it */
+
+    // 6. Navigation UI (always clear)
     this.renderCompass(ctx, camX, camY, vw, vh);
     this.renderMiniMap(ctx, camX, camY, vw, vh);
 
-    /* shadow then hero, so he sits on the ground rather than floating */
-    ctx.fillStyle = "rgba(10,10,18,0.3)";
+    // 7. Hero shadow and sprite (grounded firmly beneath feet)
+    ctx.fillStyle = this.isDay ? "rgba(15,20,35,0.35)" : "rgba(10,10,18,0.5)";
     ctx.beginPath();
-    ctx.ellipse(Math.round(this.px), Math.round(this.py) + 7, 5, 2.5, 0, 0, Math.PI * 2);
+    const shadowX = this.isDay ? Math.round(this.px) + 1.5 : Math.round(this.px);
+    const shadowY = this.isDay ? Math.round(this.py) + 3.8 : Math.round(this.py) + 3.2;
+    ctx.ellipse(shadowX, shadowY, 5.5, 2.6, 0, 0, Math.PI * 2);
     ctx.fill();
 
     const fi = heroFrameIndex(this.dir, this.moving ? this.frame : 0);
     ctx.drawImage(
       this.atlas.canvas,
-      fi * TILE,
+      fi * HERO_CELL_W,
       this.atlas.heroRowY,
-      TILE,
-      TILE,
-      Math.round(this.px) - HERO_W / 2 - 2,
-      Math.round(this.py) - HERO_H + 6,
-      TILE,
-      TILE
+      HERO_CELL_W,
+      HERO_CELL_H,
+      Math.round(this.px) - HERO_CELL_W / 2,
+      Math.round(this.py) - 14,
+      HERO_CELL_W,
+      HERO_CELL_H
     );
+
+    // 8. Player Character 'YOU' floating tag (image 4)
+    const bob = Math.sin(performance.now() / 240) * 1.5;
+    const tagX = Math.round(this.px);
+    const tagY = Math.round(this.py) - 25 + bob;
+
+    // Dark pill backing with crisp Spidey red border
+    ctx.fillStyle = "rgba(10, 14, 26, 0.92)";
+    ctx.strokeStyle = "#e62838";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(tagX - 11, tagY - 6, 22, 10, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // Downward pointer arrow pointing right at Spidey's head
+    ctx.fillStyle = "#e62838";
+    ctx.beginPath();
+    ctx.moveTo(tagX - 3, tagY + 4);
+    ctx.lineTo(tagX + 3, tagY + 4);
+    ctx.lineTo(tagX, tagY + 7);
+    ctx.closePath();
+    ctx.fill();
+
+    // 'YOU' text in crisp white
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 6px ui-monospace, monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("YOU", tagX, tagY - 1);
 
     ctx.restore();
   }
 
   /*
-    Night.
+    Daylight lighting pass:
+    Directional sunlight drop shadows to the southeast, plus warm atmosphere.
+  */
+  private renderDaylight(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    vw: number,
+    vh: number,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number
+  ) {
+    ctx.fillStyle = "rgba(18, 24, 42, 0.22)";
 
-    Two passes. First a cool wash over everything, which is the night
-    itself; then every light source drawn with 'lighter' so it adds back
-    into that wash instead of sitting on top of it as a pale sticker.
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        const cell = cellAt(this.world, x, y);
+        if (!cell || (!cell.id.startsWith("roof") && !cell.id.startsWith("fac_"))) continue;
 
-    The light sprite is a radial gradient rendered once into its own
-    canvas and then blitted. Building a gradient per lamp per frame is the
-    classic way to make a lit scene crawl — there can be forty lamps on
-    screen and this is the same cost as forty drawImage calls.
+        const east = cellAt(this.world, x + 1, y);
+        const south = cellAt(this.world, x, y + 1);
+
+        if (!east || (!east.id.startsWith("roof") && !east.id.startsWith("fac_"))) {
+          ctx.fillRect((x + 1) * TILE, y * TILE + 2, 4, TILE);
+        }
+        if (!south || (!south.id.startsWith("roof") && !south.id.startsWith("fac_"))) {
+          ctx.fillRect(x * TILE + 2, (y + 1) * TILE, TILE, 4);
+        }
+      }
+    }
+
+    ctx.save();
+    ctx.globalCompositeOperation = "soft-light";
+    ctx.fillStyle = "rgba(255, 245, 220, 0.12)";
+    ctx.fillRect(camX, camY, vw, vh);
+    ctx.restore();
+  }
+
+  /*
+    Night lighting pass:
+    Atmospheric deep midnight multiply wash with glowing street lamp pools,
+    warm window light, realistic vehicle headlights, and superhero ambient aura.
   */
   private renderNight(
     ctx: CanvasRenderingContext2D,
@@ -422,25 +531,52 @@ export class CityEngine {
     x1: number,
     y1: number
   ) {
-    /*
-      Night as a multiply, not a flat wash.
-
-      Painting translucent navy over the city pulled every colour toward
-      the same grey — brick, slate and plum all ended up the same muddy
-      blue, which is why the buildings looked dull and blurry. Multiply
-      scales each channel instead, so a red brick stays red and only gets
-      darker. The tint is warm-shadowed rather than pure blue so the
-      ground does not go cold under the lamps.
-    */
     const prev = ctx.globalCompositeOperation;
+
+    // Detect if hero is currently inside any venue
+    const insideVenue = this.world.venues.find((v) => {
+      const vx0 = v.x0 * TILE;
+      const vy0 = v.y0 * TILE;
+      const vx1 = (v.x1 + 1) * TILE;
+      const vy1 = (v.y1 + 1) * TILE;
+      return this.px >= vx0 && this.px <= vx1 && this.py >= vy0 && this.py <= vy1;
+    });
+
     ctx.globalCompositeOperation = "multiply";
-    ctx.fillStyle = "#59608f";
-    ctx.fillRect(camX, camY, vw, vh);
+    // If inside a venue, cut out the dark multiply fog over that venue room!
+    if (insideVenue) {
+      const rx = insideVenue.x0 * TILE;
+      const ry = insideVenue.y0 * TILE;
+      const rw = (insideVenue.x1 - insideVenue.x0 + 1) * TILE;
+      const rh = (insideVenue.y1 - insideVenue.y0 + 1) * TILE;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(camX, camY, vw, vh);
+      ctx.rect(rx, ry, rw, rh);
+      ctx.clip("evenodd");
+      ctx.fillStyle = "#2c335a";
+      ctx.fillRect(camX, camY, vw, vh);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = "#2c335a";
+      ctx.fillRect(camX, camY, vw, vh);
+    }
 
     ctx.globalCompositeOperation = "lighter";
 
-    /* lit windows and shopfronts. Which windows are lit is a hash of the
-       tile, so the same flats are on every night rather than flickering */
+    // When inside a venue, gently warm the room interior without harsh glare/washout
+    if (insideVenue) {
+      const rx = insideVenue.x0 * TILE;
+      const ry = insideVenue.y0 * TILE;
+      const rw = (insideVenue.x1 - insideVenue.x0 + 1) * TILE;
+      const rh = (insideVenue.y1 - insideVenue.y0 + 1) * TILE;
+      const midX = rx + rw / 2;
+      const midY = ry + rh / 2;
+      const roomRadius = Math.max(36, Math.min(rw, rh) * 0.7);
+      this.light(ctx, midX, midY, roomRadius, "255,242,210", 0.2);
+    }
+
+    // Windows & Shopfronts
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
         const cell = cellAt(this.world, x, y);
@@ -448,73 +584,78 @@ export class CityEngine {
         const shop = cell.id.startsWith("fac_shop");
         const win = cell.id.startsWith("fac_win");
         if (!shop && !win) continue;
-        if (win && hash3(x, y, 91) > 0.62) continue; // a dark flat
+        if (win && hash3(x, y, 41) > 0.42) continue;
 
-        ctx.fillStyle = shop ? "rgba(255,206,130,0.5)" : "rgba(255,214,150,0.38)";
-        if (shop) ctx.fillRect(x * TILE + 2, y * TILE + 6, 12, 8);
-        else ctx.fillRect(x * TILE + 4, y * TILE + 4, 8, 7);
-
-        /* a tight spill, not a cloud: a wide soft circle per window was
-           what turned whole façades into fog */
-        this.light(ctx, x * TILE + 8, y * TILE + 10, shop ? 18 : 12, "255,198,118", shop ? 0.55 : 0.34);
+        const rgb = shop ? "255,225,160" : "255,214,130";
+        const rad = shop ? 30 : 18;
+        const alpha = shop ? 0.42 : 0.28;
+        this.light(ctx, x * TILE + 8, y * TILE + 8, rad, rgb, alpha);
       }
     }
 
-    /*
-      Street lamps come on as you reach them.
-
-      Every lamp burning at once made the street a field of overlapping
-      grey-white discs with no focus anywhere. Lighting only the ones you
-      are near gives the walk a moving pool of warmth, and leaves real
-      darkness between them to walk out of.
-    */
+    // Street Lamps: warm golden pools that smoothly illuminate as player nears
+    const LAMP_PROXIMITY = 90;
     for (const p of this.world.props) {
       if (p.id !== "lamp") continue;
-      if (p.tx < x0 - 3 || p.tx > x1 + 3 || p.ty < y0 - 3 || p.ty > y1 + 3) continue;
-
+      if (p.tx < x0 - 2 || p.tx > x1 + 2 || p.ty < y0 - 2 || p.ty > y1 + 2) continue;
       const lx = p.tx * TILE + 8;
-      const ly = p.ty * TILE + 10;
-      const d = Math.hypot(lx - this.px, ly - this.py);
-      /* full from 0 to LAMP_ON, fading to nothing by LAMP_OFF */
-      const t = 1 - (d - LAMP_ON) / (LAMP_OFF - LAMP_ON);
-      const on = t < 0 ? 0 : t > 1 ? 1 : t;
-      if (on <= 0.01) continue;
-
-      /* the bulb itself brightens too, so the lamp reads as switching on
-         rather than a glow appearing around a dark post */
-      ctx.fillStyle = `rgba(255,236,180,${0.35 + on * 0.6})`;
-      ctx.fillRect(lx - 2, ly - 7, 4, 2);
-      this.light(ctx, lx, ly, 26 + on * 14, "255,206,140", 0.3 + on * 0.5);
+      const ly = p.ty * TILE + 6;
+      const dist = Math.hypot(this.px - lx, this.py - ly);
+      if (dist < LAMP_PROXIMITY) {
+        const factor = Math.max(0, 1 - dist / LAMP_PROXIMITY);
+        const glow = factor * factor; // smooth quadratic falloff
+        this.light(ctx, lx, ly, LAMP_ON * (0.7 + 0.35 * factor), "255,228,150", 0.65 * glow);
+        this.light(ctx, lx, ly, LAMP_OFF * (0.7 + 0.35 * factor), "255,210,120", 0.28 * glow);
+      }
     }
 
-    /* headlights, thrown ahead of each car */
+    // Car Headlights & Police Sirens in Night
+    const now = performance.now();
     for (const car of this.world.cars) {
+      if (car.isParked) continue;
       if (car.x < camX - 40 || car.x > camX + vw + 40) continue;
       if (car.y < camY - 40 || car.y > camY + vh + 40) continue;
-      this.light(ctx, car.x + car.dx * 14, car.y + car.dy * 14, 22, "255,236,190", 0.55);
-      this.light(ctx, car.x, car.y, 10, "255,236,190", 0.22);
+      
+      const hx = car.x + (car.dx !== 0 ? car.dx * 20 : 0);
+      const hy = car.y + (car.dy !== 0 ? car.dy * 20 : 0);
+      this.light(ctx, hx, hy, 44, "255,248,210", 0.42);
+
+      // Flashing police siren glow
+      if (car.type === "police") {
+        const sirenRed = Math.floor(now / 160) % 2 === 0;
+        const sColor = sirenRed ? "255,40,60" : "40,120,255";
+        this.light(ctx, car.x, car.y, 48, sColor, 0.48);
+      }
     }
 
-    /* the beacons, and a soft pool under the hero so he never gets lost */
+    // Discoveries & Spider-Man Hero ambient aura
     for (const d of this.world.discoveries) {
       if (d.tx < x0 - 3 || d.tx > x1 + 3 || d.ty < y0 - 3 || d.ty > y1 + 3) continue;
-      const pulse = 0.55 + Math.sin(performance.now() / 420 + d.tx) * 0.16;
+      const pulse = 0.55 + Math.sin(now / 420 + d.tx) * 0.16;
       this.light(ctx, d.tx * TILE + 8, d.ty * TILE + 2, 60, "89,232,255", pulse);
     }
-    this.light(ctx, this.px, this.py, 26, "190,212,255", 0.26);
+    // Subtle Spider-Sense Hero aura around Spidey
+    this.light(ctx, this.px, this.py, 30, "235,55,75", 0.24);
+
+    ctx.globalCompositeOperation = "source-over";
+    // Warm illuminated neon room perimeter when inside a venue
+    if (insideVenue) {
+      const rx = insideVenue.x0 * TILE;
+      const ry = insideVenue.y0 * TILE;
+      const rw = (insideVenue.x1 - insideVenue.x0 + 1) * TILE;
+      const rh = (insideVenue.y1 - insideVenue.y0 + 1) * TILE;
+      ctx.save();
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.85)";
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = "rgba(251, 191, 36, 0.6)";
+      ctx.shadowBlur = 8;
+      ctx.strokeRect(rx + 1, ry + 1, rw - 2, rh - 2);
+      ctx.restore();
+    }
 
     ctx.globalCompositeOperation = prev;
   }
 
-  /*
-    One cached radial sprite per colour.
-
-    The first attempt drew a white sprite then tinted it with a
-    'source-atop' fillRect — but source-atop composites against the whole
-    canvas, not against the sprite just drawn, so every light painted a
-    solid coloured square over the city. There are only four colours here,
-    so baking the tint into each gradient is both correct and cheaper.
-  */
   private lightSprites = new Map<string, HTMLCanvasElement>();
 
   private light(
@@ -548,14 +689,6 @@ export class CityEngine {
     ctx.restore();
   }
 
-  /*
-    The cutaway buildings.
-
-    Each project building has had its roof left off by the generator, so
-    what the street sees is the room itself: floor, furniture, and the
-    people working in it. There is no interior to walk into — the
-    building IS the exhibit.
-  */
   private renderVenues(
     ctx: CanvasRenderingContext2D,
     x0: number,
@@ -573,39 +706,49 @@ export class CityEngine {
       drawVenueFloor(ctx, v.venue, ox, oy, v.x1 - v.x0 + 1, v.y1 - v.y0 + 1);
       for (const it of v.venue.items) drawItem(ctx, it, v.venue.pal, ox, oy);
 
-      /*
-        The people. Each kind of work gets its own motion — typing is a
-        small fast nod, lifting is a slow heavy rise, painting leans in
-        and out, serving paces the counter. Standing still would make
-        every room read as a showroom rather than a workplace.
-      */
       for (const wk of v.venue.workers) {
         const wx = ox + wk.x * TILE + 8;
         const base = oy + wk.y * TILE + 11;
         let dy = 0;
         let dx = 0;
-        if (wk.doing === "type") dy = Math.sin(t * 7 + wk.x) * 0.9;
-        else if (wk.doing === "lift") dy = Math.sin(t * 2.1 + wk.y) * 2.6;
-        else if (wk.doing === "paint") dx = Math.sin(t * 3.2 + wk.x) * 1.6;
-        else if (wk.doing === "serve") dx = Math.sin(t * 1.5 + wk.y) * 2.4;
-        else dy = Math.sin(t * 1.3 + wk.x) * 0.7;
+        let dirIdx = 0; // 0 = down, 1 = up, 2 = side
+        if (wk.doing === "type") {
+          dy = Math.sin(t * 7 + wk.x) * 0.9;
+          dirIdx = 1; // Facing up towards computer monitor
+        } else if (wk.doing === "lift") {
+          dy = Math.sin(t * 2.1 + wk.y) * 2.6;
+          dirIdx = 0;
+        } else if (wk.doing === "paint") {
+          dx = Math.sin(t * 3.2 + wk.x) * 1.6;
+          dirIdx = 1; // Facing up towards easel
+        } else if (wk.doing === "serve") {
+          dx = Math.sin(t * 1.5 + wk.y) * 2.4;
+          dirIdx = 0; // Facing down towards counter
+        } else {
+          dy = Math.sin(t * 1.3 + wk.x) * 0.7;
+        }
 
-        ctx.fillStyle = "rgba(10,10,18,0.25)";
+        ctx.fillStyle = "rgba(10,10,18,0.3)";
         ctx.beginPath();
-        ctx.ellipse(wx, base + 6, 4, 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(wx, base + 4, 4.5, 2.2, 0, 0, Math.PI * 2);
         ctx.fill();
 
         const frame = Math.floor(t * (wk.doing === "idle" ? 1.4 : 4)) % 2;
+        const vIdx = (wk.variant ?? 0) % 8;
+        const col = (vIdx * 6 + dirIdx * 2 + frame);
+        const sx = col * NPC_CELL_W + 1;
+        const sy = this.atlas.npcRowY;
+
         ctx.drawImage(
           this.atlas.canvas,
-          (wk.variant * 2 + frame) * TILE,
-          this.atlas.npcRowY,
-          TILE,
-          TILE,
-          Math.round(wx - 8 + dx),
-          Math.round(base - 12 + dy),
-          TILE,
-          TILE
+          sx,
+          sy,
+          NPC_CELL_W,
+          NPC_CELL_H,
+          Math.round(wx - NPC_CELL_W / 2 + dx),
+          Math.round(base - 13 + dy),
+          NPC_CELL_W,
+          NPC_CELL_H
         );
       }
     }
@@ -620,9 +763,7 @@ export class CityEngine {
   ) {
     for (const p of this.world.props) {
       if (p.tx < x0 - 1 || p.tx > x1 + 1 || p.ty < y0 - 1 || p.ty > y1 + 1) continue;
-      /* a contact shadow is what stops a prop looking stuck on top of the
-         pavement rather than standing on it */
-      ctx.fillStyle = "rgba(10,10,18,0.22)";
+      ctx.fillStyle = this.isDay ? "rgba(15,20,35,0.25)" : "rgba(10,10,18,0.22)";
       ctx.beginPath();
       ctx.ellipse(p.tx * TILE + 8, p.ty * TILE + 14, 5, 2, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -640,6 +781,10 @@ export class CityEngine {
     }
   }
 
+  /* 
+    Enhanced Vehicles:
+    Supports taxi, sports car, van, sedan, scooter, and parked vehicles.
+  */
   private renderCars(
     ctx: CanvasRenderingContext2D,
     camX: number,
@@ -648,24 +793,35 @@ export class CityEngine {
     vh: number
   ) {
     for (const car of this.world.cars) {
-      if (car.x < camX - 32 || car.x > camX + vw + 32) continue;
-      if (car.y < camY - 32 || car.y > camY + vh + 32) continue;
+      if (car.x < camX - 36 || car.x > camX + vw + 36) continue;
+      if (car.y < camY - 36 || car.y > camY + vh + 36) continue;
 
-      const horiz = car.dx !== 0;
-      const L = 22; // length along travel
-      const W = 11; // width across
+      const horiz = car.dx !== 0 || car.isParked;
+      const type = car.type || "sedan";
+
+      // Vehicle Dimensions
+      const L = type === "van" ? 28 : type === "sports" ? 24 : type === "scooter" ? 14 : 22;
+      const W = type === "van" ? 13 : type === "scooter" ? 8 : 11;
       const w = horiz ? L : W;
       const h = horiz ? W : L;
       const x = Math.round(car.x - w / 2);
       const y = Math.round(car.y - h / 2);
 
-      /* ground shadow, offset the way the street lights fall */
-      ctx.fillStyle = "rgba(6,8,16,0.38)";
+      // Contact shadow
+      ctx.fillStyle = this.isDay ? "rgba(15,20,35,0.35)" : "rgba(6,8,16,0.38)";
       ctx.fillRect(x + 1, y + 2, w, h);
 
-      /* wheels first, so the body sits over them */
+      // Wheels
       ctx.fillStyle = "#15171f";
-      if (horiz) {
+      if (type === "scooter") {
+        if (horiz) {
+          ctx.fillRect(x + 1, y + 2, 3, h - 4);
+          ctx.fillRect(x + w - 4, y + 2, 3, h - 4);
+        } else {
+          ctx.fillRect(x + 2, y + 1, w - 4, 3);
+          ctx.fillRect(x + 2, y + h - 4, w - 4, 3);
+        }
+      } else if (horiz) {
         ctx.fillRect(x + 3, y - 1, 5, 2);
         ctx.fillRect(x + L - 8, y - 1, 5, 2);
         ctx.fillRect(x + 3, y + W - 1, 5, 2);
@@ -677,9 +833,11 @@ export class CityEngine {
         ctx.fillRect(x + W - 1, y + L - 8, 2, 5);
       }
 
-      /* body, with a darker rim so it has an edge rather than floating */
+      // Body base
       ctx.fillStyle = car.colour;
       ctx.fillRect(x, y, w, h);
+
+      // Body rim/depth
       ctx.fillStyle = "rgba(0,0,0,0.28)";
       if (horiz) {
         ctx.fillRect(x, y + h - 2, w, 2);
@@ -689,48 +847,144 @@ export class CityEngine {
         ctx.fillRect(x, y, 1, h);
       }
 
-      /* cabin and glass: the roof is the car colour darkened, the
-         windscreen and rear screen are separate so you can read which
-         way it is pointing at a glance */
-      const dark = "rgba(0,0,0,0.35)";
-      const glass = "rgba(150,200,230,0.75)";
-      if (horiz) {
-        ctx.fillStyle = dark;
-        ctx.fillRect(x + 6, y + 1, 10, h - 2);
-        ctx.fillStyle = glass;
-        ctx.fillRect(car.dx > 0 ? x + 15 : x + 5, y + 2, 2, h - 4);
-        ctx.fillRect(car.dx > 0 ? x + 5 : x + 15, y + 2, 2, h - 4);
-        ctx.fillStyle = "rgba(255,255,255,0.14)";
-        ctx.fillRect(x + 7, y + 1, 8, 2);
-      } else {
-        ctx.fillStyle = dark;
-        ctx.fillRect(x + 1, y + 6, w - 2, 10);
-        ctx.fillStyle = glass;
-        ctx.fillRect(x + 2, car.dy > 0 ? y + 15 : y + 5, w - 4, 2);
-        ctx.fillRect(x + 2, car.dy > 0 ? y + 5 : y + 15, w - 4, 2);
-        ctx.fillStyle = "rgba(255,255,255,0.14)";
-        ctx.fillRect(x + 1, y + 7, 2, 8);
+      // Type-specific styling
+      if (type === "taxi") {
+        // Taxi black & white checker beltline
+        ctx.fillStyle = "#1a1a24";
+        if (horiz) {
+          for (let cx = x + 3; cx < x + w - 3; cx += 4) {
+            ctx.fillRect(cx, y + 2, 2, 2);
+            ctx.fillRect(cx + 2, y + h - 4, 2, 2);
+          }
+        }
+        // Roof Taxi sign
+        ctx.fillStyle = "#ffffff";
+        const txw = horiz ? 6 : 4;
+        const txh = horiz ? 4 : 6;
+        ctx.fillRect(Math.round(x + w / 2 - txw / 2), Math.round(y + h / 2 - txh / 2), txw, txh);
+        ctx.fillStyle = "#f4c430";
+        ctx.fillRect(Math.round(x + w / 2 - 1), Math.round(y + h / 2 - 1), 2, 2);
+      } else if (type === "sports") {
+        // Racing stripes
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        if (horiz) {
+          ctx.fillRect(x, y + Math.floor(h / 2) - 1, w, 2);
+        } else {
+          ctx.fillRect(x + Math.floor(w / 2) - 1, y, 2, h);
+        }
+        // Rear spoiler
+        ctx.fillStyle = "#1a1a24";
+        if (horiz) {
+          const sx = car.dx > 0 ? x : x + w - 2;
+          ctx.fillRect(sx, y + 1, 2, h - 2);
+        } else {
+          const sy = car.dy > 0 ? y : y + h - 2;
+          ctx.fillRect(x + 1, sy, w - 2, 2);
+        }
+      } else if (type === "police") {
+        // NYPD Police Cruiser: White body, bold blue doors, rooftop flashing siren
+        ctx.fillStyle = "#1d4ed8"; // police blue
+        if (horiz) {
+          ctx.fillRect(x + 5, y + 1, w - 10, h - 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(x + 7, y + 2, w - 14, h - 4);
+        } else {
+          ctx.fillRect(x + 1, y + 5, w - 2, h - 10);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(x + 2, y + 7, w - 4, h - 14);
+        }
+        // Roof siren bar
+        const now = performance.now();
+        const sirenTick = Math.floor(now / 150) % 2 === 0;
+        const sirenLeft = sirenTick ? "#ef4444" : "#3b82f6";
+        const sirenRight = sirenTick ? "#3b82f6" : "#ef4444";
+        const sbw = horiz ? 8 : 4;
+        const sbh = horiz ? 4 : 8;
+        const sbx = Math.round(x + w / 2 - sbw / 2);
+        const sby = Math.round(y + h / 2 - sbh / 2);
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(sbx, sby, sbw, sbh);
+        if (horiz) {
+          ctx.fillStyle = sirenLeft;
+          ctx.fillRect(sbx + 1, sby + 1, 3, 2);
+          ctx.fillStyle = sirenRight;
+          ctx.fillRect(sbx + 4, sby + 1, 3, 2);
+        } else {
+          ctx.fillStyle = sirenLeft;
+          ctx.fillRect(sbx + 1, sby + 1, 2, 3);
+          ctx.fillStyle = sirenRight;
+          ctx.fillRect(sbx + 1, sby + 4, 2, 3);
+        }
+      } else if (type === "van") {
+        // Cargo roof panel & rear doors
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        if (horiz) {
+          ctx.fillRect(x + 4, y + 2, w - 8, h - 4);
+          ctx.fillStyle = "#222";
+          const rx = car.dx > 0 ? x : x + w - 1;
+          ctx.fillRect(rx, y + 2, 1, h - 4);
+        } else {
+          ctx.fillRect(x + 2, y + 4, w - 4, h - 8);
+          ctx.fillStyle = "#222";
+          const ry = car.dy > 0 ? y : y + h - 1;
+          ctx.fillRect(x + 2, ry, w - 4, 1);
+        }
       }
 
-      /* lamps: white ahead, red behind */
-      ctx.fillStyle = "#fff3cf";
-      ctx.fillStyle = "#ffeec4";
-      if (horiz) {
-        const fx = car.dx > 0 ? x + w - 2 : x;
-        ctx.fillRect(fx, y + 1, 2, 2);
-        ctx.fillRect(fx, y + h - 3, 2, 2);
-        ctx.fillStyle = "#e0453a";
-        const rx = car.dx > 0 ? x : x + w - 2;
-        ctx.fillRect(rx, y + 1, 2, 2);
-        ctx.fillRect(rx, y + h - 3, 2, 2);
+      // Windshield & Glass
+      const dark = "rgba(0,0,0,0.35)";
+      const glass = this.isDay ? "rgba(180,225,245,0.9)" : "rgba(150,200,230,0.75)";
+
+      if (type !== "scooter") {
+        if (horiz) {
+          ctx.fillStyle = dark;
+          ctx.fillRect(x + 6, y + 1, w - 12, h - 2);
+          ctx.fillStyle = glass;
+          const frontX = car.dx > 0 ? x + w - 7 : x + 5;
+          const rearX = car.dx > 0 ? x + 5 : x + w - 7;
+          ctx.fillRect(frontX, y + 2, 2, h - 4);
+          ctx.fillRect(rearX, y + 2, 2, h - 4);
+        } else {
+          ctx.fillStyle = dark;
+          ctx.fillRect(x + 1, y + 6, w - 2, h - 12);
+          ctx.fillStyle = glass;
+          const frontY = car.dy > 0 ? y + h - 7 : y + 5;
+          const rearY = car.dy > 0 ? y + 5 : y + h - 7;
+          ctx.fillRect(x + 2, frontY, w - 4, 2);
+          ctx.fillRect(x + 2, rearY, w - 4, 2);
+        }
       } else {
-        const fy = car.dy > 0 ? y + h - 2 : y;
-        ctx.fillRect(x + 1, fy, 2, 2);
-        ctx.fillRect(x + w - 3, fy, 2, 2);
-        ctx.fillStyle = "#e0453a";
-        const ry = car.dy > 0 ? y : y + h - 2;
-        ctx.fillRect(x + 1, ry, 2, 2);
-        ctx.fillRect(x + w - 3, ry, 2, 2);
+        // Scooter rider
+        ctx.fillStyle = "#f5cbaf"; // rider hands/face
+        ctx.fillRect(Math.round(x + w / 2 - 2), Math.round(y + h / 2 - 2), 4, 4);
+        ctx.fillStyle = car.colour; // helmet
+        ctx.fillRect(Math.round(x + w / 2 - 3), Math.round(y + h / 2 - 3), 6, 6);
+      }
+
+      // Headlights & Taillights
+      if (!car.isParked) {
+        const headColor = this.isDay ? "#fffae8" : "#fff6d4";
+        const tailColor = "#e63946";
+
+        if (horiz) {
+          const fx = car.dx > 0 ? x + w - 2 : x;
+          const rx = car.dx > 0 ? x : x + w - 2;
+          ctx.fillStyle = headColor;
+          ctx.fillRect(fx, y + 1, 2, 2);
+          ctx.fillRect(fx, y + h - 3, 2, 2);
+          ctx.fillStyle = tailColor;
+          ctx.fillRect(rx, y + 1, 2, 2);
+          ctx.fillRect(rx, y + h - 3, 2, 2);
+        } else {
+          const fy = car.dy > 0 ? y + h - 2 : y;
+          const ry = car.dy > 0 ? y : y + h - 2;
+          ctx.fillStyle = headColor;
+          ctx.fillRect(x + 1, fy, 2, 2);
+          ctx.fillRect(x + w - 3, fy, 2, 2);
+          ctx.fillStyle = tailColor;
+          ctx.fillRect(x + 1, ry, 2, 2);
+          ctx.fillRect(x + w - 3, ry, 2, 2);
+        }
       }
     }
   }
@@ -746,33 +1000,69 @@ export class CityEngine {
       if (n.x < camX - 20 || n.x > camX + vw + 20) continue;
       if (n.y < camY - 20 || n.y > camY + vh + 20) continue;
 
-      ctx.fillStyle = "rgba(10,10,18,0.25)";
+      // Realistic grounded pedestrian shadow
+      ctx.fillStyle = this.isDay ? "rgba(15,20,35,0.32)" : "rgba(10,10,18,0.45)";
       ctx.beginPath();
-      ctx.ellipse(Math.round(n.x), Math.round(n.y) + 6, 4, 2, 0, 0, Math.PI * 2);
+      ctx.ellipse(Math.round(n.x), Math.round(n.y) + 3, 5, 2.4, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      const frame = Math.floor(n.t * 5) % 2;
-      ctx.drawImage(
-        this.atlas.canvas,
-        (n.variant * 2 + frame) * TILE,
-        this.atlas.npcRowY,
-        TILE,
-        TILE,
-        Math.round(n.x) - 8,
-        Math.round(n.y) - 12,
-        TILE,
-        TILE
-      );
+      // Determine facing direction: 0 = down, 1 = up, 2 = side
+      let dirIdx = 0;
+      let flipX = false;
+      if (n.dy < -0.1) {
+        dirIdx = 1; // Walking up
+      } else if (n.dy > 0.1) {
+        dirIdx = 0; // Walking down
+      } else if (n.dx < -0.1) {
+        dirIdx = 2; // Walking left
+        flipX = true;
+      } else if (n.dx > 0.1) {
+        dirIdx = 2; // Walking right
+        flipX = false;
+      }
+
+      const frame = Math.floor(n.t * 6) % 2;
+      const v = (n.variant ?? 0) % 8;
+      const col = v * 6 + dirIdx * 2 + frame;
+      const sx = col * NPC_CELL_W + 1;
+      const sy = this.atlas.npcRowY;
+
+      if (flipX) {
+        ctx.save();
+        ctx.translate(Math.round(n.x), 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(
+          this.atlas.canvas,
+          sx,
+          sy,
+          NPC_CELL_W,
+          NPC_CELL_H,
+          -Math.round(NPC_CELL_W / 2),
+          Math.round(n.y) - 13,
+          NPC_CELL_W,
+          NPC_CELL_H
+        );
+        ctx.restore();
+      } else {
+        ctx.drawImage(
+          this.atlas.canvas,
+          sx,
+          sy,
+          NPC_CELL_W,
+          NPC_CELL_H,
+          Math.round(n.x) - Math.round(NPC_CELL_W / 2),
+          Math.round(n.y) - 13,
+          NPC_CELL_W,
+          NPC_CELL_H
+        );
+      }
     }
   }
 
   /*
-    The work pointers.
-
-    A floating diamond on its own told you a building mattered but never
-    which work was inside, so every beacon now carries its name on a
-    plate. Found ones dim and get a tick, which is what turns eight
-    identical markers into a checklist you can read at a glance.
+    High-Contrast Arcade Venue Markers:
+    Luminous cyber badges with solid backing (never obscured by floor tiles),
+    glowing status borders, pointer arrows, and floor landing targets.
   */
   private renderMarkers(ctx: CanvasRenderingContext2D) {
     const t = performance.now() / 1000;
@@ -782,47 +1072,57 @@ export class CityEngine {
     for (const d of this.world.discoveries) {
       const cx = d.tx * TILE + TILE / 2;
       const cy = d.ty * TILE;
-      const bob = Math.sin(t * 2.2 + d.tx) * 2;
+      const bob = Math.sin(t * 2.5 + d.tx) * 1.5;
       const done = this.found.has(d.id);
       const near = this.nearby?.id === d.id;
 
-      /* the plate */
+      ctx.save();
       ctx.font = "5px ui-monospace, monospace";
-      const label = done ? `✓ ${d.label}` : d.label;
-      const w = ctx.measureText(label).width + 5;
-      const py = cy - 22 + bob;
+      const icon = done ? "✓" : near ? "▶" : "✦";
+      const label = `${icon} ${d.label}`;
+      const textMetrics = ctx.measureText(label);
+      const w = textMetrics.width + 10;
+      const py = cy - 14 + bob;
+      const badgeH = 9;
 
-      ctx.fillStyle = done ? "rgba(8,12,22,0.62)" : "rgba(8,12,22,0.82)";
-      ctx.fillRect(cx - w / 2, py - 4, w, 8);
-      ctx.fillStyle = done ? "rgba(89,232,255,0.45)" : near ? "#ffffff" : "rgba(89,232,255,0.95)";
-      ctx.fillText(label, cx, py);
+      // 1. Subtle drop shadow
+      ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+      ctx.shadowBlur = 3;
+      ctx.shadowOffsetY = 1;
 
-      /* the beacon */
-      ctx.fillStyle = done ? "rgba(89,232,255,0.3)" : "rgba(89,232,255,0.9)";
+      // 2. Compact dark backing
+      ctx.fillStyle = done
+        ? "rgba(6, 12, 24, 0.88)"
+        : near
+          ? "rgba(10, 16, 36, 0.92)"
+          : "rgba(8, 14, 28, 0.86)";
       ctx.beginPath();
-      ctx.moveTo(cx, cy - 15 + bob);
-      ctx.lineTo(cx + 2.5, cy - 11.5 + bob);
-      ctx.lineTo(cx, cy - 8 + bob);
-      ctx.lineTo(cx - 2.5, cy - 11.5 + bob);
-      ctx.closePath();
+      ctx.roundRect(cx - w / 2, py - badgeH / 2, w, badgeH, 2.5);
       ctx.fill();
 
-      if (near) {
-        ctx.strokeStyle = "rgba(255,255,255,0.9)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(d.tx * TILE - 4, d.ty * TILE - 4, TILE + 8, TILE + 8);
-      }
+      // 3. Subtle border
+      ctx.strokeStyle = done
+        ? "rgba(34, 197, 94, 0.55)"
+        : near
+          ? "rgba(251, 191, 36, 0.7)"
+          : "rgba(56, 189, 248, 0.45)";
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // 4. Clean text
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = done
+        ? "#86efac"
+        : near
+          ? "#fef08a"
+          : "#bae6fd";
+      ctx.fillText(label, cx, py + 0.5);
+
+      ctx.restore();
     }
   }
 
-  /*
-    Arrows for what you cannot see.
-
-    The city is 72x56 tiles and the viewport shows maybe a twentieth of
-    it, so without these the remaining discoveries are a guessing game.
-    One chevron per unfound discovery, pinned to the screen edge nearest
-    it, with the distance in metres so it reads as navigation.
-  */
   private renderCompass(
     ctx: CanvasRenderingContext2D,
     camX: number,
@@ -830,12 +1130,14 @@ export class CityEngine {
     vw: number,
     vh: number
   ) {
+    // Disable compass direction arrows on mobile screens to prevent clutter
+    if (vw < 480) return;
+
     const pad = 26;
     for (const d of this.world.discoveries) {
       if (this.found.has(d.id)) continue;
       const tx = d.tx * TILE + TILE / 2;
       const ty = d.ty * TILE;
-      /* on screen already? then the beacon is doing the job */
       if (tx > camX + 20 && tx < camX + vw - 20 && ty > camY + 30 && ty < camY + vh - 20) continue;
 
       const ang = Math.atan2(ty - this.py, tx - this.px);
@@ -856,19 +1158,12 @@ export class CityEngine {
       ctx.restore();
 
       ctx.font = "5px ui-monospace, monospace";
-      ctx.fillStyle = "rgba(89,232,255,0.8)";
+      ctx.fillStyle = "rgba(89,232,255,0.85)";
       ctx.textAlign = "center";
       ctx.fillText(`${dist}m`, cx, cy + 9);
     }
   }
 
-  /*
-    The mini-map.
-
-    The city layout never changes, so it is rasterised once at one pixel
-    per tile and then blitted — redrawing 4,032 tiles into a corner every
-    frame would cost more than the whole rest of the render.
-  */
   private miniMap: HTMLCanvasElement | null = null;
 
   private buildMiniMap() {
@@ -883,7 +1178,6 @@ export class CityEngine {
       return !!cell && (cell.id.startsWith("roof") || cell.id.startsWith("fac_"));
     };
 
-    /* ground first */
     for (let y = 0; y < this.world.h; y++) {
       for (let x = 0; x < this.world.w; x++) {
         const cell = cellAt(this.world, x, y);
@@ -891,22 +1185,14 @@ export class CityEngine {
         const id = cell.id;
         g.fillStyle =
           id.startsWith("road") || id.startsWith("zebra")
-            ? "#20242f"
+            ? this.isDay ? "#454958" : "#20242f"
             : id === "grass" || id === "tree"
-              ? "#2c5c3a"
-              : "#39404f";
+              ? this.isDay ? "#4a9456" : "#2c5c3a"
+              : this.isDay ? "#6c7385" : "#39404f";
         g.fillRect(x, y, 1, 1);
       }
     }
 
-    /*
-      Then the buildings, extruded.
-
-      A flat fill made the radar a grid of grey squares. Dropping a dark
-      pixel below-right of every building and lighting its northern edge
-      fakes a light source, and suddenly the blocks have height - the same
-      trick the city itself uses with its parapets.
-    */
     for (let y = 0; y < this.world.h; y++) {
       for (let x = 0; x < this.world.w; x++) {
         if (!isBuilding(x, y)) continue;
@@ -920,7 +1206,7 @@ export class CityEngine {
       for (let x = 0; x < this.world.w; x++) {
         if (!isBuilding(x, y)) continue;
         const lit = !isBuilding(x, y - 1);
-        g.fillStyle = lit ? "#7e86a6" : "#5b6179";
+        g.fillStyle = lit ? (this.isDay ? "#a4acca" : "#7e86a6") : (this.isDay ? "#788099" : "#5b6179");
         g.fillRect(x, y, 1, 1);
       }
     }
@@ -936,26 +1222,17 @@ export class CityEngine {
   ) {
     if (!this.miniMap) this.miniMap = this.buildMiniMap();
 
-    /*
-      Sized against the viewport, not fixed: at a fixed radius the dish
-      swallowed a quarter of a small window.
-
-      It sits in the bottom-right corner on every size. The interact
-      button moves inboard on a phone rather than the radar moving away,
-      because a radar in the corner is where a hand expects to find one.
-    */
     const compact = vw < 260;
     const R = compact
       ? Math.max(20, Math.min(28, vw * 0.13))
       : Math.max(26, Math.min(46, Math.min(vw, vh) * 0.13));
-    const SPAN = compact ? 18 : 22; // tiles visible across the radar
+    const SPAN = compact ? 18 : 22;
     const cx = camX + vw - R - (compact ? 8 : 16);
     const cy = camY + vh - R - (compact ? 8 : 16);
-    const scale = (R * 2) / (SPAN * TILE); // screen px per world px
+    const scale = (R * 2) / (SPAN * TILE);
 
     ctx.save();
 
-    /* the dish, sitting above the city on a soft shadow */
     ctx.beginPath();
     ctx.arc(cx + 1.5, cy + 3, R, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(0,0,0,0.45)";
@@ -963,7 +1240,7 @@ export class CityEngine {
 
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(6,9,18,0.86)";
+    ctx.fillStyle = this.isDay ? "rgba(18,24,38,0.88)" : "rgba(6,9,18,0.86)";
     ctx.fill();
     ctx.save();
     ctx.clip();
@@ -976,8 +1253,6 @@ export class CityEngine {
     ctx.drawImage(this.miniMap, srcX, srcY, srcW, srcW, cx - R, cy - R, R * 2, R * 2);
     ctx.globalAlpha = 1;
 
-    /* blips. Anything outside the dish is pinned to its rim, pointing the
-       way, which is the behaviour that makes a radar useful */
     for (const d of this.world.discoveries) {
       const wx = d.tx * TILE + TILE / 2;
       const wy = d.ty * TILE;
@@ -1010,7 +1285,6 @@ export class CityEngine {
       }
     }
 
-    /* traffic, so the radar feels live */
     ctx.fillStyle = "rgba(230,235,255,0.5)";
     for (const car of this.world.cars) {
       const bx = cx + (car.x - this.px) * scale;
@@ -1019,9 +1293,14 @@ export class CityEngine {
       ctx.fillRect(bx - 1, by - 1, 2, 2);
     }
 
-    /* the player arrow, pointing the way he faces */
     const ang =
-      this.dir === "up" ? -Math.PI / 2 : this.dir === "down" ? Math.PI / 2 : this.dir === "left" ? Math.PI : 0;
+      this.dir === "up"
+        ? -Math.PI / 2
+        : this.dir === "down"
+          ? Math.PI / 2
+          : this.dir === "left"
+            ? Math.PI
+            : 0;
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(ang);
@@ -1035,11 +1314,6 @@ export class CityEngine {
     ctx.fill();
     ctx.restore();
 
-    /*
-      Glass. A vignette darkens the rim so the dish reads as a bowl
-      rather than a sticker, and one bright arc across the top left is
-      the reflection every physical screen has.
-    */
     const vg = ctx.createRadialGradient(cx, cy, R * 0.45, cx, cy, R);
     vg.addColorStop(0, "rgba(0,0,0,0)");
     vg.addColorStop(1, "rgba(2,4,10,0.75)");
@@ -1055,9 +1329,8 @@ export class CityEngine {
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.restore(); // un-clip
+    ctx.restore();
 
-    /* bezel and north mark */
     ctx.strokeStyle = "rgba(10,14,24,0.9)";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -1090,7 +1363,6 @@ const MOVE_KEYS = new Set([
   "arrowright",
 ]);
 
-/* deterministic 0..1 from a tile, for "is this flat's light on" */
 function hash3(x: number, y: number, s: number): number {
   let n = (x * 374761393 + y * 668265263 + s * 1274126177) | 0;
   n = Math.imul(n ^ (n >>> 13), 1274126177);

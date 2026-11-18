@@ -1,17 +1,24 @@
 /*
-  City of Creators — sound, synthesised.
+  City of Creators — sound and music synthesiser.
 
-  Every sound here is generated from noise and oscillators at runtime, so
-  the experiment still ships no audio files. A footstep on paving is a
-  short click with a hard high end; the same step on grass is longer,
-  quieter and much darker, because grass absorbs the top octaves. That
-  difference is the whole point: you can hear when you leave the pavement.
-
-  Nothing is created until the visitor presses Start — an AudioContext
-  made before a gesture is born suspended and stays that way.
+  Synthesises footsteps, discovery chimes, multiple music tracks, and
+  authentic retro Game Boy SFX (beeps, confirms, warps) using Web Audio API
+  oscillators and buffers, plus the original theme stream.
 */
 
 export type Surface = "stone" | "grass" | "road";
+
+export type TrackInfo = {
+  id: number;
+  title: string;
+  kind: string;
+};
+
+export const TRACKS: TrackInfo[] = [
+  { id: 0, title: "City Skyline", kind: "Original Chiptune Theme" },
+  { id: 1, title: "Cyber Arcade 8-Bit", kind: "Synthesised FM Chiptune" },
+  { id: 2, title: "Midnight Lo-Fi Beat", kind: "Generative Chill Synth" },
+];
 
 export class CityAudio {
   private ctx: AudioContext | null = null;
@@ -21,11 +28,14 @@ export class CityAudio {
   private music: HTMLAudioElement | null = null;
   private musicGain: GainNode | null = null;
   private lastStep = 0;
-  /** removes the one-shot resume listeners; set only if they were added */
   private releaseWake: (() => void) | null = null;
   muted = false;
 
-  /** called from the Start click, so the context begins running */
+  currentTrack = 0;
+  private synthLoopId = 0;
+  private synthOscs: OscillatorNode[] = [];
+  private volumeLevel = 0.5;
+
   init() {
     if (this.ctx) return;
     type WithWebkit = typeof window & { webkitAudioContext?: typeof AudioContext };
@@ -35,25 +45,6 @@ export class CityAudio {
     const ctx = new Ctor();
     this.ctx = ctx;
 
-    /*
-      The game now starts on page load, so there is no click on this page
-      to create the context under — the visitor's click was on the title
-      screen, a navigation ago. A context born that way is suspended, and
-      stays suspended however many sounds are queued into it. So the first
-      real input here resumes it, whatever that input happens to be.
-    */
-    /*
-      The game starts on page load, so there is no click on this page to
-      create the context under — the visitor's click was on the title
-      screen, a navigation ago. A context born that way is suspended and
-      stays suspended however many sounds are queued into it.
-
-      The listener is attached whatever state the context reports, not
-      only when it says "suspended". The music element needs a gesture of
-      its own regardless of the context, and hanging that off the
-      suspended branch meant a context that happened to start running
-      left the theme permanently paused.
-    */
     const wake = () => {
       void ctx.resume();
       this.wakeMusic();
@@ -71,13 +62,10 @@ export class CityAudio {
     };
 
     const master = ctx.createGain();
-    master.gain.value = 0.5;
+    master.gain.value = this.volumeLevel;
     master.connect(ctx.destination);
     this.master = master;
 
-    /* two seconds of white noise, reused for every step and for the
-       ambience — generating noise per footstep would allocate a buffer
-       several times a second for no audible gain */
     const frames = ctx.sampleRate * 2;
     const buf = ctx.createBuffer(1, frames, ctx.sampleRate);
     const data = buf.getChannelData(0);
@@ -86,21 +74,9 @@ export class CityAudio {
 
     this.startAmbience();
     this.startMusic();
-    /* some browsers allow it outright; if not, the wake listener has it */
     this.wakeMusic();
   }
 
-  /*
-    The theme.
-
-    Routed through the same master gain as everything else, so the one
-    mute button covers it — a separate <audio> element muted on its own
-    is how you end up with a muted game still playing music.
-
-    preload="none" and a play() that is only called from the first real
-    gesture: the file is a megabyte, and a visitor who never clicks
-    should never pay for it.
-  */
   private startMusic() {
     const ctx = this.ctx;
     if (!ctx || !this.master) return;
@@ -120,8 +96,6 @@ export class CityAudio {
     el.appendChild(m4a);
 
     const gain = ctx.createGain();
-    /* under the game, not over it: the footsteps and the discovery chime
-       still have to be audible through it */
     gain.gain.value = 0.34;
     gain.connect(this.master);
     this.musicGain = gain;
@@ -129,15 +103,11 @@ export class CityAudio {
     try {
       ctx.createMediaElementSource(el).connect(gain);
     } catch {
-      /* some browsers refuse a media source more than once per element;
-         fall back to the element's own volume so the music still plays */
       el.volume = 0.34;
       gain.disconnect();
       this.musicGain = null;
     }
 
-    /* in the document, hidden: a detached media element plays in most
-       browsers but not all, and an attached one is also inspectable */
     el.setAttribute("aria-hidden", "true");
     el.style.display = "none";
     document.body.appendChild(el);
@@ -145,20 +115,172 @@ export class CityAudio {
     this.music = el;
   }
 
-  /** called from the first gesture, alongside the context resume */
   private wakeMusic() {
-    const el = this.music;
-    if (!el || this.muted) return;
-    el.load();
-    void el.play().catch(() => {
-      /* autoplay still refused: the visitor can press the sound toggle */
+    if (this.currentTrack === 0) {
+      const el = this.music;
+      if (!el || this.muted) return;
+      el.load();
+      void el.play().catch(() => {});
+    } else {
+      this.startSynthesizedTrack(this.currentTrack);
+    }
+  }
+
+  setTrack(index: number) {
+    this.currentTrack = (index + TRACKS.length) % TRACKS.length;
+    this.stopSynthesizer();
+    if (this.currentTrack === 0) {
+      if (!this.muted) {
+        void this.ctx?.resume();
+        void this.music?.play().catch(() => {});
+      }
+    } else {
+      this.music?.pause();
+      if (!this.muted) {
+        void this.ctx?.resume();
+        this.startSynthesizedTrack(this.currentTrack);
+      }
+    }
+    this.playSelect();
+  }
+
+  nextTrack() {
+    this.setTrack(this.currentTrack + 1);
+  }
+
+  prevTrack() {
+    this.setTrack(this.currentTrack - 1);
+  }
+
+  private stopSynthesizer() {
+    if (this.synthLoopId) {
+      window.clearInterval(this.synthLoopId);
+      this.synthLoopId = 0;
+    }
+    for (const osc of this.synthOscs) {
+      try {
+        osc.stop();
+        osc.disconnect();
+      } catch {}
+    }
+    this.synthOscs = [];
+  }
+
+  /* 8-bit generative retro loops */
+  private startSynthesizedTrack(track: number) {
+    this.stopSynthesizer();
+    const ctx = this.ctx;
+    if (!ctx || !this.master || this.muted) return;
+
+    if (track === 1) {
+      // 8-bit Chiptune Arpeggios
+      const notes = [261.63, 329.63, 392.0, 523.25, 440.0, 392.0, 329.63, 293.66];
+      let step = 0;
+
+      this.synthLoopId = window.setInterval(() => {
+        if (!this.ctx || this.muted) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(notes[step % notes.length], t);
+
+        g.gain.setValueAtTime(0.08, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+
+        osc.connect(g).connect(this.master!);
+        osc.start(t);
+        osc.stop(t + 0.18);
+        step++;
+      }, 160);
+    } else if (track === 2) {
+      // Lo-Fi Warm Ambient Progression
+      const chords = [
+        [174.61, 220.0, 261.63, 329.63], // Fmaj7
+        [164.81, 196.0, 246.94, 293.66], // Em7
+        [146.83, 174.61, 220.0, 261.63], // Dm7
+        [130.81, 164.81, 196.0, 246.94], // Cmaj7
+      ];
+      let chordIdx = 0;
+
+      this.synthLoopId = window.setInterval(() => {
+        if (!this.ctx || this.muted) return;
+        const t = this.ctx.currentTime;
+        const currentChord = chords[chordIdx % chords.length];
+
+        for (const freq of currentChord) {
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.value = 650;
+
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, t);
+
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.04, t + 0.3);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+
+          osc.connect(filter).connect(g).connect(this.master!);
+          osc.start(t);
+          osc.stop(t + 2.0);
+        }
+        chordIdx++;
+      }, 2000);
+    }
+  }
+
+  /* Sound effects */
+  playBeep() {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || this.muted) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(880, t);
+    g.gain.setValueAtTime(0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    osc.connect(g).connect(this.master);
+    osc.start(t);
+    osc.stop(t + 0.06);
+  }
+
+  playSelect() {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || this.muted) return;
+    const t = ctx.currentTime;
+    [587.33, 880].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq, t + i * 0.05);
+      g.gain.setValueAtTime(0.08, t + i * 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.05 + 0.08);
+      osc.connect(g).connect(this.master!);
+      osc.start(t + i * 0.05);
+      osc.stop(t + i * 0.05 + 0.1);
     });
   }
 
-  /*
-    City ambience: filtered noise for distant traffic, plus two detuned
-    low oscillators for the hum a city always has under everything.
-  */
+  playWarp() {
+    const ctx = this.ctx;
+    if (!ctx || !this.master || this.muted) return;
+    const t = ctx.currentTime;
+    [300, 450, 600, 900, 1200].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, t + i * 0.04);
+      g.gain.setValueAtTime(0.1, t + i * 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.04 + 0.12);
+      osc.connect(g).connect(this.master!);
+      osc.start(t + i * 0.04);
+      osc.stop(t + i * 0.04 + 0.14);
+    });
+  }
+
   private startAmbience() {
     const ctx = this.ctx;
     if (!ctx || !this.noise || !this.master) return;
@@ -190,15 +312,10 @@ export class CityAudio {
       osc.start();
     }
 
-    /* fade in, rather than appearing at full level the instant you start */
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.16, ctx.currentTime + 2.5);
   }
 
-  /**
-   * A footstep. `surface` changes the character; repeated calls inside the
-   * step interval are ignored so this can be called every frame.
-   */
   step(surface: Surface, now: number, running: boolean) {
     const ctx = this.ctx;
     if (!ctx || !this.noise || !this.master || this.muted) return;
@@ -209,8 +326,6 @@ export class CityAudio {
 
     const src = ctx.createBufferSource();
     src.buffer = this.noise;
-    /* start somewhere random in the buffer so consecutive steps are not
-       the identical waveform, which is what makes a loop sound like a loop */
     const offset = Math.random() * 1.5;
 
     const filter = ctx.createBiquadFilter();
@@ -248,42 +363,47 @@ export class CityAudio {
     src.stop(ctx.currentTime + dur + 0.05);
   }
 
-  /** the chime when a discovery opens */
   discover() {
     const ctx = this.ctx;
     if (!ctx || !this.master || this.muted) return;
     const t = ctx.currentTime;
-    /* a rising third — two notes is enough to read as "found something" */
-    [660, 880].forEach((f, i) => {
+    [660, 880, 1100].forEach((f, i) => {
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
       osc.type = "triangle";
       osc.frequency.value = f;
-      g.gain.setValueAtTime(0, t + i * 0.09);
-      g.gain.linearRampToValueAtTime(0.14, t + i * 0.09 + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + 0.42);
+      g.gain.setValueAtTime(0, t + i * 0.08);
+      g.gain.linearRampToValueAtTime(0.16, t + i * 0.08 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.08 + 0.45);
       osc.connect(g).connect(this.master!);
-      osc.start(t + i * 0.09);
-      osc.stop(t + i * 0.09 + 0.5);
+      osc.start(t + i * 0.08);
+      osc.stop(t + i * 0.08 + 0.5);
     });
   }
 
   setMuted(m: boolean) {
     this.muted = m;
     if (this.master && this.ctx) {
-      this.master.gain.setTargetAtTime(m ? 0 : 0.5, this.ctx.currentTime, 0.05);
+      this.master.gain.setTargetAtTime(m ? 0 : this.volumeLevel, this.ctx.currentTime, 0.05);
     }
-    /* the toggle doubles as the manual start, for browsers that refused
-       the automatic one */
     if (!m) {
       void this.ctx?.resume();
       this.wakeMusic();
     } else {
       this.music?.pause();
+      this.stopSynthesizer();
+    }
+  }
+
+  setVolume(vol: number) {
+    this.volumeLevel = Math.max(0, Math.min(1, vol));
+    if (this.master && this.ctx && !this.muted) {
+      this.master.gain.setTargetAtTime(this.volumeLevel, this.ctx.currentTime, 0.05);
     }
   }
 
   destroy() {
+    this.stopSynthesizer();
     this.music?.pause();
     this.music?.remove();
     this.music = null;

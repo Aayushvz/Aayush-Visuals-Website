@@ -133,10 +133,18 @@ const P = {
 */
 export const VENUES: Record<string, Venue> = {
   pond: {
-    name: "Diorama Studio",
-    pal: P.studio,
+    name: "Diorama Studio (Peter's Lab)",
+    pal: {
+      floor: "#c98f68",
+      floorAlt: "#ba8059",
+      wall: "#2a1e28",
+      wallTrim: "#d6273c",
+      accent: "#d6273c",
+      accent2: "#38bdf8",
+      wood: "#7c4a2a",
+    },
     items: [
-      { k: "rug", x: 1, y: 3, w: 4, h: 3, c: "#5f8f6a" },
+      { k: "rug", x: 1, y: 3, w: 4, h: 3, c: "#d6273c" },
       { k: "easel", x: 1, y: 2 },
       { k: "easel", x: 5, y: 2 },
       { k: "desk", x: 2, y: 1, w: 3, h: 1 },
@@ -151,8 +159,16 @@ export const VENUES: Record<string, Venue> = {
   },
 
   cat: {
-    name: "Ops Tower",
-    pal: P.ops,
+    name: "Ops Tower (Oscorp Core)",
+    pal: {
+      floor: "#1c2a38",
+      floorAlt: "#162230",
+      wall: "#0d1822",
+      wallTrim: "#00ff9d",
+      accent: "#00ff9d",
+      accent2: "#38bdf8",
+      wood: "#243b50",
+    },
     items: [
       { k: "desk", x: 0, y: 1, w: 3, h: 1 },
       { k: "monitor", x: 0, y: 1, pass: true },
@@ -171,8 +187,16 @@ export const VENUES: Record<string, Venue> = {
   },
 
   invoice: {
-    name: "Finance Row",
-    pal: P.office,
+    name: "Finance Row (Daily Bugle)",
+    pal: {
+      floor: "#452d32",
+      floorAlt: "#3b252a",
+      wall: "#25161a",
+      wallTrim: "#ff4d5a",
+      accent: "#ff3b48",
+      accent2: "#ffd780",
+      wood: "#6e3a2c",
+    },
     items: [
       { k: "counter", x: 1, y: 4, w: 5, h: 1 },
       { k: "desk", x: 1, y: 1, w: 2, h: 1 },
@@ -189,7 +213,7 @@ export const VENUES: Record<string, Venue> = {
   },
 
   contract: {
-    name: "Legal Archive",
+    name: "Legal Archive (Nelson & Murdock)",
     pal: P.archive,
     items: [
       { k: "shelf", x: 0, y: 1, w: 3, h: 1 },
@@ -204,7 +228,7 @@ export const VENUES: Record<string, Venue> = {
   },
 
   dpl: {
-    name: "The Stadium",
+    name: "The Stadium (Marvel Arcade)",
     pal: P.arcadeHall,
     items: [
       { k: "arcade", x: 0, y: 1 },
@@ -223,7 +247,7 @@ export const VENUES: Record<string, Venue> = {
   },
 
   yantra: {
-    name: "Festival Hall",
+    name: "Festival Hall (Midtown Science)",
     pal: P.festival,
     items: [
       { k: "rug", x: 1, y: 2, w: 5, h: 4, c: "#e05fa0" },
@@ -241,7 +265,7 @@ export const VENUES: Record<string, Venue> = {
   },
 
   "mike-tyson-invitational": {
-    name: "Iron Forge Gym",
+    name: "Iron Forge (Spider Training Gym)",
     pal: P.gym,
     items: [
       { k: "rug", x: 1, y: 2, w: 5, h: 4, c: "#b5503a" },
@@ -260,7 +284,7 @@ export const VENUES: Record<string, Venue> = {
   },
 
   dropby: {
-    name: "Brand House",
+    name: "Brand House (Suit Atelier)",
     pal: P.design,
     items: [
       { k: "desk", x: 0, y: 1, w: 3, h: 1 },

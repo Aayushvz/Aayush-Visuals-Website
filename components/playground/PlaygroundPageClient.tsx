@@ -1,30 +1,39 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import MobileNav from "@/components/MobileNav";
+import { useState } from "react";
 import Cursor from "@/components/Cursor";
-import TitleScreen from "./TitleScreen";
+import CityExperience from "./city/CityExperience";
+import PlaygroundStartScreen from "./PlaygroundStartScreen";
 
 /*
-  /playground: the title screen, and nothing else.
-
-  The card shelf that used to sit under it is gone — the experiments are
-  in the city now, and a list of the same eight things directly below the
-  door into them was just the game spoiling its own contents.
-
-  The earlier rig-card shelf (ExperimentShelf + playground.css) and the
-  playground sphere (sphere/PlaygroundSphere.tsx) are no longer mounted
-  but are left in place.
+  /playground: The interactive pixel world & portfolio playground.
+  The start screen welcomes visitors first with arcade aesthetics and sound config,
+  transitioning seamlessly into the living city with Spider-Man character controls,
+  day/night lighting, and direct experiment access.
 */
 export default function PlaygroundPageClient() {
+  const [started, setStarted] = useState(false);
+  const [initialSound, setInitialSound] = useState(true);
+  const [initialGameBoy, setInitialGameBoy] = useState(false);
+
   return (
     <>
-      <Navbar />
-      <MobileNav />
       <Cursor />
       <main>
-        <TitleScreen />
+        {!started ? (
+          <PlaygroundStartScreen
+            initialSound={initialSound}
+            onStart={({ sound, openGameBoy }) => {
+              setInitialSound(sound);
+              if (openGameBoy) setInitialGameBoy(true);
+              setStarted(true);
+            }}
+          />
+        ) : (
+          <CityExperience initialSound={initialSound} initialGameBoy={initialGameBoy} />
+        )}
       </main>
     </>
   );
 }
+

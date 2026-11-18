@@ -1,0 +1,432 @@
+/*
+  The /playground Title Screen.
+  Classic SNES 16-bit arcade title screen:
+  - Big 3D arcade typography
+  - Cinematic pixel metropolis skyline & Spider-Man rooftop perch
+  - Clean primary menu: Enter Experiments world & View works
+  - Keyboard & mouse navigation
+  - Strictly uncluttered, no frame box
+*/
+
+.pgt {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #060914;
+  color: #fdf6e3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(20px, 4vw, 50px);
+  padding-top: max(75px, 8vh); /* Clearance below site navbar */
+  user-select: none;
+  font-family: var(--pg-arcade), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ── Pixel Art Sky & Metropolis Scene ── */
+
+.pgt__scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.pgt__star {
+  animation: pgtTwinkle 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes pgtTwinkle {
+  0% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+.pgt__beacon {
+  animation: pgtBeacon 1.2s steps(2) infinite;
+}
+
+@keyframes pgtBeacon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+/* Sweeping Twin Searchlight Beams (crisscross center sky in both desktop & mobile) */
+.pgt__beam--left {
+  transform-origin: 150px 275px;
+  animation: pgtSweepLeft 9s ease-in-out infinite alternate;
+}
+
+.pgt__beam--right {
+  transform-origin: 520px 285px;
+  animation: pgtSweepRight 10.5s ease-in-out infinite alternate;
+}
+
+@keyframes pgtSweepLeft {
+  0% { transform: rotate(-8deg); }
+  100% { transform: rotate(26deg); }
+}
+
+@keyframes pgtSweepRight {
+  0% { transform: rotate(8deg); }
+  100% { transform: rotate(-26deg); }
+}
+
+/* ── Continuous Expressway Highway Traffic ── */
+.pgt__trafficWest {
+  animation: pgtTrafficWest 2.4s linear infinite;
+}
+
+@keyframes pgtTrafficWest {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-70px); }
+}
+
+.pgt__trafficEast {
+  animation: pgtTrafficEast 3.2s linear infinite;
+}
+
+@keyframes pgtTrafficEast {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(70px); }
+}
+
+/* ── Drifting Pixel Clouds ── */
+.pgt__cloud--1 {
+  animation: pgtCloudDrift1 40s linear infinite alternate;
+}
+.pgt__cloud--2 {
+  animation: pgtCloudDrift2 48s linear infinite alternate;
+}
+.pgt__cloud--3 {
+  animation: pgtCloudDrift3 26s ease-in-out infinite alternate;
+}
+.pgt__cloud--4 {
+  animation: pgtCloudDrift4 30s ease-in-out infinite alternate;
+}
+
+@keyframes pgtCloudDrift1 {
+  0% { transform: translate(15px, 72px); }
+  100% { transform: translate(110px, 72px); }
+}
+
+@keyframes pgtCloudDrift2 {
+  0% { transform: translate(490px, 76px); }
+  100% { transform: translate(390px, 76px); }
+}
+
+@keyframes pgtCloudDrift3 {
+  0% { transform: translate(220px, 94px); }
+  100% { transform: translate(265px, 94px); }
+}
+
+@keyframes pgtCloudDrift4 {
+  0% { transform: translate(325px, 46px); }
+  100% { transform: translate(285px, 46px); }
+}
+
+/* ── Suspension Bridge Cable Crawl ── */
+.pgt__bridgeLights {
+  animation: pgtBridgeLights 2.4s linear infinite;
+}
+
+@keyframes pgtBridgeLights {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 16; }
+}
+
+/* ── Subtle Shooting Star / Meteor ── */
+.pgt__meteor {
+  animation: pgtMeteor 10s ease-in infinite;
+  opacity: 0;
+}
+
+@keyframes pgtMeteor {
+  0%, 74% {
+    transform: translate(380px, 15px);
+    opacity: 0;
+  }
+  76% {
+    opacity: 0.95;
+  }
+  80% {
+    transform: translate(260px, 75px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── Window Glow / Flicker in Center Skyline ── */
+.pgt__windowGlow {
+  animation: pgtWindowBreathe 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes pgtWindowBreathe {
+  0% { opacity: 0.95; }
+  50% { opacity: 0.35; }
+  100% { opacity: 0.95; }
+}
+
+/* Neon Signs Glow */
+.pgt__neonGreen {
+  text-shadow: 0 0 6px #00ff9d, 0 0 12px rgba(0, 255, 157, 0.6);
+  animation: pgtFlickerGreen 4s infinite;
+}
+
+@keyframes pgtFlickerGreen {
+  0%, 100%, 92%, 96% { opacity: 1; }
+  93%, 95% { opacity: 0.4; }
+}
+
+.pgt__neonRed {
+  text-shadow: 0 0 6px #ff3848, 0 0 12px rgba(255, 56, 72, 0.6);
+  animation: pgtFlickerRed 5s infinite;
+}
+
+@keyframes pgtFlickerRed {
+  0%, 100%, 88%, 94% { opacity: 1; }
+  89%, 93% { opacity: 0.5; }
+}
+
+/* Web Line Sway */
+.pgt__webLine {
+  transform-origin: 68px 142px;
+  animation: pgtWebSway 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes pgtWebSway {
+  0% { transform: rotate(-0.5deg); }
+  100% { transform: rotate(0.8deg); }
+}
+
+/* Ambient CRT Vignette */
+.pgt__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(130% 85% at 50% 45%, transparent 35%, rgba(4, 6, 16, 0.75) 100%),
+    linear-gradient(180deg, rgba(4, 6, 16, 0.5) 0%, transparent 22%);
+  pointer-events: none;
+}
+
+/* ── Clean Heroic Title (Zero Frame Box, Direct Overlay) ── */
+
+.pgt__content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 860px;
+  width: min(96vw, 840px);
+  padding: 10px;
+  animation: pgtFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pgtFadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Giant 3D Title Lockup (Bigger & Heroic) ── */
+
+.pgt__title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.pgt__titleTop {
+  font-size: clamp(16px, 3.2vw, 34px);
+  color: #ffffff;
+  text-shadow:
+    0 3px 0 #0d1020,
+    0 0 12px rgba(0, 0, 0, 0.9),
+    2px 2px 4px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.05em;
+}
+
+.pgt__titleBig {
+  font-size: clamp(26px, 6vw, 64px);
+  font-weight: 900;
+  color: #ff5238;
+  letter-spacing: clamp(1px, 0.4vw, 4px);
+  text-transform: uppercase;
+  max-width: 92vw;
+  box-sizing: border-box;
+  text-align: center;
+  word-break: keep-all;
+  white-space: nowrap;
+  text-shadow:
+    0 4px 0 #b32412,
+    0 8px 0 #570e06,
+    0 12px 20px rgba(0, 0, 0, 0.95),
+    -2px -2px 0 #120606,
+    2px -2px 0 #120606,
+    -2px 2px 0 #120606,
+    2px 2px 0 #120606,
+    0 0 24px rgba(0, 0, 0, 0.85);
+}
+
+/* ── Clean Arcade Menu ── */
+
+.pgt__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: clamp(26px, 4vw, 42px);
+  width: 100%;
+  max-width: 340px;
+  align-items: stretch;
+}
+
+.pgt__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 26px;
+  font-family: inherit;
+  font-size: clamp(8.5px, 1.1vw, 12px);
+  letter-spacing: 0.08em;
+  color: #fdf6e3;
+  text-decoration: none;
+  background: rgba(14, 18, 38, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.2),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.6),
+    0 4px 0 rgba(0, 0, 0, 0.8),
+    0 8px 16px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: transform 0.08s steps(2), background 0.12s linear, box-shadow 0.12s linear;
+  text-transform: uppercase;
+  border-radius: 4px;
+}
+
+.pgt__item--primary {
+  background: linear-gradient(180deg, #f03348 0%, #d11d32 100%);
+  border: 1px solid rgba(255, 120, 135, 0.4);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.5),
+    0 5px 0 #8a0e1c,
+    0 10px 20px rgba(0, 0, 0, 0.7);
+}
+
+.pgt__cursor {
+  position: absolute;
+  left: 14px;
+  opacity: 0;
+  color: #ffd79a;
+  font-size: 11px;
+}
+
+.pgt__item.is-sel,
+.pgt__item:hover,
+.pgt__item:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(28, 36, 74, 0.98);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.6),
+    0 6px 0 rgba(0, 0, 0, 0.85);
+}
+
+.pgt__item--primary.is-sel,
+.pgt__item--primary:hover,
+.pgt__item--primary:focus-visible {
+  background: linear-gradient(180deg, #ff4458 0%, #e0253b 100%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.5),
+    0 7px 0 #8a0e1c,
+    0 12px 24px rgba(239, 51, 72, 0.5);
+}
+
+.pgt__item.is-sel .pgt__cursor,
+.pgt__item:hover .pgt__cursor {
+  opacity: 1;
+  animation: pgtBlink 0.9s steps(2) infinite;
+}
+
+@keyframes pgtBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* ── Keyboard Hint ── */
+
+.pgt__hint {
+  margin: clamp(18px, 2.4vw, 30px) 0 0;
+  font-size: clamp(7.5px, 0.9vw, 10px);
+  letter-spacing: 0.14em;
+  color: rgba(253, 246, 227, 0.7);
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+  .pgt {
+    padding: 16px 12px;
+    padding-top: max(64px, 8vh);
+  }
+  .pgt__content {
+    width: 100%;
+    max-width: 100vw;
+    padding: 6px;
+  }
+  /* Move Aayush's Experiments title UP in phoneview, keep buttons where they are */
+  .pgt__title {
+    transform: translateY(clamp(-85px, -13vh, -125px));
+  }
+  .pgt__titleTop {
+    font-size: clamp(12px, 3.2vw, 16px);
+  }
+  .pgt__titleBig {
+    font-size: clamp(18px, 6.2vw, 26px);
+    letter-spacing: 1px;
+    max-width: 96vw;
+  }
+  .pgt__menu {
+    max-width: 280px;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .pgt__item {
+    padding: 12px 20px;
+    font-size: 8.5px;
+  }
+  .pgt__hint {
+    font-size: 7px;
+    margin-top: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgt__trafficWest,
+  .pgt__trafficEast,
+  .pgt__cloud--1,
+  .pgt__cloud--2,
+  .pgt__cloud--3,
+  .pgt__cloud--4,
+  .pgt__beam--left,
+  .pgt__beam--right,
+  .pgt__bridgeLights,
+  .pgt__meteor,
+  .pgt__windowGlow {
+    animation: none !important;
+  }
+}

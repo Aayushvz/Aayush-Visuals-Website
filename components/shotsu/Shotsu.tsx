@@ -103,7 +103,6 @@ function onOrbRoute(path: string) {
     path === "/" ||
     path === "/about" ||
     path === "/contact" ||
-    path === "/playground" ||
     path === "/work" ||
     path.startsWith("/work/")
   );

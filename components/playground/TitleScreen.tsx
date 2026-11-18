@@ -19,7 +19,7 @@ import "./title.css";
 */
 
 const MENU = [
-  { label: "Enter the city", href: "/playground/city-of-creators", primary: true },
+  { label: "Enter the city", href: "/playground", primary: true },
   { label: "Back to site", href: "/" },
 ];
 

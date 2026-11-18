@@ -145,32 +145,176 @@
   image-rendering: pixelated;
 }
 
-.coc__hud {
+.coc__navBar {
   position: absolute;
   top: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
-  gap: 14px;
+  justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
+  pointer-events: none;
+  z-index: 120;
+}
+
+.coc__hud {
+  position: relative;
+  height: 52px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
   background: #14183a;
   box-shadow:
     inset 2px 2px 0 rgba(255, 255, 255, 0.18),
     inset -2px -2px 0 rgba(0, 0, 0, 0.6),
-    0 0 0 3px #0a0c1e;
+    0 0 0 4px #0a0c1e;
   font-family: var(--pg-arcade), ui-monospace, monospace;
-  font-size: 8px;
+  font-size: 11px;
+  line-height: 1;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  pointer-events: auto;
 }
 
-.coc__hud--tl { left: 16px; }
-.coc__hud--tr { right: 16px; }
+.coc__hud--tl {
+  padding: 0 18px;
+  gap: 16px;
+}
 
-.coc__district { color: var(--coc-cyan); }
-.coc__found { color: var(--coc-dim); }
+.coc__hud--tr {
+  padding: 0 8px 0 10px;
+  gap: 8px;
+}
 
-.coc__exit { color: inherit; text-decoration: none; }
-.coc__exit:hover { border-color: rgba(232, 236, 248, 0.5); }
+/* Left Bar Items */
+.coc__logoLink {
+  display: flex;
+  align-items: center;
+  color: #fdf6e3;
+  text-decoration: none;
+  transition: transform 0.08s steps(2);
+}
+
+.coc__logoLink:hover {
+  transform: translateY(-1px);
+}
+
+.coc__logoMark {
+  height: 22px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(2px 2px 0 #0a0c1e);
+}
+
+.coc__divider {
+  width: 2px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.18);
+  margin: 0 4px;
+}
+
+.coc__district {
+  color: var(--coc-cyan);
+  font-weight: bold;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.coc__found {
+  color: var(--coc-dim);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* Right Bar Icon-like Buttons */
+.coc__iconBtn {
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  background: #1f274a;
+  color: #cad5ec;
+  border: 0;
+  border-radius: 3px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.25),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    0 2px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.08s steps(2);
+  padding: 0;
+}
+
+.coc__iconBtn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.coc__iconBtn:hover {
+  background: #2c3766;
+  color: #59e8ff;
+  transform: translateY(-1px);
+}
+
+.coc__iconBtn:active {
+  transform: translateY(1px);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.coc__iconBtn--gb.is-active {
+  background: #b5202c;
+  color: #ffffff;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.coc__iconBtn--sound.is-active {
+  color: #59e8ff;
+}
+
+.coc__dayEmoji {
+  font-size: 18px;
+  line-height: 1;
+  display: block;
+}
+
+/* Normal Contact Button on Right Bar */
+.coc__contactBtn {
+  height: 36px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  margin-left: 4px;
+  background: #d6273c;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.5),
+    0 2px 0 rgba(0, 0, 0, 0.5);
+  transition: all 0.08s steps(2);
+  cursor: pointer;
+}
+
+.coc__contactBtn:hover {
+  background: #ef3348;
+  transform: translateY(-1px);
+}
+
+.coc__contactBtn:active {
+  transform: translateY(1px);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
 
 .coc__prompt {
   position: absolute;
@@ -205,74 +349,179 @@
   font: inherit;
 }
 
-/* ── discovery panel ── */
+/* ── discovery panel: Right-side Docked Drawer, NO blurry fog! ── */
+
+.coc__panelBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 94;
+  background: transparent;
+  pointer-events: auto;
+}
 
 .coc__panel {
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(6, 7, 14, 0.72);
-  backdrop-filter: blur(6px);
+  top: 86px;
+  left: 16px;
+  right: auto;
+  bottom: 20px;
+  width: min(370px, calc(100vw - 32px));
+  max-height: calc(100dvh - 106px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+  z-index: 95;
 }
 
 .coc__panelInner {
-  width: min(560px, 100%);
-  max-height: 86vh;
+  position: relative;
+  pointer-events: auto;
+  width: 100%;
+  max-height: 100%;
   overflow-y: auto;
-  padding: clamp(20px, 3vw, 30px);
-  background: #14183a;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+  padding: 18px 18px 20px;
+  background: rgba(13, 17, 38, 0.96);
+  border: 2px solid #38bdf8;
+  border-radius: 14px;
   box-shadow:
-    inset 3px 3px 0 rgba(255, 255, 255, 0.2),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.6),
-    0 0 0 3px #0a0c1e,
-    0 6px 0 rgba(0, 0, 0, 0.45);
+    0 12px 36px rgba(0, 0, 0, 0.85),
+    0 0 24px rgba(56, 189, 248, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: cocSlideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.coc__panelKicker {
-  margin: 0 0 14px;
+.coc__panelInner::-webkit-scrollbar {
+  width: 4px;
+}
+
+.coc__panelInner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.coc__panelInner::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.4);
+  border-radius: 4px;
+}
+
+.coc__panelInner::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+@keyframes cocSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.coc__panelClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.coc__panelClose:hover {
+  background: #e11d48;
+  border-color: #f43f5e;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.coc__panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-right: 44px;
+}
+
+.coc__panelBadge {
+  font-family: var(--pg-arcade), ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+.coc__panelDistrict {
   font-family: var(--pg-arcade), ui-monospace, monospace;
   font-size: 7px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #ffd79a;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
 }
 
 .coc__panelTitle {
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   font-family: var(--pg-arcade), ui-monospace, monospace;
-  font-size: clamp(11px, 1.6vw, 15px);
-  line-height: 1.6;
+  font-size: clamp(12px, 1.6vw, 15px);
+  line-height: 1.5;
+  color: #ffffff;
   text-shadow: 2px 2px 0 #0a0c1e;
+}
+
+.coc__panelShotWrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  margin-bottom: 14px;
+  background: #090d1e;
 }
 
 .coc__panelShot {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: 100%;
   object-fit: cover;
-  border-radius: 0;
-  box-shadow: 0 0 0 3px #0a0c1e, inset 0 0 0 2px rgba(255, 255, 255, 0.12);
-  margin-bottom: 18px;
+  display: block;
 }
 
 .coc__panelKind {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: var(--pg-arcade), ui-monospace, monospace;
   font-size: 7px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--coc-cyan);
+  color: #fbbf24;
 }
 
 .coc__panelBlurb {
-  margin: 0 0 24px;
-  line-height: 1.7;
-  font-size: 14px;
-  color: var(--coc-dim);
+  margin: 0 0 20px;
+  line-height: 1.6;
+  font-size: 13.5px;
+  color: #cbd5e1;
 }
 
-.coc__panelActions { display: flex; flex-wrap: wrap; gap: 10px; }
+.coc__panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
 /* ── touch controls ── */
 
@@ -282,6 +531,10 @@
   display: none;
   touch-action: none;
   user-select: none;
+}
+
+.coc__mobileActions {
+  display: none;
 }
 
 .coc__touch--stick {
@@ -314,29 +567,44 @@
   cursor: pointer;
 }
 
-@media (pointer: coarse) {
-  .coc__touch { display: grid; }
-  .coc__hud { font-size: 10px; padding: 6px 10px; }
-  .coc__prompt { bottom: 160px; }
-}
 
-.coc__sound {
-  font-family: var(--pg-arcade), ui-monospace, monospace;
+
+/* ── Bottom-Left Game Boy Floating Icon (1.8x Bigger, Symmetrical with Minimap) ── */
+.coc__bottomGameBoyBtn {
+  position: absolute;
+  bottom: 22px;
+  left: 60px;
+  z-index: 80;
+  width: 58px;
+  height: 90px;
   padding: 0;
-  border: 0;
-  background: none;
-  color: var(--coc-dim);
-  font: inherit;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  display: grid;
+  place-items: center;
   cursor: pointer;
+  box-shadow: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 3px rgba(230, 40, 56, 0.7));
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+  user-select: none;
+  outline: none;
 }
 
-.coc__sound:hover,
-.coc__sound:focus-visible { color: var(--coc-cyan); }
+.coc__bottomGameBoyBtn:hover {
+  transform: translateY(-3px) scale(1.08);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 12px rgba(230, 40, 56, 0.95));
+}
 
-.coc__chipIcon { display: none; }
+.coc__bottomGameBoyBtn.is-active {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 16px rgba(255, 60, 80, 0.95)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+}
+
+.coc__bottomGameBoyIcon {
+  display: grid;
+  place-items: center;
+}
 
 /* ── phone layout ───────────────────────────────────────────────────
    Keyed on width as well as pointer type: a desktop browser at phone
@@ -344,100 +612,230 @@
    touch controls on `pointer: coarse` alone means they never appear
    there. */
 
-@media (pointer: coarse), (max-width: 760px) {
+@media (pointer: coarse), (max-width: 768px) {
   .coc__touch { display: grid; }
 
-  /* the site bar owns the top of a phone screen, so the game's own
-     chrome starts clear below it rather than crowding its underside */
-  .coc__hud {
-    top: 96px;
-    gap: 6px;
-    padding: 5px 7px;
-    font-size: 6px;
-    letter-spacing: 0.02em;
+  /* Single unified top navbar frame on mobile:
+     [ LogoMark | Downtown 0/8 | Exit | Game Boy | Sound | Contact ] */
+  .coc__navBar {
+    top: 10px;
+    left: 8px;
+    right: 8px;
+    height: 38px;
+    background: #14183a;
+    box-shadow:
+      inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.18),
+      inset -1.5px -1.5px 0 rgba(0, 0, 0, 0.6),
+      0 0 0 2px #0a0c1e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6px 0 10px;
+    pointer-events: auto;
+    border-radius: 0;
+    z-index: 120;
   }
 
-  .coc__hud--tl { left: 10px; }
-  .coc__hud--tr { right: 10px; }
+  .coc__hud {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    background: transparent;
+    box-shadow: none;
+    height: 100%;
+    padding: 0;
+    font-size: 7px;
+  }
 
-  /* the chips become signs: the words are for a desktop, where there is
-     room for them */
-  .coc__chipText { display: none; }
+  .coc__hud--tl {
+    gap: 8px;
+    font-size: 7px;
+    letter-spacing: 0.04em;
+    padding: 0;
+  }
 
-  .coc__chipIcon {
-    display: block;
+  .coc__hud--tr {
+    gap: 4px;
+    padding: 0;
+  }
+
+  /* In phone view top navbar, ONLY show: Logo, Downtown, Exit, Contact (Image 1) */
+  .coc__hud--tr .coc__iconBtn--gb,
+  .coc__hud--tr .coc__iconBtn--sound,
+  .coc__hud--tr .coc__iconBtn--day {
+    display: none !important;
+  }
+
+  .coc__logoMark {
+    height: 16px;
+  }
+
+  .coc__district {
+    display: inline-block;
+    font-size: 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  .coc__found {
+    font-size: 6.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .coc__divider {
+    display: inline-block;
+    width: 1px;
+    height: 14px;
+    margin: 0 1px;
+  }
+
+  .coc__iconBtn {
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+  }
+
+  .coc__iconBtn svg {
     width: 13px;
     height: 13px;
   }
 
-  .coc__sound,
-  .coc__exit {
-    display: grid;
-    place-items: center;
-    padding: 3px;
+  .coc__contactBtn {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 7.5px;
+    margin-left: 4px;
+    border-radius: 2px;
   }
 
-  /*
-    Four corners, four things, none of them touching: district top left,
-    radar top right (moved there in engine.ts), thumbstick bottom left,
-    interact bottom right. Sound and exit stack under the district chip,
-    because the only other free corner is under a thumb.
-  */
-  /* the two signs sit together under the district chip, spaced so a
-     thumb cannot hit the wrong one */
-  .coc__hud--tr {
-    top: 124px;
-    left: 10px;
-    right: auto;
-    flex-direction: row;
-    gap: 16px;
-  }
-
-  /* clear of both thumbs */
+  /* Completely remove the 'E' prompt badge from phone view (Image 2) */
   .coc__prompt {
-    bottom: 146px;
-    padding: 9px 14px;
-    font-size: 7px;
-    gap: 8px;
+    display: none !important;
   }
 
+  /* Virtual Joystick bottom-left */
   .coc__touch--stick {
-    left: 18px;
-    bottom: 22px;
+    left: 16px;
+    bottom: 20px;
     width: 104px;
     height: 104px;
   }
 
   .coc__knob { width: 40px; height: 40px; }
 
-  /* inboard of the radar, which owns the bottom-right corner */
+  /* Completely remove the 'E' interact button from phone view (Image 3) */
   .coc__touch--act {
-    right: 92px;
-    bottom: 26px;
-    width: 64px;
-    height: 64px;
-    font-size: 17px;
+    display: none !important;
   }
 
-  /* the discovery box becomes a sheet: a centred card with 20px of
-     margin left nothing readable on a 390px screen */
-  .coc__panel { padding: 0; align-items: end; }
+  /* Hide the large floating Game Boy from mobile (replaced by right-bottom stack) */
+  .coc__bottomGameBoyBtn {
+    display: none !important;
+  }
+
+  /* Mobile Right-Bottom Stack: Minimap -> Game Boy -> Day/Night -> Sound (Image 1) */
+  .coc__mobileActions {
+    position: absolute;
+    right: 16px;
+    bottom: 128px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 90;
+    pointer-events: auto;
+  }
+
+  .coc__mobileBtn {
+    width: 38px;
+    height: 38px;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    background: #14183a;
+    color: #cbd5e1;
+    border: 0;
+    border-radius: 7px;
+    box-shadow:
+      inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.22),
+      inset -1.5px -1.5px 0 rgba(0, 0, 0, 0.6),
+      0 0 0 2px #0a0c1e,
+      0 2px 4px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.08s steps(2), background 0.1s ease;
+  }
+
+  .coc__mobileBtn:active {
+    transform: scale(0.92);
+    box-shadow: inset 1.5px 1.5px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  .coc__mobileBtn--gb.is-active {
+    background: #b5202c;
+    color: #ffffff;
+    box-shadow:
+      inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.35),
+      inset -1.5px -1.5px 0 rgba(0, 0, 0, 0.7),
+      0 0 0 2px #e62838,
+      0 0 10px rgba(230, 40, 56, 0.6);
+  }
+
+  .coc__mobileBtn--sound.is-active {
+    color: #59e8ff;
+    box-shadow:
+      inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.25),
+      inset -1.5px -1.5px 0 rgba(0, 0, 0, 0.6),
+      0 0 0 2px #0a0c1e,
+      0 0 8px rgba(89, 232, 255, 0.4);
+  }
+
+  .coc__mobileBtn--day .coc__dayEmoji {
+    font-size: 17px;
+    line-height: 1;
+    display: block;
+  }
+
+  /* Project panel left drawer / sheet — spaced below mobile navbar, zero sliders */
+  .coc__panel {
+    top: 60px;
+    bottom: auto;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: 82dvh;
+    padding: 0;
+  }
 
   .coc__panelInner {
     width: 100%;
-    max-height: 82svh;
-    padding: 18px 16px 22px;
+    max-height: 74dvh;
+    padding: 16px 14px 18px;
+    border-radius: 12px;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .coc__panelInner::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
   .coc__panelTitle { font-size: 12px; line-height: 1.5; }
   .coc__panelBlurb { font-size: 13px; }
-  .coc__panelShot { margin-bottom: 12px; }
+  .coc__panelShotWrap { margin-bottom: 12px; }
   .coc__panelActions { gap: 8px; }
   .coc__btn { padding: 11px 14px; font-size: 7px; }
 }
 
 /* very short screens: the sheet must not swallow the whole view */
 @media (max-height: 520px) {
-  .coc__panelInner { max-height: 92svh; padding: 12px 14px 16px; }
-  .coc__panelShot { display: none; }
+  .coc__panelInner { max-height: 90svh; padding: 12px 14px 16px; }
+  .coc__panelShotWrap { display: none; }
 }

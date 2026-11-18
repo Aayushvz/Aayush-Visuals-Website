@@ -13,9 +13,15 @@
 */
 
 .pg-scope .navbar {
+  top: 16px;
+  height: 38px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
   border-radius: 0;
   border: 0;
-  padding: 10px 12px 10px 18px;
+  padding: 0 12px 0 16px;
+  gap: clamp(12px, 2vw, 22px);
   background: #14183a;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -30,8 +36,12 @@
 }
 
 .pg-scope .navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   font-family: var(--pg-arcade), ui-monospace, monospace;
   font-size: 8px;
+  line-height: 1;
   letter-spacing: 0.04em;
 }
 
@@ -46,38 +56,52 @@
 }
 
 .pg-scope .navbar__logo {
+  min-height: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
   font-family: var(--pg-arcade), ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 9px;
   color: #fdf6e3;
 }
 
 .pg-scope .navbar__logoMark {
+  height: 16px;
+  width: auto;
+  display: block;
   filter: drop-shadow(2px 2px 0 #0a0c1e);
 }
 
 .pg-scope .navbar__contact {
+  height: 24px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0;
   background: #d6273c;
   font-family: var(--pg-arcade), ui-monospace, monospace;
   font-size: 8px;
+  line-height: 1;
   font-weight: 400;
   min-height: 0;
-  padding: 11px 14px;
+  padding: 0 10px;
+  margin: 0;
   box-shadow:
     inset 2px 2px 0 rgba(255, 255, 255, 0.22),
     inset -2px -2px 0 rgba(0, 0, 0, 0.55),
-    0 3px 0 rgba(0, 0, 0, 0.5);
+    0 2px 0 rgba(0, 0, 0, 0.5);
   /* steps(), not ease: the bar should snap like a sprite, not glide */
   transition: transform 0.08s steps(2);
 }
 
 .pg-scope .navbar__contact:hover {
   background: #ef3348;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow:
     inset 2px 2px 0 rgba(255, 255, 255, 0.22),
     inset -2px -2px 0 rgba(0, 0, 0, 0.55),
-    0 3px 0 rgba(0, 0, 0, 0.5);
+    0 2px 0 rgba(0, 0, 0, 0.5);
 }
 
 .pg-scope .navbar__contact:active {
@@ -106,8 +130,24 @@
 */
 .pg-scope .coc ~ .navbar,
 .pg-scope .navbar.is-inGame {
-  top: 10px;
-  padding: 7px 9px 7px 12px;
+  top: 16px;
+  height: 38px;
+  padding: 0 12px 0 16px;
+}
+
+@media (max-width: 1150px) {
+  .pg-scope .navbar {
+    padding: 0 10px 0 12px;
+    gap: 10px;
+  }
+  .pg-scope .navbar__links {
+    gap: 10px;
+    font-size: 7.5px;
+  }
+  .pg-scope .navbar__contact {
+    padding: 0 8px;
+    font-size: 7.5px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -121,4 +161,43 @@
   .pg-scope .navbar__links { font-size: 7px; }
   .pg-scope .navbar__logo { font-size: 8px; }
   .pg-scope .navbar__contact { padding: 9px 10px; font-size: 7px; }
+}
+
+/* ── Scrollbars: Arcade Theme on Desktop, Strictly Hidden on Mobile (No Ugly Sliders) ── */
+.pg-scope * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+}
+
+.pg-scope *::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.pg-scope *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pg-scope *::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.4);
+  border-radius: 4px;
+}
+
+.pg-scope *::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+/* On mobile / phone view, completely eliminate all scrollbars */
+@media (pointer: coarse), (max-width: 768px) {
+  .pg-scope,
+  .pg-scope * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .pg-scope *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }
