@@ -1,4 +1,5 @@
 import { MATERIALS, SOLID, type PropId, type TileId } from "./tiles.ts";
+import { itemSolid, VENUES, type Venue } from "./interiors.ts";
 
 /*
   Downtown, generated as buildings rather than as tiles.
@@ -49,11 +50,37 @@ export type Discovery = {
   label: string;
 };
 
+/** a building whose roof is cut away so the street can see inside */
+export type PlacedVenue = {
+  id: string;
+  venue: Venue;
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+};
+
+/** is this world-pixel point inside a solid piece of venue furniture */
+export function venueSolidAt(v: PlacedVenue, px: number, py: number): boolean {
+  const tx = Math.floor(px / 16) - v.x0;
+  const ty = Math.floor(py / 16) - v.y0;
+  if (tx < 0 || ty < 0 || tx > v.x1 - v.x0 || ty > v.y1 - v.y0) return false;
+  return v.venue.items.some(
+    (it) =>
+      itemSolid(it) &&
+      tx >= it.x &&
+      tx < it.x + (it.w ?? 1) &&
+      ty >= it.y &&
+      ty < it.y + (it.h ?? 1)
+  );
+}
+
 export type World = {
   w: number;
   h: number;
   cells: Cell[];
   props: Prop[];
+  venues: PlacedVenue[];
   cars: Car[];
   npcs: Npc[];
   discoveries: Discovery[];
@@ -73,6 +100,7 @@ const onRoad = (v: number) => v % PITCH < ROAD_W;
 export function buildWorld(discoveries: Discovery[]): World {
   const cells: Cell[] = new Array(MAP_W * MAP_H);
   const props: Prop[] = [];
+  const venues: PlacedVenue[] = [];
   const cars: Car[] = [];
   const npcs: Npc[] = [];
 
@@ -121,6 +149,20 @@ export function buildWorld(discoveries: Discovery[]): World {
       const x1 = bx * PITCH + PITCH - 2;
       const y1 = by * PITCH + PITCH - 2;
       if (x1 >= MAP_W || y1 >= MAP_H) continue;
+
+      /*
+        A block holding one of the eight projects is built as a venue
+        instead of a building: no roof, so the street sees the studio or
+        the gym and the people in it. That is the exhibit — there is no
+        separate interior to walk into.
+      */
+      const owner = discoveries.find(
+        (d) => d.tx >= x0 - 1 && d.tx <= x1 + 1 && d.ty >= y0 - 1 && d.ty <= y1 + 1
+      );
+      if (owner && VENUES[owner.id]) {
+        makeVenue(set, venues, VENUES[owner.id], owner.id, x0, y0, x1, y1);
+        continue;
+      }
 
       if (h2(bx, by, 9) > 0.8) {
         makePark(set, props, x0, y0, x1, y1, bx, by);
@@ -205,10 +247,15 @@ export function buildWorld(discoveries: Discovery[]): World {
   }
 
   /* ── discoveries: carve a guaranteed doorway ────────────────────── */
+  /* the pavement in front of every project building is always clear, so
+     the door can be reached no matter what the generator did */
   for (const d of discoveries) {
-    set(d.tx, d.ty, "fac_door0");
-    cells[idx(d.tx, d.ty)] = { id: "fac_door0", solid: false };
-    for (let dx = -1; dx <= 1; dx++) set(d.tx + dx, d.ty + 1, "walk");
+    for (let dx = -1; dx <= 1; dx++) {
+      const x = d.tx + dx;
+      if (x < 0 || x >= MAP_W) continue;
+      const y = d.ty + 1;
+      if (y < MAP_H) cells[idx(x, y)] = { id: "walk", solid: false };
+    }
   }
 
   const world: World = {
@@ -216,6 +263,7 @@ export function buildWorld(discoveries: Discovery[]): World {
     h: MAP_H,
     cells,
     props,
+    venues,
     cars,
     npcs,
     discoveries,
@@ -291,6 +339,34 @@ function makeBuilding(
       }
     }
   }
+}
+
+/*
+  A venue: the block interior becomes an open room.
+
+  The back row is wall, the rest is walkable floor, and the furniture is
+  what the engine draws on top. Nothing here is solid at the tile level —
+  the furniture carries its own collision through venueSolidAt — which is
+  what lets the hero walk in off the street and around the desks.
+*/
+function makeVenue(
+  set: (x: number, y: number, id: TileId) => void,
+  venues: PlacedVenue[],
+  venue: Venue,
+  id: string,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number
+) {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      /* "grass" is the only non-solid non-road ground tile, and the venue
+         floor is painted over it anyway, so it is just a walkable base */
+      set(x, y, "grass");
+    }
+  }
+  venues.push({ id, venue, x0, y0, x1, y1 });
 }
 
 function makePark(

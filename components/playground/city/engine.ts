@@ -9,14 +9,16 @@ import {
   type Atlas,
   type HeroDir,
 } from "./tiles";
-import { buildWorld, cellAt, DISCOVERIES, solidAt, type Discovery, type World } from "./world";
 import {
-  drawItem,
-  drawRoomShell,
-  itemSolid,
-  ROOMS,
-  type Room,
-} from "./interiors";
+  buildWorld,
+  cellAt,
+  DISCOVERIES,
+  solidAt,
+  venueSolidAt,
+  type Discovery,
+  type World,
+} from "./world";
+import { drawItem, drawVenueFloor } from "./interiors";
 
 /*
   The game loop, kept out of React entirely.
@@ -105,10 +107,7 @@ export class CityEngine {
     const k = e.key.toLowerCase();
     if (MOVE_KEYS.has(k) || k === " " || k === "e") e.preventDefault();
     this.keys[k] = true;
-    if (k === "e" && this.nearby && !this.paused) {
-      if (this.room) this.onEnter(this.nearby);
-      else this.enterRoom(this.nearby);
-    }
+    if (k === "e" && this.nearby && !this.paused) this.onEnter(this.nearby);
   };
 
   private onKeyUp = (e: KeyboardEvent) => {
@@ -124,9 +123,7 @@ export class CityEngine {
 
   /** the on-screen interact button */
   interact = () => {
-    if (!this.nearby || this.paused) return;
-    if (this.room) this.onEnter(this.nearby);
-    else this.enterRoom(this.nearby);
+    if (this.nearby && !this.paused) this.onEnter(this.nearby);
   };
 
   markFound(id: string) {
@@ -198,12 +195,6 @@ export class CityEngine {
       this.animT = 0;
     }
 
-    if (this.room) {
-      this.updateRoom();
-      if (this.moving) this.audio?.step("stone", performance.now(), !!this.keys.shift);
-      return;
-    }
-
     this.checkNearby();
     this.updateTraffic(dt);
 
@@ -268,10 +259,8 @@ export class CityEngine {
       [nx + halfW, ny + bottom],
     ];
 
-    const blocked = this.room
-      ? corners.some(([cx, cy]) => this.solidInRoom(cx, cy))
-      : corners.some(([cx, cy]) => solidAt(this.world, cx, cy));
-    if (blocked) return;
+    if (corners.some(([cx, cy]) => solidAt(this.world, cx, cy))) return;
+    if (this.world.venues.some((v) => venueSolidAt(v, nx, ny + 5))) return;
     this.px = nx;
     this.py = ny;
   }
@@ -309,7 +298,7 @@ export class CityEngine {
     if (best && bestD < 20) {
       if (this.armed && !this.paused) {
         this.armed = false;
-        this.enterRoom(best);
+        this.onEnter(best);
       }
     } else if (!best || bestD > 30) {
       this.armed = true;
@@ -319,199 +308,10 @@ export class CityEngine {
   /** false between opening a discovery and walking away from it */
   private armed = true;
 
-  /* ── interiors ─────────────────────────────────────────────────── */
-
-  /** null outdoors; otherwise the room the hero is standing in */
-  private room: Room | null = null;
-  private roomId: string | null = null;
-  /** where to put him back when he steps out */
-  private returnTo = { x: 0, y: 0 };
-
-  private enterRoom(d: Discovery) {
-    const room = ROOMS[d.id];
-    if (!room) {
-      /* no interior authored yet: fall back to the dialog so a new
-         discovery is never a door that does nothing */
-      this.onEnter(d);
-      return;
-    }
-    this.returnTo = { x: this.px, y: this.py };
-    this.room = room;
-    this.roomId = d.id;
-    /* spawn just inside the doorway, which drawRoomShell puts at the
-       bottom centre */
-    this.px = Math.floor(room.w / 2) * TILE;
-    this.py = (room.h - 2) * TILE + 8;
-    this.dir = "up";
-    this.nearby = null;
-    this.roomArmed = false;
-    this.emit();
-  }
-
-  private exitRoom() {
-    this.room = null;
-    this.roomId = null;
-    this.px = this.returnTo.x;
-    this.py = this.returnTo.y;
-    this.dir = "down";
-    this.armed = false;
-    this.emit();
-  }
-
-  /** stops the plinth reopening the moment its panel is closed */
-  private roomArmed = false;
-
-  private updateRoom() {
-    const room = this.room;
-    if (!room) return;
-
-    /* the doorway out: the bottom-centre two tiles */
-    const doorX = Math.floor(room.w / 2) * TILE;
-    if (this.py > (room.h - 1) * TILE - 2 && Math.abs(this.px - doorX) < TILE) {
-      this.exitRoom();
-      return;
-    }
-
-    /* the plinth holding the work */
-    const pxl = room.plinth.x * TILE + TILE / 2;
-    const pyl = room.plinth.y * TILE + TILE / 2;
-    const near = Math.hypot(pxl - this.px, pyl - this.py) < 20;
-
-    const asDiscovery: Discovery | null = near && this.roomId
-      ? { id: this.roomId, title: room.name, tx: room.plinth.x, ty: room.plinth.y, label: room.name }
-      : null;
-
-    if (asDiscovery?.id !== this.nearby?.id) {
-      this.nearby = asDiscovery;
-      this.emit();
-    }
-
-    if (near) {
-      if (this.roomArmed && !this.paused) {
-        this.roomArmed = false;
-        if (this.nearby) this.onEnter(this.nearby);
-      }
-    } else {
-      this.roomArmed = true;
-    }
-  }
-
-  private solidInRoom(x: number, y: number): boolean {
-    const room = this.room;
-    if (!room) return false;
-    const tx = Math.floor(x / TILE);
-    const ty = Math.floor(y / TILE);
-    /* walls: the top band, and one tile of margin all round */
-    if (tx < 0 || ty < 2 || tx >= room.w || ty >= room.h) return true;
-    for (const it of room.items) {
-      if (!itemSolid(it)) continue;
-      const w = it.w ?? 1;
-      const h = it.h ?? 1;
-      if (tx >= it.x && tx < it.x + w && ty >= it.y && ty < it.y + h) return true;
-    }
-    return false;
-  }
-
-  private renderRoom(ctx: CanvasRenderingContext2D, vw: number, vh: number) {
-    const room = this.room;
-    if (!room) return { camX: 0, camY: 0 };
-
-    const roomW = room.w * TILE;
-    const roomH = room.h * TILE;
-    /* a room smaller than the viewport is centred rather than clamped to
-       a corner, which is what makes it read as a room and not a crop */
-    const camX = roomW < vw ? -(vw - roomW) / 2 : Math.max(0, Math.min(roomW - vw, this.px - vw / 2));
-    const camY = roomH < vh ? -(vh - roomH) / 2 : Math.max(0, Math.min(roomH - vh, this.py - vh / 2));
-
-    ctx.translate(-Math.round(camX), -Math.round(camY));
-    drawRoomShell(ctx, room);
-
-    /* items sorted by their foot, so the hero walks behind what is above
-       him and in front of what is below */
-    const items = [...room.items].sort((a, b) => a.y + (a.h ?? 1) - (b.y + (b.h ?? 1)));
-    const heroFoot = this.py;
-    for (const it of items) {
-      const foot = (it.y + (it.h ?? 1)) * TILE;
-      if (foot <= heroFoot) drawItem(ctx, it, room.pal);
-    }
-
-    /* the plinth and its glow */
-    const plx = room.plinth.x * TILE;
-    const ply = room.plinth.y * TILE;
-    drawItem(ctx, { k: "plinth", x: room.plinth.x, y: room.plinth.y }, room.pal);
-    const pulse = 0.5 + Math.sin(performance.now() / 420) * 0.2;
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    this.light(ctx, plx + 8, ply + 4, 34, "89,232,255", pulse);
-    ctx.restore();
-
-    /* the resident */
-    if (room.npc) {
-      const nx = room.npc.x * TILE + 8;
-      const ny = room.npc.y * TILE + 10;
-      ctx.fillStyle = "rgba(10,10,18,0.25)";
-      ctx.beginPath();
-      ctx.ellipse(nx, ny + 6, 4, 2, 0, 0, Math.PI * 2);
-      ctx.fill();
-      const frame = Math.floor(performance.now() / 500) % 2;
-      ctx.drawImage(
-        this.atlas.canvas,
-        (room.npc.variant * 2 + frame) * TILE,
-        this.atlas.npcRowY,
-        TILE,
-        TILE,
-        nx - 8,
-        ny - 12,
-        TILE,
-        TILE
-      );
-      /* name plate */
-      ctx.font = "5px ui-monospace, monospace";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      const w = ctx.measureText(room.npc.name).width + 5;
-      ctx.fillStyle = "rgba(8,12,22,0.8)";
-      ctx.fillRect(nx - w / 2, ny - 24, w, 8);
-      ctx.fillStyle = "#fdf6e3";
-      ctx.fillText(room.npc.name, nx, ny - 20);
-    }
-
-    /* hero */
-    ctx.fillStyle = "rgba(10,10,18,0.3)";
-    ctx.beginPath();
-    ctx.ellipse(Math.round(this.px), Math.round(this.py) + 7, 5, 2.5, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const fi = heroFrameIndex(this.dir, this.moving ? this.frame : 0);
-    ctx.drawImage(
-      this.atlas.canvas,
-      fi * TILE,
-      this.atlas.heroRowY,
-      TILE,
-      TILE,
-      Math.round(this.px) - HERO_W / 2 - 2,
-      Math.round(this.py) - HERO_H + 6,
-      TILE,
-      TILE
-    );
-
-    for (const it of items) {
-      const foot = (it.y + (it.h ?? 1)) * TILE;
-      if (foot > heroFoot) drawItem(ctx, it, room.pal);
-    }
-
-    /* the way out, marked */
-    const dx = Math.floor(room.w / 2) * TILE;
-    ctx.font = "5px ui-monospace, monospace";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(253,246,227,0.72)";
-    ctx.fillText("EXIT", dx, (room.h - 1) * TILE - 5);
-
-    return { camX, camY };
-  }
-
+  /** only fires when something the HUD actually renders has changed */
   private emit() {
     this.onState({
-      district: this.room?.name ?? "Downtown",
+      district: this.nearby?.label ?? "Downtown",
       nearby: this.nearby,
       found: [...this.found],
       x: this.px,
@@ -536,12 +336,6 @@ export class CityEngine {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = "#14141c";
     ctx.fillRect(0, 0, vw, vh);
-
-    if (this.room) {
-      this.renderRoom(ctx, vw, vh);
-      ctx.restore();
-      return;
-    }
 
     ctx.translate(-Math.round(camX), -Math.round(camY));
 
@@ -570,6 +364,7 @@ export class CityEngine {
       }
     }
 
+    this.renderVenues(ctx, x0, y0, x1, y1);
     this.renderProps(ctx, x0, y0, x1, y1);
     this.renderCars(ctx, camX, camY, vw, vh);
     this.renderNpcs(ctx, camX, camY, vw, vh);
@@ -715,6 +510,69 @@ export class CityEngine {
     ctx.globalAlpha = alpha;
     ctx.drawImage(sprite, x - radius, y - radius, radius * 2, radius * 2);
     ctx.restore();
+  }
+
+  /*
+    The cutaway buildings.
+
+    Each project building has had its roof left off by the generator, so
+    what the street sees is the room itself: floor, furniture, and the
+    people working in it. There is no interior to walk into — the
+    building IS the exhibit.
+  */
+  private renderVenues(
+    ctx: CanvasRenderingContext2D,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number
+  ) {
+    const t = performance.now() / 1000;
+
+    for (const v of this.world.venues) {
+      if (v.x1 < x0 - 1 || v.x0 > x1 + 1 || v.y1 < y0 - 1 || v.y0 > y1 + 1) continue;
+      const ox = v.x0 * TILE;
+      const oy = v.y0 * TILE;
+
+      drawVenueFloor(ctx, v.venue, ox, oy, v.x1 - v.x0 + 1, v.y1 - v.y0 + 1);
+      for (const it of v.venue.items) drawItem(ctx, it, v.venue.pal, ox, oy);
+
+      /*
+        The people. Each kind of work gets its own motion — typing is a
+        small fast nod, lifting is a slow heavy rise, painting leans in
+        and out, serving paces the counter. Standing still would make
+        every room read as a showroom rather than a workplace.
+      */
+      for (const wk of v.venue.workers) {
+        const wx = ox + wk.x * TILE + 8;
+        const base = oy + wk.y * TILE + 11;
+        let dy = 0;
+        let dx = 0;
+        if (wk.doing === "type") dy = Math.sin(t * 7 + wk.x) * 0.9;
+        else if (wk.doing === "lift") dy = Math.sin(t * 2.1 + wk.y) * 2.6;
+        else if (wk.doing === "paint") dx = Math.sin(t * 3.2 + wk.x) * 1.6;
+        else if (wk.doing === "serve") dx = Math.sin(t * 1.5 + wk.y) * 2.4;
+        else dy = Math.sin(t * 1.3 + wk.x) * 0.7;
+
+        ctx.fillStyle = "rgba(10,10,18,0.25)";
+        ctx.beginPath();
+        ctx.ellipse(wx, base + 6, 4, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const frame = Math.floor(t * (wk.doing === "idle" ? 1.4 : 4)) % 2;
+        ctx.drawImage(
+          this.atlas.canvas,
+          (wk.variant * 2 + frame) * TILE,
+          this.atlas.npcRowY,
+          TILE,
+          TILE,
+          Math.round(wx - 8 + dx),
+          Math.round(base - 12 + dy),
+          TILE,
+          TILE
+        );
+      }
+    }
   }
 
   private renderProps(
