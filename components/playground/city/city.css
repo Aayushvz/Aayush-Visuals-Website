@@ -336,6 +336,8 @@
 .coc__sound:hover,
 .coc__sound:focus-visible { color: var(--coc-cyan); }
 
+.coc__chipIcon { display: none; }
+
 /* ── phone layout ───────────────────────────────────────────────────
    Keyed on width as well as pointer type: a desktop browser at phone
    width is how most people check a responsive layout, and gating the
@@ -346,17 +348,34 @@
   .coc__touch { display: grid; }
 
   /* the site bar owns the top of a phone screen, so the game's own
-     chrome starts below it rather than underneath it */
+     chrome starts clear below it rather than crowding its underside */
   .coc__hud {
-    top: 84px;
-    gap: 8px;
-    padding: 7px 9px;
-    font-size: 7px;
-    letter-spacing: 0.04em;
+    top: 96px;
+    gap: 6px;
+    padding: 5px 7px;
+    font-size: 6px;
+    letter-spacing: 0.02em;
   }
 
   .coc__hud--tl { left: 10px; }
   .coc__hud--tr { right: 10px; }
+
+  /* the chips become signs: the words are for a desktop, where there is
+     room for them */
+  .coc__chipText { display: none; }
+
+  .coc__chipIcon {
+    display: block;
+    width: 13px;
+    height: 13px;
+  }
+
+  .coc__sound,
+  .coc__exit {
+    display: grid;
+    place-items: center;
+    padding: 3px;
+  }
 
   /*
     Four corners, four things, none of them touching: district top left,
@@ -364,11 +383,14 @@
     interact bottom right. Sound and exit stack under the district chip,
     because the only other free corner is under a thumb.
   */
+  /* the two signs sit together under the district chip, spaced so a
+     thumb cannot hit the wrong one */
   .coc__hud--tr {
-    top: 118px;
+    top: 124px;
     left: 10px;
     right: auto;
-    gap: 10px;
+    flex-direction: row;
+    gap: 16px;
   }
 
   /* clear of both thumbs */
@@ -388,11 +410,12 @@
 
   .coc__knob { width: 40px; height: 40px; }
 
+  /* inboard of the radar, which owns the bottom-right corner */
   .coc__touch--act {
-    right: 18px;
-    bottom: 56px;
-    width: 66px;
-    height: 66px;
+    right: 92px;
+    bottom: 26px;
+    width: 64px;
+    height: 64px;
     font-size: 17px;
   }
 

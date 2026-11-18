@@ -42,7 +42,10 @@ export default function CityExperience() {
     const cv = canvasRef.current;
     if (!cv) return;
     const r = cv.getBoundingClientRect();
-    const scale = r.width < 700 ? 2 : 3;
+    /* a phone gets 3x, not 2x: at 2x the hero is twelve device pixels
+       tall on a 390px screen and reads as a speck. The tighter view that
+       buys is the right trade on a screen you hold. */
+    const scale = r.width < 520 ? 3 : r.width < 700 ? 2 : 3;
     cv.width = Math.round(r.width);
     cv.height = Math.round(r.height);
     cv.dataset.scale = String(scale);
@@ -123,11 +126,25 @@ export default function CityExperience() {
                 audioRef.current?.setMuted(m);
               }}
               aria-pressed={muted}
+              aria-label={muted ? "Turn sound on" : "Turn sound off"}
             >
-              {muted ? "Sound off" : "Sound on"}
+              {/* the words on a desktop, the sign on a phone — CSS picks */}
+              <span className="coc__chipText">{muted ? "Sound off" : "Sound on"}</span>
+              <svg className="coc__chipIcon" viewBox="0 0 16 16" aria-hidden>
+                <path d="M3 6h3l4-3v10l-4-3H3z" fill="currentColor" />
+                {muted ? (
+                  <path d="M11 5l4 6M15 5l-4 6" stroke="currentColor" strokeWidth="1.6" fill="none" />
+                ) : (
+                  <path d="M12 5c1.6 1.8 1.6 4.2 0 6" stroke="currentColor" strokeWidth="1.6" fill="none" />
+                )}
+              </svg>
             </button>
-            <a className="coc__exit" href="/playground">
-              Exit
+            <a className="coc__exit" href="/playground" aria-label="Leave the city">
+              <span className="coc__chipText">Exit</span>
+              <svg className="coc__chipIcon" viewBox="0 0 16 16" aria-hidden>
+                <path d="M9 2H3v12h6" stroke="currentColor" strokeWidth="1.6" fill="none" />
+                <path d="M7 8h7M11 5l3 3-3 3" stroke="currentColor" strokeWidth="1.6" fill="none" />
+              </svg>
             </a>
           </div>
 

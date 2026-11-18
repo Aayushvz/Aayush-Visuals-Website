@@ -940,19 +940,17 @@ export class CityEngine {
       Sized against the viewport, not fixed: at a fixed radius the dish
       swallowed a quarter of a small window.
 
-      On a phone it also moves to the top right. Bottom right is where
-      the thumb and the interact button live, and a radar under a thumb
-      is a radar nobody can read.
+      It sits in the bottom-right corner on every size. The interact
+      button moves inboard on a phone rather than the radar moving away,
+      because a radar in the corner is where a hand expects to find one.
     */
     const compact = vw < 260;
     const R = compact
       ? Math.max(20, Math.min(28, vw * 0.13))
       : Math.max(26, Math.min(46, Math.min(vw, vh) * 0.13));
     const SPAN = compact ? 18 : 22; // tiles visible across the radar
-    const cx = camX + vw - R - (compact ? 10 : 16);
-    /* clear of the site bar, which is fixed at the top of a phone and
-       does not know the canvas exists */
-    const cy = compact ? camY + R + 46 : camY + vh - R - 16;
+    const cx = camX + vw - R - (compact ? 8 : 16);
+    const cy = camY + vh - R - (compact ? 8 : 16);
     const scale = (R * 2) / (SPAN * TILE); // screen px per world px
 
     ctx.save();
