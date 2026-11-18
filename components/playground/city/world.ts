@@ -1,4 +1,4 @@
-import { MATERIALS, SOLID, type PropId, type TileId } from "./tiles";
+import { MATERIALS, SOLID, type PropId, type TileId } from "./tiles.ts";
 
 /*
   Downtown, generated as buildings rather than as tiles.
