@@ -33,11 +33,14 @@
   50% { opacity: 0.25; }
 }
 
+/* the scene is beautiful and the copy has to sit on top of it, so the
+   middle band is darkened enough to read against whatever drifts past */
 .pgt__vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 80% at 50% 38%, transparent 30%, rgba(6, 8, 20, 0.72) 100%),
+    radial-gradient(90% 46% at 50% 44%, rgba(6, 8, 20, 0.66) 0%, transparent 72%),
+    radial-gradient(120% 80% at 50% 38%, transparent 30%, rgba(6, 8, 20, 0.6) 100%),
     linear-gradient(180deg, rgba(6, 8, 20, 0.55) 0%, transparent 28%);
 }
 
@@ -77,7 +80,10 @@
 }
 
 .pgt__titleBig {
-  font-size: clamp(26px, 7.2vw, 76px);
+  /* Press Start 2P is a full em per glyph, so "EXPERIMENTS" is eleven
+     ems wide — 7vw overflowed a phone. 5.4vw keeps it inside the gutter
+     at every width without shrinking it on a desktop. */
+  font-size: clamp(15px, 5.4vw, 72px);
   color: #ff8a3d;
   text-shadow:
     0 4px 0 #a33c12,
@@ -175,4 +181,108 @@
     animation: none;
   }
   .pgt__item { transition: none; }
+}
+
+/* ── the scene's animation ──────────────────────────────────────────
+   All CSS, all transform/opacity, so nothing runs on the main thread
+   per frame and a title screen left open in a tab costs nothing. */
+
+.pgt__star {
+  animation: pgtTwinkle 3.6s steps(2) infinite;
+}
+
+@keyframes pgtTwinkle {
+  0%, 70%, 100% { opacity: 0.85; }
+  80% { opacity: 0.2; }
+}
+
+.pgt__moon { animation: pgtMoonGlow 6s ease-in-out infinite; }
+
+@keyframes pgtMoonGlow {
+  0%, 100% { opacity: 0.92; }
+  50% { opacity: 1; }
+}
+
+/* three banks at three speeds: the parallax is the depth */
+.pgt__clouds { will-change: transform; }
+.pgt__clouds--far { animation: pgtDrift 120s linear infinite; }
+.pgt__clouds--mid { animation: pgtDrift 78s linear infinite; }
+.pgt__clouds--near { animation: pgtDrift 52s linear infinite; }
+
+@keyframes pgtDrift {
+  from { transform: translateX(-60px); }
+  to { transform: translateX(340px); }
+}
+
+.pgt__birds {
+  animation: pgtFly 34s linear infinite;
+  transform: translate(-40px, 44px);
+}
+
+@keyframes pgtFly {
+  from { transform: translate(-40px, 52px); }
+  to { transform: translate(340px, 26px); }
+}
+
+.pgt__boat {
+  animation: pgtSail 46s linear infinite;
+}
+
+@keyframes pgtSail {
+  from { transform: translate(-20px, 158px); }
+  to { transform: translate(330px, 150px); }
+}
+
+.pgt__shimmer {
+  animation: pgtShimmer 4.2s ease-in-out infinite;
+}
+
+@keyframes pgtShimmer {
+  0%, 100% { opacity: 0.22; transform: translateX(0); }
+  50% { opacity: 0.55; transform: translateX(3px); }
+}
+
+/* lit windows go out and come back, at staggered delays, so the city
+   looks inhabited rather than switched on */
+.pgt__win {
+  animation: pgtWindow 9s steps(2) infinite;
+}
+
+@keyframes pgtWindow {
+  0%, 88%, 100% { opacity: 1; }
+  92% { opacity: 0.15; }
+}
+
+.pgt__beam {
+  transform-origin: 247px 91px;
+  animation: pgtSweep 9s ease-in-out infinite;
+}
+
+@keyframes pgtSweep {
+  0%, 100% { transform: rotate(-28deg); opacity: 0.5; }
+  50% { transform: rotate(16deg); opacity: 1; }
+}
+
+.pgt__palm {
+  transform-origin: center bottom;
+  animation: pgtSway 7s ease-in-out infinite;
+}
+
+@keyframes pgtSway {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgt__star,
+  .pgt__moon,
+  .pgt__clouds,
+  .pgt__birds,
+  .pgt__boat,
+  .pgt__shimmer,
+  .pgt__win,
+  .pgt__beam,
+  .pgt__palm {
+    animation: none;
+  }
 }

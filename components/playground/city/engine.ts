@@ -37,6 +37,9 @@ import { drawItem, drawVenueFloor } from "./interiors";
 const SPEED = 62; // px per second, walking
 const SPRINT = 108;
 const INTERACT_RANGE = 26;
+/** a lamp is at full strength within this, and dark beyond LAMP_OFF */
+const LAMP_ON = 46;
+const LAMP_OFF = 120;
 
 export type GameState = {
   district: string;
@@ -419,10 +422,21 @@ export class CityEngine {
     x1: number,
     y1: number
   ) {
-    ctx.fillStyle = "rgba(10,14,38,0.68)";
+    /*
+      Night as a multiply, not a flat wash.
+
+      Painting translucent navy over the city pulled every colour toward
+      the same grey — brick, slate and plum all ended up the same muddy
+      blue, which is why the buildings looked dull and blurry. Multiply
+      scales each channel instead, so a red brick stays red and only gets
+      darker. The tint is warm-shadowed rather than pure blue so the
+      ground does not go cold under the lamps.
+    */
+    const prev = ctx.globalCompositeOperation;
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = "#59608f";
     ctx.fillRect(camX, camY, vw, vh);
 
-    const prev = ctx.globalCompositeOperation;
     ctx.globalCompositeOperation = "lighter";
 
     /* lit windows and shopfronts. Which windows are lit is a hash of the
@@ -436,27 +450,49 @@ export class CityEngine {
         if (!shop && !win) continue;
         if (win && hash3(x, y, 91) > 0.62) continue; // a dark flat
 
-        ctx.fillStyle = shop ? "rgba(255,206,130,0.42)" : "rgba(255,214,150,0.3)";
+        ctx.fillStyle = shop ? "rgba(255,206,130,0.5)" : "rgba(255,214,150,0.38)";
         if (shop) ctx.fillRect(x * TILE + 2, y * TILE + 6, 12, 8);
         else ctx.fillRect(x * TILE + 4, y * TILE + 4, 8, 7);
 
-        this.light(ctx, x * TILE + 8, y * TILE + 9, shop ? 30 : 20, "255,200,120", shop ? 0.5 : 0.3);
+        /* a tight spill, not a cloud: a wide soft circle per window was
+           what turned whole façades into fog */
+        this.light(ctx, x * TILE + 8, y * TILE + 10, shop ? 18 : 12, "255,198,118", shop ? 0.55 : 0.34);
       }
     }
 
-    /* street lamps pool light onto the pavement */
+    /*
+      Street lamps come on as you reach them.
+
+      Every lamp burning at once made the street a field of overlapping
+      grey-white discs with no focus anywhere. Lighting only the ones you
+      are near gives the walk a moving pool of warmth, and leaves real
+      darkness between them to walk out of.
+    */
     for (const p of this.world.props) {
       if (p.id !== "lamp") continue;
-      if (p.tx < x0 - 2 || p.tx > x1 + 2 || p.ty < y0 - 2 || p.ty > y1 + 2) continue;
-      this.light(ctx, p.tx * TILE + 8, p.ty * TILE + 10, 54, "255,214,150", 0.62);
+      if (p.tx < x0 - 3 || p.tx > x1 + 3 || p.ty < y0 - 3 || p.ty > y1 + 3) continue;
+
+      const lx = p.tx * TILE + 8;
+      const ly = p.ty * TILE + 10;
+      const d = Math.hypot(lx - this.px, ly - this.py);
+      /* full from 0 to LAMP_ON, fading to nothing by LAMP_OFF */
+      const t = 1 - (d - LAMP_ON) / (LAMP_OFF - LAMP_ON);
+      const on = t < 0 ? 0 : t > 1 ? 1 : t;
+      if (on <= 0.01) continue;
+
+      /* the bulb itself brightens too, so the lamp reads as switching on
+         rather than a glow appearing around a dark post */
+      ctx.fillStyle = `rgba(255,236,180,${0.35 + on * 0.6})`;
+      ctx.fillRect(lx - 2, ly - 7, 4, 2);
+      this.light(ctx, lx, ly, 26 + on * 14, "255,206,140", 0.3 + on * 0.5);
     }
 
     /* headlights, thrown ahead of each car */
     for (const car of this.world.cars) {
       if (car.x < camX - 40 || car.x > camX + vw + 40) continue;
       if (car.y < camY - 40 || car.y > camY + vh + 40) continue;
-      this.light(ctx, car.x + car.dx * 16, car.y + car.dy * 16, 34, "255,236,190", 0.5);
-      this.light(ctx, car.x, car.y, 14, "255,236,190", 0.25);
+      this.light(ctx, car.x + car.dx * 14, car.y + car.dy * 14, 22, "255,236,190", 0.55);
+      this.light(ctx, car.x, car.y, 10, "255,236,190", 0.22);
     }
 
     /* the beacons, and a soft pool under the hero so he never gets lost */
@@ -465,7 +501,7 @@ export class CityEngine {
       const pulse = 0.55 + Math.sin(performance.now() / 420 + d.tx) * 0.16;
       this.light(ctx, d.tx * TILE + 8, d.ty * TILE + 2, 60, "89,232,255", pulse);
     }
-    this.light(ctx, this.px, this.py, 42, "180,205,255", 0.3);
+    this.light(ctx, this.px, this.py, 26, "190,212,255", 0.26);
 
     ctx.globalCompositeOperation = prev;
   }

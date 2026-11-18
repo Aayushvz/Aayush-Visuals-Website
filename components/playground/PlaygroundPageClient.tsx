@@ -4,12 +4,13 @@ import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import Cursor from "@/components/Cursor";
 import TitleScreen from "./TitleScreen";
-import DescentPage from "./descent/DescentPage";
 
 /*
-  /playground: the title screen for City of Creators, with the experiment
-  shelf below it for anyone who would rather just read the list than play
-  anything.
+  /playground: the title screen, and nothing else.
+
+  The card shelf that used to sit under it is gone — the experiments are
+  in the city now, and a list of the same eight things directly below the
+  door into them was just the game spoiling its own contents.
 
   The earlier rig-card shelf (ExperimentShelf + playground.css) and the
   playground sphere (sphere/PlaygroundSphere.tsx) are no longer mounted
@@ -23,9 +24,6 @@ export default function PlaygroundPageClient() {
       <Cursor />
       <main>
         <TitleScreen />
-        <section id="shelf">
-          <DescentPage />
-        </section>
       </main>
     </>
   );
