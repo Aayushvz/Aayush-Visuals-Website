@@ -322,6 +322,7 @@ export class CityEngine {
     this.renderCars(ctx, camX, camY, vw, vh);
     this.renderNpcs(ctx, camX, camY, vw, vh);
     this.renderMarkers(ctx);
+    this.renderNight(ctx, camX, camY, vw, vh, x0, y0, x1, y1);
 
     /* shadow then hero, so he sits on the ground rather than floating */
     ctx.fillStyle = "rgba(10,10,18,0.3)";
@@ -342,6 +343,122 @@ export class CityEngine {
       TILE
     );
 
+    ctx.restore();
+  }
+
+  /*
+    Night.
+
+    Two passes. First a cool wash over everything, which is the night
+    itself; then every light source drawn with 'lighter' so it adds back
+    into that wash instead of sitting on top of it as a pale sticker.
+
+    The light sprite is a radial gradient rendered once into its own
+    canvas and then blitted. Building a gradient per lamp per frame is the
+    classic way to make a lit scene crawl — there can be forty lamps on
+    screen and this is the same cost as forty drawImage calls.
+  */
+  private renderNight(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    vw: number,
+    vh: number,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number
+  ) {
+    ctx.fillStyle = "rgba(10,14,38,0.68)";
+    ctx.fillRect(camX, camY, vw, vh);
+
+    const prev = ctx.globalCompositeOperation;
+    ctx.globalCompositeOperation = "lighter";
+
+    /* lit windows and shopfronts. Which windows are lit is a hash of the
+       tile, so the same flats are on every night rather than flickering */
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        const cell = cellAt(this.world, x, y);
+        if (!cell) continue;
+        const shop = cell.id.startsWith("fac_shop");
+        const win = cell.id.startsWith("fac_win");
+        if (!shop && !win) continue;
+        if (win && hash3(x, y, 91) > 0.62) continue; // a dark flat
+
+        ctx.fillStyle = shop ? "rgba(255,206,130,0.42)" : "rgba(255,214,150,0.3)";
+        if (shop) ctx.fillRect(x * TILE + 2, y * TILE + 6, 12, 8);
+        else ctx.fillRect(x * TILE + 4, y * TILE + 4, 8, 7);
+
+        this.light(ctx, x * TILE + 8, y * TILE + 9, shop ? 30 : 20, "255,200,120", shop ? 0.5 : 0.3);
+      }
+    }
+
+    /* street lamps pool light onto the pavement */
+    for (const p of this.world.props) {
+      if (p.id !== "lamp") continue;
+      if (p.tx < x0 - 2 || p.tx > x1 + 2 || p.ty < y0 - 2 || p.ty > y1 + 2) continue;
+      this.light(ctx, p.tx * TILE + 8, p.ty * TILE + 10, 54, "255,214,150", 0.62);
+    }
+
+    /* headlights, thrown ahead of each car */
+    for (const car of this.world.cars) {
+      if (car.x < camX - 40 || car.x > camX + vw + 40) continue;
+      if (car.y < camY - 40 || car.y > camY + vh + 40) continue;
+      this.light(ctx, car.x + car.dx * 16, car.y + car.dy * 16, 34, "255,236,190", 0.5);
+      this.light(ctx, car.x, car.y, 14, "255,236,190", 0.25);
+    }
+
+    /* the beacons, and a soft pool under the hero so he never gets lost */
+    for (const d of this.world.discoveries) {
+      if (d.tx < x0 - 3 || d.tx > x1 + 3 || d.ty < y0 - 3 || d.ty > y1 + 3) continue;
+      const pulse = 0.55 + Math.sin(performance.now() / 420 + d.tx) * 0.16;
+      this.light(ctx, d.tx * TILE + 8, d.ty * TILE + 2, 60, "89,232,255", pulse);
+    }
+    this.light(ctx, this.px, this.py, 42, "180,205,255", 0.3);
+
+    ctx.globalCompositeOperation = prev;
+  }
+
+  /*
+    One cached radial sprite per colour.
+
+    The first attempt drew a white sprite then tinted it with a
+    'source-atop' fillRect — but source-atop composites against the whole
+    canvas, not against the sprite just drawn, so every light painted a
+    solid coloured square over the city. There are only four colours here,
+    so baking the tint into each gradient is both correct and cheaper.
+  */
+  private lightSprites = new Map<string, HTMLCanvasElement>();
+
+  private light(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    radius: number,
+    rgb: string,
+    alpha: number
+  ) {
+    let sprite = this.lightSprites.get(rgb);
+    if (!sprite) {
+      sprite = document.createElement("canvas");
+      sprite.width = 128;
+      sprite.height = 128;
+      const sc = sprite.getContext("2d");
+      if (sc) {
+        const g = sc.createRadialGradient(64, 64, 0, 64, 64, 64);
+        g.addColorStop(0, `rgba(${rgb},0.95)`);
+        g.addColorStop(0.4, `rgba(${rgb},0.34)`);
+        g.addColorStop(1, `rgba(${rgb},0)`);
+        sc.fillStyle = g;
+        sc.fillRect(0, 0, 128, 128);
+      }
+      this.lightSprites.set(rgb, sprite);
+    }
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(sprite, x - radius, y - radius, radius * 2, radius * 2);
     ctx.restore();
   }
 
@@ -474,3 +591,10 @@ const MOVE_KEYS = new Set([
   "arrowleft",
   "arrowright",
 ]);
+
+/* deterministic 0..1 from a tile, for "is this flat's light on" */
+function hash3(x: number, y: number, s: number): number {
+  let n = (x * 374761393 + y * 668265263 + s * 1274126177) | 0;
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967295;
+}

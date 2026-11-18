@@ -243,24 +243,48 @@ function makeBuilding(
 ) {
   if (x1 - x0 < 2 || y1 - y0 < 2) return;
   const m = Math.floor(h2(x0, y0, seed) * MATERIALS.length) as 0 | 1 | 2 | 3;
-  const doorX = x0 + 1 + Math.floor(h2(x0, y1, seed + 3) * Math.max(1, x1 - x0 - 1));
-  const hasShops = h2(x0, y0, seed + 9) > 0.45;
 
-  for (let y = y0; y <= y1; y++) {
+  /*
+    Three kinds, so a street has a skyline instead of a row of identical
+    slabs. A tower takes the whole block and carries a double parapet and
+    a crowded roof; a low-rise pulls back from the kerb, leaving a yard
+    you can walk into, and fills its street level with shops.
+  */
+  const roll = h2(x0, y0, seed + 41);
+  const kind: "tower" | "mid" | "low" = roll > 0.72 ? "tower" : roll > 0.34 ? "mid" : "low";
+
+  /* a low-rise gives back its northern tiles as yard */
+  const top = kind === "low" ? Math.min(y0 + 2, y1 - 2) : y0;
+  if (kind === "low") {
+    for (let y = y0; y < top; y++) {
+      for (let x = x0; x <= x1; x++) {
+        set(x, y, h2(x, y, seed + 53) > 0.84 ? "tree" : "walk");
+      }
+    }
+  }
+
+  const doorX = x0 + 1 + Math.floor(h2(x0, y1, seed + 3) * Math.max(1, x1 - x0 - 1));
+  const hasShops = kind === "low" ? true : kind === "mid" ? h2(x0, y0, seed + 9) > 0.45 : false;
+  const parapet = kind === "tower" ? 2 : 1;
+  /* a tower shows two storeys of window above the street, a low-rise none */
+  const storeys = kind === "tower" ? 2 : kind === "mid" ? 1 : 0;
+  const acDensity = kind === "tower" ? 0.35 : 0.6;
+
+  for (let y = top; y <= y1; y++) {
     for (let x = x0; x <= x1; x++) {
-      if (y === y0) {
+      const fromBottom = y1 - y;
+
+      if (y < top + parapet) {
         set(x, y, `roof_n${m}` as TileId);
-      } else if (y < y1 - 1) {
+      } else if (fromBottom > storeys) {
         set(x, y, `roof${m}` as TileId);
-        /* plant kit on the roof, on a grid so it reads as equipment */
-        if ((x - x0) % 3 === 1 && (y - y0) % 3 === 2 && h2(x, y, seed + 17) > 0.55) {
+        if ((x - x0) % 3 === 1 && (y - top) % 3 === 2 && h2(x, y, seed + 17) > acDensity) {
           props.push({ id: "ac", tx: x, ty: y });
         }
-      } else if (y === y1 - 1) {
-        /* upper storey: windows on a two-tile bay */
+      } else if (fromBottom > 0) {
+        /* upper storeys: windows on a two-tile bay */
         set(x, y, ((x - x0) % 2 === 0 ? `fac_win${m}` : `fac_wall${m}`) as TileId);
       } else {
-        /* street level */
         if (x === doorX) set(x, y, `fac_door${m}` as TileId);
         else if (hasShops && (x - x0) % 2 === 1) set(x, y, `fac_shop${m}` as TileId);
         else set(x, y, ((x - x0) % 2 === 0 ? `fac_win${m}` : `fac_wall${m}`) as TileId);
