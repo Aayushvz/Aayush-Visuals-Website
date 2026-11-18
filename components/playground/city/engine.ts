@@ -3,6 +3,7 @@ import {
   heroFrameIndex,
   HERO_H,
   HERO_W,
+  propAtlasIndex,
   TILE,
   tileAtlasIndex,
   type Atlas,
@@ -183,6 +184,43 @@ export class CityEngine {
     }
 
     this.checkNearby();
+    this.updateTraffic(dt);
+  }
+
+  /*
+    Traffic and pedestrians.
+
+    Cars loop the full width or height of the map and wrap, which costs
+    nothing and means the streets are never empty wherever you are.
+    Pedestrians turn round when the pavement runs out rather than
+    pathfinding — at this scale the difference is invisible and the cost
+    is not.
+  */
+  private updateTraffic(dt: number) {
+    const wpx = this.world.w * TILE;
+    const hpx = this.world.h * TILE;
+
+    for (const car of this.world.cars) {
+      car.x += car.dx * car.speed * dt;
+      car.y += car.dy * car.speed * dt;
+      if (car.x < -24) car.x = wpx + 24;
+      if (car.x > wpx + 24) car.x = -24;
+      if (car.y < -24) car.y = hpx + 24;
+      if (car.y > hpx + 24) car.y = -24;
+    }
+
+    for (const n of this.world.npcs) {
+      n.t += dt;
+      const nx = n.x + n.dx * 18 * dt;
+      const ny = n.y + n.dy * 18 * dt;
+      if (solidAt(this.world, nx, ny + 4)) {
+        n.dx = -n.dx;
+        n.dy = -n.dy;
+      } else {
+        n.x = nx;
+        n.y = ny;
+      }
+    }
   }
 
   /* the hero's feet are the collider — a box the size of the whole sprite
@@ -280,6 +318,9 @@ export class CityEngine {
       }
     }
 
+    this.renderProps(ctx, x0, y0, x1, y1);
+    this.renderCars(ctx, camX, camY, vw, vh);
+    this.renderNpcs(ctx, camX, camY, vw, vh);
     this.renderMarkers(ctx);
 
     /* shadow then hero, so he sits on the ground rather than floating */
@@ -302,6 +343,97 @@ export class CityEngine {
     );
 
     ctx.restore();
+  }
+
+  private renderProps(
+    ctx: CanvasRenderingContext2D,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number
+  ) {
+    for (const p of this.world.props) {
+      if (p.tx < x0 - 1 || p.tx > x1 + 1 || p.ty < y0 - 1 || p.ty > y1 + 1) continue;
+      /* a contact shadow is what stops a prop looking stuck on top of the
+         pavement rather than standing on it */
+      ctx.fillStyle = "rgba(10,10,18,0.22)";
+      ctx.beginPath();
+      ctx.ellipse(p.tx * TILE + 8, p.ty * TILE + 14, 5, 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.drawImage(
+        this.atlas.canvas,
+        propAtlasIndex(p.id) * TILE,
+        this.atlas.propRowY,
+        TILE,
+        TILE,
+        p.tx * TILE,
+        p.ty * TILE,
+        TILE,
+        TILE
+      );
+    }
+  }
+
+  private renderCars(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    vw: number,
+    vh: number
+  ) {
+    for (const car of this.world.cars) {
+      if (car.x < camX - 30 || car.x > camX + vw + 30) continue;
+      if (car.y < camY - 30 || car.y > camY + vh + 30) continue;
+
+      const horiz = car.dx !== 0;
+      const w = horiz ? 18 : 10;
+      const h = horiz ? 10 : 18;
+      const x = Math.round(car.x - w / 2);
+      const y = Math.round(car.y - h / 2);
+
+      ctx.fillStyle = "rgba(10,10,18,0.3)";
+      ctx.fillRect(x + 1, y + h - 2, w, 3);
+      ctx.fillStyle = car.colour;
+      ctx.fillRect(x, y, w, h);
+      /* roof + screen: two bands are enough to read as a car from above */
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      if (horiz) ctx.fillRect(x + 5, y + 1, 8, h - 2);
+      else ctx.fillRect(x + 1, y + 5, w - 2, 8);
+      ctx.fillStyle = "#ffe9b0";
+      if (horiz) ctx.fillRect(car.dx > 0 ? x + w - 2 : x, y + 1, 2, 2);
+      else ctx.fillRect(x + 1, car.dy > 0 ? y + h - 2 : y, 2, 2);
+    }
+  }
+
+  private renderNpcs(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    vw: number,
+    vh: number
+  ) {
+    for (const n of this.world.npcs) {
+      if (n.x < camX - 20 || n.x > camX + vw + 20) continue;
+      if (n.y < camY - 20 || n.y > camY + vh + 20) continue;
+
+      ctx.fillStyle = "rgba(10,10,18,0.25)";
+      ctx.beginPath();
+      ctx.ellipse(Math.round(n.x), Math.round(n.y) + 6, 4, 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const frame = Math.floor(n.t * 5) % 2;
+      ctx.drawImage(
+        this.atlas.canvas,
+        (n.variant * 2 + frame) * TILE,
+        this.atlas.npcRowY,
+        TILE,
+        TILE,
+        Math.round(n.x) - 8,
+        Math.round(n.y) - 12,
+        TILE,
+        TILE
+      );
+    }
   }
 
   private renderMarkers(ctx: CanvasRenderingContext2D) {
