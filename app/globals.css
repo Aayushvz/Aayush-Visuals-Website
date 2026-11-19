@@ -123,7 +123,12 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:has(:target) {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Off-screen sections stop animating (see components/AnimationBudget.tsx).
@@ -1381,14 +1386,31 @@ html.has-cursor .cursorRing {
 
 /* after the 3D hero (components/test/zhu), the hand-off is the
    reference's: the hero's frame squeezes a touch and scrolls away like a
-   card, and About simply follows it in flow - no pull-up over a held
-   frame, and no stepped bands rising over it */
+   card, and About follows it in flow. About then pins at top:0 while the
+   dark Statement panel rises over it with the signature parallax effect. */
 .zh--embedded + .aboutStage {
   margin-top: 0;
 }
 
+.zh--embedded + .aboutStage::after {
+  content: "";
+  display: block;
+  height: 100vh;
+}
+
+.zh--embedded + .aboutStage .about {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-height: 100svh;
+}
+
 .zh--embedded + .aboutStage .about__steps {
   display: none;
+}
+
+.zh--embedded + .aboutStage + .statement {
+  margin-top: -100vh;
 }
 
 /* The panel itself. White/off-white on purpose — the hero is the one dark,
@@ -1807,7 +1829,7 @@ html.has-cursor .cursorRing {
      the element as 250svh, which beat every stylesheet - including the phone
      rule that tried to shorten it, so a phone spent two and a half screens on
      one sentence. It lives here now so the phone block can have its own. */
-  min-height: 250svh;
+  min-height: 175svh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9558,7 +9580,7 @@ html.contact-page-active body {
   a display rule, not a re-derivation.
 */
 .services-section {
-  min-height: 300vh;
+  min-height: 200vh;
 }
 
 .services-pin {
@@ -9864,7 +9886,7 @@ html.contact-page-active body {
   .services-section {
     /* the deck drives this now, not the ring; both want roughly the same
        travel, so the number did not need to change */
-    min-height: 340vh;
+    min-height: 220vh;
   }
 
   .services-pin {
@@ -10655,6 +10677,7 @@ html.contact-page-active body {
   width: 100% !important;
   max-width: 100% !important;
   overflow: hidden;
+  contain: layout style paint;
   font-family: var(--font-primary), "General Sans", system-ui, sans-serif;
   text-transform: lowercase;
   user-select: none;
@@ -10693,13 +10716,14 @@ html.contact-page-active body {
   position: absolute;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow: 0 0 6px #fff, 0 0 12px #a78bfa;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(167, 139, 250, 0.45);
   animation: seaTwinkle ease-in-out infinite alternate;
+  will-change: transform, opacity;
 }
 
 @keyframes seaTwinkle {
-  0% { transform: scale(0.75); opacity: 0.25; }
-  100% { transform: scale(1.35); opacity: 1; box-shadow: 0 0 10px #fff, 0 0 22px #c4b5fd; }
+  0% { transform: scale(0.72); opacity: 0.28; }
+  100% { transform: scale(1.22); opacity: 0.95; }
 }
 
 .seaFooter__shootingStar {
@@ -10710,6 +10734,7 @@ html.contact-page-active body {
   transform: rotate(-35deg);
   opacity: 0;
   animation: seaShoot 12s infinite linear;
+  will-change: transform, opacity;
 }
 .seaFooter__shootingStar--1 {
   top: 18%;
@@ -10728,14 +10753,14 @@ html.contact-page-active body {
   100% { opacity: 0; }
 }
 
-/* --- Shimmering Ocean & Horizon --- */
+/* --- Realistic Nocturnal Ocean & Horizon --- */
 .seaFooter__ocean {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 34%;
-  background: linear-gradient(180deg, #170b30 0%, #100824 35%, #080414 70%, #030208 100%);
+  height: 35%;
+  background: linear-gradient(180deg, #140728 0%, #0d041c 30%, #080312 65%, #030107 100%);
   overflow: hidden;
   z-index: 2;
 }
@@ -10745,45 +10770,71 @@ html.contact-page-active body {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, rgba(170, 146, 240, 0.35) 12%, #AA92F0 50%, rgba(170, 146, 240, 0.35) 88%, transparent 100%);
-  box-shadow: 0 0 20px #AA92F0, 0 0 45px #8b5cf6, 0 0 85px rgba(170, 146, 240, 0.7);
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(170, 146, 240, 0.2) 15%, rgba(216, 201, 255, 0.75) 50%, rgba(170, 146, 240, 0.2) 85%, transparent 100%);
+  box-shadow: 0 0 16px rgba(170, 146, 240, 0.9), 0 0 35px rgba(139, 92, 246, 0.6), 0 0 70px rgba(170, 146, 240, 0.35);
+}
+
+/* Atmospheric horizon haze separating sky & ocean */
+.seaFooter__horizonMist {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.04) 70%, transparent 100%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Campfire reflection on the water near the shore */
+.seaFooter__waterReflection {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 46%;
+  background: radial-gradient(ellipse 70% 65% at 30% 12%, rgba(255, 120, 20, 0.28) 0%, rgba(255, 75, 0, 0.12) 40%, transparent 75%);
+  pointer-events: none;
+  animation: seaWaterReflect 1.6s infinite ease-in-out alternate;
+  will-change: transform, opacity;
+}
+@keyframes seaWaterReflect {
+  0% { opacity: 0.7; transform: scaleY(0.96) scaleX(0.98); }
+  100% { opacity: 1; transform: scaleY(1.04) scaleX(1.02); }
 }
 
 .seaFooter__wavesWrapper {
   position: absolute;
   inset: 0;
-  opacity: 0.6;
   pointer-events: none;
+  overflow: hidden;
 }
-.seaFooter__waveLayer {
-  position: absolute;
-  left: -15%;
-  right: -15%;
-  height: 2px;
-  background: repeating-linear-gradient(90deg, transparent 0px, transparent 18px, rgba(170, 146, 240, 0.4) 18px, rgba(170, 146, 240, 0.4) 36px);
-  animation: seaWaveLinear 8s infinite linear alternate;
+
+.seaFooter__oceanSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
-.seaFooter__waveLayer--1 {
-  top: 20%;
-  animation-duration: 7s;
-  opacity: 0.9;
+
+.seaFooter__waveRibbon {
+  animation: seaWaveDrift 10s infinite ease-in-out alternate;
+  will-change: transform;
 }
-.seaFooter__waveLayer--2 {
-  top: 50%;
-  animation-duration: 11s;
-  opacity: 0.55;
-  background: repeating-linear-gradient(90deg, transparent 0px, transparent 24px, rgba(196, 181, 253, 0.32) 24px, rgba(196, 181, 253, 0.32) 48px);
+.seaFooter__waveRibbon--1 {
+  animation-duration: 9s;
 }
-.seaFooter__waveLayer--3 {
-  top: 78%;
-  animation-duration: 15s;
-  opacity: 0.4;
-  background: repeating-linear-gradient(90deg, transparent 0px, transparent 32px, rgba(139, 92, 246, 0.28) 32px, rgba(139, 92, 246, 0.28) 64px);
+.seaFooter__waveRibbon--2 {
+  animation-duration: 13s;
+  animation-delay: -3s;
 }
-@keyframes seaWaveLinear {
+.seaFooter__waveRibbon--3 {
+  animation-duration: 16s;
+  animation-delay: -6s;
+}
+@keyframes seaWaveDrift {
   0% { transform: translateX(0); }
-  100% { transform: translateX(36px); }
+  100% { transform: translateX(28px); }
 }
 
 /* --- Left Campfire & Right Jungle Cliffs --- */
@@ -10812,13 +10863,90 @@ html.contact-page-active body {
   display: block;
 }
 
+/* Realistic organic campfire flicker */
 .seaFooter__flameGroup {
-  transform-origin: 210px 335px;
-  animation: seaFlamePulse 0.45s infinite ease-in-out alternate;
+  transform-origin: 210px 345px;
+  animation: seaFlameRealistic 0.4s infinite ease-in-out alternate;
+  will-change: transform;
 }
-@keyframes seaFlamePulse {
-  0% { transform: scaleY(0.96) scaleX(1.02) skewX(-2deg); filter: brightness(0.95); }
-  100% { transform: scaleY(1.05) scaleX(0.98) skewX(2deg); filter: brightness(1.2) drop-shadow(0 0 14px #ff9d00); }
+@keyframes seaFlameRealistic {
+  0% { transform: scaleY(0.96) scaleX(1.03) skewX(-1.5deg); }
+  50% { transform: scaleY(1.05) scaleX(0.97) skewX(2deg); }
+  100% { transform: scaleY(0.99) scaleX(1.01) skewX(-0.8deg); }
+}
+
+/* Dynamic warm fire glow on ground & rocks */
+.seaFooter__fireGlow {
+  transform-origin: 210px 345px;
+  animation: seaFireGlowBreath 1.4s infinite ease-in-out alternate;
+  will-change: transform, opacity;
+}
+@keyframes seaFireGlowBreath {
+  0% { opacity: 0.72; transform: scale(0.97); }
+  100% { opacity: 0.95; transform: scale(1.03); }
+}
+
+/* Rising campfire ember sparks */
+.seaFooter__ember {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffcc00;
+  box-shadow: 0 0 3px #ffaa00, 0 0 6px #ff4500;
+  pointer-events: none;
+  animation: seaEmberFloat infinite ease-out;
+  will-change: transform, opacity;
+}
+@keyframes seaEmberFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.95;
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(var(--drift-x, 14px), -130px) scale(0.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seaFooter__star,
+  .seaFooter__shootingStar,
+  .seaFooter__waveRibbon,
+  .seaFooter__flameGroup,
+  .seaFooter__fireGlow,
+  .seaFooter__ember,
+  .seaFooter__waterReflection,
+  .seaFooter__emblem {
+    animation: none !important;
+  }
+}
+
+/* 4-point cross diffraction on bright stars */
+.seaFooter__star--bright::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.75);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 0 6px #fff;
+}
+.seaFooter__star--bright::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 0 6px #fff;
 }
 
 /* --- Center Typography & Branding --- */

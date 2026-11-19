@@ -54,12 +54,6 @@ const ITEMS: Item[] = [
   ...CHIPS.map((c) => ({ ...c, chip: true })),
 ];
 
-/* one tag lands every so often, then the whole set is left alone for a beat
-   before the floor gives way */
-const POP_STEP = 70;
-const POP_MS = 420;
-const DWELL_MS = 900;
-
 /* a drag under this many pixels is a click, so the one pill that is a link
    still behaves like one */
 const CLICK_SLOP = 6;
@@ -164,32 +158,18 @@ export default function AboutTagPile() {
       if (!W || !H) return;
 
       const engine = Engine.create();
+      // Natural gravity so tags freefall and pile along the floor
       engine.gravity.y = 1;
 
       /*
         Walls just outside the frame, so a tag can come to rest half off the
         edge the way the reference's do, and a thick floor so nothing can
         tunnel through it at speed.
-
-        The overhang is a share of the width rather than a fixed 52px: that
-        is 3.6% of a 1425 desktop and 13% of a 390 phone, and at 13% the
-        chips - which are circles, and roll - ended up outside the screen.
-        Replayed at 390, four of the five finished beyond the edge.
       */
       const edge = Math.min(52, W * 0.04);
       const T = 240;
       Composite.add(engine.world, [
         Bodies.rectangle(W / 2, H + T / 2, W + 800, T, { isStatic: true }),
-        /*
-          A lid, and the reason for it is the text above.
-
-          The band is only as tall as the room left under the last line, and
-          on a short phone that is less than a deep pile needs: at twenty
-          tags the pile was taller than the band and simply kept stacking
-          upward, straight over the statement. Thinning the phone set fixes
-          this instance; the lid makes it structural, so no count, no throw
-          and no window shape can ever put a tag on a word.
-        */
         Bodies.rectangle(W / 2, -4 - T / 2, W + 800, T, { isStatic: true }),
         Bodies.rectangle(-edge - T / 2, H / 2, T, H * 4, { isStatic: true }),
         Bodies.rectangle(W + edge + T / 2, H / 2, T, H * 4, { isStatic: true }),
@@ -200,7 +180,12 @@ export default function AboutTagPile() {
         el: HTMLElement;
         w: number;
         h: number;
-        born: number;
+        homeX: number;
+        homeY: number;
+        homeAngle: number;
+        isChip: boolean;
+        dropAt: number;
+        released: boolean;
       };
       const live: Live[] = [];
 
@@ -219,9 +204,9 @@ export default function AboutTagPile() {
         const y = r.top - wr.top + r.height / 2;
 
         const opts = {
-          restitution: 0.22,
-          friction: 0.45,
-          frictionAir: 0.012,
+          restitution: 0.28,
+          friction: 0.35,
+          frictionAir: 0.015,
           density: 0.0014,
         };
         const body = item.chip
@@ -229,50 +214,44 @@ export default function AboutTagPile() {
           : /* chamfered to the pill's own radius, so they roll off each
                other at the ends instead of catching on square corners */
             Bodies.rectangle(x, y, w, h, { ...opts, chamfer: { radius: h / 2 } });
-        Body.setAngle(body, (item.rot * Math.PI) / 180);
-        /*
-          A pill cannot be allowed to spin, because a pill is a word.
-
-          Left free they tumble, and one landed reading bottom-to-top with
-          REFRAMING PROBLEMS upside down, which is the one thing a label must
-          never do. Infinite inertia locks the angle where it was set, so
-          every pill keeps the tilt it was drawn at through the fall, the
-          landing and any throw. It also stacks far more tidily, which is
-          what lets the pile fill the band rather than sprawl across it.
-
-          The chips keep their inertia. They are circles with a glyph in the
-          middle and nothing to read upside down, and their rolling is most
-          of what stops the pile looking like a shelf.
-        */
-        if (!item.chip) Body.setInertia(body, Infinity);
+        const angle = (item.rot * Math.PI) / 180;
+        Body.setAngle(body, angle);
         Body.setStatic(body, true);
         Composite.add(engine.world, body);
-        live.push({ body, el, w, h, born: live.length * POP_STEP });
+        live.push({
+          body,
+          el,
+          w,
+          h,
+          homeX: x,
+          homeY: y,
+          homeAngle: angle,
+          isChip: !!item.chip,
+          dropAt: 160 + live.length * 28,
+          released: false,
+        });
       });
 
       if (!live.length) return;
 
-      /* hidden BEFORE the class lands, or there is one frame where the
-         stylesheet's arrangement is gone and the loop has not yet written a
-         transform, and every tag paints in the corner */
-      live.forEach((l) => {
-        l.el.style.opacity = "0";
-      });
+      /* Instantly position all tags in their exact designed arrangement
+         from the starting — fully visible, perfectly placed, no delay or jump */
       wrap!.classList.add("aboutTags--live");
+      live.forEach((l) => {
+        l.el.style.opacity = "1";
+        l.el.style.transform =
+          `translate3d(${(l.body.position.x - l.w / 2).toFixed(1)}px, ` +
+          `${(l.body.position.y - l.h / 2).toFixed(1)}px, 0) ` +
+          `rotate(${l.body.angle.toFixed(4)}rad)`;
+      });
 
       const t0 = performance.now();
-      const releaseAt = t0 + (live.length - 1) * POP_STEP + POP_MS + DWELL_MS;
-      let released = false;
       let raf = 0;
       let running = true;
       /*
-        Parking. The pile used to step the physics and rewrite every tag's
-        transform on every frame for as long as the panel was near the
-        screen - which, pinned, is a long stretch of the page - even though
-        a settled pile does not move. Once every tag has been still for
-        STILL_FRAMES frames (and nothing is held), the loop stops; it picks
-        up again the moment a tag is grabbed. A resting body has nothing
-        left to show, so the picture is the same.
+        Parking. Once every tag has been still for STILL_FRAMES frames (and nothing
+        is held), the loop stops; it picks up again the moment a tag is grabbed or
+        tossed.
       */
       const STILL_FRAMES = 45;
       let still = 0;
@@ -284,38 +263,44 @@ export default function AboutTagPile() {
         if (running && !raf) raf = requestAnimationFrame(frame);
       };
 
-      /* out-and-back overshoot on the way in, so a tag lands rather than
-         simply appears */
-      const pop = (p: number) => {
-        const c = 1.7;
-        const u = p - 1;
-        return 1 + (c + 1) * u * u * u + c * u * u;
-      };
-
       const frame = (now: number) => {
         raf = 0;
         if (dead) return;
 
-        if (!released && now >= releaseAt) {
-          released = true;
-          live.forEach((l) => Body.setStatic(l.body, false));
+        // Cascade release: tags begin freefalling sequentially
+        for (const l of live) {
+          if (!l.released && now - t0 >= l.dropAt) {
+            l.released = true;
+            Body.setStatic(l.body, false);
+            Body.setVelocity(l.body, { x: (Math.random() - 0.5) * 0.6, y: 0.6 });
+          }
         }
 
         Engine.update(engine, 1000 / 60);
 
         for (const l of live) {
-          const age = now - t0 - l.born;
-          const p = Math.max(0, Math.min(1, age / POP_MS));
-          const s = p <= 0 ? 0 : pop(p);
-          l.el.style.opacity = String(Math.min(1, p * 2));
+          // Restrain pills from flipping upside down while allowing natural organic tilt
+          if (!l.isChip) {
+            const maxDelta = 0.42; // ~24 degrees
+            if (l.body.angle < l.homeAngle - maxDelta) {
+              Body.setAngle(l.body, l.homeAngle - maxDelta);
+              Body.setAngularVelocity(l.body, 0);
+            } else if (l.body.angle > l.homeAngle + maxDelta) {
+              Body.setAngle(l.body, l.homeAngle + maxDelta);
+              Body.setAngularVelocity(l.body, 0);
+            }
+          }
+
           l.el.style.transform =
             `translate3d(${(l.body.position.x - l.w / 2).toFixed(1)}px, ` +
             `${(l.body.position.y - l.h / 2).toFixed(1)}px, 0) ` +
-            `rotate(${l.body.angle.toFixed(4)}rad) scale(${s.toFixed(3)})`;
+            `rotate(${l.body.angle.toFixed(4)}rad)`;
         }
 
-        if (released && !held) {
-          const calm = live.every((l) => l.body.speed < 0.02 && Math.abs(l.body.angularSpeed) < 0.0005);
+        if (!held && live.every((l) => l.released)) {
+          const calm = live.every(
+            (l) => l.body.speed < 0.04 && Math.abs(l.body.angularSpeed) < 0.005
+          );
           still = calm ? still + 1 : 0;
           if (still >= STILL_FRAMES) parked = true;
         }
@@ -356,7 +341,7 @@ export default function AboutTagPile() {
       let drag: Drag | null = null;
 
       const onDown = (l: Live) => (e: PointerEvent) => {
-        if (e.button !== 0 || !released) return;
+        if (e.button !== 0) return;
         drag = { l, id: e.pointerId, px: e.clientX, py: e.clientY, vx: 0, vy: 0, moved: 0, caught: false };
         Body.setStatic(l.body, true);
         l.el.classList.add("aboutTags__held");
@@ -417,7 +402,10 @@ export default function AboutTagPile() {
         Body.setStatic(d.l.body, false);
         const clamp = (v: number) => Math.max(-MAX_THROW, Math.min(MAX_THROW, v));
         Body.setVelocity(d.l.body, { x: clamp(d.vx), y: clamp(d.vy) });
-        Body.setAngularVelocity(d.l.body, clamp(d.vx) * 0.012);
+        if (d.l.isChip) {
+          Body.setAngularVelocity(d.l.body, clamp(d.vx) * 0.012);
+        }
+        wake();
         /* a real drag must not also count as a click on the link pill */
         if (d.moved > CLICK_SLOP) {
           const swallow = (ev: Event) => {

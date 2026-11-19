@@ -22,8 +22,12 @@
 .zh-after { height: 70svh; }
 
 /* embedded on the homepage: the site's own nav, background and next
-   section take over */
-.zh--embedded { background: transparent; }
+   section take over. Snappy, responsive scroll travel (~1.2 viewports)
+   so the 3D mark transitions crisply without trapping the user */
+.zh--embedded {
+  --zh-pin: 1200px;
+  background: transparent;
+}
 .zh--embedded .zh-stage { height: calc(100dvh + var(--zh-pin)); }
 
 .zh-frame {
@@ -185,12 +189,14 @@
 
 @media (hover: none) and (pointer: coarse) {
   .zh { --zh-pin: 2800px; }
+  .zh--embedded { --zh-pin: 950px; }
 }
 
 @media (max-width: 760px) {
   /* phones: the whole sequence (orbit, roles) in about two screens of
      scrolling rather than nearly four */
   .zh { --zh-pin: 1500px; }
+  .zh--embedded { --zh-pin: 800px; }
   /* the mark stands tall on a phone and its top swings up past the name
      as it turns, so the tagline sits higher to stay clear of it */
   .zh-tag { top: calc(var(--zh-name-top, 30%) - 3.1em); }

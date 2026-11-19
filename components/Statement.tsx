@@ -207,8 +207,8 @@ export default function Statement() {
         the same sequence plays out in a little over half the scrolling.
       */
       const phone = phoneMq.matches;
-      const startTrigger = (phone ? 0.3 : 0.4) * vh;
-      const endTrigger = (phone ? -0.45 : -1.0) * vh;
+      const startTrigger = (phone ? 0.25 : 0.35) * vh;
+      const endTrigger = (phone ? -0.4 : -0.7) * vh;
       const p = Math.min(1, Math.max(0, (startTrigger - r.top) / (startTrigger - endTrigger)));
 
       /* --tp and --lineP are read by every word span's calc(), so each write
