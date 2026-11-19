@@ -124,7 +124,7 @@ export class CityEngine {
   /* ── input ─────────────────────────────────────────────────────── */
 
   private onKeyDown = (e: KeyboardEvent) => {
-    const k = e.key.toLowerCase();
+    const k = keyName(e);
     if (MOVE_KEYS.has(k) || k === " " || k === "e") e.preventDefault();
     this.keys[k] = true;
 
@@ -137,7 +137,7 @@ export class CityEngine {
   };
 
   private onKeyUp = (e: KeyboardEvent) => {
-    this.keys[e.key.toLowerCase()] = false;
+    this.keys[keyName(e)] = false;
   };
 
   private clearKeys = () => {
@@ -1365,6 +1365,33 @@ export class CityEngine {
     ctx.fillText("N", cx, cy - R - 6);
 
     ctx.restore();
+  }
+}
+
+/*
+  Name a key by where it sits, not by what it prints.
+
+  `e.key` is the character the layout produces, so on AZERTY the WASD
+  block types z/q/s/d and the hero would not move; holding a modifier
+  can change it mid-press, which strands a key in the down state.
+  `e.code` is the physical key, identical on every layout, so WASD and
+  the arrows both work for everyone. We fall back to `e.key` for the
+  keys we read as characters (e, g, space).
+*/
+function keyName(e: KeyboardEvent): string {
+  switch (e.code) {
+    case "KeyW": return "w";
+    case "KeyA": return "a";
+    case "KeyS": return "s";
+    case "KeyD": return "d";
+    case "KeyE": return "e";
+    case "KeyG": return "g";
+    case "ArrowUp": return "arrowup";
+    case "ArrowDown": return "arrowdown";
+    case "ArrowLeft": return "arrowleft";
+    case "ArrowRight": return "arrowright";
+    case "Space": return " ";
+    default: return e.key.toLowerCase();
   }
 }
 

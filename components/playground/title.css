@@ -109,7 +109,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: clamp(26px, 4vw, 44px);
+  /* sits well below the wordmark: with one button left, the gap is what
+     separates the title from the single thing there is to do */
+  margin-top: clamp(54px, 9vw, 104px);
 }
 
 .pgt__item {

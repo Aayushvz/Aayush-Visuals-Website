@@ -575,8 +575,10 @@
   bottom: 22px;
   left: 60px;
   z-index: 80;
-  width: 58px;
-  height: 90px;
+  /* the way into the work, so it is sized to be found at a glance
+     rather than to match the small toggles in the bar */
+  width: 86px;
+  height: 134px;
   padding: 0;
   background: transparent;
   border: none;
@@ -773,6 +775,17 @@
   .coc__mobileBtn:active {
     transform: scale(0.92);
     box-shadow: inset 1.5px 1.5px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  .coc__mobileBtn--gb {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+  }
+
+  .coc__mobileBtn--gb svg {
+    width: 36px;
+    height: 36px;
   }
 
   .coc__mobileBtn--gb.is-active {

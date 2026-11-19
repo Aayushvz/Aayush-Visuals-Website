@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import LogoMark from "@/components/LogoMark";
 import "./city/city.css";
 import "./start-screen.css";
@@ -9,20 +8,23 @@ import "./start-screen.css";
 type StartScreenProps = {
   onStart: (opts: { sound: boolean; openGameBoy?: boolean }) => void;
   initialSound?: boolean;
+  /* true once the city's chunk has finished downloading */
+  ready?: boolean;
 };
 
 const MENU = [
   { label: "Enter Experiments world", action: "play", primary: true },
-  { label: "View works", action: "works", href: "/work" },
 ];
 
 export default function PlaygroundStartScreen({
   onStart,
   initialSound = true,
+  ready = true,
 }: StartScreenProps) {
   const [sel, setSel] = useState(0);
+  /* pressed Enter before the city had arrived */
+  const [waiting, setWaiting] = useState(false);
   const [sound, setSound] = useState(initialSound);
-  const router = useRouter();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -45,11 +47,25 @@ export default function PlaygroundStartScreen({
   const executeItem = (idx: number) => {
     const item = MENU[idx];
     if (item.action === "play") {
-      onStart({ sound });
-    } else if (item.href) {
-      router.push(item.href);
+      /*
+        A press is never refused. If the chunk is still in flight the
+        intent is held and honoured the moment it lands, so an early
+        click reads as "loading", not as a dead button.
+      */
+      if (ready) onStart({ sound });
+      else setWaiting(true);
     }
   };
+
+  /* onStart is an inline arrow in the parent, so its identity changes
+     every render — the latch is what keeps the hand-off to exactly one */
+  const handedOff = useRef(false);
+  useEffect(() => {
+    if (waiting && ready && !handedOff.current) {
+      handedOff.current = true;
+      onStart({ sound });
+    }
+  }, [waiting, ready, sound, onStart]);
 
   return (
     <div className="coc pgt">
@@ -693,7 +709,7 @@ export default function PlaygroundStartScreen({
           <span className="pgt__titleBig">EXPERIMENTS</span>
         </h1>
 
-        {/* Clean Arcade Menu (Only 2 buttons: Enter Experiments world & View works) */}
+        {/* One way in. A second button here only delayed the decision. */}
         <nav className="pgt__menu" aria-label="Game Menu">
           {MENU.map((item, i) => (
             <button
@@ -708,13 +724,17 @@ export default function PlaygroundStartScreen({
               <span className="pgt__cursor" aria-hidden="true">
                 ▶
               </span>
-              <span>{item.label}</span>
+              <span>
+                {item.action === "play" && waiting ? "Loading…" : item.label}
+              </span>
             </button>
           ))}
         </nav>
 
-        {/* Navigation Key Hint */}
-        <p className="pgt__hint">↑ ↓ to choose · Enter to start</p>
+        {/* doubles as the loader's status line */}
+        <p className="pgt__hint">
+          {ready ? "Press Enter to start" : "Loading the city…"}
+        </p>
       </div>
     </div>
   );
