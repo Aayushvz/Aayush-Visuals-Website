@@ -1239,3 +1239,25 @@
     transform: rotate(-26deg) scale(0.9);
   }
 }
+
+/* ── desktop placement: level with the radar ─────────────────────────
+   The radar is drawn into the canvas 16 world units from the bottom and
+   right, which at the 3x desktop scale is 48 CSS pixels. The console now
+   sits on the same baseline, the same 48px in from its own edge, so the
+   two read as a matched pair of instruments rather than one floating
+   panel and one HUD dial. */
+
+@media (min-width: 601px) {
+  .gb__overlay {
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 16px 48px 48px;
+  }
+
+  .gb__chassis {
+    width: 392px;
+    max-width: 42vw;
+    height: min(calc(100vh - 150px), 620px);
+    max-height: calc(100vh - 150px);
+  }
+}

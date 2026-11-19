@@ -90,8 +90,33 @@ export default function CityExperience({
     engineRef.current = engine;
     engine.start();
 
+    /*
+      Lock the document for as long as the city is open.
+
+      The canvas is a fixed layer, but the page underneath it can still
+      rubber-band on a touch drag, and what shows through the gap is the
+      site's own light background — a white band down the edge of a
+      night city. Scoped CSS cannot reach <html>, so it is set here and
+      put back verbatim on unmount.
+    */
+    const root = document.documentElement;
+    const prev = {
+      overflow: root.style.overflow,
+      overscroll: root.style.overscrollBehavior,
+      background: root.style.background,
+      scheme: root.style.colorScheme,
+    };
+    root.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
+    root.style.background = "#0a0c1e";
+    root.style.colorScheme = "dark";
+
     window.addEventListener("resize", fit);
     return () => {
+      root.style.overflow = prev.overflow;
+      root.style.overscrollBehavior = prev.overscroll;
+      root.style.background = prev.background;
+      root.style.colorScheme = prev.scheme;
       window.removeEventListener("resize", fit);
       engine.destroy();
       audio.destroy();

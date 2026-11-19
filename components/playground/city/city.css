@@ -839,3 +839,55 @@
   .coc__panelInner { max-height: 90svh; padding: 12px 14px 16px; }
   .coc__panelShotWrap { display: none; }
 }
+
+
+/* ── the Game Boy is the control people hunt for ─────────────────────
+   It was the same 36px chip as exit and sound, so it read as one more
+   icon in a row rather than the thing that opens the console. */
+
+.coc__iconBtn--gb {
+  width: 46px;
+  height: 46px;
+}
+
+.coc__iconBtn--gb svg {
+  width: 30px;
+  height: 30px;
+}
+
+@media (pointer: coarse), (max-width: 760px) {
+  .coc__iconBtn--gb {
+    width: 54px;
+    height: 54px;
+  }
+
+  .coc__iconBtn--gb svg {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ── no light edges ──────────────────────────────────────────────────
+   The game is a fixed layer over the page. Rubber-banding a touch past
+   the end of it exposed whatever is underneath, which on a light system
+   theme is a white band down the edge of a night city. Nothing under
+   the game should ever be visible, and nothing should rubber-band. */
+
+.coc {
+  overscroll-behavior: none;
+  touch-action: none;
+  background: #0a0c1e;
+}
+
+/* the phone column uses its own class; the Game Boy gets to be bigger
+   than its neighbours there too, since it is the one control a visitor
+   has to find rather than stumble on */
+.coc__mobileBtn--gb {
+  width: 54px;
+  height: 54px;
+}
+
+.coc__mobileBtn--gb svg {
+  width: 34px;
+  height: 34px;
+}

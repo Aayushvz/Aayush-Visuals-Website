@@ -361,8 +361,24 @@ export class CityEngine {
     const vw = canvas.width / scale;
     const vh = canvas.height / scale;
 
-    const camX = Math.max(0, Math.min(this.world.w * TILE - vw, this.px - vw / 2));
-    const camY = Math.max(0, Math.min(this.world.h * TILE - vh, this.py - vh / 2));
+    /*
+      The camera follows the ROUNDED hero, not the float one.
+
+      This was the phone jitter. The camera was derived from this.px and
+      then rounded for the translate, while the sprite was rounded
+      separately — two roundings of the same moving value, crossing their
+      .5 boundaries at different moments. The hero's screen position
+      therefore flipped between two pixels as he walked, which at the 3x
+      phone scale is a three-device-pixel shudder across the whole view.
+
+      Driving both from one integer makes the difference constant: as the
+      rounded hero advances a pixel the camera advances with it, so the
+      world slides and the hero stays put.
+    */
+    const hx = Math.round(this.px);
+    const hy = Math.round(this.py);
+    const camX = Math.max(0, Math.min(this.world.w * TILE - vw, hx - vw / 2));
+    const camY = Math.max(0, Math.min(this.world.h * TILE - vh, hy - vh / 2));
 
     ctx.save();
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
