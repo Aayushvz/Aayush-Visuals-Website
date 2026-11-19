@@ -577,8 +577,8 @@
   z-index: 80;
   /* the way into the work, so it is sized to be found at a glance
      rather than to match the small toggles in the bar */
-  width: 86px;
-  height: 134px;
+  width: 103px;
+  height: 161px;
   padding: 0;
   background: transparent;
   border: none;
